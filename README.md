@@ -2,6 +2,7 @@
 This is a web application of an android app I made. More robust feature set and information presented. 
 
 1. Planned Features
+ - Something
  - Team Logos
  - Player Headshots
  - Standings
