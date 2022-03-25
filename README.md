@@ -6,7 +6,7 @@ This is a web application of an android app I made. More robust feature set and 
    - Axios (API calling from server side)
    - Ajax (communicating with server side)
 2. APIs Used
-   -  TSN Player Headshots endpoint
+   - TSN Player Headshots endpoint
      - https://tsnimages.tsn.ca/ImageProvider/PlayerHeadshot?seoId
    - Drew Hynes NHL API documentation (all info)
      - https://gitlab.com/dword4/nhlapi
