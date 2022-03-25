@@ -8,6 +8,7 @@ This is a web application of an android app I made. More robust feature set and 
 2. APIs Used
    - https://tsnimages.tsn.ca/ImageProvider/PlayerHeadshot?seoId (player headshots)
    - Drew Hynes NHL API documentation (all info)
+     - https://gitlab.com/dword4/nhlapi
 3. Planned Features
    - Team Logos
    - Player Headshots
