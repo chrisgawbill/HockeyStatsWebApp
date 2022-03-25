@@ -5,7 +5,10 @@ This is a web application of an android app I made. More robust feature set and 
    - Express JS
    - Axios (API calling from server side)
    - Ajax (communicating with server side)
-2. Planned Features
+2. APIs Used
+   - https://tsnimages.tsn.ca/ImageProvider/PlayerHeadshot?seoId (player headshots)
+   - Drew Hynes NHL API documentation (all info)
+3. Planned Features
    - Team Logos
    - Player Headshots
    - Standings
@@ -15,6 +18,6 @@ This is a web application of an android app I made. More robust feature set and 
    - Upcoming Games
    - Allow user to favorite teams/players (like Fotmob)
    - Add login feature to allow user to save their favorites
-3. Completed Features
+4. Completed Features
 
 
