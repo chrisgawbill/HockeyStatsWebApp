@@ -76,13 +76,16 @@ let fillTeamPanel = (teamName, teamID) =>{
 }
 let fillPlayerPanel = () => {
     let teamDiv = document.getElementById("team-div");
-
+    teamDiv.style.position = 'relative';
     let playerDiv = document.createElement('div');
     playerDiv.style.borderLeft = 'none';
     playerDiv.style.borderRight = 'none';
+    playerDiv.style.borderBottom = 'none';
     playerDiv.style.borderTop = 'solid';
-    playerDiv.style.borderBottom = 'solid';
     playerDiv.style.height = '50%';
+    playerDiv.style.width = '100%';
+    playerDiv.style.position ='absolute';
+    playerDiv.style.bottom = '0';
 
     let playerHead = document.createElement('h2');
     let playerTextHead =  document.createTextNode("Claude Giroux");
