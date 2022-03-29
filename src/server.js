@@ -51,7 +51,8 @@ app.get('/GetTeamInfo/:teamID', function(req, res){
                 teamInfo.push(conference);
                 teamInfo.push(establishedYear);
 
-                console.log(response.data);
+                console.log(teamInfo);
+                res.send(teamInfo);
               })
           
               // Print error message if occur
@@ -59,29 +60,39 @@ app.get('/GetTeamInfo/:teamID', function(req, res){
 });
 app.get('/GetQuickTeamStats/:teamID', function(req, res){
     axios.get(
-        `https://statsapi.web.nhl.com/api/v1/teams/` + req.params.teamID + "/stats")
+        `https://statsapi.web.nhl.com/api/v1/teams/` + req.params.teamID + '/stats')
           
               // Print data
               .then(response => {
+
                 let wins = response.data.stats[0].splits[0].stat.wins;
-                let loses = response.data.stats[0].splits[0].stat.loses;
-                let overtimeLoses = response.data.stats[0].stat.splits[0].ot;
+                let loses = response.data.stats[0].splits[0].stat.losses;
+                let overtimeLoses = response.data.stats[0].splits[0].stat.ot;
                 let points = response.data.stats[0].splits[0].stat.pts;
-                console.log(response.data);
+
+                let record = wins + " - " + loses + " - " + overtimeLoses + "(" + points  + " pts)";
+                res.send(record);
+ 
               })
           
               // Print error message if occur
               .catch(error => res.send('error'))
 });
-app.get('/GetFullTeamStatss/:teamID', function(req, res){
+app.get('/GetFullTeamStats/:teamID', function(req, res){
     axios.get(
-        `https://statsapi.web.nhl.com/api/v1/teams/` + req.params.teamID + "/stats")
+        `https://statsapi.web.nhl.com/api/v1/teams/` + req.params.teamID + '/stats')
           
               // Print data
               .then(response => {
-                let statsData = response.data.stats.splits[0].stat;
-                let statsRankings = response.data.stats[1].splits[0].stats;
-                console.log(response.data);
+                let statsData = response.data.stats[0].splits[0].stat;
+                let statsRankings = response.data.stats[1].splits[0].stat;
+
+                let statArray = new Array();
+                statArray.push(statsData);
+                statArray.push(statsRankings);
+
+                console.log(statArray);
+                res.send(statArray);
               })
           
               // Print error message if occur
@@ -93,10 +104,44 @@ app.get('/GetTeamRoster/:teamID', function(req, res){
           
               // Print data
               .then(response => {
-                console.log(response.data);
+                let teamRosterArray = new Array();
+                for(let i = 0; i < response.data.roster.length; i++){
+                  let playerID = response.data.roster[i].person.id;
+                  let playerName = response.data.roster[i].person.fullName;
+                  let jerseyNumber = response.data.roster[i].jerseyNumber;
+                  let playerPosition = response.data.roster[i].position.code;
+
+                  let playerInfoArray = new Array();
+                  playerInfoArray.push(playerID);
+                  playerInfoArray.push(playerName);
+                  playerInfoArray.push(jerseyNumber);
+                  playerInfoArray.push(playerPosition);
+                  console.log(playerInfoArray);
+
+                  teamRosterArray.push(playerInfoArray);
+                }
+                console.log(teamRosterArray);
+                res.send(teamRosterArray);
               })
           
               // Print error message if occur
               .catch(error => res.send('error'))
+});
+app.get('/GetPlayerInfo/:playerID', function(req, res){
+  axios.get(
+      `https://statsapi.web.nhl.com/api/v1/people/` + req.params.playerID)
+        
+            // Print data
+            .then(response => {
+              let fullName = response.data.people[0].fullName;
+
+              let playerInfoArray  = new Array();
+              playerInfoArray.push(fullName);
+
+              res.send(playerInfoArray);
+            })
+        
+            // Print error message if occur
+            .catch(error => res.send('error'))
 });
 app.listen(port);
