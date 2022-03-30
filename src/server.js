@@ -51,7 +51,6 @@ app.get('/GetTeamInfo/:teamID', function(req, res){
                 teamInfo.push(conference);
                 teamInfo.push(establishedYear);
 
-                console.log(teamInfo);
                 res.send(teamInfo);
               })
           
@@ -91,7 +90,6 @@ app.get('/GetFullTeamStats/:teamID', function(req, res){
                 statArray.push(statsData);
                 statArray.push(statsRankings);
 
-                console.log(statArray);
                 res.send(statArray);
               })
           
@@ -120,7 +118,6 @@ app.get('/GetTeamRoster/:teamID', function(req, res){
 
                   teamRosterArray.push(playerInfoArray);
                 }
-                console.log(teamRosterArray);
                 res.send(teamRosterArray);
               })
           
@@ -134,11 +131,80 @@ app.get('/GetPlayerInfo/:playerID', function(req, res){
             // Print data
             .then(response => {
               let fullName = response.data.people[0].fullName;
+              let nationality = response.data.people[0].nationality;
+              let height = response.data.people[0].height;
+              let weight = response.data.people[0].weight;
+              let age = response.data.people[0].currentAge;
+              let position = response.data.people[0].primaryPosition.abbreviation;
 
               let playerInfoArray  = new Array();
+
               playerInfoArray.push(fullName);
+              playerInfoArray.push(nationality);
+              playerInfoArray.push(height);
+              playerInfoArray.push(weight);
+              playerInfoArray.push(age);
+              playerInfoArray.push(position);
 
               res.send(playerInfoArray);
+            })
+        
+            // Print error message if occur
+            .catch(error => res.send('error'))
+});
+app.get('/GetNonGoaliePlayerStats/:playerID/:startYear/:endYear', function(req, res){
+  axios.get(
+      `https://statsapi.web.nhl.com/api/v1/people/` + req.params.playerID + '/stats?stats=statsSingleSeason&season=' + req.params.startYear + req.params.endYear)
+        
+            // Print data
+            .then(response => {
+              let goals = response.data.stats[0].splits[0].stat.goals;
+              let assists = response.data.stats[0].splits[0].stat.assists;
+              let points = response.data.stats[0].splits[0].stat.points;
+              let gamesPlayed = response.data.stats[0].splits[0].stat.games;
+              let penaltyMinutes = response.data.stats[0].splits[0].stat.penaltyMinutes;
+              let plusMinus = response.data.stats[0].splits[0].stat.plusMinus;
+              let timeOnIce = response.data.stats[0].splits[0].stat.timeOnIcePerGame;
+
+              let playerStatsArray  = new Array();
+              playerStatsArray.push(goals);
+              playerStatsArray.push(assists);
+              playerStatsArray.push(points);
+              playerStatsArray.push(gamesPlayed);
+              playerStatsArray.push(penaltyMinutes);
+              playerStatsArray.push(plusMinus);
+              playerStatsArray.push(timeOnIce);
+
+              res.send(playerStatsArray);
+            })
+        
+            // Print error message if occur
+            .catch(error => res.send('error'))
+});
+app.get('/GetGoaliePlayerStats/:playerID/:startYear/:endYear', function(req, res){
+  axios.get(
+      `https://statsapi.web.nhl.com/api/v1/people/` + req.params.playerID + '/stats?stats=statsSingleSeason&season=' + req.params.startYear + req.params.endYear)
+        
+            // Print data
+            .then(response => {
+              let wins = response.data.stats[0].splits[0].stat.wins;
+              let losses = response.data.stats[0].splits[0].stat.losses;
+              let ot = response.data.stats[0].splits[0].stat.ot;
+              let savePercentage = response.data.stats[0].splits[0].stat.savePercentage;
+              let goalAgainstAverage = response.data.stats[0].splits[0].stat.goalAgainstAverage;
+              let gamesPlayed = response.data.stats[0].splits[0].stat.games;
+              let shutouts = response.data.stats[0].splits[0].stat.shutouts;
+
+              let playerStatsArray  = new Array();
+              playerStatsArray.push(wins);
+              playerStatsArray.push(losses);
+              playerStatsArray.push(ot);
+              playerStatsArray.push(savePercentage);
+              playerStatsArray.push(goalAgainstAverage);
+              playerStatsArray.push(gamesPlayed);
+              playerStatsArray.push(shutouts);
+
+              res.send(playerStatsArray);
             })
         
             // Print error message if occur
