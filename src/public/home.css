@@ -4,3 +4,34 @@ body{
 #home-team-list{
     list-style: none;
 }
+#team-div{
+    width: 35%;
+    height: 600px;
+    border: solid;
+    float: right;
+    display:none;
+}
+#home-team-list-div{
+    width: 60%;
+    height: 500px;
+    float: left;
+}
+#team-info-div{
+    height: 100%;
+    overflow: auto;
+}
+#player-info-div{
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-top: solid;
+    height: 50%;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    overflow: auto;
+}
+#player-image{
+    height: 100px;
+    width: 100px;
+}

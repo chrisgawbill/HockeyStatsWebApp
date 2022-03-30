@@ -42,18 +42,9 @@ let displayList = () => {
   });
 };
 let displayTeamInfo = (teamName, teamID) => {
-  let teamListDiv = document.getElementById("home-team-list-div");
   let teamDiv = document.getElementById("team-div");
 
-  teamListDiv.style.width = "60%";
-  teamListDiv.style.height = "500px";
-  teamDiv.style.width = "35%";
-  teamDiv.style.height = "600px";
-
-  teamDiv.style.border = "solid";
-
-  teamListDiv.style.float = "left";
-  teamDiv.style.float = "right";
+  teamDiv.style.display = "block";
 
   wipeTeamPanel();
   fillTeamPanel(teamName, teamID);
@@ -71,8 +62,6 @@ let fillTeamPanel = (teamName, teamID) => {
 
       let teamInfoDiv = document.createElement("div");
       teamInfoDiv.id = "team-info-div";
-      teamInfoDiv.style.height = "100%";
-      teamInfoDiv.style.overflow = "auto";
 
       let teamHeader = document.createElement("h2");
       let teamHeaderText = document.createTextNode(teamName);
@@ -115,6 +104,7 @@ let fillPlayerPanel = (playerID, playerPositionCode) => {
   let playerDiv = document.getElementById("player-info-div");
 
   teamInfoDiv.style.height = "50%";
+
   if (playerDiv != null) {
     wipePlayerPanel();
   } else {
@@ -122,15 +112,6 @@ let fillPlayerPanel = (playerID, playerPositionCode) => {
     teamDiv.style.position = "relative";
     playerDiv = document.createElement("div");
     playerDiv.id = "player-info-div";
-    playerDiv.style.borderLeft = "none";
-    playerDiv.style.borderRight = "none";
-    playerDiv.style.borderBottom = "none";
-    playerDiv.style.borderTop = "solid";
-    playerDiv.style.height = "50%";
-    playerDiv.style.width = "100%";
-    playerDiv.style.position = "absolute";
-    playerDiv.style.bottom = "0";
-    playerDiv.style.overflow = "auto";
   }
 
   getPlayerInfo(playerID, function (playerInfo) {
@@ -140,8 +121,7 @@ let fillPlayerPanel = (playerID, playerPositionCode) => {
 
       let playerImage = document.createElement("img");
       playerImage.src = imageURL;
-      playerImage.style.height = "100px";
-      playerImage.style.width = "100px";
+      playerImage.id = "player-image"
 
       let playerHead = document.createElement("h2");
       let playerTextHead = document.createTextNode(playerName);
