@@ -21,5 +21,9 @@ This is a web application of an android app I made. More robust feature set and 
    - Allow user to favorite teams/players (like Fotmob)
    - Add login feature to allow user to save their favorites
 4. Completed Features
+   - Player Headhots (Quick Look Panel)
+   - Rosters (Quick Look Panel)
+   - Player Stats (Quick Look Panel)
+   - Team Info (Quick Look Panel)
 
 
