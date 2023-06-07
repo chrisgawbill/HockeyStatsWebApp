@@ -1,8 +1,8 @@
 import {useState, useEffect} from 'react';
 
-const [lotteryOddsChange, setLotteryOddsChange] = useState("")
 
 const DraftLotteryOddsBlock = (props) => {
+    const [lotteryOddsChange, setLotteryOddsChange] = useState("")
     return (
         <div className="generic-block">
             <div className="block-picture">
@@ -10,7 +10,7 @@ const DraftLotteryOddsBlock = (props) => {
             </div>
             <div className="block-info">
                 <p>{props.teamName}</p>
-                <p>{props.lotterOdds}</p>
+                <p>{props.lotteryOdds}</p>
             </div>
         </div>
     );
