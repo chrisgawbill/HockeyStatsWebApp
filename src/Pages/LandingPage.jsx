@@ -6,10 +6,10 @@ const LandingPage = () => {
     return(
         <div>
             <QuickLinks></QuickLinks>
-            <div className="clear-div"></div>
+            {/* <div className="clear-div"></div>
             <IndividualLeaders></IndividualLeaders>
             <div className="clear-div"></div>
-            <DraftLotteryOdds></DraftLotteryOdds>
+            <DraftLotteryOdds></DraftLotteryOdds> */}
         </div>
     );
 }

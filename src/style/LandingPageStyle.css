@@ -1,20 +1,4 @@
-.quick-links-block{
-    width:15%;
-    border-color: black;
-    border: solid;
-    float: left;
-    margin-right: 1%;
-    margin-left: 2%;
-    border-radius: 10px;
-}
-.quick-links-block p{
-    font-weight: bold;
-}
-.quick-links-block :hover{
-    background-color:lightblue;
-}
-.header-div{
-    float:left;
+/* .header-div{
     margin-left:2%;
 }
 .clear-div{
@@ -28,4 +12,4 @@
     margin-right: 1%;
     margin-left: 2%;
     border-radius: 10px;
-}
+} */
