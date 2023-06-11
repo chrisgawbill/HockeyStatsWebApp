@@ -1,15 +1,28 @@
-/* .header-div{
-    margin-left:2%;
+.container-fluid{
+    border: solid;
+    border-color: black;
+}
+.landing-header{
+    text-align: left;
+}
+.quick-links-btn{
+    height: 4rem;
+    width: 15rem;
+    border: solid;
+    border-color: black;
+}
+.generic-block{
+    height: 4rem;
+    width: 15rem;
+    border: solid;
+    border-color: black;
+}
+.block-picture{
+    float: left;
+}
+.block-info{
+    float: right;
 }
 .clear-div{
     clear: both;
 }
-.generic-block{
-    width:15%;
-    border-color: black;
-    border: solid;
-    float: left;
-    margin-right: 1%;
-    margin-left: 2%;
-    border-radius: 10px;
-} */

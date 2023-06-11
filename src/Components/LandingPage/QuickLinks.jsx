@@ -1,20 +1,28 @@
+import { Button, Col, Row } from "react-bootstrap";
+import "../../style/LandingPageStyle.css";
 const QuickLinks = () => {
-  return (
-    <div>
-        <div class="row">
-            <div class="col-2">
-                <h2>Quick Links</h2>
-            </div>
+    return (
+        <div>
+            <Row>
+                <Col class="landing-header">
+                    <h2>Quick Links</h2>
+                </Col>
+            </Row>
+            <Row>
+                <Col md={3}>
+                    <Button varient="info" class="quick-links-btn">Teams List</Button>
+                </Col>
+                <Col md={3}>
+                    <Button varient="info" class="quick-links-btn">Standings</Button>
+                </Col>
+                <Col md={3}>
+                    <Button varient="info" class="quick-links-btn">Teams List</Button>
+                </Col>
+                <Col md={3}>
+                    <Button varient="info" class="quick-links-btn">Standings</Button>
+                </Col>
+            </Row>
         </div>
-        <div class="row">
-            <div class="col-1">
-                <button type="button" class="btn btn-info">Teams List</button>
-            </div>
-            <div class="col-1">
-                <button type="button" class="btn btn-info">Standings</button>
-            </div>
-        </div>
-    </div>
-  );
+    );
 };
 export default QuickLinks;

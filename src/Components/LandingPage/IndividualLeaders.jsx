@@ -1,16 +1,29 @@
+import { Col, Row } from "react-bootstrap";
+import "../../style/LandingPageStyle.css";
 import IndividualLeadersBlock from "./IndividualLeadersBlock";
-
+const items = [
+    { id: 1, name: "Claude Giroux", info: "Assist Leader" },
+    { id: 2, name: "Sidney Crosby", info: "Scoring Leader"},
+    { id: 3, name: "Connor McDavid", info: "Points Leader" },
+    { id: 4, name: "Claude Giroux", info: "Assist Leader" },
+    { id: 5, name: "Sidney Crosby", info: "Scoring Leader"},
+    { id: 6, name: "Connor McDavid", info: "Points Leader" },
+  ];
 const IndividualLeaders = () => {
-    return(
+    return (
         <div>
-            <div className="header-div">
-                <h2>Individual Leaders</h2>
-            </div>
-            <div className="clear-div"></div>
-            <div>
-                <IndividualLeadersBlock playerName="Claude Giroux" infoName="Assists Leader"></IndividualLeadersBlock>
-                <IndividualLeadersBlock playerName="Sidney Crosby" infoName="Scoring Leader"></IndividualLeadersBlock>
-            </div>
+            <Row>
+                <Col class="landing-header">
+                    <h2>Individual Leaders</h2>
+                </Col>
+            </Row>
+            <Row class="row-scroller">
+                {items.map((item) => (
+                    <Col md={3}>
+                        <IndividualLeadersBlock playerName={item.name} infoName={item.info}></IndividualLeadersBlock>
+                    </Col>
+                ))}
+            </Row>
         </div>
     );
 }
