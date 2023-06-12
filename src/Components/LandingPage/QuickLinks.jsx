@@ -1,5 +1,5 @@
 import { Button, Col, Row } from "react-bootstrap";
-import "../../style/LandingPageStyle.css";
+import "../../style/LandingPage/QuickLinks.css";
 const QuickLinks = () => {
     return (
         <div>
@@ -9,12 +9,6 @@ const QuickLinks = () => {
                 </Col>
             </Row>
             <Row>
-                <Col md={3}>
-                    <Button varient="info" className="quick-links-btn">Teams List</Button>
-                </Col>
-                <Col md={3}>
-                    <Button varient="info" className="quick-links-btn">Standings</Button>
-                </Col>
                 <Col md={3}>
                     <Button varient="info" className="quick-links-btn">Teams List</Button>
                 </Col>

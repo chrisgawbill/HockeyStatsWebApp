@@ -1,4 +1,4 @@
-import "../../style/LandingPageStyle.css";
+import "../../style/LandingPage/LandingPageBlock.css";
 import {useState, useEffect} from 'react';
 const RowBlock = (props) => {
     return(
