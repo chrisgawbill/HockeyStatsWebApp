@@ -25,6 +25,7 @@ const LandingPage = () => {
                     <QuickLinks></QuickLinks>
                     <LandingPageRow title={"Individual Leaders"} data={individualLeadersData}></LandingPageRow>
                     <LandingPageRow title={"Draft Lottery Odds"} data={draftLotteryOddsData}></LandingPageRow>
+                    <LandingPageRow title={"NHL Awards"} data={draftLotteryOddsData}></LandingPageRow>
                 </Col>
                 <Col md={5}></Col>
             </Row>
