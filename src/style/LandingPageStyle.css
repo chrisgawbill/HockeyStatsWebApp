@@ -12,13 +12,14 @@
     border-color: black;
 }
 .generic-block{
-    height: 4rem;
+    height: 5rem;
     width: 15rem;
     border: solid;
     border-color: black; 
     margin-top:1rem;
     margin-bottom: 1rem;
     margin-left: 0.5rem;
+    padding-right: 0.25rem;
 }
 .block-picture{
     float: left;
@@ -26,17 +27,19 @@
     border-color: black;
 }
 .block-picture > img{
-    height: 3.7rem;
+    height: 4.7rem;
 }
 .block-info{
     float: right;
 }
 .row-scroller{
-    overflow: auto;
+    overflow-x: auto;
     white-space: nowrap;
+    display: block;
 }
-.row-scroller .col-md-3{
+.row-scroller > .row-scroller-column{
     display: inline-block;
+    float:none;
 }
 .clear-div{
     clear: both;
