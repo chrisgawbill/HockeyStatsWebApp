@@ -15,13 +15,28 @@
     height: 4rem;
     width: 15rem;
     border: solid;
-    border-color: black;
+    border-color: black; 
+    margin-top:1rem;
+    margin-bottom: 1rem;
+    margin-left: 0.5rem;
 }
 .block-picture{
     float: left;
+    border-right: solid;
+    border-color: black;
+}
+.block-picture > img{
+    height: 3.7rem;
 }
 .block-info{
     float: right;
+}
+.row-scroller{
+    overflow: auto;
+    white-space: nowrap;
+}
+.row-scroller .col-md-3{
+    display: inline-block;
 }
 .clear-div{
     clear: both;

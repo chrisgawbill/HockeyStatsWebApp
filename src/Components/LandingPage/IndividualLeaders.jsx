@@ -13,11 +13,11 @@ const IndividualLeaders = () => {
     return (
         <div>
             <Row>
-                <Col class="landing-header">
+                <Col className="landing-header">
                     <h2>Individual Leaders</h2>
                 </Col>
             </Row>
-            <Row class="row-scroller">
+            <Row className="row-scroller">
                 {items.map((item) => (
                     <Col md={3}>
                         <IndividualLeadersBlock playerName={item.name} infoName={item.info}></IndividualLeadersBlock>

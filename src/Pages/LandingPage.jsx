@@ -1,7 +1,6 @@
 import {Col, Container, Row} from "react-bootstrap";
 import QuickLinks from "../Components/LandingPage/QuickLinks";
 import IndividualLeaders from "../Components/LandingPage/IndividualLeaders";
-import "../style/LandingPageStyle.css";
 
 const LandingPage = () => {
     return (
