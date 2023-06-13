@@ -9,10 +9,9 @@ const RowBlock = (props) => {
             
             if(draftLotteryOddsColor[0] === "UP"){
                 setBlockPictureColor("lightgreen")
+            }else{
+                setBlockPictureColor("#c72845")
             }
-            setBlockPictureColor("red")
-
-            console.log(blockPictureColor)
         }
     },[props.rowInfo])
     return(
