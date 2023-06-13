@@ -1,0 +1,9 @@
+.standings-title-row{
+    border-bottom: solid;
+    border-color: black;
+    padding-bottom: 0.5rem;
+}
+.standings-title-column > span{
+    font-weight: bold;
+    font-size: medium;
+}

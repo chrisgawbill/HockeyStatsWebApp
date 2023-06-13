@@ -1,0 +1,7 @@
+.container-fluid{
+    border: solid;
+    border-color: black;
+}
+.clear-div{
+    clear: both;
+}
