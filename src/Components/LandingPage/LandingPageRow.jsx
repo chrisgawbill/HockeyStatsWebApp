@@ -12,8 +12,8 @@ const LandingPageRow = (props) => {
             </Row>
             <Row className="row-scroller">
                 {props.data.map((item) => (
-                    <Col md={3} className="row-scroller-column">
-                        <RowBlock playerName={item.name} infoName={item.info} image={item.image}></RowBlock>
+                    <Col md={3} className="row-scroller-column" key={item.id}>
+                        <RowBlock playerName={item.name} infoName={item.info} image={item.image} rowInfo={item.rowInfo}></RowBlock>
                     </Col>
                 ))}
             </Row>

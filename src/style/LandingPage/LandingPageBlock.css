@@ -19,8 +19,9 @@
 .block-info{
     float: right;
 }
-.block-info > p{
-    width: auto;
+.block-info > span{
+    display: inline-block;
+    width: 9.2rem;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
