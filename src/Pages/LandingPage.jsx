@@ -2,7 +2,7 @@ import {Col, Container, Row} from "react-bootstrap";
 import QuickLinks from "../Components/LandingPage/QuickLinks";
 import LandingPageRow from "../Components/LandingPage/LandingPageRow";
 import LandingPageStandings from "../Components/LandingPage/LandingPageStandings";
-import { individualLeadersData, draftLotteryOddsData, playerAwards, teamAwards } from "../Data/LocalData/LandingPageLocalData";
+import { individualLeadersData, draftLotteryOddsData, playerAwards, teamAwards, easternStandings, westernStandings } from "../Data/LocalData/LandingPageLocalData";
 const LandingPage = () => {
     return (
         <Container fluid>
@@ -15,8 +15,8 @@ const LandingPage = () => {
                     <LandingPageRow title={"Team Awards (2022)"} data={teamAwards}></LandingPageRow>
                 </Col>
                 <Col md={5}>
-                  <LandingPageStandings title={"Eastern Conference"}></LandingPageStandings>
-                  <LandingPageStandings title={"Western Conference"}></LandingPageStandings>
+                  <LandingPageStandings title={"Eastern Conference"} data={easternStandings}></LandingPageStandings>
+                  <LandingPageStandings title={"Western Conference"} data={westernStandings}></LandingPageStandings>
                 </Col>
             </Row>
         </Container>
