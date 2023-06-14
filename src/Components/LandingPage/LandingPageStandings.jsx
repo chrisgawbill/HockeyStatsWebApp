@@ -14,7 +14,7 @@ const LandingPageStandings = (props) => {
             <Row className="standings-row">
                 <LandingPageStandingsTitleRow></LandingPageStandingsTitleRow>
                 {props.data.map((item) => (
-                    <LandingPageStandingsRow teamPlace={item.standingsPlace} teamName={item.name} teamRecord={item.record} teamPoints={item.points}></LandingPageStandingsRow>
+                    <LandingPageStandingsRow key={item.id} teamPlace={item.standingsPlace} teamName={item.name} teamRecord={item.record} teamPoints={item.points}></LandingPageStandingsRow>
                 ))}
             </Row>
         </div>
