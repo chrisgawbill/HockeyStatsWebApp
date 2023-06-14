@@ -5,3 +5,6 @@ export const getStandings = () => {
 export const getStandingsbyConference = () => {
     return axiosNhl.get("/standings/byConference");
 }
+export const getDraft = () => {
+    return axiosNhl.get("/draft/2024")
+}

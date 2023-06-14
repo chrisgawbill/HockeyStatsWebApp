@@ -2,7 +2,7 @@ import {Col, Container, Row} from "react-bootstrap";
 import QuickLinks from "../Components/LandingPage/QuickLinks";
 import LandingPageRow from "../Components/LandingPage/LandingPageRow";
 import LandingPageStandings from "../Components/LandingPage/LandingPageStandings";
-import {getStandings, getStandingsbyConference} from "../Services/ApiHandler";
+import {getDraft, getStandings, getStandingsbyConference} from "../Services/ApiHandler";
 import {
     individualLeadersData,
     draftLotteryOddsData,
@@ -18,7 +18,13 @@ const LandingPage = () => {
     const [westernStandingsData, setWesternStandingsData] = useState([]);
     useEffect(() => {
         getStandingsData();
+        getDraftData();
     },[])
+    async function getDraftData(){
+        getDraft().then((response) => {
+            console.log(response.data)
+        })
+    }
     async function getStandingsData() {
         getStandingsbyConference().then((response) => {
             const initialEasternStandings = response.data.records[0];
