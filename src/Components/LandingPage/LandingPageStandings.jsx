@@ -7,7 +7,7 @@ const LandingPageStandings = (props) => {
     return(
         <div>
             <Row>
-                <Col>
+                <Col className="standings-header">
                     <h2>{props.title}</h2>
                 </Col>
             </Row>
