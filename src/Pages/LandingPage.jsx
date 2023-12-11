@@ -3,8 +3,7 @@ import QuickLinks from "../Components/LandingPage/QuickLinks";
 import LandingPageRow from "../Components/LandingPage/LandingPageRow";
 import LandingPageStandings from "../Components/LandingPage/LandingPageStandings";
 import {
-  getStandingsByConference,
-  getStandingsByLeague,
+  GetCurrentStandings,
 } from "../Services/ApiHandler";
 import {
   individualLeadersData,
@@ -12,31 +11,29 @@ import {
   teamAwards,
 } from "../Data/LocalData/LandingPageLocalData";
 import { useState, useEffect } from "react";
-import draftLotteryOddsHelper from "../Data/Helpers/DraftLotteryOddsHelper";
-import conferenceStandingsHelper from "../Data/Helpers/ConferenceStandingsHelper";
+import { CreateDraftLotteryOddsArray } from "../Data/Helpers/DraftLotteryOddsHelper";
+import { CreateConferenceStandingsArray, CreateStandingsArray } from "../Data/Helpers/ConferenceStandingsHelper";
 const LandingPage = () => {
   //use States that will set with data that will be passed to components in landingPage
   const [easternStandingsData, setEasternStandingsData] = useState([]);
   const [westernStandingsData, setWesternStandingsData] = useState([]);
   const [draftLotteryOddsData, setDraftLotteryOddsData] = useState([]);
   //Custom hook that parses and modifies the api data to create draftLotteryOddsArray (which is then set in the useState)
-  const { createDraftLotteryOddsArray } = draftLotteryOddsHelper();
-  const { createStandingsArray } = conferenceStandingsHelper();
   //This useEffect will call apis to get data that will be used in components
   useEffect(() => {
     getStandingsData();
     getDraftLotteryOdds();
   }, []);
   function getStandingsData() {
-    getStandingsByConference()
+    GetCurrentStandings()
       .then((response) => {
-        const initialEasternStandings = response.data.records[0];
-        const initialWesternStandings = response.data.records[1];
+        const initialEasternStandings = CreateConferenceStandingsArray(response.data, "Eastern");
+        const initialWesternStandings = CreateConferenceStandingsArray(response.data, "Western");
 
-        const fixedEasternStandings = createStandingsArray(
+        const fixedEasternStandings = CreateStandingsArray(
           initialEasternStandings.teamRecords
         );
-        const fixedWesternStandings = createStandingsArray(
+        const fixedWesternStandings = CreateStandingsArray(
           initialWesternStandings.teamRecords
         );
 
@@ -46,15 +43,15 @@ const LandingPage = () => {
       .catch((error) => console.log(error));
   }
   function getDraftLotteryOdds() {
-    getStandingsByLeague()
-      .then((response) => {
-        const initialLeagueStandings = response.data.records[0];
-        const draftLotteryOddsArray = createDraftLotteryOddsArray(
-          initialLeagueStandings.teamRecords
-        );
-        setDraftLotteryOddsData(draftLotteryOddsArray);
-      })
-      .catch((error) => console.log(error));
+    // GetStandingsByLeague()
+    //   .then((response) => {
+    //     const initialLeagueStandings = response.data.records[0];
+    //     const draftLotteryOddsArray = CreateDraftLotteryOddsArray(
+    //       initialLeagueStandings.teamRecords
+    //     );
+    //     setDraftLotteryOddsData(draftLotteryOddsArray);
+    //   })
+    //   .catch((error) => console.log(error));
   }
   return (
     <Container fluid>

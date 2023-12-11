@@ -1,5 +1,4 @@
 import { Col, Row } from "react-bootstrap";
-import {useState, useEffect} from 'react';
 import "../../style/LandingPage/LandingPageRow.css";
 import RowBlock from "./RowBlock";
 const LandingPageRow = (props) => {

@@ -1,5 +1,7 @@
 import axios from "axios";
 
-export const axiosNhl = axios.create({
-  baseURL: "https://statsapi.web.nhl.com/api/v1",
+export const axiosExpressHandler = axios.create({
+  baseURL: "http://localhost:9000",
+  headers: {'Access-Control-Allow-Headers ' : '*'},
+  withCredentials: true
 });

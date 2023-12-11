@@ -1,4 +1,4 @@
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Row } from "react-bootstrap";
 import React from "react";
 import { useEffect, useState } from "react";
 const LandingPageStandingsRow = (props) => {
