@@ -1,6 +1,6 @@
 var express = require("express");
 var axios = require("axios");
-const { response } = require("../app");
+
 var router = express.Router();
 
 var axiosNhl = axios.create({
