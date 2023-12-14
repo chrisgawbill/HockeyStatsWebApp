@@ -1,0 +1,14 @@
+.standings-header{
+    margin-left: 5rem;
+    margin-right: 2rem;
+}
+.standings-row{
+    border-color: black;
+    border: solid;
+    margin-left: 5rem;
+    margin-right: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    height: 20rem;
+    overflow: auto;
+}

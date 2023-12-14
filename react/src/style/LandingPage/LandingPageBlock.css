@@ -1,0 +1,29 @@
+.generic-block{
+    height: 5rem;
+    width: 15rem;
+    border: solid;
+    border-color: black; 
+    margin-top:1rem;
+    margin-bottom: 1rem;
+    margin-left: 0.5rem;
+    padding-right: 0.25rem;
+}
+.block-picture{
+    float: left;
+    border-right: solid;
+    border-color: black;
+}
+.block-picture > img{
+    width: 4.7rem;
+    height: 4.7rem;
+}
+.block-info{
+    float: right;
+}
+.block-info > span{
+    display: inline-block;
+    width: 9.2rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
