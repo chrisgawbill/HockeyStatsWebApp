@@ -24,7 +24,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "tsc": "tsc"
   },
   "eslintConfig": {
     "extends": [
@@ -43,5 +44,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "ts-loader": "^9.5.1",
+    "ts-migrate": "^0.1.35",
+    "typescript": "^5.3.3"
   }
 }
