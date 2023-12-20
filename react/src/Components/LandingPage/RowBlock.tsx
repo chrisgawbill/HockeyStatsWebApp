@@ -14,11 +14,13 @@ export default function RowBlock({playerName, infoName, image, rowInfo}:RowBlock
         if(rowInfo === "draftLotteryOdds"){
             let draftLotteryOddsColor = infoName.split("(");
             draftLotteryOddsColor = draftLotteryOddsColor[1].split(")");
-            
-            if(draftLotteryOddsColor[0] === "UP"){
+            const trend = draftLotteryOddsColor[0]
+            if(trend === "UP"){
                 setBlockPictureColor("lightgreen");
+            }else if(trend === "DOWN") {
+                setBlockPictureColor("#ff6666");
             }else{
-                setBlockPictureColor("#c72845");
+                setBlockPictureColor("#ff9900");
             }
         }
     }, []);

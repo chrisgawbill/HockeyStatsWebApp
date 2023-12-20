@@ -18,7 +18,6 @@ export default function LandingPage(){
   const [draftLotteryOddsData, setDraftLotteryOddsData] = useState([]);
   useEffect(()=>{
     GetDraftLotteryOdds(setDraftLotteryOddsData)
-    console.log(draftLotteryOddsData)
   },[])
   return (
     <Container fluid>
