@@ -1,5 +1,5 @@
 import React from "react";
-import { Col, Row } from "react-bootstrap";
+import { Col} from "react-bootstrap";
 import { leagueLeaderColor } from "../../../style/LandingPage/colors";
 export default function LeaguePageStandingsLegend(){
     return(
