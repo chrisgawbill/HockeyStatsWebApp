@@ -2,13 +2,15 @@ import { StandingsTeam } from "../Models/StandingsTeam";
 
 export function CreateConferenceStandingsArray(
   initialStandings: any[],
-  matchingConferenceName: string
+  matchingConferenceName: string = "",
 ) {
   let fixedConferenceStandings:StandingsTeam[] = new Array(16);
-  for (let i = 0; i < initialStandings.length; i++) {
+  let i = 0;
+  let currentSize = 0;
+  initialStandings = initialStandings.filter((team) =>  team.conferenceName === matchingConferenceName);
+  do{
     const responseTeam = initialStandings[i];
     if (responseTeam.conferenceName === matchingConferenceName) {
-
       const name = responseTeam.teamCommonName.default;
       const conferenceName = responseTeam.conferenceName;
       const divisionName = responseTeam.divisionName;
@@ -25,7 +27,8 @@ export function CreateConferenceStandingsArray(
       const pointsPctg = Math.round((responseTeam.pointPctg*100)*100)/100;
       const leagueStanding = responseTeam.leagueSequence;
       const conferenceStanding = responseTeam.conferenceSequence;
-      const divisionStanding = responseTeam.divisionStanding;
+      const divisionStanding = responseTeam.divisionSequence;
+      const wildCardRank = responseTeam.wildcardSequence;
 
       const standingsTeam: StandingsTeam = new StandingsTeam(
         i,
@@ -41,9 +44,13 @@ export function CreateConferenceStandingsArray(
         leagueStanding,
         conferenceStanding,
         divisionStanding,
+        wildCardRank
       );
-      fixedConferenceStandings[i] = standingsTeam;
+      fixedConferenceStandings[currentSize] = standingsTeam;
+      currentSize++;
     }
-  }
+    i++;
+  }while(currentSize < 16);
+
   return fixedConferenceStandings;
 }
