@@ -1,6 +1,7 @@
 .standings-header{
     margin-left: 5rem;
     margin-right: 2rem;
+    text-align: center;
 }
 .standings-table{
     border-color: black;
