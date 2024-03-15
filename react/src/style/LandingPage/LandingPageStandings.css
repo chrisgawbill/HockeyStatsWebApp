@@ -13,3 +13,9 @@
     height: 20rem;
     overflow: auto;
 }
+.standings-info-row{
+    border-color: gray;
+}
+.standings-info-row :hover{
+    border: solid;
+}

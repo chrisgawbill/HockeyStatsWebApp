@@ -3,6 +3,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
 import { conferenceLeaderColor, defaultColor, divisionLeaderColor, divisionRankedColor, leagueLeaderColor, outOfPlayoffsColor, wildCardColor } from "../../../style/LandingPage/colors";
+import "../../../style/LandingPage/LandingPageStandings.css";
 
 interface LandingPageStandingsRowProps{
   team:StandingsTeam,
@@ -31,7 +32,7 @@ export default function LandingPageStandingsRow({team}:LandingPageStandingsRowPr
     },[team, team.leagueStanding, team.conferenceStandingsPlace, team.divisionStandingsPlace, team.wildCardRank])
   return (
     <div>
-      <Row className="standings-info-row" style={{borderBottom:bottomBorder, borderColor:"grey", backgroundColor:rowColor}}>
+      <Row className="standings-info-row" style={{borderBottom:bottomBorder, backgroundColor:rowColor}}>
         <Col md={1} className="standings-info-column">
           <span>{team.conferenceStandingsPlace}</span>
         </Col>

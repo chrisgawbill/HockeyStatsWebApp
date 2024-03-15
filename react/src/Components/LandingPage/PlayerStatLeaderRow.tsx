@@ -1,18 +1,26 @@
 import { Col, Row } from "react-bootstrap";
 import "../../style/LandingPage/LandingPageRow.css";
-import React from "react";
+import React, { useState } from "react";
 import { TopStatLeader } from "../../Data/Models/TopStatLeader";
+import StatsLeaderModal from "./Modals/StatsLeaderModal";
+import { PlayerStatLeader } from "../../Data/Models/PlayerStatLeader";
 
 interface PlayerStatLeaderProps {
   title: string;
   topStatLeaders: TopStatLeader[];
-  setShowStatModal:Function;
+  setShowStatModal: Function;
 }
 export default function PlayerStatLeaderRow({
   title,
   topStatLeaders,
-  setShowStatModal
+  setShowStatModal,
 }: PlayerStatLeaderProps) {
+
+  const [showStatLeaderModal, setShowStatLeaderModal] =
+    useState<boolean>(false);
+  const [currentModalTitle, setCurrentModalTitle] = useState<string>("");
+  const [currentModalStatList, setCurrentModalStatList] = useState<PlayerStatLeader[]>([]);
+
   if (topStatLeaders.length >= 1) {
     return (
       <div>
@@ -23,16 +31,28 @@ export default function PlayerStatLeaderRow({
         </Row>
         <Row className="row-scroller">
           {topStatLeaders.map((topStatLeader: TopStatLeader) => (
-            <Col md={4} className="row-scroller-column" key={topStatLeader.player.id}>
-              <div className="stat-leader-block">
+            <Col
+              md={4}
+              className="row-scroller-column"
+              key={topStatLeader.player.id}
+            >
+              <div className="stat-leader-block" onClick={()=>{
+                setShowStatLeaderModal(true);
+                setCurrentModalTitle(topStatLeader.statIndicator);
+                setCurrentModalStatList(topStatLeader.statLeadersList);
+              }}>
                 <div className="block-picture">
                   <img src={topStatLeader.player.playerImage} alt=""></img>
                 </div>
                 <div className="block-info">
                   <span className="block-info-name">
-                    {topStatLeader.player.firstName + " " + topStatLeader.player.lastName}
+                    {topStatLeader.player.firstName +
+                      " " +
+                      topStatLeader.player.lastName}
                   </span>
-                  <p className="block-info-indicator">{topStatLeader.statIndicator}</p>
+                  <p className="block-info-indicator">
+                    {topStatLeader.statIndicator}
+                  </p>
                 </div>
                 <div className="stat-leader-value-block">
                   <p>{topStatLeader.player.value}</p>
@@ -42,6 +62,12 @@ export default function PlayerStatLeaderRow({
             </Col>
           ))}
         </Row>
+        <StatsLeaderModal
+          showModal={showStatLeaderModal}
+          setShowStatsModal={setShowStatLeaderModal}
+          statsLeaderData={currentModalStatList}
+          modalTitle={currentModalTitle}
+        ></StatsLeaderModal>
       </div>
     );
   }

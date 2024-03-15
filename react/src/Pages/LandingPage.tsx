@@ -75,15 +75,18 @@ export default function LandingPage() {
 
       const topGoalLeader: TopStatLeader = new TopStatLeader(
         "Goals",
-        goalLeader
+        goalLeader,
+        goalLeaderData
       );
       const topAssistLeader: TopStatLeader = new TopStatLeader(
         "Assists",
-        assistLeader
+        assistLeader,
+        assistLeaderData
       );
       const topPointsLeadr: TopStatLeader = new TopStatLeader(
         "Points",
-        pointsLeader
+        pointsLeader,
+        pointsLeaderData
       );
 
       const topPlayerLeaders: TopStatLeader[] = [
@@ -109,18 +112,21 @@ export default function LandingPage() {
       const gaaLeader: PlayerStatLeader = gaaLeaderData[0];
       const shutoutLeader: PlayerStatLeader = shutoutLeaderData[0];
 
-      const topWinLeader: TopStatLeader = new TopStatLeader("Wins", winsLeader);
+      const topWinLeader: TopStatLeader = new TopStatLeader("Wins", winsLeader, winsLeaderData);
       const topSavePercentageLeader: TopStatLeader = new TopStatLeader(
         "SV%",
-        savePercentageLeader
+        savePercentageLeader,
+        savePercentageLeaderData
       );
       const topGaaLeader: TopStatLeader = new TopStatLeader(
         "GAA",
-        gaaLeader
+        gaaLeader,
+        gaaLeaderData
       );
       const topShutoutLeader: TopStatLeader = new TopStatLeader(
         "Shutouts",
-        shutoutLeader
+        shutoutLeader,
+        shutoutLeaderData
       );
 
       const topGoalieLeaders: TopStatLeader[] = [
