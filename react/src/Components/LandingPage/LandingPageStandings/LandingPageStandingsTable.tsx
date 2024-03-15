@@ -24,9 +24,6 @@ export default function LandingPageStandingsTable({
         sortFns:{
             PLACE:(array)=>array.sort((a,b)=>a.conferenceStandingsPlace-b.conferenceStandingsPlace),
             TEAM:(array)=>array.sort((a,b)=>a.teamName.localeCompare(b.teamName)),
-            WINS:(array)=>array.sort((a,b)=>a.wins-b.wins),
-            LOSSES:(array)=>array.sort((a,b)=>a.losses-b.losses),
-            OT:(array)=>array.sort((a,b)=>a.otLosses-b.otLosses),
             RECORD:(array)=>array.sort((a,b)=>a.record.localeCompare(b.record)),
             POINTS:(array)=>array.sort((a,b)=>a.points-b.points),
             POINTSPERCENTAGE:(array)=>array.sort((a,b)=>a.pointsPercentage-b.pointsPercentage),
@@ -39,9 +36,6 @@ export default function LandingPageStandingsTable({
   const COLUMNS= [
       {label: '#', renderCell:(item:StandingsTeam)=>item.conferenceStandingsPlace,sort:{sortKey:"PLACE"}},
       {label: 'Team', renderCell:(item:StandingsTeam)=>item.teamName,sort:{sortKey:"TEAM"}},
-      {label: 'W', renderCell:(item:StandingsTeam)=>item.wins,sort:{sortKey:"WINS"}},
-      {label: 'L', renderCell:(item:StandingsTeam)=>item.losses,sort:{sortKey:"LOSSES"}},
-      {label: 'OT', renderCell:(item:StandingsTeam)=> item.otLosses,sort:{sortKey:"OT"}},
       {label: 'Record', renderCell:(item:StandingsTeam)=>item.record,sort:{sortKey:"RECORD"}},
       {label:'P', renderCell:(item:StandingsTeam)=>item.points,sort:{sortKey:"POINTS"}},
       {label:'P%', renderCell:(item:StandingsTeam)=>item.pointsPercentage,sort:{sortKey:"POINTSPERCENTAGE"}},
