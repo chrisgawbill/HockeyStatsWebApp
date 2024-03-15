@@ -2,13 +2,11 @@ import { Col, Row } from "react-bootstrap";
 import "../../style/LandingPage/LandingPageRow.css";
 import RowBlock from "./RowBlock";
 import React from "react";
-import { StandingsTeam } from "../../Data/Models/StandingsTeam";
-
-interface LandingPageRowProps{
-    title:string,
-    data:any[],
+interface LandingPageRowProps {
+  title: string;
+  data: any[];
 }
-export default function LandingPageRow({title, data}:LandingPageRowProps){
+export default function LandingPageRow({ title, data }: LandingPageRowProps) {
     return (
         <div>
             <Row>
@@ -25,4 +23,4 @@ export default function LandingPageRow({title, data}:LandingPageRowProps){
             </Row>
         </div>
     );
-};
+}
