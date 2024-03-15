@@ -25,7 +25,7 @@ export default function StatsLeaderModal({showModal, setShowStatsModal, statsLea
     return(
         <div>
         <Modal show={showModal} onHide={handleModalClose}>
-            <Modal.Header>{modalTitle + " " + "Leaders"}</Modal.Header>
+            <Modal.Header>{modalTitle + " Leaders"}</Modal.Header>
             <Modal.Body>
                 <CompactTable columns={COLUMNS} data={data} theme={theme} layout={{fixedHeader:true}}/>
             </Modal.Body>
