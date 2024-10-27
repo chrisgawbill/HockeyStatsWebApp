@@ -16,7 +16,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
             </Row>
             <Row className="row-scroller">
                 {data.map((item) => (
-                    <Col md={3} className="row-scroller-column" key={item.id}>
+                    <Col md={2} className="row-scroller-column" key={item.id}>
                         <RowBlock playerName={item.name} infoName={item.info} image={item.image} rowInfo={item.rowInfo}/>
                     </Col>
                 ))}

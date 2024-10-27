@@ -44,7 +44,7 @@ export default function PlayerStatLeaderRow({
                 <div className="block-picture">
                   <img src={topStatLeader.player.playerImage} alt=""></img>
                 </div>
-                <div className="block-info">
+                <div className="stat-leader-block-info">
                   <span className="block-info-name">
                     {topStatLeader.player.firstName +
                       " " +

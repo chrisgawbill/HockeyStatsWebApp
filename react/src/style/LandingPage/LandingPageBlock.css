@@ -1,12 +1,12 @@
 .generic-block {
     height: 5rem;
-    width: 13.5rem;
+    width: 9rem;
     border: solid;
     border-color: black;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    margin-left: 0.5rem;
-    padding-right: 0.25rem;
+    margin-left: 0.25rem;
+    padding-right: 0.10rem;
     border-radius: 10px;
   }
   .block-picture {
@@ -22,11 +22,14 @@
   }
   .block-info {
     float: left;
+  }
+  .block-info >p {
+    margin-left:25%;
     text-align: center;
   }
   .block-info > span {
     display: inline-block;
-    width: 8rem;
+    width: 3rem;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -35,15 +38,28 @@
   /* Stat Leader Block CSS */
   .stat-leader-block {
     height: 5rem;
-    min-width: 19rem;
+    min-width: 16rem;
     border: solid;
     border-color: black;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    margin-left: 1.8rem;
-    margin-right: 1.8rem;
+    margin-left: 3.0rem;
     display: inline-block;
     border-radius: 10px;
+  }
+  .stat-leader-block-info{
+    float: left;
+    text-align: center;
+  }
+  .stat-leader-block-info > span{
+    display: inline-block;
+    width: 8rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    height: 100%;
   }
   .stat-leader-value-block {
     float: left;
@@ -63,7 +79,8 @@
 @media only screen and (min-width: 768px) {
   .generic-block {
     height: 5rem;
-    width: 16rem;
+    width: 10rem;
+
   }
   /* Stat Leader Block CSS */
   .stat-leader-block {
@@ -72,9 +89,8 @@
     border: solid;
     border-color: black;
     margin-top: 1rem;
+    margin-left: 0rem;
     margin-bottom: 1rem;
-    margin-left: 1.8rem;
-    margin-right: 1.8rem;
     display: inline-block;
     border-radius: 10px;
   }
