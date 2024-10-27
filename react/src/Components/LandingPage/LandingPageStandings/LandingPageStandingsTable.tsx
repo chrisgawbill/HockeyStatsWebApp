@@ -71,10 +71,14 @@ export default function LandingPageStandingsTable({
     },
   ];
   const COLUMNS = React.useRef(CONFERENCE_STANDINGS_COLUMNS);
+  const HEIGHT = React.useRef("380px");
+
   if(standingFormat === "Division"){
     COLUMNS.current = DIVISION_STANDINGS_COLUMNS
+    HEIGHT.current = "210px";
   }else{
     COLUMNS.current = CONFERENCE_STANDINGS_COLUMNS;
+    HEIGHT.current = "380px";
   }
   const sort = useSort(
     data,
@@ -101,7 +105,7 @@ export default function LandingPageStandingsTable({
     console.log(action, state);
   }
   return (
-    <div style={{ height: "380px", marginTop: "1%", marginBottom: "2%" }}>
+    <div style={{ height: HEIGHT.current, marginTop: "1%", marginBottom: "2%" }}>
       <CompactTable
         className="standings-table"
         columns={COLUMNS.current}
