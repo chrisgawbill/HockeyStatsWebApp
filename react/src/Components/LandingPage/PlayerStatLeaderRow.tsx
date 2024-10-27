@@ -41,7 +41,7 @@ export default function PlayerStatLeaderRow({
                 setCurrentModalTitle(topStatLeader.statIndicator);
                 setCurrentModalStatList(topStatLeader.statLeadersList);
               }}>
-                <div className="block-picture">
+                <div className="stat-leader-block-picture">
                   <img src={topStatLeader.player.playerImage} alt=""></img>
                 </div>
                 <div className="stat-leader-block-info">

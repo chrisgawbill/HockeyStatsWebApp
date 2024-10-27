@@ -19,3 +19,16 @@
 .standings-info-row :hover{
     border: solid;
 }
+.standings-table-teamName-col > p{
+    display: none;
+}
+.standings-table-team-logo{
+    float: left;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+@media only screen and (min-width: 768px) {
+    .standings-table-teamName-col > p{
+        display: inline;
+    }
+}

@@ -20,7 +20,7 @@ export default function StatsLeaderModal({showModal, setShowStatsModal, statsLea
         {label: 'Name', renderCell:(item:PlayerStatLeader)=>item.firstName + " " + item.lastName},
         {label: 'Team', renderCell:(item:PlayerStatLeader)=>item.teamName},
         {label: 'Position', renderCell:(item:PlayerStatLeader)=>item.position},
-        {label: '#', renderCell:(item:PlayerStatLeader)=>item.value},
+        {label:modalTitle, renderCell:(item:PlayerStatLeader)=>item.value},
     ];
     return(
         <div>

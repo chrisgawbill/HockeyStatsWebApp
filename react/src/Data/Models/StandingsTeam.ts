@@ -1,5 +1,6 @@
 export class StandingsTeam{
     public id:number;
+    public teamLogo:string;
     public teamName:string;
     public conferenceName:string;
     public divisionName:string;
@@ -14,9 +15,10 @@ export class StandingsTeam{
     public divisionStandingsPlace:number;
     public wildCardRank:number;
 
-    constructor(id:number, teamName:string,conferenceName:string,divisionName:string,wins:number,losses:number,otLosses:number,record:string,points:number,pointsPercentage:number,leagueStanding:number,
+    constructor(id:number, teamLogo:string, teamName:string,conferenceName:string,divisionName:string,wins:number,losses:number,otLosses:number,record:string,points:number,pointsPercentage:number,leagueStanding:number,
         conferenceStandingsPlace:number,divisionStandingsPlace:number,wildCardRank:number){
         this.id = id;
+        this.teamLogo = teamLogo;
         this.teamName = teamName;
         this.conferenceName = conferenceName;
         this.divisionName = divisionName;

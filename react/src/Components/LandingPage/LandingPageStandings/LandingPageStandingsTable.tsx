@@ -24,7 +24,7 @@ export default function LandingPageStandingsTable({
     },
     {
       label: "Team",
-      renderCell: (item: StandingsTeam) => item.teamName,
+      renderCell: (item: StandingsTeam) => <span className="standings-table-teamName-col"><img className="standings-table-team-logo" src={item.teamLogo} alt="team logo"/><p>{item.teamName}</p></span>,
       sort: { sortKey: "TEAM" },
     },
     {
@@ -51,7 +51,7 @@ export default function LandingPageStandingsTable({
     },
     {
       label: "Team",
-      renderCell: (item: StandingsTeam) => item.teamName,
+      renderCell: (item: StandingsTeam) => <span className="standings-table-teamName-col"><img className="standings-table-team-logo" src={item.teamLogo} alt="team logo"/><p>{item.teamName}</p></span>,
       sort: { sortKey: "TEAM" },
     },
     {
