@@ -26,6 +26,7 @@ export default function LandingPageStandings() {
     useState<Boolean>(true);
   const [showDivisionStandings, setShowDivisionStandings] =
     useState<Boolean>(false);
+  const [switchViewButtonText, setSwitchViewButtonText] = useState<String>("Show Divisional Standings")
 
   //This useEffect will call apis to get data that will be used in components
   useEffect(() => {
@@ -91,11 +92,17 @@ export default function LandingPageStandings() {
       <Row>
       <Button
           onClick={() => {
+            if(showDivisionStandings === true){
+              setSwitchViewButtonText("Show Divisional Standings")
+            }else{
+              setSwitchViewButtonText("Show Conference Standings")
+            }
             setShowConferenceStandings(!showConferenceStandings);
             setShowDivisionStandings(!showDivisionStandings);
+            
           }}
         >
-          Switch Standing Format
+          {switchViewButtonText}
         </Button>
       </Row>
       <Row>
