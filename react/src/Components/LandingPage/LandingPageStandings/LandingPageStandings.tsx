@@ -61,10 +61,10 @@ export default function LandingPageStandings() {
   return (
     <Container>
       <div>
-        <Button onClick={()=>{
+        <Button  onClick={()=>{
           setShowConferenceStandings(!showConferenceStandings);
           setShowDivisionStandings(!showDivisionStandings);
-        }}>Click</Button>
+        }}>Switch Standing Format</Button>
       </div>
       {
         showConferenceStandings ? 
