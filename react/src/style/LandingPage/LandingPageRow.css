@@ -1,5 +1,5 @@
 .landing-header{
-    text-align: left;
+    text-align: center;
 }
 .row-scroller{
     overflow-x: auto;
@@ -9,4 +9,9 @@
 .row-scroller > .row-scroller-column{
     display: inline-block;
     float:none;
+}
+@media only screen and (min-width: 768px) {
+    .landing-header{
+        text-align: left;
+    }
 }

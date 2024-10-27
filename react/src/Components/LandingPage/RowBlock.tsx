@@ -9,10 +9,12 @@ interface RowBlockProps{
     rowInfo:string
 }
 export default function RowBlock({playerName, infoName, image, rowInfo}:RowBlockProps){
+    const blockInfo = React.useRef(infoName);
     const [blockPictureColor, setBlockPictureColor] = useState("transparent")
     useEffect(() => {
         if(rowInfo === "draftLotteryOdds"){
             let draftLotteryOddsColor = infoName.split("(");
+            blockInfo.current = draftLotteryOddsColor[0];
             draftLotteryOddsColor = draftLotteryOddsColor[1].split(")");
             const trend = draftLotteryOddsColor[0]
             if(trend === "UP"){
@@ -31,7 +33,7 @@ export default function RowBlock({playerName, infoName, image, rowInfo}:RowBlock
             </div>
             <div className="block-info">
                 <span className="block-info-name">{playerName}</span>
-                <p className="block-info-info">{infoName}</p>
+                <p className="block-info-info">{blockInfo.current}</p>
             </div>
             <div className="clear-div"></div>
         </div>

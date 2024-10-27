@@ -1,69 +1,90 @@
-.generic-block{
+.generic-block {
     height: 5rem;
-    width: 16rem;
+    width: 13.5rem;
     border: solid;
-    border-color: black; 
-    margin-top:1rem;
+    border-color: black;
+    margin-top: 1rem;
     margin-bottom: 1rem;
     margin-left: 0.5rem;
     padding-right: 0.25rem;
-    border-radius:10px;
-}
-.block-picture{
+    border-radius: 10px;
+  }
+  .block-picture {
     float: left;
     width: 4.7rem;
     height: 100%;
     border-right: solid;
     border-color: black;
-}
-.block-picture > img{
+  }
+  .block-picture > img {
     width: 100%;
     height: 100%;
-}
-.block-info{
+  }
+  .block-info {
     float: left;
     text-align: center;
-}
-.block-info > span{
+  }
+  .block-info > span {
     display: inline-block;
     width: 8rem;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     height: 100%;
-}
-/* Stat Leader Block CSS */
-.stat-leader-block{
+  }
+  /* Stat Leader Block CSS */
+  .stat-leader-block {
     height: 5rem;
     min-width: 19rem;
     border: solid;
-    border-color: black; 
-    margin-top:1rem;
+    border-color: black;
+    margin-top: 1rem;
     margin-bottom: 1rem;
+    margin-left: 1.8rem;
+    margin-right: 1.8rem;
     display: inline-block;
-    border-radius:10px;
-}
-.stat-leader-block :first{
-    margin-left: 0.5rem;
-}
-.stat-leader-block:hover{
-    cursor: pointer;
-    background-color: lightblue;
-
-    box-shadow: 10px 10px 5px #cccbcb;
-}
-.stat-leader-value-block{
+    border-radius: 10px;
+  }
+  .stat-leader-value-block {
     float: left;
     height: 100%;
     border-left: solid;
     margin-left: 0.5rem;
     border-color: black;
-}
-.stat-leader-value-block > p{
+  }
+  .stat-leader-value-block > p {
     font-weight: bold;
     font-size: 1.8rem;
     margin-left: 35%;
-    margin-top:35%;
+    margin-top: 35%;
 
     text-align: center;
+  }
+@media only screen and (min-width: 768px) {
+  .generic-block {
+    height: 5rem;
+    width: 16rem;
+  }
+  /* Stat Leader Block CSS */
+  .stat-leader-block {
+    height: 5rem;
+    min-width: 19rem;
+    border: solid;
+    border-color: black;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 1.8rem;
+    margin-right: 1.8rem;
+    display: inline-block;
+    border-radius: 10px;
+  }
+  .stat-leader-block :first {
+    margin-left: 0.5rem;
+  }
+  .stat-leader-block:hover {
+    cursor: pointer;
+    background-color: lightblue;
+
+    box-shadow: 10px 10px 5px #cccbcb;
+  }
 }
