@@ -46,6 +46,12 @@
 .stat-leader-block :first{
     margin-left: 0.5rem;
 }
+.stat-leader-block:hover{
+    cursor: pointer;
+    background-color: lightblue;
+
+    box-shadow: 10px 10px 5px #cccbcb;
+}
 .stat-leader-value-block{
     float: left;
     height: 100%;

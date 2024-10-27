@@ -7,11 +7,13 @@ import LandingPageStandingsTable from "./LandingPageStandingsTable";
 interface StandingsContainerProps {
   standingsName: string;
   standingsData: StandingsTeam[];
+  standingFormat:String;
 }
 
 export default function StandingsContainer({
   standingsName,
   standingsData,
+  standingFormat,
 }: StandingsContainerProps) {
   if (standingsData.length > 1) {
     return (
@@ -24,7 +26,7 @@ export default function StandingsContainer({
           </Col>
         </Row>
         <Row>
-          <LandingPageStandingsTable standingsData={standingsData} />
+          <LandingPageStandingsTable standingsData={standingsData} standingFormat={standingFormat} />
         </Row>
       </div>
     );
