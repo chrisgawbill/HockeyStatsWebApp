@@ -26,7 +26,9 @@ export default function LandingPageStandings() {
     useState<Boolean>(true);
   const [showDivisionStandings, setShowDivisionStandings] =
     useState<Boolean>(false);
-  const [switchViewButtonText, setSwitchViewButtonText] = useState<String>("Show Divisional Standings")
+  const [switchViewButtonText, setSwitchViewButtonText] = useState<String>(
+    "Show Divisional Standings"
+  );
 
   //This useEffect will call apis to get data that will be used in components
   useEffect(() => {
@@ -90,74 +92,75 @@ export default function LandingPageStandings() {
         </Col>
       </Row>
       <Row>
-      <Button
+        <Button
+          variant="secondary"
+          id="landingPage-standings-switcher"
           onClick={() => {
-            if(showDivisionStandings === true){
-              setSwitchViewButtonText("Show Divisional Standings")
-            }else{
-              setSwitchViewButtonText("Show Conference Standings")
+            if (showDivisionStandings === true) {
+              setSwitchViewButtonText("Show Divisional Standings");
+            } else {
+              setSwitchViewButtonText("Show Conference Standings");
             }
             setShowConferenceStandings(!showConferenceStandings);
             setShowDivisionStandings(!showDivisionStandings);
-            
           }}
         >
           {switchViewButtonText}
         </Button>
       </Row>
       <Row>
-      {showConferenceStandings ? (
-        <StandingsContainer
-          standingsName="Eastern"
-          standingsData={easternStandingsData}
-          standingFormat={"Conference"}
-        />
-      ) : null}
+        {showConferenceStandings ? (
+          <StandingsContainer
+            standingsName="Eastern"
+            standingsData={easternStandingsData}
+            standingFormat={"Conference"}
+          />
+        ) : null}
       </Row>
       <Row>
-      {showConferenceStandings ? (
-        <StandingsContainer
-          standingsName="Western"
-          standingsData={westernStandingsData}
-          standingFormat={"Conference"}
-        />
-      ) : null}
+        {showConferenceStandings ? (
+          <StandingsContainer
+            standingsName="Western"
+            standingsData={westernStandingsData}
+            standingFormat={"Conference"}
+          />
+        ) : null}
       </Row>
       <Row>
-      {showDivisionStandings ? (
-        <StandingsContainer
-          standingsName="Metro"
-          standingsData={metropolitanStandings}
-          standingFormat={"Division"}
-        />
-      ) : null}
+        {showDivisionStandings ? (
+          <StandingsContainer
+            standingsName="Metro"
+            standingsData={metropolitanStandings}
+            standingFormat={"Division"}
+          />
+        ) : null}
       </Row>
       <Row>
-      {showDivisionStandings ? (
-        <StandingsContainer
-          standingsName="Atlantic"
-          standingsData={atlanticStandings}
-          standingFormat={"Division"}
-        />
-      ) : null}
+        {showDivisionStandings ? (
+          <StandingsContainer
+            standingsName="Atlantic"
+            standingsData={atlanticStandings}
+            standingFormat={"Division"}
+          />
+        ) : null}
       </Row>
       <Row>
-      {showDivisionStandings ? (
-        <StandingsContainer
-          standingsName="Central"
-          standingsData={centralStandings}
-          standingFormat={"Division"}
-        />
-      ) : null}
+        {showDivisionStandings ? (
+          <StandingsContainer
+            standingsName="Central"
+            standingsData={centralStandings}
+            standingFormat={"Division"}
+          />
+        ) : null}
       </Row>
       <Row>
-      {showDivisionStandings ? (
-        <StandingsContainer
-          standingsName="Pacific"
-          standingsData={pacificStandings}
-          standingFormat={"Division"}
-        />
-      ) : null}
+        {showDivisionStandings ? (
+          <StandingsContainer
+            standingsName="Pacific"
+            standingsData={pacificStandings}
+            standingFormat={"Division"}
+          />
+        ) : null}
       </Row>
     </Container>
   );

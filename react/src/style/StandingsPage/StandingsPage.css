@@ -1,0 +1,14 @@
+.standings-page-header-box{
+    display: inline-block;
+    width:50%;
+    height:5rem;
+    margin-top:2rem;
+    margin-bottom:2rem;
+    border-bottom: solid;
+}
+.standings-page-header-box > p{
+    text-align: center;
+}
+.standings-page-header-box:hover{
+    background-color: lightblue;
+}

@@ -75,10 +75,10 @@ export default function LandingPageStandingsTable({
 
   if(standingFormat === "Division"){
     COLUMNS.current = DIVISION_STANDINGS_COLUMNS
-    HEIGHT.current = "210px";
+    HEIGHT.current = "250px";
   }else{
     COLUMNS.current = CONFERENCE_STANDINGS_COLUMNS;
-    HEIGHT.current = "380px";
+    HEIGHT.current = "322px";
   }
   const sort = useSort(
     data,

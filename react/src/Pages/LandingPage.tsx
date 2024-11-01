@@ -30,6 +30,7 @@ export default function LandingPage() {
   const [pointsLeaderData, setPointsLeaderData] = useState<PlayerStatLeader[]>(
     []
   );
+  const [faceoffLeadersData, setFaceoffLeadersData] = useState<PlayerStatLeader[]>([]);
   const [topPlayerLeaderData, setTopPlayerLeaderData] = useState<
     TopStatLeader[]
   >([]);
@@ -54,7 +55,8 @@ export default function LandingPage() {
     GetSkaterLeaders(
       setGoalLeaderData,
       setAssistLeaderData,
-      setPointsLeaderData
+      setPointsLeaderData,
+      setFaceoffLeadersData
     );
     GetGoalieLeaders(
       setWinsLeaderData,
@@ -67,11 +69,13 @@ export default function LandingPage() {
     if (
       goalLeaderData[0] !== undefined &&
       assistLeaderData[0] !== undefined &&
-      pointsLeaderData[0] !== undefined
+      pointsLeaderData[0] !== undefined &&
+      faceoffLeadersData[0] !== undefined
     ) {
       const goalLeader: PlayerStatLeader = goalLeaderData[0];
       const assistLeader: PlayerStatLeader = assistLeaderData[0];
       const pointsLeader: PlayerStatLeader = pointsLeaderData[0];
+      const faceoffLeader:PlayerStatLeader = faceoffLeadersData[0];
 
       const topGoalLeader: TopStatLeader = new TopStatLeader(
         "Goals",
@@ -83,21 +87,27 @@ export default function LandingPage() {
         assistLeader,
         assistLeaderData
       );
-      const topPointsLeadr: TopStatLeader = new TopStatLeader(
+      const topPointsLeader: TopStatLeader = new TopStatLeader(
         "Points",
         pointsLeader,
         pointsLeaderData
+      );
+      const topFaceoffLeader: TopStatLeader = new TopStatLeader(
+        "Faceoffs",
+        faceoffLeader,
+        faceoffLeadersData
       );
 
       const topPlayerLeaders: TopStatLeader[] = [
         topGoalLeader,
         topAssistLeader,
-        topPointsLeadr,
+        topPointsLeader,
+        topFaceoffLeader,
       ];
 
       setTopPlayerLeaderData(topPlayerLeaders);
     }
-  }, [goalLeaderData, assistLeaderData, pointsLeaderData]);
+  }, [goalLeaderData, assistLeaderData, pointsLeaderData, faceoffLeadersData]);
   useEffect(() => {
     console.log(savePercentageLeaderData)
     if (
@@ -150,16 +160,19 @@ export default function LandingPage() {
         <Col md={7}>
           <QuickLinks></QuickLinks>
           <PlayerStatLeaderRow
+            key={"skaterStatLeaders"}
             title={"Skater Stat Leaders"}
             topStatLeaders={topPlayerLeaderData}
             setShowStatModal={setShowStatLeaderModal}
           ></PlayerStatLeaderRow>
           <PlayerStatLeaderRow
+            key={"goalieStatLeaders"}
             title="Goalie Stat Leaders"
             topStatLeaders={topGoalieLeaderData}
             setShowStatModal={setShowStatLeaderModal}
           ></PlayerStatLeaderRow>
           <LandingPageRow
+            key={"draftLottteryOdds"}
             title={"Draft Lottery Odds"}
             data={draftLotteryOddsData}
           ></LandingPageRow>
@@ -186,7 +199,8 @@ function GetDraftLotteryOdds(setDraftLotteryOddsData: Function) {
 function GetSkaterLeaders(
   setGoalLeaderData: Function,
   setAssistLeaderData: Function,
-  setPointsLeaderData: Function
+  setPointsLeaderData: Function,
+  setFaceoffLeadersData:Function
 ) {
   GetSkaterStatLeaders("goals")
     .then((response) => {
@@ -218,6 +232,15 @@ function GetSkaterLeaders(
       setPointsLeaderData(pointsLeaderData);
     })
     .catch((error) => console.log(error));
+  GetSkaterStatLeaders("faceoffLeaders")
+    .then((response)=>{
+      const responseData = response.data;
+      const faceoffLeadersData:PlayerStatLeader[] = PlayerStatLeaderConverter(
+        responseData,
+        "faceoffLeaders"
+      );
+      setFaceoffLeadersData(faceoffLeadersData);
+    })
 }
 function GetGoalieLeaders(
   setWinsLeaderData: Function,
