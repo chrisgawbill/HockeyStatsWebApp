@@ -1,0 +1,12 @@
+.teamList-block{
+    border: solid;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+.teamList-block:hover{
+    background-color: lightblue;
+}
+.teamList-row:first-child{
+    margin-top: 2rem;
+}

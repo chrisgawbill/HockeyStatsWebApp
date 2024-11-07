@@ -16,6 +16,9 @@ import PlayerStatLeaderConverter from "../Data/Helpers/PlayerStatLeaderConverter
 import PlayerStatLeaderRow from "../Components/LandingPage/PlayerStatLeaderRow";
 import { TopStatLeader } from "../Data/Models/TopStatLeader";
 import StatsLeaderModal from "../Components/LandingPage/Modals/StatsLeaderModal";
+import PageHeader from "../Components/PageHeader";
+
+import "../style/LandingPage/LandingPageStyle.css";
 
 export default function LandingPage() {
   //use States that will set with data that will be passed to components in landingPage
@@ -156,9 +159,9 @@ export default function LandingPage() {
   ]);
   return (
     <Container fluid>
-      <Row>
+      <PageHeader pageTitle="Home"/>
+      <Row id="landingPage-content">
         <Col md={7}>
-          <QuickLinks></QuickLinks>
           <PlayerStatLeaderRow
             key={"skaterStatLeaders"}
             title={"Skater Stat Leaders"}

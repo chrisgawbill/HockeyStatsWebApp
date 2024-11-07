@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../style/StandingsPage/StandingsPage.css";
-import { Container } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap";
 import LandingPageStandingsTable from "../Components/LandingPage/LandingPageStandings/LandingPageStandingsTable";
 import { StandingsTeam } from "../Data/Models/StandingsTeam";
 import { GetCurrentStandings } from "../Services/ApiHandler";
@@ -8,6 +8,8 @@ import { CreateConferenceStandingsArray } from "../Data/Helpers/ConferenceStandi
 import { CreateDivisionStandingsArray } from "../Data/Helpers/DivisionStandingsHelper";
 
 import StandingsContainer from "../Components/LandingPage/LandingPageStandings/StandingsContainer";
+import { Link } from "react-router-dom";
+import PageHeader from "../Components/PageHeader";
 export default function StandingsPage() {
   const [easternStandingsData, setEasternStandingsData] = useState<
     StandingsTeam[]
@@ -20,11 +22,12 @@ export default function StandingsPage() {
   >([]);
   const [centralStandings, setCentralStandings] = useState<StandingsTeam[]>([]);
   const [pacificStandings, setPacificStandings] = useState<StandingsTeam[]>([]);
-  const [showConferenceStandings, setShowConferenceStandings] =
-    useState<Boolean>(true);
+  const [showDivisionStandings, setShowDivisionStandings] =
+    useState<Boolean>(false);
   const [atlanticStandings, setAtlanticStandings] = useState<StandingsTeam[]>(
     []
   );
+
   useEffect(() => {
     GetStandings(
       setEasternStandingsData,
@@ -80,30 +83,75 @@ export default function StandingsPage() {
 
   return (
     <Container>
-      <div>
-        <div className="standings-page-header-box">
-            <p>Conference Standings</p>
-        </div>
-        <div className="standings-page-header-box">
-            <p>Division Standings</p>
-        </div>
-      </div>
-      <div>
-        <div>
-          <StandingsContainer
-            standingsName="Eastern"
-            standingsData={easternStandingsData}
-            standingFormat={"Conference"}
-          />
-        </div>
-        <div>
-          <StandingsContainer
-            standingsName="Western"
-            standingsData={westernStandingsData}
-            standingFormat={"Conference"}
-          />
-        </div>
-      </div>
+    <PageHeader pageTitle="Standings"/>
+      <Row>
+        <Col md={6} className="standings-page-header-box">
+          <Button
+            id="standings-page-conference-viewSwitcher"
+            className="standings-page-viewSwitcher-btn"
+            onClick={() => {
+              setShowDivisionStandings(false);
+              document.getElementById("standings-page-conference-viewSwitcher")!.style.borderColor="darkBlue";
+              document.getElementById("standings-page-division-viewSwitcher")!.style.borderColor = "grey";
+            }}
+          >
+            Conference Standings
+          </Button>
+        </Col>
+        <Col md={6} className="standings-page-header-box">
+          <Button
+            id="standings-page-division-viewSwitcher"
+            className="standings-page-viewSwitcher-btn"
+            onClick={() => {
+              setShowDivisionStandings(true);
+              document.getElementById("standings-page-conference-viewSwitcher")!.style.borderColor="grey";;
+              document.getElementById("standings-page-division-viewSwitcher")!.style.borderColor="darkBlue";;
+            }}
+          >
+            Division Standings
+          </Button>
+        </Col>
+      </Row>
+      <Row id="standings-page-table-container">
+        {!showDivisionStandings ? (
+          <>
+            <StandingsContainer
+              standingsName="Eastern"
+              standingsData={easternStandingsData}
+              standingFormat={"Conference"}
+            />
+            <StandingsContainer
+              standingsName="Western"
+              standingsData={westernStandingsData}
+              standingFormat={"Conference"}
+            />
+          </>
+        ) : null}
+        {showDivisionStandings ? (
+          <>
+            <StandingsContainer
+              standingsName="Metropolitan"
+              standingsData={metropolitanStandings}
+              standingFormat={"Division"}
+            />
+            <StandingsContainer
+              standingsName="Atlantic"
+              standingsData={atlanticStandings}
+              standingFormat={"Division"}
+            />
+            <StandingsContainer
+              standingsName="Central"
+              standingsData={centralStandings}
+              standingFormat={"Division"}
+            />
+            <StandingsContainer
+              standingsName="Pacific"
+              standingsData={pacificStandings}
+              standingFormat={"Division"}
+            />
+          </>
+        ) : null}
+      </Row>
     </Container>
   );
 }

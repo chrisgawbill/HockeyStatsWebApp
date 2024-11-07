@@ -32,7 +32,9 @@ export default function PlayerStatLeaderRow({
         <Row className="row-scroller">
           {topStatLeaders.map((topStatLeader: TopStatLeader) => (
             <Col
-              md={4}
+              sm
+              md = {5}
+              lg = {4}
               className="row-scroller-column"
               key={topStatLeader.player.id}
             >

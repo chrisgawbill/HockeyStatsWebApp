@@ -1,3 +1,26 @@
+#standing-page-header > h2{
+   text-align: center;
+   margin-top: 0.5rem;
+   margin-bottom: 2rem;
+}
+#standings-page-table-container{
+    height: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.clear-div{
+    float: none;
+}
+.header-menu-btn{
+    border: none;
+    width: 100%;
+    background-color: grey;
+}
+.standings-page-viewSwitcher-btn{
+    width: 100%;
+    text-align: center;
+    background-color: grey;
+}
 .standings-page-header-box{
     display: inline-block;
     width:50%;
@@ -9,6 +32,9 @@
 .standings-page-header-box > p{
     text-align: center;
 }
-.standings-page-header-box:hover{
-    background-color: lightblue;
+@media only screen and (min-width: 768px) {
+    #standing-page-header > h2{
+        margin-top: 0.5rem;
+        margin-bottom: 2rem;
+     }
 }
