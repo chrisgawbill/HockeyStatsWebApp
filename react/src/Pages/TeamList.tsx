@@ -7,10 +7,13 @@ import { Team } from "../Data/Models/Team";
 
 import "../style/TeamList/TeamList.css";
 import PageHeader from "../Components/PageHeader";
+import TeamListModal from "../Components/LandingPage/Modals/TeamListModal";
 
 export default function TeamList() {
   const teamListData = React.useRef<any[]>([]);
   const [teamList, setTeamList] = useState<Team[]>([]);
+  const[showTeamModal, setShowTeamModal] = useState<boolean>(false);
+  const[modalTeam, setModalTeam] = useState<Team>(new Team(0, "", []));
 
   useEffect(() => {
     GetListOfTeams().then((response) => {
@@ -40,8 +43,11 @@ export default function TeamList() {
         {
             teamList.map((team)=>{
                 return(
-                    <Row className="teamList-row">
-                        <div className="teamList-block">
+                    <Row key={team.id} className="teamList-row">
+                        <div className="teamList-block" onClick={() => {
+                            setShowTeamModal(true);
+                            setModalTeam(team)
+                        }}>
                             <p>{team.teamName}</p>
                         </div>
                     </Row>
@@ -49,6 +55,7 @@ export default function TeamList() {
             })
         }
       </div>
+      <TeamListModal showModal={showTeamModal} setShowModal={setShowTeamModal} team={modalTeam}/>
     </Container>
   );
 }

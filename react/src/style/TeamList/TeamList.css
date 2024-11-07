@@ -3,10 +3,19 @@
     border-radius: 10px;
     margin-bottom: 1rem;
     text-align: center;
+    padding: 0.5rem;
+    width: 85rem;
 }
 .teamList-block:hover{
     background-color: lightblue;
 }
 .teamList-row:first-child{
     margin-top: 2rem;
+}
+
+@media only screen and (min-width: 768px) {
+    .teamList-block{
+        margin-bottom: 1rem;
+        width: 85rem;
+    }
 }
