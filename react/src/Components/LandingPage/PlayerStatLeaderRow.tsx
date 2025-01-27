@@ -32,7 +32,9 @@ export default function PlayerStatLeaderRow({
         <Row className="row-scroller">
           {topStatLeaders.map((topStatLeader: TopStatLeader) => (
             <Col
-              md={4}
+              sm
+              md = {5}
+              lg = {4}
               className="row-scroller-column"
               key={topStatLeader.player.id}
             >
@@ -41,10 +43,10 @@ export default function PlayerStatLeaderRow({
                 setCurrentModalTitle(topStatLeader.statIndicator);
                 setCurrentModalStatList(topStatLeader.statLeadersList);
               }}>
-                <div className="block-picture">
+                <div className="stat-leader-block-picture">
                   <img src={topStatLeader.player.playerImage} alt=""></img>
                 </div>
-                <div className="block-info">
+                <div className="stat-leader-block-info">
                   <span className="block-info-name">
                     {topStatLeader.player.firstName +
                       " " +

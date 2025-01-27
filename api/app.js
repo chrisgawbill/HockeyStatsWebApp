@@ -8,7 +8,9 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var standingsRouter = require('./routes/standings');
-var playerRouter = require('./routes/player')
+var playerRouter = require('./routes/player');
+var teamRouter = require('./routes/team');
+const { spawn } = require('child_process');
 
 let corsOptions = {
   origin : ['http://localhost:3000'],
@@ -30,7 +32,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/standings", standingsRouter);
-app.use("/player", playerRouter)
+app.use("/player", playerRouter);
+app.use("/team", teamRouter);
+
+app.use("/python-service/:message", (req,res) => {
+  const {message} = req.params;
+  const pythonProcess = spawn('python',['./routes/hockey-ai.py', message]);
+
+  pythonProcess.stdout.on('data',(data)=>{
+    res.send(data.toString());
+  })
+  pythonProcess.stderr.on('data',(data)=>{
+    console.error('stderr: ' + data);
+    res.status(500).send(data.toString());
+  })
+  pythonProcess.on('close', (code) =>{
+    console.log('child process exited with code: ' + code);
+  })
+})
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -46,5 +66,4 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
 module.exports = app;

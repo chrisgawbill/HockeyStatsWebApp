@@ -11,6 +11,7 @@ export function CreateConferenceStandingsArray(
   do{
     const responseTeam = initialStandings[i];
     if (responseTeam.conferenceName === matchingConferenceName) {
+      const teamLogo = responseTeam.teamLogo;
       const name = responseTeam.teamCommonName.default;
       const conferenceName = responseTeam.conferenceName;
       const divisionName = responseTeam.divisionName;
@@ -32,6 +33,7 @@ export function CreateConferenceStandingsArray(
 
       const standingsTeam: StandingsTeam = new StandingsTeam(
         i,
+        teamLogo,
         name,
         conferenceName,
         divisionName,

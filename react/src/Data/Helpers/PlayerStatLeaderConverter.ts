@@ -12,6 +12,9 @@ export default function PlayerStatLeaderConverter(playerLeaderResponseData:any, 
         case "points":
             localPlayerResponseData = playerLeaderResponseData.points;
             break;
+        case "faceoffLeaders":
+            localPlayerResponseData = playerLeaderResponseData.faceoffLeaders;
+            break;
         case "wins":
             localPlayerResponseData = playerLeaderResponseData.wins;
             break;

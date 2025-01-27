@@ -18,9 +18,9 @@ export default function StatsLeaderModal({showModal, setShowStatsModal, statsLea
     const data = {nodes:statsLeaderData}
     const COLUMNS= [
         {label: 'Name', renderCell:(item:PlayerStatLeader)=>item.firstName + " " + item.lastName},
-        {label: 'Team', renderCell:(item:PlayerStatLeader)=>item.teamName},
+        {label: 'Team', renderCell:(item:PlayerStatLeader)=><span className="standings-table-teamName-col"><img className="standings-table-team-logo" src={item.teamLogo} alt="team logo"></img><p>{item.teamName}</p></span>},
         {label: 'Position', renderCell:(item:PlayerStatLeader)=>item.position},
-        {label: '#', renderCell:(item:PlayerStatLeader)=>item.value},
+        {label:modalTitle, renderCell:(item:PlayerStatLeader)=>item.value},
     ];
     return(
         <div>

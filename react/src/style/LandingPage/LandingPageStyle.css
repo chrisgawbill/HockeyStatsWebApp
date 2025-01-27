@@ -5,3 +5,6 @@
 .clear-div{
     clear: both;
 }
+#landingPage-content{
+    margin-top: 2rem;
+}
