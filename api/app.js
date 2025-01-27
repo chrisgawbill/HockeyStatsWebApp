@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var standingsRouter = require('./routes/standings');
 var playerRouter = require('./routes/player');
+var teamRouter = require('./routes/team');
 const { spawn } = require('child_process');
 
 let corsOptions = {
@@ -31,10 +32,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/standings", standingsRouter);
-app.use("/player", playerRouter)
+app.use("/player", playerRouter);
+app.use("/team", teamRouter);
 
-app.use("/python-service", (req,res) => {
-  const pythonProcess = spawn('python',['./routes/hockey-ai.py']);
+app.use("/python-service/:message", (req,res) => {
+  const {message} = req.params;
+  const pythonProcess = spawn('python',['./routes/hockey-ai.py', message]);
+
   pythonProcess.stdout.on('data',(data)=>{
     res.send(data.toString());
   })

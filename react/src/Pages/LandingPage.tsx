@@ -19,6 +19,7 @@ import StatsLeaderModal from "../Components/LandingPage/Modals/StatsLeaderModal"
 import PageHeader from "../Components/PageHeader";
 
 import "../style/LandingPage/LandingPageStyle.css";
+import { InterfaceWithChatBot } from "../Services/GenAIHandler";
 
 export default function LandingPage() {
   //use States that will set with data that will be passed to components in landingPage
@@ -52,6 +53,7 @@ export default function LandingPage() {
   //UseState for showing the modal when player leader is clicked
   const [showStatLeaderModal, setShowStatLeaderModal] =
     useState<boolean>(false);
+  const [chatInfo, setChatInfo] = useState();
 
   useEffect(() => {
     GetDraftLotteryOdds(setDraftLotteryOddsData);
@@ -67,7 +69,13 @@ export default function LandingPage() {
       setGaaLeaderData,
       setShutoutLeaderData
     );
+    GetChatInfo(setChatInfo)
   }, []);
+  useEffect(() => {
+    if(chatInfo !== undefined){
+      console.log(chatInfo)
+    }
+  },[chatInfo])
   useEffect(() => {
     if (
       goalLeaderData[0] !== undefined &&
@@ -289,4 +297,10 @@ function GetGoalieLeaders(
       setShutoutLeaderData(shutoutLeaderData);
     })
     .catch((error) => console.log(error));
+}
+function GetChatInfo(setChatInfo:Function){
+  InterfaceWithChatBot("What is offsides").then((response) => {
+    const responseData = response.data;
+    setChatInfo(responseData);
+  })
 }

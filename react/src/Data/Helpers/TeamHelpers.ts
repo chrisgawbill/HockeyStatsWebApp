@@ -4,6 +4,7 @@ import { TeamStats } from "../Models/TeamStats";
 export function ConvertToListOfTeams(teamListData:any[], teamResponseData: any[]) {
   let teamArray: Team[] = new Array(32);
   console.log(teamListData)
+  console.log(teamResponseData)
   for (let i = 0; i < teamListData.length; i++) {
     const id: number = teamListData[i].franchiseId;
     const teamName: string = teamListData[i].fullName;
