@@ -39,18 +39,38 @@ app.use("/python-service/:message", (req,res) => {
   const {message} = req.params;
   const pythonProcess = spawn('python',['./routes/hockey-ai.py', message]);
 
+  let responseSent = false;
+  let stderrLogs = "";
+  let stdoutData = "";
+
   pythonProcess.stdout.on('data',(data)=>{
-    res.send(data.toString());
-  })
+    stdoutData += data.toString();
+  });
   pythonProcess.stderr.on('data',(data)=>{
+    stderrLogs += data.toString();
     console.error('stderr: ' + data);
-    res.status(500).send(data.toString());
-  })
+  });
   pythonProcess.on('close', (code) =>{
     console.log('child process exited with code: ' + code);
-  })
-})
-
+    if(!responseSent){
+      if(code !== 0){
+        res.status(500).send(`Process exited with code ${code}`)
+      }else{
+        try{
+          const jsonReponse = JSON.parse(stdoutData);
+          if(jsonReponse.error){
+            res.status(500).send(jsonReponse.error)
+          }else{
+            res.send(jsonReponse.data);
+          }
+        }catch(e){
+          res.status(500).send(`Error parsing JSON response\n${stdoutData}`);
+        }
+      }
+      responseSent = true
+    }
+});
+});
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

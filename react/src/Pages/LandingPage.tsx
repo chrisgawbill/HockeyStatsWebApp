@@ -53,8 +53,10 @@ export default function LandingPage() {
   //UseState for showing the modal when player leader is clicked
   const [showStatLeaderModal, setShowStatLeaderModal] =
     useState<boolean>(false);
-  const [chatInfo, setChatInfo] = useState();
-
+  const [chatInfo, setChatInfo] = useState(null);
+  useEffect(() => {
+    GetChatInfo(setChatInfo)
+  }, [])
   useEffect(() => {
     GetDraftLotteryOdds(setDraftLotteryOddsData);
     GetSkaterLeaders(
@@ -69,10 +71,9 @@ export default function LandingPage() {
       setGaaLeaderData,
       setShutoutLeaderData
     );
-    GetChatInfo(setChatInfo)
   }, []);
   useEffect(() => {
-    if(chatInfo !== undefined){
+    if(chatInfo !== null){
       console.log(chatInfo)
     }
   },[chatInfo])
@@ -302,5 +303,7 @@ function GetChatInfo(setChatInfo:Function){
   InterfaceWithChatBot("What is offsides").then((response) => {
     const responseData = response.data;
     setChatInfo(responseData);
+  }).catch((error) => {
+    console.error("Error occured while trying to interface with chatbot")
   })
 }

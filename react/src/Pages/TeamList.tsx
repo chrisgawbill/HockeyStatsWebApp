@@ -36,13 +36,14 @@ export default function TeamList() {
     //   const finalTeamData = ConvertToListOfTeams(teamListData.current, rawData);
     //   setTeamList(finalTeamData);
     // });
-    let rawData: any[] = localTeamList;
-    rawData.sort((a, b) => {
+    let rawLocalList: any[] = localTeamList;
+    rawLocalList.sort((a, b) => {
       return b.fullName - a.fullName;
     })
-    teamListData.current = rawData;
+    teamListData.current = rawLocalList;
     GetTeamStatsById("").then((response) => {
-      const rawData: any[] = response.data.standings;
+      console.log(response)
+      const rawData: any[] = response.data.data;
       const finalTeamData = ConvertToListOfTeams(teamListData.current, rawData);
       setTeamList(finalTeamData);
     });
