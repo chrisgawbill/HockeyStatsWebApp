@@ -13,8 +13,8 @@ import TeamListModal from "../Components/LandingPage/Modals/TeamListModal";
 export default function TeamList() {
   const teamListData = React.useRef<any[]>([]);
   const [teamList, setTeamList] = useState<Team[]>([]);
-  const[showTeamModal, setShowTeamModal] = useState<boolean>(false);
-  const[modalTeam, setModalTeam] = useState<Team>(new Team(0, "", []));
+  const [showTeamModal, setShowTeamModal] = useState<boolean>(false);
+  const [modalTeam, setModalTeam] = useState<Team>(new Team(0, "", []));
 
   useEffect(() => {
     // GetListOfTeams().then((response) => {
@@ -36,38 +36,49 @@ export default function TeamList() {
     //   const finalTeamData = ConvertToListOfTeams(teamListData.current, rawData);
     //   setTeamList(finalTeamData);
     // });
+    GetTeams(setTeamList);
+  }, [teamListData]);
+  return (
+    <Container>
+      <PageHeader pageTitle="Team List" />
+      <div className="teamList-row">
+        {teamList.map((team) => (
+          <Row key={team.id} className="teamList-block"  
+            onClick={() => {
+            setShowTeamModal(true);
+            setModalTeam(team);
+          }}>
+            <Col>
+              <p>{team.teamName}</p>
+            </Col>
+            <Col>
+              <Link to="/TeamPage">
+                <Button>GO</Button>
+              </Link>
+            </Col>
+          </Row>
+        ))}
+      </div>
+      <TeamListModal
+        showModal={showTeamModal}
+        setShowModal={setShowTeamModal}
+        team={modalTeam}
+      />
+    </Container>
+  );
+  async function GetTeams(setTeamList: Function) {
     let rawLocalList: any[] = localTeamList;
     rawLocalList.sort((a, b) => {
       return b.fullName - a.fullName;
-    })
+    });
     teamListData.current = rawLocalList;
-    GetTeamStatsById("").then((response) => {
-      console.log(response)
-      const rawData: any[] = response.data.data;
+    try {
+      const temStatsData = await GetTeamStatsById("");
+      const rawData: any[] = temStatsData.data;
       const finalTeamData = ConvertToListOfTeams(teamListData.current, rawData);
       setTeamList(finalTeamData);
-    });
-  },[teamListData]);
-  return (
-    <Container>
-      <PageHeader pageTitle="Team List"/>
-      <div>
-        {
-            teamList.map((team)=>{
-                return(
-                    <Row key={team.id} className="teamList-row">
-                        <div className="teamList-block" onClick={() => {
-                            setShowTeamModal(true);
-                            setModalTeam(team)
-                        }}>
-                            <p>{team.teamName}</p>
-                        </div>
-                    </Row>
-                )
-            })
-        }
-      </div>
-      <TeamListModal showModal={showTeamModal} setShowModal={setShowTeamModal} team={modalTeam}/>
-    </Container>
-  );
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  }
 }

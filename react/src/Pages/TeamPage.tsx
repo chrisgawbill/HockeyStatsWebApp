@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { GetListOfTeams, GetTeamStatsById } from "../Services/ApiHandler";
 import { ConvertToListOfTeams } from "../Data/Helpers/TeamHelpers";
+import PageHeader from "../Components/PageHeader";
 
 interface TeamPageProps {
   teamId: Number;
@@ -10,5 +11,10 @@ export default function TeamPage({ teamId }: TeamPageProps) {
   useEffect(() => {
 
   });
-  return <div></div>;
+  return(
+     <div>
+        <PageHeader pageTitle=""/>
+        
+     </div>
+    );
 }

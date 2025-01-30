@@ -7,11 +7,11 @@ var axiosNhl = axios.create({
   baseURL: "https://api-web.nhle.com/v1",
 });
 
-router.get("/", function (req, res, next) {
+router.get("/", async function (req, res, next) {
   try {
-    axiosNhl.get("/standings/now").then((response) => {
-      res.send(response.data);
-    });
+    const url = "/standings/now";
+    const response = await axiosNhl.get(url);
+    res.send(response.data);
   } catch (e) {
     res.send(e);
   }

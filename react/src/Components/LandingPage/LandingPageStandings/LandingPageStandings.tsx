@@ -41,7 +41,7 @@ export default function LandingPageStandings() {
       setPacificStandings
     );
   }, []);
-  function GetStandings(
+  async function GetStandings(
     setEasternStandings: Function,
     setWesternStandings: Function,
     setMetropolitanStandings: Function,
@@ -49,9 +49,9 @@ export default function LandingPageStandings() {
     setCentralStandings: Function,
     setPacificStandings: Function
   ) {
-    GetCurrentStandings()
-      .then((response) => {
-        const responseStandings = response.data.standings;
+    try{
+      const data = await GetCurrentStandings();
+      const responseStandings = data.standings;
         const easternStandings: StandingsTeam[] =
           CreateConferenceStandingsArray(responseStandings, "Eastern");
 
@@ -80,8 +80,9 @@ export default function LandingPageStandings() {
         setAtlanticStandings(atlanticStandings);
         setCentralStandings(centralStandings);
         setPacificStandings(pacificStandings);
-      })
-      .catch((error) => console.log(error));
+    }catch(error){
+      console.error("Error fetching standings: ", error);
+    }
   }
 
   return (

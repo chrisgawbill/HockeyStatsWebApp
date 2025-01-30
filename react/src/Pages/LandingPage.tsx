@@ -20,6 +20,7 @@ import PageHeader from "../Components/PageHeader";
 
 import "../style/LandingPage/LandingPageStyle.css";
 import { InterfaceWithChatBot } from "../Services/GenAIHandler";
+import { error } from "console";
 
 export default function LandingPage() {
   //use States that will set with data that will be passed to components in landingPage
@@ -121,7 +122,6 @@ export default function LandingPage() {
     }
   }, [goalLeaderData, assistLeaderData, pointsLeaderData, faceoffLeadersData]);
   useEffect(() => {
-    console.log(savePercentageLeaderData)
     if (
       winsLeaderData[0] !== undefined &&
       savePercentageLeaderData[0] !== undefined &&
@@ -198,112 +198,115 @@ export default function LandingPage() {
   );
 }
 //Custom hook that parses and modifies the api data to create draftLotteryOddsArray (which is then set in the useState)
-function GetDraftLotteryOdds(setDraftLotteryOddsData: Function) {
-  GetCurrentStandings()
-    .then((response) => {
-      const responseData = response.data.standings;
-      const draftLotteryOddsArray: DraftLotteryTeam[] =
-        CreateDraftLotteryOddsArray(responseData);
-      setDraftLotteryOddsData(draftLotteryOddsArray);
-    })
-    .catch((error) => console.log(error));
+async function GetDraftLotteryOdds(setDraftLotteryOddsData: Function) {
+  try{
+    const data = await GetCurrentStandings();
+    const draftLotteryOddsArray: DraftLotteryTeam[] =
+      CreateDraftLotteryOddsArray(data.standings);
+    setDraftLotteryOddsData(draftLotteryOddsArray);
+  }catch(error){
+    console.error("Error fetching standings: ", error);
+  }
 }
-function GetSkaterLeaders(
+async function GetSkaterLeaders(
   setGoalLeaderData: Function,
   setAssistLeaderData: Function,
   setPointsLeaderData: Function,
   setFaceoffLeadersData:Function
 ) {
-  GetSkaterStatLeaders("goals")
-    .then((response) => {
-      const responseData = response.data;
-      const goalStatLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
-        responseData,
-        "goals"
-      );
-      setGoalLeaderData(goalStatLeaders);
-    })
-    .catch((error) => console.log(error));
-  GetSkaterStatLeaders("assists")
-    .then((response) => {
-      const responseData = response.data;
-      const assistLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
-        responseData,
-        "assists"
-      );
-      setAssistLeaderData(assistLeaderData);
-    })
-    .catch((error) => console.log(error));
-  GetSkaterStatLeaders("points")
-    .then((response) => {
-      const responseData = response.data;
-      const pointsLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
-        responseData,
-        "points"
-      );
-      setPointsLeaderData(pointsLeaderData);
-    })
-    .catch((error) => console.log(error));
-  GetSkaterStatLeaders("faceoffLeaders")
-    .then((response)=>{
-      const responseData = response.data;
-      const faceoffLeadersData:PlayerStatLeader[] = PlayerStatLeaderConverter(
-        responseData,
-        "faceoffLeaders"
-      );
-      setFaceoffLeadersData(faceoffLeadersData);
-    })
+  try{
+    const data = await GetSkaterStatLeaders("goals");
+    const goalStatLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+      data,
+      "goals"
+    );
+    setGoalLeaderData(goalStatLeaders);
+  }catch(error){
+    console.error("Error fetching goals: ", error);
+  }
+  try{
+    const data = await GetSkaterStatLeaders("assists");
+    const assistLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
+      data,
+      "assists"
+    );
+    setAssistLeaderData(assistLeaderData);
+  }catch(error){
+    console.error("Error fetching assists: ", error);
+  }
+  try{
+    const data = await GetSkaterStatLeaders("points");
+    const pointsLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
+      data,
+      "points"
+    );
+    setPointsLeaderData(pointsLeaderData);
+  }catch(error){
+    console.error("Error fetching points: ", error);
+  }
+  try{  
+    const data = await GetSkaterStatLeaders("faceoffLeaders");
+    const faceoffLeadersData:PlayerStatLeader[] = PlayerStatLeaderConverter(
+      data,
+      "faceoffLeaders"
+    );
+    setFaceoffLeadersData(faceoffLeadersData);
+  }catch(error){
+    console.error("Error fetching faceoff leaders: ", error);
+  }
 }
-function GetGoalieLeaders(
+async function GetGoalieLeaders(
   setWinsLeaderData: Function,
   setSavePercentageLeaderData: Function,
   setGaaLeaderData: Function,
   setShutoutLeaderData: Function
 ) {
-  GetGoalieStatLeaders("wins")
-    .then((response) => {
-      const responseData = response.data;
-      const winsLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
-        responseData,
-        "wins"
-      );
-      setWinsLeaderData(winsLeaderData);
-    })
-    .catch((error) => console.log(error));
-  GetGoalieStatLeaders("savePctg")
-    .then((response) => {
-      const responseData = response.data;
-      const savePercentageLederData: PlayerStatLeader[] =
-        PlayerStatLeaderConverter(responseData, "savePctg");
-      setSavePercentageLeaderData(savePercentageLederData);
-    })
-    .catch((error) => console.log(error));
-  GetGoalieStatLeaders("goalsAgainstAverage")
-    .then((response) => {
-      const responseData = response.data;
-      const gaaLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
-        responseData,
-        "goalsAgainstAverage"
-      );
-      setGaaLeaderData(gaaLeaderData);
-    })
-    .catch((error) => console.log(error));
-  GetGoalieStatLeaders("shutouts")
-    .then((response) => {
-      const responseData = response.data;
-      const shutoutLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
-        responseData,
-        "shutouts"
-      );
-      setShutoutLeaderData(shutoutLeaderData);
-    })
-    .catch((error) => console.log(error));
+  try{
+    const data = await GetGoalieStatLeaders("wins");
+    const winsLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
+      data,
+      "wins"
+    );
+    setWinsLeaderData(winsLeaderData);
+  }catch(error){
+    console.error("Error fetching wins: ", error);
+  }
+  try{
+    const data = await  GetGoalieStatLeaders("savePctg");
+    const savePercentageLederData: PlayerStatLeader[] =
+      PlayerStatLeaderConverter(data, "savePctg");
+    setSavePercentageLeaderData(savePercentageLederData);
+  }catch(error){
+    console.error("Error fetching save percentage: ", error);
+  }
+  try{
+    const data = await GetGoalieStatLeaders("goalsAgainstAverage");
+    const gaaLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
+      data,
+      "goalsAgainstAverage"
+    );
+    setGaaLeaderData(gaaLeaderData);
+  }catch(error){
+    console.error("Error fetching goals against average: ", error);
+  }
+  try{
+    const data = await GetGoalieStatLeaders("shutouts");
+    const shutoutLeaderData: PlayerStatLeader[] = PlayerStatLeaderConverter(
+      data,
+      "shutouts"
+    );
+    setShutoutLeaderData(shutoutLeaderData);
+  }catch(error){
+    console.error("Error fetching shutouts: ", error);
+  }
 }
-function GetChatInfo(setChatInfo:Function){
-  InterfaceWithChatBot("What is offsides").then((response) => {
-    const responseData = response.data;
-    setChatInfo(responseData);
-  }).catch((error) => {
-    console.error("Error occured while trying to interface with chatbot")
-  })
+async function GetChatInfo(setChatInfo:Function){
+  try{
+    const message = {content: 'What is the history of the Philadelphia Flyers, break the history up into 5 segments with each segment being 200-300 words, give me the data in JSON format, call the name of the array containing the data "History"'}
+    const data =  await InterfaceWithChatBot(message);
+    setChatInfo(data)
+  }catch(error){
+    console.error("An erorr has occured in the component: ", error);
+    throw error;
+  }
 }
