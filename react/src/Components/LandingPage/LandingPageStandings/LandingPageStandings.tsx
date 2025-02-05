@@ -6,22 +6,10 @@ import { CreateConferenceStandingsArray } from "../../../Data/Helpers/Conference
 import { CreateDivisionStandingsArray } from "../../../Data/Helpers/DivisionStandingsHelper";
 import React from "react";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
+import { useStandingsData } from "../../../Data/Context/StandingsContext";
 
 export default function LandingPageStandings() {
-  const [easternStandingsData, setEasternStandingsData] = useState<
-    StandingsTeam[]
-  >([]);
-  const [westernStandingsData, setWesternStandingsData] = useState<
-    StandingsTeam[]
-  >([]);
-  const [metropolitanStandings, setMetropolitanStandings] = useState<
-    StandingsTeam[]
-  >([]);
-  const [atlanticStandings, setAtlanticStandings] = useState<StandingsTeam[]>(
-    []
-  );
-  const [centralStandings, setCentralStandings] = useState<StandingsTeam[]>([]);
-  const [pacificStandings, setPacificStandings] = useState<StandingsTeam[]>([]);
+  const {easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, loadingData} = useStandingsData();
   const [showConferenceStandings, setShowConferenceStandings] =
     useState<Boolean>(true);
   const [showDivisionStandings, setShowDivisionStandings] =
@@ -29,139 +17,90 @@ export default function LandingPageStandings() {
   const [switchViewButtonText, setSwitchViewButtonText] = useState<String>(
     "Show Divisional Standings"
   );
-
-  //This useEffect will call apis to get data that will be used in components
-  useEffect(() => {
-    GetStandings(
-      setEasternStandingsData,
-      setWesternStandingsData,
-      setMetropolitanStandings,
-      setAtlanticStandings,
-      setCentralStandings,
-      setPacificStandings
+  if(loadingData){
+    return (
+      <p>Loading Data</p>
+    )
+  }else{
+    return (
+      <Container>
+        <Row>
+          <Col className="landing-header">
+            <h2>League Standings</h2>
+          </Col>
+        </Row>
+        <Row>
+          <Button
+            variant="secondary"
+            id="landingPage-standings-switcher"
+            onClick={() => {
+              if (showDivisionStandings === true) {
+                setSwitchViewButtonText("Show Divisional Standings");
+              } else {
+                setSwitchViewButtonText("Show Conference Standings");
+              }
+              setShowConferenceStandings(!showConferenceStandings);
+              setShowDivisionStandings(!showDivisionStandings);
+            }}
+          >
+            {switchViewButtonText}
+          </Button>
+        </Row>
+        <Row>
+          {showConferenceStandings ? (
+            <StandingsContainer
+              standingsName="Eastern"
+              standingsData={easternStandingsData}
+              standingFormat={"Conference"}
+            />
+          ) : null}
+        </Row>
+        <Row>
+          {showConferenceStandings ? (
+            <StandingsContainer
+              standingsName="Western"
+              standingsData={westernStandingsData}
+              standingFormat={"Conference"}
+            />
+          ) : null}
+        </Row>
+        <Row>
+          {showDivisionStandings ? (
+            <StandingsContainer
+              standingsName="Metro"
+              standingsData={metropolitanStandings}
+              standingFormat={"Division"}
+            />
+          ) : null}
+        </Row>
+        <Row>
+          {showDivisionStandings ? (
+            <StandingsContainer
+              standingsName="Atlantic"
+              standingsData={atlanticStandings}
+              standingFormat={"Division"}
+            />
+          ) : null}
+        </Row>
+        <Row>
+          {showDivisionStandings ? (
+            <StandingsContainer
+              standingsName="Central"
+              standingsData={centralStandings}
+              standingFormat={"Division"}
+            />
+          ) : null}
+        </Row>
+        <Row>
+          {showDivisionStandings ? (
+            <StandingsContainer
+              standingsName="Pacific"
+              standingsData={pacificStandings}
+              standingFormat={"Division"}
+            />
+          ) : null}
+        </Row>
+      </Container>
     );
-  }, []);
-  function GetStandings(
-    setEasternStandings: Function,
-    setWesternStandings: Function,
-    setMetropolitanStandings: Function,
-    setAtlanticStandings: Function,
-    setCentralStandings: Function,
-    setPacificStandings: Function
-  ) {
-    GetCurrentStandings()
-      .then((response) => {
-        const responseStandings = response.data.standings;
-        const easternStandings: StandingsTeam[] =
-          CreateConferenceStandingsArray(responseStandings, "Eastern");
-
-        const metropolitanStandings: StandingsTeam[] =
-          CreateDivisionStandingsArray(responseStandings, "Metropolitan");
-        const atlanticStandings: StandingsTeam[] = CreateDivisionStandingsArray(
-          responseStandings,
-          "Atlantic"
-        );
-
-        const westernStandings: StandingsTeam[] =
-          CreateConferenceStandingsArray(responseStandings, "Western");
-        const centralStandings: StandingsTeam[] = CreateDivisionStandingsArray(
-          responseStandings,
-          "Central"
-        );
-        const pacificStandings: StandingsTeam[] = CreateDivisionStandingsArray(
-          responseStandings,
-          "Pacific"
-        );
-
-        setEasternStandings(easternStandings);
-        setWesternStandings(westernStandings);
-
-        setMetropolitanStandings(metropolitanStandings);
-        setAtlanticStandings(atlanticStandings);
-        setCentralStandings(centralStandings);
-        setPacificStandings(pacificStandings);
-      })
-      .catch((error) => console.log(error));
   }
-
-  return (
-    <Container>
-      <Row>
-        <Col className="landing-header">
-          <h2>League Standings</h2>
-        </Col>
-      </Row>
-      <Row>
-        <Button
-          variant="secondary"
-          id="landingPage-standings-switcher"
-          onClick={() => {
-            if (showDivisionStandings === true) {
-              setSwitchViewButtonText("Show Divisional Standings");
-            } else {
-              setSwitchViewButtonText("Show Conference Standings");
-            }
-            setShowConferenceStandings(!showConferenceStandings);
-            setShowDivisionStandings(!showDivisionStandings);
-          }}
-        >
-          {switchViewButtonText}
-        </Button>
-      </Row>
-      <Row>
-        {showConferenceStandings ? (
-          <StandingsContainer
-            standingsName="Eastern"
-            standingsData={easternStandingsData}
-            standingFormat={"Conference"}
-          />
-        ) : null}
-      </Row>
-      <Row>
-        {showConferenceStandings ? (
-          <StandingsContainer
-            standingsName="Western"
-            standingsData={westernStandingsData}
-            standingFormat={"Conference"}
-          />
-        ) : null}
-      </Row>
-      <Row>
-        {showDivisionStandings ? (
-          <StandingsContainer
-            standingsName="Metro"
-            standingsData={metropolitanStandings}
-            standingFormat={"Division"}
-          />
-        ) : null}
-      </Row>
-      <Row>
-        {showDivisionStandings ? (
-          <StandingsContainer
-            standingsName="Atlantic"
-            standingsData={atlanticStandings}
-            standingFormat={"Division"}
-          />
-        ) : null}
-      </Row>
-      <Row>
-        {showDivisionStandings ? (
-          <StandingsContainer
-            standingsName="Central"
-            standingsData={centralStandings}
-            standingFormat={"Division"}
-          />
-        ) : null}
-      </Row>
-      <Row>
-        {showDivisionStandings ? (
-          <StandingsContainer
-            standingsName="Pacific"
-            standingsData={pacificStandings}
-            standingFormat={"Division"}
-          />
-        ) : null}
-      </Row>
-    </Container>
-  );
 }

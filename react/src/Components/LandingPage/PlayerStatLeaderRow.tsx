@@ -8,12 +8,10 @@ import { PlayerStatLeader } from "../../Data/Models/PlayerStatLeader";
 interface PlayerStatLeaderProps {
   title: string;
   topStatLeaders: TopStatLeader[];
-  setShowStatModal: Function;
 }
 export default function PlayerStatLeaderRow({
   title,
-  topStatLeaders,
-  setShowStatModal,
+  topStatLeaders
 }: PlayerStatLeaderProps) {
 
   const [showStatLeaderModal, setShowStatLeaderModal] =
@@ -57,7 +55,7 @@ export default function PlayerStatLeaderRow({
                   </p>
                 </div>
                 <div className="stat-leader-value-block">
-                  <p>{topStatLeader.player.value}</p>
+                  <p>{topStatLeader.player.statLeaderValue}</p>
                 </div>
                 <div className="clear-div"></div>
               </div>

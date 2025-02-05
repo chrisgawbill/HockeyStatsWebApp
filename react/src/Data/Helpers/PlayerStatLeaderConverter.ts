@@ -43,7 +43,7 @@ export default function PlayerStatLeaderConverter(playerLeaderResponseData:any, 
         const position = localPlayerResponseData[i].position;
         const value = localPlayerResponseData[i].value;
 
-        const playerStatLeader:PlayerStatLeader = new PlayerStatLeader(id, firstName, lastName, sweaterNumber, playerImage, teamAbbrev, teamName, teamLogo, position, value);
+        const playerStatLeader:PlayerStatLeader = new PlayerStatLeader(id, firstName, lastName, sweaterNumber, playerImage, teamAbbrev, teamName, teamLogo, position, true, value);
         playerStatLeaderArray[i] = playerStatLeader;
     }
     return playerStatLeaderArray;

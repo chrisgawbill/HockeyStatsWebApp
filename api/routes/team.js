@@ -7,20 +7,20 @@ var axiosNhl = axios.create({
   baseURL: "https://api.nhle.com/stats/rest/en/team",
 });
 
-router.get("/", function (req, res, next) {
+router.get("/", async function (req, res, next) {
     try {
-      axiosNhl.get("/").then((response) => {
-        res.send(response.data);
-      });
+      const url = "/";
+      const response = await axiosNhl.get(url);
+      res.send(response.data);
     } catch (e) {
       res.send(e);
     }
   });
-  router.get("/summary?sort=shotsForPerGame&cayenneExp=seasonId=20232024 and gameTypeId=2", function (req, res, next) {
+router.get("/stats", async function (req, res, next) {
     try {
-      axiosNhl.get("/").then((response) => {
-        res.send(response.data);
-      });
+      const url = "/summary?sort=shotsForPerGame&cayenneExp=seasonId=20232024 and gameTypeId=2";
+      const response = await axiosNhl.get(url);
+      res.send(response.data)
     } catch (e) {
       res.send(e);
     }

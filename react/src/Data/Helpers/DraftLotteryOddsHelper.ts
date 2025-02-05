@@ -2,11 +2,11 @@ import { DraftLotteryTeam } from "../Models/DraftLotteryTeam";
 
 export function CreateDraftLotteryOddsArray(initialStandings: any[]) {
   let draftLotteryOddsArray: DraftLotteryTeam[] = new Array(16);
-
+  let arrayPosition = 0;
   for (let i = 31; i > 10; i--) {
     const responseTeam = initialStandings[i];
     if (responseTeam.wildcardSequence > 2) {
-      const teamId:number = i;
+      const teamId:number = responseTeam.teamId;
       const teamName:string = responseTeam.teamCommonName.default;
       const teamImage:string = responseTeam.teamLogo;
       const teamLeagueRank:number = parseInt(responseTeam.leagueSequence);
@@ -28,7 +28,8 @@ export function CreateDraftLotteryOddsArray(initialStandings: any[]) {
         teamDraftLotteryOdds,
         draftLotteryOddsTrend,
       );
-      draftLotteryOddsArray[i] = draftLotteryTeam;
+      draftLotteryOddsArray[arrayPosition] = draftLotteryTeam;
+      arrayPosition++;
     }
   }
   draftLotteryOddsArray = draftLotteryOddsArray.sort((n1,n2)=>{

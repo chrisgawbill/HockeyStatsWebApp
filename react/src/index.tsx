@@ -4,10 +4,25 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import App from './App';
+import { StandingsDataProvider } from './Data/Context/StandingsContext';
+import { SkaterStatLeaderProvider } from './Data/Context/SkaterStatLeadersContext';
+import { GoalieLeaderDataProvider } from './Data/Context/GoalieStatLeadersContext';
+import { DraftLotteryDataProvider } from './Data/Context/DraftLotteryContext';
+import { ListOfTeamsDataProvider } from './Data/Context/ListOfTeamsContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-    <App/>
+    <ListOfTeamsDataProvider>
+        <StandingsDataProvider>
+            <SkaterStatLeaderProvider>
+                <GoalieLeaderDataProvider>
+                    <DraftLotteryDataProvider>
+                        <App/>
+                    </DraftLotteryDataProvider>
+                </GoalieLeaderDataProvider>
+            </SkaterStatLeaderProvider>
+        </StandingsDataProvider>
+    </ListOfTeamsDataProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
