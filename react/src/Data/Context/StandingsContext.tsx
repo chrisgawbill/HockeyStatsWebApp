@@ -1,12 +1,32 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { StandingsTeam } from "../Models/StandingsTeam";
 import { GetCurrentStandings } from "../../Services/ApiHandler";
-import { CreateConferenceStandingsArray } from "../Helpers/ConferenceStandingsHelper";
-import { CreateDivisionStandingsArray } from "../Helpers/DivisionStandingsHelper";
+import { CreateLeagueStandingsArray } from "../Helpers/LeagueStandingsHelper";
+import { GetConferenceStandings, GetDivisionStandings, GetDraftLotteryOddsArray, IsThereLeagueStandings, StoreLeagueStandings } from "../Helpers/LocalDB/StandingsDBHelpers";
 
-const StandingsContext = createContext<any>(null);
+export const StandingsContext = createContext<any>(null);
 
+interface StandingsData{
+  easternStandingsData:StandingsTeam[];
+  westernStandingsData:StandingsTeam[];
+  metropolitanStandings:StandingsTeam[];
+  atlanticStandings:StandingsTeam[];
+  centralStandings:StandingsTeam[];
+  pacificStandings:StandingsTeam[];
+  draftLotteryOdds:StandingsTeam[];
+  loadingStandingsData:boolean;
+}
 const  StandingsDataProvider = ({children}: {children:ReactNode}) => {
+    const loadingRefs = useRef({
+          loadingEasternStandings:true,
+          loadingWesternStandings:true,
+          loadingMetropolitanStandings:true,
+          loadingAtlanticStandings:true,
+          loadingPacificStandings:true,
+          loadingCentralStandings:true,
+          loadingDraftLotteryOdds:true,
+    })
+  
   const [easternStandingsData, setEasternStandingsData] = useState<
     StandingsTeam[]
   >([]);
@@ -21,68 +41,115 @@ const  StandingsDataProvider = ({children}: {children:ReactNode}) => {
   );
   const [centralStandings, setCentralStandings] = useState<StandingsTeam[]>([]);
   const [pacificStandings, setPacificStandings] = useState<StandingsTeam[]>([]);
+  const [draftLotteryOdds, setDraftLotteryOdds] = useState<StandingsTeam[]>([]);
 
-  const [loadingData, setLoadingData] = useState<boolean>(true);
+  const [loadingStandingsData, setLoadingStandingsData] = useState<boolean>(true);
+  function CheckLoadingStatus(){
+    const allStatsLoaded = !Object.values(loadingRefs.current).includes(true);
+    if(allStatsLoaded){
+        setLoadingStandingsData(false);
+    }
+  }
+
+  async function GetEasternConferenceStandings(){
+    try{
+      const easternStandings = await GetConferenceStandings("Eastern");
+      setEasternStandingsData(easternStandings);
+      loadingRefs.current.loadingEasternStandings = false;
+    }catch(error){
+      console.error("Could not retrieve data");
+    }
+  }
+  async function GetWesternConferenceStandings(){
+    try{
+      const westernStandings = await GetConferenceStandings("Western");
+      setWesternStandingsData(westernStandings);
+      loadingRefs.current.loadingWesternStandings = false;
+    }catch(error){
+      console.error("Could not retrieve data");
+    }
+  }
+  async function GetMetropolitanDivisionStandings(){
+    try{
+      const metropolitanStandings = await GetDivisionStandings("Metropolitan");
+      setMetropolitanStandings(metropolitanStandings);
+      loadingRefs.current.loadingMetropolitanStandings = false;
+    }catch(error){
+      console.error("Could not retrieve data");
+    }
+  }
+  async function GetAtlanticDivisionStandings(){
+    try{
+      const atlanticStandings = await GetDivisionStandings("Atlantic");
+      setAtlanticStandings(atlanticStandings);
+      loadingRefs.current.loadingAtlanticStandings = false;
+    }catch(error){
+      console.error("Could not retrieve data");
+    }
+  }
+  async function GetCentralDivisionStandings(){
+    try{
+      const centralStandings = await GetDivisionStandings("Central");
+      setCentralStandings(centralStandings);
+      loadingRefs.current.loadingCentralStandings = false;
+    }catch(error){
+      console.error("Could not retrieve data");
+    }
+  }
+  async function GetPacificDivisionStandings(){
+    try{
+      const pacificStandings = await GetDivisionStandings("Pacific");
+      setPacificStandings(pacificStandings);
+      loadingRefs.current.loadingPacificStandings = false;
+    }catch(error){
+      console.error("Could not retrieve data");
+    }
+  }
+  async function GetDraftLotteryOdds(){
+    try{
+      const draftLotteryOdds = await GetDraftLotteryOddsArray();
+      console.log(draftLotteryOdds);
+      setDraftLotteryOdds(draftLotteryOdds);
+      loadingRefs.current.loadingDraftLotteryOdds = false;
+    }catch(error){
+      console.error("Could not retrieve data");
+    }
+  }
 
   async function GetStandings() {
-    const cachedEasternConferenceStandings = localStorage.getItem('eastern-conference-standings-key');
-    const cachedWesternConferenceStandings = localStorage.getItem('western-conference standings-key');
-    const cachedMetropolitanDivisionStandings = localStorage.getItem('metropolitan-division-standings-key');
-    const cachedAtlanticDivisionStandings = localStorage.getItem('atlantic-division-standings-key');
-    const cachedCentralDivisionStandings = localStorage.getItem('central-divsion-standings-key');
-    const cachedPacificDivisionStandings = localStorage.getItem('pacific-division-standings-key');
-
-    if(cachedEasternConferenceStandings && cachedWesternConferenceStandings && cachedMetropolitanDivisionStandings && cachedAtlanticDivisionStandings && cachedCentralDivisionStandings && cachedPacificDivisionStandings){
-        setEasternStandingsData(JSON.parse(cachedEasternConferenceStandings));
-        setWesternStandingsData(JSON.parse(cachedWesternConferenceStandings));
-        setMetropolitanStandings(JSON.parse(cachedMetropolitanDivisionStandings));
-        setAtlanticStandings(JSON.parse(cachedAtlanticDivisionStandings));
-        setCentralStandings(JSON.parse(cachedCentralDivisionStandings));
-        setPacificStandings(JSON.parse(cachedPacificDivisionStandings));
-
-        setLoadingData(false);
+    const isLeagueStandingsCached = await IsThereLeagueStandings();
+    if(isLeagueStandingsCached === false){
+      await Promise.all([
+        GetEasternConferenceStandings(),
+        GetWesternConferenceStandings(),
+        GetMetropolitanDivisionStandings(),
+        GetAtlanticDivisionStandings(),
+        GetCentralDivisionStandings(),
+        GetPacificDivisionStandings(),
+        GetDraftLotteryOdds(),
+      ]);
     }else{
         try{
             const data = await GetCurrentStandings();
             const responseStandings = data.standings;
-              const easternStandings: StandingsTeam[] =
-                CreateConferenceStandingsArray(responseStandings, "Eastern");
-      
-              const metropolitanStandings: StandingsTeam[] =
-                CreateDivisionStandingsArray(responseStandings, "Metropolitan");
-              const atlanticStandings: StandingsTeam[] = CreateDivisionStandingsArray(
-                responseStandings,
-                "Atlantic"
-              );
-      
-              const westernStandings: StandingsTeam[] =
-                CreateConferenceStandingsArray(responseStandings, "Western");
-              const centralStandings: StandingsTeam[] = CreateDivisionStandingsArray(
-                responseStandings,
-                "Central"
-              );
-              const pacificStandings: StandingsTeam[] = CreateDivisionStandingsArray(
-                responseStandings,
-                "Pacific"
-              );
-              localStorage.setItem('eastern-conference-standings-key', JSON.stringify(easternStandings));
-              localStorage.setItem('western-conference standings-key', JSON.stringify(westernStandings));
-              localStorage.setItem('metropolitan-division-standings-key',JSON.stringify(metropolitanStandings));
-              localStorage.setItem('atlantic-division-standings-key', JSON.stringify(atlanticStandings));
-              localStorage.setItem('central-divsion-standings-key', JSON.stringify(centralStandings));
-              localStorage.setItem('pacific-division-standings-key', JSON.stringify(pacificStandings));
+            console.log(responseStandings);
+            const leagueStandings:StandingsTeam[] = CreateLeagueStandingsArray(responseStandings);
+            console.log(leagueStandings);
+            await StoreLeagueStandings(leagueStandings);
 
-              setEasternStandingsData(easternStandings);
-              setWesternStandingsData(westernStandings);
-      
-              setMetropolitanStandings(metropolitanStandings);
-              setAtlanticStandings(atlanticStandings);
-              setCentralStandings(centralStandings);
-              setPacificStandings(pacificStandings);
+            await Promise.all([
+              GetEasternConferenceStandings(),
+              GetWesternConferenceStandings(),
+              GetMetropolitanDivisionStandings(),
+              GetAtlanticDivisionStandings(),
+              GetCentralDivisionStandings(),
+              GetPacificDivisionStandings(),
+              GetDraftLotteryOdds(),
+            ])
           }catch(error){
             console.error("Error fetching standings: ", error);
           }finally{
-            setLoadingData(false);
+            CheckLoadingStatus();
           }
     }
   }
@@ -93,10 +160,22 @@ const  StandingsDataProvider = ({children}: {children:ReactNode}) => {
     }, []);
 
     return(
-        <StandingsContext.Provider value={{easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, loadingData}}>
+        <StandingsContext.Provider value={{easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, draftLotteryOdds, loadingStandingsData}}>
             {children}
         </StandingsContext.Provider>
     )
+};
+export const useStandingsContext = (): StandingsData => {
+  const context = useContext(StandingsContext);
+  if(context  === undefined){
+    throw new Error("useStandingsContext must be used withing Standings Provider");
+  }
+  return context;
+}
+
+export const useDraftLotteryOddsData = () => {
+  const context = useStandingsContext();
+  return context.draftLotteryOdds;
 };
 
 const useStandingsData = () => useContext(StandingsContext);

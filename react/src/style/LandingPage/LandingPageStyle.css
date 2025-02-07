@@ -8,3 +8,7 @@
 #landingPage-content{
     margin-top: 2rem;
 }
+/* Clearfix */
+.clearfix {
+    clear: both;
+}

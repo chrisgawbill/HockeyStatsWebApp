@@ -10,12 +10,13 @@ import "../style/LandingPage/LandingPageStyle.css";
 import { InterfaceWithChatBot } from "../Services/GenAIHandler";
 import { useSkaterLeaderData } from "../Data/Context/SkaterStatLeadersContext";
 import { useGoalieLeaderData } from "../Data/Context/GoalieStatLeadersContext";
-import { useDraftLotteryData } from "../Data/Context/DraftLotteryContext";
+import {useDraftLotteryOddsData } from "../Data/Context/StandingsContext";
 
 export default function LandingPage() {
   const {goalLeaderData, assistLeaderData, pointsLeaderData, faceoffLeadersData, loadingSkaterLeaderData} = useSkaterLeaderData();
   const {winsLeaderData, savePercentageLeaderData, gaaLeaderData, shutoutLeaderData, loadingGoalieLeaderData} = useGoalieLeaderData();
-  const {draftLotteryOddsData, loadingDraftLotteryData} = useDraftLotteryData();
+
+  const draftLotteryOddsData = useDraftLotteryOddsData();
 
   const [chatInfo, setChatInfo] = useState(null);
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function LandingPage() {
     }
   },[chatInfo])
 
-  if(loadingSkaterLeaderData === true || loadingGoalieLeaderData === true || loadingDraftLotteryData === true){
+  if(loadingSkaterLeaderData === true || loadingGoalieLeaderData === true || !draftLotteryOddsData){
     return(
       <p>Loading Data</p>
     );

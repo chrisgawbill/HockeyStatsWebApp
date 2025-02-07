@@ -1,11 +1,7 @@
-import { Button, Col, Container, Row } from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { Button, Container, Row } from "react-bootstrap";
+import { useState } from "react";
 import StandingsContainer from "./StandingsContainer";
-import { GetCurrentStandings } from "../../../Services/ApiHandler";
-import { CreateConferenceStandingsArray } from "../../../Data/Helpers/ConferenceStandingsHelper";
-import { CreateDivisionStandingsArray } from "../../../Data/Helpers/DivisionStandingsHelper";
 import React from "react";
-import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
 import { useStandingsData } from "../../../Data/Context/StandingsContext";
 
 export default function LandingPageStandings() {
@@ -24,11 +20,6 @@ export default function LandingPageStandings() {
   }else{
     return (
       <Container>
-        <Row>
-          <Col className="landing-header">
-            <h2>League Standings</h2>
-          </Col>
-        </Row>
         <Row>
           <Button
             variant="secondary"

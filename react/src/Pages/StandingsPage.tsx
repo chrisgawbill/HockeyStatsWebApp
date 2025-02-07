@@ -6,7 +6,7 @@ import PageHeader from "../Components/PageHeader";
 import { useStandingsData } from "../Data/Context/StandingsContext";
 
 export default function StandingsPage() {
-  const {easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, loadingData} = useStandingsData();
+  const {easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, draftLotteryOddsData, loadingData} = useStandingsData();
   
   const [showDivisionStandings, setShowDivisionStandings] =
     useState<Boolean>(false);

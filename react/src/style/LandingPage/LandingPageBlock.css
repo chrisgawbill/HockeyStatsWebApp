@@ -49,7 +49,7 @@
   }
   .stat-leader-block-picture {
     float: left;
-    width: 4.7rem;
+    width: 25%;
     height: 100%;
     border-right: solid;
     border-color: black;
@@ -63,10 +63,10 @@
     text-align: center;
   }
   .stat-leader-block-info > span{
-    display: inline-block;
+    display: inline;
     width: 8rem;
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
+    padding-left: 0.15rem;
+    padding-right: 0.15rem;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

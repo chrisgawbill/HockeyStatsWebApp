@@ -57,7 +57,6 @@ export default function PlayerStatLeaderRow({
                 <div className="stat-leader-value-block">
                   <p>{topStatLeader.player.statLeaderValue}</p>
                 </div>
-                <div className="clear-div"></div>
               </div>
             </Col>
           ))}

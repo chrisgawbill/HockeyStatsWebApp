@@ -7,16 +7,17 @@ export class StandingsTeam{
     public wins:number;
     public losses:number;
     public otLosses:number;
-    public record:string;
     public points:number;
     public pointsPercentage:number;
     public leagueStanding:number;
     public conferenceStandingsPlace:number;
     public divisionStandingsPlace:number;
     public wildCardRank:number;
+    public draftLotteryOdds:number;
+    public draftLotteryOddsTrend:string;
 
-    constructor(id:number, teamLogo:string, teamName:string,conferenceName:string,divisionName:string,wins:number,losses:number,otLosses:number,record:string,points:number,pointsPercentage:number,leagueStanding:number,
-        conferenceStandingsPlace:number,divisionStandingsPlace:number,wildCardRank:number){
+    constructor(id:number, teamLogo:string, teamName:string,conferenceName:string,divisionName:string,wins:number,losses:number,otLosses:number,points:number,pointsPercentage:number,leagueStanding:number,
+        conferenceStandingsPlace:number,divisionStandingsPlace:number,wildCardRank:number, draftLotteryOdds:number, draftLotteryOddsTrend:string){
         this.id = id;
         this.teamLogo = teamLogo;
         this.teamName = teamName;
@@ -25,12 +26,13 @@ export class StandingsTeam{
         this.wins = wins;
         this.losses = losses;
         this.otLosses = otLosses;
-        this.record = record;
         this.points = points;
         this.pointsPercentage = pointsPercentage;
         this.leagueStanding = leagueStanding;
         this.conferenceStandingsPlace = conferenceStandingsPlace;
         this.divisionStandingsPlace = divisionStandingsPlace;
         this.wildCardRank = wildCardRank;
+        this.draftLotteryOdds = draftLotteryOdds;
+        this.draftLotteryOddsTrend = draftLotteryOddsTrend;
     }
 }

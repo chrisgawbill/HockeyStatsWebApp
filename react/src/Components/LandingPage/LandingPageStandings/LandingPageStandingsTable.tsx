@@ -29,7 +29,7 @@ export default function LandingPageStandingsTable({
     },
     {
       label: "Record",
-      renderCell: (item: StandingsTeam) => item.record,
+      renderCell: (item: StandingsTeam) => (item.wins + "-" + item.losses + "-" + item.otLosses),
       sort: { sortKey: "RECORD" },
     },
     {
@@ -56,7 +56,7 @@ export default function LandingPageStandingsTable({
     },
     {
       label: "Record",
-      renderCell: (item: StandingsTeam) => item.record,
+      renderCell: (item: StandingsTeam) => (item.wins + "-" + item.losses + "-" + item.otLosses),
       sort: { sortKey: "RECORD" },
     },
     {

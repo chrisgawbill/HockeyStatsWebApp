@@ -7,7 +7,6 @@ import App from './App';
 import { StandingsDataProvider } from './Data/Context/StandingsContext';
 import { SkaterStatLeaderProvider } from './Data/Context/SkaterStatLeadersContext';
 import { GoalieLeaderDataProvider } from './Data/Context/GoalieStatLeadersContext';
-import { DraftLotteryDataProvider } from './Data/Context/DraftLotteryContext';
 import { ListOfTeamsDataProvider } from './Data/Context/ListOfTeamsContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
@@ -16,9 +15,7 @@ root.render(
         <StandingsDataProvider>
             <SkaterStatLeaderProvider>
                 <GoalieLeaderDataProvider>
-                    <DraftLotteryDataProvider>
                         <App/>
-                    </DraftLotteryDataProvider>
                 </GoalieLeaderDataProvider>
             </SkaterStatLeaderProvider>
         </StandingsDataProvider>
