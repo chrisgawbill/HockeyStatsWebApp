@@ -44,6 +44,15 @@ export async function GetTeamStatsById(teamId:string){
         throw error;
     }
 }
+export async function GetScheduledGames(){
+    try{
+        const response = await axiosExpressHandler.get("/schedule/");
+        return response.data;
+    }catch(error){
+        console.error("Error fetching data: ", error);
+        throw error;
+    }
+}
 export async function GetDraft(){
     // return axiosNhl.get("/draft")
 }

@@ -10,6 +10,8 @@ var usersRouter = require("./routes/users");
 var standingsRouter = require("./routes/standings");
 var playerRouter = require("./routes/player");
 var teamRouter = require("./routes/team");
+var scheduleRouter = require("./routes/schedule");
+
 const { spawn } = require("child_process");
 
 let corsOptions = {
@@ -34,6 +36,7 @@ app.use("/users", usersRouter);
 app.use("/standings", standingsRouter);
 app.use("/player", playerRouter);
 app.use("/team", teamRouter);
+app.use("/schedule", scheduleRouter);
 
 app.post("/python-service", async (req, res) => {
   try{

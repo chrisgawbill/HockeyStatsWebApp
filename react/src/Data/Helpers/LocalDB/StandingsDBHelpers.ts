@@ -98,7 +98,7 @@ async function GetDivisionStandings(divisionName: string) {
         };
         cursorRequest.onerror = function (event: Event) {
           console.error(
-            "Error retrieving top stat leader: ",
+            "Error retrieving division standings: ",
             (event.target as IDBRequest).error?.message
           );
           reject((event.target as IDBRequest).error);

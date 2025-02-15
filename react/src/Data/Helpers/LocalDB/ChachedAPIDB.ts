@@ -1,7 +1,7 @@
 let db:IDBDatabase;
 
 const cachedAPIDBPromise:Promise<IDBDatabase> = new Promise((resolve, reject) => {
-    let request: IDBOpenDBRequest = indexedDB.open("cachedAPIDatabse", 8);
+    let request: IDBOpenDBRequest = indexedDB.open("cachedAPIDatabse", 9);
 
     request.onupgradeneeded = function(event:IDBVersionChangeEvent){
         db = (event.target as IDBOpenDBRequest).result;
@@ -23,6 +23,13 @@ const cachedAPIDBPromise:Promise<IDBDatabase> = new Promise((resolve, reject) =>
 
             leagueStandingsStore.createIndex("conference_place", ["conferenceName", "conferenceStandingsPlace"], {unique:false});
             leagueStandingsStore.createIndex("division_place", ["divisionName", "divisionStandingsPlace"], {unique:false});
+        }
+        if(!db.objectStoreNames.contains("scheduledGameStore")){
+            const scheduledGameStore = db.createObjectStore("scheduledGameStore", {keyPath:"gameId"});
+            scheduledGameStore.createIndex("homeTeam", "homeTeam", {unique:false});
+            scheduledGameStore.createIndex("awayTeam", "awayTeam", {unique:false});
+            scheduledGameStore.createIndex("date", "date", {unique:false});
+            scheduledGameStore.createIndex("dayOfWeek","dayOfWeek", {unique:false});
         }
     };
     request.onsuccess = function(event:Event){

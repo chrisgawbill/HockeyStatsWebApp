@@ -94,7 +94,7 @@ export default function LandingPageStandingsTable({
         TEAM: (array) =>
           array.sort((a, b) => a.teamName.localeCompare(b.teamName)),
         RECORD: (array) =>
-          array.sort((a, b) => a.record.localeCompare(b.record)),
+          array.sort((a, b) => a.wins.localeCompare(b.wins)),
         POINTS: (array) => array.sort((a, b) => a.points - b.points),
         POINTSPERCENTAGE: (array) =>
           array.sort((a, b) => a.pointsPercentage - b.pointsPercentage),

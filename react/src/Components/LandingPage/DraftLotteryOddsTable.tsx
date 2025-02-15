@@ -5,7 +5,7 @@ import React from "react";
 import { CompactTable } from "@table-library/react-table-library/compact";
 import TREND_UP from "../../style/icons/green_arrow_up.png";
 import TREND_DOWN from "../../style/icons/red_arrow_down.png";
-import TREND_SAME from "../../style/icons/yellow_line.png";
+import TREND_SAME from "../../style/icons/yellow_same_line.png";
 
 interface DraftLotteryOddsTableProps{
     draftLotteryOddsData:StandingsTeam[];
