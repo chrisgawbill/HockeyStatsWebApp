@@ -41,7 +41,10 @@ async function StoreScheduledGames(
 async function GetGameFromDay(dayOfWeek: string) {
   try {
     const db = await cachedAPIDBPromise;
-    let transaction: IDBTransaction = db.transaction(["scheduledGameStore"],"readonly");
+    let transaction: IDBTransaction = db.transaction(
+      ["scheduledGameStore"],
+      "readonly"
+    );
     let scheduledGameStore: IDBObjectStore =
       transaction.objectStore("scheduledGameStore");
 
@@ -76,23 +79,29 @@ async function GetGameFromDay(dayOfWeek: string) {
 async function GetAllGames() {
   try {
     const db = await cachedAPIDBPromise;
-    let transaction: IDBTransaction = db.transaction(["scheduledGameStore"],"readonly");
+    let transaction: IDBTransaction = db.transaction(
+      ["scheduledGameStore"],
+      "readonly"
+    );
     let scheduledGameStore: IDBObjectStore =
       transaction.objectStore("scheduledGameStore");
 
     let games: ScheduledGame[] = [];
 
-        let request:IDBRequest<ScheduledGame[]> = scheduledGameStore.getAll();
-        return new Promise<ScheduledGame[]>((resolve, reject) => {
-            request.onsuccess = function(event:Event){
-                games.push((event.target as IDBRequest<ScheduledGame>).result);
-                resolve(games);
-            }
-            request.onerror = function(event:Event){
-                console.error("Error retrieving scheduled games: ", (event.target as IDBRequest).error?.message);
-                reject((event.target as IDBRequest).error);
-            }
-        })
+    let request: IDBRequest<ScheduledGame[]> = scheduledGameStore.getAll();
+    return new Promise<ScheduledGame[]>((resolve, reject) => {
+      request.onsuccess = function (event: Event) {
+        games.push((event.target as IDBRequest<ScheduledGame>).result);
+        resolve(games);
+      };
+      request.onerror = function (event: Event) {
+        console.error(
+          "Error retrieving scheduled games: ",
+          (event.target as IDBRequest).error?.message
+        );
+        reject((event.target as IDBRequest).error);
+      };
+    });
   } catch (error) {
     console.error("Failed to connect to the database: ", error);
     return Promise.reject(error);
@@ -128,4 +137,9 @@ async function IsThereGamesScheduled(): Promise<Boolean> {
     throw error;
   }
 }
-export { StoreScheduledGames, GetGameFromDay, GetAllGames, IsThereGamesScheduled };
+export {
+  StoreScheduledGames,
+  GetGameFromDay,
+  GetAllGames,
+  IsThereGamesScheduled,
+};
