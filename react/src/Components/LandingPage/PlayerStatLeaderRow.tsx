@@ -45,14 +45,14 @@ export default function PlayerStatLeaderRow({
                   <img src={topStatLeader.player.playerImage} alt=""></img>
                 </div>
                 <div className="stat-leader-block-info">
+                  <h4 className="block-info-indicator">
+                    {topStatLeader.statIndicator}
+                  </h4>
                   <span className="block-info-name">
                     {topStatLeader.player.firstName +
                       " " +
                       topStatLeader.player.lastName}
                   </span>
-                  <p className="block-info-indicator">
-                    {topStatLeader.statIndicator}
-                  </p>
                 </div>
                 <div className="stat-leader-value-block">
                   <p>{topStatLeader.player.statLeaderValue}</p>
