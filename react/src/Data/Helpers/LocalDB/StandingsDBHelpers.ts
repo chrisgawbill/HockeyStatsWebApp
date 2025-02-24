@@ -126,7 +126,6 @@ async function GetDivisionStandings(divisionName: string) {
           let cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
           if (cursor && draftLotteryOdds.length < 16) {
             draftLotteryOdds.push(cursor.value);
-            console.log(cursor.value);
             cursor.continue();
           } else {
             resolve(draftLotteryOdds)
@@ -157,7 +156,6 @@ async function GetDivisionStandings(divisionName: string) {
         return new Promise<boolean>((resolve, reject) => {
             request.onsuccess = (event:Event) =>{
                 const count:Number = (event.target as IDBRequest<number>).result;
-                console.log(`Number of entries is ${count}`)
                 resolve(count === 0);
             }
             request.onerror = (event:Event)=>{

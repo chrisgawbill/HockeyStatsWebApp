@@ -108,7 +108,6 @@ const  StandingsDataProvider = ({children}: {children:ReactNode}) => {
   async function GetDraftLotteryOdds(){
     try{
       const draftLotteryOdds = await GetDraftLotteryOddsArray();
-      console.log(draftLotteryOdds);
       setDraftLotteryOdds(draftLotteryOdds);
       loadingRefs.current.loadingDraftLotteryOdds = false;
     }catch(error){

@@ -107,6 +107,33 @@ async function GetAllGames() {
     return Promise.reject(error);
   }
 }
+async function UpdateGameDB(game:ScheduledGame){
+  try{
+    const db = await cachedAPIDBPromise;
+    let transaction: IDBTransaction = db.transaction(
+      ["scheduledGameStore"],
+      "readwrite"
+    );
+    let scheduledGameStore: IDBObjectStore =
+      transaction.objectStore("scheduledGameStore");
+    let request: IDBRequest<IDBValidKey> = scheduledGameStore.get(game.gameId);
+    request.onsuccess = function(event:Event){
+      let gameToUpdate = (event.target as IDBRequest).result;
+      if(gameToUpdate){
+        let updateRequest:IDBRequest<IDBValidKey> = scheduledGameStore.put(game);
+        updateRequest.onsuccess = function(event:Event){
+          console.log("Game has been updated: ", (event.target as IDBRequest<IDBValidKey>).result);
+        }
+        updateRequest.onerror = function(event:Event){
+          console.error("Failed to update the game: ", (event.target as IDBRequest).error?.message);
+        }
+      }
+    }
+  }catch(error){
+    console.error("Failed to update the game: ", error);
+    return Promise.reject(error);
+  }
+}
 async function IsThereGamesScheduled(): Promise<Boolean> {
   try {
     const db = await cachedAPIDBPromise;
@@ -121,7 +148,6 @@ async function IsThereGamesScheduled(): Promise<Boolean> {
     return new Promise<boolean>((resolve, reject) => {
       request.onsuccess = (event: Event) => {
         const count: Number = (event.target as IDBRequest<number>).result;
-        console.log(`Number of entries is ${count}`);
         resolve(count === 0);
       };
       request.onerror = (event: Event) => {
@@ -141,5 +167,6 @@ export {
   StoreScheduledGames,
   GetGameFromDay,
   GetAllGames,
+  UpdateGameDB,
   IsThereGamesScheduled,
 };

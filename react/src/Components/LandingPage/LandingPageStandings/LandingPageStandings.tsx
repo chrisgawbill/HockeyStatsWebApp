@@ -40,6 +40,7 @@ export default function LandingPageStandings() {
         <Row>
           {showConferenceStandings ? (
             <StandingsContainer
+              key={"easternStandings"}
               standingsName="Eastern"
               standingsData={easternStandingsData}
               standingFormat={"Conference"}
@@ -49,6 +50,7 @@ export default function LandingPageStandings() {
         <Row>
           {showConferenceStandings ? (
             <StandingsContainer
+              key={"westernStandings"}
               standingsName="Western"
               standingsData={westernStandingsData}
               standingFormat={"Conference"}
@@ -58,6 +60,7 @@ export default function LandingPageStandings() {
         <Row>
           {showDivisionStandings ? (
             <StandingsContainer
+              key={"metropolitanStandings"}
               standingsName="Metro"
               standingsData={metropolitanStandings}
               standingFormat={"Division"}
@@ -67,6 +70,7 @@ export default function LandingPageStandings() {
         <Row>
           {showDivisionStandings ? (
             <StandingsContainer
+              key={"atlanticStandings"}
               standingsName="Atlantic"
               standingsData={atlanticStandings}
               standingFormat={"Division"}
@@ -76,6 +80,7 @@ export default function LandingPageStandings() {
         <Row>
           {showDivisionStandings ? (
             <StandingsContainer
+              key={"centralStandings"}
               standingsName="Central"
               standingsData={centralStandings}
               standingFormat={"Division"}
@@ -85,6 +90,7 @@ export default function LandingPageStandings() {
         <Row>
           {showDivisionStandings ? (
             <StandingsContainer
+              key={"pacificStandings"}
               standingsName="Pacific"
               standingsData={pacificStandings}
               standingFormat={"Division"}

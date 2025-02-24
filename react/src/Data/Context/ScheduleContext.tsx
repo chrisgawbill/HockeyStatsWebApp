@@ -1,76 +1,181 @@
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { ScheduledGame } from "../Models/ScheduledGame";
-import { GetScheduledGames } from "../../Services/ApiHandler";
+import { GetGameDetails, GetScheduledGames } from "../../Services/ApiHandler";
 import ConvertWeekToGames from "../Helpers/ScheduleHelper";
-import { GetAllGames, IsThereGamesScheduled, StoreScheduledGames } from "../Helpers/LocalDB/ScheduleDBHelpers";
+import {
+  GetAllGames,
+  IsThereGamesScheduled,
+  StoreScheduledGames,
+  UpdateGameDB,
+} from "../Helpers/LocalDB/ScheduleDBHelpers";
 
 const ListOfGamesContext = createContext<any>(null);
 
 const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
+  /**List of scheduled games */
   const [listOfGamesData, setListOfGamesData] = useState<ScheduledGame[]>([]);
-  const [loadingListOfGamesData, setLoadingListOfGamesData] =useState<boolean>(true);
-  const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>([]);
+  /**Loading state for listOfGamesData */
+  const [loadingListOfGamesData, setLoadingListOfGamesData] =
+    useState<boolean>(true);
+  const [datesWithGames, setDatesWithGames] = useState<Date[]>([]);
+  /**List of games on a specific date */
+  const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>(
+    []
+  );
 
-  useEffect(() => {
-    console.log(listOfGamesData);
-  }, [listOfGamesData]);
-
-  async function ListOfGamesCall(){
-    try{
+  /**Method that calls the service method to get a list of games */
+  async function ListOfGamesCall() {
+    try {
       const response = await GetScheduledGames();
       const week = response.gameWeek;
-      let localScheduledGames:ScheduledGame[] = [];
-      for(let i = 0; i < response.gameWeek.length; i++){
-        if(week[i].numberOfGames > 0){
-          const dayOfGames:ScheduledGame[] = ConvertWeekToGames(week[i]);
+      let localScheduledGames: ScheduledGame[] = [];
+      for (let i = 0; i < response.gameWeek.length; i++) {
+        if (week[i].numberOfGames > 0) {
+          const dayOfGames: ScheduledGame[] = ConvertWeekToGames(week[i]);
           await StoreScheduledGames(dayOfGames);
           localScheduledGames.push(...dayOfGames);
         }
       }
       setListOfGamesData(localScheduledGames);
-    }catch(error){
+    } catch (error) {
       console.error("Error fetching games: ", error);
-    }finally{
+    } finally {
       setLoadingListOfGamesData(false);
-      const currentDate:Date = new Date();
-      await fetchGamesByDate(currentDate);
     }
   }
-
-  async function GetListOfGames(){
-    try{
+  /**Method that checks to see if there are games in local storage or if an api call needs to be made */
+  async function GetListOfGames() {
+    try {
       const isLeagueStandingsCached = await IsThereGamesScheduled();
-      if(isLeagueStandingsCached === false){
-        const response:any[] = await(GetAllGames());
-        if(new Date(response[0][response.length-1].date).getTime() <= new Date().getTime()){
+      if (isLeagueStandingsCached === false) {
+        const response: any[] = await GetAllGames();
+        const lastResponseDate = new Date(response[0][response.length - 1].date);
+        const currentDate = new Date();
+        if (
+          lastResponseDate.getUTCMonth() <= currentDate.getUTCMonth() && lastResponseDate.getUTCDay() < currentDate.getUTCDay() && lastResponseDate.getUTCFullYear() <= currentDate.getUTCFullYear()
+        ) {
           await ListOfGamesCall();
+        }else{
+          setListOfGamesData(response[0]);
+          setLoadingListOfGamesData(false);
         }
-        setListOfGamesData(response[0]);
-        setLoadingListOfGamesData(false);
-        const currentDate:Date = new Date();
-        await fetchGamesByDate(currentDate); 
-      }else{
+      } else {
         await ListOfGamesCall();
-      } 
-    }catch(error){
+      }
+    } catch (error) {
       console.error("Error fetching games: ", error);
     }
   }
-  const fetchGamesByDate = useCallback(async (date:Date) => {
-    console.log(listOfGamesData);
-    if(!loadingListOfGamesData){
-      const todaysGames:ScheduledGame[] = listOfGamesData.filter((game:ScheduledGame) => isSameDate((new Date(game.date)),date));
-      console.log(todaysGames);
-      setSelectedDateGames(todaysGames);
+  /**Method that fetches games by date */
+  const fetchGamesByDate = useCallback(
+    async (date: Date) => {
+      if (!loadingListOfGamesData) {
+        const todaysGames: ScheduledGame[] = listOfGamesData.filter(
+          (game: ScheduledGame) => isSameDate(new Date(game.date), date)
+        );
+        setSelectedDateGames(todaysGames);
+      }
+    },
+    [listOfGamesData, loadingListOfGamesData, setSelectedDateGames]
+  );
+  /**Method that updates past games, it checks to see which games, if any, need to be updated and then updates them */
+  const updatePastGames = useCallback(async () => {
+    if (!loadingListOfGamesData) {
+      const gamesThatNeedToUpdate: ScheduledGame[] = listOfGamesData.filter(
+        (game: ScheduledGame) => doesGameNeedToUpdate(game)
+      );
+      let updatedGamesList:ScheduledGame[] = listOfGamesData;
+      for(const game of gamesThatNeedToUpdate){
+        const updatedGame:ScheduledGame | undefined = await updateGame(game);
+        if(updatedGame){
+          const index = updatedGamesList.findIndex((g: ScheduledGame) => g.gameId === updatedGame.gameId);
+          updatedGamesList[index] = updatedGame;
+          UpdateGameDB(updatedGame);
+        }
+      }
+      setListOfGamesData(updatedGamesList);
     }
-  },[listOfGamesData, loadingListOfGamesData, setSelectedDateGames]);
-  function isSameDate(date1:Date, date2:Date){
-    console.log(date1, date2);
-    return (date1.getUTCFullYear() === date2.getUTCFullYear() && date1.getUTCMonth() === date2.getUTCMonth() && date1.getUTCDate() === date2.getUTCDate());
+  }, [listOfGamesData, loadingListOfGamesData]);
+  /**Method that gets an updated game */
+  async function updateGame(game: ScheduledGame) {
+    try{
+      const id = game.gameId;
+      const response = await GetGameDetails(id);
+      const updatedGame = new ScheduledGame(
+        game.gameId,
+        game.date,
+        game.gameTime,
+        game.dayOfWeek,
+        game.venue,
+        game.homeTeam,
+        game.homeLogo,
+        response.homeTeam.score,
+        game.awayTeam,
+        game.awayLogo,
+        response.awayTeam.score,
+        game.broadcasts,
+        "",
+        game.gameCenter
+      );
+      return updatedGame;
+    }catch(error){
+      console.error("Error updating game: ", error);
+    }
   }
-  useEffect(() => {(GetListOfGames())}, []);
+ /**Method that checks to see whether a game needs to be updated */
+  function doesGameNeedToUpdate(game: ScheduledGame) {
+    const date = new Date(game.date);
+    const gameDay = date.getUTCDay();
+    const gameMonth = date.getUTCMonth();
+    const gameYear = date.getUTCFullYear();
+    const currentDate = new Date();
+    if (
+      gameMonth <= currentDate.getUTCMonth() &&
+      gameYear <= currentDate.getUTCFullYear() &&
+      gameDay < currentDate.getUTCDay()
+    ) {
+      if (game.homeScore === undefined && game.awayScore === undefined) {
+        return true;
+      }
+    }
+    return false;
+  }
+  /**Method that checks to see if two dates are the same*/
+  function isSameDate(date1: Date, date2: Date) {
+    return (
+      date1.getUTCFullYear() === date2.getUTCFullYear() &&
+      date1.getUTCMonth() === date2.getUTCMonth() &&
+      date1.getUTCDate() === date2.getUTCDate()
+    );
+  }
+  /**Initial useEffect to get the list of scheduled games */
+  useEffect(() => {
+    GetListOfGames();
+  }, []);
+  /**useEffect that is used to update games and to fetch games by the current date */
+  useEffect(() => {
+    if(!loadingListOfGamesData && listOfGamesData.length > 0){
+      const currentDate: Date = new Date();
+      updatePastGames();
+      fetchGamesByDate(currentDate);
+    }
+  }, [loadingListOfGamesData, listOfGamesData, updatePastGames, fetchGamesByDate]);
   return (
-    <ListOfGamesContext.Provider value={{listOfGamesData, loadingListOfGamesData, selectedDateGames, fetchGamesByDate}}>
+    <ListOfGamesContext.Provider
+      value={{
+        listOfGamesData,
+        loadingListOfGamesData,
+        selectedDateGames,
+        fetchGamesByDate,
+      }}
+    >
       {children}
     </ListOfGamesContext.Provider>
   );

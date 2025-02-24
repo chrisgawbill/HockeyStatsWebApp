@@ -15,5 +15,14 @@ router.get("/", async function (req, res, next) {
       res.send(e);
     }
   });
+  router.get("/:gameID", async function (req, res, next) {
+    try {
+      const url = `/gamecenter/${req.params.gameID}/boxscore`;
+      const response = await axiosNhl.get(url);
+      res.send(response.data);
+    } catch (e) {
+      res.send(e);
+    }
+  });
 
   module.exports  = router;

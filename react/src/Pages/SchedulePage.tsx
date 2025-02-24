@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useListOfGames } from "../Data/Context/ScheduleContext";
 import PageHeader from "../Components/PageHeader";
 import { Button, ButtonGroup, Col, Container, Row } from "react-bootstrap";
 import { ScheduledGame } from "../Data/Models/ScheduledGame";
+import "../style/SchedulePage.css";
 
 function SchedulePage() {
   const {
@@ -33,10 +34,10 @@ function SchedulePage() {
   return (
     <Container>
       <PageHeader pageTitle="Schedule" />
-      <Row style={{ marginTop: "10px", marginBottom: "5px" }}>
+      <Row className="date-row">
         <ButtonGroup>
           <Button
-            style={{ marginRight: "5px", width: "20px" }}
+            className="btn btn-primary"
             onClick={() =>
               getCorrectDate(
                 selectedDate,
@@ -53,9 +54,9 @@ function SchedulePage() {
           >
             Prev
           </Button>
-          <p>{selectedDate.toISOString().split("T")[0]}</p>
+          <p className="mx-3 my-auto">{selectedDate.toLocaleString('default', {month:'long'})} {selectedDate.getDate()}, {selectedDate.getFullYear()}</p>
           <Button
-            style={{ marginLeft: "5px", width: "20px" }}
+            className="btn btn-primary"
             onClick={() =>
               getCorrectDate(
                 selectedDate,
@@ -75,59 +76,49 @@ function SchedulePage() {
         </ButtonGroup>
       </Row>
       {selectedDateGames.map((game: ScheduledGame) => (
-        <div style={{ marginTop: "10px", marginBottom: "5px" }}>
-          <Row key={game.gameId}>
+        <div key={game.gameId} className="game-card">
+          <Row key={game.gameId} className="game-row">
             <Col
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
+              className="team-info"
             >
               <img
-                style={{ height: "50px", width: "50px", marginRight: "10px" }}
                 src={game.homeLogo}
                 alt="home_logo"
               />
               <h3>{game.homeTeam}</h3>
-              {game.homeScore !== null ? (
-                <h3 style={{ marginLeft: "10px" }}>({game.homeScore})</h3>
+              {game.homeScore !== undefined ? (
+                <h3>({game.homeScore})</h3>
               ) : (
                 <></>
               )}
             </Col>
-            <Col>
+            <Col className="vs">
               <h3>VS</h3>
-              <p>{convertUTCToLocal(game.gameTime)} EST</p>
+              <p className="game-time">{convertUTCToLocal(game.gameTime)}</p>
             </Col>
             <Col
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
+                className="team-info"
             >
-              {game.awayScore !== null ? (
-                <h3 style={{ marginRight: "10px" }}>({game.awayScore})</h3>
+              {game.awayScore !== undefined ? (
+                <h3>({game.awayScore})</h3>
               ) : (
                 <></>
               )}
               <h3>{game.awayTeam}</h3>
               <img
-                style={{ height: "50px", width: "50px", marginLeft: "10px" }}
                 src={game.awayLogo}
                 alt="away_logo"
               />
             </Col>
           </Row>
-          <Row>
+          <Row className="game-details">
             <Col>
               <p>Venue: {game.venue}</p>
             </Col>
-            <Col>
+            <Col className="text-center">
               <ButtonGroup>
-                {game.ticketLink !== "" ? <Button onClick={() => handleTicketClick(game.ticketLink)}>Tickets</Button> : <></>}
-                <Button onClick={() => handleGameCenterClick(game.gameCenter)}>Game Center</Button>
+                {game.ticketLink !== "" ? (<Button className="btn btn-primary" onClick={() => handleTicketClick(game.ticketLink)}>Tickets</Button>) : (<></>)}
+                <Button className="btn btn-primary" onClick={() => handleGameCenterClick(game.gameCenter)}>Game Center</Button>
               </ButtonGroup>
             </Col>
             <Col>

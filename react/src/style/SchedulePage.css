@@ -1,0 +1,38 @@
+.date-row{
+    margin: 10px 0;
+}
+.game-card{
+    margin:10px 0;
+}
+.game-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 10px;
+    border-bottom:1px solid #ddd;
+}
+.team-info{
+    display:flex;
+    align-items:center;
+}
+.team-info img{
+    height: 50px;
+    width: 50px;
+    margin: 0 10px;
+}
+.team-info h3{
+    margin:0;
+}
+.vs{
+    text-align: center;
+}
+.game-time{
+    font-size: 14px;
+}
+.game-details{
+    padding: 10px;
+}
+.btn-group p{
+    margin:0;
+    font-weight: bold;
+}

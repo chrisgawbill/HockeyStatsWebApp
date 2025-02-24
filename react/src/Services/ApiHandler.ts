@@ -53,6 +53,15 @@ export async function GetScheduledGames(){
         throw error;
     }
 }
+export async function GetGameDetails(gameID:number){
+    try{
+        const response = await axiosExpressHandler.get(`/schedule/${gameID}`);
+        return response.data;
+    }catch(error){
+        console.error("Error fetching data: ", error);
+        throw error;
+    }
+}
 export async function GetDraft(){
     // return axiosNhl.get("/draft")
 }
