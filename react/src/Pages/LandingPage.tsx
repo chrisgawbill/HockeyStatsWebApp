@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import LandingPageRow from "../Components/LandingPage/LandingPageRow";
+import LandingPageRow from "../Components/LandingPage/DraftLotteryOddsRow";
 import LandingPageStandings from "../Components/LandingPage/LandingPageStandings/LandingPageStandings";
 import { useEffect, useState } from "react";
 import React from "react";
@@ -11,6 +11,7 @@ import { InterfaceWithChatBot } from "../Services/GenAIHandler";
 import { useSkaterLeaderData } from "../Data/Context/SkaterStatLeadersContext";
 import { useGoalieLeaderData } from "../Data/Context/GoalieStatLeadersContext";
 import {useDraftLotteryOddsData } from "../Data/Context/StandingsContext";
+import DraftLotteryOddsRow from "../Components/LandingPage/DraftLotteryOddsRow";
 
 export default function LandingPage() {
   const {goalLeaderData, assistLeaderData, pointsLeaderData, faceoffLeadersData, loadingSkaterLeaderData} = useSkaterLeaderData();
@@ -48,11 +49,11 @@ export default function LandingPage() {
               title="Goalie Stat Leaders"
               topStatLeaders={[winsLeaderData, savePercentageLeaderData, gaaLeaderData, shutoutLeaderData]}
             ></PlayerStatLeaderRow>
-            <LandingPageRow
+            <DraftLotteryOddsRow
               key={"draftLottteryOdds"}
               title={"Draft Lottery Odds"}
               data={draftLotteryOddsData}
-            ></LandingPageRow>
+            ></DraftLotteryOddsRow>
           </Col>
           <Col md={5}>
             <LandingPageStandings></LandingPageStandings>

@@ -1,0 +1,19 @@
+.draft-lottery-odds-accordion-card{
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.draft-lottery-odds-accordion-card:hover{
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: scale(1.05);
+}
+.draft-lottery-odds-accordion-team-logo img{
+    height: 50px;
+    width: 50px;
+}
+.draft-lottery-odds-accordion-odds span{
+    margin-left: 2%;
+    font-weight: bold;
+}
+.draft-lottery-odds-accordion-record span{
+    margin-left: 2%;
+    font-weight: bold;
+}

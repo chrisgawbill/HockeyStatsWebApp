@@ -2,7 +2,7 @@ import { Col, Row } from "react-bootstrap";
 import "../../style/LandingPage/LandingPageRow.css";
 import React, { useState } from "react";
 import { TopStatLeader } from "../../Data/Models/TopStatLeader";
-import StatsLeaderModal from "./Modals/StatsLeaderModal";
+import StatsLeaderModal from "../Modals/StatsLeaderModal";
 import { PlayerStatLeader } from "../../Data/Models/PlayerStatLeader";
 
 interface PlayerStatLeaderProps {

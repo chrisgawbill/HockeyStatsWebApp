@@ -8,7 +8,7 @@ import { localTeamList } from "../Data/LocalData/TeamListData";
 
 import "../style/TeamList/TeamList.css";
 import PageHeader from "../Components/PageHeader";
-import TeamListModal from "../Components/LandingPage/Modals/TeamListModal";
+import TeamListModal from "../Components/Modals/TeamListModal";
 import { useListOfTeamsData } from "../Data/Context/ListOfTeamsContext";
 
 export default function TeamList() {
