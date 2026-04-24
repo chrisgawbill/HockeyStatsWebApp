@@ -20,6 +20,8 @@
 /react/.env.production.local
 
 /api/routes/config.py
+/api/.env
+/api/venv/
 
 /react/npm-debug.log*
 /react/yarn-debug.log*
