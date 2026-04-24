@@ -1,4 +1,4 @@
-import { Accordion, Col, Row } from "react-bootstrap";
+import { Col, Row } from "react-bootstrap";
 import "../../style/LandingPage/LandingPageRow.css";
 import "../../style/LandingPage/LandingPageBlock.css";
 import React from "react";
@@ -9,16 +9,10 @@ interface LandingPageRowProps {
   title: string;
   data: StandingsTeam[];
 }
+
 export default function LandingPageRow({ title, data }: LandingPageRowProps) {
   if (data.length > 1) {
-    let draftLotteryOddsDataOne: StandingsTeam[] = [];
-    let draftLotteryOddsDataTwo: StandingsTeam[] = [];
-    for (let i = 0; i < 8; i++) {
-      draftLotteryOddsDataOne.push(data[i]);
-    }
-    for (let i = 8; i < 16; i++) {
-      draftLotteryOddsDataTwo.push(data[i]);
-    }
+    const maxOdds = Math.max(...data.map((t) => t.draftLotteryOdds));
     return (
       <div className="section-container">
         <Row>
@@ -28,26 +22,24 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
         </Row>
         <Row>
           <Col>
-            <Accordion>
-              {data.slice(0,8).map((team, index) => (
-                <DraftLotteryOddsAccordian
-                  key={index}
-                  team={team}
-                  index={index}
-                /> 
-              ))}
-            </Accordion>
+            {data.slice(0, 8).map((team, index) => (
+              <DraftLotteryOddsAccordian
+                key={team.id}
+                team={team}
+                index={index}
+                maxOdds={maxOdds}
+              />
+            ))}
           </Col>
           <Col>
-            <Accordion>
-              {data.slice(8).map((team, index) => (
-                <DraftLotteryOddsAccordian
-                  key={index}
-                  team={team}
-                  index={index}
-                />
-              ))}
-            </Accordion>
+            {data.slice(8).map((team, index) => (
+              <DraftLotteryOddsAccordian
+                key={team.id}
+                team={team}
+                index={index + 8}
+                maxOdds={maxOdds}
+              />
+            ))}
           </Col>
         </Row>
       </div>

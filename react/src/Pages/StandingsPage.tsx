@@ -7,40 +7,30 @@ import { useStandingsData } from "../Data/Context/StandingsContext";
 
 export default function StandingsPage() {
   const {easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, draftLotteryOddsData, loadingData} = useStandingsData();
-  
-  const [showDivisionStandings, setShowDivisionStandings] =
-    useState<Boolean>(false);
+
+  const [showDivisionStandings, setShowDivisionStandings] = useState<Boolean>(false);
+
   if(loadingData){
     return(
       <p>Loading Data</p>
     )
   }else{
     return (
-      <Container>
-      <PageHeader pageTitle="Standings"/>
+      <Container fluid>
+        <PageHeader />
         <Row>
           <Col md={6} className="standings-page-header-box">
             <Button
-              id="standings-page-conference-viewSwitcher"
-              className="standings-page-viewSwitcher-btn"
-              onClick={() => {
-                setShowDivisionStandings(false);
-                document.getElementById("standings-page-conference-viewSwitcher")!.style.borderColor="darkBlue";
-                document.getElementById("standings-page-division-viewSwitcher")!.style.borderColor = "grey";
-              }}
+              className={`standings-page-viewSwitcher-btn${!showDivisionStandings ? " viewSwitcher-selected" : ""}`}
+              onClick={() => setShowDivisionStandings(false)}
             >
               Conference Standings
             </Button>
           </Col>
           <Col md={6} className="standings-page-header-box">
             <Button
-              id="standings-page-division-viewSwitcher"
-              className="standings-page-viewSwitcher-btn"
-              onClick={() => {
-                setShowDivisionStandings(true);
-                document.getElementById("standings-page-conference-viewSwitcher")!.style.borderColor="grey";;
-                document.getElementById("standings-page-division-viewSwitcher")!.style.borderColor="darkBlue";;
-              }}
+              className={`standings-page-viewSwitcher-btn${showDivisionStandings ? " viewSwitcher-selected" : ""}`}
+              onClick={() => setShowDivisionStandings(true)}
             >
               Division Standings
             </Button>

@@ -36,7 +36,7 @@ export default function LandingPage() {
   }else{
     return (
       <Container fluid>
-        <PageHeader pageTitle="Home"/>
+        <PageHeader />
         <Row id="landingPage-content">
           <Col lg={7}>
             <PlayerStatLeaderRow

@@ -13,7 +13,7 @@ export default function TeamPage({ teamId }: TeamPageProps) {
   });
   return(
      <div>
-        <PageHeader pageTitle=""/>
+        <PageHeader />
         
      </div>
     );

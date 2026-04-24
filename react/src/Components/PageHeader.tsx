@@ -1,38 +1,29 @@
 import React from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Button, Col, Row } from "react-bootstrap";
+import { Link, useLocation } from "react-router-dom";
+import "../style/PageHeader.css";
 
-interface PageHeaderProps {
-  pageTitle: string;
-}
-export default function PageHeader({ pageTitle }: PageHeaderProps) {
+export default function PageHeader() {
+  const { pathname } = useLocation();
+
+  const navItems = [
+    { label: "Home", path: "/" },
+    { label: "Schedule", path: "/schedule" },
+    { label: "Standings", path: "/standings" },
+    { label: "Team List", path: "/teamList" },
+  ];
+
   return (
-    <>
-      <Row id="standing-page-header">
-        <h1>{pageTitle}</h1>
-      </Row>
-      <Row id="standings-page-header-menu">
-        <Col xs={2} md={3} className="standings-page-header-menu-item">
-          <Link to="/">
-            <Button className="header-menu-btn">Home</Button>
+    <Row id="nav-bar">
+      {navItems.map(({ label, path }) => (
+        <Col key={path} className="nav-bar-item">
+          <Link to={path} style={{ width: "100%" }}>
+            <Button className={`nav-btn${pathname === path ? " active-page" : ""}`}>
+              {label}
+            </Button>
           </Link>
         </Col>
-        <Col xs={2} md={3} className="standings-page-header-menu-item">
-          <Link to="/schedule">
-            <Button className="header-menu-btn">Schedule</Button>
-          </Link>
-        </Col>
-        <Col xs={2} md={3} className="standings-page-header-menu-item">
-          <Link to="/standings">
-            <Button className="header-menu-btn">Standings</Button>
-          </Link>
-        </Col>
-        <Col xs={2} md={3} className="standings-page-header-menu-item">
-          <Link to="/teamList">
-            <Button className="header-menu-btn">Team List</Button>
-          </Link>
-        </Col>
-      </Row>
-    </>
+      ))}
+    </Row>
   );
 }

@@ -21,8 +21,8 @@ export default function TeamList() {
     );
   }else{
     return (
-      <Container>
-        <PageHeader pageTitle="Team List" />
+      <Container fluid>
+        <PageHeader />
         <div className="teamList-row">
           {listOfTeamsData.map((team: Team) => (
             <Row key={team.id} className="teamList-block"  

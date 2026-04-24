@@ -1,4 +1,5 @@
 .standings-header{
+    margin-top: 1rem;
     margin-left: 5rem;
     margin-right: 2rem;
     text-align: center;
@@ -29,8 +30,21 @@
     height: 2.5rem;
 }
 #landingPage-standings-switcher{
-    height: 2.5rem;
     width: 100%;
+    background-color: #1B4F8A !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 20px !important;
+    padding: 6px 16px;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+#landingPage-standings-switcher:hover,
+#landingPage-standings-switcher:focus {
+    background-color: #163f70 !important;
+    color: white !important;
 }
 @media only screen and (min-width: 768px) {
     .standings-table-teamName-col > p{

@@ -32,8 +32,8 @@ function SchedulePage() {
     listOfGamesData[listOfGamesData.length - 1].date
   );
   return (
-    <Container>
-      <PageHeader pageTitle="Schedule" />
+    <Container fluid>
+      <PageHeader />
       <Row className="date-row">
         <ButtonGroup>
           <Button

@@ -22,7 +22,6 @@ export default function LandingPageStandings() {
       <Container>
         <Row>
           <Button
-            variant="secondary"
             id="landingPage-standings-switcher"
             onClick={() => {
               if (showDivisionStandings === true) {
