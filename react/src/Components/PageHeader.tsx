@@ -9,7 +9,7 @@ export default function PageHeader({ pageTitle }: PageHeaderProps) {
   return (
     <>
       <Row id="standing-page-header">
-        <h2>{pageTitle}</h2>
+        <h1>{pageTitle}</h1>
       </Row>
       <Row id="standings-page-header-menu">
         <Col xs={2} md={3} className="standings-page-header-menu-item">

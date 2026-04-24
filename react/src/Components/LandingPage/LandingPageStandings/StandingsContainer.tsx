@@ -21,7 +21,7 @@ export default function StandingsContainer({
         <Row>
           <Col className="standings-header">
             <Row>
-              <h2>{standingsName}</h2>
+              <h3>{standingsName}</h3>
             </Row>
           </Col>
         </Row>

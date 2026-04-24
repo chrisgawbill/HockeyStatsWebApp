@@ -27,6 +27,7 @@ export default function PlayerStatLeaderRow({
             <h2>{title}</h2>
           </Col>
         </Row>
+        <div className="row-scroller-wrapper">
         <Row className="row-scroller">
           {topStatLeaders.map((topStatLeader: TopStatLeader) => (
             <Col
@@ -61,6 +62,7 @@ export default function PlayerStatLeaderRow({
             </Col>
           ))}
         </Row>
+        </div>
         <StatsLeaderModal
           showModal={showStatLeaderModal}
           setShowStatsModal={setShowStatLeaderModal}

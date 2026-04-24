@@ -1,3 +1,4 @@
+require("dotenv").config();
 var createError = require("http-errors");
 var cors = require("cors");
 var express = require("express");
@@ -66,11 +67,15 @@ app.use(function (err, req, res, next) {
 
 const runAIPythonScript = (message) =>{
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn("python", ["./routes/hockey-ai.py", message]);
+    const pythonProcess = spawn("./venv/bin/python3", ["./routes/hockey-ai.py", message]);
 
     let stderrLogs = "";
     let stdoutData = "";
 
+    pythonProcess.on("error", (err) => {
+      console.error("Failed to start python process: ", err);
+      reject(`Failed to start python process: ${err.message}`);
+    });
     pythonProcess.stdout.on("data", (data) => {
       stdoutData += data.toString();
     });

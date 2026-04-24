@@ -14,7 +14,26 @@ export default function LandingPageStandingsTable({
   standingsData,
   standingFormat,
 }: LandingPageStandingTableProps) {
-  const theme = useTheme(getTheme());
+  const theme = useTheme([getTheme(), {
+    Table: `
+        --data-table-library_grid-template-columns: 0.25fr 2fr 1fr 0.5fr 0.7fr;
+        border: none;
+    `,
+    BaseCell: `
+        padding: 6px 4px;
+        border: none;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+    `,
+    HeaderCell: `
+        background-color: #fff;
+        border-bottom: 2px solid rgba(0,0,0,0.15);
+    `,
+    Row: `
+        &:nth-child(even) > .td { background-color: rgba(0,0,0,0.06); }
+        & > .td:first-child { border-left: 3px solid transparent; transition: border-left-color 0.15s ease; }
+        &:hover > .td:first-child { border-left-color: rgb(0, 100, 200); }
+    `,
+  }]);
   const data = { nodes: standingsData };
   const CONFERENCE_STANDINGS_COLUMNS = [
     {
@@ -111,7 +130,7 @@ export default function LandingPageStandingsTable({
         columns={COLUMNS.current}
         data={data}
         theme={theme}
-        layout={{ fixedHeader: true }}
+        layout={{ fixedHeader: true, custom: true }}
         sort={sort}
       />
     </div>

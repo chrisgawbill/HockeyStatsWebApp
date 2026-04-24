@@ -1,13 +1,15 @@
 .teamList-block{
-    border: solid;
-    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    border-radius: 12px;
     margin-bottom: 1rem;
     text-align: center;
     padding: 0.5rem;
     width: 85rem;
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
 }
 .teamList-block:hover{
-    background-color: lightblue;
+    background-color: rgba(0, 100, 200, 0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.16);
 }
 .teamList-row:first-child{
     margin-top: 2rem;

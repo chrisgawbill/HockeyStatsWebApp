@@ -4,8 +4,8 @@
     text-align: center;
 }
 .standings-table{
-    border-color: black;
-    border: solid;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    border-radius: 12px;
     margin-left: 5rem;
     margin-right: 2rem;
     margin-top: 1rem;
@@ -13,17 +13,18 @@
     height: 20rem;
     overflow: auto;
 }
-.standings-info-row{
-    border-color: gray;
-}
-.standings-info-row :hover{
-    border: solid;
+.standings-table-teamName-col{
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: 100%;
+    overflow: hidden;
 }
 .standings-table-teamName-col > p{
     display: none;
 }
 .standings-table-team-logo{
-    float: left;
+    flex: 0 0 2.5rem;
     width: 2.5rem;
     height: 2.5rem;
 }
@@ -33,11 +34,23 @@
 }
 @media only screen and (min-width: 768px) {
     .standings-table-teamName-col > p{
-        display: inline-block;
-        margin-top: 0.35rem;
-        width: 70%;
+        display: block;
+        flex: 1;
+        min-width: 0;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        margin: 0;
+    }
+}
+
+@media only screen and (max-width: 1599px) {
+    .standings-header{
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+    .standings-table{
+        margin-left: 0;
+        margin-right: 0;
     }
 }

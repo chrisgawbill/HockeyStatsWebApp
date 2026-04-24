@@ -38,7 +38,7 @@ export default function LandingPage() {
       <Container fluid>
         <PageHeader pageTitle="Home"/>
         <Row id="landingPage-content">
-          <Col md={7}>
+          <Col lg={7}>
             <PlayerStatLeaderRow
               key={"skaterStatLeaders"}
               title={"Skater Stat Leaders"}
@@ -55,7 +55,7 @@ export default function LandingPage() {
               data={draftLotteryOddsData}
             ></DraftLotteryOddsRow>
           </Col>
-          <Col md={5}>
+          <Col lg={5}>
             <LandingPageStandings></LandingPageStandings>
           </Col>
         </Row>
