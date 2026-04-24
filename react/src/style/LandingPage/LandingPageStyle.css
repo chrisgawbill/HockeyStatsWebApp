@@ -1,12 +1,4 @@
-.container-fluid{
-}
-.clear-div{
-    clear: both;
-}
-#landingPage-content{
-    margin-top: 2rem;
-}
-/* Clearfix */
-.clearfix {
-    clear: both;
+#landingPage-content {
+    margin: 2rem auto 0;
+    max-width: 112.5rem;
 }

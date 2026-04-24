@@ -7,7 +7,7 @@ import LandingPageStandingsTable from "./LandingPageStandingsTable";
 interface StandingsContainerProps {
   standingsName: string;
   standingsData: StandingsTeam[];
-  standingFormat:String;
+  standingFormat: string;
 }
 
 export default function StandingsContainer({

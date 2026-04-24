@@ -1,102 +1,114 @@
-import { Button, Container, Row } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import { useState } from "react";
 import StandingsContainer from "./StandingsContainer";
+import SlidingToggle from "./SlidingToggle";
 import React from "react";
 import { useStandingsData } from "../../../Data/Context/StandingsContext";
 
+type Conference = "Eastern" | "Western";
+type StandingsView = "conference" | "division";
+
 export default function LandingPageStandings() {
-  const {easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, loadingData} = useStandingsData();
-  const [showConferenceStandings, setShowConferenceStandings] =
-    useState<Boolean>(true);
-  const [showDivisionStandings, setShowDivisionStandings] =
-    useState<Boolean>(false);
-  const [switchViewButtonText, setSwitchViewButtonText] = useState<String>(
-    "Show Divisional Standings"
-  );
-  if(loadingData){
-    return (
-      <p>Loading Data</p>
-    )
-  }else{
-    return (
-      <Container>
+  const {
+    easternStandingsData,
+    westernStandingsData,
+    metropolitanStandings,
+    atlanticStandings,
+    centralStandings,
+    pacificStandings,
+    loadingData,
+  } = useStandingsData();
+
+  const [view, setView] = useState<StandingsView>("conference");
+  const [conference, setConference] = useState<Conference>("Eastern");
+
+  if (loadingData) {
+    return <p>Loading Data</p>;
+  }
+
+  return (
+    <Container>
+      <Row className="mb-2">
+        <SlidingToggle
+          options={[
+            { label: "Conference", value: "conference" as StandingsView },
+            { label: "Division", value: "division" as StandingsView },
+          ]}
+          value={view}
+          onChange={setView}
+        />
+      </Row>
+      <Row className="mb-2">
+        <SlidingToggle
+          options={[
+            { label: "Eastern", value: "Eastern" as Conference },
+            { label: "Western", value: "Western" as Conference },
+          ]}
+          value={conference}
+          onChange={setConference}
+        />
+      </Row>
+
+      {view === "conference" && conference === "Eastern" && (
         <Row>
-          <Button
-            id="landingPage-standings-switcher"
-            onClick={() => {
-              if (showDivisionStandings === true) {
-                setSwitchViewButtonText("Show Divisional Standings");
-              } else {
-                setSwitchViewButtonText("Show Conference Standings");
-              }
-              setShowConferenceStandings(!showConferenceStandings);
-              setShowDivisionStandings(!showDivisionStandings);
-            }}
-          >
-            {switchViewButtonText}
-          </Button>
+          <StandingsContainer
+            key="easternStandings"
+            standingsName="Eastern"
+            standingsData={easternStandingsData}
+            standingFormat="Conference"
+          />
         </Row>
+      )}
+      {view === "conference" && conference === "Western" && (
         <Row>
-          {showConferenceStandings ? (
-            <StandingsContainer
-              key={"easternStandings"}
-              standingsName="Eastern"
-              standingsData={easternStandingsData}
-              standingFormat={"Conference"}
-            />
-          ) : null}
+          <StandingsContainer
+            key="westernStandings"
+            standingsName="Western"
+            standingsData={westernStandingsData}
+            standingFormat="Conference"
+          />
         </Row>
-        <Row>
-          {showConferenceStandings ? (
+      )}
+      {view === "division" && conference === "Eastern" && (
+        <>
+          <Row>
             <StandingsContainer
-              key={"westernStandings"}
-              standingsName="Western"
-              standingsData={westernStandingsData}
-              standingFormat={"Conference"}
-            />
-          ) : null}
-        </Row>
-        <Row>
-          {showDivisionStandings ? (
-            <StandingsContainer
-              key={"metropolitanStandings"}
+              key="metropolitanStandings"
               standingsName="Metro"
               standingsData={metropolitanStandings}
-              standingFormat={"Division"}
+              standingFormat="Division"
             />
-          ) : null}
-        </Row>
-        <Row>
-          {showDivisionStandings ? (
+          </Row>
+          <Row>
             <StandingsContainer
-              key={"atlanticStandings"}
+              key="atlanticStandings"
               standingsName="Atlantic"
               standingsData={atlanticStandings}
-              standingFormat={"Division"}
+              standingFormat="Division"
             />
-          ) : null}
-        </Row>
-        <Row>
-          {showDivisionStandings ? (
+          </Row>
+        </>
+      )}
+      {view === "division" && conference === "Western" && (
+        <>
+          <Row>
             <StandingsContainer
-              key={"centralStandings"}
+              key="centralStandings"
               standingsName="Central"
               standingsData={centralStandings}
-              standingFormat={"Division"}
+              standingFormat="Division"
             />
-          ) : null}
-        </Row>
-        <Row>
-          {showDivisionStandings ? (
+          </Row>
+          <Row>
             <StandingsContainer
-              key={"pacificStandings"}
+              key="pacificStandings"
               standingsName="Pacific"
               standingsData={pacificStandings}
-              standingFormat={"Division"}
+              standingFormat="Division"
             />
-          ) : null}
-        </Row>
-      </Container>
-    );
-  }
+          </Row>
+        </>
+      )}
+    </Container>
+  );
 }

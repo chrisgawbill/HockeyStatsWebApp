@@ -8,7 +8,7 @@ import "../../../style/LandingPage/LandingPageStandings.css";
 
 interface LandingPageStandingTableProps {
   standingsData: StandingsTeam[];
-  standingFormat: String;
+  standingFormat: string;
 }
 export default function LandingPageStandingsTable({
   standingsData,
@@ -34,82 +34,54 @@ export default function LandingPageStandingsTable({
         &:hover > .td:first-child { border-left-color: rgb(0, 100, 200); }
     `,
   }]);
-  const data = { nodes: standingsData };
-  const CONFERENCE_STANDINGS_COLUMNS = [
-    {
-      label: "#",
-      renderCell: (item: StandingsTeam) => item.conferenceStandingsPlace,
-      sort: { sortKey: "PLACE" },
-    },
-    {
-      label: "Team",
-      renderCell: (item: StandingsTeam) => <span className="standings-table-teamName-col"><img className="standings-table-team-logo" src={item.teamLogo} alt="team logo"/><p>{item.teamName}</p></span>,
-      sort: { sortKey: "TEAM" },
-    },
-    {
-      label: "Record",
-      renderCell: (item: StandingsTeam) => (item.wins + "-" + item.losses + "-" + item.otLosses),
-      sort: { sortKey: "RECORD" },
-    },
-    {
-      label: "P",
-      renderCell: (item: StandingsTeam) => item.points,
-      sort: { sortKey: "POINTS" },
-    },
-    {
-      label: "P%",
-      renderCell: (item: StandingsTeam) => item.pointsPercentage,
-      sort: { sortKey: "POINTSPERCENTAGE" },
-    },
-  ];
-  const DIVISION_STANDINGS_COLUMNS = [
-    {
-      label: "#",
-      renderCell: (item: StandingsTeam) => item.divisionStandingsPlace,
-      sort: { sortKey: "PLACE" },
-    },
-    {
-      label: "Team",
-      renderCell: (item: StandingsTeam) => <span className="standings-table-teamName-col"><img className="standings-table-team-logo" src={item.teamLogo} alt="team logo"/><p>{item.teamName}</p></span>,
-      sort: { sortKey: "TEAM" },
-    },
-    {
-      label: "Record",
-      renderCell: (item: StandingsTeam) => (item.wins + "-" + item.losses + "-" + item.otLosses),
-      sort: { sortKey: "RECORD" },
-    },
-    {
-      label: "P",
-      renderCell: (item: StandingsTeam) => item.points,
-      sort: { sortKey: "POINTS" },
-    },
-    {
-      label: "P%",
-      renderCell: (item: StandingsTeam) => item.pointsPercentage,
-      sort: { sortKey: "POINTSPERCENTAGE" },
-    },
-  ];
-  const COLUMNS = React.useRef(CONFERENCE_STANDINGS_COLUMNS);
-  const HEIGHT = React.useRef("380px");
 
-  if(standingFormat === "Division"){
-    COLUMNS.current = DIVISION_STANDINGS_COLUMNS
-    HEIGHT.current = "250px";
-  }else{
-    COLUMNS.current = CONFERENCE_STANDINGS_COLUMNS;
-    HEIGHT.current = "322px";
-  }
+  const isDivision = standingFormat === "Division";
+  const data = { nodes: standingsData };
+
+  const COLUMNS = React.useRef([
+    {
+      label: "#",
+      renderCell: (item: StandingsTeam) =>
+        isDivision ? item.divisionStandingsPlace : item.conferenceStandingsPlace,
+      sort: { sortKey: "PLACE" },
+    },
+    {
+      label: "Team",
+      renderCell: (item: StandingsTeam) => (
+        <span className="standings-table-teamName-col">
+          <img className="standings-table-team-logo" src={item.teamLogo} alt="team logo" />
+          <p>{item.teamName}</p>
+        </span>
+      ),
+      sort: { sortKey: "TEAM" },
+    },
+    {
+      label: "Record",
+      renderCell: (item: StandingsTeam) => `${item.wins}-${item.losses}-${item.otLosses}`,
+      sort: { sortKey: "RECORD" },
+    },
+    {
+      label: "P",
+      renderCell: (item: StandingsTeam) => item.points,
+      sort: { sortKey: "POINTS" },
+    },
+    {
+      label: "P%",
+      renderCell: (item: StandingsTeam) => item.pointsPercentage,
+      sort: { sortKey: "POINTSPERCENTAGE" },
+    },
+  ]);
+
+  const HEIGHT = React.useRef(isDivision ? "15.625rem" : "38.75rem");
+  HEIGHT.current = isDivision ? "15.625rem" : "38.75rem";
+
   const sort = useSort(
     data,
-    {
-      onChange: onSortChange,
-    },
+    {},
     {
       sortFns: {
         PLACE: (array) =>
-          array.sort(
-            (a, b) => a.conferenceStandingsPlace - b.conferenceStandingsPlace
-          ),
+          array.sort((a, b) => a.conferenceStandingsPlace - b.conferenceStandingsPlace),
         TEAM: (array) =>
           array.sort((a, b) => a.teamName.localeCompare(b.teamName)),
         RECORD: (array) =>
@@ -120,9 +92,7 @@ export default function LandingPageStandingsTable({
       },
     }
   );
-  function onSortChange(action: any, state: any) {
-    console.log(action, state);
-  }
+
   return (
     <div style={{ height: HEIGHT.current, marginTop: "1%", marginBottom: "2%" }}>
       <CompactTable

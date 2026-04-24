@@ -4,14 +4,10 @@
     border: solid;
     border-color: black;
     margin-bottom: 0.5rem;
-  }
-@media only screen and (min-width: 768px) {
-  .quick-links-btn {
-    height: 4rem;
-    width: 15rem;
-  }
-  #quick-links-container{
-    
-  }
 }
 
+@media only screen and (min-width: 768px) {
+    .quick-links-btn {
+        width: 15rem;
+    }
+}
