@@ -112,16 +112,16 @@ function SchedulePage() {
             </Col>
           </Row>
           <Row className="game-details">
-            <Col>
+            <Col xs={12} sm={4}>
               <p>Venue: {game.venue}</p>
             </Col>
-            <Col className="text-center">
+            <Col xs={12} sm={4} className="text-center">
               <ButtonGroup>
                 {game.ticketLink !== "" ? (<Button className="btn btn-primary" onClick={() => handleTicketClick(game.ticketLink)}>Tickets</Button>) : (<></>)}
                 <Button className="btn btn-primary" onClick={() => handleGameCenterClick(game.gameCenter)}>Game Center</Button>
               </ButtonGroup>
             </Col>
-            <Col>
+            <Col xs={12} sm={4}>
               <p>
                 Broadcasts:{" "}
                 {game.broadcasts
