@@ -1,0 +1,42 @@
+#standings-page-table-container{
+    height: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.standings-page-viewSwitcher-btn {
+    width: 100%;
+    text-align: center;
+    background-color: var(--color-primary) !important;
+    border: 1.5px solid var(--color-primary) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: var(--border-radius-pill) !important;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+    box-shadow: none !important;
+}
+
+.standings-page-viewSwitcher-btn:hover {
+    background-color: var(--color-primary-dark) !important;
+    color: white !important;
+}
+
+.standings-page-viewSwitcher-btn.viewSwitcher-selected {
+    background-color: white !important;
+    color: var(--color-primary) !important;
+}
+
+.standings-page-header-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    height: 5rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.standings-page-header-box > p {
+    text-align: center;
+}

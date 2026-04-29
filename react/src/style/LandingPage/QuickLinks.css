@@ -1,6 +1,13 @@
-.quick-links-btn{
+.quick-links-btn {
     height: 4rem;
-    width: 15rem;
+    width: 100%;
     border: solid;
     border-color: black;
+    margin-bottom: 0.5rem;
+}
+
+@media only screen and (min-width: 768px) {
+    .quick-links-btn {
+        width: 15rem;
+    }
 }

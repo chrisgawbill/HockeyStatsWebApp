@@ -1,0 +1,155 @@
+/* Schedule page layout */
+.schedule-page {
+    padding-bottom: 2rem;
+}
+
+/* --- Date navigation --- */
+.date-row {
+    --bs-gutter-x: 0;
+    margin: 0 0 1.5rem;
+}
+
+.date-row .btn-group {
+    width: 100%;
+    background-color: var(--color-primary);
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+}
+
+.date-row .btn-group > .btn {
+    background: transparent !important;
+    border: none !important;
+    border-radius: var(--border-radius-pill) !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    padding: 6px 20px;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.date-row .btn-group > .btn:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+}
+
+.schedule-date-label {
+    flex: 1;
+    text-align: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* --- Game cards --- */
+.game-card {
+    background: #ffffff;
+    border-radius: var(--border-radius-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    margin: 0 0.25rem 1rem;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.game-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    transform: translateY(-2px);
+}
+
+/* --- Matchup row --- */
+.game-row {
+    align-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: none;
+    margin: 0;
+}
+
+.team-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.game-row > .col:last-child {
+    justify-content: flex-end;
+}
+
+.team-info img {
+    height: 3.5rem;
+    width: 3.5rem;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.team-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.vs {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vs h3 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #90a4ae;
+    margin: 0 0 2px;
+}
+
+.game-time {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #37474f;
+    margin: 0;
+}
+
+/* --- Game details footer --- */
+.game-details {
+    align-items: center;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    background: #f8f9fa;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    font-size: 0.8rem;
+    color: #78909c;
+    margin: 0;
+}
+
+.game-details .text-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-details p {
+    margin: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.game-details .btn.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    border-radius: var(--border-radius-pill) !important;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    box-shadow: none !important;
+    transition: background-color 0.2s;
+}
+
+.game-details .btn.btn-primary:hover {
+    background-color: var(--color-primary-dark) !important;
+    border-color: var(--color-primary-dark) !important;
+}

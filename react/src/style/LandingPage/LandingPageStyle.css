@@ -1,7 +1,16 @@
-.container-fluid{
-    border: solid;
-    border-color: black;
+#landingPage-content {
+    margin: 2rem auto 0;
+    max-width: 112.5rem;
+    gap: 1.5rem 0;
 }
-.clear-div{
-    clear: both;
+
+#landingPage-content > [class*="col-"] {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+@media (min-width: 1921px) {
+    #landingPage-content {
+        max-width: 90vw;
+    }
 }

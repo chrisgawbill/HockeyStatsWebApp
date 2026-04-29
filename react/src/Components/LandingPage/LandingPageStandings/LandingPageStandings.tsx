@@ -1,103 +1,86 @@
-import { Container } from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { Container, Row } from "react-bootstrap";
+import { useState } from "react";
 import StandingsContainer from "./StandingsContainer";
-import { GetCurrentStandings } from "../../../Services/ApiHandler";
-import { CreateConferenceStandingsArray } from "../../../Data/Helpers/ConferenceStandingsHelper";
+import SlidingToggle from "./SlidingToggle";
 import React from "react";
+import { useStandingsData } from "../../../Data/Context/StandingsContext";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
 
-export default function LandingPageStandings() {
-  const [easternStandingsData, setEasternStandingsData] = useState<
-    StandingsTeam[]
-  >([]);
-  const [westernStandingsData, setWesternStandingsData] = useState<
-    StandingsTeam[]
-  >([]);
+type Conference = "Eastern" | "Western";
+type StandingsView = "conference" | "division";
 
-  // const [metroStandings, setMetroStandings] = useState<StandingsTeam[]>(
-  //   new Array(16)
-  // );
-  // const [atlanticStandings, setAtlanticStandings] = useState<StandingsTeam[]>(
-  //   new Array(16)
-  // );
-  // const [centralStandings, setCentralStandings] = useState<StandingsTeam[]>(
-  //   new Array(16)
-  // );
-  // const [pacificStandings, setPacificStandings] = useState<StandingsTeam[]>(
-  //   new Array(16)
-  // );
-
-  //This useEffect will call apis to get data that will be used in components
-  useEffect(() => {
-    GetStandings(setEasternStandingsData, setWesternStandingsData);
-  }, []);
-  // useEffect(() => {
-  //   if (
-  //     easternStandingsData !== undefined ||
-  //     westernStandingsData !== undefined
-  //   ) {
-  //     GetDivisionStandings(
-  //       setMetroStandings,
-  //       "Metropolitan",
-  //       easternStandingsData
-  //     );
-  //     GetDivisionStandings(
-  //       setAtlanticStandings,
-  //       "Atlantic",
-  //       easternStandingsData
-  //     );
-  //     GetDivisionStandings(
-  //       setCentralStandings,
-  //       "Central",
-  //       westernStandingsData
-  //     );
-  //     GetDivisionStandings(
-  //       setPacificStandings,
-  //       "Pacific",
-  //       westernStandingsData
-  //     );
-  //   }
-  // }, [easternStandingsData, westernStandingsData]);
-  function GetStandings(
-    setEasternStandings: Function,
-    setWesternStandings: Function
-  ) {
-    GetCurrentStandings()
-      .then((response) => {
-        const responseStandings = response.data.standings;
-        const easternStandings: StandingsTeam[] =
-          CreateConferenceStandingsArray(responseStandings, "Eastern");
-        const westernStandings: StandingsTeam[] =
-          CreateConferenceStandingsArray(responseStandings, "Western");
-
-        setEasternStandings(easternStandings);
-        setWesternStandings(westernStandings);
-      })
-      .catch((error) => console.log(error));
-  }
-    return (
-      <Container>
-        <div>
-          <StandingsContainer
-            standingsName="Eastern"
-            standingsData={easternStandingsData}
-          />
-        </div>
-        <div>
-          <StandingsContainer
-            standingsName="Western"
-            standingsData={westernStandingsData}
-          />
-        </div>
-      </Container>
-    );
+interface StandingsEntry {
+  name: string;
+  data: StandingsTeam[];
+  format: "Conference" | "Division";
 }
-// function GetDivisionStandings(
-//   setDivisionStandings: Function,
-//   divisionName: string,
-//   conferenceStandings: StandingsTeam[]
-// ) {
-//   let divisionStandingsArray: StandingsTeam[] = new Array(8);
-//   divisionStandingsArray = conferenceStandings.filter((team) => team.divisionName === divisionName)
-//   setDivisionStandings(divisionStandingsArray);
-// }
+
+export default function LandingPageStandings() {
+  const {
+    easternStandingsData,
+    westernStandingsData,
+    metropolitanStandings,
+    atlanticStandings,
+    centralStandings,
+    pacificStandings,
+    loadingData,
+  } = useStandingsData();
+
+  const [view, setView] = useState<StandingsView>("conference");
+  const [conference, setConference] = useState<Conference>("Eastern");
+
+  if (loadingData) {
+    return <p>Loading Data</p>;
+  }
+
+  const standingsLookup: Record<StandingsView, Record<Conference, StandingsEntry[]>> = {
+    conference: {
+      Eastern: [{ name: "Eastern", data: easternStandingsData, format: "Conference" }],
+      Western: [{ name: "Western", data: westernStandingsData, format: "Conference" }],
+    },
+    division: {
+      Eastern: [
+        { name: "Metro", data: metropolitanStandings, format: "Division" },
+        { name: "Atlantic", data: atlanticStandings, format: "Division" },
+      ],
+      Western: [
+        { name: "Central", data: centralStandings, format: "Division" },
+        { name: "Pacific", data: pacificStandings, format: "Division" },
+      ],
+    },
+  };
+
+  return (
+    <Container>
+      <Row className="mb-2">
+        <SlidingToggle
+          options={[
+            { label: "Conference", value: "conference" as StandingsView },
+            { label: "Division", value: "division" as StandingsView },
+          ]}
+          value={view}
+          onChange={setView}
+        />
+      </Row>
+      <Row className="mb-2">
+        <SlidingToggle
+          options={[
+            { label: "Eastern", value: "Eastern" as Conference },
+            { label: "Western", value: "Western" as Conference },
+          ]}
+          value={conference}
+          onChange={setConference}
+        />
+      </Row>
+      {standingsLookup[view][conference].map((entry) => (
+        <Row key={entry.name}>
+          <StandingsContainer
+            standingsName={entry.name}
+            standingsData={entry.data}
+            standingFormat={entry.format}
+          />
+        </Row>
+      ))}
+    </Container>
+  );
+}
