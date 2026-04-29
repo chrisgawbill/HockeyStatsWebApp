@@ -57,12 +57,6 @@
     }
 }
 
-.clear-div{
-    content: "";
-    clear: both;
-    float: none;
-}
-
 .row-scroller > .row-scroller-column{
     display: inline-block;
     float: none;

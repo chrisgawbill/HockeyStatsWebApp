@@ -1,8 +1,8 @@
 .sliding-toggle {
   position: relative;
   display: flex;
-  background-color: #1b4f8a;
-  border-radius: 20px;
+  background-color: var(--color-primary);
+  border-radius: var(--border-radius-pill);
   padding: 4px;
   width: 100%;
 }
@@ -39,7 +39,7 @@
 }
 
 .sliding-toggle__btn--active {
-  color: #1b4f8a;
+  color: var(--color-primary);
 }
 
 .sliding-toggle__btn:not(.sliding-toggle__btn--active):hover {

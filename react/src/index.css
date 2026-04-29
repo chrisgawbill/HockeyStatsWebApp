@@ -1,3 +1,16 @@
+:root {
+  --color-primary: #1B4F8A;
+  --color-primary-dark: #163f70;
+  --border-radius-card: 12px;
+  --border-radius-pill: 20px;
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.clear-div {
+  clear: both;
+  float: none;
+}
+
 body {
   margin: 0;
   font-family: 'Roboto', sans-serif;

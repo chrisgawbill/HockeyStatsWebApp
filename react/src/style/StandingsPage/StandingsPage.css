@@ -4,17 +4,13 @@
     white-space: nowrap;
 }
 
-.clear-div{
-    float: none;
-}
-
 .standings-page-viewSwitcher-btn {
     width: 100%;
     text-align: center;
-    background-color: #1B4F8A !important;
-    border: 1.5px solid #1B4F8A !important;
+    background-color: var(--color-primary) !important;
+    border: 1.5px solid var(--color-primary) !important;
     color: rgba(255, 255, 255, 0.8) !important;
-    border-radius: 20px !important;
+    border-radius: var(--border-radius-pill) !important;
     padding: 8px 20px;
     font-weight: 500;
     transition: background-color 0.2s, color 0.2s;
@@ -22,13 +18,13 @@
 }
 
 .standings-page-viewSwitcher-btn:hover {
-    background-color: #163f70 !important;
+    background-color: var(--color-primary-dark) !important;
     color: white !important;
 }
 
 .standings-page-viewSwitcher-btn.viewSwitcher-selected {
     background-color: white !important;
-    color: #1B4F8A !important;
+    color: var(--color-primary) !important;
 }
 
 .standings-page-header-box {

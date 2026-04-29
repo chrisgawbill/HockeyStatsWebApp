@@ -32,7 +32,7 @@ function SchedulePage() {
     listOfGamesData[listOfGamesData.length - 1].date
   );
   return (
-    <Container fluid>
+    <Container fluid className="schedule-page">
       <PageHeader />
       <Row className="date-row">
         <ButtonGroup>
@@ -54,7 +54,7 @@ function SchedulePage() {
           >
             Prev
           </Button>
-          <p className="mx-3 my-auto">{selectedDate.toLocaleString('default', {month:'long'})} {selectedDate.getDate()}, {selectedDate.getFullYear()}</p>
+          <p className="schedule-date-label">{selectedDate.toLocaleString('default', {month:'long'})} {selectedDate.getDate()}, {selectedDate.getFullYear()}</p>
           <Button
             className="btn btn-primary"
             onClick={() =>
