@@ -72,8 +72,8 @@ export default function LandingPageStandingsTable({
     },
   ]);
 
-  const HEIGHT = React.useRef(isDivision ? "15.625rem" : "38.75rem");
-  HEIGHT.current = isDivision ? "15.625rem" : "38.75rem";
+  const HEIGHT = React.useRef(isDivision ? "20rem" : "38.75rem");
+  HEIGHT.current = isDivision ? "20rem" : "38.75rem";
 
   const sort = useSort(
     data,

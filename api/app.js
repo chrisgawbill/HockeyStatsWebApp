@@ -16,7 +16,7 @@ var scheduleRouter = require("./routes/schedule");
 const { spawn } = require("child_process");
 
 let corsOptions = {
-  origin: ["http://localhost:3000"],
+  origin: ["http://localhost:3000", "http://localhost:5173"],
 };
 
 var app = express();

@@ -4,9 +4,16 @@ import StandingsContainer from "./StandingsContainer";
 import SlidingToggle from "./SlidingToggle";
 import React from "react";
 import { useStandingsData } from "../../../Data/Context/StandingsContext";
+import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
 
 type Conference = "Eastern" | "Western";
 type StandingsView = "conference" | "division";
+
+interface StandingsEntry {
+  name: string;
+  data: StandingsTeam[];
+  format: "Conference" | "Division";
+}
 
 export default function LandingPageStandings() {
   const {
@@ -25,6 +32,23 @@ export default function LandingPageStandings() {
   if (loadingData) {
     return <p>Loading Data</p>;
   }
+
+  const standingsLookup: Record<StandingsView, Record<Conference, StandingsEntry[]>> = {
+    conference: {
+      Eastern: [{ name: "Eastern", data: easternStandingsData, format: "Conference" }],
+      Western: [{ name: "Western", data: westernStandingsData, format: "Conference" }],
+    },
+    division: {
+      Eastern: [
+        { name: "Metro", data: metropolitanStandings, format: "Division" },
+        { name: "Atlantic", data: atlanticStandings, format: "Division" },
+      ],
+      Western: [
+        { name: "Central", data: centralStandings, format: "Division" },
+        { name: "Pacific", data: pacificStandings, format: "Division" },
+      ],
+    },
+  };
 
   return (
     <Container>
@@ -48,67 +72,15 @@ export default function LandingPageStandings() {
           onChange={setConference}
         />
       </Row>
-
-      {view === "conference" && conference === "Eastern" && (
-        <Row>
+      {standingsLookup[view][conference].map((entry) => (
+        <Row key={entry.name}>
           <StandingsContainer
-            key="easternStandings"
-            standingsName="Eastern"
-            standingsData={easternStandingsData}
-            standingFormat="Conference"
+            standingsName={entry.name}
+            standingsData={entry.data}
+            standingFormat={entry.format}
           />
         </Row>
-      )}
-      {view === "conference" && conference === "Western" && (
-        <Row>
-          <StandingsContainer
-            key="westernStandings"
-            standingsName="Western"
-            standingsData={westernStandingsData}
-            standingFormat="Conference"
-          />
-        </Row>
-      )}
-      {view === "division" && conference === "Eastern" && (
-        <>
-          <Row>
-            <StandingsContainer
-              key="metropolitanStandings"
-              standingsName="Metro"
-              standingsData={metropolitanStandings}
-              standingFormat="Division"
-            />
-          </Row>
-          <Row>
-            <StandingsContainer
-              key="atlanticStandings"
-              standingsName="Atlantic"
-              standingsData={atlanticStandings}
-              standingFormat="Division"
-            />
-          </Row>
-        </>
-      )}
-      {view === "division" && conference === "Western" && (
-        <>
-          <Row>
-            <StandingsContainer
-              key="centralStandings"
-              standingsName="Central"
-              standingsData={centralStandings}
-              standingFormat="Division"
-            />
-          </Row>
-          <Row>
-            <StandingsContainer
-              key="pacificStandings"
-              standingsName="Pacific"
-              standingsData={pacificStandings}
-              standingFormat="Division"
-            />
-          </Row>
-        </>
-      )}
+      ))}
     </Container>
   );
 }
