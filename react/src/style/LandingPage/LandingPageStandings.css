@@ -1,21 +1,21 @@
 /* Standings tables */
 .standings-header {
-  margin: 1rem 2rem 0 5rem;
+  margin: var(--space-md) var(--space-xl) 0 5rem;
   text-align: center;
 }
 
 .standings-table {
   box-shadow: var(--shadow-card);
   border-radius: var(--border-radius-card);
-  margin: 1rem 2rem 1rem 5rem;
-  height: 39rem;
+  margin: var(--space-md) var(--space-xl) var(--space-md) 5rem;
+  max-height: 39rem;
   overflow: auto;
 }
 
 .standings-table-teamName-col {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-xs);
   width: 100%;
   overflow: hidden;
 }
@@ -42,12 +42,12 @@
   }
 }
 
-@media only screen and (max-width: 1599px) {
+@media only screen and (max-width: 1399px) {
   .standings-header {
-    margin: 1rem 0.5rem 0;
+    margin: var(--space-md) var(--space-sm) 0;
   }
 
   .standings-table {
-    margin: 1rem 0;
+    margin: var(--space-md) 0;
   }
 }

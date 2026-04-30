@@ -26,14 +26,10 @@ export default function StatsLeaderModal({showModal, setShowStatsModal, statsLea
     ];
     return(
         <div>
-        <Modal show={showModal} onHide={handleModalClose} className="stat-leader-modal">
-            <Modal.Header className="stat-leader-modal-header">
-                <h4>
-                    {modalTitle + " Leaders"}
-                </h4>
-            </Modal.Header>
-            <Modal.Body className="stat-leader-modal-body">
-                <CompactTable className="stat-leader-table" columns={COLUMNS} data={data} theme={theme} layout={{fixedHeader:true}}/>
+        <Modal show={showModal} onHide={handleModalClose}>
+            <Modal.Header>{modalTitle + " Leaders"}</Modal.Header>
+            <Modal.Body>
+                <CompactTable columns={COLUMNS} data={data} theme={theme} layout={{fixedHeader:true}}/>fda06cd6 (Removed some uneeded files):react/src/Components/LandingPage/Modals/StatsLeaderModal.tsx
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="outline-danger" onClick={handleModalClose}>Close</Button>
