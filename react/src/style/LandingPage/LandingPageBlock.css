@@ -3,7 +3,7 @@
   height: 5rem;
   min-width: 16rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-  margin: 1rem 0 1rem 3rem;
+  margin: var(--space-md) 0 var(--space-md) 3rem;
   border-radius: var(--border-radius-card);
   display: flex;
   align-items: center;
@@ -29,7 +29,7 @@
   flex: 1 1 auto;
   min-width: 0;
   text-align: center;
-  padding: 0 0.5rem;
+  padding: 0 var(--space-sm);
 }
 
 .stat-leader-block-info h4 {
@@ -66,7 +66,7 @@
 @media only screen and (min-width: 768px) {
   .stat-leader-block {
     min-width: 300px;
-    margin: 1rem 0;
+    margin: var(--space-md) 0;
     box-shadow: var(--shadow-card);
     transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
   }
@@ -84,7 +84,7 @@
   }
 }
 
-@media only screen and (min-width: 768px) and (max-width: 1599px) {
+@media only screen and (min-width: 768px) and (max-width: 1399px) {
   .stat-leader-block {
     min-width: 220px;
   }

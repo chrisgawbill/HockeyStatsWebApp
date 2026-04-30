@@ -21,7 +21,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col xs={6}>
             {data.slice(0, 8).map((team, index) => (
               <DraftLotteryOddsAccordian
                 key={team.id}
@@ -31,7 +31,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
               />
             ))}
           </Col>
-          <Col>
+          <Col xs={6}>
             {data.slice(8).map((team, index) => (
               <DraftLotteryOddsAccordian
                 key={team.id}

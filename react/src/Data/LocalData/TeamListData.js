@@ -11,7 +11,7 @@ export const localTeamList = [
     {id:25, fullName: "Dallas Stars", triCode:"DAL"},
     {id:52, fullName: "Winnipeg Jets", triCode:"WPG"},
     {id:14, fullName: "Tampa Bay Lightning", triCode:"TBL"},
-    {id:59, fullName: "Utah Hockey Club", triCode:"UTA"},
+    {id:59, fullName: "Utah Mammoth", triCode:"UTA"},
     {id:18, fullName: "Nashville Predators", triCode:"NSH"},
     {id:4, fullName: "Philadelphia Flyers", triCode:"PHI"},
     {id:1, fullName: "New Jersey Devils", triCode:"NJD"},
