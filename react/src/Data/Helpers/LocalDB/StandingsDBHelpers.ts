@@ -144,29 +144,45 @@ async function GetDivisionStandings(divisionName: string) {
       return Promise.reject(error);
     }
   }
-  async function IsThereLeagueStandings():Promise<Boolean>{
-    try{
-        const db = await cachedAPIDBPromise;
-        let transaction: IDBTransaction = db.transaction(["leagueStandingsStore"], "readonly");
-        let leagueStandingsStore: IDBObjectStore = transaction.objectStore(
-          "leagueStandingsStore"
-        );
-        const request = leagueStandingsStore.count();
+  async function IsLeagueStandingsStored(): Promise<boolean> {
+    try {
+      const db = await cachedAPIDBPromise;
+      let transaction: IDBTransaction = db.transaction(["leagueStandingsStore"], "readonly");
+      let leagueStandingsStore: IDBObjectStore = transaction.objectStore(
+        "leagueStandingsStore"
+      );
+      const request = leagueStandingsStore.count();
 
-        return new Promise<boolean>((resolve, reject) => {
-            request.onsuccess = (event:Event) =>{
-                const count:Number = (event.target as IDBRequest<number>).result;
-                resolve(count === 0);
-            }
-            request.onerror = (event:Event)=>{
-                console.error("Error counting entries in the store: ", (event.target as IDBRequest).error?.message);
-                reject((event.target as IDBRequest).error)
-            }
-        })
-    }catch(error){
-        console.error("Error connecting to the database: ", error);
-        throw error;
+      return new Promise<boolean>((resolve, reject) => {
+        request.onsuccess = (event: Event) => {
+          const count: number = (event.target as IDBRequest<number>).result;
+          resolve(count > 0);
+        };
+        request.onerror = (event: Event) => {
+          console.error("Error counting entries in the store: ", (event.target as IDBRequest).error?.message);
+          reject((event.target as IDBRequest).error);
+        };
+      });
+    } catch (error) {
+      console.error("Error connecting to the database: ", error);
+      throw error;
     }
   }
 
-export{StoreLeagueStandings, GetConferenceStandings, GetDivisionStandings, GetDraftLotteryOddsArray, IsThereLeagueStandings}
+async function GetTeamByIdFromCache(teamId: string): Promise<StandingsTeam | undefined> {
+  try {
+    const db = await cachedAPIDBPromise;
+    const transaction = db.transaction(["leagueStandingsStore"], "readonly");
+    const store = transaction.objectStore("leagueStandingsStore");
+    return new Promise((resolve, reject) => {
+      const request = store.get(teamId);
+      request.onsuccess = (event) => resolve((event.target as IDBRequest<StandingsTeam>).result);
+      request.onerror = (event) => reject((event.target as IDBRequest).error);
+    });
+  } catch (error) {
+    console.error("Failed to connect to the database: ", error);
+    return Promise.reject(error);
+  }
+}
+
+export{StoreLeagueStandings, GetConferenceStandings, GetDivisionStandings, GetDraftLotteryOddsArray, IsLeagueStandingsStored, GetTeamByIdFromCache}

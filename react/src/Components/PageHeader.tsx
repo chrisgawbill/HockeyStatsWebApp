@@ -18,7 +18,7 @@ export default function PageHeader() {
       {navItems.map(({ label, path }) => (
         <Col key={path} className="nav-bar-item">
           <Link to={path} style={{ width: "100%" }}>
-            <Button className={`nav-btn${pathname === path ? " active-page" : ""}`}>
+            <Button className={`nav-btn${pathname === path || (path === "/teamList" && pathname.startsWith("/team/")) ? " active-page" : ""}`}>
               {label}
             </Button>
           </Link>

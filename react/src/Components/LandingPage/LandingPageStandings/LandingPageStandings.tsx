@@ -23,13 +23,13 @@ export default function LandingPageStandings() {
     atlanticStandings,
     centralStandings,
     pacificStandings,
-    loadingData,
+    loadingStandingsData,
   } = useStandingsData();
 
   const [view, setView] = useState<StandingsView>("conference");
   const [conference, setConference] = useState<Conference>("Eastern");
 
-  if (loadingData) {
+  if (loadingStandingsData) {
     return <p>Loading Data</p>;
   }
 

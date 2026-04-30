@@ -17,12 +17,20 @@ interface StandingsEntry {
 }
 
 export default function StandingsPage() {
-  const { easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, loadingData } = useStandingsData();
+  const {
+    easternStandingsData,
+    westernStandingsData,
+    metropolitanStandings,
+    atlanticStandings,
+    centralStandings,
+    pacificStandings,
+    loadingStandingsData,
+  } = useStandingsData();
 
   const [view, setView] = useState<StandingsView>("conference");
   const [conference, setConference] = useState<Conference>("Eastern");
 
-  if (loadingData) {
+  if (loadingStandingsData) {
     return <p>Loading Data</p>;
   }
 

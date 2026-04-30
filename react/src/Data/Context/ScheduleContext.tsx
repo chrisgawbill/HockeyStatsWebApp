@@ -11,7 +11,7 @@ import { GetGameDetails, GetScheduledGames } from "../../Services/ApiHandler";
 import ConvertWeekToGames from "../Helpers/ScheduleHelper";
 import {
   GetAllGames,
-  IsThereGamesScheduled,
+  IsScheduleStored,
   StoreScheduledGames,
   UpdateGameDB,
 } from "../Helpers/LocalDB/ScheduleDBHelpers";
@@ -53,24 +53,31 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
   /**Method that checks to see if there are games in local storage or if an api call needs to be made */
   async function GetListOfGames() {
     try {
-      const isLeagueStandingsCached = await IsThereGamesScheduled();
-      if (isLeagueStandingsCached === false) {
-        const response: any[] = await GetAllGames();
-        const lastResponseDate = new Date(response[0][response.length - 1].date);
-        const currentDate = new Date();
-        if (
-          lastResponseDate.getUTCMonth() <= currentDate.getUTCMonth() && lastResponseDate.getUTCDay() < currentDate.getUTCDay() && lastResponseDate.getUTCFullYear() <= currentDate.getUTCFullYear()
-        ) {
+      const hasStoredGames = await IsScheduleStored();
+      if (hasStoredGames) {
+        const response: ScheduledGame[] = await GetAllGames();
+        if (response && response.length > 0) {
+          const lastResponseDate = new Date(response[response.length - 1].date);
+          const currentDate = new Date();
+          if (
+            lastResponseDate.getUTCMonth() <= currentDate.getUTCMonth() &&
+            lastResponseDate.getUTCDate() < currentDate.getUTCDate() &&
+            lastResponseDate.getUTCFullYear() <= currentDate.getUTCFullYear()
+          ) {
+            await ListOfGamesCall();
+          } else {
+            setListOfGamesData(response);
+            setLoadingListOfGamesData(false);
+          }
+        } else {
           await ListOfGamesCall();
-        }else{
-          setListOfGamesData(response[0]);
-          setLoadingListOfGamesData(false);
         }
       } else {
         await ListOfGamesCall();
       }
     } catch (error) {
       console.error("Error fetching games: ", error);
+      setLoadingListOfGamesData(false);
     }
   }
   /**Method that fetches games by date */

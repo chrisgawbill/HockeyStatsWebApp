@@ -1,19 +1,21 @@
-import { json } from "stream/consumers";
 import { axiosExpressHandler } from "./AxiosInstance"
 
-export async function InterfaceWithChatBot(message:object){
-    try{
-        const serializedMessage = JSON.stringify(message);
+export async function InterfaceWithChatBot(message: object, cacheKey?: string) {
+    try {
+        const serializedMessage = JSON.stringify({ ...message, ...(cacheKey ? { cacheKey } : {}) });
         const response = await axiosExpressHandler.post("/python-service", serializedMessage, {
-            headers:{
-                'Content-Type':'application/json'
-            }
-        })
-        const data = response.data;
-        let cleanedJsonString = data.trim().replace(/^\s*```json\s*/, '').replace(/\s*```\s*$/, '');
-        const jsonData = JSON.parse(cleanedJsonString);
-        return jsonData;
-    }catch(error){
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const raw = response.data;
+        if (typeof raw === 'object' && raw !== null) return raw;
+        const str = String(raw);
+        const start = str.indexOf('{');
+        const end = str.lastIndexOf('}');
+        if (start !== -1 && end > start) {
+            return JSON.parse(str.slice(start, end + 1));
+        }
+        throw new Error('No JSON object found in AI response');
+    } catch (error) {
         console.error("Error fetching data: ", error);
         throw error;
     }

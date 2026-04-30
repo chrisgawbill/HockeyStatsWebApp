@@ -62,6 +62,54 @@ export async function GetGameDetails(gameID:number){
         throw error;
     }
 }
+export async function GetTeamRoster(triCode: string) {
+    try{
+        const response = await axiosExpressHandler.get(`/team/roster/${triCode}`);
+        return response.data;
+    }catch(error){
+        console.error("Error fetching team roster: ", error);
+        throw error;
+    }
+}
+export async function GetTeamSchedule(triCode: string) {
+    try{
+        const response = await axiosExpressHandler.get(`/team/schedule/${triCode}`);
+        return response.data;
+    }catch(error){
+        console.error("Error fetching team schedule: ", error);
+        throw error;
+    }
+}
+export async function GetSkaterSummary(teamId?: string) {
+    try{
+        const url = teamId ? `/player/skater/summary?teamId=${teamId}` : "/player/skater/summary";
+        const response = await axiosExpressHandler.get(url);
+        return response.data;
+    }catch(error){
+        console.error("Error fetching skater summary: ", error);
+        throw error;
+    }
+}
+export async function GetSkaterCorsi(teamId?: string) {
+    try{
+        const url = teamId ? `/player/skater/corsi?teamId=${teamId}` : "/player/skater/corsi";
+        const response = await axiosExpressHandler.get(url);
+        return response.data;
+    }catch(error){
+        console.error("Error fetching skater corsi: ", error);
+        throw error;
+    }
+}
+export async function GetGoalieSummary(teamId?: string) {
+    try{
+        const url = teamId ? `/player/goalie/summary?teamId=${teamId}` : "/player/goalie/summary";
+        const response = await axiosExpressHandler.get(url);
+        return response.data;
+    }catch(error){
+        console.error("Error fetching goalie summary: ", error);
+        throw error;
+    }
+}
 export async function GetDraft(){
     // return axiosNhl.get("/draft")
 }

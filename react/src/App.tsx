@@ -13,7 +13,7 @@ export default function App() {
         <Route path="standings" element={<StandingsPage/>} />
         <Route path="schedule" element={<SchedulePage/>} />
         <Route path="teamList" element={<TeamList/>} />
-        <Route path="team" element={<TeamPage teamId={28}/>} />
+        <Route path="team/:teamId" element={<TeamPage />} />
       </Routes>
     </HashRouter>
   );

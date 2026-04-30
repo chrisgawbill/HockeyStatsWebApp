@@ -25,6 +25,9 @@
 /api/routes/config.py
 /api/.env
 /api/venv/
+/api/ai-cache/
+/api/roster-cache/
+/api/player-cache/
 
 /react/npm-debug.log*
 /react/yarn-debug.log*
