@@ -1,10 +1,13 @@
 #nav-bar {
   background-color: var(--color-primary);
-  padding: 8px;
-  margin-bottom: 16px;
+  padding: var(--space-sm);
+  margin-bottom: var(--space-md);
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .nav-bar-item {
@@ -41,4 +44,20 @@
 .nav-btn.active-page:focus {
   background-color: rgba(255, 255, 255, 0.92) !important;
   color: var(--color-primary) !important;
+}
+
+@media (max-width: 576px) {
+  #nav-bar {
+    padding: var(--space-xs) 2px;
+  }
+
+  .nav-bar-item {
+    padding: 2px 2px;
+  }
+
+  .nav-btn {
+    padding: 6px 4px !important;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
 }

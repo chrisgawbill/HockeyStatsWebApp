@@ -1,15 +1,15 @@
 #landingPage-content {
-    margin: 2rem auto 0;
+    margin: var(--space-xl) auto 0;
     max-width: 112.5rem;
-    gap: 1.5rem 0;
+    gap: var(--space-lg) 0;
 }
 
 #landingPage-content > [class*="col-"] {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
 }
 
-@media (min-width: 1921px) {
+@media (min-width: 1920px) {
     #landingPage-content {
         max-width: 90vw;
     }

@@ -1,82 +1,81 @@
 import React, { useState } from "react";
 import "../style/StandingsPage/StandingsPage.css";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
 import StandingsContainer from "../Components/LandingPage/LandingPageStandings/StandingsContainer";
+import SlidingToggle from "../Components/LandingPage/LandingPageStandings/SlidingToggle";
 import PageHeader from "../Components/PageHeader";
 import { useStandingsData } from "../Data/Context/StandingsContext";
+import { StandingsTeam } from "../Data/Models/StandingsTeam";
+
+type Conference = "Eastern" | "Western";
+type StandingsView = "conference" | "division";
+
+interface StandingsEntry {
+  name: string;
+  data: StandingsTeam[];
+  format: "Conference" | "Division";
+}
 
 export default function StandingsPage() {
-  const {easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, draftLotteryOddsData, loadingData} = useStandingsData();
+  const { easternStandingsData, westernStandingsData, metropolitanStandings, atlanticStandings, centralStandings, pacificStandings, loadingData } = useStandingsData();
 
-  const [showDivisionStandings, setShowDivisionStandings] = useState<Boolean>(false);
+  const [view, setView] = useState<StandingsView>("conference");
+  const [conference, setConference] = useState<Conference>("Eastern");
 
-  if(loadingData){
-    return(
-      <p>Loading Data</p>
-    )
-  }else{
-    return (
-      <Container fluid>
-        <PageHeader />
-        <Row>
-          <Col md={6} className="standings-page-header-box">
-            <Button
-              className={`standings-page-viewSwitcher-btn${!showDivisionStandings ? " viewSwitcher-selected" : ""}`}
-              onClick={() => setShowDivisionStandings(false)}
-            >
-              Conference Standings
-            </Button>
-          </Col>
-          <Col md={6} className="standings-page-header-box">
-            <Button
-              className={`standings-page-viewSwitcher-btn${showDivisionStandings ? " viewSwitcher-selected" : ""}`}
-              onClick={() => setShowDivisionStandings(true)}
-            >
-              Division Standings
-            </Button>
-          </Col>
-        </Row>
-        <Row id="standings-page-table-container">
-          {!showDivisionStandings ? (
-            <>
-              <StandingsContainer
-                standingsName="Eastern"
-                standingsData={easternStandingsData}
-                standingFormat={"Conference"}
-              />
-              <StandingsContainer
-                standingsName="Western"
-                standingsData={westernStandingsData}
-                standingFormat={"Conference"}
-              />
-            </>
-          ) : null}
-          {showDivisionStandings ? (
-            <>
-              <StandingsContainer
-                standingsName="Metropolitan"
-                standingsData={metropolitanStandings}
-                standingFormat={"Division"}
-              />
-              <StandingsContainer
-                standingsName="Atlantic"
-                standingsData={atlanticStandings}
-                standingFormat={"Division"}
-              />
-              <StandingsContainer
-                standingsName="Central"
-                standingsData={centralStandings}
-                standingFormat={"Division"}
-              />
-              <StandingsContainer
-                standingsName="Pacific"
-                standingsData={pacificStandings}
-                standingFormat={"Division"}
-              />
-            </>
-          ) : null}
-        </Row>
-      </Container>
-    );
+  if (loadingData) {
+    return <p>Loading Data</p>;
   }
+
+  const standingsLookup: Record<StandingsView, Record<Conference, StandingsEntry[]>> = {
+    conference: {
+      Eastern: [{ name: "Eastern", data: easternStandingsData, format: "Conference" }],
+      Western: [{ name: "Western", data: westernStandingsData, format: "Conference" }],
+    },
+    division: {
+      Eastern: [
+        { name: "Metro", data: metropolitanStandings, format: "Division" },
+        { name: "Atlantic", data: atlanticStandings, format: "Division" },
+      ],
+      Western: [
+        { name: "Central", data: centralStandings, format: "Division" },
+        { name: "Pacific", data: pacificStandings, format: "Division" },
+      ],
+    },
+  };
+
+  return (
+    <Container fluid>
+      <PageHeader />
+      <Row className="mb-2 justify-content-center">
+        <SlidingToggle
+          options={[
+            { label: "Conference", value: "conference" as StandingsView },
+            { label: "Division", value: "division" as StandingsView },
+          ]}
+          value={view}
+          onChange={setView}
+        />
+      </Row>
+      <Row className="mb-2 justify-content-center">
+        <SlidingToggle
+          options={[
+            { label: "Eastern", value: "Eastern" as Conference },
+            { label: "Western", value: "Western" as Conference },
+          ]}
+          value={conference}
+          onChange={setConference}
+        />
+      </Row>
+      <Row id="standings-page-table-container">
+        {standingsLookup[view][conference].map((entry) => (
+          <StandingsContainer
+            key={entry.name}
+            standingsName={entry.name}
+            standingsData={entry.data}
+            standingFormat={entry.format}
+          />
+        ))}
+      </Row>
+    </Container>
+  );
 }
