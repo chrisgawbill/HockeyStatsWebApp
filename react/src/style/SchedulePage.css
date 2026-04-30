@@ -136,10 +136,10 @@
 }
 
 /* Mobile: stack details vertically */
-@media (max-width: 575px) {
+@media (max-width: 575.98px) {
     .game-details {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: var(--space-sm);
         padding: 0.75rem 1rem;
     }
 
