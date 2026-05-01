@@ -14,7 +14,7 @@ async function StoreScheduledGames(
       transaction.objectStore("scheduledGameStore");
     const promises = scheduledGames.map((game) => {
       return new Promise<void>((resolve, reject) => {
-        let request: IDBRequest<IDBValidKey> = scheduledGameStore.add(game);
+        let request: IDBRequest<IDBValidKey> = scheduledGameStore.put(game);
         request.onsuccess = function (event: Event) {
           console.log(
             "Game has been added to the store",

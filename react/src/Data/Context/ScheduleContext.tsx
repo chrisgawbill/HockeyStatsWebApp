@@ -57,13 +57,20 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
       if (hasStoredGames) {
         const response: ScheduledGame[] = await GetAllGames();
         if (response && response.length > 0) {
+          const today = new Date();
           const lastResponseDate = new Date(response[response.length - 1].date);
-          const currentDate = new Date();
-          if (
-            lastResponseDate.getUTCMonth() <= currentDate.getUTCMonth() &&
-            lastResponseDate.getUTCDate() < currentDate.getUTCDate() &&
-            lastResponseDate.getUTCFullYear() <= currentDate.getUTCFullYear()
-          ) {
+          const isStale =
+            lastResponseDate.getUTCMonth() <= today.getUTCMonth() &&
+            lastResponseDate.getUTCDate() < today.getUTCDate() &&
+            lastResponseDate.getUTCFullYear() <= today.getUTCFullYear();
+
+          const firstDateStr = response
+            .map((g: ScheduledGame) => String(g.date))
+            .sort()[0] ?? "";
+          const seasonStartYear = today.getMonth() >= 9 ? today.getFullYear() : today.getFullYear() - 1;
+          const isIncomplete = firstDateStr > `${seasonStartYear}-10-01`;
+
+          if (isStale || isIncomplete) {
             await ListOfGamesCall();
           } else {
             setListOfGamesData(response);
@@ -85,7 +92,7 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     async (date: Date) => {
       if (!loadingListOfGamesData) {
         const todaysGames: ScheduledGame[] = listOfGamesData.filter(
-          (game: ScheduledGame) => isSameDate(new Date(game.date), date)
+          (game: ScheduledGame) => isSameDate(parseLocalDate(game.date), date)
         );
         setSelectedDateGames(todaysGames);
       }
@@ -154,12 +161,17 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     }
     return false;
   }
+  function parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
   /**Method that checks to see if two dates are the same*/
   function isSameDate(date1: Date, date2: Date) {
     return (
-      date1.getUTCFullYear() === date2.getUTCFullYear() &&
-      date1.getUTCMonth() === date2.getUTCMonth() &&
-      date1.getUTCDate() === date2.getUTCDate()
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
     );
   }
   /**Initial useEffect to get the list of scheduled games */
