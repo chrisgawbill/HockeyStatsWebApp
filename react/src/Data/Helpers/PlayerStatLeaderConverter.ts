@@ -30,11 +30,11 @@ export default function PlayerStatLeaderConverter(playerLeaderResponseData:any, 
         default:
             break;
     }
-    let playerStatLeaderArray:PlayerStatLeader[] = new Array(10);
-    for(let i = 0; i < localPlayerResponseData.length; i++){
-        const id:number = localPlayerResponseData[i].id;
-        const firstName:string = localPlayerResponseData[i].firstName.default;
-        const lastName:string = localPlayerResponseData[i].lastName.default;
+    let playerStatLeaderArray: PlayerStatLeader[] = [];
+    for (let i = 0; i < localPlayerResponseData.length; i++) {
+        const id: number = localPlayerResponseData[i].id;
+        const firstName: string = localPlayerResponseData[i].firstName.default;
+        const lastName: string = localPlayerResponseData[i].lastName.default;
         const sweaterNumber = localPlayerResponseData[i].sweaterNumber;
         const playerImage = localPlayerResponseData[i].headshot;
         const teamAbbrev = localPlayerResponseData[i].teamAbbrev;
@@ -43,8 +43,8 @@ export default function PlayerStatLeaderConverter(playerLeaderResponseData:any, 
         const position = localPlayerResponseData[i].position;
         const value = localPlayerResponseData[i].value;
 
-        const playerStatLeader:PlayerStatLeader = new PlayerStatLeader(id, firstName, lastName, sweaterNumber, playerImage, teamAbbrev, teamName, teamLogo, position, true, value);
-        playerStatLeaderArray[i] = playerStatLeader;
+        const playerStatLeader: PlayerStatLeader = new PlayerStatLeader(id, firstName, lastName, sweaterNumber, playerImage, teamAbbrev, teamName, teamLogo, position, true, value);
+        playerStatLeaderArray.push(playerStatLeader);
     }
     return playerStatLeaderArray;
 }

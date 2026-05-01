@@ -2,7 +2,7 @@ import React, { createContext, ReactNode, useContext, useEffect, useRef, useStat
 import { StandingsTeam } from "../Models/StandingsTeam";
 import { GetCurrentStandings } from "../../Services/ApiHandler";
 import { CreateLeagueStandingsArray } from "../Helpers/LeagueStandingsHelper";
-import { GetConferenceStandings, GetDivisionStandings, GetDraftLotteryOddsArray, IsThereLeagueStandings, StoreLeagueStandings } from "../Helpers/LocalDB/StandingsDBHelpers";
+import { GetConferenceStandings, GetDivisionStandings, GetDraftLotteryOddsArray, IsLeagueStandingsStored, StoreLeagueStandings } from "../Helpers/LocalDB/StandingsDBHelpers";
 
 export const StandingsContext = createContext<any>(null);
 
@@ -44,112 +44,125 @@ const  StandingsDataProvider = ({children}: {children:ReactNode}) => {
   const [draftLotteryOdds, setDraftLotteryOdds] = useState<StandingsTeam[]>([]);
 
   const [loadingStandingsData, setLoadingStandingsData] = useState<boolean>(true);
-  function CheckLoadingStatus(){
+  function CheckLoadingStatus() {
     const allStatsLoaded = !Object.values(loadingRefs.current).includes(true);
-    if(allStatsLoaded){
-        setLoadingStandingsData(false);
+    if (allStatsLoaded) {
+      setLoadingStandingsData(false);
     }
   }
 
-  async function GetEasternConferenceStandings(){
-    try{
+  async function GetEasternConferenceStandings() {
+    try {
       const easternStandings = await GetConferenceStandings("Eastern");
       setEasternStandingsData(easternStandings);
-      loadingRefs.current.loadingEasternStandings = false;
-    }catch(error){
+    } catch (error) {
       console.error("Could not retrieve data");
+    } finally {
+      loadingRefs.current.loadingEasternStandings = false;
+      CheckLoadingStatus();
     }
   }
-  async function GetWesternConferenceStandings(){
-    try{
+  async function GetWesternConferenceStandings() {
+    try {
       const westernStandings = await GetConferenceStandings("Western");
       setWesternStandingsData(westernStandings);
-      loadingRefs.current.loadingWesternStandings = false;
-    }catch(error){
+    } catch (error) {
       console.error("Could not retrieve data");
+    } finally {
+      loadingRefs.current.loadingWesternStandings = false;
+      CheckLoadingStatus();
     }
   }
-  async function GetMetropolitanDivisionStandings(){
-    try{
+  async function GetMetropolitanDivisionStandings() {
+    try {
       const metropolitanStandings = await GetDivisionStandings("Metropolitan");
       setMetropolitanStandings(metropolitanStandings);
-      loadingRefs.current.loadingMetropolitanStandings = false;
-    }catch(error){
+    } catch (error) {
       console.error("Could not retrieve data");
+    } finally {
+      loadingRefs.current.loadingMetropolitanStandings = false;
+      CheckLoadingStatus();
     }
   }
-  async function GetAtlanticDivisionStandings(){
-    try{
+  async function GetAtlanticDivisionStandings() {
+    try {
       const atlanticStandings = await GetDivisionStandings("Atlantic");
       setAtlanticStandings(atlanticStandings);
-      loadingRefs.current.loadingAtlanticStandings = false;
-    }catch(error){
+    } catch (error) {
       console.error("Could not retrieve data");
+    } finally {
+      loadingRefs.current.loadingAtlanticStandings = false;
+      CheckLoadingStatus();
     }
   }
-  async function GetCentralDivisionStandings(){
-    try{
+  async function GetCentralDivisionStandings() {
+    try {
       const centralStandings = await GetDivisionStandings("Central");
       setCentralStandings(centralStandings);
-      loadingRefs.current.loadingCentralStandings = false;
-    }catch(error){
+    } catch (error) {
       console.error("Could not retrieve data");
+    } finally {
+      loadingRefs.current.loadingCentralStandings = false;
+      CheckLoadingStatus();
     }
   }
-  async function GetPacificDivisionStandings(){
-    try{
+  async function GetPacificDivisionStandings() {
+    try {
       const pacificStandings = await GetDivisionStandings("Pacific");
       setPacificStandings(pacificStandings);
-      loadingRefs.current.loadingPacificStandings = false;
-    }catch(error){
+    } catch (error) {
       console.error("Could not retrieve data");
+    } finally {
+      loadingRefs.current.loadingPacificStandings = false;
+      CheckLoadingStatus();
     }
   }
-  async function GetDraftLotteryOdds(){
-    try{
+  async function GetDraftLotteryOdds() {
+    try {
       const draftLotteryOdds = await GetDraftLotteryOddsArray();
       setDraftLotteryOdds(draftLotteryOdds);
-      loadingRefs.current.loadingDraftLotteryOdds = false;
-    }catch(error){
+    } catch (error) {
       console.error("Could not retrieve data");
+    } finally {
+      loadingRefs.current.loadingDraftLotteryOdds = false;
+      CheckLoadingStatus();
     }
   }
 
   async function GetStandings() {
-    const isLeagueStandingsCached = await IsThereLeagueStandings();
-    if(isLeagueStandingsCached === false){
-      await Promise.all([
-        GetEasternConferenceStandings(),
-        GetWesternConferenceStandings(),
-        GetMetropolitanDivisionStandings(),
-        GetAtlanticDivisionStandings(),
-        GetCentralDivisionStandings(),
-        GetPacificDivisionStandings(),
-        GetDraftLotteryOdds(),
-      ]);
-    }else{
-        try{
-            const data = await GetCurrentStandings();
-            const responseStandings = data.standings;
-            console.log(responseStandings);
-            const leagueStandings:StandingsTeam[] = CreateLeagueStandingsArray(responseStandings);
-            console.log(leagueStandings);
-            await StoreLeagueStandings(leagueStandings);
+    try {
+      const hasStoredStandings = await IsLeagueStandingsStored();
+      if (hasStoredStandings) {
+        await Promise.all([
+          GetEasternConferenceStandings(),
+          GetWesternConferenceStandings(),
+          GetMetropolitanDivisionStandings(),
+          GetAtlanticDivisionStandings(),
+          GetCentralDivisionStandings(),
+          GetPacificDivisionStandings(),
+          GetDraftLotteryOdds(),
+        ]);
+      } else {
+        const data = await GetCurrentStandings();
+        const responseStandings = data.standings;
+        const leagueStandings: StandingsTeam[] =
+          CreateLeagueStandingsArray(responseStandings);
+        await StoreLeagueStandings(leagueStandings);
 
-            await Promise.all([
-              GetEasternConferenceStandings(),
-              GetWesternConferenceStandings(),
-              GetMetropolitanDivisionStandings(),
-              GetAtlanticDivisionStandings(),
-              GetCentralDivisionStandings(),
-              GetPacificDivisionStandings(),
-              GetDraftLotteryOdds(),
-            ])
-          }catch(error){
-            console.error("Error fetching standings: ", error);
-          }finally{
-            CheckLoadingStatus();
-          }
+        await Promise.all([
+          GetEasternConferenceStandings(),
+          GetWesternConferenceStandings(),
+          GetMetropolitanDivisionStandings(),
+          GetAtlanticDivisionStandings(),
+          GetCentralDivisionStandings(),
+          GetPacificDivisionStandings(),
+          GetDraftLotteryOdds(),
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching standings: ", error);
+    } finally {
+      setLoadingStandingsData(false);
     }
   }
 

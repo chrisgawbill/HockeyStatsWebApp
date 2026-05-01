@@ -1,5 +1,5 @@
 #nav-bar {
-  background-color: var(--color-primary);
+  background-color: #1B4F8A;
   padding: var(--space-sm);
   margin-bottom: var(--space-md);
   display: flex;
@@ -14,6 +14,7 @@
   display: flex;
   justify-content: center;
   padding: 2px 4px;
+  flex: 1;
 }
 
 .nav-btn {
@@ -37,13 +38,13 @@
 
 .nav-btn.active-page {
   background-color: white !important;
-  color: var(--color-primary) !important;
+  color: #1B4F8A !important;
 }
 
 .nav-btn.active-page:hover,
 .nav-btn.active-page:focus {
   background-color: rgba(255, 255, 255, 0.92) !important;
-  color: var(--color-primary) !important;
+  color: #1B4F8A !important;
 }
 
 @media (max-width: 576px) {

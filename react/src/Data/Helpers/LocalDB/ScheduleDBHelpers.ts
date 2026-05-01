@@ -91,8 +91,8 @@ async function GetAllGames() {
     let request: IDBRequest<ScheduledGame[]> = scheduledGameStore.getAll();
     return new Promise<ScheduledGame[]>((resolve, reject) => {
       request.onsuccess = function (event: Event) {
-        games.push((event.target as IDBRequest<ScheduledGame>).result);
-        resolve(games);
+        const result = (event.target as IDBRequest<ScheduledGame[]>).result;
+        resolve(result);
       };
       request.onerror = function (event: Event) {
         console.error(
@@ -134,7 +134,7 @@ async function UpdateGameDB(game:ScheduledGame){
     return Promise.reject(error);
   }
 }
-async function IsThereGamesScheduled(): Promise<Boolean> {
+async function IsScheduleStored(): Promise<boolean> {
   try {
     const db = await cachedAPIDBPromise;
     let transaction: IDBTransaction = db.transaction(
@@ -147,8 +147,8 @@ async function IsThereGamesScheduled(): Promise<Boolean> {
 
     return new Promise<boolean>((resolve, reject) => {
       request.onsuccess = (event: Event) => {
-        const count: Number = (event.target as IDBRequest<number>).result;
-        resolve(count === 0);
+        const count: number = (event.target as IDBRequest<number>).result;
+        resolve(count > 0);
       };
       request.onerror = (event: Event) => {
         console.error(
@@ -168,5 +168,5 @@ export {
   GetGameFromDay,
   GetAllGames,
   UpdateGameDB,
-  IsThereGamesScheduled,
+  IsScheduleStored,
 };

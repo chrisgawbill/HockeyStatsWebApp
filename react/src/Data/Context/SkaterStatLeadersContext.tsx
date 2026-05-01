@@ -29,108 +29,112 @@ const SkaterStatLeaderProvider = ({children}: {children:ReactNode}) => {
             setLoadingSkaterLeaderData(false);
         }
       }
-      async function GetSkaterGoalLeaders(){
-        const cachedGoalLeader:TopStatLeader = await getTopStatLeader("Goals");
-        if(cachedGoalLeader){
+      async function GetSkaterGoalLeaders() {
+        try {
+          const cachedGoalLeader: TopStatLeader = await getTopStatLeader("Goals");
+          if (cachedGoalLeader) {
             setGoalLeaderData(cachedGoalLeader);
-            loadingRefs.current.loadingGoals = false;
-        }else{
-            try{
-                const data = await GetSkaterStatLeaders("goals");
-                const goalStatLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
-                  data,
-                  "goals"
-                );
-                const goalLeader: PlayerStatLeader = goalStatLeaders[0];
-                const topGoalLeader: TopStatLeader = new TopStatLeader(
-                  "Goals",
-                  goalLeader,
-                  goalStatLeaders
-                );
-                storeTopStatLeader(topGoalLeader);
-                setGoalLeaderData(topGoalLeader);
-                loadingRefs.current.loadingGoals = false;
-              }catch(error){
-                console.error("Error fetching goals: ", error);
-              }
+          } else {
+            const data = await GetSkaterStatLeaders("goals");
+            const goalStatLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+              data,
+              "goals"
+            );
+            const goalLeader: PlayerStatLeader = goalStatLeaders[0];
+            const topGoalLeader: TopStatLeader = new TopStatLeader(
+              "Goals",
+              goalLeader,
+              goalStatLeaders
+            );
+            storeTopStatLeader(topGoalLeader);
+            setGoalLeaderData(topGoalLeader);
+          }
+        } catch (error) {
+          console.error("Error fetching goals: ", error);
+        } finally {
+          loadingRefs.current.loadingGoals = false;
+          CheckLoadingStatus();
         }
       }
-      async function GetSkaterAssistLeaders(){
-        const cachedAssistLeader:TopStatLeader = await getTopStatLeader("Assists");
-        if(cachedAssistLeader){
+      async function GetSkaterAssistLeaders() {
+        try {
+          const cachedAssistLeader: TopStatLeader = await getTopStatLeader("Assists");
+          if (cachedAssistLeader) {
             setAssistLeaderData(cachedAssistLeader);
-            loadingRefs.current.loadingAssists = false;
-        }else{
-            try{
-                const data = await GetSkaterStatLeaders("assists");
-                const assistLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
-                  data,
-                  "assists"
-                );
-                const assistLeader: PlayerStatLeader = assistLeaders[0];
-                const topAssistLeader: TopStatLeader = new TopStatLeader(
-                  "Assists",
-                  assistLeader,
-                  assistLeaders
-                );
-                storeTopStatLeader(topAssistLeader);
-                setAssistLeaderData(topAssistLeader);
-                loadingRefs.current.loadingAssists = false;
-              }catch(error){
-                console.error("Error fetching assists: ", error);
-              }
+          } else {
+            const data = await GetSkaterStatLeaders("assists");
+            const assistLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+              data,
+              "assists"
+            );
+            const assistLeader: PlayerStatLeader = assistLeaders[0];
+            const topAssistLeader: TopStatLeader = new TopStatLeader(
+              "Assists",
+              assistLeader,
+              assistLeaders
+            );
+            storeTopStatLeader(topAssistLeader);
+            setAssistLeaderData(topAssistLeader);
+          }
+        } catch (error) {
+          console.error("Error fetching assists: ", error);
+        } finally {
+          loadingRefs.current.loadingAssists = false;
+          CheckLoadingStatus();
         }
       }
-      async function GetSkaterPointsLeader(){
-        const cachedPointsLeader:TopStatLeader = await getTopStatLeader("Points");
-        if(cachedPointsLeader){
+      async function GetSkaterPointsLeader() {
+        try {
+          const cachedPointsLeader: TopStatLeader = await getTopStatLeader("Points");
+          if (cachedPointsLeader) {
             setPointsLeaderData(cachedPointsLeader);
-            loadingRefs.current.loadingPoints = false;
-        }else{
-            try{
-                const data = await GetSkaterStatLeaders("points");
-                const pointsLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
-                  data,
-                  "points"
-                );
-                const pointsLeader: PlayerStatLeader = pointsLeaders[0];
-                const topPointsLeader: TopStatLeader = new TopStatLeader(
-                  "Points",
-                  pointsLeader,
-                  pointsLeaders
-                );
-                storeTopStatLeader(topPointsLeader);
-                setPointsLeaderData(topPointsLeader);
-                loadingRefs.current.loadingPoints = false;
-              }catch(error){
-                console.error("Error fetching points: ", error);
-              }
+          } else {
+            const data = await GetSkaterStatLeaders("points");
+            const pointsLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+              data,
+              "points"
+            );
+            const pointsLeader: PlayerStatLeader = pointsLeaders[0];
+            const topPointsLeader: TopStatLeader = new TopStatLeader(
+              "Points",
+              pointsLeader,
+              pointsLeaders
+            );
+            storeTopStatLeader(topPointsLeader);
+            setPointsLeaderData(topPointsLeader);
+          }
+        } catch (error) {
+          console.error("Error fetching points: ", error);
+        } finally {
+          loadingRefs.current.loadingPoints = false;
+          CheckLoadingStatus();
         }
       }
-      async function GetSkaterFaceoffLeader(){
-        const cachedFaceoffLeader:TopStatLeader = await getTopStatLeader("Faceoffs");
-        if(cachedFaceoffLeader){
+      async function GetSkaterFaceoffLeader() {
+        try {
+          const cachedFaceoffLeader: TopStatLeader = await getTopStatLeader("Faceoffs");
+          if (cachedFaceoffLeader) {
             setFaceoffLeadersData(cachedFaceoffLeader);
-            loadingRefs.current.loadingFaceoffs = false;
-        }else{
-            try{  
-                const data = await GetSkaterStatLeaders("faceoffLeaders");
-                const faceoffLeaders:PlayerStatLeader[] = PlayerStatLeaderConverter(
-                  data,
-                  "faceoffLeaders"
-                );
-                const faceoffLeader:PlayerStatLeader = faceoffLeaders[0];
-                const topFaceoffLeader: TopStatLeader = new TopStatLeader(
-                  "Faceoffs",
-                  faceoffLeader,
-                  faceoffLeaders
-                );
-                storeTopStatLeader(topFaceoffLeader);
-                setFaceoffLeadersData(topFaceoffLeader);
-                loadingRefs.current.loadingFaceoffs = false;
-              }catch(error){
-                console.error("Error fetching faceoff leaders: ", error);
-              }
+          } else {
+            const data = await GetSkaterStatLeaders("faceoffLeaders");
+            const faceoffLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+              data,
+              "faceoffLeaders"
+            );
+            const faceoffLeader: PlayerStatLeader = faceoffLeaders[0];
+            const topFaceoffLeader: TopStatLeader = new TopStatLeader(
+              "Faceoffs",
+              faceoffLeader,
+              faceoffLeaders
+            );
+            storeTopStatLeader(topFaceoffLeader);
+            setFaceoffLeadersData(topFaceoffLeader);
+          }
+        } catch (error) {
+          console.error("Error fetching faceoff leaders: ", error);
+        } finally {
+          loadingRefs.current.loadingFaceoffs = false;
+          CheckLoadingStatus();
         }
       }
       async function FetchAllData(){
