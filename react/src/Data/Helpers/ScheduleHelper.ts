@@ -26,6 +26,20 @@ export default function ConvertWeekToGames(week: any) {
       ticketLink = games[i].ticketsLink;
     }
     const gameCenter = games[i].gameCenterLink;
+    const isPlayoff = games[i].gameType === 3;
+    const playoffRound: number | null = (() => {
+      if (!isPlayoff) return null;
+      if (games[i].seriesStatus?.round != null) return games[i].seriesStatus.round;
+      const idStr = String(games[i].id ?? "");
+      return idStr.length === 10 ? parseInt(idStr.slice(6, 8)) || null : null;
+    })();
+    const periodType: string | null = games[i].periodDescriptor?.periodType ?? null;
+    const seriesWins: string | null = (() => {
+      if (!isPlayoff) return null;
+      const top = games[i].seriesStatus?.topSeedWins;
+      const bot = games[i].seriesStatus?.bottomSeedWins;
+      return top != null && bot != null ? `${top}-${bot}` : null;
+    })();
 
     const game: ScheduledGame = new ScheduledGame(
       gameId,
@@ -41,7 +55,11 @@ export default function ConvertWeekToGames(week: any) {
       awayScore,
       broadcasts,
       ticketLink,
-      gameCenter
+      gameCenter,
+      isPlayoff,
+      playoffRound,
+      periodType,
+      seriesWins
     );
     localListOfGames.push(game);
   }

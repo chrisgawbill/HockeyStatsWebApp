@@ -8,7 +8,7 @@ interface PlayerCardProps {
 const FALLBACK_HEADSHOT = "https://assets.nhle.com/mugs/nhl/skater/default.png";
 
 export default function PlayerCard({ player }: PlayerCardProps) {
-  const headshotUrl = `https://assets.nhle.com/mugs/nhl/skater/${player.id}.png`;
+  const headshotUrl = player.headshot || FALLBACK_HEADSHOT;
 
   return (
     <div className="player-card">
