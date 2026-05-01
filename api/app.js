@@ -92,8 +92,9 @@ app.use(function (err, req, res, next) {
 
 const runAIPythonScript = (message) =>{
   return new Promise((resolve, reject) => {
+    const pythonPath = process.env.NODE_ENV === "production" ? "python3" : path.join(__dirname, "venv/bin/python3");
     const pythonProcess = spawn(
-      path.join(__dirname, "venv/bin/python3"),
+      pythonPath,
       [path.join(__dirname, "routes/hockey-ai.py"), message]
     );
 
