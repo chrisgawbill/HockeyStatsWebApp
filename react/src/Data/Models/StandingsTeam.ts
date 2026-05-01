@@ -1,5 +1,5 @@
 export class StandingsTeam{
-    public id:number;
+    public id:string;
     public teamLogo:string;
     public teamName:string;
     public conferenceName:string;
@@ -16,7 +16,7 @@ export class StandingsTeam{
     public draftLotteryOdds:number;
     public draftLotteryOddsTrend:string;
 
-    constructor(id:number, teamLogo:string, teamName:string,conferenceName:string,divisionName:string,wins:number,losses:number,otLosses:number,points:number,pointsPercentage:number,leagueStanding:number,
+    constructor(id:string, teamLogo:string, teamName:string,conferenceName:string,divisionName:string,wins:number,losses:number,otLosses:number,points:number,pointsPercentage:number,leagueStanding:number,
         conferenceStandingsPlace:number,divisionStandingsPlace:number,wildCardRank:number, draftLotteryOdds:number, draftLotteryOddsTrend:string){
         this.id = id;
         this.teamLogo = teamLogo;

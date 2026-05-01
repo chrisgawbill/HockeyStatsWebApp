@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { Container } from "react-bootstrap";
 import { Team } from "../Data/Models/Team";
 import { TeamStats } from "../Data/Models/TeamStats";
 import { localTeamList } from "../Data/LocalData/TeamListData";
 import "../style/TeamList/TeamList.css";
 import PageHeader from "../Components/PageHeader";
-import TeamListModal from "../Components/Modals/TeamListModal";
 import { useListOfTeamsData } from "../Data/Context/ListOfTeamsContext";
+import { useNavigate } from "react-router-dom";
 
 const triCodeLookup: Record<string, string> = Object.fromEntries(
   (localTeamList as any[]).map((t) => [t.fullName, t.triCode])
@@ -21,8 +21,7 @@ function getCurrentStats(team: Team): TeamStats | null {
 
 export default function TeamList() {
   const { listOfTeamsData, loadingListOfTeamsData } = useListOfTeamsData();
-  const [showTeamModal, setShowTeamModal] = useState<boolean>(false);
-  const [modalTeam, setModalTeam] = useState<Team>(new Team(0, "", []));
+  const navigate = useNavigate();
 
   if (loadingListOfTeamsData) {
     return <p>Loading Data</p>;
@@ -45,8 +44,7 @@ export default function TeamList() {
               key={team.teamName}
               className="team-card"
               onClick={() => {
-                setShowTeamModal(true);
-                setModalTeam(team);
+                navigate(`/team/${triCode}`);
               }}
             >
               <img className="team-card__logo" src={logoUrl} alt={team.teamName} />
@@ -65,11 +63,6 @@ export default function TeamList() {
           );
         })}
       </div>
-      <TeamListModal
-        showModal={showTeamModal}
-        setShowModal={setShowTeamModal}
-        team={modalTeam}
-      />
     </Container>
   );
 }

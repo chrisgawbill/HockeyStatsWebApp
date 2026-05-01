@@ -38,106 +38,113 @@ const GoalieLeaderDataProvider = ({ children }: { children: ReactNode }) => {
         setLoadingGoalieLeaderData(false);
     }
   }
-  async function GetWinsLeader(){
-    const cachedWinsLeaderData:TopStatLeader = await getTopStatLeader("Wins");
-    if(cachedWinsLeaderData){
+  async function GetWinsLeader() {
+    try {
+      const cachedWinsLeaderData: TopStatLeader = await getTopStatLeader("Wins");
+      if (cachedWinsLeaderData) {
         setWinsLeaderData(cachedWinsLeaderData);
-        loadingRefs.current.loadingWins = false;
-    }else{
-        try {
-            const data = await GetGoalieStatLeaders("wins");
-            const winsLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
-              data,
-              "wins"
-            );
-            const winsLeader: PlayerStatLeader = winsLeaders[0];
-            const topWinLeader: TopStatLeader = new TopStatLeader(
-              "Wins",
-              winsLeader,
-              winsLeaders
-            );
-            storeTopStatLeader(topWinLeader);
-            setWinsLeaderData(topWinLeader);
-            loadingRefs.current.loadingWins = false;
-          } catch (error) {
-            console.error("Error fetching wins: ", error);
-          }
-    }
-  }
-  async function GetSavePercentageLeader(){
-    const cachedSavePercentageLeaderData:TopStatLeader = await getTopStatLeader("SV%");
-      if(cachedSavePercentageLeaderData){
-        setSavePercentageLeaderData(cachedSavePercentageLeaderData);
-        loadingRefs.current.loadingSavePercentage = false;
-      }else{
-        try {
-            const data = await GetGoalieStatLeaders("savePctg");
-            const savePercentageLeaders: PlayerStatLeader[] =
-              PlayerStatLeaderConverter(data, "savePctg");
-            const savePercentageLeader: PlayerStatLeader = savePercentageLeaders[0];
-            const topSavePercentageLeader: TopStatLeader = new TopStatLeader(
-              "SV%",
-              savePercentageLeader,
-              savePercentageLeaders
-            );
-            storeTopStatLeader(topSavePercentageLeader);
-            setSavePercentageLeaderData(topSavePercentageLeader);
-            loadingRefs.current.loadingSavePercentage = false;
-          } catch (error) {
-            console.error("Error fetching save percentage: ", error);
-          }
+      } else {
+        const data = await GetGoalieStatLeaders("wins");
+        const winsLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+          data,
+          "wins"
+        );
+        const winsLeader: PlayerStatLeader = winsLeaders[0];
+        const topWinLeader: TopStatLeader = new TopStatLeader(
+          "Wins",
+          winsLeader,
+          winsLeaders
+        );
+        storeTopStatLeader(topWinLeader);
+        setWinsLeaderData(topWinLeader);
       }
-  }
-  async function GetGaaLeader(){
-    const cachedGaaLeaderData:TopStatLeader = await getTopStatLeader("GAA");
-    if(cachedGaaLeaderData){
-        setGaaLeaderData(cachedGaaLeaderData);
-        loadingRefs.current.loadingGaa = false;
-    }else{
-        try {
-            const data = await GetGoalieStatLeaders("goalsAgainstAverage");
-            const gaaLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
-              data,
-              "goalsAgainstAverage"
-            );
-            const gaaLeader: PlayerStatLeader = gaaLeaders[0];
-            const topGaaLeader: TopStatLeader = new TopStatLeader(
-              "GAA",
-              gaaLeader,
-              gaaLeaders
-            );
-            storeTopStatLeader(topGaaLeader);
-            setGaaLeaderData(topGaaLeader);
-            loadingRefs.current.loadingGaa = false;
-          } catch (error) {
-            console.error("Error fetching goals against average: ", error);
-          }
+    } catch (error) {
+      console.error("Error fetching wins: ", error);
+    } finally {
+      loadingRefs.current.loadingWins = false;
+      CheckLoadingStatus();
     }
   }
-  async function GetShutoutLeader(){
-    const cachedShutoutLeaderData:TopStatLeader = await getTopStatLeader("Shutouts");
-    if(cachedShutoutLeaderData){
+  async function GetSavePercentageLeader() {
+    try {
+      const cachedSavePercentageLeaderData: TopStatLeader =
+        await getTopStatLeader("SV%");
+      if (cachedSavePercentageLeaderData) {
+        setSavePercentageLeaderData(cachedSavePercentageLeaderData);
+      } else {
+        const data = await GetGoalieStatLeaders("savePctg");
+        const savePercentageLeaders: PlayerStatLeader[] =
+          PlayerStatLeaderConverter(data, "savePctg");
+        const savePercentageLeader: PlayerStatLeader = savePercentageLeaders[0];
+        const topSavePercentageLeader: TopStatLeader = new TopStatLeader(
+          "SV%",
+          savePercentageLeader,
+          savePercentageLeaders
+        );
+        storeTopStatLeader(topSavePercentageLeader);
+        setSavePercentageLeaderData(topSavePercentageLeader);
+      }
+    } catch (error) {
+      console.error("Error fetching save percentage: ", error);
+    } finally {
+      loadingRefs.current.loadingSavePercentage = false;
+      CheckLoadingStatus();
+    }
+  }
+  async function GetGaaLeader() {
+    try {
+      const cachedGaaLeaderData: TopStatLeader = await getTopStatLeader("GAA");
+      if (cachedGaaLeaderData) {
+        setGaaLeaderData(cachedGaaLeaderData);
+      } else {
+        const data = await GetGoalieStatLeaders("goalsAgainstAverage");
+        const gaaLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+          data,
+          "goalsAgainstAverage"
+        );
+        const gaaLeader: PlayerStatLeader = gaaLeaders[0];
+        const topGaaLeader: TopStatLeader = new TopStatLeader(
+          "GAA",
+          gaaLeader,
+          gaaLeaders
+        );
+        storeTopStatLeader(topGaaLeader);
+        setGaaLeaderData(topGaaLeader);
+      }
+    } catch (error) {
+      console.error("Error fetching goals against average: ", error);
+    } finally {
+      loadingRefs.current.loadingGaa = false;
+      CheckLoadingStatus();
+    }
+  }
+  async function GetShutoutLeader() {
+    try {
+      const cachedShutoutLeaderData: TopStatLeader = await getTopStatLeader(
+        "Shutouts"
+      );
+      if (cachedShutoutLeaderData) {
         setShutoutLeaderData(cachedShutoutLeaderData);
-        loadingRefs.current.loadingShutouts = false;
-    }else{
-        try {
-            const data = await GetGoalieStatLeaders("shutouts");
-            const shutoutLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
-              data,
-              "shutouts"
-            );
-            const shutoutLeader: PlayerStatLeader = shutoutLeaders[0];
-            const topShutoutLeader: TopStatLeader = new TopStatLeader(
-              "Shutouts",
-              shutoutLeader,
-              shutoutLeaders
-            );
-            storeTopStatLeader(topShutoutLeader);
-            setShutoutLeaderData(topShutoutLeader);
-            loadingRefs.current.loadingShutouts = false;
-          } catch (error) {
-            console.error("Error fetching shutouts: ", error);
-          }
+      } else {
+        const data = await GetGoalieStatLeaders("shutouts");
+        const shutoutLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(
+          data,
+          "shutouts"
+        );
+        const shutoutLeader: PlayerStatLeader = shutoutLeaders[0];
+        const topShutoutLeader: TopStatLeader = new TopStatLeader(
+          "Shutouts",
+          shutoutLeader,
+          shutoutLeaders
+        );
+        storeTopStatLeader(topShutoutLeader);
+        setShutoutLeaderData(topShutoutLeader);
+      }
+    } catch (error) {
+      console.error("Error fetching shutouts: ", error);
+    } finally {
+      loadingRefs.current.loadingShutouts = false;
+      CheckLoadingStatus();
     }
   }
   async function FetchAllData(){

@@ -22,7 +22,7 @@ export default function PlayerStatLeaderRow({ title, topStatLeaders }: PlayerSta
       <div className="row-scroller-wrapper">
         <Row className="row-scroller">
           {topStatLeaders.map((topStatLeader: TopStatLeader) => (
-            <Col sm md={5} lg={4} className="row-scroller-column" key={topStatLeader.player.id}>
+            <Col sm md={5} lg={4} className="row-scroller-column" key={topStatLeader.statIndicator}>
               <StatLeaderCard topStatLeader={topStatLeader} />
             </Col>
           ))}

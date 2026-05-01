@@ -5,6 +5,7 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+var fs = require("fs");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -14,6 +15,22 @@ var teamRouter = require("./routes/team");
 var scheduleRouter = require("./routes/schedule");
 
 const { spawn } = require("child_process");
+
+const AI_CACHE_DIR = path.join(__dirname, "ai-cache");
+const AI_CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000;
+
+function readAICache(key) {
+  try {
+    const entry = JSON.parse(fs.readFileSync(path.join(AI_CACHE_DIR, `${key}.json`), "utf-8"));
+    if (Date.now() - entry.timestamp < AI_CACHE_TTL_MS) return entry.data;
+  } catch {}
+  return null;
+}
+
+function writeAICache(key, data) {
+  fs.mkdirSync(AI_CACHE_DIR, { recursive: true });
+  fs.writeFileSync(path.join(AI_CACHE_DIR, `${key}.json`), JSON.stringify({ timestamp: Date.now(), data }));
+}
 
 let corsOptions = {
   origin: ["http://localhost:3000", "http://localhost:5173", "https://chrisgawbill.github.io"],
@@ -40,11 +57,19 @@ app.use("/team", teamRouter);
 app.use("/schedule", scheduleRouter);
 
 app.post("/python-service", async (req, res) => {
-  try{
-    const message = req.body.content; 
-    const result = await runAIPythonScript(message)
+  try {
+    const message = req.body.content;
+    const key = req.body.cacheKey ?? "default";
+
+    const cached = readAICache(key);
+    if (cached !== null) {
+      return res.send(cached);
+    }
+
+    const result = await runAIPythonScript(message);
+    writeAICache(key, result);
     res.send(result);
-  }catch(error){
+  } catch (error) {
     console.error("Error running python script: ", error);
     res.status(500).send(`Internal Server Error: ${error}`);
   }
@@ -67,7 +92,10 @@ app.use(function (err, req, res, next) {
 
 const runAIPythonScript = (message) =>{
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn("./venv/bin/python3", ["./routes/hockey-ai.py", message]);
+    const pythonProcess = spawn(
+      path.join(__dirname, "venv/bin/python3"),
+      [path.join(__dirname, "routes/hockey-ai.py"), message]
+    );
 
     let stderrLogs = "";
     let stdoutData = "";

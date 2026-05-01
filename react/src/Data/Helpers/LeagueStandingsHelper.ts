@@ -1,9 +1,14 @@
 import { StandingsTeam } from "../Models/StandingsTeam";
 
-export function CreateLeagueStandingsArray(initialStandings:any[]){
-  let leageuStandingsArray:StandingsTeam[] = new Array(32);
-  for(let i = 0; i < initialStandings.length; i++){
+export function CreateLeagueStandingsArray(initialStandings: any[]) {
+  let leageuStandingsArray: StandingsTeam[] = [];
+  for (let i = 0; i < initialStandings.length; i++) {
     const responseTeam = initialStandings[i];
+    const teamId = responseTeam.teamAbbrev?.default || responseTeam.teamId?.id || responseTeam.teamId || responseTeam.id || responseTeam.team?.id;
+    if (!teamId) {
+      console.warn("Skipping team with missing ID. Keys available:", Object.keys(responseTeam), responseTeam);
+      continue;
+    }
     const teamLogo = responseTeam.teamLogo;
     const name = responseTeam.teamCommonName.default;
     const conferenceName = responseTeam.conferenceName;
@@ -12,21 +17,21 @@ export function CreateLeagueStandingsArray(initialStandings:any[]){
     const losses = responseTeam.losses;
     const otLosses = responseTeam.otLosses;
     const points = responseTeam.points;
-    const pointsPctg = Math.round((responseTeam.pointPctg*100)*100)/100;
+    const pointsPctg = Math.round(responseTeam.pointPctg * 100 * 100) / 100;
     const leagueStanding = responseTeam.leagueSequence;
     const conferenceStanding = responseTeam.conferenceSequence;
     const divisionStanding = responseTeam.divisionSequence;
     const wildCardRank = responseTeam.wildcardSequence;
 
-    const teamLastTenLeagueRank:number = responseTeam.leagueL10Sequence;
-    const teamDraftLotteryOdds:number = DraftLotteryOddsHelper(leagueStanding);
-    const draftLotteryOddsTrend:string = DraftLotteryOddsTrendHelper(
+    const teamLastTenLeagueRank: number = responseTeam.leagueL10Sequence;
+    const teamDraftLotteryOdds: number = DraftLotteryOddsHelper(leagueStanding);
+    const draftLotteryOddsTrend: string = DraftLotteryOddsTrendHelper(
       leagueStanding,
       teamLastTenLeagueRank
     );
 
     const standingsTeam: StandingsTeam = new StandingsTeam(
-      i,
+      teamId,
       teamLogo,
       name,
       conferenceName,
@@ -43,7 +48,7 @@ export function CreateLeagueStandingsArray(initialStandings:any[]){
       teamDraftLotteryOdds,
       draftLotteryOddsTrend
     );
-    leageuStandingsArray[i] = standingsTeam;
+    leageuStandingsArray.push(standingsTeam);
   }
   return leageuStandingsArray;
 }

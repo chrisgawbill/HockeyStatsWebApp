@@ -1,13 +1,16 @@
 let db:IDBDatabase;
 
 const cachedAPIDBPromise:Promise<IDBDatabase> = new Promise((resolve, reject) => {
-    let request: IDBOpenDBRequest = indexedDB.open("cachedAPIDatabse", 9);
+    let request: IDBOpenDBRequest = indexedDB.open("cachedAPIDatabse", 10);
 
     request.onupgradeneeded = function(event:IDBVersionChangeEvent){
         db = (event.target as IDBOpenDBRequest).result;
-  
+
         if(!db.objectStoreNames.contains("topStatLeaderStore")){
             db.createObjectStore("topStatLeaderStore", {keyPath:"statIndicator"});
+        }
+        if(db.objectStoreNames.contains("leagueStandingsStore")){
+            db.deleteObjectStore("leagueStandingsStore");
         }
         if(!db.objectStoreNames.contains("leagueStandingsStore")){
             const leagueStandingsStore = db.createObjectStore("leagueStandingsStore", {keyPath:"id"});
