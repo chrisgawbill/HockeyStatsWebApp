@@ -20,7 +20,14 @@ export interface MockScheduleGame {
   opponent: string;
   opponentTriCode: string;
   date: string;
+  isoDate: string;
   isHome: boolean;
+  result?: "W" | "L" | "OTW" | "OTL" | "SOW" | "SOL" | null;
+  teamScore?: number | null;
+  oppScore?: number | null;
+  isPlayoff?: boolean;
+  playoffRound?: number | null;
+  seriesWins?: string | null;
 }
 
 export interface MockStatItem {
@@ -35,6 +42,7 @@ export interface RosterPlayer {
   name: string;
   number: number;
   stat: string;
+  headshot?: string;
 }
 
 export const MOCK_TEAM: MockTeam = {

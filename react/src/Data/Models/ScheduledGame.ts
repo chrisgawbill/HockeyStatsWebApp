@@ -8,13 +8,17 @@ export interface IScheduledGame {
     venue: string;
     homeTeam: string;
     homeLogo: string;
-    homeScore:number;
+    homeScore: number;
     awayTeam: string;
     awayLogo: string;
-    awayScore:number;
+    awayScore: number;
     broadcasts: GameBroadcast[];
     ticketLink: string;
     gameCenter: string;
+    isPlayoff: boolean;
+    playoffRound: number | null;
+    periodType: string | null;
+    seriesWins: string | null;
 }
 export class ScheduledGame implements IScheduledGame {
     gameId: number;
@@ -24,13 +28,17 @@ export class ScheduledGame implements IScheduledGame {
     venue: string;
     homeTeam: string;
     homeLogo: string;
-    homeScore:number;
+    homeScore: number;
     awayTeam: string;
     awayLogo: string;
     awayScore: number;
     broadcasts: GameBroadcast[];
     ticketLink: string;
     gameCenter: string;
+    isPlayoff: boolean;
+    playoffRound: number | null;
+    periodType: string | null;
+    seriesWins: string | null;
 
     constructor(
         gameId: number,
@@ -40,13 +48,17 @@ export class ScheduledGame implements IScheduledGame {
         venue: string,
         homeTeam: string,
         homeLogo: string,
-        homeScore:number,
+        homeScore: number,
         awayTeam: string,
         awayLogo: string,
-        awayScore:number,
+        awayScore: number,
         broadcasts: GameBroadcast[],
         ticketLink: string,
-        gameCenter: string
+        gameCenter: string,
+        isPlayoff: boolean = false,
+        playoffRound: number | null = null,
+        periodType: string | null = null,
+        seriesWins: string | null = null
     ) {
         this.gameId = gameId;
         this.date = date;
@@ -62,6 +74,10 @@ export class ScheduledGame implements IScheduledGame {
         this.broadcasts = broadcasts;
         this.ticketLink = ticketLink;
         this.gameCenter = gameCenter;
+        this.isPlayoff = isPlayoff;
+        this.playoffRound = playoffRound;
+        this.periodType = periodType;
+        this.seriesWins = seriesWins;
     }
 }
 

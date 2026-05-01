@@ -1,5 +1,5 @@
 export const localTeamList = [
-    {id:8, fullName: "Montreal Canadiens", triCode:"MTL", primary: "#AF1E2D", secondary: "#192168"},
+    {id:8, fullName: "Montréal Canadiens", triCode:"MTL", primary: "#AF1E2D", secondary: "#192168"},
     {id:7, fullName: "Buffalo Sabres", triCode:"BUF", primary: "#002654", secondary: "#FCB514"},
     {id:2, fullName: "New York Islanders", triCode:"NYI", primary: "#00539B", secondary: "#F47D30"},
     {id:28, fullName: "San Jose Sharks", triCode:"SJS", primary: "#006D75", secondary: "#EA7200"},

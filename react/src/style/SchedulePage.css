@@ -47,7 +47,6 @@
 .game-card {
     background: var(--color-white);
     border-radius: var(--border-radius-card);
-    box-shadow: var(--shadow-card);
     overflow: hidden;
     margin: 0 var(--space-xs) var(--space-md);
     transition: box-shadow 0.2s ease, transform 0.15s ease;
@@ -113,6 +112,44 @@
     margin: 0;
 }
 
+.game-playoff-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(230, 81, 0, 0.12);
+    color: #bf360c;
+    border-radius: 999px;
+    padding: 2px 10px 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+}
+
+.game-final-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 4px;
+    letter-spacing: 1px;
+}
+
+.game-period-chip {
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    background: rgba(0, 0, 0, 0.07);
+    color: var(--color-muted-text);
+}
+
+.game-period-chip.overtime {
+    background: rgba(33, 150, 243, 0.12);
+    color: #0d47a1;
+}
+
 /* --- Game details footer --- */
 .game-details {
     align-items: center;
@@ -147,23 +184,46 @@
         text-align: center;
     }
 
-    .game-details .btn.btn-primary {
+    .md3-btn-group > .btn {
         white-space: nowrap;
     }
 }
 
-.game-details .btn.btn-primary {
-    background-color: var(--color-primary) !important;
-    border-color: var(--color-primary) !important;
-    border-radius: var(--border-radius-pill) !important;
-    padding: 4px 14px;
+/* MD3 Segmented Button Group */
+.md3-btn-group {
+    border: 1px solid var(--color-primary);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.md3-btn-group > .btn {
+    background: transparent !important;
+    border: none !important;
+    border-left: 1px solid var(--color-primary) !important;
+    border-radius: 0 !important;
+    color: var(--color-primary) !important;
+    padding: 6px 16px;
     font-size: var(--text-sm);
     font-weight: 500;
+    letter-spacing: 0.1px;
     box-shadow: none !important;
+    margin-left: 0 !important;
+    min-height: 40px;
     transition: background-color 0.2s;
 }
 
-.game-details .btn.btn-primary:hover {
-    background-color: var(--color-primary-dark) !important;
-    border-color: var(--color-primary-dark) !important;
+.md3-btn-group > .btn:first-child {
+    border-left: none !important;
+}
+
+.md3-btn-group > .btn:hover {
+    background-color: color-mix(in srgb, var(--color-primary) 8%, transparent) !important;
+    color: var(--color-primary) !important;
+}
+
+.md3-btn-group > .btn:focus,
+.md3-btn-group > .btn:active {
+    background-color: color-mix(in srgb, var(--color-primary) 12%, transparent) !important;
+    color: var(--color-primary) !important;
+    box-shadow: none !important;
 }

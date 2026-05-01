@@ -12,7 +12,7 @@ export default function TeamHero({ team }: TeamHeroProps) {
   var primaryColor = localTeamList.find(x => x.triCode == team.triCode)?.primary;
 
   return (
-    <div className="team-hero" style={{background: `linear-gradient(135deg, ${primaryColor} 0%, #1a1a1a 100%)`,}}>
+    <div className="team-hero" style={{background: `linear-gradient(to bottom right, ${primaryColor} 20%, color-mix(in srgb, ${primaryColor} 30%, #000) 100%)`,}}>
       <nav className="team-hero__breadcrumb">
         <Link to="/teamList" className="team-hero__breadcrumb-back">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

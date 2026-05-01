@@ -28,10 +28,11 @@ function getTopTen(players: PlayerStatLine[], category: StatCategory): PlayerSta
 
 interface Props {
   players: PlayerStatLine[];
+  headshotMap: Map<number, string>;
 }
 
-export default function PlayerStatsSection({ players }: Props) {
-  const [selectedKey, setSelectedKey] = useState<StatCategoryKey>("points");
+export default function PlayerStatsSection({ players, headshotMap }: Props) {
+  const [selectedKey, setSelectedKey] = useState<StatCategoryKey>("goals");
 
   const selectedCategory = STAT_CATEGORIES.find((c) => c.key === selectedKey)!;
   const topTen = getTopTen(players, selectedCategory);
@@ -63,7 +64,7 @@ export default function PlayerStatsSection({ players }: Props) {
                 <span className="player-stat-row__rank">#{index + 1}</span>
                 <img
                   className="player-stat-row__headshot"
-                  src={`https://assets.nhle.com/mugs/nhl/skater/${player.playerId}.png`}
+                  src={headshotMap.get(player.playerId) || FALLBACK_HEADSHOT}
                   alt={player.name}
                   onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_HEADSHOT; }}
                 />

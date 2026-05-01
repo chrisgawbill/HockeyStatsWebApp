@@ -60,6 +60,7 @@ function transformRoster(
       name: `${p.firstName?.default ?? ""} ${p.lastName?.default ?? ""}`.trim(),
       number: p.sweaterNumber ?? 0,
       stat,
+      headshot: p.headshot ?? "",
     });
   }
   for (const pos of ["Center", "Left Wing", "Right Wing", "Defenseman"] as Position[]) {
@@ -77,20 +78,35 @@ function transformRoster(
   return result;
 }
 
-function transformSchedule(scheduleData: any, teamId: number): MockScheduleGame[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const games: any[] = scheduleData.games ?? [];
+function getGameOutcome(g: any, teamId: number): Pick<MockScheduleGame, "result" | "teamScore" | "oppScore"> {
+  const isHome = g.homeTeam?.id === teamId;
+  const teamScore: number | undefined = isHome ? g.homeTeam?.score : g.awayTeam?.score;
+  const oppScore: number | undefined = isHome ? g.awayTeam?.score : g.homeTeam?.score;
 
+  if (g.gameState !== "OFF" && g.gameState !== "FINAL") {
+    return { result: null, teamScore: null, oppScore: null };
+  }
+  if (teamScore == null || oppScore == null) {
+    return { result: null, teamScore: null, oppScore: null };
+  }
+
+  const won = teamScore > oppScore;
+  const periodType: string | undefined = g.periodDescriptor?.periodType;
+  let result: MockScheduleGame["result"];
+  if (periodType === "SO") result = won ? "SOW" : "SOL";
+  else if (periodType === "OT") result = won ? "OTW" : "OTL";
+  else result = won ? "W" : "L";
+
+  return { result, teamScore, oppScore };
+}
+
+function transformSchedule(scheduleData: any, teamId: number): MockScheduleGame[] {
+  const games: any[] = scheduleData.games ?? [];
   const sorted = [...games].sort(
     (a, b) => new Date(a.gameDate + "T12:00:00").getTime() - new Date(b.gameDate + "T12:00:00").getTime()
   );
 
-  const futureIdx = sorted.findIndex((g) => new Date(g.gameDate + "T12:00:00") >= today);
-  const startIdx = Math.max(0, futureIdx === -1 ? sorted.length - 8 : futureIdx - 3);
-  const selected = sorted.slice(startIdx, startIdx + 8);
-
-  return selected.map((g) => {
+  return sorted.map((g) => {
     const isHome = g.homeTeam?.id === teamId;
     const opp = isHome ? g.awayTeam : g.homeTeam;
     const localEntry = (localTeamList as any[]).find((t) => t.id === opp?.id);
@@ -101,7 +117,22 @@ function transformSchedule(scheduleData: any, teamId: number): MockScheduleGame[
       date: new Date(g.gameDate + "T12:00:00").toLocaleDateString("en-US", {
         month: "short", day: "numeric", year: "numeric",
       }),
+      isoDate: g.gameDate,
       isHome,
+      isPlayoff: g.gameType === 3,
+      playoffRound: (() => {
+        if (g.gameType !== 3) return null;
+        if (g.seriesStatus?.round != null) return g.seriesStatus.round;
+        const idStr = String(g.id ?? "");
+        return idStr.length === 10 ? parseInt(idStr.slice(6, 8)) || null : null;
+      })(),
+      seriesWins: (() => {
+        if (g.gameType !== 3) return null;
+        const top = g.seriesStatus?.topSeedWins;
+        const bot = g.seriesStatus?.bottomSeedWins;
+        return top != null && bot != null ? `${top}-${bot}` : null;
+      })(),
+      ...getGameOutcome(g, teamId),
     };
   });
 }
@@ -153,6 +184,7 @@ export default function TeamPage() {
   const [schedule, setSchedule] = useState<MockScheduleGame[]>([]);
   const [roster, setRoster] = useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
   const [playerStats, setPlayerStats] = useState<PlayerStatLine[]>([]);
+  const [headshotMap, setHeadshotMap] = useState<Map<number, string>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -199,6 +231,16 @@ export default function TeamPage() {
         for (const g of goalieRes?.data ?? []) {
           if (g.goalieId != null && g.timeOnIcePerGame != null) toiMap.set(g.goalieId, g.timeOnIcePerGame);
         }
+        const allRosterPlayers = [
+          ...(rosterRes.forwards ?? []),
+          ...(rosterRes.defensemen ?? []),
+          ...(rosterRes.goalies ?? []),
+        ];
+        const newHeadshotMap = new Map<number, string>();
+        for (const p of allRosterPlayers) {
+          if (p.id && p.headshot) newHeadshotMap.set(p.id, p.headshot);
+        }
+        setHeadshotMap(newHeadshotMap);
         setStats(transformTeamStats(raw));
         setSchedule(transformSchedule(scheduleRes, numericId));
         setRoster(transformRoster(rosterRes, toiMap));
@@ -254,7 +296,7 @@ export default function TeamPage() {
         <BasicInfoStrip team={staticInfo ? { ...team, ...staticInfo } : team} />
         <ScheduleStrip games={schedule} />
         <TeamStatsRow stats={stats} />
-        <PlayerStatsSection players={playerStats} />
+        <PlayerStatsSection players={playerStats} headshotMap={headshotMap} />
         <RosterSection roster={roster} />
       </div>
     </div>
