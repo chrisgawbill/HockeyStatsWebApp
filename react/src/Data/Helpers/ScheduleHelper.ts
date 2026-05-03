@@ -29,11 +29,13 @@ export default function ConvertWeekToGames(week: any) {
     const isPlayoff = games[i].gameType === 3;
     const playoffRound: number | null = (() => {
       if (!isPlayoff) return null;
-      if (games[i].seriesStatus?.round != null) return games[i].seriesStatus.round;
+      if (games[i].seriesStatus?.round != null)
+        return games[i].seriesStatus.round;
       const idStr = String(games[i].id ?? "");
       return idStr.length === 10 ? parseInt(idStr.slice(6, 8)) || null : null;
     })();
-    const periodType: string | null = games[i].periodDescriptor?.periodType ?? null;
+    const periodType: string | null =
+      games[i].periodDescriptor?.periodType ?? null;
     const seriesWins: string | null = (() => {
       if (!isPlayoff) return null;
       const top = games[i].seriesStatus?.topSeedWins;
@@ -59,7 +61,7 @@ export default function ConvertWeekToGames(week: any) {
       isPlayoff,
       playoffRound,
       periodType,
-      seriesWins
+      seriesWins,
     );
     localListOfGames.push(game);
   }
@@ -77,7 +79,7 @@ function ConvertToListOfBroadcasts(broadcasts: any) {
       id,
       broadcastName,
       market,
-      broadcastCountry
+      broadcastCountry,
     );
     localListOfBroadcasts.push(broadcast);
   }

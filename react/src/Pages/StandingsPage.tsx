@@ -6,6 +6,7 @@ import SlidingToggle from "../Components/LandingPage/LandingPageStandings/Slidin
 import PageHeader from "../Components/PageHeader";
 import { useStandingsData } from "../Data/Context/StandingsContext";
 import { StandingsTeam } from "../Data/Models/StandingsTeam";
+import StandingsClinchLegend from "../Components/LandingPage/LandingPageStandings/StandingsClinchLegend";
 
 type Conference = "Eastern" | "Western";
 type StandingsView = "conference" | "division";
@@ -34,10 +35,13 @@ export default function StandingsPage() {
     return <p>Loading Data</p>;
   }
 
-  const standingsLookup: Record<StandingsView, Record<Conference, StandingsEntry[]>> = {
+  const standingsLookup: Record<
+    StandingsView,
+    Record<Conference, StandingsEntry[]>
+  > = {
     conference: {
-      Eastern: [{ name: "Eastern", data: easternStandingsData, format: "Conference" }],
-      Western: [{ name: "Western", data: westernStandingsData, format: "Conference" }],
+      Eastern: [{ name: "", data: easternStandingsData, format: "Conference" }],
+      Western: [{ name: "", data: westernStandingsData, format: "Conference" }],
     },
     division: {
       Eastern: [
@@ -52,38 +56,43 @@ export default function StandingsPage() {
   };
 
   return (
-    <Container fluid>
+    <>
       <PageHeader />
-      <Row className="mb-2 justify-content-center">
-        <SlidingToggle
-          options={[
-            { label: "Conference", value: "conference" as StandingsView },
-            { label: "Division", value: "division" as StandingsView },
-          ]}
-          value={view}
-          onChange={setView}
-        />
-      </Row>
-      <Row className="mb-2 justify-content-center">
-        <SlidingToggle
-          options={[
-            { label: "Eastern", value: "Eastern" as Conference },
-            { label: "Western", value: "Western" as Conference },
-          ]}
-          value={conference}
-          onChange={setConference}
-        />
-      </Row>
-      <Row id="standings-page-table-container">
-        {standingsLookup[view][conference].map((entry) => (
-          <StandingsContainer
-            key={entry.name}
-            standingsName={entry.name}
-            standingsData={entry.data}
-            standingFormat={entry.format}
+      <Container fluid className="standings-page">
+        <Row className="standings-page-toggle-row mb-2 justify-content-center">
+          <SlidingToggle
+            options={[
+              { label: "Conference", value: "conference" as StandingsView },
+              { label: "Division", value: "division" as StandingsView },
+            ]}
+            value={view}
+            onChange={setView}
           />
-        ))}
-      </Row>
-    </Container>
+        </Row>
+        <Row className="standings-page-toggle-row mb-2 justify-content-center">
+          <SlidingToggle
+            options={[
+              { label: "Eastern", value: "Eastern" as Conference },
+              { label: "Western", value: "Western" as Conference },
+            ]}
+            value={conference}
+            onChange={setConference}
+          />
+        </Row>
+        <div className="standings-page-legend-row">
+          <StandingsClinchLegend />
+        </div>
+        <Row id="standings-page-table-container">
+          {standingsLookup[view][conference].map((entry) => (
+            <StandingsContainer
+              key={entry.name}
+              standingsName={entry.name}
+              standingsData={entry.data}
+              standingFormat={entry.format}
+            />
+          ))}
+        </Row>
+      </Container>
+    </>
   );
 }

@@ -1,4 +1,8 @@
 /* Standings tables */
+.landing-standings-mobile-title {
+  display: none;
+}
+
 .standings-header {
   margin: var(--space-md) var(--space-xl) 0 5rem;
   text-align: center;
@@ -30,6 +34,61 @@
   height: 2.5rem;
 }
 
+.standings-clinch-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+  border-radius: 999px;
+  background: var(--standings-status-accent);
+  color: var(--standings-status-on-accent);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+  cursor: help;
+}
+
+.standings-clinch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  width: fit-content;
+  max-width: calc(100% - 7rem);
+  margin: 0 var(--space-xl) var(--space-sm) 5rem;
+  padding: 0.375rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  box-shadow: var(--shadow-card);
+}
+
+.standings-clinch-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem 0.25rem 0.25rem;
+  border-radius: 999px;
+  background: var(--standings-status-container);
+  color: var(--standings-status-on-container);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.standings-clinch-legend__item .standings-clinch-badge {
+  margin-left: 0;
+  cursor: default;
+}
+
 @media only screen and (min-width: 768px) {
   .standings-table-teamName-col > p {
     display: block;
@@ -50,4 +109,153 @@
   .standings-table {
     margin: var(--space-md) 0;
   }
+
+  .standings-clinch-legend {
+    max-width: 100%;
+    margin: 0 0 var(--space-sm);
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .landing-standings-mobile-title {
+    display: flex;
+    margin-top: var(--space-lg);
+  }
+
+  .standings-clinch-legend {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--border-radius-card);
+    padding: 0.375rem 0.5rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      black calc(100% - 1.5rem),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      black calc(100% - 1.5rem),
+      transparent
+    );
+  }
+
+  .standings-clinch-legend::-webkit-scrollbar {
+    display: none;
+  }
+
+  .standings-clinch-legend__item {
+    min-height: 1.625rem;
+    padding-right: 0.5rem;
+    font-size: var(--text-xs);
+  }
+}
+
+[data-theme="dark"] .standings-header h3 {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .standings-table {
+  background-color: var(--color-surface);
+}
+
+.standings-status--presidents {
+  --standings-status-container: #fff8e1;
+  --standings-status-accent: #7d5700;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #241a00;
+}
+
+.standings-status--conference {
+  --standings-status-container: #e7f7ff;
+  --standings-status-accent: #006782;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #001f2a;
+}
+
+.standings-status--division {
+  --standings-status-container: #e8f5e9;
+  --standings-status-accent: #2e7d32;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #09210d;
+}
+
+.standings-status--playoffs {
+  --standings-status-container: #ede7f6;
+  --standings-status-accent: #5e35b1;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #1f0b46;
+}
+
+.standings-status--wildcard {
+  --standings-status-container: #ffede7;
+  --standings-status-accent: #a13d12;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #331000;
+}
+
+[data-theme="dark"] .standings-status--presidents {
+  --standings-status-container: #332900;
+  --standings-status-accent: #f2c94c;
+  --standings-status-on-accent: #241a00;
+  --standings-status-on-container: #fff3bf;
+}
+
+[data-theme="dark"] .standings-status--conference {
+  --standings-status-container: #003545;
+  --standings-status-accent: #7dd8f7;
+  --standings-status-on-accent: #001f2a;
+  --standings-status-on-container: #d4f4ff;
+}
+
+[data-theme="dark"] .standings-status--division {
+  --standings-status-container: #12351a;
+  --standings-status-accent: #8dd694;
+  --standings-status-on-accent: #09210d;
+  --standings-status-on-container: #d6f5d9;
+}
+
+[data-theme="dark"] .standings-status--playoffs {
+  --standings-status-container: #2b1b55;
+  --standings-status-accent: #d0bcff;
+  --standings-status-on-accent: #1f0b46;
+  --standings-status-on-container: #f0e7ff;
+}
+
+[data-theme="dark"] .standings-status--wildcard {
+  --standings-status-container: #4a1d0b;
+  --standings-status-accent: #ffb59c;
+  --standings-status-on-accent: #331000;
+  --standings-status-on-container: #ffdbd0;
+}
+
+.standings-status-cell {
+  background: var(--standings-status-container) !important;
+  color: var(--standings-status-on-container) !important;
+}
+
+.standings-status-cell--first {
+  border-left-color: var(--standings-status-accent) !important;
+}
+
+.standings-status-cell:hover,
+.standings-status-cell:hover ~ .standings-status-cell {
+  background: color-mix(
+    in srgb,
+    var(--standings-status-container) 88%,
+    var(--standings-status-accent)
+  ) !important;
+  color: var(--standings-status-on-container) !important;
+}
+
+.standings-status-cell * {
+  color: var(--standings-status-on-container) !important;
+}
+
+.standings-status-cell .standings-clinch-badge,
+.standings-clinch-legend__item .standings-clinch-badge {
+  color: var(--standings-status-on-accent) !important;
 }

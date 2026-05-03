@@ -2,13 +2,13 @@ import { ScheduledGame } from "../../Models/ScheduledGame";
 import { cachedAPIDBPromise } from "./ChachedAPIDB";
 
 async function StoreScheduledGames(
-  scheduledGames: ScheduledGame[]
+  scheduledGames: ScheduledGame[],
 ): Promise<void> {
   try {
     const db = await cachedAPIDBPromise;
     let transaction: IDBTransaction = db.transaction(
       ["scheduledGameStore"],
-      "readwrite"
+      "readwrite",
     );
     let scheduledGameStore: IDBObjectStore =
       transaction.objectStore("scheduledGameStore");
@@ -18,14 +18,14 @@ async function StoreScheduledGames(
         request.onsuccess = function (event: Event) {
           console.log(
             "Game has been added to the store",
-            (event.target as IDBRequest<IDBValidKey>).result
+            (event.target as IDBRequest<IDBValidKey>).result,
           );
           resolve();
         };
         request.onerror = function (event: Event) {
           console.error(
             "Error adding game to the store",
-            (event.target as IDBRequest).error?.message
+            (event.target as IDBRequest).error?.message,
           );
           reject((event.target as IDBRequest).error);
         };
@@ -43,7 +43,7 @@ async function GetGameFromDay(dayOfWeek: string) {
     const db = await cachedAPIDBPromise;
     let transaction: IDBTransaction = db.transaction(
       ["scheduledGameStore"],
-      "readonly"
+      "readonly",
     );
     let scheduledGameStore: IDBObjectStore =
       transaction.objectStore("scheduledGameStore");
@@ -66,7 +66,7 @@ async function GetGameFromDay(dayOfWeek: string) {
       cursorRequest.onerror = function (event: Event) {
         console.error(
           "Error retrieving games: ",
-          (event.target as IDBRequest).error?.message
+          (event.target as IDBRequest).error?.message,
         );
         reject((event.target as IDBRequest).error);
       };
@@ -81,7 +81,7 @@ async function GetAllGames() {
     const db = await cachedAPIDBPromise;
     let transaction: IDBTransaction = db.transaction(
       ["scheduledGameStore"],
-      "readonly"
+      "readonly",
     );
     let scheduledGameStore: IDBObjectStore =
       transaction.objectStore("scheduledGameStore");
@@ -97,7 +97,7 @@ async function GetAllGames() {
       request.onerror = function (event: Event) {
         console.error(
           "Error retrieving scheduled games: ",
-          (event.target as IDBRequest).error?.message
+          (event.target as IDBRequest).error?.message,
         );
         reject((event.target as IDBRequest).error);
       };
@@ -107,29 +107,36 @@ async function GetAllGames() {
     return Promise.reject(error);
   }
 }
-async function UpdateGameDB(game:ScheduledGame){
-  try{
+async function UpdateGameDB(game: ScheduledGame) {
+  try {
     const db = await cachedAPIDBPromise;
     let transaction: IDBTransaction = db.transaction(
       ["scheduledGameStore"],
-      "readwrite"
+      "readwrite",
     );
     let scheduledGameStore: IDBObjectStore =
       transaction.objectStore("scheduledGameStore");
     let request: IDBRequest<IDBValidKey> = scheduledGameStore.get(game.gameId);
-    request.onsuccess = function(event:Event){
+    request.onsuccess = function (event: Event) {
       let gameToUpdate = (event.target as IDBRequest).result;
-      if(gameToUpdate){
-        let updateRequest:IDBRequest<IDBValidKey> = scheduledGameStore.put(game);
-        updateRequest.onsuccess = function(event:Event){
-          console.log("Game has been updated: ", (event.target as IDBRequest<IDBValidKey>).result);
-        }
-        updateRequest.onerror = function(event:Event){
-          console.error("Failed to update the game: ", (event.target as IDBRequest).error?.message);
-        }
+      if (gameToUpdate) {
+        let updateRequest: IDBRequest<IDBValidKey> =
+          scheduledGameStore.put(game);
+        updateRequest.onsuccess = function (event: Event) {
+          console.log(
+            "Game has been updated: ",
+            (event.target as IDBRequest<IDBValidKey>).result,
+          );
+        };
+        updateRequest.onerror = function (event: Event) {
+          console.error(
+            "Failed to update the game: ",
+            (event.target as IDBRequest).error?.message,
+          );
+        };
       }
-    }
-  }catch(error){
+    };
+  } catch (error) {
     console.error("Failed to update the game: ", error);
     return Promise.reject(error);
   }
@@ -139,7 +146,7 @@ async function IsScheduleStored(): Promise<boolean> {
     const db = await cachedAPIDBPromise;
     let transaction: IDBTransaction = db.transaction(
       ["scheduledGameStore"],
-      "readonly"
+      "readonly",
     );
     let scheduledGameStore: IDBObjectStore =
       transaction.objectStore("scheduledGameStore");
@@ -153,7 +160,7 @@ async function IsScheduleStored(): Promise<boolean> {
       request.onerror = (event: Event) => {
         console.error(
           "Error counting entries in the store: ",
-          (event.target as IDBRequest).error?.message
+          (event.target as IDBRequest).error?.message,
         );
         reject((event.target as IDBRequest).error);
       };

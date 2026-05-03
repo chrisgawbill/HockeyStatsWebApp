@@ -4,9 +4,18 @@ export function CreateLeagueStandingsArray(initialStandings: any[]) {
   let leageuStandingsArray: StandingsTeam[] = [];
   for (let i = 0; i < initialStandings.length; i++) {
     const responseTeam = initialStandings[i];
-    const teamId = responseTeam.teamAbbrev?.default || responseTeam.teamId?.id || responseTeam.teamId || responseTeam.id || responseTeam.team?.id;
+    const teamId =
+      responseTeam.teamAbbrev?.default ||
+      responseTeam.teamId?.id ||
+      responseTeam.teamId ||
+      responseTeam.id ||
+      responseTeam.team?.id;
     if (!teamId) {
-      console.warn("Skipping team with missing ID. Keys available:", Object.keys(responseTeam), responseTeam);
+      console.warn(
+        "Skipping team with missing ID. Keys available:",
+        Object.keys(responseTeam),
+        responseTeam,
+      );
       continue;
     }
     const teamLogo = responseTeam.teamLogo;
@@ -22,12 +31,14 @@ export function CreateLeagueStandingsArray(initialStandings: any[]) {
     const conferenceStanding = responseTeam.conferenceSequence;
     const divisionStanding = responseTeam.divisionSequence;
     const wildCardRank = responseTeam.wildcardSequence;
+    const clinchingIndicator =
+      responseTeam.clinchingIndicator || responseTeam.clinchIndicator || "";
 
     const teamLastTenLeagueRank: number = responseTeam.leagueL10Sequence;
     const teamDraftLotteryOdds: number = DraftLotteryOddsHelper(leagueStanding);
     const draftLotteryOddsTrend: string = DraftLotteryOddsTrendHelper(
       leagueStanding,
-      teamLastTenLeagueRank
+      teamLastTenLeagueRank,
     );
 
     const standingsTeam: StandingsTeam = new StandingsTeam(
@@ -45,8 +56,9 @@ export function CreateLeagueStandingsArray(initialStandings: any[]) {
       conferenceStanding,
       divisionStanding,
       wildCardRank,
+      clinchingIndicator,
       teamDraftLotteryOdds,
-      draftLotteryOddsTrend
+      draftLotteryOddsTrend,
     );
     leageuStandingsArray.push(standingsTeam);
   }
@@ -63,7 +75,7 @@ function DraftLotteryOddsTrendHelper(leagueRank: number, lastTenRank: number) {
   return "SAME";
 }
 function DraftLotteryOddsHelper(leagueRank: number) {
-  let draftLotteryOdds:number = 0.00;
+  let draftLotteryOdds: number = 0.0;
   switch (leagueRank) {
     case 32:
       draftLotteryOdds = 18.5;

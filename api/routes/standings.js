@@ -11,7 +11,15 @@ router.get("/", async function (req, res, next) {
   try {
     const url = "/standings/now";
     const response = await axiosNhl.get(url);
-    res.send(response.data);
+    const standings = response.data.standings?.map((team) => ({
+      ...team,
+      clinchingIndicator: team.clinchingIndicator ?? team.clinchIndicator ?? "",
+    }));
+
+    res.send({
+      ...response.data,
+      standings,
+    });
   } catch (e) {
     res.send(e);
   }

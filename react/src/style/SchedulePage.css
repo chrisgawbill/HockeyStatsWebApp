@@ -1,229 +1,309 @@
 /* Schedule page layout */
 .schedule-page {
-    padding-bottom: 2rem;
+  padding-bottom: 2rem;
 }
 
 /* --- Date navigation --- */
 .date-row {
-    --bs-gutter-x: 0;
-    margin: 0 0 var(--space-lg);
+  --bs-gutter-x: 0;
+  justify-content: center;
+  margin: 0 0 var(--space-lg);
+  padding: 0 var(--space-md);
 }
 
 .date-row .btn-group {
-    width: 100%;
-    background-color: var(--color-primary);
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
+  width: 100%;
+  max-width: 42rem;
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 12%,
+    var(--color-surface)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-primary) 42%, transparent);
+  border-radius: var(--border-radius-pill);
+  box-shadow: var(--shadow-card);
+  padding: 4px;
+  display: flex;
+  align-items: center;
 }
 
 .date-row .btn-group > .btn {
-    background: transparent !important;
-    border: none !important;
-    border-radius: var(--border-radius-pill) !important;
-    box-shadow: none !important;
-    color: rgba(255, 255, 255, 0.85) !important;
-    padding: 6px 20px;
-    font-weight: 500;
-    transition: background-color 0.2s, color 0.2s;
-    white-space: nowrap;
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--border-radius-pill) !important;
+  box-shadow: none !important;
+  color: var(--color-primary) !important;
+  padding: 6px 20px;
+  font-weight: 500;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  white-space: nowrap;
 }
 
-.date-row .btn-group > .btn:hover:not(:disabled) {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-    color: white !important;
+.date-row .btn-group > .btn.schedule-nav-btn {
+  padding: 6px 12px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-row .btn-group > .btn:hover:not(:disabled),
+.date-row .btn-group > .btn:focus {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 10%,
+    transparent
+  ) !important;
+  color: var(--color-primary-dark) !important;
 }
 
 .schedule-date-label {
-    flex: 1;
-    text-align: center;
-    color: white;
-    font-weight: 600;
-    font-size: var(--text-base);
-    margin: 0;
+  flex: 1;
+  text-align: center;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--text-base);
+  margin: 0;
 }
 
 /* --- Game cards --- */
 .game-card {
-    background: var(--color-white);
-    border-radius: var(--border-radius-card);
-    overflow: hidden;
-    margin: 0 var(--space-xs) var(--space-md);
-    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border-radius: var(--border-radius-card);
+  overflow: hidden;
+  max-width: 64rem;
+  margin: 0 auto var(--space-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
 }
 
 .game-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-    transform: translateY(-2px);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  transform: translateY(-2px);
 }
 
 /* --- Matchup row --- */
 .game-row {
-    align-items: center;
-    padding-top: var(--space-md);
-    padding-bottom: var(--space-md);
-    border-bottom: none;
-    margin: 0;
+  align-items: center;
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: none;
+  margin: 0;
 }
 
 .team-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .game-row > .col:last-child {
-    justify-content: flex-end;
+  justify-content: flex-end;
 }
 
 .team-info img {
-    height: 3.5rem;
-    width: 3.5rem;
-    object-fit: contain;
-    flex-shrink: 0;
+  height: 3.5rem;
+  width: 3.5rem;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .team-info h3 {
-    margin: 0;
-    font-size: var(--text-lg);
-    font-weight: 600;
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
 }
 
 .vs {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .vs h3 {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--color-muted-text);
-    margin: 0 0 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+  margin: 0 0 2px;
 }
 
 .game-time {
-    font-size: var(--text-base);
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    margin: 0;
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
 .game-playoff-badge {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(230, 81, 0, 0.12);
-    color: #bf360c;
-    border-radius: 999px;
-    padding: 2px 10px 2px 6px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(230, 81, 0, 0.12);
+  color: #bf360c;
+  border-radius: 999px;
+  padding: 2px 10px 2px 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
 }
 
 .game-final-score {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin: 0 0 4px;
-    letter-spacing: 1px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 4px;
+  letter-spacing: 1px;
 }
 
 .game-period-chip {
-    border-radius: 999px;
-    padding: 2px 10px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    background: rgba(0, 0, 0, 0.07);
-    color: var(--color-muted-text);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: var(--color-chip-bg);
+  color: var(--color-muted-text);
 }
 
 .game-period-chip.overtime {
-    background: rgba(33, 150, 243, 0.12);
-    color: #0d47a1;
+  background: rgba(33, 150, 243, 0.12);
+  color: #0d47a1;
 }
 
 /* --- Game details footer --- */
 .game-details {
-    align-items: center;
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
-    background: var(--color-bg-subtle);
-    border-top: 1px solid rgba(0, 0, 0, 0.07);
-    font-size: var(--text-sm);
-    color: var(--color-muted-text);
-    margin: 0;
+  align-items: center;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  border-top: 1px solid var(--color-divider);
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+  margin: 0;
 }
 
 .game-details .text-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .game-details p {
-    margin: 0;
+  margin: 0;
 }
 
 /* Mobile: stack details vertically */
 @media (max-width: 575.98px) {
-    .game-details {
-        flex-direction: column;
-        gap: var(--space-sm);
-        padding: 0.75rem 1rem;
-    }
+  .schedule-page {
+    padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+  }
 
-    .game-details .col-12 {
-        text-align: center;
-    }
+  .date-row {
+    margin-bottom: var(--space-xl);
+  }
 
-    .md3-btn-group > .btn {
-        white-space: nowrap;
-    }
+  .schedule-date-label {
+    font-size: var(--text-sm);
+  }
+
+  .game-card {
+    margin-right: var(--space-xs);
+    margin-left: var(--space-xs);
+  }
+
+  .game-details {
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: 0.75rem 1rem;
+  }
+
+  .game-details .col-12 {
+    text-align: center;
+  }
+
+  .md3-btn-group > .btn {
+    white-space: nowrap;
+  }
 }
 
 /* MD3 Segmented Button Group */
 .md3-btn-group {
-    border: 1px solid var(--color-primary);
-    border-radius: 20px;
-    overflow: hidden;
+  border: 1px solid var(--color-primary);
+  border-radius: 20px;
+  overflow: hidden;
 }
 
 .md3-btn-group > .btn {
-    background: transparent !important;
-    border: none !important;
-    border-left: 1px solid var(--color-primary) !important;
-    border-radius: 0 !important;
-    color: var(--color-primary) !important;
-    padding: 6px 16px;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    letter-spacing: 0.1px;
-    box-shadow: none !important;
-    margin-left: 0 !important;
-    min-height: 40px;
-    transition: background-color 0.2s;
+  background: transparent !important;
+  border: none !important;
+  border-left: 1px solid var(--color-primary) !important;
+  border-radius: 0 !important;
+  color: var(--color-primary) !important;
+  padding: 6px 16px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  box-shadow: none !important;
+  margin-left: 0 !important;
+  min-height: 40px;
+  transition: background-color 0.2s;
 }
 
 .md3-btn-group > .btn:first-child {
-    border-left: none !important;
+  border-left: none !important;
 }
 
 .md3-btn-group > .btn:hover {
-    background-color: color-mix(in srgb, var(--color-primary) 8%, transparent) !important;
-    color: var(--color-primary) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    transparent
+  ) !important;
+  color: var(--color-primary) !important;
 }
 
 .md3-btn-group > .btn:focus,
 .md3-btn-group > .btn:active {
-    background-color: color-mix(in srgb, var(--color-primary) 12%, transparent) !important;
-    color: var(--color-primary) !important;
-    box-shadow: none !important;
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 12%,
+    transparent
+  ) !important;
+  color: var(--color-primary) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .game-period-chip.overtime {
+  color: var(--color-blue-accent);
+}
+
+[data-theme="dark"] .game-playoff-badge {
+  color: #ff8a65;
+}
+
+[data-theme="dark"] .game-final-score {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .game-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .team-info h3 {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .game-time {
+  color: var(--color-text-secondary);
 }
