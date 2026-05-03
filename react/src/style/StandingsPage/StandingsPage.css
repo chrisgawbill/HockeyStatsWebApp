@@ -1,5 +1,32 @@
-#standings-page-table-container{
-    height: 100%;
-    overflow: hidden;
-    white-space: nowrap;
+#standings-page-table-container {
+  height: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.standings-page-toggle-row {
+  padding-left: var(--space-xl);
+  padding-right: var(--space-xl);
+}
+
+.standings-page-legend-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.standings-page-legend-row .standings-clinch-legend {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+@media (max-width: 767px) {
+  .standings-page {
+    padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+  }
+
+  .standings-page-toggle-row {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
 }

@@ -1,25 +1,32 @@
 :root {
-  --color-primary: #1B4F8A;
+  --color-primary: #1b4f8a;
   --color-primary-dark: #163f70;
   --color-blue-accent: #1565c0;
   --color-white: #ffffff;
+  --color-bg: #f7f7f5;
   --color-bg-subtle: #f8f9fa;
+  --color-surface: #ffffff;
   --color-text: #212121;
   --color-text-secondary: #37474f;
   --color-muted-text: #90a4ae;
   --color-success: #43a047;
   --color-danger: #e53935;
   --color-info-bg: #e3f2fd;
+  --color-divider: rgba(0, 0, 0, 0.08);
+  --color-subtle-divider: rgba(0, 0, 0, 0.05);
+  --color-chip-bg: rgba(0, 0, 0, 0.07);
   --border-radius-card: 12px;
   --border-radius-pill: 20px;
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --color-selection: #ffffff;
+  --color-selection-text: #1b4f8a;
 
-  --space-xs: 0.25rem;                                                                                                              
-  --space-sm: 0.5rem;                                                                                                               
-  --space-md: 1rem;                                                                                                                 
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
   --space-lg: 1.5rem;
-  --space-xl: 2rem;                         
-                                          
+  --space-xl: 2rem;
+
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -28,12 +35,37 @@
   --text-2xl: 1.5rem;
 }
 
+[data-theme="dark"] {
+  --color-primary: #5b9bd5;
+  --color-primary-dark: #4a80c4;
+  --color-blue-accent: #64b5f6;
+  --color-bg: #0f1117;
+  --color-bg-subtle: #161b27;
+  --color-surface: #1e2130;
+  --color-text: #e2e8f0;
+  --color-text-secondary: #a0aec0;
+  --color-muted-text: #718096;
+  --color-success: #68d391;
+  --color-danger: #fc8181;
+  --color-info-bg: rgba(66, 153, 225, 0.15);
+  --color-divider: rgba(255, 255, 255, 0.08);
+  --color-subtle-divider: rgba(255, 255, 255, 0.05);
+  --color-chip-bg: rgba(255, 255, 255, 0.07);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --color-selection: #93c5fd;
+  --color-selection-text: #1b4f8a;
+}
+
 body {
   margin: 0;
-  background-color: #f7f7f5;
-  font-family: 'Roboto', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 h1 {
@@ -55,6 +87,6 @@ h3 {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }

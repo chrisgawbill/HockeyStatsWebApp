@@ -8,12 +8,26 @@ import {
 
 const FALLBACK_HEADSHOT = "https://assets.nhle.com/mugs/nhl/skater/default.png";
 
-function getTopTen(players: PlayerStatLine[], category: StatCategory): PlayerStatLine[] {
-  const eligible = category.key === "faceoffWinPct"
-    ? players.filter((p) => p.faceoffWinPct !== null)
-    : category.key === "corsiPct"
-    ? players.filter((p) => p.corsiPct !== null)
-    : players;
+function getTopTen(
+  players: PlayerStatLine[],
+  category: StatCategory,
+): PlayerStatLine[] {
+  let eligible =
+    category.key === "faceoffWinPct"
+      ? players.filter(
+          (p) =>
+            p.faceoffWinPct !== null &&
+            (p.position === "C" || p.position === "LW" || p.position === "RW"),
+        )
+      : category.key === "corsiPct"
+        ? players.filter((p) => p.corsiPct !== null)
+        : players;
+
+  if (category.requiresMinGames) {
+    const maxGP = Math.max(...players.map((p) => p.gamesPlayed), 0);
+    const minGP = Math.min(20, Math.round(maxGP * 0.25));
+    eligible = eligible.filter((p) => p.gamesPlayed >= minGP);
+  }
 
   return [...eligible]
     .sort((a, b) => {
@@ -54,24 +68,34 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
       </div>
 
       <div className="player-stat-leaderboard">
-        <p className="player-stat-leaderboard__title">{selectedCategory.label} Leaders</p>
+        <p className="player-stat-leaderboard__title">
+          {selectedCategory.label} Leaders
+        </p>
         {topTen.map((player, index) => {
           const val = player[selectedKey];
-          const formatted = val !== null ? selectedCategory.format(val as number) : "—";
+          const formatted =
+            val !== null ? selectedCategory.format(val as number) : "—";
           return (
-            <div key={`${player.playerId}-${index}`} className="player-stat-row">
+            <div
+              key={`${player.playerId}-${index}`}
+              className="player-stat-row"
+            >
               <div className="player-stat-row__leading">
                 <span className="player-stat-row__rank">#{index + 1}</span>
                 <img
                   className="player-stat-row__headshot"
                   src={headshotMap.get(player.playerId) || FALLBACK_HEADSHOT}
                   alt={player.name}
-                  onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_HEADSHOT; }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = FALLBACK_HEADSHOT;
+                  }}
                 />
               </div>
               <div className="player-stat-row__info">
                 <span className="player-stat-row__name">{player.name}</span>
-                <span className="player-stat-row__pos">{player.position} · {player.gamesPlayed} GP</span>
+                <span className="player-stat-row__pos">
+                  {player.position} · {player.gamesPlayed} GP
+                </span>
               </div>
               <span className="player-stat-row__value">{formatted}</span>
             </div>

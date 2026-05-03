@@ -17,8 +17,18 @@ import {
   RosterPlayer,
   PlayerStatLine,
 } from "../Data/LocalData/TeamPageMockData";
-import { GetTeamStatsById, GetTeamRoster, GetTeamSchedule, GetSkaterSummary, GetSkaterCorsi, GetGoalieSummary } from "../Services/ApiHandler";
-import { GetTeamByIdFromCache } from "../Data/Helpers/LocalDB/StandingsDBHelpers";
+import {
+  GetTeamStatsById,
+  GetTeamRoster,
+  GetTeamSchedule,
+  GetSkaterSummary,
+  GetSkaterCorsi,
+  GetGoalieSummary,
+} from "../Services/ApiHandler";
+import {
+  GetTeamByIdFromCache,
+  GetConferenceStandings,
+} from "../Data/Helpers/LocalDB/StandingsDBHelpers";
 import { InterfaceWithChatBot } from "../Services/GenAIHandler";
 import "../style/TeamPage/TeamPage.css";
 
@@ -31,7 +41,13 @@ const POS_MAP: Record<string, Position> = {
 };
 
 function buildEmptyRoster(): Record<Position, RosterPlayer[]> {
-  return { Center: [], "Left Wing": [], "Right Wing": [], Defenseman: [], Goalie: [] };
+  return {
+    Center: [],
+    "Left Wing": [],
+    "Right Wing": [],
+    Defenseman: [],
+    Goalie: [],
+  };
 }
 
 function formatToi(seconds: number): string {
@@ -42,7 +58,7 @@ function formatToi(seconds: number): string {
 
 function transformRoster(
   rosterData: any,
-  toiMap: Map<number, number>
+  toiMap: Map<number, number>,
 ): Record<Position, RosterPlayer[]> {
   const result = buildEmptyRoster();
   const all = [
@@ -63,7 +79,12 @@ function transformRoster(
       headshot: p.headshot ?? "",
     });
   }
-  for (const pos of ["Center", "Left Wing", "Right Wing", "Defenseman"] as Position[]) {
+  for (const pos of [
+    "Center",
+    "Left Wing",
+    "Right Wing",
+    "Defenseman",
+  ] as Position[]) {
     result[pos].sort((a, b) => {
       const aToi = toiMap.get(a.id) ?? 0;
       const bToi = toiMap.get(b.id) ?? 0;
@@ -78,10 +99,17 @@ function transformRoster(
   return result;
 }
 
-function getGameOutcome(g: any, teamId: number): Pick<MockScheduleGame, "result" | "teamScore" | "oppScore"> {
+function getGameOutcome(
+  g: any,
+  teamId: number,
+): Pick<MockScheduleGame, "result" | "teamScore" | "oppScore"> {
   const isHome = g.homeTeam?.id === teamId;
-  const teamScore: number | undefined = isHome ? g.homeTeam?.score : g.awayTeam?.score;
-  const oppScore: number | undefined = isHome ? g.awayTeam?.score : g.homeTeam?.score;
+  const teamScore: number | undefined = isHome
+    ? g.homeTeam?.score
+    : g.awayTeam?.score;
+  const oppScore: number | undefined = isHome
+    ? g.awayTeam?.score
+    : g.homeTeam?.score;
 
   if (g.gameState !== "OFF" && g.gameState !== "FINAL") {
     return { result: null, teamScore: null, oppScore: null };
@@ -100,10 +128,15 @@ function getGameOutcome(g: any, teamId: number): Pick<MockScheduleGame, "result"
   return { result, teamScore, oppScore };
 }
 
-function transformSchedule(scheduleData: any, teamId: number): MockScheduleGame[] {
+function transformSchedule(
+  scheduleData: any,
+  teamId: number,
+): MockScheduleGame[] {
   const games: any[] = scheduleData.games ?? [];
   const sorted = [...games].sort(
-    (a, b) => new Date(a.gameDate + "T12:00:00").getTime() - new Date(b.gameDate + "T12:00:00").getTime()
+    (a, b) =>
+      new Date(a.gameDate + "T12:00:00").getTime() -
+      new Date(b.gameDate + "T12:00:00").getTime(),
   );
 
   return sorted.map((g) => {
@@ -112,10 +145,16 @@ function transformSchedule(scheduleData: any, teamId: number): MockScheduleGame[
     const localEntry = (localTeamList as any[]).find((t) => t.id === opp?.id);
     return {
       gameId: g.id,
-      opponent: localEntry?.fullName ?? opp?.placeName?.default ?? opp?.abbrev ?? "Unknown",
+      opponent:
+        localEntry?.fullName ??
+        opp?.placeName?.default ??
+        opp?.abbrev ??
+        "Unknown",
       opponentTriCode: opp?.abbrev ?? "",
       date: new Date(g.gameDate + "T12:00:00").toLocaleDateString("en-US", {
-        month: "short", day: "numeric", year: "numeric",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       }),
       isoDate: g.gameDate,
       isHome,
@@ -137,33 +176,54 @@ function transformSchedule(scheduleData: any, teamId: number): MockScheduleGame[
   });
 }
 
-function transformPlayerStats(summaryData: any, corsiData: any): PlayerStatLine[] {
+function transformPlayerStats(
+  summaryData: any,
+  corsiData: any,
+): PlayerStatLine[] {
   const corsiMap = new Map<number, number>();
   for (const p of corsiData?.data ?? []) {
-    if (p.playerId != null && p.satPercentage != null) corsiMap.set(p.playerId, p.satPercentage);
+    if (p.playerId != null && p.satPercentage != null)
+      corsiMap.set(p.playerId, p.satPercentage);
   }
-  return (summaryData?.data ?? []).map((p: any): PlayerStatLine => ({
-    playerId: p.playerId,
-    name: p.skaterFullName ?? "",
-    position: p.positionCode ?? "",
-    gamesPlayed: p.gamesPlayed ?? 0,
-    goals: p.goals ?? 0,
-    assists: p.assists ?? 0,
-    points: p.points ?? 0,
-    plusMinus: p.plusMinus ?? 0,
-    penaltyMinutes: p.penaltyMinutes ?? 0,
-    faceoffWinPct: p.faceoffWinPct > 0 ? p.faceoffWinPct : null,
-    corsiPct: corsiMap.get(p.playerId) ?? null,
-  }));
+  return (summaryData?.data ?? []).map(
+    (p: any): PlayerStatLine => ({
+      playerId: p.playerId,
+      name: p.skaterFullName ?? "",
+      position: p.positionCode ?? "",
+      gamesPlayed: p.gamesPlayed ?? 0,
+      goals: p.goals ?? 0,
+      assists: p.assists ?? 0,
+      points: p.points ?? 0,
+      plusMinus: p.plusMinus ?? 0,
+      penaltyMinutes: p.penaltyMinutes ?? 0,
+      faceoffWinPct: p.faceoffWinPct > 0 ? p.faceoffWinPct : null,
+      corsiPct: corsiMap.get(p.playerId) ?? null,
+    }),
+  );
 }
 
 function transformTeamStats(raw: any): MockStatItem[] {
   return [
-    { label: "Goals For / GP",     value: raw.goalsForPerGame?.toFixed(2) ?? "—" },
-    { label: "Goals Against / GP", value: raw.goalsAgainstPerGame?.toFixed(2) ?? "—" },
-    { label: "Power Play %",       value: raw.powerPlayPct != null ? `${(raw.powerPlayPct * 100).toFixed(1)}%` : "—" },
-    { label: "Penalty Kill %",     value: raw.penaltyKillPct != null ? `${(raw.penaltyKillPct * 100).toFixed(1)}%` : "—" },
-    { label: "Shots / GP",         value: raw.shotsForPerGame?.toFixed(1) ?? "—" },
+    { label: "Goals For / GP", value: raw.goalsForPerGame?.toFixed(2) ?? "—" },
+    {
+      label: "Goals Against / GP",
+      value: raw.goalsAgainstPerGame?.toFixed(2) ?? "—",
+    },
+    {
+      label: "Power Play %",
+      value:
+        raw.powerPlayPct != null
+          ? `${(raw.powerPlayPct * 100).toFixed(1)}%`
+          : "—",
+    },
+    {
+      label: "Penalty Kill %",
+      value:
+        raw.penaltyKillPct != null
+          ? `${(raw.penaltyKillPct * 100).toFixed(1)}%`
+          : "—",
+    },
+    { label: "Shots / GP", value: raw.shotsForPerGame?.toFixed(1) ?? "—" },
   ];
 }
 
@@ -177,14 +237,20 @@ export default function TeamPage() {
 
   const [team, setTeam] = useState<MockTeam | null>(null);
   const [staticInfo, setStaticInfo] = useState<{
-    arena: string; founded: number; stanleyCups: number;
-    conferenceChampionships: number; hallOfFamers: number;
+    arena: string;
+    founded: number;
+    stanleyCups: number;
+    conferenceChampionships: number;
+    hallOfFamers: number;
   } | null>(null);
   const [stats, setStats] = useState<MockStatItem[]>([]);
   const [schedule, setSchedule] = useState<MockScheduleGame[]>([]);
-  const [roster, setRoster] = useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
+  const [roster, setRoster] =
+    useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
   const [playerStats, setPlayerStats] = useState<PlayerStatLine[]>([]);
-  const [headshotMap, setHeadshotMap] = useState<Map<number, string>>(new Map());
+  const [headshotMap, setHeadshotMap] = useState<Map<number, string>>(
+    new Map(),
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -193,7 +259,15 @@ export default function TeamPage() {
 
     async function fetchMain() {
       try {
-        const [statsRes, standingsEntry, rosterRes, scheduleRes, summaryRes, corsiRes, goalieRes] = await Promise.all([
+        const [
+          statsRes,
+          standingsEntry,
+          rosterRes,
+          scheduleRes,
+          summaryRes,
+          corsiRes,
+          goalieRes,
+        ] = await Promise.all([
           GetTeamStatsById(String(numericId)),
           GetTeamByIdFromCache(triCode).catch(() => undefined),
           GetTeamRoster(triCode),
@@ -206,17 +280,28 @@ export default function TeamPage() {
         const raw = statsRes?.data?.[0] ?? {};
         const s = standingsEntry;
 
+        const conferenceStandings = s?.conferenceName
+          ? await GetConferenceStandings(s.conferenceName).catch(() => [])
+          : [];
+        const playoffCutoff = conferenceStandings.find(
+          (t) => t.conferenceStandingsPlace === 8,
+        );
+        const teamPoints = s?.points ?? raw.points ?? 0;
+        const playoffLineDelta =
+          playoffCutoff != null ? teamPoints - playoffCutoff.points : 0;
+
         setTeam({
           name: raw.teamFullName ?? teamEntry?.fullName ?? "",
           triCode,
-          wins:       s?.wins       ?? raw.wins       ?? 0,
-          losses:     s?.losses     ?? raw.losses      ?? 0,
-          otLosses:   s?.otLosses   ?? raw.otLosses    ?? 0,
-          points:     s?.points     ?? raw.points      ?? 0,
+          wins: s?.wins ?? raw.wins ?? 0,
+          losses: s?.losses ?? raw.losses ?? 0,
+          otLosses: s?.otLosses ?? raw.otLosses ?? 0,
+          points: teamPoints,
           divisionRank: s?.divisionStandingsPlace ?? 0,
-          division:     s?.divisionName  ?? "",
-          conference:   s?.conferenceName ?? "",
-          // AI fields — filled in below
+          division: s?.divisionName ?? "",
+          conference: s?.conferenceName ?? "",
+          conferenceRank: s?.conferenceStandingsPlace ?? 0,
+          playoffLineDelta,
           founded: 0,
           arena: "—",
           stanleyCups: 0,
@@ -226,10 +311,12 @@ export default function TeamPage() {
 
         const toiMap = new Map<number, number>();
         for (const p of summaryRes?.data ?? []) {
-          if (p.playerId != null && p.timeOnIcePerGame != null) toiMap.set(p.playerId, p.timeOnIcePerGame);
+          if (p.playerId != null && p.timeOnIcePerGame != null)
+            toiMap.set(p.playerId, p.timeOnIcePerGame);
         }
         for (const g of goalieRes?.data ?? []) {
-          if (g.goalieId != null && g.timeOnIcePerGame != null) toiMap.set(g.goalieId, g.timeOnIcePerGame);
+          if (g.goalieId != null && g.timeOnIcePerGame != null)
+            toiMap.set(g.goalieId, g.timeOnIcePerGame);
         }
         const allRosterPlayers = [
           ...(rosterRes.forwards ?? []),
@@ -262,11 +349,11 @@ export default function TeamPage() {
           `hallOfFamers (number - players inducted into the Hockey Hall of Fame).`;
         const info = await InterfaceWithChatBot({ content: prompt }, triCode);
         setStaticInfo({
-          arena:                   info.arena                   ?? "—",
-          founded:                 info.founded                 ?? 0,
-          stanleyCups:             info.stanleyCups             ?? 0,
+          arena: info.arena ?? "—",
+          founded: info.founded ?? 0,
+          stanleyCups: info.stanleyCups ?? 0,
           conferenceChampionships: info.conferenceChampionships ?? 0,
-          hallOfFamers:            info.hallOfFamers            ?? 0,
+          hallOfFamers: info.hallOfFamers ?? 0,
         });
       } catch (err) {
         console.error("Error fetching static team info from AI", err);
