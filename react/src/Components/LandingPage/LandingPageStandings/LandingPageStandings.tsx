@@ -1,10 +1,11 @@
-import { Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { useState } from "react";
 import StandingsContainer from "./StandingsContainer";
 import SlidingToggle from "./SlidingToggle";
 import React from "react";
 import { useStandingsData } from "../../../Data/Context/StandingsContext";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
+import StandingsClinchLegend from "./StandingsClinchLegend";
 
 type Conference = "Eastern" | "Western";
 type StandingsView = "conference" | "division";
@@ -33,10 +34,13 @@ export default function LandingPageStandings() {
     return <p>Loading Data</p>;
   }
 
-  const standingsLookup: Record<StandingsView, Record<Conference, StandingsEntry[]>> = {
+  const standingsLookup: Record<
+    StandingsView,
+    Record<Conference, StandingsEntry[]>
+  > = {
     conference: {
-      Eastern: [{ name: "Eastern", data: easternStandingsData, format: "Conference" }],
-      Western: [{ name: "Western", data: westernStandingsData, format: "Conference" }],
+      Eastern: [{ name: "", data: easternStandingsData, format: "Conference" }],
+      Western: [{ name: "", data: westernStandingsData, format: "Conference" }],
     },
     division: {
       Eastern: [
@@ -52,6 +56,11 @@ export default function LandingPageStandings() {
 
   return (
     <Container>
+      <Row className="landing-standings-mobile-title">
+        <Col className="landing-header">
+          <h2>Standings</h2>
+        </Col>
+      </Row>
       <Row className="mb-2">
         <SlidingToggle
           options={[
@@ -72,6 +81,7 @@ export default function LandingPageStandings() {
           onChange={setConference}
         />
       </Row>
+      <StandingsClinchLegend />
       {standingsLookup[view][conference].map((entry) => (
         <Row key={entry.name}>
           <StandingsContainer

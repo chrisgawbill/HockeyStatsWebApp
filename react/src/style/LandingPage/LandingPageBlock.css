@@ -2,8 +2,12 @@
 .stat-leader-block {
   height: 5rem;
   min-width: 16rem;
-  background-color: color-mix(in srgb, var(--color-primary) 4%, white);
-  border: 1px solid rgba(27, 79, 138, 0.2);
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 4%,
+    var(--color-surface)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   margin: var(--space-md) 0 var(--space-md) 3rem;
   border-radius: var(--border-radius-card);
   display: flex;
@@ -39,6 +43,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--color-text);
 }
 
 .stat-leader-block-info > span {
@@ -46,12 +51,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--color-text-secondary);
 }
 
 .stat-leader-value-block {
   flex: 0 0 5rem;
   height: 100%;
-  border-left: 1px solid rgba(0,0,0,0.1);
+  border-left: 1px solid var(--color-divider);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,18 +68,26 @@
   font-size: 1.8rem;
   margin: 0;
   text-align: center;
+  color: var(--color-text);
 }
 
 @media only screen and (min-width: 768px) {
   .stat-leader-block {
     min-width: 300px;
     margin: var(--space-md) 0;
-    transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+    transition:
+      box-shadow 0.2s ease,
+      transform 0.2s ease,
+      background-color 0.2s ease;
   }
 
   .stat-leader-block:hover {
     cursor: pointer;
-    background-color: color-mix(in srgb, var(--color-primary) 8%, white);
+    background-color: color-mix(
+      in srgb,
+      var(--color-primary) 8%,
+      var(--color-surface)
+    );
     box-shadow: var(--shadow-card);
     transform: scale(1.05);
   }

@@ -17,7 +17,7 @@
 /* ── Hero ──────────────────────────────────────────────────────────────── */
 
 .team-hero {
-  background-color: var(--color-primary);
+  background-color: #1b4f8a;
   padding: var(--space-lg) var(--space-xl) var(--space-xl);
   display: flex;
   flex-direction: column;
@@ -102,6 +102,16 @@
   font-weight: 500;
 }
 
+.team-hero__badge--playoff.above {
+  background: rgba(34, 197, 94, 0.3);
+  color: #bbf7d0;
+}
+
+.team-hero__badge--playoff.below {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fecaca;
+}
+
 /* ── Shared section wrapper ─────────────────────────────────────────────── */
 
 .team-section {
@@ -126,8 +136,8 @@
 }
 
 .info-card {
-  background: color-mix(in srgb, var(--color-primary) 4%, white);
-  border: 1px solid rgba(27, 79, 138, 0.2);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   border-radius: var(--border-radius-card);
   padding: var(--space-md) var(--space-lg);
   display: flex;
@@ -135,11 +145,18 @@
   align-items: center;
   min-width: 120px;
   flex-shrink: 0;
-  transition: box-shadow 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    background-color 0.2s ease;
 }
 
 .info-card:hover {
-  background-color: color-mix(in srgb, var(--color-primary) 8%, white);
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    var(--color-surface)
+  );
   box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
@@ -176,13 +193,25 @@
 }
 
 @keyframes enterFromRight {
-  from { transform: translateX(36px); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+  from {
+    transform: translateX(36px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes enterFromLeft {
-  from { transform: translateX(-36px); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+  from {
+    transform: translateX(-36px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .schedule-strip--prev .schedule-strip__card,
@@ -193,12 +222,16 @@
   animation-delay: calc(var(--card-index, 0) * 28ms);
 }
 
-.schedule-strip--prev .schedule-strip__card { animation-name: enterFromRight; }
-.schedule-strip--next .schedule-strip__card { animation-name: enterFromLeft; }
+.schedule-strip--prev .schedule-strip__card {
+  animation-name: enterFromRight;
+}
+.schedule-strip--next .schedule-strip__card {
+  animation-name: enterFromLeft;
+}
 
 .schedule-strip__nav {
-  background: color-mix(in srgb, var(--color-primary) 6%, white);
-  border: 1px solid rgba(27, 79, 138, 0.2);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -212,7 +245,11 @@
 }
 
 .schedule-strip__nav:hover {
-  background: color-mix(in srgb, var(--color-primary) 15%, white);
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 15%,
+    var(--color-surface)
+  );
 }
 
 .schedule-strip__nav--hidden {
@@ -221,19 +258,26 @@
 }
 
 .schedule-strip__card {
-  background: color-mix(in srgb, var(--color-primary) 4%, white);
-  border: 1px solid rgba(27, 79, 138, 0.2);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   border-radius: var(--border-radius-card);
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  transition: box-shadow 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    background-color 0.2s ease;
 }
 
 .schedule-strip__card:hover {
-  background-color: color-mix(in srgb, var(--color-primary) 8%, white);
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    var(--color-surface)
+  );
   box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
@@ -292,12 +336,16 @@
 }
 
 .schedule-strip__badge.home {
-  background: color-mix(in srgb, var(--color-primary) 15%, white);
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 15%,
+    var(--color-surface)
+  );
   color: var(--color-primary);
 }
 
 .schedule-strip__badge.away {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--color-chip-bg);
   color: var(--color-text-secondary);
 }
 
@@ -333,7 +381,6 @@
   margin-bottom: 4px;
 }
 
-
 /* ── Team stats strip ───────────────────────────────────────────────────── */
 
 .stat-strip {
@@ -343,8 +390,8 @@
 }
 
 .stat-pill {
-  background: color-mix(in srgb, var(--color-primary) 4%, white);
-  border: 1px solid rgba(27, 79, 138, 0.2);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   border-radius: var(--border-radius-card);
   padding: var(--space-md) var(--space-lg);
   display: flex;
@@ -352,11 +399,18 @@
   align-items: center;
   flex: 1;
   min-width: 120px;
-  transition: box-shadow 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    background-color 0.2s ease;
 }
 
 .stat-pill:hover {
-  background-color: color-mix(in srgb, var(--color-primary) 8%, white);
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    var(--color-surface)
+  );
   box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
@@ -390,14 +444,14 @@
   text-align: center;
   margin-bottom: var(--space-sm);
   padding-bottom: var(--space-xs);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--color-divider);
 }
 
 /* ── Player card ────────────────────────────────────────────────────────── */
 
 .player-card {
-  background: color-mix(in srgb, var(--color-primary) 4%, white);
-  border: 1px solid rgba(27, 79, 138, 0.2);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   border-radius: var(--border-radius-card);
   padding: var(--space-md) var(--space-sm);
   display: flex;
@@ -405,11 +459,18 @@
   align-items: center;
   margin-bottom: var(--space-sm);
   cursor: pointer;
-  transition: box-shadow 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    background-color 0.2s ease;
 }
 
 .player-card:hover {
-  background-color: color-mix(in srgb, var(--color-primary) 8%, white);
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    var(--color-surface)
+  );
   box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
@@ -431,13 +492,13 @@
   position: absolute;
   bottom: -4px;
   right: -4px;
-  background: var(--color-primary);
+  background: #1b4f8a;
   color: white;
   border-radius: var(--border-radius-pill);
   font-size: var(--text-xs);
   font-weight: 700;
   padding: 2px 7px;
-  border: 2px solid white;
+  border: 2px solid var(--color-surface);
 }
 
 .player-card__name {
@@ -461,7 +522,7 @@
   gap: 0;
   overflow-x: auto;
   margin-bottom: var(--space-md);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .player-stat-tab {
@@ -477,7 +538,9 @@
   cursor: pointer;
   white-space: nowrap;
   letter-spacing: 0.1px;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .player-stat-tab:hover {
@@ -494,8 +557,8 @@
 }
 
 .player-stat-leaderboard {
-  background: color-mix(in srgb, var(--color-primary) 4%, white);
-  border: 1px solid rgba(27, 79, 138, 0.2);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   border-radius: var(--border-radius-card);
   overflow: hidden;
 }
@@ -509,7 +572,7 @@
   margin: 0;
   padding: var(--space-sm) var(--space-md);
   background: var(--color-bg-subtle);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .player-stat-row {
@@ -517,7 +580,7 @@
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-sm) var(--space-md);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--color-subtle-divider);
   transition: background 0.15s ease;
   cursor: pointer;
 }
@@ -584,6 +647,70 @@
   text-align: right;
 }
 
+/* ── Dark mode overrides for hardcoded win/loss/playoff colors ──────────── */
+
+[data-theme="dark"] .schedule-strip__score.win,
+[data-theme="dark"] .schedule-strip__result.win {
+  color: var(--color-success);
+}
+
+[data-theme="dark"] .schedule-strip__score.loss,
+[data-theme="dark"] .schedule-strip__result.loss {
+  color: var(--color-danger);
+}
+
+[data-theme="dark"] .schedule-strip__playoff-badge {
+  color: #ff8a65;
+}
+
+/* ── Dark mode: lighten team primary color for text readability ─────────── */
+/* Teams with dark primary colors (navy, black, dark red) are invisible as   */
+/* text on dark card surfaces without this adjustment.                        */
+
+[data-theme="dark"] .info-card__value,
+[data-theme="dark"] .stat-pill__value,
+[data-theme="dark"] .player-stat-row__value,
+[data-theme="dark"] .schedule-strip__nav,
+[data-theme="dark"] .schedule-strip__badge.home,
+[data-theme="dark"] .player-stat-tab:hover,
+[data-theme="dark"] .player-stat-tab.active {
+  color: color-mix(in srgb, var(--color-primary) 55%, white);
+}
+
+[data-theme="dark"] .player-stat-tab.active {
+  border-bottom-color: color-mix(in srgb, var(--color-primary) 55%, white);
+}
+
+/* ── Schedule strip: desktop/mobile toggle ──────────────────────────────── */
+
+.schedule-strip-wrapper--mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .schedule-strip-wrapper--desktop {
+    display: none;
+  }
+
+  .schedule-strip-wrapper--mobile {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--space-xs);
+  }
+
+  .schedule-strip--scroll {
+    display: flex;
+    gap: var(--space-md);
+    width: max-content;
+  }
+
+  .schedule-strip--scroll .schedule-strip__card {
+    width: 120px;
+    flex-shrink: 0;
+  }
+}
+
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 
 @media (max-width: 1200px) {
@@ -601,6 +728,10 @@
 @media (max-width: 576px) {
   .team-hero {
     padding: var(--space-md) var(--space-md) var(--space-lg);
+  }
+
+  .team-hero__breadcrumb {
+    display: none;
   }
 
   .team-hero__body {

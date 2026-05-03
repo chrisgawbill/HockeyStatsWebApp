@@ -3,7 +3,7 @@ import "../../style/LandingPage/LandingPageRow.css";
 import "../../style/LandingPage/LandingPageBlock.css";
 import React from "react";
 import { StandingsTeam } from "../../Data/Models/StandingsTeam";
-import DraftLotteryOddsAccordian from "./DraftLotteryOddsAccordian";
+import DraftLotteryOddsCard from "./DraftLotteryOddsCard";
 
 interface LandingPageRowProps {
   title: string;
@@ -23,7 +23,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
         <Row>
           <Col xs={6}>
             {data.slice(0, 8).map((team, index) => (
-              <DraftLotteryOddsAccordian
+              <DraftLotteryOddsCard
                 key={team.id}
                 team={team}
                 index={index}
@@ -33,7 +33,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
           </Col>
           <Col xs={6}>
             {data.slice(8).map((team, index) => (
-              <DraftLotteryOddsAccordian
+              <DraftLotteryOddsCard
                 key={team.id}
                 team={team}
                 index={index + 8}

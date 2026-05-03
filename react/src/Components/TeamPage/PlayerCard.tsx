@@ -17,7 +17,9 @@ export default function PlayerCard({ player }: PlayerCardProps) {
           className="player-card__headshot"
           src={headshotUrl}
           alt={player.name}
-          onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_HEADSHOT; }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = FALLBACK_HEADSHOT;
+          }}
         />
         <span className="player-card__number">#{player.number}</span>
       </div>
