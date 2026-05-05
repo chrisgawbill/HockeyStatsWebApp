@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 import PageHeader from "../Components/PageHeader";
 import TeamHero from "../Components/TeamPage/TeamHero";
@@ -11,12 +11,13 @@ import RosterSection from "../Components/TeamPage/RosterSection";
 import { localTeamList } from "../Data/LocalData/TeamListData";
 import {
   MockTeam,
-  MockScheduleGame,
   MockStatItem,
   Position,
   RosterPlayer,
   PlayerStatLine,
 } from "../Data/LocalData/TeamPageMockData";
+import { GameBroadcast } from "../Data/Models/GameBroadcast";
+import { ScheduledGame } from "../Data/Models/ScheduledGame";
 import {
   GetTeamStatsById,
   GetTeamRoster,
@@ -30,7 +31,7 @@ import {
   GetConferenceStandings,
 } from "../Data/Helpers/LocalDB/StandingsDBHelpers";
 import { InterfaceWithChatBot } from "../Services/GenAIHandler";
-import "../style/TeamPage/TeamPage.css";
+import styles from "../style/TeamPage/TeamPage.module.css";
 
 const POS_MAP: Record<string, Position> = {
   C: "Center",
@@ -99,39 +100,27 @@ function transformRoster(
   return result;
 }
 
-function getGameOutcome(
-  g: any,
-  teamId: number,
-): Pick<MockScheduleGame, "result" | "teamScore" | "oppScore"> {
-  const isHome = g.homeTeam?.id === teamId;
-  const teamScore: number | undefined = isHome
-    ? g.homeTeam?.score
-    : g.awayTeam?.score;
-  const oppScore: number | undefined = isHome
-    ? g.awayTeam?.score
-    : g.homeTeam?.score;
+function convertBroadcasts(broadcasts: any[] = []): GameBroadcast[] {
+  return broadcasts.map(
+    (broadcast) =>
+      new GameBroadcast(
+        broadcast.id,
+        broadcast.network,
+        broadcast.market,
+        broadcast.countryCode,
+      ),
+  );
+}
 
-  if (g.gameState !== "OFF" && g.gameState !== "FINAL") {
-    return { result: null, teamScore: null, oppScore: null };
-  }
-  if (teamScore == null || oppScore == null) {
-    return { result: null, teamScore: null, oppScore: null };
-  }
-
-  const won = teamScore > oppScore;
-  const periodType: string | undefined = g.periodDescriptor?.periodType;
-  let result: MockScheduleGame["result"];
-  if (periodType === "SO") result = won ? "SOW" : "SOL";
-  else if (periodType === "OT") result = won ? "OTW" : "OTL";
-  else result = won ? "W" : "L";
-
-  return { result, teamScore, oppScore };
+function getDayOfWeek(gameDate: string): string {
+  return new Date(`${gameDate}T12:00:00`).toLocaleDateString("en-US", {
+    weekday: "short",
+  });
 }
 
 function transformSchedule(
   scheduleData: any,
-  teamId: number,
-): MockScheduleGame[] {
+): ScheduledGame[] {
   const games: any[] = scheduleData.games ?? [];
   const sorted = [...games].sort(
     (a, b) =>
@@ -140,39 +129,49 @@ function transformSchedule(
   );
 
   return sorted.map((g) => {
-    const isHome = g.homeTeam?.id === teamId;
-    const opp = isHome ? g.awayTeam : g.homeTeam;
-    const localEntry = (localTeamList as any[]).find((t) => t.id === opp?.id);
-    return {
-      gameId: g.id,
-      opponent:
-        localEntry?.fullName ??
-        opp?.placeName?.default ??
-        opp?.abbrev ??
-        "Unknown",
-      opponentTriCode: opp?.abbrev ?? "",
-      date: new Date(g.gameDate + "T12:00:00").toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      isoDate: g.gameDate,
-      isHome,
-      isPlayoff: g.gameType === 3,
-      playoffRound: (() => {
+    const isPlayoff = g.gameType === 3;
+    let topSeedTeamAbbrev: string | null = null;
+    let bottomSeedTeamAbbrev: string | null = null;
+    const playoffRound: number | null = (() => {
         if (g.gameType !== 3) return null;
-        if (g.seriesStatus?.round != null) return g.seriesStatus.round;
+        if (g.seriesStatus?.round != null) {
+          topSeedTeamAbbrev = g.seriesStatus?.topSeedTeamAbbrev ?? null;
+          bottomSeedTeamAbbrev = g.seriesStatus?.bottomSeedTeamAbbrev ?? null;
+          return g.seriesStatus.round;
+        }
         const idStr = String(g.id ?? "");
         return idStr.length === 10 ? parseInt(idStr.slice(6, 8)) || null : null;
-      })(),
-      seriesWins: (() => {
+      })();
+    const seriesWins: string | null = (() => {
         if (g.gameType !== 3) return null;
         const top = g.seriesStatus?.topSeedWins;
         const bot = g.seriesStatus?.bottomSeedWins;
         return top != null && bot != null ? `${top}-${bot}` : null;
-      })(),
-      ...getGameOutcome(g, teamId),
-    };
+      })();
+
+    return new ScheduledGame(
+      g.id,
+      g.gameDate,
+      g.startTimeUTC,
+      getDayOfWeek(g.gameDate),
+      g.venue?.default ?? "",
+      g.homeTeam?.abbrev ?? "",
+      g.homeTeam?.logo ?? "",
+      g.homeTeam?.score,
+      g.awayTeam?.abbrev ?? "",
+      g.awayTeam?.logo ?? "",
+      g.awayTeam?.score,
+      convertBroadcasts(g.tvBroadcasts),
+      g.gameState === "FUT" ? g.ticketsLink ?? "" : "",
+      g.gameCenterLink ?? "",
+      isPlayoff,
+      playoffRound,
+      g.periodDescriptor?.periodType ?? null,
+      seriesWins,
+      topSeedTeamAbbrev,
+      bottomSeedTeamAbbrev,
+      g.gameState,
+    );
   });
 }
 
@@ -229,7 +228,16 @@ function transformTeamStats(raw: any): MockStatItem[] {
 
 export default function TeamPage() {
   const { teamId } = useParams<{ teamId: string }>();
+  const location = useLocation();
+  const routeState = location.state as {
+    sourcePath?: string;
+    fallbackPath?: string;
+    activeNavPath?: string;
+  } | null;
   const triCode: string = teamId?.toUpperCase() ?? "";
+  const teamSourcePath = location.pathname;
+  const teamActiveNavPath =
+    routeState?.activeNavPath ?? routeState?.sourcePath ?? "/teamList";
   const teamEntry = (localTeamList as any[]).find((t) => t.triCode === triCode);
   const numericId: number = teamEntry?.id ?? 0;
   const primaryColor: string = teamEntry?.primary ?? "#1B4F8A";
@@ -244,7 +252,7 @@ export default function TeamPage() {
     hallOfFamers: number;
   } | null>(null);
   const [stats, setStats] = useState<MockStatItem[]>([]);
-  const [schedule, setSchedule] = useState<MockScheduleGame[]>([]);
+  const [schedule, setSchedule] = useState<ScheduledGame[]>([]);
   const [roster, setRoster] =
     useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
   const [playerStats, setPlayerStats] = useState<PlayerStatLine[]>([]);
@@ -329,7 +337,7 @@ export default function TeamPage() {
         }
         setHeadshotMap(newHeadshotMap);
         setStats(transformTeamStats(raw));
-        setSchedule(transformSchedule(scheduleRes, numericId));
+        setSchedule(transformSchedule(scheduleRes));
         setRoster(transformRoster(rosterRes, toiMap));
         setPlayerStats(transformPlayerStats(summaryRes, corsiRes));
       } catch (err) {
@@ -366,9 +374,9 @@ export default function TeamPage() {
 
   if (loading || !team) {
     return (
-      <div className="team-page" style={pageStyle}>
+      <div className={styles["team-page"]} style={pageStyle}>
         <PageHeader />
-        <div className="team-page__content" style={{ paddingTop: "2rem" }}>
+        <div className={styles["team-page__content"]} style={{ paddingTop: "2rem" }}>
           <p>Loading…</p>
         </div>
       </div>
@@ -376,12 +384,18 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="team-page" style={pageStyle}>
+    <div className={styles["team-page"]} style={pageStyle}>
       <PageHeader />
       <TeamHero team={team} />
-      <div className="team-page__content">
+      <div className={styles["team-page__content"]}>
         <BasicInfoStrip team={staticInfo ? { ...team, ...staticInfo } : team} />
-        <ScheduleStrip games={schedule} />
+        <ScheduleStrip
+          games={schedule}
+          teamAbbrev={triCode}
+          sourceLabel={team.name}
+          sourcePath={teamSourcePath}
+          activeNavPath={teamActiveNavPath}
+        />
         <TeamStatsRow stats={stats} />
         <PlayerStatsSection players={playerStats} headshotMap={headshotMap} />
         <RosterSection roster={roster} />

@@ -1,5 +1,7 @@
 import React from "react";
 import { MockStatItem } from "../../Data/LocalData/TeamPageMockData";
+import shared from "../../style/shared.module.css";
+import styles from "../../style/TeamPage/TeamPage.module.css";
 
 interface TeamStatsRowProps {
   stats: MockStatItem[];
@@ -7,13 +9,16 @@ interface TeamStatsRowProps {
 
 export default function TeamStatsRow({ stats }: TeamStatsRowProps) {
   return (
-    <section className="team-section">
-      <h2 className="team-section__title">Team Stats</h2>
-      <div className="stat-strip">
+    <section className={shared.section}>
+      <h2 className={shared.sectionTitle}>Team Stats</h2>
+      <div className={styles["stat-strip"]}>
         {stats.map((stat) => (
-          <div key={stat.label} className="stat-pill">
-            <span className="stat-pill__value">{stat.value}</span>
-            <span className="stat-pill__label">{stat.label}</span>
+          <div
+            key={stat.label}
+            className={`${styles["stat-pill"]} ${shared.surface} ${shared.surfaceInteractive}`}
+          >
+            <span className={styles["stat-pill__value"]}>{stat.value}</span>
+            <span className={styles["stat-pill__label"]}>{stat.label}</span>
           </div>
         ))}
       </div>

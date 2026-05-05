@@ -112,20 +112,6 @@
   color: #fecaca;
 }
 
-/* ── Shared section wrapper ─────────────────────────────────────────────── */
-
-.team-section {
-  margin-bottom: var(--space-xl);
-}
-
-.team-section__title {
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: var(--color-text);
-  margin: 0 0 var(--space-md);
-}
-
 /* ── Basic Info strip ───────────────────────────────────────────────────── */
 
 .info-strip {
@@ -136,29 +122,12 @@
 }
 
 .info-card {
-  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--border-radius-card);
   padding: var(--space-md) var(--space-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 120px;
   flex-shrink: 0;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.15s ease,
-    background-color 0.2s ease;
-}
-
-.info-card:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 8%,
-    var(--color-surface)
-  );
-  box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
 }
 
 .info-card__value {
@@ -182,6 +151,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  position: relative;
 }
 
 .schedule-strip {
@@ -242,6 +212,18 @@
   flex-shrink: 0;
   color: var(--color-primary);
   transition: background-color 0.2s ease;
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+}
+
+.schedule-strip__nav:first-child {
+  left: calc((36px + var(--space-sm)) * -1);
+}
+
+.schedule-strip__nav:last-child {
+  right: calc((36px + var(--space-sm)) * -1);
 }
 
 .schedule-strip__nav:hover {
@@ -258,28 +240,14 @@
 }
 
 .schedule-strip__card {
-  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--border-radius-card);
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.15s ease,
-    background-color 0.2s ease;
 }
 
-.schedule-strip__card:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 8%,
-    var(--color-surface)
-  );
-  box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
+.schedule-strip__card--clickable {
+  cursor: pointer;
 }
 
 .schedule-strip__logo {
@@ -367,6 +335,12 @@
   color: #c62828;
 }
 
+.schedule-strip__result.live {
+  background: rgba(229, 57, 53, 0.14);
+  color: var(--color-danger);
+  text-transform: uppercase;
+}
+
 .schedule-strip__playoff-badge {
   display: flex;
   align-items: center;
@@ -390,29 +364,12 @@
 }
 
 .stat-pill {
-  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--border-radius-card);
   padding: var(--space-md) var(--space-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
   min-width: 120px;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.15s ease,
-    background-color 0.2s ease;
-}
-
-.stat-pill:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 8%,
-    var(--color-surface)
-  );
-  box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
 }
 
 .stat-pill__value {
@@ -450,29 +407,12 @@
 /* ── Player card ────────────────────────────────────────────────────────── */
 
 .player-card {
-  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--border-radius-card);
   padding: var(--space-md) var(--space-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: var(--space-sm);
   cursor: pointer;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.15s ease,
-    background-color 0.2s ease;
-}
-
-.player-card:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 8%,
-    var(--color-surface)
-  );
-  box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
 }
 
 .player-card__img-wrap {
@@ -554,13 +494,6 @@
   background: transparent;
   border-bottom-color: var(--color-primary);
   color: var(--color-primary);
-}
-
-.player-stat-leaderboard {
-  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--border-radius-card);
-  overflow: hidden;
 }
 
 .player-stat-leaderboard__title {
@@ -701,13 +634,15 @@
 
   .schedule-strip--scroll {
     display: flex;
-    gap: var(--space-md);
+    gap: var(--space-sm);
     width: max-content;
   }
 
   .schedule-strip--scroll .schedule-strip__card {
-    width: 120px;
+    width: calc((100vw - (var(--space-md) * 2) - (var(--space-sm) * 2)) / 3);
+    min-width: 92px;
     flex-shrink: 0;
+    padding: var(--space-sm);
   }
 }
 
@@ -744,23 +679,56 @@
     padding: 0 var(--space-md);
   }
 
+  .info-strip {
+    gap: var(--space-sm);
+  }
+
+  .info-card {
+    flex: 0 0 calc((100% - var(--space-sm)) / 2);
+    min-width: 0;
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  .info-card__value {
+    max-width: 100%;
+    font-size: var(--text-xl);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .stat-strip {
     gap: var(--space-sm);
   }
 
   .roster-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    grid-template-columns: none;
+    align-items: flex-start;
     gap: var(--space-md);
+    overflow-x: auto;
+    margin: 0;
+    padding: 0 0 var(--space-xs);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
   }
 
   .roster-column {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-sm);
+    flex: 0 0 100%;
+    min-width: 0;
+    align-self: flex-start;
+    align-content: start;
+    scroll-snap-align: start;
   }
 
   .roster-column__header {
     grid-column: 1 / -1;
+    min-height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .player-card {

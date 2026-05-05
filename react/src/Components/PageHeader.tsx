@@ -147,19 +147,28 @@ function BackIcon() {
   );
 }
 
+function normalizeNavPath(path: string): string {
+  return path.split("?")[0];
+}
+
 export default function PageHeader() {
   const location = useLocation();
   const { pathname } = location;
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
-  const isSubPage = pathname.startsWith("/team/");
-  const teamRouteState = location.state as {
+  const isTeamSubPage = pathname.startsWith("/team/");
+  const isGameSubPage = pathname.startsWith("/game/");
+  const isSubPage = isTeamSubPage || isGameSubPage;
+  const routeState = location.state as {
     sourcePath?: string;
     fallbackPath?: string;
+    activeNavPath?: string;
   } | null;
-  const sourcePath = teamRouteState?.sourcePath ?? "/teamList";
-  const activePath = isSubPage ? sourcePath : pathname;
+  const sourcePath = routeState?.sourcePath ?? (isGameSubPage ? "/schedule" : "/teamList");
+  const activePath = normalizeNavPath(
+    isSubPage ? routeState?.activeNavPath ?? sourcePath : pathname,
+  );
 
   const handleBack = () => {
     if (window.history.state?.idx > 0) {
@@ -167,7 +176,7 @@ export default function PageHeader() {
       return;
     }
 
-    navigate(teamRouteState?.fallbackPath ?? sourcePath);
+    navigate(routeState?.fallbackPath ?? sourcePath);
   };
 
   const navItems = [
@@ -178,7 +187,10 @@ export default function PageHeader() {
   ];
 
   return (
-    <div id="nav-bar">
+    <div
+      id="nav-bar"
+      style={isSubPage ? { marginBottom: 0 } : undefined}
+    >
       <div className="nav-back-col">
         {isSubPage && (
           <button

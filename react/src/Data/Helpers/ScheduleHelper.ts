@@ -27,10 +27,15 @@ export default function ConvertWeekToGames(week: any) {
     }
     const gameCenter = games[i].gameCenterLink;
     const isPlayoff = games[i].gameType === 3;
+    let topSeedTeamAbbrev;
+    let bottomSeedTeamAbbrev;
     const playoffRound: number | null = (() => {
       if (!isPlayoff) return null;
-      if (games[i].seriesStatus?.round != null)
+      if (games[i].seriesStatus?.round != null){
+        topSeedTeamAbbrev = games[i].seriesStatus?.topSeedTeamAbbrev ?? null;
+        bottomSeedTeamAbbrev = games[i].seriesStatus?.bottomSeedTeamAbbrev ?? null;
         return games[i].seriesStatus.round;
+      }
       const idStr = String(games[i].id ?? "");
       return idStr.length === 10 ? parseInt(idStr.slice(6, 8)) || null : null;
     })();
@@ -62,6 +67,9 @@ export default function ConvertWeekToGames(week: any) {
       playoffRound,
       periodType,
       seriesWins,
+      topSeedTeamAbbrev,
+      bottomSeedTeamAbbrev,
+      gameState
     );
     localListOfGames.push(game);
   }
