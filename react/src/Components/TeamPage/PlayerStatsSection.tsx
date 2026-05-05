@@ -5,6 +5,11 @@ import {
   StatCategoryKey,
   PlayerStatLine,
 } from "../../Data/LocalData/TeamPageMockData";
+import shared from "../../style/shared.module.css";
+import styles from "../../style/TeamPage/TeamPage.module.css";
+
+const cx = (...classes: Array<string | false | null | undefined>) =>
+  classes.filter(Boolean).join(" ");
 
 const FALLBACK_HEADSHOT = "https://assets.nhle.com/mugs/nhl/skater/default.png";
 
@@ -52,14 +57,17 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
   const topTen = getTopTen(players, selectedCategory);
 
   return (
-    <section className="team-section">
-      <h2 className="team-section__title">Player Stats</h2>
+    <section className={shared.section}>
+      <h2 className={shared.sectionTitle}>Player Stats</h2>
 
-      <div className="player-stat-categories">
+      <div className={styles["player-stat-categories"]}>
         {STAT_CATEGORIES.map((cat) => (
           <button
             key={cat.key}
-            className={`player-stat-tab${selectedKey === cat.key ? " active" : ""}`}
+            className={cx(
+              styles["player-stat-tab"],
+              selectedKey === cat.key && styles.active,
+            )}
             onClick={() => setSelectedKey(cat.key)}
           >
             {cat.shortLabel}
@@ -67,8 +75,8 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
         ))}
       </div>
 
-      <div className="player-stat-leaderboard">
-        <p className="player-stat-leaderboard__title">
+      <div className={`${styles["player-stat-leaderboard"]} ${shared.surface} ${shared.surfaceClip}`}>
+        <p className={styles["player-stat-leaderboard__title"]}>
           {selectedCategory.label} Leaders
         </p>
         {topTen.map((player, index) => {
@@ -78,12 +86,12 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
           return (
             <div
               key={`${player.playerId}-${index}`}
-              className="player-stat-row"
+              className={styles["player-stat-row"]}
             >
-              <div className="player-stat-row__leading">
-                <span className="player-stat-row__rank">#{index + 1}</span>
+              <div className={styles["player-stat-row__leading"]}>
+                <span className={styles["player-stat-row__rank"]}>#{index + 1}</span>
                 <img
-                  className="player-stat-row__headshot"
+                  className={styles["player-stat-row__headshot"]}
                   src={headshotMap.get(player.playerId) || FALLBACK_HEADSHOT}
                   alt={player.name}
                   onError={(e) => {
@@ -91,13 +99,13 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
                   }}
                 />
               </div>
-              <div className="player-stat-row__info">
-                <span className="player-stat-row__name">{player.name}</span>
-                <span className="player-stat-row__pos">
+              <div className={styles["player-stat-row__info"]}>
+                <span className={styles["player-stat-row__name"]}>{player.name}</span>
+                <span className={styles["player-stat-row__pos"]}>
                   {player.position} · {player.gamesPlayed} GP
                 </span>
               </div>
-              <span className="player-stat-row__value">{formatted}</span>
+              <span className={styles["player-stat-row__value"]}>{formatted}</span>
             </div>
           );
         })}

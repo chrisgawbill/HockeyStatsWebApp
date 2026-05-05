@@ -283,16 +283,22 @@ export default function TeamList() {
                   </p>
                   <div className="team-card__metrics">
                     <span>
-                      <strong>{stats.points}</strong>
-                      PTS
+                      <strong className="team-card__metrics-value">
+                        {stats.points}
+                      </strong>
+                      <span className="team-card__metrics-label">PTS</span>
                     </span>
                     <span>
-                      <strong>{(winPct * 100).toFixed(1)}</strong>
-                      WIN%
+                      <strong className="team-card__metrics-value">
+                        {(winPct * 100).toFixed(1)}
+                      </strong>
+                      <span className="team-card__metrics-label">WIN%</span>
                     </span>
                     <span>
-                      <strong>{formatNumber(stats.goalsPerGame, 2)}</strong>
-                      GF/GP
+                      <strong className="team-card__metrics-value">
+                        {formatNumber(stats.goalsPerGame, 2)}
+                      </strong>
+                      <span className="team-card__metrics-label">GF/GP</span>
                     </span>
                   </div>
                 </>

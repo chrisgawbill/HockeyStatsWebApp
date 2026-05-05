@@ -19,7 +19,22 @@ export default function LandingPageStandingsTable({
 }: LandingPageStandingTableProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMobile, setIsMobile] = React.useState(() =>
+    typeof window === "undefined"
+      ? false
+      : window.matchMedia("(max-width: 767px)").matches,
+  );
   const standingsSourcePath = location.pathname === "/" ? "/" : "/standings";
+
+  React.useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const handleChange = () => setIsMobile(query.matches);
+
+    handleChange();
+    query.addEventListener("change", handleChange);
+    return () => query.removeEventListener("change", handleChange);
+  }, []);
+
   const goToTeam = (team: StandingsTeam) => {
     navigate(`/team/${team.id}`, {
       state: {
@@ -35,6 +50,10 @@ export default function LandingPageStandingsTable({
       Table: `
         --data-table-library_grid-template-columns: 0.25fr 2fr 1fr 0.5fr 0.7fr;
         border: none;
+
+        @media (max-width: 767px) {
+          --data-table-library_grid-template-columns: 2.25rem minmax(6.75rem, 1fr) 6.5rem 3.25rem;
+        }
     `,
       HeaderRow: `
         & > .th {
@@ -47,10 +66,18 @@ export default function LandingPageStandingsTable({
     `,
       BaseCell: `
         padding: 8px 6px;
+
+        @media (max-width: 767px) {
+          padding: 8px 4px;
+        }
     `,
       HeaderCell: `
         padding: 10px 6px;
         border-bottom: 1px solid var(--color-divider);
+
+        @media (max-width: 767px) {
+          padding: 8px 4px;
+        }
     `,
       Row: `
         color: var(--color-text);
@@ -128,7 +155,7 @@ export default function LandingPageStandingsTable({
           ? (item as StandingsTeam).divisionStandingsPlace
           : (item as StandingsTeam).conferenceStandingsPlace,
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam, true),
-      sort: { sortKey: "PLACE" },
+      sort: isMobile ? undefined : { sortKey: "PLACE" },
     },
     {
       label: "Team",
@@ -147,7 +174,7 @@ export default function LandingPageStandingsTable({
         );
       },
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-      sort: { sortKey: "TEAM" },
+      sort: isMobile ? undefined : { sortKey: "TEAM" },
     },
     {
       label: "Record",
@@ -156,20 +183,26 @@ export default function LandingPageStandingsTable({
           (item as StandingsTeam).otLosses
         }`,
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-      sort: { sortKey: "RECORD" },
+      sort: isMobile ? undefined : { sortKey: "RECORD" },
     },
     {
-      label: "P",
+      label: "Pts",
       renderCell: (item: any) => (item as StandingsTeam).points,
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-      sort: { sortKey: "POINTS" },
+      sort: isMobile ? undefined : { sortKey: "POINTS" },
     },
-    {
-      label: "P%",
-      renderCell: (item: any) => (item as StandingsTeam).pointsPercentage,
-      cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-      sort: { sortKey: "POINTSPERCENTAGE" },
-    },
+    ...(
+      isMobile
+        ? []
+        : [
+            {
+              label: "P%",
+              renderCell: (item: any) => (item as StandingsTeam).pointsPercentage,
+              cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
+              sort: { sortKey: "POINTSPERCENTAGE" },
+            },
+          ]
+    ),
   ];
 
   const HEIGHT = isDivision ? "20rem" : "38.75rem";
@@ -194,7 +227,7 @@ export default function LandingPageStandingsTable({
   );
 
   return (
-    <div style={{ height: HEIGHT, marginTop: "1%", marginBottom: "2%" }}>
+    <div className="standings-table-shell" style={{ height: HEIGHT, marginTop: "1%", marginBottom: "2%" }}>
       <CompactTable
         className="standings-table"
         columns={COLUMNS}

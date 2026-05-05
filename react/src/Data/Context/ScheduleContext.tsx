@@ -139,6 +139,13 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
         game.broadcasts,
         "",
         game.gameCenter,
+        game.isPlayoff,
+        game.playoffRound,
+        game.periodType,
+        game.seriesWins,
+        game.topSeedTeamAbbrev,
+        game.bottomSeedTeamAbbrev,
+        game.gameState
       );
       return updatedGame;
     } catch (error) {

@@ -4,6 +4,7 @@ import StandingsPage from "./Pages/StandingsPage";
 import TeamPage from "./Pages/TeamPage";
 import TeamList from "./Pages/TeamList";
 import SchedulePage from "./Pages/SchedulePage";
+import GameDetailPage from "./Pages/GameDetailPage";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="schedule" element={<SchedulePage/>} />
         <Route path="teamList" element={<TeamList/>} />
         <Route path="team/:teamId" element={<TeamPage />} />
+        <Route path="game/:gameId" element={<GameDetailPage />} />
       </Routes>
     </HashRouter>
   );

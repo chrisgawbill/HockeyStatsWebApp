@@ -34,7 +34,7 @@ function CreateHistoricalTeamStatsList(teamResponseData: any[]) {
     const goalsAgainst = data.goalsAgainst;
     const goalsAgainstPerGame = data.goalsAgainstPerGame;
     const goalsFor = data.goalsFor;
-    const goalsForPerGame = data.goalsPerGame;
+    const goalsForPerGame = data.goalsForPerGame ?? data.goalsPerGame;
     const penaltyKillPct = data.penaltyKillPct;
     const powerPlayPct = data.powerPlayPct;
     const shotsAgainstPerGame = data.shotsAgainstPerGame;
