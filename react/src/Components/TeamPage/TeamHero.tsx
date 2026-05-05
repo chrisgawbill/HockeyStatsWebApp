@@ -32,8 +32,7 @@ export default function TeamHero({ team }: TeamHeroProps) {
   )?.primary;
 
   return (
-    <div
-      className={styles["team-hero"]}
+    <div className={styles["team-hero"]}
       style={{
         background: `linear-gradient(to bottom right, ${primaryColor} 20%, color-mix(in srgb, ${primaryColor} 30%, #000) 100%)`,
       }}
