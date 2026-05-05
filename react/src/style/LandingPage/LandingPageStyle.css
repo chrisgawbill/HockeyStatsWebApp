@@ -14,3 +14,14 @@
         max-width: 90vw;
     }
 }
+
+@media (max-width: 576px) {
+    #landingPage-content {
+        margin-top: var(--space-lg);
+    }
+
+    #landingPage-content > [class*="col-"] {
+        padding-left: var(--space-md);
+        padding-right: var(--space-md);
+    }
+}

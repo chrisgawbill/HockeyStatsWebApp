@@ -19,6 +19,9 @@ export interface IScheduledGame {
   playoffRound: number | null;
   periodType: string | null;
   seriesWins: string | null;
+  topSeedTeamAbbrev: string| null;
+  bottomSeedTeamAbbrev: string| null;
+  gameState: string;
 }
 export class ScheduledGame implements IScheduledGame {
   gameId: number;
@@ -39,6 +42,9 @@ export class ScheduledGame implements IScheduledGame {
   playoffRound: number | null;
   periodType: string | null;
   seriesWins: string | null;
+  topSeedTeamAbbrev: string| null;
+  bottomSeedTeamAbbrev: string| null;
+  gameState: string;
 
   constructor(
     gameId: number,
@@ -59,6 +65,9 @@ export class ScheduledGame implements IScheduledGame {
     playoffRound: number | null = null,
     periodType: string | null = null,
     seriesWins: string | null = null,
+    topSeedTeamAbbrev: string| null,
+    bottomSeedTeamAbbrev: string| null,
+    gameState: string,
   ) {
     this.gameId = gameId;
     this.date = date;
@@ -78,5 +87,8 @@ export class ScheduledGame implements IScheduledGame {
     this.playoffRound = playoffRound;
     this.periodType = periodType;
     this.seriesWins = seriesWins;
+    this.topSeedTeamAbbrev = topSeedTeamAbbrev;
+    this.bottomSeedTeamAbbrev = bottomSeedTeamAbbrev;
+    this.gameState = gameState;
   }
 }

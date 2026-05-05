@@ -104,3 +104,11 @@
     min-width: 220px;
   }
 }
+
+@media only screen and (max-width: 576px) {
+  .stat-leader-block {
+    width: min(100%, 21rem);
+    min-width: 0;
+    margin: var(--space-md) auto;
+  }
+}

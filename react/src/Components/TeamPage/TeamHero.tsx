@@ -2,6 +2,10 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MockTeam } from "../../Data/LocalData/TeamPageMockData";
 import { localTeamList } from "../../Data/LocalData/TeamListData";
+import styles from "../../style/TeamPage/TeamPage.module.css";
+
+const cx = (...classes: Array<string | false | null | undefined>) =>
+  classes.filter(Boolean).join(" ");
 
 interface TeamHeroProps {
   team: MockTeam;
@@ -29,13 +33,13 @@ export default function TeamHero({ team }: TeamHeroProps) {
 
   return (
     <div
-      className="team-hero"
+      className={styles["team-hero"]}
       style={{
         background: `linear-gradient(to bottom right, ${primaryColor} 20%, color-mix(in srgb, ${primaryColor} 30%, #000) 100%)`,
       }}
     >
-      <nav className="team-hero__breadcrumb">
-        <Link to={sourcePath} className="team-hero__breadcrumb-back">
+      <nav className={styles["team-hero__breadcrumb"]}>
+        <Link to={sourcePath} className={styles["team-hero__breadcrumb-back"]}>
           <svg
             width="16"
             height="16"
@@ -51,26 +55,30 @@ export default function TeamHero({ team }: TeamHeroProps) {
           </svg>
           {sourceLabel}
         </Link>
-        <span className="team-hero__breadcrumb-sep">/</span>
-        <span className="team-hero__breadcrumb-current">{team.name}</span>
+        <span className={styles["team-hero__breadcrumb-sep"]}>/</span>
+        <span className={styles["team-hero__breadcrumb-current"]}>{team.name}</span>
       </nav>
-      <div className="team-hero__body">
-        <img className="team-hero__logo" src={logoUrl} alt={team.name} />
-        <div className="team-hero__info">
-          <h1 className="team-hero__name">{team.name}</h1>
-          <p className="team-hero__record">
+      <div className={styles["team-hero__body"]}>
+        <img className={styles["team-hero__logo"]} src={logoUrl} alt={team.name} />
+        <div className={styles["team-hero__info"]}>
+          <h1 className={styles["team-hero__name"]}>{team.name}</h1>
+          <p className={styles["team-hero__record"]}>
             {team.wins}-{team.losses}-{team.otLosses}&nbsp;·&nbsp;{team.points}{" "}
             PTS
           </p>
-          <div className="team-hero__badges">
-            <span className="team-hero__badge">
+          <div className={styles["team-hero__badges"]}>
+            <span className={styles["team-hero__badge"]}>
               #{team.conferenceRank} {team.conference} Conference
             </span>
-            <span className="team-hero__badge">
+            <span className={styles["team-hero__badge"]}>
               #{team.divisionRank} {team.division}
             </span>
             <span
-              className={`team-hero__badge team-hero__badge--playoff ${team.playoffLineDelta >= 0 ? "above" : "below"}`}
+              className={cx(
+                styles["team-hero__badge"],
+                styles["team-hero__badge--playoff"],
+                team.playoffLineDelta >= 0 ? styles.above : styles.below,
+              )}
             >
               {Math.abs(team.playoffLineDelta)} pts{" "}
               {team.playoffLineDelta >= 0 ? "above" : "below"} playoff line

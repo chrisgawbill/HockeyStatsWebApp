@@ -1,31 +1,122 @@
 .stat-leader-modal {
-  height: 68vh;
-  max-height: 90vh;
-}
-.stat-leader-table {
-  overflow: auto;
-}
-.stat-leader-modal-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.stat-leader-modal-body {
-  max-height: calc(75px * 5);
-  overflow-y: scroll;
-  flex: 1;
-}
-.stat-leader-modal-header h4 {
-  font-weight: bold;
+  width: min(42rem, calc(100vw - 2rem));
+  max-width: none;
 }
 
-[data-theme="dark"] .modal-content {
-  background-color: var(--color-surface);
+.stat-leader-modal__content {
+  max-height: min(82vh, 46rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-card);
+}
+
+.stat-leader-modal__header,
+.stat-leader-modal__footer {
+  flex-shrink: 0;
+  border-color: var(--color-divider);
+}
+
+.stat-leader-modal__header .modal-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.stat-leader-modal__body {
+  min-height: 0;
+  padding: var(--space-md);
+  overflow: hidden;
+}
+
+.stat-leader-modal__table {
+  max-height: calc(82vh - 10rem);
+  overflow: auto;
+  background: var(--color-surface);
+}
+
+.stat-leader-modal__team-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.stat-leader-modal__team-cell p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-leader-modal__team-logo {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.stat-leader-modal__close {
+  min-width: 5rem;
+}
+
+[data-theme="dark"] .modal-backdrop {
+  background-color: #020617;
+}
+
+[data-theme="dark"] .stat-leader-modal__content {
+  background: var(--color-surface);
   color: var(--color-text);
   border-color: var(--color-divider);
 }
 
-[data-theme="dark"] .modal-header,
-[data-theme="dark"] .modal-footer {
-  border-color: var(--color-divider);
+[data-theme="dark"] .stat-leader-modal__table {
+  background: var(--color-surface);
+}
+
+@media (max-width: 576px) {
+  .stat-leader-modal {
+    width: calc(100vw - 1.5rem);
+    margin: var(--space-md) auto;
+  }
+
+  .stat-leader-modal__content {
+    max-height: 82vh;
+  }
+
+  .stat-leader-modal__body {
+    padding: var(--space-sm);
+  }
+
+  .stat-leader-modal__table {
+    max-height: calc(82vh - 9.5rem);
+  }
+
+  .stat-leader-modal__table .th,
+  .stat-leader-modal__table .td {
+    font-size: var(--text-sm);
+  }
+
+  .stat-leader-modal__team-cell {
+    justify-content: center;
+  }
+
+  .stat-leader-modal__team-cell p {
+    display: none;
+  }
+
+  .stat-leader-modal__team-logo {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .stat-leader-modal__footer {
+    padding: var(--space-sm);
+  }
+
+  .stat-leader-modal__close {
+    width: 100%;
+  }
 }

@@ -87,7 +87,18 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   transform: translateY(-2px);
 }
+.game-card--clickable {
+  cursor: pointer;
+}
 
+.game-card--clickable:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
+  outline-offset: 3px;
+}
+
+.game-card:not(.game-card--clickable):hover {
+  transform: none;
+}
 /* --- Matchup row --- */
 .game-row {
   align-items: center;
@@ -179,6 +190,11 @@
 .game-period-chip.overtime {
   background: rgba(33, 150, 243, 0.12);
   color: #0d47a1;
+}
+
+.game-period-chip.live {
+  background: rgba(229, 57, 53, 0.14);
+  color: var(--color-danger);
 }
 
 /* --- Game details footer --- */

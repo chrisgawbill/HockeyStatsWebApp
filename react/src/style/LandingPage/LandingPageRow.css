@@ -68,3 +68,30 @@
     text-align: left;
   }
 }
+
+@media only screen and (max-width: 576px) {
+  .row-scroller-wrapper {
+    width: 100%;
+  }
+
+  .row-scroller-wrapper::after {
+    display: none;
+  }
+
+  .row-scroller {
+    text-align: center;
+  }
+
+  .row-scroller > .row-scroller-column {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .section-container > .row {
+    --bs-gutter-x: var(--space-md);
+    max-width: 26rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
