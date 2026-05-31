@@ -10,6 +10,5 @@ if (!apiBaseUrl && import.meta.env.PROD) {
 
 export const axiosExpressHandler = axios.create({
   baseURL: apiBaseUrl,
-  headers: {'Access-Control-Allow-Headers ' : '*'},
   withCredentials: false
 });
