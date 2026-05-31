@@ -32,11 +32,11 @@ jobs:
           run_install: false
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --ignore-workspace
         working-directory: react
 
       - name: Build
-        run: pnpm run build
+        run: pnpm --ignore-workspace run build
         working-directory: react
 
       - uses: actions/upload-pages-artifact@v3
