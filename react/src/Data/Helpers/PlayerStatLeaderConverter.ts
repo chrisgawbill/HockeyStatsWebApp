@@ -31,6 +31,8 @@ export default function PlayerStatLeaderConverter(playerLeaderResponseData:any, 
             break;
     }
     let playerStatLeaderArray: PlayerStatLeader[] = [];
+    if (!Array.isArray(localPlayerResponseData)) return playerStatLeaderArray;
+
     for (let i = 0; i < localPlayerResponseData.length; i++) {
         const id: number = localPlayerResponseData[i].id;
         const firstName: string = localPlayerResponseData[i].firstName.default;

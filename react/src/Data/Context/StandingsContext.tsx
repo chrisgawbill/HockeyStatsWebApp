@@ -79,5 +79,5 @@ export const useStandingsContext = (): StandingsData => {
 
 export const useDraftLotteryOddsData = () => useStandingsContext().draftLotteryOdds;
 
-const useStandingsData = () => useContext(StandingsContext);
+const useStandingsData = (): StandingsData => useStandingsContext();
 export { StandingsDataProvider, useStandingsData };

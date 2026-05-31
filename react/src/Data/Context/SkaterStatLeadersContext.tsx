@@ -28,5 +28,10 @@ const SkaterStatLeaderProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const useSkaterLeaderData = () => useContext(SkaterStatLeaderContext);
+const useSkaterLeaderData = (): SkaterLeaderContextValue => {
+  const context = useContext(SkaterStatLeaderContext);
+  if (!context) throw new Error("useSkaterLeaderData must be used within SkaterStatLeaderProvider");
+  return context;
+};
+
 export { SkaterStatLeaderProvider, useSkaterLeaderData };

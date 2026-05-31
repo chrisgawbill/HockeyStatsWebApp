@@ -28,5 +28,10 @@ const GoalieLeaderDataProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const useGoalieLeaderData = () => useContext(GoalieLeaderContext);
+const useGoalieLeaderData = (): GoalieLeaderContextValue => {
+  const context = useContext(GoalieLeaderContext);
+  if (!context) throw new Error("useGoalieLeaderData must be used within GoalieLeaderDataProvider");
+  return context;
+};
+
 export { GoalieLeaderDataProvider, useGoalieLeaderData };

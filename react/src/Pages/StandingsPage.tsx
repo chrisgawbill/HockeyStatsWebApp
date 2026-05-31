@@ -7,6 +7,7 @@ import PageHeader from "../Components/PageHeader";
 import { useStandingsData } from "../Data/Context/StandingsContext";
 import { StandingsTeam } from "../Data/Models/StandingsTeam";
 import StandingsClinchLegend from "../Components/LandingPage/LandingPageStandings/StandingsClinchLegend";
+import LoadingState from "../Components/LoadingState";
 
 type Conference = "Eastern" | "Western";
 type StandingsView = "conference" | "division";
@@ -32,7 +33,7 @@ export default function StandingsPage() {
   const [conference, setConference] = useState<Conference>("Eastern");
 
   if (loadingStandingsData) {
-    return <p>Loading Data</p>;
+    return <LoadingState label="Loading standings" fullPage />;
   }
 
   const standingsLookup: Record<

@@ -7,6 +7,7 @@ import { useStandingsData } from "../../../Data/Context/StandingsContext";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
 import StandingsClinchLegend from "./StandingsClinchLegend";
 import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
+import LoadingState from "../../LoadingState";
 
 type Conference = "Eastern" | "Western";
 type StandingsView = "conference" | "division";
@@ -32,7 +33,7 @@ export default function LandingPageStandings() {
   const [conference, setConference] = useState<Conference>("Eastern");
 
   if (loadingStandingsData) {
-    return <p>Loading Data</p>;
+    return <LoadingState label="Loading standings" />;
   }
 
   const standingsLookup: Record<

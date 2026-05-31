@@ -9,6 +9,7 @@ import { useListOfTeamsData } from "../Data/Context/ListOfTeamsContext";
 import { useNavigate } from "react-router-dom";
 import { useStandingsData } from "../Data/Context/StandingsContext";
 import { StandingsTeam } from "../Data/Models/StandingsTeam";
+import LoadingState from "../Components/LoadingState";
 
 const triCodeLookup: Record<string, string> = Object.fromEntries(
   (localTeamList as any[]).map((t) => [t.fullName, t.triCode]),
@@ -159,7 +160,7 @@ export default function TeamList() {
   ]);
 
   if (loadingListOfTeamsData || loadingStandingsData) {
-    return <p>Loading Data</p>;
+    return <LoadingState label="Loading teams" fullPage />;
   }
 
   return (

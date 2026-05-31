@@ -22,6 +22,7 @@ export function useStatLeaders(type: StatLeaderType) {
     try {
       const data = await fetcher(apiKey);
       const statLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(data, apiKey);
+      if (statLeaders.length === 0) return;
       const topLeader = new TopStatLeader(displayKey, statLeaders[0], statLeaders);
       setLeaders(prev => ({ ...prev, [displayKey]: topLeader }));
     } catch (error) {

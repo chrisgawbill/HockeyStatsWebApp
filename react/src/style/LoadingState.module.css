@@ -1,0 +1,34 @@
+.loading-state,
+.loading-state--full-page {
+  display: flex;
+  min-height: 8rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  color: var(--color-muted-text);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.loading-state--full-page {
+  min-height: 60vh;
+}
+
+.loading-state__spinner {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 3px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: loading-state-spin 0.75s linear infinite;
+}
+
+.loading-state__label {
+  line-height: 1;
+}
+
+@keyframes loading-state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

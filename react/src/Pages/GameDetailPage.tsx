@@ -13,6 +13,7 @@ import PlayerStatsSelection from "../Components/GameDetail/PlayerStatsSelection"
 import { getTheme } from "../Services/ThemeHandler";
 import shared from "../style/shared.module.css";
 import styles from "../style/GameDetailPage.module.css";
+import LoadingState from "../Components/LoadingState";
 
  function getPeriodScores(scoring: LandingScoringPeriod[], homeAbbrev: string, awayAbbrev: string) {
    return scoring.map(period => ({
@@ -75,7 +76,7 @@ import styles from "../style/GameDetailPage.module.css";
     }, [boxscore]);
 
 
-    if (loading) return <div className={styles["game-detail-page"]}><PageHeader /><div className={shared.loadingState}>Loading...</div></div>;
+    if (loading) return <div className={styles["game-detail-page"]}><PageHeader /><LoadingState label="Loading game" /></div>;
     if (error || !boxscore) return <div className={styles["game-detail-page"]}><PageHeader /><div className={shared.errorState}>Game data unavailable.</div></div>;
 
     const isFuture = boxscore.gameState === "FUT" || boxscore.gameState === "PRE";
