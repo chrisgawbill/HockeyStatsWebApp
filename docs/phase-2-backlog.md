@@ -4,7 +4,7 @@ Future feature roadmap for the HockeyStatsWebApp. Items are ordered so shared ba
 
 ## 2.1 API health, diagnostics, and environment visibility
 
-- [ ] **Owner:** Either | **Depends on:** Architecture baseline
+- [x] **Owner:** Either | **Depends on:** Architecture baseline | **Done:** 2026-05-31 (see [phase-2-progress.md](./phase-2-progress.md#21--api-health-diagnostics-and-environment-visibility))
 
 Add lightweight operational visibility so local development and deployments can quickly answer whether the React app, Express API, NHL upstreams, cache folders, and optional AI integration are configured correctly.
 
