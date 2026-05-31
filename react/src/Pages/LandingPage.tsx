@@ -8,6 +8,7 @@ import { useSkaterLeaderData } from "../Data/Context/SkaterStatLeadersContext";
 import { useGoalieLeaderData } from "../Data/Context/GoalieStatLeadersContext";
 import { useDraftLotteryOddsData } from "../Data/Context/StandingsContext";
 import DraftLotteryOddsRow from "../Components/LandingPage/DraftLotteryOddsRow";
+import LoadingState from "../Components/LoadingState";
 
 export default function LandingPage() {
   const { goalLeaderData, assistLeaderData, pointsLeaderData, faceoffLeadersData, loadingSkaterLeaderData } = useSkaterLeaderData();
@@ -15,7 +16,7 @@ export default function LandingPage() {
   const draftLotteryOddsData = useDraftLotteryOddsData();
 
   if (loadingSkaterLeaderData || loadingGoalieLeaderData || !draftLotteryOddsData) {
-    return <p>Loading Data</p>;
+    return <LoadingState label="Loading data" fullPage />;
   }
 
   return (

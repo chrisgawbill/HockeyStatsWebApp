@@ -5,6 +5,7 @@ import PageHeader from "../Components/PageHeader";
 import TeamHero from "../Components/TeamPage/TeamHero";
 import BasicInfoStrip from "../Components/TeamPage/BasicInfoStrip";
 import ScheduleStrip from "../Components/TeamPage/ScheduleStrip";
+import LoadingState from "../Components/LoadingState";
 import TeamStatsRow from "../Components/TeamPage/TeamStatsRow";
 import PlayerStatsSection from "../Components/TeamPage/PlayerStatsSection";
 import RosterSection from "../Components/TeamPage/RosterSection";
@@ -374,7 +375,7 @@ export default function TeamPage() {
       <div className={styles["team-page"]} style={pageStyle}>
         <PageHeader />
         <div className={styles["team-page__content"]} style={{ paddingTop: "2rem" }}>
-          <p>Loading…</p>
+          <LoadingState label="Loading team" />
         </div>
       </div>
     );

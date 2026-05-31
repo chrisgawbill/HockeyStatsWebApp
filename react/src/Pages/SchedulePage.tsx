@@ -7,6 +7,7 @@ import styles from '../style/SchedulePage.module.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ScheduleCard from '../Components/SchedulePage/ScheduleCard';
 import DatePicker from '../Components/SchedulePage/DatePicker';
+import LoadingState from '../Components/LoadingState';
 
 function parseLocalDate(dateStr: string | null): Date | null {
 	if (!dateStr) return null;
@@ -61,7 +62,7 @@ function SchedulePage() {
 	};
 
 	if (loadingListOfGamesData) {
-		return <div>Loading...</div>;
+		return <LoadingState label="Loading schedule" fullPage />;
 	}
 	if (!listOfGamesData || listOfGamesData.length === 0) {
 		return <div>No games scheduled</div>;

@@ -1,0 +1,8 @@
+{
+  "short_name": "Hockey Stats",
+  "name": "Hockey Stats Web App",
+  "start_url": "/HockeyStatsWebApp/",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
