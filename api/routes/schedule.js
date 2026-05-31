@@ -1,8 +1,25 @@
 var express = require("express");
 const { axiosNhl } = require("../services/nhlApiClient");
 const { GetOrFetch, writeCache, CACHE_TYPES } = require("../utils/cacheManager");
+const { mapGame } = require("../services/mappers/scheduleMapper");
 
 var router = express.Router();
+
+/**
+ * Flatten the raw weekly season payload into a list of ScheduleGameContract.
+ * The week supplies date/dayAbbrev; each of its games is mapped with that ctx.
+ * @param {{ gameWeek?: any[] }} raw
+ * @returns {import("../services/mappers/scheduleMapper").ScheduleGameContract[]}
+ */
+function mapSeasonSchedule(raw) {
+  const games = [];
+  for (const week of raw?.gameWeek ?? []) {
+    for (const g of week.games ?? []) {
+      games.push(mapGame(g, { date: week.date, dayAbbrev: week.dayAbbrev }));
+    }
+  }
+  return games;
+}
 
 async function fetchSeasonSchedule() {
   const today = new Date();
@@ -41,8 +58,8 @@ async function refreshScheduleCache() {
 
 router.get("/", async function (req, res, next) {
   try {
-    const data = await GetOrFetch(CACHE_TYPES.SCHEDULE, 'season', fetchSeasonSchedule);
-    res.send(data);
+    const raw = await GetOrFetch(CACHE_TYPES.SCHEDULE, 'season', fetchSeasonSchedule);
+    res.send({ games: mapSeasonSchedule(raw) });
   } catch (e) {
     next(e);
   }

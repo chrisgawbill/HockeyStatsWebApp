@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { ScheduledGame } from "../Models/ScheduledGame";
 import { GetGameDetails, GetScheduledGames } from "../../Services/ApiHandler";
-import ConvertWeekToGames from "../Helpers/ScheduleHelper";
+import ConvertContractsToGames from "../Helpers/ScheduleHelper";
 
 const ListOfGamesContext = createContext<any>(null);
 
@@ -20,14 +20,7 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
   async function fetchGames() {
     try {
       const response = await GetScheduledGames();
-      const week = response.gameWeek;
-      const localScheduledGames: ScheduledGame[] = [];
-      for (let i = 0; i < week.length; i++) {
-        if (week[i].numberOfGames > 0) {
-          localScheduledGames.push(...ConvertWeekToGames(week[i]));
-        }
-      }
-      setListOfGamesData(localScheduledGames);
+      setListOfGamesData(ConvertContractsToGames(response.games));
     } catch (error) {
       console.error("Error fetching games: ", error);
     } finally {
@@ -89,7 +82,7 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     const gameDate = parseLocalDate(game.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return gameDate < today && game.homeScore === undefined && game.awayScore === undefined;
+    return gameDate < today && game.homeScore == null && game.awayScore == null;
   }
 
   function parseLocalDate(dateStr: string | Date): Date {

@@ -39,15 +39,29 @@ Status legend: ☐ not started · ◐ in progress · ☑ done
 
 ---
 
-## ☐ 2.2 — Normalize API response contracts
+## ☑ 2.2 — Normalize API response contracts
+
+**Completed:** 2026-05-31
 
 ### What I have done
 
-_TODO_
+- Added a backend normalization layer (anti-corruption layer) in `api/services/mappers/`: `scheduleMapper.js`, `standingsMapper.js`, `rosterMapper.js`, and `playerMapper.js`. Each shape is documented with a JSDoc `@typedef`.
+- Normalized six shapes: `ScheduleGameContract` (+ `GameBroadcastContract`), `StandingsTeamContract`, `RosterPlayerContract`/`RosterContract`, `SkaterSummaryContract`, `GoalieSummaryContract`, and `StatLeaderContract`.
+- `scheduleMapper.mapGame(rawGame, { date, dayAbbrev })` serves both schedule sources (weekly `/schedule/` and club `/team/schedule/:triCode`), which supply the date differently. Playoff round/series logic and broadcast mapping that were duplicated in `ScheduleHelper.ts` and `TeamPage.tsx` now live here once.
+- Wired the routes to map **after** `GetOrFetch` so the cache keeps storing raw NHL data: `standings.js`, `schedule.js`, `team.js` (roster + schedule), and `player.js` (skater/goalie summary + skater/goalie stat leaders).
+- Updated frontend callers and deleted the duplicated transforms: `ScheduleHelper.ts` (now wraps contracts), `ScheduleContext.tsx`, `LeagueStandingsHelper.ts`, `PlayerStatLeaderConverter.ts`, `useStatLeaders.ts`, and `TeamPage.tsx` (removed `transformSchedule`, `convertBroadcasts`, `getDayOfWeek`; simplified `transformRoster`/`transformPlayerStats`).
+- Added defensive fallbacks throughout (guarded `.default` unwraps, `venue?.default ?? ""`, `faceoffWinPct > 0 ? value : null`). The guarded `.default` unwrap in `mapStatLeaders` fixed a latent crash where a missing player/team name would throw and silently empty a stat category.
+- Documented the layer in `docs/architecture.md` (new "Backend Response Contracts" section, plus route/helper/convention updates).
+- Verified: all backend route modules `require()` cleanly and `tsc --noEmit` passes with no errors.
 
 ### What I have learned
 
-_TODO_
+- **Push the anti-corruption layer to the boundary.** Raw NHL JSON was leaking all the way into React, so the same field-extraction lived in multiple places and drifted. Normalizing once at the backend boundary means an NHL field rename is a one-mapper fix.
+- **Separate shape translation from app logic.** Only raw-field extraction moved to the backend. App/derived/display logic (draft-lottery odds, TOI formatting, `pointsPctg` rounding) stayed on the frontend — the mapper should not own those.
+- **Map after `GetOrFetch`, not inside it.** Caching raw and mapping on the way out means mapper changes never require a cache clear and old cache entries stay compatible. Mapping is cheap; correctness/flexibility wins.
+- **Watch shape changes that ripple into logic.** Emitting `homeScore: null` (instead of the raw `undefined`) broke a `=== undefined` check in `ScheduleContext.doesGameNeedToUpdate`; fixed by comparing with `== null`.
+- **Field-name bugs are silent.** `teams.home.team.abbrev` vs `homeTeam.abbrev`, `gameId` vs `id`, `ticketLink` vs `ticketsLink` all return blank instead of throwing — the existing frontend helpers are the source of truth for verifying these.
+- **Flag unverified assumptions.** The goalie summary stat field names (`savePct`, etc.) weren't exercised by the old frontend, so they're best-guesses left with a `NOTE` and `?? null` guards — worth confirming against a live response.
 
 ---
 

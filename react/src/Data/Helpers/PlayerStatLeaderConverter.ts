@@ -1,51 +1,30 @@
 import { PlayerStatLeader } from "../Models/PlayerStatLeader";
 
-export default function PlayerStatLeaderConverter(playerLeaderResponseData:any, leadBy:string){
-    let localPlayerResponseData:any[] = [];
-    switch(leadBy){
-        case "goals":
-            localPlayerResponseData = playerLeaderResponseData.goals;
-            break;
-        case "assists":
-            localPlayerResponseData = playerLeaderResponseData.assists;
-            break;
-        case "points":
-            localPlayerResponseData = playerLeaderResponseData.points;
-            break;
-        case "faceoffLeaders":
-            localPlayerResponseData = playerLeaderResponseData.faceoffLeaders;
-            break;
-        case "wins":
-            localPlayerResponseData = playerLeaderResponseData.wins;
-            break;
-        case "savePctg":
-            localPlayerResponseData = playerLeaderResponseData.savePctg;
-            break;
-        case "goalsAgainstAverage":
-            localPlayerResponseData = playerLeaderResponseData.goalsAgainstAverage;
-            break;
-        case "shutouts":
-            localPlayerResponseData = playerLeaderResponseData.shutouts;
-            break;
-        default:
-            break;
-    }
+/**
+ * The backend (api/services/mappers/playerMapper.js -> mapStatLeaders) now returns
+ * a flat array of StatLeaderContract for the requested category, with the fragile
+ * `.default` unwrapping already done defensively server-side. This converter just
+ * wraps each contract in the PlayerStatLeader model the UI expects.
+ */
+export default function PlayerStatLeaderConverter(leaders: any[]) {
     let playerStatLeaderArray: PlayerStatLeader[] = [];
-    if (!Array.isArray(localPlayerResponseData)) return playerStatLeaderArray;
+    if (!Array.isArray(leaders)) return playerStatLeaderArray;
 
-    for (let i = 0; i < localPlayerResponseData.length; i++) {
-        const id: number = localPlayerResponseData[i].id;
-        const firstName: string = localPlayerResponseData[i].firstName.default;
-        const lastName: string = localPlayerResponseData[i].lastName.default;
-        const sweaterNumber = localPlayerResponseData[i].sweaterNumber;
-        const playerImage = localPlayerResponseData[i].headshot;
-        const teamAbbrev = localPlayerResponseData[i].teamAbbrev;
-        const teamName = localPlayerResponseData[i].teamName.default;
-        const teamLogo = localPlayerResponseData[i].teamLogo;
-        const position = localPlayerResponseData[i].position;
-        const value = localPlayerResponseData[i].value;
-
-        const playerStatLeader: PlayerStatLeader = new PlayerStatLeader(id, firstName, lastName, sweaterNumber, playerImage, teamAbbrev, teamName, teamLogo, position, true, value);
+    for (let i = 0; i < leaders.length; i++) {
+        const leader = leaders[i];
+        const playerStatLeader: PlayerStatLeader = new PlayerStatLeader(
+            leader.id,
+            leader.firstName,
+            leader.lastName,
+            leader.sweaterNumber,
+            leader.headshot,
+            leader.teamAbbrev,
+            leader.teamName,
+            leader.teamLogo,
+            leader.position,
+            true,
+            leader.value,
+        );
         playerStatLeaderArray.push(playerStatLeader);
     }
     return playerStatLeaderArray;

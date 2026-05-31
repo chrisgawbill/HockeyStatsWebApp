@@ -21,7 +21,7 @@ export function useStatLeaders(type: StatLeaderType) {
   async function fetchStat({ displayKey, apiKey }: StatEntry) {
     try {
       const data = await fetcher(apiKey);
-      const statLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(data, apiKey);
+      const statLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(data);
       if (statLeaders.length === 0) return;
       const topLeader = new TopStatLeader(displayKey, statLeaders[0], statLeaders);
       setLeaders(prev => ({ ...prev, [displayKey]: topLeader }));
