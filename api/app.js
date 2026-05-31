@@ -62,6 +62,7 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
+  console.error(`${req.method} ${req.originalUrl} failed:`, err);
   res.status(err.status || 500).json({ error: err.message ?? "Internal server error" });
 });
 

@@ -57,7 +57,11 @@ async function GetOrFetch(type, key, fetcher){
     return await inFlight.get(inFlightKey);
   }
   const promise = fetcher().then(async data => {
-    await writeCache(type, key, data);
+    try {
+      await writeCache(type, key, data);
+    } catch (error) {
+      console.error(`Failed to write ${type} cache for ${key}:`, error);
+    }
     return data;
   }).finally(() => inFlight.delete(inFlightKey));
 
