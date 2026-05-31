@@ -1,6 +1,10 @@
 import { Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import { ScheduledGame } from '../../Data/Models/ScheduledGame';
 import { useTheme } from '../../Data/Context/ThemeContext';
+import styles from '../../style/SchedulePage.module.css';
+
+const cx = (...classes: Array<string | false | null | undefined>) =>
+  classes.filter(Boolean).join(' ');
 
 type ScheduleCardProps = {
 	game: ScheduledGame;
@@ -58,17 +62,17 @@ const ScheduleCard = ({ game, isGameCompleted, goToGameDetails }: ScheduleCardPr
 	return (
 		<div
 			key={game.gameId}
-			className={`game-card${isGameCompleted(game) ? ' game-card--clickable' : ''}`}
+			className={cx(styles["game-card"], isGameCompleted(game) && styles["game-card--clickable"])}
             onClick={() => isGameCompleted(game) && goToGameDetails(game)}
 		>
-			<Row key={game.gameId} className='game-row'>
-				<Col className='team-info'>
+			<Row key={game.gameId} className={styles["game-row"]}>
+				<Col className={styles["team-info"]}>
 					<img src={homeLogo} alt='home_logo' />
 					<h3>{game.homeTeam}</h3>
 				</Col>
-				<Col className='vs'>
+				<Col className={styles["vs"]}>
 					{game.isPlayoff && (
-						<div className='game-playoff-badge'>
+						<div className={styles["game-playoff-badge"]}>
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
 								height='16px'
@@ -93,14 +97,16 @@ const ScheduleCard = ({ game, isGameCompleted, goToGameDetails }: ScheduleCardPr
 					)}
 					{hasScore(game) ?
 						<>
-							<p className='game-final-score'>
+							<p className={styles["game-final-score"]}>
 								{game.homeScore} – {game.awayScore}
 							</p>
 							{statusLabel && (
 								<span
-									className={`game-period-chip${
-										game.periodType === 'OT' || game.periodType === 'SO' ? ' overtime' : ''
-									}${isGameInProgress(game) ? ' live' : ''}`}
+									className={cx(
+										styles["game-period-chip"],
+										(game.periodType === 'OT' || game.periodType === 'SO') && styles["overtime"],
+										isGameInProgress(game) && styles["live"],
+									)}
 								>
 									{statusLabel}
 								</span>
@@ -108,21 +114,21 @@ const ScheduleCard = ({ game, isGameCompleted, goToGameDetails }: ScheduleCardPr
 						</>
 					:	<>
 							<h3>VS</h3>
-							<p className='game-time'>{convertUTCToLocal(game.gameTime)}</p>
+							<p className={styles["game-time"]}>{convertUTCToLocal(game.gameTime)}</p>
 						</>
 					}
 				</Col>
-				<Col className='team-info'>
+				<Col className={styles["team-info"]}>
 					<h3>{game.awayTeam}</h3>
 					<img src={awayLogo} alt='away_logo' />
 				</Col>
 			</Row>
-			<Row className='game-details'>
+			<Row className={styles["game-details"]}>
 				<Col xs={12} sm={4}>
 					<p>Venue: {game.venue}</p>
 				</Col>
 				<Col xs={12} sm={4} className='text-center'>
-					<ButtonGroup className='md3-btn-group'>
+					<ButtonGroup className={styles["md3-btn-group"]}>
 						{game.ticketLink !== '' ?
 							<Button
 								className='btn btn-primary'

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../style/StandingsPage/StandingsPage.css";
+import styles from "../style/StandingsPage/StandingsPage.module.css";
 import { Container, Row } from "react-bootstrap";
 import StandingsContainer from "../Components/LandingPage/LandingPageStandings/StandingsContainer";
 import SlidingToggle from "../Components/LandingPage/LandingPageStandings/SlidingToggle";
@@ -58,8 +58,8 @@ export default function StandingsPage() {
   return (
     <>
       <PageHeader />
-      <Container fluid className="standings-page">
-        <Row className="standings-page-toggle-row mb-2 justify-content-center">
+      <Container fluid className={styles["standings-page"]}>
+        <Row className={`${styles["standings-page-toggle-row"]} mb-2 justify-content-center`}>
           <SlidingToggle
             options={[
               { label: "Conference", value: "conference" as StandingsView },
@@ -69,7 +69,7 @@ export default function StandingsPage() {
             onChange={setView}
           />
         </Row>
-        <Row className="standings-page-toggle-row mb-2 justify-content-center">
+        <Row className={`${styles["standings-page-toggle-row"]} mb-2 justify-content-center`}>
           <SlidingToggle
             options={[
               { label: "Eastern", value: "Eastern" as Conference },
@@ -79,10 +79,10 @@ export default function StandingsPage() {
             onChange={setConference}
           />
         </Row>
-        <div className="standings-page-legend-row">
-          <StandingsClinchLegend />
+        <div className={styles["standings-page-legend-row"]}>
+          <StandingsClinchLegend className={styles["standings-legend"]} />
         </div>
-        <Row id="standings-page-table-container">
+        <Row className={styles["standings-page-table-container"]}>
           {standingsLookup[view][conference].map((entry) => (
             <StandingsContainer
               key={entry.name}

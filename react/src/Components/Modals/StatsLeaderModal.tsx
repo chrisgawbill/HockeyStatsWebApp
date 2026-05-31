@@ -5,7 +5,7 @@ import { CompactTable } from "@table-library/react-table-library/compact";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
-import "../../style/Modals/StatLeaderModal.css";
+import styles from "../../style/Modals/StatLeaderModal.module.css";
 
 interface StatsLeaderModalProps {
   showModal: boolean;
@@ -64,9 +64,9 @@ export default function StatsLeaderModal({
     {
       label: "Team",
       renderCell: (item: PlayerStatLeader) => (
-        <span className="stat-leader-modal__team-cell">
+        <span className={styles["stat-leader-modal__team-cell"]}>
           <img
-            className="stat-leader-modal__team-logo"
+            className={styles["stat-leader-modal__team-logo"]}
             src={item.teamLogo}
             alt={item.teamName}
           ></img>
@@ -88,15 +88,15 @@ export default function StatsLeaderModal({
       <Modal
         show={showModal}
         onHide={handleModalClose}
-        dialogClassName="stat-leader-modal"
-        contentClassName="stat-leader-modal__content"
+        dialogClassName={styles["stat-leader-modal"]}
+        contentClassName={styles["stat-leader-modal__content"]}
         centered
       >
-        <Modal.Header className="stat-leader-modal__header">
+        <Modal.Header className={styles["stat-leader-modal__header"]}>
           <Modal.Title>{modalTitle + " Leaders"}</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="stat-leader-modal__body">
-          <div className="stat-leader-modal__table">
+        <Modal.Body className={styles["stat-leader-modal__body"]}>
+          <div className={styles["stat-leader-modal__table"]}>
             <CompactTable
               columns={COLUMNS}
               data={data}
@@ -105,8 +105,8 @@ export default function StatsLeaderModal({
             />
           </div>
         </Modal.Body>
-        <Modal.Footer className="stat-leader-modal__footer">
-          <Button className="stat-leader-modal__close" variant="outline-danger" onClick={handleModalClose}>
+        <Modal.Footer className={styles["stat-leader-modal__footer"]}>
+          <Button className={styles["stat-leader-modal__close"]} variant="outline-danger" onClick={handleModalClose}>
             Close
           </Button>
         </Modal.Footer>

@@ -1,27 +1,24 @@
 var express = require("express");
-var axios = require("axios");
+const { axiosNhl } = require("../services/nhlApiClient");
+const { GetOrFetch, CACHE_TYPES } = require("../utils/cacheManager");
 
 var router = express.Router();
 
-var axiosNhl = axios.create({
-  baseURL: "https://api-web.nhle.com/v1",
-});
+async function fetchStandings() {
+  const response = await axiosNhl.get("/standings/now");
+  const standings = response.data.standings?.map((team) => ({
+    ...team,
+    clinchingIndicator: team.clinchingIndicator ?? team.clinchIndicator ?? "",
+  }));
+  return { ...response.data, standings };
+}
 
 router.get("/", async function (req, res, next) {
   try {
-    const url = "/standings/now";
-    const response = await axiosNhl.get(url);
-    const standings = response.data.standings?.map((team) => ({
-      ...team,
-      clinchingIndicator: team.clinchingIndicator ?? team.clinchIndicator ?? "",
-    }));
-
-    res.send({
-      ...response.data,
-      standings,
-    });
+    const data = await GetOrFetch(CACHE_TYPES.STANDINGS, 'current', fetchStandings);
+    res.send(data);
   } catch (e) {
-    res.send(e);
+    next(e);
   }
 });
 

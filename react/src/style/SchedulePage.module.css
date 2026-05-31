@@ -11,7 +11,7 @@
   padding: 0 var(--space-md);
 }
 
-.date-row .btn-group {
+.date-row :global(.btn-group) {
   width: 100%;
   max-width: 42rem;
   background-color: color-mix(
@@ -27,7 +27,7 @@
   align-items: center;
 }
 
-.date-row .btn-group > .btn {
+.date-row :global(.btn-group) > :global(.btn) {
   background: transparent !important;
   border: none !important;
   border-radius: var(--border-radius-pill) !important;
@@ -41,7 +41,7 @@
   white-space: nowrap;
 }
 
-.date-row .btn-group > .btn.schedule-nav-btn {
+.date-row :global(.btn-group) > :global(.btn).schedule-nav-btn {
   padding: 6px 12px;
   min-width: 44px;
   display: flex;
@@ -49,14 +49,22 @@
   justify-content: center;
 }
 
-.date-row .btn-group > .btn:hover:not(:disabled),
-.date-row .btn-group > .btn:focus {
+.date-row :global(.btn-group) > :global(.btn):hover:not(:disabled),
+.date-row :global(.btn-group) > :global(.btn):focus {
   background-color: color-mix(
     in srgb,
     var(--color-primary) 10%,
     transparent
   ) !important;
   color: var(--color-primary-dark) !important;
+}
+
+.schedule-nav-btn {
+  padding: 6px 12px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .schedule-date-label {
@@ -87,6 +95,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   transform: translateY(-2px);
 }
+
 .game-card--clickable {
   cursor: pointer;
 }
@@ -99,6 +108,7 @@
 .game-card:not(.game-card--clickable):hover {
   transform: none;
 }
+
 /* --- Matchup row --- */
 .game-row {
   align-items: center;
@@ -114,7 +124,7 @@
   gap: 0.75rem;
 }
 
-.game-row > .col:last-child {
+.game-row > :global(.col):last-child {
   justify-content: flex-end;
 }
 
@@ -209,7 +219,7 @@
   margin: 0;
 }
 
-.game-details .text-center {
+.game-details :global(.text-center) {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -244,11 +254,11 @@
     padding: 0.75rem 1rem;
   }
 
-  .game-details .col-12 {
+  .game-details :global(.col-12) {
     text-align: center;
   }
 
-  .md3-btn-group > .btn {
+  .md3-btn-group > :global(.btn) {
     white-space: nowrap;
   }
 }
@@ -260,7 +270,7 @@
   overflow: hidden;
 }
 
-.md3-btn-group > .btn {
+.md3-btn-group > :global(.btn) {
   background: transparent !important;
   border: none !important;
   border-left: 1px solid var(--color-primary) !important;
@@ -276,11 +286,11 @@
   transition: background-color 0.2s;
 }
 
-.md3-btn-group > .btn:first-child {
+.md3-btn-group > :global(.btn):first-child {
   border-left: none !important;
 }
 
-.md3-btn-group > .btn:hover {
+.md3-btn-group > :global(.btn):hover {
   background-color: color-mix(
     in srgb,
     var(--color-primary) 8%,
@@ -289,8 +299,8 @@
   color: var(--color-primary) !important;
 }
 
-.md3-btn-group > .btn:focus,
-.md3-btn-group > .btn:active {
+.md3-btn-group > :global(.btn):focus,
+.md3-btn-group > :global(.btn):active {
   background-color: color-mix(
     in srgb,
     var(--color-primary) 12%,
@@ -300,26 +310,26 @@
   box-shadow: none !important;
 }
 
-[data-theme="dark"] .game-period-chip.overtime {
+:global([data-theme="dark"]) .game-period-chip.overtime {
   color: var(--color-blue-accent);
 }
 
-[data-theme="dark"] .game-playoff-badge {
+:global([data-theme="dark"]) .game-playoff-badge {
   color: #ff8a65;
 }
 
-[data-theme="dark"] .game-final-score {
+:global([data-theme="dark"]) .game-final-score {
   color: var(--color-text);
 }
 
-[data-theme="dark"] .game-card:hover {
+:global([data-theme="dark"]) .game-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
-[data-theme="dark"] .team-info h3 {
+:global([data-theme="dark"]) .team-info h3 {
   color: var(--color-text);
 }
 
-[data-theme="dark"] .game-time {
+:global([data-theme="dark"]) .game-time {
   color: var(--color-text-secondary);
 }

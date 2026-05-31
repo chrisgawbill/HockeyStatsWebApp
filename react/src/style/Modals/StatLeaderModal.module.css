@@ -20,7 +20,7 @@
   border-color: var(--color-divider);
 }
 
-.stat-leader-modal__header .modal-title {
+.stat-leader-modal__header :global(.modal-title) {
   font-size: var(--text-lg);
   font-weight: 600;
 }
@@ -62,17 +62,17 @@
   min-width: 5rem;
 }
 
-[data-theme="dark"] .modal-backdrop {
+:global([data-theme="dark"] .modal-backdrop) {
   background-color: #020617;
 }
 
-[data-theme="dark"] .stat-leader-modal__content {
+:global([data-theme="dark"]) .stat-leader-modal__content {
   background: var(--color-surface);
   color: var(--color-text);
   border-color: var(--color-divider);
 }
 
-[data-theme="dark"] .stat-leader-modal__table {
+:global([data-theme="dark"]) .stat-leader-modal__table {
   background: var(--color-surface);
 }
 
@@ -94,8 +94,8 @@
     max-height: calc(82vh - 9.5rem);
   }
 
-  .stat-leader-modal__table .th,
-  .stat-leader-modal__table .td {
+  .stat-leader-modal__table :global(.th),
+  .stat-leader-modal__table :global(.td) {
     font-size: var(--text-sm);
   }
 

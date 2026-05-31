@@ -1,6 +1,5 @@
 import { Col, Row } from "react-bootstrap";
-import "../../style/LandingPage/LandingPageRow.css";
-import "../../style/LandingPage/LandingPageBlock.css";
+import styles from "../../style/LandingPage/LandingPageRow.module.css";
 import React from "react";
 import { StandingsTeam } from "../../Data/Models/StandingsTeam";
 import DraftLotteryOddsCard from "./DraftLotteryOddsCard";
@@ -14,9 +13,9 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
   if (data.length > 1) {
     const maxOdds = Math.max(...data.map((t) => t.draftLotteryOdds));
     return (
-      <div className="section-container">
+      <div className={styles["section-container"]}>
         <Row>
-          <Col className="landing-header">
+          <Col className={styles["landing-header"]}>
             <h2>{title}</h2>
           </Col>
         </Row>
