@@ -26,7 +26,7 @@ React pages/components
 │   ├── src/index.tsx       React root and global context providers
 │   ├── src/Pages/          Route-level page components
 │   ├── src/Components/     Reusable UI sections and widgets
-│   ├── src/Data/           Models, contexts, helpers, constants, and local data
+│   ├── src/Data/           Models, contexts, hooks, helpers, constants, and local data
 │   ├── src/Services/       Frontend API clients and service functions
 │   └── src/style/          CSS modules, shared CSS, and image assets
 └── docs/architecture.md    This file
@@ -48,6 +48,7 @@ The frontend is a Vite React app using TypeScript, React Router, React Bootstrap
 - `/teamList` renders `TeamList`
 - `/team/:teamId` renders `TeamPage`
 - `/game/:gameId` renders `GameDetailPage`
+- `/diagnostics` renders `DiagnosticsPage` (intentionally unlinked; see [Diagnostics Layer](#diagnostics-layer))
 
 Because this uses `HashRouter`, URLs are intended to work in static hosting environments such as GitHub Pages.
 
@@ -81,6 +82,9 @@ Frontend HTTP calls are centralized in:
 - `GetGameDetails(gameID)` calls `/schedule/:gameID`
 - `GetTeamRoster(triCode)` calls `/team/roster/:triCode`
 - `GetSkaterSummary(teamId)` calls `/player/skater/summary`
+- `GetHealth(passphrase)` calls `/health` and `GetCacheReport(passphrase)` calls `/health/cache-usage`; both attach the passphrase as the `x-diagnostics-key` header (never a query string), since the backend reads it from that header (see [Diagnostics Layer](#diagnostics-layer))
+
+Note: `ApiHandler.ts` also exports `GetDraft()`, but it is currently an empty stub (its body is commented out). Draft lottery odds are not fetched from an API; they are computed locally (see [Important Hockey And NHL API Background](#important-hockey-and-nhl-api-background)).
 
 `GenAIHandler.ts` calls `/python-service` and normalizes the AI response into JSON when possible.
 
@@ -93,6 +97,7 @@ Use this structure when deciding where code belongs:
 - `Models/`: class-like data shapes used by the UI, such as `ScheduledGame`, `Team`, `StandingsTeam`, and `PlayerStatLeader`.
 - `Helpers/`: conversion logic from raw NHL API responses into app models.
 - `Context/`: React providers and hooks for shared state.
+- `Hooks/`: reusable custom hooks that compose services, helpers, and constants. For example, `useStatLeaders.ts` loads and tracks stat leader data using `STAT_CONFIG` and `PlayerStatLeaderConverter`.
 - `Constants/`: static configuration such as stat leader category mappings.
 - `LocalData/`: local static NHL team metadata and mock-shaped page data.
 
@@ -155,10 +160,20 @@ Routes are grouped by NHL domain:
   - `GET /player/goalie/summary`
   - Uses NHL skater and goalie stats endpoints
 
+- `api/routes/health.js`
+  - `GET /health`
+  - `GET /health/cache-usage`
+  - Passphrase-protected diagnostics endpoints (see [Diagnostics Layer](#diagnostics-layer))
+
 - `POST /python-service`
   - Defined in `api/app.js`
   - Calls `api/routes/hockey-ai.py` through a Python subprocess
   - Caches AI responses by cache key
+
+- `api/routes/index.js`
+  - `GET /`, mounted in `api/app.js` as `indexRouter`
+  - Leftover Express-generator scaffolding: it calls `res.render('index', ...)`, which expects a view engine/template this API does not configure
+  - It serves no real purpose for this app and can likely be removed; do not build on it
 
 ### NHL API Clients
 
@@ -224,6 +239,36 @@ Important details:
 - In production, Express uses `python3`.
 - AI responses are cached for a long time using `CACHE_TYPES.AI`.
 - AI output should be treated as helpful but not authoritative unless separately verified.
+
+## Diagnostics Layer
+
+The app exposes a small, passphrase-protected diagnostics layer for inspecting backend health and cache usage.
+
+End-to-end flow:
+
+```text
+DiagnosticsPage (unlinked route #/diagnostics)
+  -> GetHealth(passphrase) / GetCacheReport(passphrase)  (x-diagnostics-key header)
+  -> api/routes/health.js  (authCheck middleware)
+  -> seasonHelper, cacheManager, process env
+```
+
+### Endpoints
+
+- `GET /health` returns API status, app version, environment, current `seasonId`, cache-directory writability, whether `ANTHROPIC_API_KEY` is configured, uptime, and server time. Sensitive values are reported as booleans/status only, never as raw values.
+- `GET /health/cache-usage` returns per-section cache sizes in bytes, the largest section, and the total.
+
+### Authentication model
+
+The single most important rule: **the backend is the only real gate.** Because the frontend is a static SPA, any check done in React is bypassable, and the Express endpoints are publicly reachable. So:
+
+- `api/utils/auth.js` holds `matchesPassphrase` (a pure, constant-time `crypto.timingSafeEqual` comparison against `DIAGNOSTICS_PASSPHRASE`, failing closed if unset) and `authCheck`, an Express middleware applied via `router.use(authCheck)` in `health.js`. It guards every route in that module and returns `401` without the correct passphrase.
+- The passphrase travels in the `x-diagnostics-key` **header**, not a query string, so it is not written to request logs or browser history. `app.js` lists this header in CORS `allowedHeaders` so the browser preflight succeeds.
+- `DIAGNOSTICS_PASSPHRASE` lives only in `api/.env` and is generated with high entropy (e.g. `crypto.randomBytes(32)`); it must never be committed or baked into the frontend bundle.
+
+### Frontend
+
+`DiagnosticsPage` is an unlinked route — "hidden" only by obscurity, which is acceptable because the backend enforces access. It shows a passphrase gate, then renders an MD3 status grid and a cache-usage table (bytes formatted for display on the frontend). The entered passphrase is kept in `sessionStorage` so a refresh stays authenticated within the tab; a wrong passphrase or unreachable API is caught and surfaced without crashing the app.
 
 ## Important Hockey And NHL API Background
 
