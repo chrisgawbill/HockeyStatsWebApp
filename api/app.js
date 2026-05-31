@@ -5,32 +5,16 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-var fs = require("fs");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var standingsRouter = require("./routes/standings");
 var playerRouter = require("./routes/player");
 var teamRouter = require("./routes/team");
-var scheduleRouter = require("./routes/schedule");
+const { router: scheduleRouter, refreshScheduleCache } = require("./routes/schedule");
 
 const { spawn } = require("child_process");
-
-const AI_CACHE_DIR = path.join(__dirname, "ai-cache");
-const AI_CACHE_TTL_MS = 365 * 24 * 60 * 60 * 1000;
-
-function readAICache(key) {
-  try {
-    const entry = JSON.parse(fs.readFileSync(path.join(AI_CACHE_DIR, `${key}.json`), "utf-8"));
-    if (Date.now() - entry.timestamp < AI_CACHE_TTL_MS) return entry.data;
-  } catch {}
-  return null;
-}
-
-function writeAICache(key, data) {
-  fs.mkdirSync(AI_CACHE_DIR, { recursive: true });
-  fs.writeFileSync(path.join(AI_CACHE_DIR, `${key}.json`), JSON.stringify({ timestamp: Date.now(), data }));
-}
+const { readCache, writeCache, CACHE_TYPES } = require("./utils/cacheManager");
 
 let corsOptions = {
   origin: ["http://localhost:3000", "http://localhost:5173", "https://chrisgawbill.github.io"],
@@ -56,22 +40,21 @@ app.use("/player", playerRouter);
 app.use("/team", teamRouter);
 app.use("/schedule", scheduleRouter);
 
-app.post("/python-service", async (req, res) => {
+app.post("/python-service", async (req, res, next) => {
   try {
     const message = req.body.content;
     const key = req.body.cacheKey ?? "default";
 
-    const cached = readAICache(key);
+    const cached = await readCache(CACHE_TYPES.AI, key);
     if (cached !== null) {
       return res.send(cached);
     }
 
     const result = await runAIPythonScript(message);
-    writeAICache(key, result);
+    await writeCache(CACHE_TYPES.AI, key, result);
     res.send(result);
   } catch (error) {
-    console.error("Error running python script: ", error);
-    res.status(500).send(`Internal Server Error: ${error}`);
+    next(error);
   }
 });
 // catch 404 and forward to error handler
@@ -81,13 +64,7 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render("error");
+  res.status(err.status || 500).json({ error: err.message ?? "Internal server error" });
 });
 
 const runAIPythonScript = (message) =>{
@@ -98,7 +75,6 @@ const runAIPythonScript = (message) =>{
       [path.join(__dirname, "routes/hockey-ai.py"), message]
     );
 
-    let stderrLogs = "";
     let stdoutData = "";
 
     pythonProcess.on("error", (err) => {
@@ -109,7 +85,6 @@ const runAIPythonScript = (message) =>{
       stdoutData += data.toString();
     });
     pythonProcess.stderr.on("data", (data) => {
-      stderrLogs += data.toString();
       console.error("stderr: " + data);
     });
     pythonProcess.on("close", (code) => {
@@ -131,4 +106,30 @@ const runAIPythonScript = (message) =>{
     });
   });
 }
+// Schedule cache refreshes at 8AM, 7PM, 11PM UTC
+const REFRESH_HOURS_UTC = [8, 19, 23];
+function scheduleNextRefresh() {
+  const now = new Date();
+  let nextMs = null;
+  for (const hour of REFRESH_HOURS_UTC) {
+    const candidate = new Date(now);
+    candidate.setUTCHours(hour, 0, 0, 0);
+    if (candidate.getTime() > now.getTime()) {
+      nextMs = candidate.getTime();
+      break;
+    }
+  }
+  if (!nextMs) {
+    const tomorrow = new Date(now);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(REFRESH_HOURS_UTC[0], 0, 0, 0);
+    nextMs = tomorrow.getTime();
+  }
+  setTimeout(async () => {
+    await refreshScheduleCache();
+    scheduleNextRefresh();
+  }, nextMs - now.getTime());
+}
+scheduleNextRefresh();
+
 module.exports = app;

@@ -3,7 +3,7 @@ import { useListOfGames } from '../Data/Context/ScheduleContext';
 import PageHeader from '../Components/PageHeader';
 import { Container } from 'react-bootstrap';
 import { ScheduledGame } from '../Data/Models/ScheduledGame';
-import '../style/SchedulePage.css';
+import styles from '../style/SchedulePage.module.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ScheduleCard from '../Components/SchedulePage/ScheduleCard';
 import DatePicker from '../Components/SchedulePage/DatePicker';
@@ -86,7 +86,7 @@ function SchedulePage() {
 	return (
 		<>
 			<PageHeader />
-			<Container fluid className='schedule-page'>
+			<Container fluid className={styles["schedule-page"]}>
 				<DatePicker
 					sortedGames={sortedGames}
 					selectedDate={selectedDate}

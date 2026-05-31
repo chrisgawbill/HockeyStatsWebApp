@@ -6,6 +6,7 @@ import React from "react";
 import { useStandingsData } from "../../../Data/Context/StandingsContext";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
 import StandingsClinchLegend from "./StandingsClinchLegend";
+import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
 
 type Conference = "Eastern" | "Western";
 type StandingsView = "conference" | "division";
@@ -56,8 +57,8 @@ export default function LandingPageStandings() {
 
   return (
     <Container>
-      <Row className="landing-standings-mobile-title">
-        <Col className="landing-header">
+      <Row className={styles["landing-standings-mobile-title"]}>
+        <Col className={styles["landing-header"]}>
           <h2>Standings</h2>
         </Col>
       </Row>

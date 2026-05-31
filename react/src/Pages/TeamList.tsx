@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 import { Team } from "../Data/Models/Team";
 import { TeamStats } from "../Data/Models/TeamStats";
 import { localTeamList } from "../Data/LocalData/TeamListData";
-import "../style/TeamList/TeamList.css";
+import styles from "../style/TeamList/TeamList.module.css";
 import PageHeader from "../Components/PageHeader";
 import { useListOfTeamsData } from "../Data/Context/ListOfTeamsContext";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ const triCodeLookup: Record<string, string> = Object.fromEntries(
 function normalizeKey(value: string) {
   return value
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .toLowerCase();
 }
 
@@ -163,15 +163,15 @@ export default function TeamList() {
   }
 
   return (
-    <Container fluid className="team-list-page">
+    <Container fluid className={styles["team-list-page"]}>
       <PageHeader />
-      <section className="team-list-toolbar">
-        <div className="team-list-toolbar__header">
+      <section className={styles["team-list-toolbar"]}>
+        <div className={styles["team-list-toolbar__header"]}>
           <h1>Team List</h1>
           <p>{teams.length} teams</p>
         </div>
-        <div className="team-list-controls">
-          <label className="team-list-search">
+        <div className={styles["team-list-controls"]}>
+          <label className={styles["team-list-search"]}>
             <span>Search</span>
             <input
               value={search}
@@ -217,7 +217,7 @@ export default function TeamList() {
             </select>
           </label>
         </div>
-        <div className="team-list-filter-chips" aria-label="Team filters">
+        <div className={styles["team-list-filter-chips"]} aria-label="Team filters">
           {[
             ["all", "All Teams"],
             ["playoff", "Playoff"],
@@ -225,18 +225,18 @@ export default function TeamList() {
           ].map(([value, label]) => (
             <button
               key={value}
-              className={filter === value ? "active" : ""}
+              className={filter === value ? styles["active"] : ""}
               onClick={() => setFilter(value as TeamFilter)}
             >
               {label}
             </button>
           ))}
-          <button className="team-list-reset-btn" onClick={resetFilters}>
+          <button className={styles["team-list-reset-btn"]} onClick={resetFilters}>
             Reset
           </button>
         </div>
       </section>
-      <div className="team-card-grid">
+      <div className={styles["team-card-grid"]}>
         {teams.map(({ team, stats, standings, triCode }) => {
           const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${triCode}_light.svg`;
           const winPct = getWinPct(stats);
@@ -252,7 +252,7 @@ export default function TeamList() {
           return (
             <div
               key={team.teamName}
-              className="team-card"
+              className={styles["team-card"]}
               onClick={() => {
                 navigate(`/team/${triCode}`, {
                   state: {
@@ -262,55 +262,55 @@ export default function TeamList() {
                 });
               }}
             >
-              <div className="team-card__top">
+              <div className={styles["team-card__top"]}>
                 <img
-                  className="team-card__logo"
+                  className={styles["team-card__logo"]}
                   src={logoUrl}
                   alt={team.teamName}
                 />
                 {statusLabel && (
-                  <span className="team-card__status">{statusLabel}</span>
+                  <span className={styles["team-card__status"]}>{statusLabel}</span>
                 )}
               </div>
-              <p className="team-card__name">{team.teamName}</p>
-              <p className="team-card__meta">
+              <p className={styles["team-card__name"]}>{team.teamName}</p>
+              <p className={styles["team-card__meta"]}>
                 {standings?.divisionName ?? "NHL"} · {triCode}
               </p>
               {stats ? (
                 <>
-                  <p className="team-card__record">
+                  <p className={styles["team-card__record"]}>
                     {stats.wins}-{stats.losses}-{stats.otLosses}
                   </p>
-                  <div className="team-card__metrics">
+                  <div className={styles["team-card__metrics"]}>
                     <span>
-                      <strong className="team-card__metrics-value">
+                      <strong className={styles["team-card__metrics-value"]}>
                         {stats.points}
                       </strong>
-                      <span className="team-card__metrics-label">PTS</span>
+                      <span className={styles["team-card__metrics-label"]}>PTS</span>
                     </span>
                     <span>
-                      <strong className="team-card__metrics-value">
+                      <strong className={styles["team-card__metrics-value"]}>
                         {(winPct * 100).toFixed(1)}
                       </strong>
-                      <span className="team-card__metrics-label">WIN%</span>
+                      <span className={styles["team-card__metrics-label"]}>WIN%</span>
                     </span>
                     <span>
-                      <strong className="team-card__metrics-value">
+                      <strong className={styles["team-card__metrics-value"]}>
                         {formatNumber(stats.goalsPerGame, 2)}
                       </strong>
-                      <span className="team-card__metrics-label">GF/GP</span>
+                      <span className={styles["team-card__metrics-label"]}>GF/GP</span>
                     </span>
                   </div>
                 </>
               ) : (
-                <p className="team-card__record">—</p>
+                <p className={styles["team-card__record"]}>—</p>
               )}
             </div>
           );
         })}
       </div>
       {teams.length === 0 && (
-        <p className="team-list-empty">No teams match the current filters.</p>
+        <p className={styles["team-list-empty"]}>No teams match the current filters.</p>
       )}
     </Container>
   );

@@ -88,7 +88,7 @@
     padding-right: 0;
   }
 
-  .section-container > .row {
+  .section-container > :global(.row) {
     --bs-gutter-x: var(--space-md);
     max-width: 26rem;
     margin-left: auto;

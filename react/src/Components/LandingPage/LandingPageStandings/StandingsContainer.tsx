@@ -1,5 +1,5 @@
 import { Col, Row } from "react-bootstrap";
-import "../../../style/LandingPage/LandingPageStandings.css";
+import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
 import React from "react";
 import LandingPageStandingsTable from "./LandingPageStandingsTable";
@@ -19,7 +19,7 @@ export default function StandingsContainer({
     return (
       <div>
         <Row>
-          <Col className="standings-header">
+          <Col className={styles["standings-header"]}>
             <Row>
               <h3>{standingsName}</h3>
             </Row>

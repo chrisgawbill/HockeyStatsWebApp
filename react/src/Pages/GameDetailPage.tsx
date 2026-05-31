@@ -4,7 +4,7 @@ import { BoxscoreTeamStats, GameDetailBoxscore, GameLanding, LandingScoringPerio
 import { useTheme } from "@table-library/react-table-library/theme";
 import { useParams } from "react-router-dom";
 import PageHeader from "../Components/PageHeader";
-import HeroScoarboard from "../Components/GameDetail/HeroScoarboard";
+import HeroScoreboard from "../Components/GameDetail/HeroScoreboard";
 import PeriodScoresTable from "../Components/GameDetail/PeriodScoresTable";
 import ScoringSummary from "../Components/GameDetail/ScoringSummary";
 import TeamComparison from "../Components/GameDetail/TeamComparison";
@@ -83,7 +83,7 @@ import styles from "../style/GameDetailPage.module.css";
     return(
         <div className={styles["game-detail-page"]}>
             <PageHeader/>
-            <HeroScoarboard boxscore={boxscore} theme={theme}/>
+            <HeroScoreboard boxscore={boxscore} theme={theme}/>
             {!isFuture && (
                 <div className={styles["game-detail-page__content"]}>
                     {periodScores.length > 0 && 

@@ -5,7 +5,7 @@ import { useTheme } from "@table-library/react-table-library/theme";
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
-import "../../../style/LandingPage/LandingPageStandings.css";
+import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
 import { CLINCH_STATUS_META, ClinchStatus } from "./ClinchStatus";
 
 interface LandingPageStandingTableProps {
@@ -127,7 +127,7 @@ export default function LandingPageStandingsTable({
 
     return (
       <span
-        className={`standings-clinch-badge ${statusMeta.className}`}
+        className={`${styles["standings-clinch-badge"]} ${statusMeta.className}`}
         aria-label={statusMeta.label}
         title={statusMeta.label}
       >
@@ -141,9 +141,11 @@ export default function LandingPageStandingsTable({
     if (!status) return {};
 
     return {
-      className: `standings-status-cell ${isFirstCell ? "standings-status-cell--first" : ""} ${
-        CLINCH_STATUS_META[status].className
-      }`,
+      className: [
+        styles["standings-status-cell"],
+        isFirstCell && styles["standings-status-cell--first"],
+        CLINCH_STATUS_META[status].className,
+      ].filter(Boolean).join(" "),
     };
   };
 
@@ -162,9 +164,9 @@ export default function LandingPageStandingsTable({
       renderCell: (item: any) => {
         const team = item as StandingsTeam;
         return (
-          <span className="standings-table-teamName-col">
+          <span className={styles["standings-table-teamName-col"]}>
             <img
-              className="standings-table-team-logo"
+              className={styles["standings-table-team-logo"]}
               src={team.teamLogo}
               alt="team logo"
             />
@@ -227,9 +229,9 @@ export default function LandingPageStandingsTable({
   );
 
   return (
-    <div className="standings-table-shell" style={{ height: HEIGHT, marginTop: "1%", marginBottom: "2%" }}>
+    <div className={styles["standings-table-shell"]} style={{ height: HEIGHT, marginTop: "1%", marginBottom: "2%" }}>
       <CompactTable
-        className="standings-table"
+        className={styles["standings-table"]}
         columns={COLUMNS}
         data={data}
         theme={theme}

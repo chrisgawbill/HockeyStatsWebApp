@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { TopStatLeader } from "../../Data/Models/TopStatLeader";
 import StatsLeaderModal from "../Modals/StatsLeaderModal";
+import styles from "../../style/LandingPage/StatLeaderCard.module.css";
 
 interface StatLeaderCardProps {
   topStatLeader: TopStatLeader;
@@ -11,17 +12,17 @@ export default function StatLeaderCard({ topStatLeader }: StatLeaderCardProps) {
 
   return (
     <>
-      <div className="stat-leader-block" onClick={() => setShowModal(true)}>
-        <div className="stat-leader-block-picture">
+      <div className={styles["stat-leader-block"]} onClick={() => setShowModal(true)}>
+        <div className={styles["stat-leader-block-picture"]}>
           <img src={topStatLeader.player.playerImage} alt="" />
         </div>
-        <div className="stat-leader-block-info">
-          <h4 className="block-info-indicator">{topStatLeader.statIndicator}</h4>
-          <span className="block-info-name">
+        <div className={styles["stat-leader-block-info"]}>
+          <h4 className={styles["block-info-indicator"]}>{topStatLeader.statIndicator}</h4>
+          <span className={styles["block-info-name"]}>
             {topStatLeader.player.firstName + " " + topStatLeader.player.lastName}
           </span>
         </div>
-        <div className="stat-leader-value-block">
+        <div className={styles["stat-leader-value-block"]}>
           <p>{topStatLeader.player.statLeaderValue}</p>
         </div>
       </div>

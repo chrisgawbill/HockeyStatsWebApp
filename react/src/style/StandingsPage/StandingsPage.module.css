@@ -1,4 +1,4 @@
-#standings-page-table-container {
+.standings-page-table-container {
   height: 100%;
   overflow: hidden;
   white-space: nowrap;
@@ -15,7 +15,7 @@
   width: 100%;
 }
 
-.standings-page-legend-row .standings-clinch-legend {
+.standings-legend {
   margin-left: 0;
   margin-right: 0;
 }

@@ -1,19 +1,23 @@
 import React from "react";
 import { CLINCH_STATUS_META, ClinchStatus } from "./ClinchStatus";
-import "../../../style/LandingPage/LandingPageStandings.css";
+import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
 
-export default function StandingsClinchLegend() {
+interface Props {
+  className?: string;
+}
+
+export default function StandingsClinchLegend({ className }: Props) {
   return (
     <div
-      className="standings-clinch-legend"
+      className={[styles["standings-clinch-legend"], className].filter(Boolean).join(" ")}
       aria-label="Standings clinch legend"
     >
       {(Object.keys(CLINCH_STATUS_META) as ClinchStatus[]).map((status) => {
         const statusMeta = CLINCH_STATUS_META[status];
         return (
-          <span key={status} className="standings-clinch-legend__item">
+          <span key={status} className={styles["standings-clinch-legend__item"]}>
             <span
-              className={`standings-clinch-badge ${statusMeta.className}`}
+              className={`${styles["standings-clinch-badge"]} ${statusMeta.className}`}
               aria-hidden="true"
             >
               {statusMeta.badge}

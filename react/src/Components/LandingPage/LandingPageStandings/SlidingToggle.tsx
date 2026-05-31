@@ -1,5 +1,8 @@
 import React from "react";
-import "../../../style/LandingPage/SlidingToggle.css";
+import styles from "../../../style/LandingPage/SlidingToggle.module.css";
+
+const cx = (...classes: Array<string | false | null | undefined>) =>
+  classes.filter(Boolean).join(" ");
 
 interface Option<T extends string> {
   label: string;
@@ -20,9 +23,9 @@ export default function SlidingToggle<T extends string>({
   const activeIndex = options.findIndex((o) => o.value === value);
 
   return (
-    <div className="sliding-toggle">
+    <div className={styles["sliding-toggle"]}>
       <div
-        className="sliding-toggle__indicator"
+        className={styles["sliding-toggle__indicator"]}
         style={{
           transform:
             activeIndex === 1 ? "translateX(calc(100% + 4px))" : "translateX(0)",
@@ -31,7 +34,7 @@ export default function SlidingToggle<T extends string>({
       {options.map((opt) => (
         <button
           key={opt.value}
-          className={`sliding-toggle__btn${value === opt.value ? " sliding-toggle__btn--active" : ""}`}
+          className={cx(styles["sliding-toggle__btn"], value === opt.value && styles["sliding-toggle__btn--active"])}
           onClick={() => onChange(opt.value)}
         >
           {opt.label}
