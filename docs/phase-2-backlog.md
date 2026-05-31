@@ -28,7 +28,7 @@ Things to implement:
 
 ## 2.2 Normalize API response contracts
 
-- [ ] **Owner:** Either | **Depends on:** 2.1
+- [x] **Owner:** Either | **Depends on:** 2.1 | **Done:** 2026-05-31 (see [phase-2-progress.md](./phase-2-progress.md#22--normalize-api-response-contracts))
 
 Create stable backend response shapes for schedule, standings, teams, rosters, and player stats so frontend helpers do less defensive guessing against raw NHL API objects.
 

@@ -1,25 +1,18 @@
 import { StandingsTeam } from "../Models/StandingsTeam";
 
+/**
+ * The backend (api/services/mappers/standingsMapper.js) now returns each team in
+ * the StandingsTeamContract shape (id resolved, clinch indicator normalized, raw
+ * pointPctg). This helper only layers on app/display logic: pointsPctg rounding
+ * and the locally-computed draft-lottery odds + trend.
+ */
 export function CreateLeagueStandingsArray(initialStandings: any[]) {
   let leageuStandingsArray: StandingsTeam[] = [];
   for (let i = 0; i < initialStandings.length; i++) {
     const responseTeam = initialStandings[i];
-    const teamId =
-      responseTeam.teamAbbrev?.default ||
-      responseTeam.teamId?.id ||
-      responseTeam.teamId ||
-      responseTeam.id ||
-      responseTeam.team?.id;
-    if (!teamId) {
-      console.warn(
-        "Skipping team with missing ID. Keys available:",
-        Object.keys(responseTeam),
-        responseTeam,
-      );
-      continue;
-    }
+    const teamId = responseTeam.teamId;
     const teamLogo = responseTeam.teamLogo;
-    const name = responseTeam.teamCommonName.default;
+    const name = responseTeam.name;
     const conferenceName = responseTeam.conferenceName;
     const divisionName = responseTeam.divisionName;
     const wins = responseTeam.wins;
@@ -31,8 +24,7 @@ export function CreateLeagueStandingsArray(initialStandings: any[]) {
     const conferenceStanding = responseTeam.conferenceSequence;
     const divisionStanding = responseTeam.divisionSequence;
     const wildCardRank = responseTeam.wildcardSequence;
-    const clinchingIndicator =
-      responseTeam.clinchingIndicator || responseTeam.clinchIndicator || "";
+    const clinchingIndicator = responseTeam.clinchingIndicator;
 
     const teamLastTenLeagueRank: number = responseTeam.leagueL10Sequence;
     const teamDraftLotteryOdds: number = DraftLotteryOddsHelper(leagueStanding);

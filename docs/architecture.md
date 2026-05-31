@@ -95,13 +95,13 @@ The frontend data layer lives under `react/src/Data/`.
 Use this structure when deciding where code belongs:
 
 - `Models/`: class-like data shapes used by the UI, such as `ScheduledGame`, `Team`, `StandingsTeam`, and `PlayerStatLeader`.
-- `Helpers/`: conversion logic from raw NHL API responses into app models.
+- `Helpers/`: conversion logic that wraps normalized backend contracts into app model classes (and layers on app-only logic such as draft-lottery odds). For the most-used NHL data, raw-field extraction now happens in the backend mappers (see [Backend Response Contracts](#backend-response-contracts)), so these helpers no longer parse raw NHL shapes.
 - `Context/`: React providers and hooks for shared state.
 - `Hooks/`: reusable custom hooks that compose services, helpers, and constants. For example, `useStatLeaders.ts` loads and tracks stat leader data using `STAT_CONFIG` and `PlayerStatLeaderConverter`.
 - `Constants/`: static configuration such as stat leader category mappings.
 - `LocalData/`: local static NHL team metadata and mock-shaped page data.
 
-The app often receives large, inconsistent NHL API objects. Helper files should convert those raw objects into stable app-specific models before the data reaches display components.
+The app often receives large, inconsistent NHL API objects. For the most-used NHL data (schedule games, standings teams, roster players, skater/goalie summaries, stat leaders) the backend now normalizes these into stable contracts before they reach the frontend; helper files wrap those contracts into model classes. When adding new NHL data, prefer normalizing at the backend boundary (a mapper) over re-parsing raw shapes in the browser.
 
 ### Page Responsibilities
 
@@ -135,29 +135,29 @@ Routes are grouped by NHL domain:
 - `api/routes/standings.js`
   - `GET /standings`
   - Fetches current standings from `https://api-web.nhle.com/v1/standings/now`
-  - Normalizes `clinchingIndicator`
+  - Normalizes each team into a `StandingsTeamContract` via `standingsMapper` (see [Backend Response Contracts](#backend-response-contracts))
 
 - `api/routes/schedule.js`
   - `GET /schedule/`
-  - Fetches a season-to-near-future schedule by calling weekly NHL schedule endpoints
+  - Fetches a season-to-near-future schedule by calling weekly NHL schedule endpoints, then returns `{ games }` where each game is a `ScheduleGameContract`
   - `GET /schedule/landing/:gameID`
-  - Fetches game landing data
+  - Fetches game landing data (raw passthrough)
   - `GET /schedule/:gameID`
-  - Fetches game boxscore data
+  - Fetches game boxscore data (raw passthrough)
 
 - `api/routes/team.js`
-  - `GET /team/roster/:triCode`
-  - `GET /team/schedule/:triCode`
-  - `GET /team/stats`
-  - `GET /team/:teamId?`
+  - `GET /team/roster/:triCode` — returns a normalized `RosterContract` (`{ players }`)
+  - `GET /team/schedule/:triCode` — returns `{ games }` of `ScheduleGameContract`, sorted by date
+  - `GET /team/stats` — raw team summary stats (not yet normalized)
+  - `GET /team/:teamId?` — raw team summary stats (not yet normalized)
   - Uses NHL team stats and club schedule endpoints
 
 - `api/routes/player.js`
-  - `GET /player/skater/statLeaders/:statIndicator`
-  - `GET /player/goalie/statLeaders/:statIndicator`
-  - `GET /player/skater/summary`
-  - `GET /player/skater/corsi`
-  - `GET /player/goalie/summary`
+  - `GET /player/skater/statLeaders/:statIndicator` — flat array of `StatLeaderContract`
+  - `GET /player/goalie/statLeaders/:statIndicator` — flat array of `StatLeaderContract`
+  - `GET /player/skater/summary` — array of `SkaterSummaryContract`
+  - `GET /player/skater/corsi` — raw passthrough (frontend merges into skater stats by `playerId`)
+  - `GET /player/goalie/summary` — array of `GoalieSummaryContract`
   - Uses NHL skater and goalie stats endpoints
 
 - `api/routes/health.js`
@@ -185,6 +185,23 @@ Routes are grouped by NHL domain:
 - `axiosNhlGoalie`: `https://api.nhle.com/stats/rest/en/goalie`
 
 Prefer these clients over creating new Axios instances inside route handlers.
+
+### Backend Response Contracts
+
+`api/services/mappers/` holds the normalization layer (an anti-corruption layer) that translates messy, inconsistent NHL API shapes into stable, documented contracts **once**, at the backend boundary. The frontend consumes these contracts, not raw NHL JSON, so NHL field renames are fixed in one mapper instead of across pages and helpers.
+
+Mapper modules, each documenting its shape(s) with a JSDoc `@typedef`:
+
+- `scheduleMapper.js` — `mapGame(rawGame, { date, dayAbbrev })` → `ScheduleGameContract`; `mapBroadcasts` → `GameBroadcastContract[]`. One mapper serves both schedule sources (the weekly endpoint supplies the date on the week; the club-schedule endpoint supplies it per game).
+- `standingsMapper.js` — `mapStandingsTeam(rawTeam)` → `StandingsTeamContract` (or `null` for rows with no resolvable id). Owns the `teamId` fallback chain and `clinchingIndicator`/`clinchIndicator` spelling normalization.
+- `rosterMapper.js` — `mapRoster(rawRoster)` → `RosterContract` (`{ players }`), flattening forwards/defensemen/goalies and keeping the raw position code.
+- `playerMapper.js` — `mapSkaterSummary`, `mapGoalieSummary`, and `mapStatLeaders(raw, category)`.
+
+Conventions for this layer:
+
+- **Mappers are pure functions** with defensive fallbacks for missing or renamed NHL fields (e.g. `venue?.default ?? ""`, guarded `.default` unwraps, `faceoffWinPct > 0 ? value : null`).
+- **Map after `GetOrFetch`, not inside it.** Cached entries store the **raw** NHL response, and the route maps on the way out. This means a mapper change never requires clearing the cache, and old cache entries stay compatible.
+- **Shape translation only.** App/derived/display logic stays on the frontend (e.g. draft-lottery odds in `LeagueStandingsHelper.ts`, TOI string formatting, `pointsPctg` rounding). Corsi (SAT%) is a separate endpoint merged on the frontend by `playerId` and is intentionally not part of the skater contract.
 
 ### Backend Caching
 
@@ -283,7 +300,7 @@ Useful domain terms:
 - `gameType=3`: playoffs.
 - `gameState`: NHL game state. The UI treats `FUT` and `PRE` as future/pre-game states. Completed games include states such as `OFF` and `FINAL`.
 - `cayenneExp`: NHL stats API query expression. Backend code URL-encodes these expressions before sending them to NHL stats endpoints.
-- `clinchingIndicator` / `clinchIndicator`: NHL standings APIs may use either spelling, so backend/frontend code normalizes this.
+- `clinchingIndicator` / `clinchIndicator`: NHL standings APIs may use either spelling. The backend `standingsMapper` normalizes this to `clinchingIndicator` so the frontend never has to.
 
 Draft lottery odds are currently calculated locally in `LeagueStandingsHelper.ts` based on league rank.
 
@@ -315,7 +332,8 @@ Draft lottery odds are currently calculated locally in `LeagueStandingsHelper.ts
 - Use `GetOrFetch` for data that is expensive, reused, or unlikely to need second-by-second freshness.
 - Choose cache keys that include every input affecting the response, such as team ID, tri-code, stat name, and season.
 - Pass errors to `next(error)` so the shared JSON error handler responds consistently.
-- Keep route handlers thin: validate/collect request inputs, call NHL APIs or helpers, normalize response shape, and return JSON.
+- Keep route handlers thin: validate/collect request inputs, fetch (via `GetOrFetch` where appropriate), then map the raw response through a mapper in `api/services/mappers/` before returning JSON. Put all NHL-field knowledge in the mapper, not the handler.
+- When normalizing cached data, map **after** `GetOrFetch` so the cache stores the raw response (see [Backend Response Contracts](#backend-response-contracts)).
 
 ### AI And Automation
 
@@ -349,5 +367,6 @@ The backend allows CORS from:
 
 ## Current Maintenance Notes
 
-- `TeamPage.tsx` has a lot of data transformation logic inline. If team page behavior grows, consider moving those transforms into helper files near `react/src/Data/Helpers/`.
+- `TeamPage.tsx` still holds some display-shaping logic inline (grouping roster players by position, formatting TOI, building stat rows), but the raw NHL parsing it used to duplicate now lives in the backend mappers. If team page behavior grows, consider moving the remaining display transforms into helper files near `react/src/Data/Helpers/`.
+- Team summary stats (`/team/stats`, `/team/:teamId?`) and skater corsi (`/player/skater/corsi`) are not yet normalized into contracts. If they grow more consumers, add mappers for them under `api/services/mappers/`.
 - The root `README.md` and existing architecture doc were empty at the time this document was written, so this file is the main architecture reference.

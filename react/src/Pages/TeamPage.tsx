@@ -17,8 +17,8 @@ import {
   RosterPlayer,
   PlayerStatLine,
 } from "../Data/LocalData/TeamPageMockData";
-import { GameBroadcast } from "../Data/Models/GameBroadcast";
 import { ScheduledGame } from "../Data/Models/ScheduledGame";
+import ConvertContractsToGames from "../Data/Helpers/ScheduleHelper";
 import {
   GetTeamStatsById,
   GetTeamRoster,
@@ -56,24 +56,19 @@ function formatToi(seconds: number): string {
 }
 
 function transformRoster(
-  rosterData: any,
+  players: any[],
   toiMap: Map<number, number>,
 ): Record<Position, RosterPlayer[]> {
   const result = buildEmptyRoster();
-  const all = [
-    ...(rosterData.forwards ?? []),
-    ...(rosterData.defensemen ?? []),
-    ...(rosterData.goalies ?? []),
-  ];
-  for (const p of all) {
-    const pos = POS_MAP[p.positionCode] as Position;
+  for (const p of players ?? []) {
+    const pos = POS_MAP[p.position] as Position;
     if (!pos) continue;
     const toi = toiMap.get(p.id);
     const stat = toi != null ? formatToi(toi) : "";
     result[pos].push({
       id: p.id,
-      name: `${p.firstName?.default ?? ""} ${p.lastName?.default ?? ""}`.trim(),
-      number: p.sweaterNumber ?? 0,
+      name: p.name,
+      number: p.number ?? 0,
       stat,
       headshot: p.headshot ?? "",
     });
@@ -98,83 +93,8 @@ function transformRoster(
   return result;
 }
 
-function convertBroadcasts(broadcasts: any[] = []): GameBroadcast[] {
-  return broadcasts.map(
-    (broadcast) =>
-      new GameBroadcast(
-        broadcast.id,
-        broadcast.network,
-        broadcast.market,
-        broadcast.countryCode,
-      ),
-  );
-}
-
-function getDayOfWeek(gameDate: string): string {
-  return new Date(`${gameDate}T12:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-  });
-}
-
-function transformSchedule(
-  scheduleData: any,
-): ScheduledGame[] {
-  const games: any[] = scheduleData.games ?? [];
-  const sorted = [...games].sort(
-    (a, b) =>
-      new Date(a.gameDate + "T12:00:00").getTime() -
-      new Date(b.gameDate + "T12:00:00").getTime(),
-  );
-
-  return sorted.map((g) => {
-    const isPlayoff = g.gameType === 3;
-    let topSeedTeamAbbrev: string | null = null;
-    let bottomSeedTeamAbbrev: string | null = null;
-    const playoffRound: number | null = (() => {
-        if (g.gameType !== 3) return null;
-        if (g.seriesStatus?.round != null) {
-          topSeedTeamAbbrev = g.seriesStatus?.topSeedTeamAbbrev ?? null;
-          bottomSeedTeamAbbrev = g.seriesStatus?.bottomSeedTeamAbbrev ?? null;
-          return g.seriesStatus.round;
-        }
-        const idStr = String(g.id ?? "");
-        return idStr.length === 10 ? parseInt(idStr.slice(6, 8)) || null : null;
-      })();
-    const seriesWins: string | null = (() => {
-        if (g.gameType !== 3) return null;
-        const top = g.seriesStatus?.topSeedWins;
-        const bot = g.seriesStatus?.bottomSeedWins;
-        return top != null && bot != null ? `${top}-${bot}` : null;
-      })();
-
-    return new ScheduledGame(
-      g.id,
-      g.gameDate,
-      g.startTimeUTC,
-      getDayOfWeek(g.gameDate),
-      g.venue?.default ?? "",
-      g.homeTeam?.abbrev ?? "",
-      g.homeTeam?.logo ?? "",
-      g.homeTeam?.score,
-      g.awayTeam?.abbrev ?? "",
-      g.awayTeam?.logo ?? "",
-      g.awayTeam?.score,
-      convertBroadcasts(g.tvBroadcasts),
-      g.gameState === "FUT" ? g.ticketsLink ?? "" : "",
-      g.gameCenterLink ?? "",
-      isPlayoff,
-      playoffRound,
-      g.periodDescriptor?.periodType ?? null,
-      seriesWins,
-      topSeedTeamAbbrev,
-      bottomSeedTeamAbbrev,
-      g.gameState,
-    );
-  });
-}
-
 function transformPlayerStats(
-  summaryData: any,
+  summary: any[],
   corsiData: any,
 ): PlayerStatLine[] {
   const corsiMap = new Map<number, number>();
@@ -182,18 +102,19 @@ function transformPlayerStats(
     if (p.playerId != null && p.satPercentage != null)
       corsiMap.set(p.playerId, p.satPercentage);
   }
-  return (summaryData?.data ?? []).map(
+  return (summary ?? []).map(
     (p: any): PlayerStatLine => ({
       playerId: p.playerId,
-      name: p.skaterFullName ?? "",
-      position: p.positionCode ?? "",
+      name: p.name ?? "",
+      position: p.position ?? "",
       gamesPlayed: p.gamesPlayed ?? 0,
       goals: p.goals ?? 0,
       assists: p.assists ?? 0,
       points: p.points ?? 0,
       plusMinus: p.plusMinus ?? 0,
       penaltyMinutes: p.penaltyMinutes ?? 0,
-      faceoffWinPct: p.faceoffWinPct > 0 ? p.faceoffWinPct : null,
+      // Backend already maps "no faceoffs" (0) to null; pass it through.
+      faceoffWinPct: p.faceoffWinPct ?? null,
       corsiPct: corsiMap.get(p.playerId) ?? null,
     }),
   );
@@ -316,27 +237,22 @@ export default function TeamPage() {
         });
 
         const toiMap = new Map<number, number>();
-        for (const p of summaryRes?.data ?? []) {
-          if (p.playerId != null && p.timeOnIcePerGame != null)
-            toiMap.set(p.playerId, p.timeOnIcePerGame);
+        for (const p of summaryRes ?? []) {
+          if (p.playerId != null && p.toiPerGame != null)
+            toiMap.set(p.playerId, p.toiPerGame);
         }
-        for (const g of goalieRes?.data ?? []) {
-          if (g.goalieId != null && g.timeOnIcePerGame != null)
-            toiMap.set(g.goalieId, g.timeOnIcePerGame);
+        for (const g of goalieRes ?? []) {
+          if (g.goalieId != null && g.toiPerGame != null)
+            toiMap.set(g.goalieId, g.toiPerGame);
         }
-        const allRosterPlayers = [
-          ...(rosterRes.forwards ?? []),
-          ...(rosterRes.defensemen ?? []),
-          ...(rosterRes.goalies ?? []),
-        ];
         const newHeadshotMap = new Map<number, string>();
-        for (const p of allRosterPlayers) {
+        for (const p of rosterRes.players ?? []) {
           if (p.id && p.headshot) newHeadshotMap.set(p.id, p.headshot);
         }
         setHeadshotMap(newHeadshotMap);
         setStats(transformTeamStats(raw));
-        setSchedule(transformSchedule(scheduleRes));
-        setRoster(transformRoster(rosterRes, toiMap));
+        setSchedule(ConvertContractsToGames(scheduleRes.games));
+        setRoster(transformRoster(rosterRes.players, toiMap));
         setPlayerStats(transformPlayerStats(summaryRes, corsiRes));
       } catch (err) {
         console.error("Error loading team data", err);
