@@ -26,10 +26,7 @@ import {
   GetSkaterCorsi,
   GetGoalieSummary,
 } from "../Services/ApiHandler";
-import {
-  GetTeamByIdFromCache,
-  GetConferenceStandings,
-} from "../Data/Helpers/LocalDB/StandingsDBHelpers";
+import { useStandingsContext } from "../Data/Context/StandingsContext";
 import { InterfaceWithChatBot } from "../Services/GenAIHandler";
 import styles from "../style/TeamPage/TeamPage.module.css";
 
@@ -236,6 +233,7 @@ export default function TeamPage() {
   } | null;
   const triCode: string = teamId?.toUpperCase() ?? "";
   const teamSourcePath = location.pathname;
+  const { easternStandingsData, westernStandingsData } = useStandingsContext();
   const teamActiveNavPath =
     routeState?.activeNavPath ?? routeState?.sourcePath ?? "/teamList";
   const teamEntry = (localTeamList as any[]).find((t) => t.triCode === triCode);
@@ -269,7 +267,6 @@ export default function TeamPage() {
       try {
         const [
           statsRes,
-          standingsEntry,
           rosterRes,
           scheduleRes,
           summaryRes,
@@ -277,7 +274,6 @@ export default function TeamPage() {
           goalieRes,
         ] = await Promise.all([
           GetTeamStatsById(String(numericId)),
-          GetTeamByIdFromCache(triCode).catch(() => undefined),
           GetTeamRoster(triCode),
           GetTeamSchedule(triCode),
           GetSkaterSummary(String(numericId)),
@@ -286,11 +282,12 @@ export default function TeamPage() {
         ]);
 
         const raw = statsRes?.data?.[0] ?? {};
-        const s = standingsEntry;
+        const allStandings = [...easternStandingsData, ...westernStandingsData];
+        const s = allStandings.find(t => t.id === triCode);
 
-        const conferenceStandings = s?.conferenceName
-          ? await GetConferenceStandings(s.conferenceName).catch(() => [])
-          : [];
+        const conferenceStandings = s?.conferenceName === 'Eastern'
+          ? easternStandingsData
+          : westernStandingsData;
         const playoffCutoff = conferenceStandings.find(
           (t) => t.conferenceStandingsPlace === 8,
         );

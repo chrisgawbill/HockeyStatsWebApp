@@ -1,4 +1,5 @@
 import { Row, ButtonGroup, Button } from 'react-bootstrap';
+import styles from '../../style/SchedulePage.module.css';
 
 type DatePickerProps = {
 	sortedGames: { date: string }[];
@@ -54,10 +55,10 @@ const DatePicker = ({ sortedGames, selectedDate, onDateChange }: DatePickerProps
 	const isNextButtonDisabled = selectedKey >= toDateKey(upperBound);
 
 	return (
-		<Row className='date-row'>
+		<Row className={styles["date-row"]}>
 			<ButtonGroup>
 				<Button
-					className='btn btn-primary schedule-nav-btn'
+					className={`btn btn-primary ${styles["schedule-nav-btn"]}`}
 					onClick={() =>
 						getCorrectDate(
 							selectedDate,
@@ -84,12 +85,12 @@ const DatePicker = ({ sortedGames, selectedDate, onDateChange }: DatePickerProps
 						<polyline points='15 18 9 12 15 6' />
 					</svg>
 				</Button>
-				<p className='schedule-date-label'>
+				<p className={styles["schedule-date-label"]}>
 					{selectedDate.toLocaleString('default', { month: 'long' })}{' '}
 					{selectedDate.getDate()}, {selectedDate.getFullYear()}
 				</p>
 				<Button
-					className='btn btn-primary schedule-nav-btn'
+					className={`btn btn-primary ${styles["schedule-nav-btn"]}`}
 					onClick={() =>
 						getCorrectDate(
 							selectedDate,

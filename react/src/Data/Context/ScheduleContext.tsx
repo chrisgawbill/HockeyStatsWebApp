@@ -9,34 +9,22 @@ import React, {
 import { ScheduledGame } from "../Models/ScheduledGame";
 import { GetGameDetails, GetScheduledGames } from "../../Services/ApiHandler";
 import ConvertWeekToGames from "../Helpers/ScheduleHelper";
-import {
-  GetAllGames,
-  IsScheduleStored,
-  StoreScheduledGames,
-  UpdateGameDB,
-} from "../Helpers/LocalDB/ScheduleDBHelpers";
 
 const ListOfGamesContext = createContext<any>(null);
 
 const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
   const [listOfGamesData, setListOfGamesData] = useState<ScheduledGame[]>([]);
-  const [loadingListOfGamesData, setLoadingListOfGamesData] =
-    useState<boolean>(true);
-  const [datesWithGames, setDatesWithGames] = useState<Date[]>([]);
-  const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>(
-    [],
-  );
+  const [loadingListOfGamesData, setLoadingListOfGamesData] = useState<boolean>(true);
+  const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>([]);
 
-  async function ListOfGamesCall() {
+  async function fetchGames() {
     try {
       const response = await GetScheduledGames();
       const week = response.gameWeek;
-      let localScheduledGames: ScheduledGame[] = [];
-      for (let i = 0; i < response.gameWeek.length; i++) {
+      const localScheduledGames: ScheduledGame[] = [];
+      for (let i = 0; i < week.length; i++) {
         if (week[i].numberOfGames > 0) {
-          const dayOfGames: ScheduledGame[] = ConvertWeekToGames(week[i]);
-          await StoreScheduledGames(dayOfGames);
-          localScheduledGames.push(...dayOfGames);
+          localScheduledGames.push(...ConvertWeekToGames(week[i]));
         }
       }
       setListOfGamesData(localScheduledGames);
@@ -46,44 +34,7 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
       setLoadingListOfGamesData(false);
     }
   }
-  async function GetListOfGames() {
-    try {
-      const hasStoredGames = await IsScheduleStored();
-      if (hasStoredGames) {
-        const response: ScheduledGame[] = await GetAllGames();
-        if (response && response.length > 0) {
-          const today = new Date();
-          const lastResponseDate = new Date(response[response.length - 1].date);
-          const isStale =
-            lastResponseDate.getUTCMonth() <= today.getUTCMonth() &&
-            lastResponseDate.getUTCDate() < today.getUTCDate() &&
-            lastResponseDate.getUTCFullYear() <= today.getUTCFullYear();
 
-          const firstDateStr =
-            response.map((g: ScheduledGame) => String(g.date)).sort()[0] ?? "";
-          const seasonStartYear =
-            today.getMonth() >= 9
-              ? today.getFullYear()
-              : today.getFullYear() - 1;
-          const isIncomplete = firstDateStr > `${seasonStartYear}-10-01`;
-
-          if (isStale || isIncomplete) {
-            await ListOfGamesCall();
-          } else {
-            setListOfGamesData(response);
-            setLoadingListOfGamesData(false);
-          }
-        } else {
-          await ListOfGamesCall();
-        }
-      } else {
-        await ListOfGamesCall();
-      }
-    } catch (error) {
-      console.error("Error fetching games: ", error);
-      setLoadingListOfGamesData(false);
-    }
-  }
   const fetchGamesByDate = useCallback(
     async (date: Date) => {
       if (!loadingListOfGamesData) {
@@ -93,8 +44,9 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
         setSelectedDateGames(todaysGames);
       }
     },
-    [listOfGamesData, loadingListOfGamesData, setSelectedDateGames],
+    [listOfGamesData, loadingListOfGamesData],
   );
+
   const updatePastGames = useCallback(async () => {
     if (!loadingListOfGamesData) {
       const gamesThatNeedToUpdate: ScheduledGame[] = listOfGamesData.filter(
@@ -110,7 +62,6 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
             (g: ScheduledGame) => g.gameId === updatedGame.gameId,
           );
           updatedGamesList[index] = updatedGame;
-          UpdateGameDB(updatedGame);
         }
       }
       setListOfGamesData(updatedGamesList);
@@ -119,35 +70,16 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
 
   async function updateGame(game: ScheduledGame) {
     try {
-      const id = game.gameId;
-      const response = await GetGameDetails(id);
-      if (!response?.homeTeam || !response?.awayTeam) {
-        return undefined;
-      }
-      const updatedGame = new ScheduledGame(
-        game.gameId,
-        game.date,
-        game.gameTime,
-        game.dayOfWeek,
-        game.venue,
-        game.homeTeam,
-        game.homeLogo,
-        response.homeTeam.score ?? game.homeScore,
-        game.awayTeam,
-        game.awayLogo,
-        response.awayTeam.score ?? game.awayScore,
-        game.broadcasts,
-        "",
-        game.gameCenter,
-        game.isPlayoff,
-        game.playoffRound,
-        game.periodType,
-        game.seriesWins,
-        game.topSeedTeamAbbrev,
-        game.bottomSeedTeamAbbrev,
-        game.gameState
+      const response = await GetGameDetails(game.gameId);
+      if (!response?.homeTeam || !response?.awayTeam) return undefined;
+      return new ScheduledGame(
+        game.gameId, game.date, game.gameTime, game.dayOfWeek, game.venue,
+        game.homeTeam, game.homeLogo, response.homeTeam.score ?? game.homeScore,
+        game.awayTeam, game.awayLogo, response.awayTeam.score ?? game.awayScore,
+        game.broadcasts, "", game.gameCenter, game.isPlayoff, game.playoffRound,
+        game.periodType, game.seriesWins, game.topSeedTeamAbbrev,
+        game.bottomSeedTeamAbbrev, game.gameState,
       );
-      return updatedGame;
     } catch (error) {
       console.error("Error updating game: ", error);
     }
@@ -157,22 +89,13 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     const gameDate = parseLocalDate(game.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return (
-      gameDate < today &&
-      game.homeScore === undefined &&
-      game.awayScore === undefined
-    );
+    return gameDate < today && game.homeScore === undefined && game.awayScore === undefined;
   }
 
   function parseLocalDate(dateStr: string | Date): Date {
     if (dateStr instanceof Date) {
-      return new Date(
-        dateStr.getFullYear(),
-        dateStr.getMonth(),
-        dateStr.getDate(),
-      );
+      return new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
     }
-
     const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day);
   }
@@ -184,34 +107,24 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
       date1.getDate() === date2.getDate()
     );
   }
+
   useEffect(() => {
-    GetListOfGames();
+    fetchGames();
   }, []);
 
   useEffect(() => {
     if (!loadingListOfGamesData && listOfGamesData.length > 0) {
-      const currentDate: Date = new Date();
       updatePastGames();
-      fetchGamesByDate(currentDate);
+      fetchGamesByDate(new Date());
     }
-  }, [
-    loadingListOfGamesData,
-    listOfGamesData,
-    updatePastGames,
-    fetchGamesByDate,
-  ]);
+  }, [loadingListOfGamesData, listOfGamesData, updatePastGames, fetchGamesByDate]);
+
   return (
-    <ListOfGamesContext.Provider
-      value={{
-        listOfGamesData,
-        loadingListOfGamesData,
-        selectedDateGames,
-        fetchGamesByDate,
-      }}
-    >
+    <ListOfGamesContext.Provider value={{ listOfGamesData, loadingListOfGamesData, selectedDateGames, fetchGamesByDate }}>
       {children}
     </ListOfGamesContext.Provider>
   );
 };
+
 const useListOfGames = () => useContext(ListOfGamesContext);
 export { ListOfGamesProvider, useListOfGames };

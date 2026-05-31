@@ -1,73 +1,71 @@
 var express = require("express");
-var axios = require("axios");
+const { axiosNhl } = require("../services/nhlApiClient");
+const { GetOrFetch, writeCache, CACHE_TYPES } = require("../utils/cacheManager");
 
 var router = express.Router();
 
-var axiosNhl = axios.create({
-  baseURL: "https://api-web.nhle.com/v1",
-});
+async function fetchSeasonSchedule() {
+  const today = new Date();
+  const seasonStartYear = today.getMonth() >= 9 ? today.getFullYear() : today.getFullYear() - 1;
+  const startDate = new Date(`${seasonStartYear}-10-01`);
+  const endDate = new Date(today);
+  endDate.setDate(endDate.getDate() + 28);
 
-let seasonCache = null;
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+  const weekDates = [];
+  const cur = new Date(startDate);
+  while (cur <= endDate) {
+    weekDates.push(cur.toISOString().split("T")[0]);
+    cur.setDate(cur.getDate() + 7);
+  }
+
+  const responses = await Promise.all(
+    weekDates.map(date => axiosNhl.get(`/schedule/${date}`).catch(() => null))
+  );
+
+  const allGameWeeks = [];
+  for (const resp of responses) {
+    if (resp?.data?.gameWeek) allGameWeeks.push(...resp.data.gameWeek);
+  }
+  return { gameWeek: allGameWeeks };
+}
+
+async function refreshScheduleCache() {
+  try {
+    const data = await fetchSeasonSchedule();
+    await writeCache(CACHE_TYPES.SCHEDULE, 'season', data);
+    console.log('Schedule cache refreshed at', new Date().toISOString());
+  } catch (e) {
+    console.error('Failed to refresh schedule cache:', e);
+  }
+}
 
 router.get("/", async function (req, res, next) {
   try {
-    const now = Date.now();
-    if (seasonCache && now - seasonCache.fetchedAt < CACHE_TTL) {
-      return res.send(seasonCache.data);
-    }
-
-    const today = new Date();
-    const seasonStartYear =
-      today.getMonth() >= 9 ? today.getFullYear() : today.getFullYear() - 1;
-    const startDate = new Date(`${seasonStartYear}-10-01`);
-    const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() + 28);
-
-    const weekDates = [];
-    const cur = new Date(startDate);
-    while (cur <= endDate) {
-      weekDates.push(cur.toISOString().split("T")[0]);
-      cur.setDate(cur.getDate() + 7);
-    }
-
-    const responses = await Promise.all(
-      weekDates.map((date) =>
-        axiosNhl.get(`/schedule/${date}`).catch(() => null),
-      ),
-    );
-
-    const allGameWeeks = [];
-    for (const resp of responses) {
-      if (resp?.data?.gameWeek) {
-        allGameWeeks.push(...resp.data.gameWeek);
-      }
-    }
-
-    const result = { gameWeek: allGameWeeks };
-    seasonCache = { data: result, fetchedAt: now };
-    res.send(result);
+    const data = await GetOrFetch(CACHE_TYPES.SCHEDULE, 'season', fetchSeasonSchedule);
+    res.send(data);
   } catch (e) {
-    res.send(e);
+    next(e);
   }
 });
+
 router.get("/landing/:gameID", async function (req, res, next) {
-   try {
-     const url = `/gamecenter/${req.params.gameID}/landing`;
-     const response = await axiosNhl.get(url);
-     res.send(response.data);
-   } catch (e) {
-     res.send(e);
-   }
- });
+  try {
+    const url = `/gamecenter/${req.params.gameID}/landing`;
+    const response = await axiosNhl.get(url);
+    res.send(response.data);
+  } catch (e) {
+    next(e);
+  }
+});
+
 router.get("/:gameID", async function (req, res, next) {
   try {
     const url = `/gamecenter/${req.params.gameID}/boxscore`;
     const response = await axiosNhl.get(url);
     res.send(response.data);
   } catch (e) {
-    res.send(e);
+    next(e);
   }
 });
 
-module.exports = router;
+module.exports = { router, refreshScheduleCache };

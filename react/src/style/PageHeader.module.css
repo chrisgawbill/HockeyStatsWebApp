@@ -1,4 +1,4 @@
-#nav-bar {
+.nav-bar {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
@@ -95,7 +95,7 @@
 }
 
 @media (max-width: 576px) {
-  #nav-bar {
+  .nav-bar {
     position: fixed;
     top: auto;
     bottom: 0;

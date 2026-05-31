@@ -1,5 +1,5 @@
 import { Col, Row } from "react-bootstrap";
-import "../../style/LandingPage/LandingPageRow.css";
+import styles from "../../style/LandingPage/LandingPageRow.module.css";
 import React from "react";
 import { TopStatLeader } from "../../Data/Models/TopStatLeader";
 import StatLeaderCard from "./StatLeaderCard";
@@ -15,14 +15,14 @@ export default function PlayerStatLeaderRow({ title, topStatLeaders }: PlayerSta
   return (
     <div>
       <Row>
-        <Col className="landing-header">
+        <Col className={styles["landing-header"]}>
           <h2>{title}</h2>
         </Col>
       </Row>
-      <div className="row-scroller-wrapper">
-        <Row className="row-scroller">
+      <div className={styles["row-scroller-wrapper"]}>
+        <Row className={styles["row-scroller"]}>
           {topStatLeaders.map((topStatLeader: TopStatLeader) => (
-            <Col sm md={5} lg={4} className="row-scroller-column" key={topStatLeader.statIndicator}>
+            <Col sm md={5} lg={4} className={styles["row-scroller-column"]} key={topStatLeader.statIndicator}>
               <StatLeaderCard topStatLeader={topStatLeader} />
             </Col>
           ))}

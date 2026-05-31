@@ -3,7 +3,7 @@ import LandingPageStandings from "../Components/LandingPage/LandingPageStandings
 import React from "react";
 import PlayerStatLeaderRow from "../Components/LandingPage/PlayerStatLeaderRow";
 import PageHeader from "../Components/PageHeader";
-import "../style/LandingPage/LandingPageStyle.css";
+import styles from "../style/LandingPage/LandingPage.module.css";
 import { useSkaterLeaderData } from "../Data/Context/SkaterStatLeadersContext";
 import { useGoalieLeaderData } from "../Data/Context/GoalieStatLeadersContext";
 import { useDraftLotteryOddsData } from "../Data/Context/StandingsContext";
@@ -21,7 +21,7 @@ export default function LandingPage() {
   return (
     <Container fluid>
       <PageHeader />
-      <Row id="landingPage-content">
+      <Row className={styles["landingPage-content"]}>
         <Col lg={7}>
           <PlayerStatLeaderRow
             title="Skater Stat Leaders"

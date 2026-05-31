@@ -1,3 +1,7 @@
+.landing-header {
+  text-align: center;
+}
+
 .quick-links-btn {
     height: 4rem;
     width: 100%;
@@ -7,6 +11,10 @@
 }
 
 @media only screen and (min-width: 768px) {
+    .landing-header {
+        text-align: left;
+    }
+
     .quick-links-btn {
         width: 15rem;
     }

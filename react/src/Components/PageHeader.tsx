@@ -2,7 +2,10 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../Data/Context/ThemeContext";
-import "../style/PageHeader.css";
+import styles from "../style/PageHeader.module.css";
+
+const cx = (...classes: Array<string | false | null | undefined>) =>
+  classes.filter(Boolean).join(" ");
 
 function HomeIcon() {
   return (
@@ -188,13 +191,13 @@ export default function PageHeader() {
 
   return (
     <div
-      id="nav-bar"
+      className={styles["nav-bar"]}
       style={isSubPage ? { marginBottom: 0 } : undefined}
     >
-      <div className="nav-back-col">
+      <div className={styles["nav-back-col"]}>
         {isSubPage && (
           <button
-            className="nav-back-btn"
+            className={styles["nav-back-btn"]}
             onClick={handleBack}
             aria-label="Go back"
           >
@@ -203,21 +206,21 @@ export default function PageHeader() {
         )}
       </div>
       {navItems.map(({ label, path, icon }) => (
-        <div key={path} className="nav-bar-item">
+        <div key={path} className={styles["nav-bar-item"]}>
           <Link to={path} style={{ width: "100%" }}>
             <Button
-              className={`nav-btn${activePath === path ? " active-page" : ""}`}
+              className={cx(styles["nav-btn"], activePath === path && styles["active-page"])}
               aria-label={label}
             >
-              <span className="nav-btn__label">{label}</span>
-              <span className="nav-btn__icon">{icon}</span>
+              <span className={styles["nav-btn__label"]}>{label}</span>
+              <span className={styles["nav-btn__icon"]}>{icon}</span>
             </Button>
           </Link>
         </div>
       ))}
-      <div className="nav-theme-col">
+      <div className={styles["nav-theme-col"]}>
         <button
-          className="theme-toggle-btn"
+          className={styles["theme-toggle-btn"]}
           onClick={toggleTheme}
           aria-label={
             theme === "dark" ? "Switch to light mode" : "Switch to dark mode"

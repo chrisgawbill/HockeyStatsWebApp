@@ -4,7 +4,6 @@
 /node_modules/
 /react/node_modules/
 /api/node_modules/
-/pnpm-lock.yaml
 /react/.pnp
 /react/.pnp.js
 
@@ -17,7 +16,9 @@
 
 # misc
 /react/.DS_Store
+/react/.env
 /react/.env.local
+/react/.env.production
 /react/.env.development.local
 /react/.env.test.local
 /react/.env.production.local
@@ -28,8 +29,12 @@
 /api/ai-cache/
 /api/roster-cache/
 /api/player-cache/
+/api/schedule-cache/
+/api/standings-cache/
+/api/stat-leaders-cache/
 
+/api/*.log
 /react/npm-debug.log*
 /react/yarn-debug.log*
 /react/yarn-error.log*
-
+*.log
