@@ -8,18 +8,31 @@ import React, {
 } from "react";
 import { ScheduledGame } from "../Models/ScheduledGame";
 import { GetGameDetails, GetScheduledGames } from "../../Services/ApiHandler";
-import ConvertContractsToGames from "../Helpers/ScheduleHelper";
+import { ConvertContractsToGames, parseLocalDate } from "../Helpers/ScheduleHelper";
+import { useSeason } from "./SeasonContext";
 
 const ListOfGamesContext = createContext<any>(null);
 
+/**
+ * Loads the selected season's full schedule once and shares it. Every schedule
+ * view (day/week/month) is a client-side projection of this one array, so only a
+ * season change triggers a re-fetch. Also exposes the games for a chosen day and
+ * a setter to change that day.
+ */
 const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
   const [listOfGamesData, setListOfGamesData] = useState<ScheduledGame[]>([]);
   const [loadingListOfGamesData, setLoadingListOfGamesData] = useState<boolean>(true);
   const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>([]);
+  const { season } = useSeason();
 
-  async function fetchGames() {
+  /**
+   * Fetches the full schedule for one season, converts backend contracts into
+   * ScheduledGame models, and stores the result for every schedule view to
+   * project locally.
+   */
+  async function fetchGames(seasonId: string) {
     try {
-      const response = await GetScheduledGames();
+      const response = await GetScheduledGames(seasonId);
       setListOfGamesData(ConvertContractsToGames(response.games));
     } catch (error) {
       console.error("Error fetching games: ", error);
@@ -28,11 +41,16 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  /**
+   * Filters the loaded season schedule to one local calendar day and stores it
+   * for the day view. It returns no data directly; consumers read
+   * `selectedDateGames` from context after this runs.
+   */
   const fetchGamesByDate = useCallback(
     async (date: Date) => {
       if (!loadingListOfGamesData) {
         const todaysGames: ScheduledGame[] = listOfGamesData.filter(
-          (game: ScheduledGame) => isSameDate(parseLocalDate(game.date), date),
+          (game: ScheduledGame) => isSameDate(game.date, date),
         );
         setSelectedDateGames(todaysGames);
       }
@@ -40,6 +58,11 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     [listOfGamesData, loadingListOfGamesData],
   );
 
+  /**
+   * Finds completed games whose schedule entry lacks a score, fetches each game
+   * detail payload, and swaps scored copies into `listOfGamesData`. This keeps
+   * stale schedule-cache rows useful without reloading the whole season.
+   */
   const updatePastGames = useCallback(async () => {
     if (!loadingListOfGamesData) {
       const gamesThatNeedToUpdate: ScheduledGame[] = listOfGamesData.filter(
@@ -61,6 +84,11 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [listOfGamesData, loadingListOfGamesData]);
 
+  /**
+   * Fetches one game-detail payload and returns a ScheduledGame copy with scores
+   * filled from the detail response. Returns undefined when the detail payload is
+   * missing the team data needed to update safely.
+   */
   async function updateGame(game: ScheduledGame) {
     try {
       const response = await GetGameDetails(game.gameId);
@@ -78,21 +106,20 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  /**
+   * Returns true when a game is in the past and both scores are still absent.
+   * `== null` is deliberate because missing scores can arrive as null or
+   * undefined depending on which layer produced the ScheduledGame.
+   */
   function doesGameNeedToUpdate(game: ScheduledGame) {
-    const gameDate = parseLocalDate(game.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return gameDate < today && game.homeScore == null && game.awayScore == null;
+    return game.date < today && game.homeScore == null && game.awayScore == null;
   }
 
-  function parseLocalDate(dateStr: string | Date): Date {
-    if (dateStr instanceof Date) {
-      return new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
-    }
-    const [year, month, day] = dateStr.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  }
-
+  /**
+   * Compares two Date objects by local calendar day only, ignoring their time.
+   */
   function isSameDate(date1: Date, date2: Date) {
     return (
       date1.getFullYear() === date2.getFullYear() &&
@@ -102,8 +129,10 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
   }
 
   useEffect(() => {
-    fetchGames();
-  }, []);
+    setLoadingListOfGamesData(true);
+    setSelectedDateGames([]);
+    fetchGames(season);
+  }, [season]);
 
   useEffect(() => {
     if (!loadingListOfGamesData && listOfGamesData.length > 0) {

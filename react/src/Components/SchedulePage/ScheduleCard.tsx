@@ -1,10 +1,25 @@
 import { Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import { ScheduledGame } from '../../Data/Models/ScheduledGame';
 import { useTheme } from '../../Data/Context/ThemeContext';
+import {
+	convertUTCToLocal,
+	hasScore,
+	isGameInProgress,
+	getGameStatusLabel,
+} from '../../Data/Helpers/GameStatusHelper';
 import styles from '../../style/SchedulePage.module.css';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(' ');
+
+/**
+ * Returns the logo URL variant for the active theme. NHL logo URLs are stored as
+ * `_light.svg`; dark mode uses the matching `_dark.svg` asset.
+ */
+function themedLogoUrl(logoUrl: string, theme: string): string {
+	const logoSuffix = theme === 'dark' ? 'dark' : 'light';
+	return logoUrl.replace('_light.svg', `_${logoSuffix}.svg`);
+}
 
 type ScheduleCardProps = {
 	game: ScheduledGame;
@@ -12,52 +27,23 @@ type ScheduleCardProps = {
     goToGameDetails: (game: ScheduledGame) => void;
 };
 
-function convertUTCToLocal(utcString: string) {
-	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-	const utcDate = new Date(utcString);
-
-	const localizedDate = utcDate.toLocaleTimeString('en-US', {
-		timeZone: timeZone,
-		hour: 'numeric',
-		minute: 'numeric',
-		hour12: true,
-	});
-	return localizedDate;
-}
-
+/**
+ * Opens the NHL ticket URL in a new tab. The caller supplies the already-vetted
+ * ticket URL from the ScheduledGame model and no value is returned.
+ */
 function handleTicketClick(ticketLink: string) {
 	window.open(ticketLink, '_blank');
 }
 
-function hasScore(game: ScheduledGame): boolean {
-	return game.homeScore != null && game.awayScore != null;
-}
-
-function isGameInProgress(game: ScheduledGame): boolean {
-	return (
-		game.gameState !== 'FUT' &&
-		game.gameState !== 'PRE' &&
-		game.gameState !== 'OFF' &&
-		game.gameState !== 'FINAL'
-	);
-}
-
-function getGameStatusLabel(game: ScheduledGame): string {
-	if (game.gameState === 'OFF' || game.gameState === 'FINAL') {
-		if (game.periodType === 'OT') return 'F/OT';
-		if (game.periodType === 'SO') return 'F/SO';
-		return 'FINAL';
-	}
-
-	if (isGameInProgress(game)) return 'LIVE';
-	return '';
-}
-
+/**
+ * The tall, full-width game card used in the schedule's day view. Shows the
+ * matchup, score or start time, playoff badge, venue, tickets, and broadcasts;
+ * a completed game is clickable through to its detail page.
+ */
 const ScheduleCard = ({ game, isGameCompleted, goToGameDetails }: ScheduleCardProps) => {
     const { theme } = useTheme();
-	const logoSuffix = theme === 'dark' ? 'dark' : 'light';
-	const homeLogo = game.homeLogo.replace('_light.svg', `_${logoSuffix}.svg`);
-	const awayLogo = game.awayLogo.replace('_light.svg', `_${logoSuffix}.svg`);
+	const homeLogo = themedLogoUrl(game.homeLogo, theme);
+	const awayLogo = themedLogoUrl(game.awayLogo, theme);
 	const statusLabel = getGameStatusLabel(game);
 	return (
 		<div

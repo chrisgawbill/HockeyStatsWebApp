@@ -18,7 +18,6 @@ import {
   PlayerStatLine,
 } from "../Data/LocalData/TeamPageMockData";
 import { ScheduledGame } from "../Data/Models/ScheduledGame";
-import ConvertContractsToGames from "../Data/Helpers/ScheduleHelper";
 import {
   GetTeamStatsById,
   GetTeamRoster,
@@ -28,9 +27,14 @@ import {
   GetGoalieSummary,
 } from "../Services/ApiHandler";
 import { useStandingsContext } from "../Data/Context/StandingsContext";
+import { useSeason } from "../Data/Context/SeasonContext";
 import { InterfaceWithChatBot } from "../Services/GenAIHandler";
 import styles from "../style/TeamPage/TeamPage.module.css";
+import { ConvertContractsToGames } from "../Data/Helpers/ScheduleHelper";
 
+/**
+ * Maps NHL roster position codes into the display buckets used by the roster UI.
+ */
 const POS_MAP: Record<string, Position> = {
   C: "Center",
   L: "Left Wing",
@@ -39,6 +43,9 @@ const POS_MAP: Record<string, Position> = {
   G: "Goalie",
 };
 
+/**
+ * Builds an empty roster bucket map for component state and roster transforms.
+ */
 function buildEmptyRoster(): Record<Position, RosterPlayer[]> {
   return {
     Center: [],
@@ -49,12 +56,20 @@ function buildEmptyRoster(): Record<Position, RosterPlayer[]> {
   };
 }
 
+/**
+ * Formats a per-game time-on-ice value in seconds into the roster stat label.
+ */
 function formatToi(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
   return `${m}:${s.toString().padStart(2, "0")} TOI`;
 }
 
+/**
+ * Groups roster players by display position and sorts each group by time on ice
+ * (most-used first), looking up TOI per player from `toiMap`. Players whose
+ * position code isn't in POS_MAP are skipped. Returns the grouped roster.
+ */
 function transformRoster(
   players: any[],
   toiMap: Map<number, number>,
@@ -93,6 +108,12 @@ function transformRoster(
   return result;
 }
 
+/**
+ * Builds the per-player stat lines for the team's player table from the skater
+ * summary, merging in Corsi (SAT%) by playerId since it comes from a separate
+ * endpoint. Missing values default to 0/null; a null faceoff percentage means
+ * the player did not take faceoffs.
+ */
 function transformPlayerStats(
   summary: any[],
   corsiData: any,
@@ -113,13 +134,16 @@ function transformPlayerStats(
       points: p.points ?? 0,
       plusMinus: p.plusMinus ?? 0,
       penaltyMinutes: p.penaltyMinutes ?? 0,
-      // Backend already maps "no faceoffs" (0) to null; pass it through.
       faceoffWinPct: p.faceoffWinPct ?? null,
       corsiPct: corsiMap.get(p.playerId) ?? null,
     }),
   );
 }
 
+/**
+ * Shapes the raw NHL team summary into the labeled stat tiles the header strip
+ * renders, formatting rates/percentages and falling back to "—" when absent.
+ */
 function transformTeamStats(raw: any): MockStatItem[] {
   return [
     { label: "Goals For / GP", value: raw.goalsForPerGame?.toFixed(2) ?? "—" },
@@ -145,6 +169,12 @@ function transformTeamStats(raw: any): MockStatItem[] {
   ];
 }
 
+/**
+ * Team route (`/team/:teamId`, where the param is actually a tri-code). Pulls the
+ * numeric team id and primary color from local team metadata, then loads stats,
+ * roster, schedule, and player stats for the selected season in one batch, plus
+ * AI-generated team history fetched separately (it isn't season-dependent).
+ */
 export default function TeamPage() {
   const { teamId } = useParams<{ teamId: string }>();
   const location = useLocation();
@@ -156,6 +186,7 @@ export default function TeamPage() {
   const triCode: string = teamId?.toUpperCase() ?? "";
   const teamSourcePath = location.pathname;
   const { easternStandingsData, westernStandingsData } = useStandingsContext();
+  const { season } = useSeason();
   const teamActiveNavPath =
     routeState?.activeNavPath ?? routeState?.sourcePath ?? "/teamList";
   const teamEntry = (localTeamList as any[]).find((t) => t.triCode === triCode);
@@ -183,8 +214,12 @@ export default function TeamPage() {
 
   useEffect(() => {
     if (!triCode) return;
-    setStaticInfo(null);
 
+    /**
+     * Loads the team data that changes by selected season: summary stats,
+     * roster, club schedule, skater totals, Corsi, and optional goalie TOI. The
+     * results are shaped into the TeamPage view models and stored in state.
+     */
     async function fetchMain() {
       try {
         const [
@@ -195,12 +230,12 @@ export default function TeamPage() {
           corsiRes,
           goalieRes,
         ] = await Promise.all([
-          GetTeamStatsById(String(numericId)),
-          GetTeamRoster(triCode),
-          GetTeamSchedule(triCode),
-          GetSkaterSummary(String(numericId)),
-          GetSkaterCorsi(String(numericId)),
-          GetGoalieSummary(String(numericId)).catch(() => null),
+          GetTeamStatsById(String(numericId), season),
+          GetTeamRoster(triCode, season),
+          GetTeamSchedule(triCode, season),
+          GetSkaterSummary(String(numericId), season),
+          GetSkaterCorsi(String(numericId), season),
+          GetGoalieSummary(String(numericId), season).catch(() => null),
         ]);
 
         const raw = statsRes?.data?.[0] ?? {};
@@ -214,6 +249,10 @@ export default function TeamPage() {
           (t) => t.conferenceStandingsPlace === 8,
         );
         const teamPoints = s?.points ?? raw.points ?? 0;
+        /**
+         * Points above or below the playoff line, using the #8 seed in the
+         * team's conference as the cutoff.
+         */
         const playoffLineDelta =
           playoffCutoff != null ? teamPoints - playoffCutoff.points : 0;
 
@@ -261,6 +300,18 @@ export default function TeamPage() {
       }
     }
 
+    fetchMain();
+  }, [teamId, triCode, season]);
+
+  useEffect(() => {
+    if (!triCode) return;
+    setStaticInfo(null);
+
+    /**
+     * Fetches static team-history fields from the AI service once per team. This
+     * data is intentionally independent of the selected season, so season changes
+     * do not trigger another AI request.
+     */
     async function fetchStaticInfo() {
       try {
         const prompt =
@@ -282,7 +333,6 @@ export default function TeamPage() {
       }
     }
 
-    fetchMain();
     fetchStaticInfo();
   }, [teamId, triCode]);
 

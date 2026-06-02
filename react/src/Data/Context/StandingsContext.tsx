@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from "react
 import { StandingsTeam } from "../Models/StandingsTeam";
 import { GetCurrentStandings } from "../../Services/ApiHandler";
 import { CreateLeagueStandingsArray } from "../Helpers/LeagueStandingsHelper";
+import { useSeason } from "./SeasonContext";
 
 interface StandingsData {
   easternStandingsData: StandingsTeam[];
@@ -16,6 +17,11 @@ interface StandingsData {
 
 export const StandingsContext = createContext<StandingsData | null>(null);
 
+/**
+ * Fetches the selected season's standings and pre-splits them into the slices the
+ * UI needs — by conference, by division, and the draft-lottery odds list — each
+ * sorted into standings order. Re-fetches whenever the season changes.
+ */
 const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
   const [easternStandingsData, setEasternStandingsData] = useState<StandingsTeam[]>([]);
   const [westernStandingsData, setWesternStandingsData] = useState<StandingsTeam[]>([]);
@@ -25,11 +31,13 @@ const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
   const [pacificStandings, setPacificStandings] = useState<StandingsTeam[]>([]);
   const [draftLotteryOdds, setDraftLotteryOdds] = useState<StandingsTeam[]>([]);
   const [loadingStandingsData, setLoadingStandingsData] = useState(true);
+  const { season } = useSeason();
 
   useEffect(() => {
+    setLoadingStandingsData(true);
     async function fetchStandings() {
       try {
-        const data = await GetCurrentStandings();
+        const data = await GetCurrentStandings(season);
         const all: StandingsTeam[] = CreateLeagueStandingsArray(data.standings);
 
         const byConference = (name: string) =>
@@ -46,6 +54,10 @@ const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
         setAtlanticStandings(byDivision('Atlantic'));
         setCentralStandings(byDivision('Central'));
         setPacificStandings(byDivision('Pacific'));
+        /**
+         * Keeps the lottery list to the 16 non-playoff teams that carry odds,
+         * sorted best-odds first for the landing-page display.
+         */
         setDraftLotteryOdds(
           all.filter(t => t.draftLotteryOdds > 0)
              .sort((a, b) => b.draftLotteryOdds - a.draftLotteryOdds)
@@ -58,7 +70,7 @@ const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     fetchStandings();
-  }, []);
+  }, [season]);
 
   return (
     <StandingsContext.Provider value={{

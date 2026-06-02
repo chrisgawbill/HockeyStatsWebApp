@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MockTeam } from "../../Data/LocalData/TeamPageMockData";
 import { localTeamList } from "../../Data/LocalData/TeamListData";
+import SeasonSelector from "../SeasonSelector";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
@@ -11,6 +12,12 @@ interface TeamHeroProps {
   team: MockTeam;
 }
 
+/**
+ * Team page header: a colored hero with a back breadcrumb, season selector, team
+ * logo, record, and standings badges. The breadcrumb's target and label come from
+ * the route state's `sourcePath` (where the user navigated from), defaulting to
+ * the team list. The background gradient is derived from the team's primary color.
+ */
 export default function TeamHero({ team }: TeamHeroProps) {
   const location = useLocation();
   const teamRouteState = location.state as {
@@ -37,26 +44,29 @@ export default function TeamHero({ team }: TeamHeroProps) {
         background: `linear-gradient(to bottom right, ${primaryColor} 20%, color-mix(in srgb, ${primaryColor} 30%, #000) 100%)`,
       }}
     >
-      <nav className={styles["team-hero__breadcrumb"]}>
-        <Link to={sourcePath} className={styles["team-hero__breadcrumb-back"]}>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          {sourceLabel}
-        </Link>
-        <span className={styles["team-hero__breadcrumb-sep"]}>/</span>
-        <span className={styles["team-hero__breadcrumb-current"]}>{team.name}</span>
-      </nav>
+      <div className={styles["team-hero__top-row"]}>
+        <nav className={styles["team-hero__breadcrumb"]}>
+          <Link to={sourcePath} className={styles["team-hero__breadcrumb-back"]}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            {sourceLabel}
+          </Link>
+          <span className={styles["team-hero__breadcrumb-sep"]}>/</span>
+          <span className={styles["team-hero__breadcrumb-current"]}>{team.name}</span>
+        </nav>
+        <SeasonSelector className={styles["team-hero__season"]} />
+      </div>
       <div className={styles["team-hero__body"]}>
         <img className={styles["team-hero__logo"]} src={logoUrl} alt={team.name} />
         <div className={styles["team-hero__info"]}>
