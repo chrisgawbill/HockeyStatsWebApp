@@ -1,11 +1,17 @@
-var express = require("express");
-const { getCurrentSeasonId } = require("../utils/seasonHelper");
-const { axiosNhl, axiosNhlTeam } = require("../services/nhlApiClient");
-const { GetOrFetch, CACHE_TYPES } = require("../utils/cacheManager");
-const { mapRoster } = require("../services/mappers/rosterMapper");
-const { mapGame } = require("../services/mappers/scheduleMapper");
+var express = require('express');
+const { validateSeason } = require('../utils/seasonHelper');
+const { axiosNhl, axiosNhlTeam } = require('../services/nhlApiClient');
+const { GetOrFetch, CACHE_TYPES } = require('../utils/cacheManager');
+const { mapRoster } = require('../services/mappers/rosterMapper');
+const { mapGame } = require('../services/mappers/scheduleMapper');
 
 var router = express.Router();
+
+/**
+ * All team routes are season-capable. Resolve the optional `?season=` query
+ * once at the router level so each handler can read `req.seasonId`.
+ */
+router.use(validateSeason);
 
 /**
  * Local-time-aware short weekday for a YYYY-MM-DD club-schedule date.
@@ -14,67 +20,96 @@ var router = express.Router();
  * @returns {string}
  */
 function shortDayOfWeek(gameDate) {
-  return new Date(`${gameDate}T12:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-  });
+	return new Date(`${gameDate}T12:00:00`).toLocaleDateString('en-US', {
+		weekday: 'short',
+	});
 }
 
-router.get("/roster/:triCode", async function (req, res, next) {
-  try {
-    const { triCode } = req.params;
-    const season = getCurrentSeasonId();
-    const raw = await GetOrFetch(
-      CACHE_TYPES.ROSTER,
-      `${triCode}_${season}`,
-      () => axiosNhl.get(`/roster/${triCode}/${season}`).then(r => r.data)
-    );
-    res.send(mapRoster(raw));
-  } catch (e) {
-    next(e);
-  }
+/**
+ * GET /team/roster/:triCode?season=
+ * Reads a team tri-code and validated season, fetches/caches the raw NHL roster
+ * for that team/season, and returns a normalized RosterContract.
+ */
+router.get('/roster/:triCode', async function (req, res, next) {
+	try {
+		const { triCode } = req.params;
+		const season = req.seasonId;
+		const raw = await GetOrFetch(
+			CACHE_TYPES.ROSTER,
+			`${triCode}_${season}`,
+			() => axiosNhl.get(`/roster/${triCode}/${season}`).then((r) => r.data),
+		);
+		res.send(mapRoster(raw));
+	} catch (e) {
+		next(e);
+	}
 });
 
-router.get("/schedule/:triCode", async function (req, res, next) {
-  try {
-    const { triCode } = req.params;
-    const season = req.query.season || getCurrentSeasonId();
-    const response = await axiosNhl.get(`/club-schedule-season/${triCode}/${season}`);
-    const games = (response.data.games ?? [])
-      .map((g) =>
-        mapGame(g, { date: g.gameDate, dayAbbrev: shortDayOfWeek(g.gameDate) }),
-      )
-      .sort((a, b) =>
-        new Date(`${a.date}T12:00:00`).getTime() -
-        new Date(`${b.date}T12:00:00`).getTime(),
-      );
-    res.send({ games });
-  } catch (e) {
-    next(e);
-  }
+/**
+ * GET /team/schedule/:triCode?season=
+ * Reads a team tri-code and validated season, fetches that club's season
+ * schedule, maps each game through the shared ScheduleGameContract mapper, and
+ * returns the games sorted by calendar date.
+ */
+router.get('/schedule/:triCode', async function (req, res, next) {
+	try {
+		const { triCode } = req.params;
+		const season = req.seasonId;
+		const response = await axiosNhl.get(
+			`/club-schedule-season/${triCode}/${season}`,
+		);
+		const games = (response.data.games ?? [])
+			.map((g) =>
+				mapGame(g, { date: g.gameDate, dayAbbrev: shortDayOfWeek(g.gameDate) }),
+			)
+			.sort(
+				(a, b) =>
+					new Date(`${a.date}T12:00:00`).getTime() -
+					new Date(`${b.date}T12:00:00`).getTime(),
+			);
+		res.send({ games });
+	} catch (e) {
+		next(e);
+	}
 });
 
-router.get("/stats", async function (req, res, next) {
-  try {
-    const url = "/summary?sort=shotsForPerGame&cayenneExp=seasonId=20232024 and gameTypeId=2";
-    const response = await axiosNhlTeam.get(url);
-    res.send(response.data);
-  } catch (e) {
-    next(e);
-  }
+/**
+ * GET /team/stats?season=
+ * Reads a validated season, queries raw league-wide regular-season team summary
+ * stats, and passes the NHL stats payload through unchanged.
+ */
+router.get('/stats', async function (req, res, next) {
+	try {
+		const season = req.seasonId;
+		const url = `/summary?sort=shotsForPerGame&cayenneExp=seasonId=${season} and gameTypeId=2`;
+		const response = await axiosNhlTeam.get(url);
+		res.send(response.data);
+	} catch (e) {
+		next(e);
+	}
 });
 
-router.get("/:teamId?", async function (req, res, next) {
-  try {
-    const { teamId } = req.params;
-    const season = req.query.season || getCurrentSeasonId();
-    const cayenneExp = teamId
-      ? `teamId%3D${teamId}%20and%20seasonId%3D${season}%20and%20gameTypeId%3D2`
-      : `seasonId%3D${season}%20and%20gameTypeId%3D2`;
-    const response = await axiosNhlTeam.get(`/summary?cayenneExp=${cayenneExp}`);
-    res.send(response.data);
-  } catch (e) {
-    next(e);
-  }
+/**
+ * GET /team/:teamId?season=
+ * Reads an optional NHL team id and validated season, queries raw regular-season
+ * team summary stats for that scope, and passes the NHL stats payload through
+ * unchanged.
+ */
+router.get('/:teamId?', async function (req, res, next) {
+	try {
+		const { teamId } = req.params;
+		const season = req.seasonId;
+		const cayenneExp =
+			teamId ?
+				`teamId%3D${teamId}%20and%20seasonId%3D${season}%20and%20gameTypeId%3D2`
+			:	`seasonId%3D${season}%20and%20gameTypeId%3D2`;
+		const response = await axiosNhlTeam.get(
+			`/summary?cayenneExp=${cayenneExp}`,
+		);
+		res.send(response.data);
+	} catch (e) {
+		next(e);
+	}
 });
 
 module.exports = router;

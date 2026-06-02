@@ -3,6 +3,13 @@
   padding-bottom: 2rem;
 }
 
+/* --- View toggle (Daily / Weekly / Monthly) --- */
+.schedule-view-toggle {
+  max-width: 30rem;
+  margin: 0 auto var(--space-lg);
+  padding: 0 var(--space-md);
+}
+
 /* --- Date navigation --- */
 .date-row {
   --bs-gutter-x: 0;
@@ -176,6 +183,11 @@
   font-weight: 700;
   letter-spacing: 0.3px;
   margin-bottom: 6px;
+  white-space: nowrap;
+}
+
+.game-playoff-badge svg {
+  flex-shrink: 0;
 }
 
 .game-final-score {
@@ -195,6 +207,7 @@
   text-transform: uppercase;
   background: var(--color-chip-bg);
   color: var(--color-muted-text);
+  white-space: nowrap;
 }
 
 .game-period-chip.overtime {
@@ -246,6 +259,37 @@
   .game-card {
     margin-right: var(--space-xs);
     margin-left: var(--space-xs);
+  }
+
+  /* Keep the matchup on one line so the score stays centered between teams */
+  .game-row {
+    flex-wrap: nowrap;
+  }
+
+  .team-info {
+    gap: 0.4rem;
+    min-width: 0; /* allow team columns to shrink evenly */
+  }
+
+  .team-info img {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+
+  .team-info h3 {
+    font-size: var(--text-sm);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .vs {
+    flex-shrink: 0; /* never squeeze the score/badge column */
+  }
+
+  .game-final-score {
+    font-size: 1.25rem;
   }
 
   .game-details {

@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext } from "react";
 import { TopStatLeader } from "../Models/TopStatLeader";
 import { useStatLeaders } from "../Hooks/useStatLeaders";
 import { STAT_LEADER_TYPES } from "../Constants/StatLeaderTypes";
+import { useSeason } from "./SeasonContext";
 
 interface GoalieLeaderContextValue {
   winsLeaderData: TopStatLeader | undefined;
@@ -13,8 +14,13 @@ interface GoalieLeaderContextValue {
 
 const GoalieLeaderContext = createContext<GoalieLeaderContextValue | null>(null);
 
+/**
+ * Loads goalie stat leaders for the current season via useStatLeaders and exposes
+ * each category (wins, save %, GAA, shutouts) under a named field for the UI.
+ */
 const GoalieLeaderDataProvider = ({ children }: { children: ReactNode }) => {
-  const { leaders, loading } = useStatLeaders(STAT_LEADER_TYPES.GOALIE);
+  const { season } = useSeason();
+  const { leaders, loading } = useStatLeaders(STAT_LEADER_TYPES.GOALIE, season);
   return (
     <GoalieLeaderContext.Provider value={{
       winsLeaderData:           leaders['Wins'],

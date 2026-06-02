@@ -10,26 +10,37 @@ interface Option<T extends string> {
 }
 
 interface Props<T extends string> {
-  options: [Option<T>, Option<T>];
+  options: [...Option<T>[]];
   value: T;
   onChange: (value: T) => void;
 }
 
+/**
+ * Generic segmented control: a row of options with a sliding indicator behind the
+ * active one. Generic over the value type so callers get type-safe `value`/
+ * `onChange`. Shared by the schedule view toggle and the standings view toggles.
+ */
 export default function SlidingToggle<T extends string>({
   options,
   value,
   onChange,
 }: Props<T>) {
-  const activeIndex = options.findIndex((o) => o.value === value);
+  const activeIndex = Math.max(0, options.findIndex((o) => o.value === value));
+  const count = options.length;
+  /**
+   * One indicator segment is exactly one button wide; translating by whole
+   * button widths keeps it aligned for any option count.
+   */
+  const indicatorStyle = {
+    width: `calc((100% - 8px) / ${count})`,
+    transform: `translateX(${activeIndex * 100}%)`,
+  };
 
   return (
     <div className={styles["sliding-toggle"]}>
       <div
         className={styles["sliding-toggle__indicator"]}
-        style={{
-          transform:
-            activeIndex === 1 ? "translateX(calc(100% + 4px))" : "translateX(0)",
-        }}
+        style={indicatorStyle}
       />
       {options.map((opt) => (
         <button
