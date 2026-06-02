@@ -95,7 +95,7 @@ Things to implement:
 - Include mapper cases for missing or renamed NHL fields, especially guarded `.default` unwrapping and `clinchingIndicator`/`clinchIndicator`
 - Unit test `isValidSeasonId`, `getCurrentSeasonId` where practical, and `validateSeason` middleware success/failure behavior
 - Add route-level tests for health diagnostics auth and at least one season-aware route using mocked NHL clients/cache boundaries
-- Verify cache keys include every response-changing input: season, team, stat category, and schedule/standings variants
+- Verify cache keys include every response-changing input where caching is used: season, team, stat category, and schedule/standings variants; explicitly note any intentionally uncached route boundaries
 - Keep NHL network access out of tests; use fixtures or small inline mock payloads
 - Document how to run the backend tests locally and what they intentionally do not cover yet
 ```
