@@ -65,15 +65,52 @@ Status legend: ☐ not started · ◐ in progress · ☑ done
 
 ---
 
-## ☐ 2.3 — Season and date range controls
+## ☑ 2.3 — Season and date range controls
+
+**Completed:** 2026-06-02
 
 ### What I have done
 
-_TODO_
+Season-aware controls (the original backlog scope):
+
+- **Backend optional `season` query param + validation** across `schedule.js`, `standings.js`, `player.js` (skater/goalie stat leaders, skater/goalie summary, skater corsi), and `team.js` (schedule, stats, summary). Validation and defaulting are centralized in a single `validateSeason` Express middleware (in `seasonHelper.js`) that resolves `?season=` onto `req.seasonId` — falling back to `getCurrentSeasonId()` when absent and responding `400` with the shared `INVALID_SEASON_MSG` when malformed. Handlers read `req.seasonId` instead of repeating the validate-and-default block.
+- Added `isValidSeasonId(idStr)` to `api/utils/seasonHelper.js` (8 digits + start year + 1 === end year).
+- **`season` is folded into every cache key** that varies by season (e.g. `skater_${stat}_${seasonId}`, `${triCode}_${season}`, the schedule/standings keys), so different seasons never collide in the filesystem cache.
+- `standings.js`: the NHL standings endpoint is **date-based, not season-based**, so it translates a season → end date via the `/standings-season` index (cached under the `season-index` key); the current season uses the live `/standings/now`.
+- `schedule.js`: `fetchSeasonSchedule` windows the fetch — current season = today + 28 days; past seasons = through June 30 of the following year.
+- **Frontend shared season state** in `SeasonContext.tsx`, backed by the `?season=` URL param; `SeasonProvider` wraps the app in `App.tsx` (outermost data provider, inside `HashRouter`); `useSeason()` hook. An invalid/absent `?season=` falls back to the current season, and `setSeason` preserves other params (`?date=`, `?view=`).
+- `react/src/Data/Helpers/SeasonHelper.ts`: `getCurrentSeasonId`, `isValidSeasonId`, `getRecentSeasonIds`, `formatSeasonLabel` ("20252026" → "2025–26").
+- `SeasonSelector` component (+ styles) placed on Landing, Schedule, Standings, and Team pages. It deep-link-tolerant: a `?season=` outside the recent-N window is appended so the controlled `<select>` always has a matching option.
+- Contexts/hooks re-fetch on season change: `ScheduleContext`, `StandingsContext`, and skater/goalie leaders via `useStatLeaders(type, season)`.
+- `ApiHandler.ts` threads `season` through all relevant calls via the `withParams` helper (no hand-rolled `?season=` query strings remain).
+- `EmptyState` component (+ styles) shown on Schedule and Standings when a season has no data.
+
+Schedule multi-view (added to this ticket on top of the original backlog scope):
+
+- Added `?view=day|week|month` to the URL (frontend-only, alongside `season`/`date`).
+- View toggle reuses the existing `SlidingToggle` (also used on StandingsPage).
+- `groupGamesByDate(games)` in `ScheduleHelper` keys by `formatDateParam(game.date)` — the same formatter the calendar looks up by, so keys always match.
+- `GameChip` — compact dense matchup unit for the grid cells (stacks away-over-home), separate from the tall `ScheduleCard` used in day view.
+- `ScheduleCalendar` — one shared 7-column grid that serves both week (7 consecutive days) and month (1st…last with a leading weekday offset) views.
+- Overflow rule: up to `maxVisible` chips per day, then "+N more" → drops into the day view for that date.
+- Extracted presentation-only schedule helpers into `GameStatusHelper.ts` (`convertUTCToLocal`, `hasScore`, `isGameInProgress`, `getGameStatusLabel`) shared by the day cards and the calendar chips.
+
+### Review cleanups (resolved)
+
+The redundancies surfaced during review are now closed out:
+
+- [x] Routed the hand-rolled `?season=` builders in `ApiHandler.ts` through `withParams`.
+- [x] Extracted the repeated season validate-and-default block into one `validateSeason` Express middleware (sets `req.seasonId`) plus a single exported `INVALID_SEASON_MSG`, applied across `standings.js`, `schedule.js`, `player.js`, and `team.js`. This also fixed two latent bugs in the earlier hand-rolled state: a helper that referenced an out-of-scope `res` (threw on invalid input instead of returning a clean `400`), and a `schedule.js` call that invoked the validator but ignored its result (so invalid seasons were never rejected).
+- [x] Consolidated `parseLocalDate` — `DatePicker.tsx` no longer defines its own copy.
+- [x] Empty-state consistency — `EmptyState` is now also used on the landing page (`PlayerStatLeaderRow`).
 
 ### What I have learned
 
-_TODO_
+- **Of the three URL params, only `season` reaches the API.** `date` and `view` are frontend-only — they decide how to slice/display data already in `listOfGamesData`, so neither belongs in an `ApiHandler` call.
+- **Week/month views are client-side projections, not new fetches.** `ScheduleContext` already loads the whole season in one go, so the grids just group and re-render the same array.
+- **The standings endpoint is date-based, not season-based** — translating a season needs the `/standings-season` index for the settled end date (current season uses the live `/now` route).
+- **A season-aware cache key is part of the feature, not an afterthought.** Once a query param changes the response, every cache key that varies by season has to include it or stale data from another season leaks through.
+- **Group and look up with the same key formatter.** `groupGamesByDate` and the calendar cells both key off `formatDateParam`, so the grid can't silently miss games because one side used a `Date` and the other a string.
 
 ---
 

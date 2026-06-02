@@ -52,7 +52,7 @@ Things to implement:
 
 ## 2.3 Season and date range controls
 
-- [ ] **Owner:** Either | **Depends on:** 2.2
+- [x] **Owner:** Either | **Depends on:** 2.2 | **Done:** 2026-06-02 (see [phase-2-progress.md](./phase-2-progress.md#23--season-and-date-range-controls))
 
 Let users explore past and current seasons instead of only the season inferred by `seasonHelper` and the currently cached schedule window.
 

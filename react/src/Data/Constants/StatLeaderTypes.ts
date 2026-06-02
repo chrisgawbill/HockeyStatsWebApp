@@ -14,9 +14,13 @@ export interface StatEntry {
 
 interface StatLeaderConfig {
   stats: StatEntry[];
-  fetcher: (statIndicator: string) => Promise<any>;
+  fetcher: (statIndicator: string, season?: string) => Promise<any>;
 }
 
+/**
+ * Stat-leader load plan per player type. `displayKey` is the UI bucket label;
+ * `apiKey` is the NHL stat category passed to the backend route.
+ */
 export const STAT_CONFIG: Record<StatLeaderType, StatLeaderConfig> = {
   [STAT_LEADER_TYPES.SKATER]: {
     stats: [

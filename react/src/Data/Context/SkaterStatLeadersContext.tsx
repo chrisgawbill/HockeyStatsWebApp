@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext } from "react";
 import { TopStatLeader } from "../Models/TopStatLeader";
 import { useStatLeaders } from "../Hooks/useStatLeaders";
 import { STAT_LEADER_TYPES } from "../Constants/StatLeaderTypes";
+import { useSeason } from "./SeasonContext";
 
 interface SkaterLeaderContextValue {
   goalLeaderData: TopStatLeader | undefined;
@@ -13,8 +14,13 @@ interface SkaterLeaderContextValue {
 
 const SkaterStatLeaderContext = createContext<SkaterLeaderContextValue | null>(null);
 
+/**
+ * Loads skater stat leaders for the current season via useStatLeaders and exposes
+ * each category (goals, assists, points, faceoffs) under a named field for the UI.
+ */
 const SkaterStatLeaderProvider = ({ children }: { children: ReactNode }) => {
-  const { leaders, loading } = useStatLeaders(STAT_LEADER_TYPES.SKATER);
+  const { season } = useSeason();
+  const { leaders, loading } = useStatLeaders(STAT_LEADER_TYPES.SKATER, season);
   return (
     <SkaterStatLeaderContext.Provider value={{
       goalLeaderData:      leaders['Goals'],

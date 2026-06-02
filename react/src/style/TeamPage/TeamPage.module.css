@@ -25,10 +25,34 @@
   margin-bottom: var(--space-xl);
 }
 
+/* Breadcrumb on the left, season selector centered in the row, with a balancing
+   empty third column so the selector stays centered regardless of breadcrumb width. */
+.team-hero__top-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.team-hero__season {
+  grid-column: 2;
+  /* Drop the standalone bar's page margins; the row handles spacing. */
+  margin: 0;
+  padding: 0;
+  /* Tint the pill as a light shade of the team (hero) color instead of plain white,
+     with a dark shade of the same hue for text so it stays legible and on-brand. */
+  --season-bg: color-mix(in srgb, var(--color-primary) 24%, white);
+  --season-border: color-mix(in srgb, var(--color-primary) 45%, white);
+  --season-text: color-mix(in srgb, var(--color-primary) 78%, black);
+  --season-label: color-mix(in srgb, var(--color-primary) 60%, black);
+  --season-accent: color-mix(in srgb, var(--color-primary) 70%, black);
+}
+
 .team-hero__breadcrumb {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
+  min-width: 0;
 }
 
 .team-hero__breadcrumb-back {

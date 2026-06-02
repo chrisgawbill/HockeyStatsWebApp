@@ -54,14 +54,12 @@ Because this uses `HashRouter`, URLs are intended to work in static hosting envi
 
 ### Global Providers
 
-`react/src/index.tsx` wraps the app in several providers:
+The providers are split across two files by whether they depend on routing or the selected season:
 
-- `ThemeProvider`
-- `ListOfTeamsDataProvider`
-- `ListOfGamesProvider`
-- `StandingsDataProvider`
-- `SkaterStatLeaderProvider`
-- `GoalieLeaderDataProvider`
+- `react/src/index.tsx` wraps the app in the providers that need neither — `ThemeProvider` and `ListOfTeamsDataProvider` — then renders `<App />`.
+- `react/src/App.tsx` nests the rest *inside* `HashRouter`, in this order: `SeasonProvider` → `StandingsDataProvider` → `ListOfGamesProvider` → `SkaterStatLeaderProvider` → `GoalieLeaderDataProvider` → `Routes`.
+
+This ordering is deliberate. `SeasonProvider` (`react/src/Data/Context/SeasonContext.tsx`) reads the `?season=` URL param via `useSearchParams`, so it must sit inside `HashRouter`. The season-dependent data providers re-fetch when the selection changes, so they must sit inside `SeasonProvider`. `ThemeProvider`/`ListOfTeamsDataProvider` depend on neither, so they stay at the `index.tsx` root. See [Season Selection](#season-selection).
 
 These providers fetch shared data once and make it available to pages through custom hooks. This keeps page components from repeatedly fetching the same high-level data.
 
@@ -95,7 +93,7 @@ The frontend data layer lives under `react/src/Data/`.
 Use this structure when deciding where code belongs:
 
 - `Models/`: class-like data shapes used by the UI, such as `ScheduledGame`, `Team`, `StandingsTeam`, and `PlayerStatLeader`.
-- `Helpers/`: conversion logic that wraps normalized backend contracts into app model classes (and layers on app-only logic such as draft-lottery odds). For the most-used NHL data, raw-field extraction now happens in the backend mappers (see [Backend Response Contracts](#backend-response-contracts)), so these helpers no longer parse raw NHL shapes.
+- `Helpers/`: conversion logic that wraps normalized backend contracts into app model classes (and layers on app-only logic such as draft-lottery odds). For the most-used NHL data, raw-field extraction now happens in the backend mappers (see [Backend Response Contracts](#backend-response-contracts)), so these helpers no longer parse raw NHL shapes. Also home to presentation-only helpers (`GameStatusHelper.ts` for schedule time/status formatting, `ScheduleHelper.ts` date grouping) and frontend season utilities (`SeasonHelper.ts`, see [Season Selection](#season-selection)).
 - `Context/`: React providers and hooks for shared state.
 - `Hooks/`: reusable custom hooks that compose services, helpers, and constants. For example, `useStatLeaders.ts` loads and tracks stat leader data using `STAT_CONFIG` and `PlayerStatLeaderConverter`.
 - `Constants/`: static configuration such as stat leader category mappings.
@@ -109,7 +107,7 @@ Pages are route-level containers. They usually fetch or assemble data, then pass
 
 - `LandingPage` shows stat leaders, standings, and draft lottery odds from global contexts.
 - `StandingsPage` switches between conference and division standings using data from `StandingsContext`.
-- `SchedulePage` reads all scheduled games from `ScheduleContext`, filters by selected date, and links completed games to detail pages.
+- `SchedulePage` reads all scheduled games from `ScheduleContext` and renders one of three views chosen by a `?view=day|week|month` URL param (toggled with the shared `SlidingToggle`). Day view uses the tall `ScheduleCard`; week/month views render the shared `ScheduleCalendar` 7-column grid of compact `GameChip`s. All three are client-side projections of the same already-loaded season array — only `?season=` triggers a re-fetch (see [Season Selection](#season-selection)). Completed games link to detail pages.
 - `GameDetailPage` fetches boxscore and landing data for one game, computes period scores and team totals, then renders game-detail sections.
 - `TeamPage` fetches team stats, roster, schedule, skater stats, goalie stats, and AI-generated static history info for one team.
 
@@ -130,29 +128,29 @@ The backend is an Express app in `api/`. It listens on port `9000` by default.
 
 ### Backend Route Modules
 
-Routes are grouped by NHL domain:
+Routes are grouped by NHL domain. Most data routes accept an optional `?season=` query param; see [Season Selection](#season-selection) for the shared validation and defaulting behavior.
 
 - `api/routes/standings.js`
-  - `GET /standings`
-  - Fetches current standings from `https://api-web.nhle.com/v1/standings/now`
+  - `GET /standings` — optional `?season=`
+  - Current season uses the live `https://api-web.nhle.com/v1/standings/now`; a past season is translated to its settled end date via the `/standings-season` index, since the NHL standings endpoint is date-based, not season-based
   - Normalizes each team into a `StandingsTeamContract` via `standingsMapper` (see [Backend Response Contracts](#backend-response-contracts))
 
 - `api/routes/schedule.js`
-  - `GET /schedule/`
-  - Fetches a season-to-near-future schedule by calling weekly NHL schedule endpoints, then returns `{ games }` where each game is a `ScheduleGameContract`
+  - `GET /schedule/` — optional `?season=`
+  - Fetches a season schedule by calling weekly NHL schedule endpoints, then returns `{ games }` where each game is a `ScheduleGameContract`. The fetch window depends on the season: the current season runs from October 1 through today + 28 days; a past season runs through June 30 of the following year
   - `GET /schedule/landing/:gameID`
   - Fetches game landing data (raw passthrough)
   - `GET /schedule/:gameID`
   - Fetches game boxscore data (raw passthrough)
 
-- `api/routes/team.js`
+- `api/routes/team.js` (all accept optional `?season=`)
   - `GET /team/roster/:triCode` — returns a normalized `RosterContract` (`{ players }`)
   - `GET /team/schedule/:triCode` — returns `{ games }` of `ScheduleGameContract`, sorted by date
   - `GET /team/stats` — raw team summary stats (not yet normalized)
   - `GET /team/:teamId?` — raw team summary stats (not yet normalized)
   - Uses NHL team stats and club schedule endpoints
 
-- `api/routes/player.js`
+- `api/routes/player.js` (all accept optional `?season=`)
   - `GET /player/skater/statLeaders/:statIndicator` — flat array of `StatLeaderContract`
   - `GET /player/goalie/statLeaders/:statIndicator` — flat array of `StatLeaderContract`
   - `GET /player/skater/summary` — array of `SkaterSummaryContract`
@@ -229,9 +227,33 @@ Use `GetOrFetch(type, key, fetcher)` for new cached backend fetches. It checks t
 
 ### Season IDs
 
-`api/utils/seasonHelper.js` computes the current NHL season ID. NHL season IDs are strings like `20252026`. The helper treats October as the start of a new season.
+`api/utils/seasonHelper.js` exposes two helpers. `getCurrentSeasonId()` computes the current NHL season ID — strings like `20252026`, treating October as the start of a new season. `isValidSeasonId(idStr)` validates the format (8 digits, where the first 4 + 1 equals the last 4).
 
-Use this helper rather than hard-coding season IDs, except when intentionally showing historical data.
+Use these helpers rather than hard-coding season IDs, except when intentionally showing historical data.
+
+## Season Selection
+
+Season-aware controls let users browse past seasons instead of only the one inferred by `seasonHelper`. The same `seasonId` flows from a frontend selector, through the URL, to the season-capable backend routes.
+
+### Backend
+
+Season-capable routes (`standings.js`, `schedule.js`, `team.js`, `player.js`) share one Express middleware, `validateSeason` (exported from `api/utils/seasonHelper.js`):
+
+1. It reads the optional `?season=` query param.
+2. If present and `isValidSeasonId` rejects it, it responds `400` with the shared `INVALID_SEASON_MSG` and stops.
+3. Otherwise it resolves `season || getCurrentSeasonId()` onto `req.seasonId`. Handlers read `req.seasonId` and use it everywhere downstream — including the **cache key**, so different seasons never collide in the filesystem cache (e.g. `skater_${stat}_${seasonId}`, `${triCode}_${season}`).
+
+Apply it as route middleware (`router.get(path, validateSeason, handler)`) or, where every route in a module is season-capable, at the router level (`router.use(validateSeason)` — as `team.js` does). Add it to any new season-capable route rather than re-inlining the validate-and-default logic.
+
+Two endpoints don't take a season directly and translate instead: standings is date-based (a past season → its `standingsEnd` date from the `/standings-season` index), and the schedule fetch windows by season (see the route notes above).
+
+### Frontend
+
+`SeasonContext.tsx` holds the shared selection, backed by the `?season=` URL param (so a season is deep-linkable and survives refresh). `SeasonProvider` wraps the app inside `HashRouter`; `useSeason()` returns `{ season, setSeason }`. An absent or invalid param falls back to `getCurrentSeasonId()`, and `setSeason` preserves other params such as `?date=` and `?view=`.
+
+`react/src/Data/Helpers/SeasonHelper.ts` is the frontend twin of the backend helper: `getCurrentSeasonId`, `isValidSeasonId`, plus `getRecentSeasonIds(count)` and `formatSeasonLabel` ("20252026" → "2025–26") for the picker.
+
+The `SeasonSelector` component (Landing, Schedule, Standings, Team pages) is a controlled `<select>` over the recent seasons; a deep-linked season outside that window is appended so the control always has a matching option. Data providers/hooks (`ScheduleContext`, `StandingsContext`, `useStatLeaders`) re-fetch when `season` changes, and `ApiHandler.ts` threads `season` through the relevant calls (most via its `withParams` helper). When a selected season has no data, pages render the shared `EmptyState` component.
 
 ## AI Integration
 
@@ -331,6 +353,7 @@ Draft lottery odds are currently calculated locally in `LeagueStandingsHelper.ts
 - Reuse clients from `api/services/nhlApiClient.js`.
 - Use `GetOrFetch` for data that is expensive, reused, or unlikely to need second-by-second freshness.
 - Choose cache keys that include every input affecting the response, such as team ID, tri-code, stat name, and season.
+- For season-capable routes, apply the shared `validateSeason` middleware and read `req.seasonId` rather than re-inlining the validate-and-default logic (see [Season Selection](#season-selection)).
 - Pass errors to `next(error)` so the shared JSON error handler responds consistently.
 - Keep route handlers thin: validate/collect request inputs, fetch (via `GetOrFetch` where appropriate), then map the raw response through a mapper in `api/services/mappers/` before returning JSON. Put all NHL-field knowledge in the mapper, not the handler.
 - When normalizing cached data, map **after** `GetOrFetch` so the cache stores the raw response (see [Backend Response Contracts](#backend-response-contracts)).
