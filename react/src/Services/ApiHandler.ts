@@ -1,17 +1,42 @@
 import { axiosExpressHandler } from './AxiosInstance';
-export async function GetCurrentStandings() {
+
+/**
+ * Frontend API client: one async function per backend operation. Each issues a
+ * GET through the shared axios instance, returns `response.data`, and logs then
+ * re-throws on failure so callers can surface their own loading/empty states.
+ * Season-aware calls take an optional `season` and thread it through `withParams`.
+ */
+
+const DIAGNOSTICS_HEADER = 'x-diagnostics-key';
+
+/**
+ * Appends only the defined params to `path` as a query string (empty/undefined
+ * values are dropped), so `?season=` etc. is added only when actually set.
+ */
+function withParams(
+	path: string,
+	params: Record<string, string | undefined>,
+): string {
+	const search = new URLSearchParams();
+	for (const [key, value] of Object.entries(params)) {
+		if (value) search.set(key, value);
+	}
+	const qs = search.toString();
+	return qs ? `${path}?${qs}` : path;
+}
+export async function GetCurrentStandings(season?: string) {
 	try {
-		const response = await axiosExpressHandler.get('/standings');
+		const response = await axiosExpressHandler.get(withParams('/standings', { season }));
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching data: ', error);
 		throw error;
 	}
 }
-export async function GetSkaterStatLeaders(statIndicator: string) {
+export async function GetSkaterStatLeaders(statIndicator: string, season?: string) {
 	try {
 		const response = await axiosExpressHandler.get(
-			'/player/skater/statLeaders/' + statIndicator,
+			withParams(`/player/skater/statLeaders/${statIndicator}`, { season }),
 		);
 		return response.data;
 	} catch (error) {
@@ -19,10 +44,10 @@ export async function GetSkaterStatLeaders(statIndicator: string) {
 		throw error;
 	}
 }
-export async function GetGoalieStatLeaders(statIndicator: string) {
+export async function GetGoalieStatLeaders(statIndicator: string, season?: string) {
 	try {
 		const response = await axiosExpressHandler.get(
-			'/player/goalie/statLeaders/' + statIndicator,
+			withParams(`/player/goalie/statLeaders/${statIndicator}`, { season }),
 		);
 		return response.data;
 	} catch (error) {
@@ -39,18 +64,18 @@ export async function GetListOfTeams() {
 		throw error;
 	}
 }
-export async function GetTeamStatsById(teamId: string) {
+export async function GetTeamStatsById(teamId: string, season?: string) {
 	try {
-		const response = await axiosExpressHandler.get('/team/' + teamId);
+		const response = await axiosExpressHandler.get(withParams(`/team/${teamId}`, { season }));
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching data: ', error);
 		throw error;
 	}
 }
-export async function GetScheduledGames() {
+export async function GetScheduledGames(season?: string) {
 	try {
-		const response = await axiosExpressHandler.get('/schedule/');
+		const response = await axiosExpressHandler.get(withParams('/schedule/', { season }));
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching data: ', error);
@@ -77,30 +102,29 @@ export async function GetGameDetails(gameID: number) {
 		throw error;
 	}
 }
-export async function GetTeamRoster(triCode: string) {
+export async function GetTeamRoster(triCode: string, season?: string) {
 	try {
-		const response = await axiosExpressHandler.get(`/team/roster/${triCode}`);
+		const response = await axiosExpressHandler.get(
+			withParams(`/team/roster/${triCode}`, { season }),
+		);
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching team roster: ', error);
 		throw error;
 	}
 }
-export async function GetTeamSchedule(triCode: string) {
+export async function GetTeamSchedule(triCode: string, season?: string) {
 	try {
-		const response = await axiosExpressHandler.get(`/team/schedule/${triCode}`);
+		const response = await axiosExpressHandler.get(withParams(`/team/schedule/${triCode}`, { season }));
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching team schedule: ', error);
 		throw error;
 	}
 }
-export async function GetSkaterSummary(teamId?: string) {
+export async function GetSkaterSummary(teamId?: string, season?: string) {
 	try {
-		const url =
-			teamId ?
-				`/player/skater/summary?teamId=${teamId}`
-			:	'/player/skater/summary';
+		const url = withParams('/player/skater/summary', { teamId, season });
 		const response = await axiosExpressHandler.get(url);
 		return response.data;
 	} catch (error) {
@@ -108,10 +132,9 @@ export async function GetSkaterSummary(teamId?: string) {
 		throw error;
 	}
 }
-export async function GetSkaterCorsi(teamId?: string) {
+export async function GetSkaterCorsi(teamId?: string, season?: string) {
 	try {
-		const url =
-			teamId ? `/player/skater/corsi?teamId=${teamId}` : '/player/skater/corsi';
+		const url = withParams('/player/skater/corsi', { teamId, season });
 		const response = await axiosExpressHandler.get(url);
 		return response.data;
 	} catch (error) {
@@ -119,12 +142,9 @@ export async function GetSkaterCorsi(teamId?: string) {
 		throw error;
 	}
 }
-export async function GetGoalieSummary(teamId?: string) {
+export async function GetGoalieSummary(teamId?: string, season?: string) {
 	try {
-		const url =
-			teamId ?
-				`/player/goalie/summary?teamId=${teamId}`
-			:	'/player/goalie/summary';
+		const url = withParams('/player/goalie/summary', { teamId, season });
 		const response = await axiosExpressHandler.get(url);
 		return response.data;
 	} catch (error) {
@@ -132,10 +152,13 @@ export async function GetGoalieSummary(teamId?: string) {
 		throw error;
 	}
 }
-export async function GetDraft() {
-	// return axiosNhl.get("/draft")
-}
-const DIAGNOSTICS_HEADER = 'x-diagnostics-key';
+/**
+ * Placeholder for a future draft endpoint. Draft lottery odds are currently
+ * computed locally from league rank in LeagueStandingsHelper, so this returns
+ * nothing by design.
+ */
+export async function GetDraft() {}
+
 export async function GetHealth(passphrase: string) {
 	try {
 		const response = await axiosExpressHandler.get('/health', {
