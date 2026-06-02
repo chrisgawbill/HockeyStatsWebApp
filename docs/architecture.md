@@ -331,7 +331,7 @@ Draft lottery odds are currently calculated locally in `LeagueStandingsHelper.ts
 ### General
 
 - Keep frontend API calls in `react/src/Services/ApiHandler.ts` unless there is a strong reason to create a separate service.
-- Keep raw NHL response conversion in `react/src/Data/Helpers/`.
+- Keep raw NHL response conversion at the backend boundary in `api/services/mappers/` for shared NHL data. Frontend helpers should wrap normalized contracts and own presentation-only or derived app logic.
 - Keep reusable display components in `react/src/Components/`.
 - Keep route-level orchestration in `react/src/Pages/`.
 - Use existing model classes in `react/src/Data/Models/` when passing structured data through the UI.
