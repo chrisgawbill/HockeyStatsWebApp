@@ -114,7 +114,7 @@ The redundancies surfaced during review are now closed out:
 
 ---
 
-## ☐ 2.4 — Schedule search, filters, and team calendar
+## ☐ 2.4 — Backend contract and season test coverage
 
 ### What I have done
 
@@ -126,7 +126,7 @@ _TODO_
 
 ---
 
-## ☐ 2.5 — Enhanced game detail pages
+## ☐ 2.5 — Schedule search, filters, and team calendar
 
 ### What I have done
 
@@ -138,7 +138,7 @@ _TODO_
 
 ---
 
-## ☐ 2.6 — Team page depth: roster, schedule, leaders, and history
+## ☐ 2.6 — Enhanced game detail pages
 
 ### What I have done
 
@@ -150,7 +150,7 @@ _TODO_
 
 ---
 
-## ☐ 2.7 — Player profile pages
+## ☐ 2.7 — Team page depth: roster, schedule, leaders, and history
 
 ### What I have done
 
@@ -162,7 +162,7 @@ _TODO_
 
 ---
 
-## ☐ 2.8 — Favorites and personalized dashboard
+## ☐ 2.8 — Player profile pages
 
 ### What I have done
 
@@ -174,7 +174,7 @@ _TODO_
 
 ---
 
-## ☐ 2.9 — Advanced standings and playoff race views
+## ☐ 2.9 — Favorites and personalized dashboard
 
 ### What I have done
 
@@ -186,7 +186,7 @@ _TODO_
 
 ---
 
-## ☐ 2.10 — Search across teams, players, and games
+## ☐ 2.10 — Advanced standings and playoff race views
 
 ### What I have done
 
@@ -198,7 +198,7 @@ _TODO_
 
 ---
 
-## ☐ 2.11 — AI history hardening and source separation
+## ☐ 2.11 — Search across teams, players, and games
 
 ### What I have done
 
@@ -210,7 +210,19 @@ _TODO_
 
 ---
 
-## ☐ 2.12 — Test coverage and release readiness
+## ☐ 2.12 — AI history hardening and source separation
+
+### What I have done
+
+_TODO_
+
+### What I have learned
+
+_TODO_
+
+---
+
+## ☐ 2.13 — Frontend coverage and release readiness
 
 ### What I have done
 
