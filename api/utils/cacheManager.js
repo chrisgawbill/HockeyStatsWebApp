@@ -12,13 +12,15 @@ const CACHE_TYPES = {
 	STAT_LEADERS: 'stat-leaders',
 };
 
+const CACHE_ROOT = path.join(__dirname, '../cache/');
+
 const CACHE_DIRS = {
-	[CACHE_TYPES.PLAYER]: path.join(__dirname, '../player-cache/'),
-	[CACHE_TYPES.ROSTER]: path.join(__dirname, '../roster-cache/'),
-	[CACHE_TYPES.AI]: path.join(__dirname, '../ai-cache/'),
-	[CACHE_TYPES.SCHEDULE]: path.join(__dirname, '../schedule-cache/'),
-	[CACHE_TYPES.STANDINGS]: path.join(__dirname, '../standings-cache/'),
-	[CACHE_TYPES.STAT_LEADERS]: path.join(__dirname, '../stat-leaders-cache/'),
+	[CACHE_TYPES.PLAYER]: path.join(CACHE_ROOT, 'player-cache/'),
+	[CACHE_TYPES.ROSTER]: path.join(CACHE_ROOT, 'roster-cache/'),
+	[CACHE_TYPES.AI]: path.join(CACHE_ROOT, 'ai-cache/'),
+	[CACHE_TYPES.SCHEDULE]: path.join(CACHE_ROOT, 'schedule-cache/'),
+	[CACHE_TYPES.STANDINGS]: path.join(CACHE_ROOT, 'standings-cache/'),
+	[CACHE_TYPES.STAT_LEADERS]: path.join(CACHE_ROOT, 'stat-leaders-cache/'),
 };
 
 const CACHE_TTLS = {
@@ -76,7 +78,8 @@ async function GetOrFetch(type, key, fetcher) {
 
 async function isCacheWritable() {
 	try {
-		await fs.promises.access(path.join(__dirname, '../'), fs.constants.W_OK);
+		await fs.promises.mkdir(CACHE_ROOT, { recursive: true });
+		await fs.promises.access(CACHE_ROOT, fs.constants.W_OK);
 		return true;
 	} catch (e) {
 		return false;
