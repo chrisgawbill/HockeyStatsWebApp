@@ -258,7 +258,7 @@ Domain tables live behind explicit SQL migrations under `api/db/migrations/`. Ru
 
 ```text
 cd api
-npm run db:migrate
+pnpm run db:migrate
 ```
 
 The migration runner (`api/db/migrate.js`) reads `CACHE_DATABASE_URL` and `CACHE_DATABASE_SSL` from `api/.env`, creates `schema_migrations` if needed, applies only pending `.sql` files, and records each successful migration. The first migration creates:
@@ -440,14 +440,16 @@ Typical development setup:
 ```text
 Backend:
   cd api
-  npm install
-  npm start
+  pnpm install
+  pnpm start
 
 Frontend:
   cd react
   pnpm install
   pnpm start
 ```
+
+This project standardizes on `pnpm`; `package-lock.json` files are gitignored.
 
 The frontend defaults to `http://localhost:9000` for API calls. Set `VITE_API_URL` if the backend is running somewhere else.
 
@@ -461,4 +463,4 @@ The backend allows CORS from:
 
 - `TeamPage.tsx` still holds some display-shaping logic inline (grouping roster players by position, formatting TOI, building stat rows), but the raw NHL parsing it used to duplicate now lives in the backend mappers. If team page behavior grows, consider moving the remaining display transforms into helper files near `react/src/Data/Helpers/`.
 - Team summary stats (`/team/stats`, `/team/:teamId?`) and skater corsi (`/player/skater/corsi`) are not yet normalized into contracts. If they grow more consumers, add mappers for them under `api/services/mappers/`.
-- The root `README.md` and existing architecture doc were empty at the time this document was written, so this file is the main architecture reference.
+- This file is the main architecture reference. The root `README.md` is a short orientation/quick-start that links here.
