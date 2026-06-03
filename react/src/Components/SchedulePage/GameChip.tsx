@@ -9,7 +9,7 @@ import {
 } from "../../Data/Helpers/gameStatusHelper";
 import styles from "../../style/ScheduleCalendar.module.css";
 
-function cx(...classes: Array<string | false | null | undefined>) {
+function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 

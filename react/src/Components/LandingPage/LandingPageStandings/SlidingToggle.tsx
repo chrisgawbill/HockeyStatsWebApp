@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "../../../style/LandingPage/SlidingToggle.module.css";
 
-function cx(...classes: Array<string | false | null | undefined>) {
+function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 

@@ -6,7 +6,7 @@ import styles from "../../style/ScheduleCalendar.module.css";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-function cx(...classes: Array<string | false | null | undefined>) {
+function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 

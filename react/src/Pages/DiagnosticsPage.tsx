@@ -4,7 +4,7 @@ import LoadingState from '../Components/LoadingState';
 import { GetHealth, GetCacheReport } from '../Services/apiHandler';
 import styles from '../style/DiagnosticsPage.module.css';
 
-function cx(...classes: Array<string | false | null | undefined>) {
+function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }
 

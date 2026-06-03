@@ -9,7 +9,7 @@ import { formatSeasonLabel } from "../../Data/Helpers/seasonHelper";
 
 interface PlayerStatLeaderProps {
   title: string;
-  topStatLeaders: Array<TopStatLeader | undefined>;
+  topStatLeaders: (TopStatLeader | undefined)[];
 }
 
 /**

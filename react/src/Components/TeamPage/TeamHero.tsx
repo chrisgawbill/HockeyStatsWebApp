@@ -5,7 +5,7 @@ import { localTeamList } from "../../Data/LocalData/teamListData";
 import SeasonSelector from "../SeasonSelector";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 
-function cx(...classes: Array<string | false | null | undefined>) {
+function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -36,7 +36,7 @@ export default function TeamHero({ team }: TeamHeroProps) {
           : "Team List";
   const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${team.triCode}_dark.svg`;
   var primaryColor = localTeamList.find(
-    (x) => x.triCode == team.triCode,
+    (x) => x.triCode === team.triCode,
   )?.primary;
 
   return (

@@ -3,7 +3,7 @@ import { getTeamPrimaryColor } from "../../Data/Helpers/teamColor";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/GameDetailPage.module.css";
 
-function cx(...classes: Array<string | false | null | undefined>) {
+function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 

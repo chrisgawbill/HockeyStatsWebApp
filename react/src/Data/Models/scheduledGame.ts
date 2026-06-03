@@ -1,6 +1,6 @@
 import { GameBroadcast } from "./gameBroadcast";
 
-export interface IScheduledGame {
+export interface ScheduledGameShape {
   gameId: number;
   date: Date;
   gameTime: string;
@@ -23,7 +23,7 @@ export interface IScheduledGame {
   bottomSeedTeamAbbrev: string| null;
   gameState: string;
 }
-export class ScheduledGame implements IScheduledGame {
+export class ScheduledGame implements ScheduledGameShape {
   gameId: number;
   date: Date;
   gameTime: string;
