@@ -606,17 +606,17 @@
 
 /* ── Dark mode overrides for hardcoded win/loss/playoff colors ──────────── */
 
-[data-theme="dark"] .schedule-strip__score.win,
-[data-theme="dark"] .schedule-strip__result.win {
+[data-theme='dark'] .schedule-strip__score.win,
+[data-theme='dark'] .schedule-strip__result.win {
   color: var(--color-success);
 }
 
-[data-theme="dark"] .schedule-strip__score.loss,
-[data-theme="dark"] .schedule-strip__result.loss {
+[data-theme='dark'] .schedule-strip__score.loss,
+[data-theme='dark'] .schedule-strip__result.loss {
   color: var(--color-danger);
 }
 
-[data-theme="dark"] .schedule-strip__playoff-badge {
+[data-theme='dark'] .schedule-strip__playoff-badge {
   color: #ff8a65;
 }
 
@@ -624,17 +624,17 @@
 /* Teams with dark primary colors (navy, black, dark red) are invisible as   */
 /* text on dark card surfaces without this adjustment.                        */
 
-[data-theme="dark"] .info-card__value,
-[data-theme="dark"] .stat-pill__value,
-[data-theme="dark"] .player-stat-row__value,
-[data-theme="dark"] .schedule-strip__nav,
-[data-theme="dark"] .schedule-strip__badge.home,
-[data-theme="dark"] .player-stat-tab:hover,
-[data-theme="dark"] .player-stat-tab.active {
+[data-theme='dark'] .info-card__value,
+[data-theme='dark'] .stat-pill__value,
+[data-theme='dark'] .player-stat-row__value,
+[data-theme='dark'] .schedule-strip__nav,
+[data-theme='dark'] .schedule-strip__badge.home,
+[data-theme='dark'] .player-stat-tab:hover,
+[data-theme='dark'] .player-stat-tab.active {
   color: color-mix(in srgb, var(--color-primary) 55%, white);
 }
 
-[data-theme="dark"] .player-stat-tab.active {
+[data-theme='dark'] .player-stat-tab.active {
   border-bottom-color: color-mix(in srgb, var(--color-primary) 55%, white);
 }
 

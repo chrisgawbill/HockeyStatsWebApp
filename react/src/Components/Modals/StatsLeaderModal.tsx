@@ -1,11 +1,11 @@
-import React from "react";
-import { PlayerStatLeader } from "../../Data/Models/playerStatLeader";
-import { Modal, Button } from "react-bootstrap";
-import { CompactTable } from "@table-library/react-table-library/compact";
-import { useTheme } from "@table-library/react-table-library/theme";
-import { getTheme } from "@table-library/react-table-library/baseline";
+import React from 'react';
+import { PlayerStatLeader } from '../../Data/Models/playerStatLeader';
+import { Modal, Button } from 'react-bootstrap';
+import { CompactTable } from '@table-library/react-table-library/compact';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { getTheme } from '@table-library/react-table-library/baseline';
 
-import styles from "../../style/Modals/StatLeaderModal.module.css";
+import styles from '../../style/Modals/StatLeaderModal.module.css';
 
 interface StatsLeaderModalProps {
   showModal: boolean;
@@ -57,16 +57,16 @@ export default function StatsLeaderModal({
   const data = { nodes: statsLeaderData };
   const COLUMNS = [
     {
-      label: "Name",
+      label: 'Name',
       renderCell: (item: PlayerStatLeader) =>
-        item.firstName + " " + item.lastName,
+        item.firstName + ' ' + item.lastName,
     },
     {
-      label: "Team",
+      label: 'Team',
       renderCell: (item: PlayerStatLeader) => (
-        <span className={styles["stat-leader-modal__team-cell"]}>
+        <span className={styles['stat-leader-modal__team-cell']}>
           <img
-            className={styles["stat-leader-modal__team-logo"]}
+            className={styles['stat-leader-modal__team-logo']}
             src={item.teamLogo}
             alt={item.teamName}
           ></img>
@@ -75,7 +75,7 @@ export default function StatsLeaderModal({
       ),
     },
     {
-      label: "Pos",
+      label: 'Pos',
       renderCell: (item: PlayerStatLeader) => item.position,
     },
     {
@@ -88,15 +88,15 @@ export default function StatsLeaderModal({
       <Modal
         show={showModal}
         onHide={handleModalClose}
-        dialogClassName={styles["stat-leader-modal"]}
-        contentClassName={styles["stat-leader-modal__content"]}
+        dialogClassName={styles['stat-leader-modal']}
+        contentClassName={styles['stat-leader-modal__content']}
         centered
       >
-        <Modal.Header className={styles["stat-leader-modal__header"]}>
-          <Modal.Title>{modalTitle + " Leaders"}</Modal.Title>
+        <Modal.Header className={styles['stat-leader-modal__header']}>
+          <Modal.Title>{modalTitle + ' Leaders'}</Modal.Title>
         </Modal.Header>
-        <Modal.Body className={styles["stat-leader-modal__body"]}>
-          <div className={styles["stat-leader-modal__table"]}>
+        <Modal.Body className={styles['stat-leader-modal__body']}>
+          <div className={styles['stat-leader-modal__table']}>
             <CompactTable
               columns={COLUMNS}
               data={data}
@@ -105,8 +105,12 @@ export default function StatsLeaderModal({
             />
           </div>
         </Modal.Body>
-        <Modal.Footer className={styles["stat-leader-modal__footer"]}>
-          <Button className={styles["stat-leader-modal__close"]} variant="outline-danger" onClick={handleModalClose}>
+        <Modal.Footer className={styles['stat-leader-modal__footer']}>
+          <Button
+            className={styles['stat-leader-modal__close']}
+            variant="outline-danger"
+            onClick={handleModalClose}
+          >
             Close
           </Button>
         </Modal.Footer>

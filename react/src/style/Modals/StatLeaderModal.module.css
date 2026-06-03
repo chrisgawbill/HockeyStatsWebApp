@@ -62,17 +62,17 @@
   min-width: 5rem;
 }
 
-:global([data-theme="dark"] .modal-backdrop) {
+:global([data-theme='dark'] .modal-backdrop) {
   background-color: #020617;
 }
 
-:global([data-theme="dark"]) .stat-leader-modal__content {
+:global([data-theme='dark']) .stat-leader-modal__content {
   background: var(--color-surface);
   color: var(--color-text);
   border-color: var(--color-divider);
 }
 
-:global([data-theme="dark"]) .stat-leader-modal__table {
+:global([data-theme='dark']) .stat-leader-modal__table {
   background: var(--color-surface);
 }
 

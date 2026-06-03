@@ -1,12 +1,12 @@
-import { getTheme } from "@table-library/react-table-library/baseline";
-import { CompactTable } from "@table-library/react-table-library/compact";
-import { useSort } from "@table-library/react-table-library/sort";
-import { useTheme } from "@table-library/react-table-library/theme";
-import * as React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { StandingsTeam } from "../../../Data/Models/standingsTeam";
-import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
-import { CLINCH_STATUS_META, ClinchStatus } from "./clinchStatus";
+import { getTheme } from '@table-library/react-table-library/baseline';
+import { CompactTable } from '@table-library/react-table-library/compact';
+import { useSort } from '@table-library/react-table-library/sort';
+import { useTheme } from '@table-library/react-table-library/theme';
+import * as React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { StandingsTeam } from '../../../Data/Models/standingsTeam';
+import styles from '../../../style/LandingPage/LandingPageStandings.module.css';
+import { CLINCH_STATUS_META, ClinchStatus } from './clinchStatus';
 
 interface LandingPageStandingTableProps {
   standingsData: StandingsTeam[];
@@ -20,19 +20,19 @@ export default function LandingPageStandingsTable({
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobile, setIsMobile] = React.useState(() =>
-    typeof window === "undefined"
+    typeof window === 'undefined'
       ? false
-      : window.matchMedia("(max-width: 767px)").matches,
+      : window.matchMedia('(max-width: 767px)').matches,
   );
-  const standingsSourcePath = location.pathname === "/" ? "/" : "/standings";
+  const standingsSourcePath = location.pathname === '/' ? '/' : '/standings';
 
   React.useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px)");
+    const query = window.matchMedia('(max-width: 767px)');
     const handleChange = () => setIsMobile(query.matches);
 
     handleChange();
-    query.addEventListener("change", handleChange);
-    return () => query.removeEventListener("change", handleChange);
+    query.addEventListener('change', handleChange);
+    return () => query.removeEventListener('change', handleChange);
   }, []);
 
   const goToTeam = (team: StandingsTeam) => {
@@ -100,22 +100,22 @@ export default function LandingPageStandingsTable({
     },
   ]);
 
-  const isDivision = standingFormat === "Division";
+  const isDivision = standingFormat === 'Division';
   const data = { nodes: standingsData };
 
   const getClinchStatus = (item: StandingsTeam): ClinchStatus | null => {
     const indicator = item.clinchingIndicator?.toString().trim().toLowerCase();
 
-    if (indicator === "p") return "presidents";
-    if (indicator === "z") return "conference";
-    if (indicator === "y") return "division";
+    if (indicator === 'p') return 'presidents';
+    if (indicator === 'z') return 'conference';
+    if (indicator === 'y') return 'division';
     if (
-      indicator === "w" ||
-      (indicator === "x" && item.wildCardRank > 0 && item.wildCardRank <= 2)
+      indicator === 'w' ||
+      (indicator === 'x' && item.wildCardRank > 0 && item.wildCardRank <= 2)
     ) {
-      return "wildcard";
+      return 'wildcard';
     }
-    if (indicator === "x") return "playoffs";
+    if (indicator === 'x') return 'playoffs';
 
     return null;
   };
@@ -127,7 +127,7 @@ export default function LandingPageStandingsTable({
 
     return (
       <span
-        className={`${styles["standings-clinch-badge"]} ${statusMeta.className}`}
+        className={`${styles['standings-clinch-badge']} ${statusMeta.className}`}
         aria-label={statusMeta.label}
         title={statusMeta.label}
       >
@@ -142,31 +142,33 @@ export default function LandingPageStandingsTable({
 
     return {
       className: [
-        styles["standings-status-cell"],
-        isFirstCell && styles["standings-status-cell--first"],
+        styles['standings-status-cell'],
+        isFirstCell && styles['standings-status-cell--first'],
         CLINCH_STATUS_META[status].className,
-      ].filter(Boolean).join(" "),
+      ]
+        .filter(Boolean)
+        .join(' '),
     };
   };
 
   const COLUMNS = [
     {
-      label: "#",
+      label: '#',
       renderCell: (item: any) =>
         isDivision
           ? (item as StandingsTeam).divisionStandingsPlace
           : (item as StandingsTeam).conferenceStandingsPlace,
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam, true),
-      sort: isMobile ? undefined : { sortKey: "PLACE" },
+      sort: isMobile ? undefined : { sortKey: 'PLACE' },
     },
     {
-      label: "Team",
+      label: 'Team',
       renderCell: (item: any) => {
         const team = item as StandingsTeam;
         return (
-          <span className={styles["standings-table-teamName-col"]}>
+          <span className={styles['standings-table-teamName-col']}>
             <img
-              className={styles["standings-table-team-logo"]}
+              className={styles['standings-table-team-logo']}
               src={team.teamLogo}
               alt="team logo"
             />
@@ -176,38 +178,36 @@ export default function LandingPageStandingsTable({
         );
       },
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-      sort: isMobile ? undefined : { sortKey: "TEAM" },
+      sort: isMobile ? undefined : { sortKey: 'TEAM' },
     },
     {
-      label: "Record",
+      label: 'Record',
       renderCell: (item: any) =>
         `${(item as StandingsTeam).wins}-${(item as StandingsTeam).losses}-${
           (item as StandingsTeam).otLosses
         }`,
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-      sort: isMobile ? undefined : { sortKey: "RECORD" },
+      sort: isMobile ? undefined : { sortKey: 'RECORD' },
     },
     {
-      label: "Pts",
+      label: 'Pts',
       renderCell: (item: any) => (item as StandingsTeam).points,
       cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-      sort: isMobile ? undefined : { sortKey: "POINTS" },
+      sort: isMobile ? undefined : { sortKey: 'POINTS' },
     },
-    ...(
-      isMobile
-        ? []
-        : [
-            {
-              label: "P%",
-              renderCell: (item: any) => (item as StandingsTeam).pointsPercentage,
-              cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
-              sort: { sortKey: "POINTSPERCENTAGE" },
-            },
-          ]
-    ),
+    ...(isMobile
+      ? []
+      : [
+          {
+            label: 'P%',
+            renderCell: (item: any) => (item as StandingsTeam).pointsPercentage,
+            cellProps: (item: any) => getStatusCellProps(item as StandingsTeam),
+            sort: { sortKey: 'POINTSPERCENTAGE' },
+          },
+        ]),
   ];
 
-  const HEIGHT = isDivision ? "20rem" : "38.75rem";
+  const HEIGHT = isDivision ? '20rem' : '38.75rem';
 
   const sort = useSort(
     data,
@@ -229,9 +229,12 @@ export default function LandingPageStandingsTable({
   );
 
   return (
-    <div className={styles["standings-table-shell"]} style={{ height: HEIGHT, marginTop: "1%", marginBottom: "2%" }}>
+    <div
+      className={styles['standings-table-shell']}
+      style={{ height: HEIGHT, marginTop: '1%', marginBottom: '2%' }}
+    >
       <CompactTable
-        className={styles["standings-table"]}
+        className={styles['standings-table']}
         columns={COLUMNS}
         data={data}
         theme={theme}
@@ -240,14 +243,14 @@ export default function LandingPageStandingsTable({
         rowProps={{
           onClick: (team: StandingsTeam) => goToTeam(team),
           onKeyDown: (event: React.KeyboardEvent, team: StandingsTeam) => {
-            if (event.key === "Enter" || event.key === " ") {
+            if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault();
               goToTeam(team);
             }
           },
           tabIndex: 0,
-          role: "button",
-          "aria-label": (team: StandingsTeam) => `View ${team.teamName}`,
+          role: 'button',
+          'aria-label': (team: StandingsTeam) => `View ${team.teamName}`,
         }}
       />
     </div>

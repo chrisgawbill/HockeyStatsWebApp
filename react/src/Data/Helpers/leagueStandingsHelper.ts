@@ -1,4 +1,4 @@
-import { StandingsTeam } from "../Models/standingsTeam";
+import { StandingsTeam } from '../Models/standingsTeam';
 
 /**
  * The backend (api/services/mappers/standingsMapper.js) now returns each team in
@@ -60,11 +60,11 @@ function DraftLotteryOddsTrendHelper(leagueRank: number, lastTenRank: number) {
   const currentOdds = DraftLotteryOddsHelper(leagueRank);
   const lastTenOdds = DraftLotteryOddsHelper(lastTenRank);
   if (currentOdds > lastTenOdds) {
-    return "UP";
+    return 'UP';
   } else if (currentOdds < lastTenOdds) {
-    return "DOWN";
+    return 'DOWN';
   }
-  return "SAME";
+  return 'SAME';
 }
 function DraftLotteryOddsHelper(leagueRank: number) {
   let draftLotteryOdds: number = 0.0;

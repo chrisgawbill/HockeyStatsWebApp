@@ -1,4 +1,4 @@
-import { ScheduledGame } from "../Models/scheduledGame";
+import { ScheduledGame } from '../Models/scheduledGame';
 
 /**
  * Small, presentation-only helpers shared by the schedule's day cards and the
@@ -12,10 +12,10 @@ import { ScheduledGame } from "../Models/scheduledGame";
  */
 export function convertUTCToLocal(utcString: string): string {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  return new Date(utcString).toLocaleTimeString("en-US", {
+  return new Date(utcString).toLocaleTimeString('en-US', {
     timeZone,
-    hour: "numeric",
-    minute: "numeric",
+    hour: 'numeric',
+    minute: 'numeric',
     hour12: true,
   });
 }
@@ -34,10 +34,10 @@ export function hasScore(game: ScheduledGame): boolean {
  */
 export function isGameInProgress(game: ScheduledGame): boolean {
   return (
-    game.gameState !== "FUT" &&
-    game.gameState !== "PRE" &&
-    game.gameState !== "OFF" &&
-    game.gameState !== "FINAL"
+    game.gameState !== 'FUT' &&
+    game.gameState !== 'PRE' &&
+    game.gameState !== 'OFF' &&
+    game.gameState !== 'FINAL'
   );
 }
 
@@ -46,11 +46,11 @@ export function isGameInProgress(game: ScheduledGame): boolean {
  * overtime/shootout final, live, or an empty string for future games.
  */
 export function getGameStatusLabel(game: ScheduledGame): string {
-  if (game.gameState === "OFF" || game.gameState === "FINAL") {
-    if (game.periodType === "OT") return "F/OT";
-    if (game.periodType === "SO") return "F/SO";
-    return "FINAL";
+  if (game.gameState === 'OFF' || game.gameState === 'FINAL') {
+    if (game.periodType === 'OT') return 'F/OT';
+    if (game.periodType === 'SO') return 'F/SO';
+    return 'FINAL';
   }
-  if (isGameInProgress(game)) return "LIVE";
-  return "";
+  if (isGameInProgress(game)) return 'LIVE';
+  return '';
 }

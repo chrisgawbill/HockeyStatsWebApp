@@ -1,22 +1,29 @@
-import { Team } from "../Models/team";
-import { TeamStats } from "../Models/teamStats";
+import { Team } from '../Models/team';
+import { TeamStats } from '../Models/teamStats';
 
-export function ConvertToListOfTeams(teamListData: any[], teamResponseData: any[]) {
+export function ConvertToListOfTeams(
+  teamListData: any[],
+  teamResponseData: any[],
+) {
   let teamArray: Team[] = [];
   for (let i = 0; i < teamListData.length; i++) {
     try {
       const id: number = teamListData[i].id;
       const teamName: string = teamListData[i].fullName;
       const rawHistoricalListData = teamResponseData.filter(
-        (team) => team.teamFullName === teamName
+        (team) => team.teamFullName === teamName,
       );
       const seasonStats: TeamStats[] = CreateHistoricalTeamStatsList(
-        rawHistoricalListData
+        rawHistoricalListData,
       );
       const team: Team = new Team(id, teamName, seasonStats);
       teamArray.push(team);
     } catch (error) {
-      console.error(`Error converting team at index ${i}:`, teamListData[i], error);
+      console.error(
+        `Error converting team at index ${i}:`,
+        teamListData[i],
+        error,
+      );
     }
   }
   return teamArray;
@@ -56,7 +63,7 @@ function CreateHistoricalTeamStatsList(teamResponseData: any[]) {
       penaltyKillPct,
       powerPlayPct,
       shotsAgainstPerGame,
-      shotsForPerGame
+      shotsForPerGame,
     );
   });
 }

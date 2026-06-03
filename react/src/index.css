@@ -35,7 +35,7 @@
   --text-2xl: 1.5rem;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --color-primary: #5b9bd5;
   --color-primary-dark: #4a80c4;
   --color-blue-accent: #64b5f6;
@@ -60,7 +60,7 @@ body {
   margin: 0;
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition:
@@ -88,5 +88,5 @@ h3 {
 
 code {
   font-family:
-    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }

@@ -1,1 +1,1 @@
-export { getTheme } from "@table-library/react-table-library/baseline";
+export { getTheme } from '@table-library/react-table-library/baseline';

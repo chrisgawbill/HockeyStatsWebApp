@@ -1,17 +1,17 @@
-import React from "react";
-import { ScheduledGame } from "../../Data/Models/scheduledGame";
-import { formatDateParam } from "../../Data/Helpers/scheduleHelper";
-import GameChip from "./GameChip";
-import styles from "../../style/ScheduleCalendar.module.css";
+import React from 'react';
+import { ScheduledGame } from '../../Data/Models/scheduledGame';
+import { formatDateParam } from '../../Data/Helpers/scheduleHelper';
+import GameChip from './GameChip';
+import styles from '../../style/ScheduleCalendar.module.css';
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 type ScheduleCalendarProps = {
-  view: "week" | "month";
+  view: 'week' | 'month';
   /** The days to render, in order. Week = 7 consecutive days; month = the 1st…last. */
   days: Date[];
   gamesByDate: Record<string, ScheduledGame[]>;
@@ -46,17 +46,21 @@ export default function ScheduleCalendar({
 
   return (
     <div
-      className={cx(styles["calendar"], styles[`calendar--${view}`])}
+      className={cx(styles['calendar'], styles[`calendar--${view}`])}
       aria-label={`${view} schedule`}
     >
       {WEEKDAYS.map((label) => (
-        <div key={label} className={styles["calendar__weekday"]}>
+        <div key={label} className={styles['calendar__weekday']}>
           {label}
         </div>
       ))}
 
       {Array.from({ length: leadingBlanks }, (_, i) => (
-        <div key={`blank-${i}`} className={styles["calendar__blank"]} aria-hidden="true" />
+        <div
+          key={`blank-${i}`}
+          className={styles['calendar__blank']}
+          aria-hidden="true"
+        />
       ))}
 
       {days.map((day) => {
@@ -69,22 +73,25 @@ export default function ScheduleCalendar({
         return (
           <div
             key={key}
-            className={cx(styles["calendar__cell"], isToday && styles["calendar__cell--today"])}
+            className={cx(
+              styles['calendar__cell'],
+              isToday && styles['calendar__cell--today'],
+            )}
           >
             <button
               type="button"
-              className={styles["calendar__date"]}
+              className={styles['calendar__date']}
               onClick={() => onSelectDay(day)}
-              aria-label={`View games for ${day.toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
+              aria-label={`View games for ${day.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
               })}`}
             >
               {day.getDate()}
             </button>
 
-            <div className={styles["calendar__games"]}>
+            <div className={styles['calendar__games']}>
               {visible.map((game) => (
                 <GameChip
                   key={game.gameId}
@@ -96,7 +103,7 @@ export default function ScheduleCalendar({
               {overflow > 0 && (
                 <button
                   type="button"
-                  className={styles["calendar__more"]}
+                  className={styles['calendar__more']}
                   onClick={() => onSelectDay(day)}
                 >
                   +{overflow} more

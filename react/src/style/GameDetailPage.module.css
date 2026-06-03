@@ -174,8 +174,13 @@
 }
 
 @keyframes pulse-live {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .game-detail-meta {
@@ -240,13 +245,21 @@
 .period-scores-table__team-col {
   text-align: left !important;
   font-weight: 600;
-  color: color-mix(in srgb, var(--period-team-color, var(--color-text)) 82%, #111827);
+  color: color-mix(
+    in srgb,
+    var(--period-team-color, var(--color-text)) 82%,
+    #111827
+  );
   white-space: nowrap;
 }
 
 .period-scores-table .total-col {
   font-weight: 700;
-  color: color-mix(in srgb, var(--period-team-color, var(--color-primary)) 82%, #111827);
+  color: color-mix(
+    in srgb,
+    var(--period-team-color, var(--color-primary)) 82%,
+    #111827
+  );
 }
 
 /* ── Scoring summary ────────────────────────────────────────────────────── */
@@ -280,7 +293,7 @@
 }
 
 .scoring-goal-row::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: var(--space-sm);
@@ -346,7 +359,11 @@
 .scoring-goal__score {
   font-size: var(--text-sm);
   font-weight: 700;
-  color: color-mix(in srgb, var(--goal-team-color, var(--color-primary)) 82%, #111827);
+  color: color-mix(
+    in srgb,
+    var(--goal-team-color, var(--color-primary)) 82%,
+    #111827
+  );
   white-space: nowrap;
   min-width: 2.5rem;
   text-align: right;
@@ -404,15 +421,27 @@
   gap: var(--space-sm);
   text-align: center;
   position: relative;
-  background: color-mix(in srgb, var(--star-team-color, var(--color-primary)) 5%, var(--color-surface));
-  border-color: color-mix(in srgb, var(--star-team-color, var(--color-primary)) 18%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--star-team-color, var(--color-primary)) 5%,
+    var(--color-surface)
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--star-team-color, var(--color-primary)) 18%,
+    transparent
+  );
 }
 
 .three-star-card__badge {
   position: absolute;
   top: var(--space-sm);
   left: var(--space-sm);
-  background: color-mix(in srgb, var(--star-team-color, var(--color-primary)) 86%, #111827);
+  background: color-mix(
+    in srgb,
+    var(--star-team-color, var(--color-primary)) 86%,
+    #111827
+  );
   color: white;
   border-radius: 50%;
   width: 22px;
@@ -430,7 +459,12 @@
   border-radius: 50%;
   object-fit: cover;
   background: var(--color-chip-bg);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--star-team-color, var(--color-primary)) 7%, var(--color-surface));
+  box-shadow: 0 0 0 4px
+    color-mix(
+      in srgb,
+      var(--star-team-color, var(--color-primary)) 7%,
+      var(--color-surface)
+    );
 }
 
 .three-star-card__info {
@@ -454,7 +488,11 @@
 .three-star-card__stats {
   font-size: var(--text-sm);
   font-weight: 700;
-  color: color-mix(in srgb, var(--star-team-color, var(--color-primary)) 82%, #111827);
+  color: color-mix(
+    in srgb,
+    var(--star-team-color, var(--color-primary)) 82%,
+    #111827
+  );
   margin-top: 2px;
 }
 
@@ -565,7 +603,11 @@
 .player-stats-team-block__title {
   font-size: var(--text-base);
   font-weight: 700;
-  color: color-mix(in srgb, var(--player-team-color, var(--color-primary)) 82%, #111827);
+  color: color-mix(
+    in srgb,
+    var(--player-team-color, var(--color-primary)) 82%,
+    #111827
+  );
   margin: 0 0 var(--space-md);
   padding: var(--space-xs) 0;
   border-bottom: 2px solid var(--player-team-color, var(--color-primary));
@@ -585,7 +627,11 @@
 
 .player-box-table-wrapper {
   margin-bottom: var(--space-md);
-  border-color: color-mix(in srgb, var(--player-team-color, var(--color-primary)) 18%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--player-team-color, var(--color-primary)) 18%,
+    transparent
+  );
 }
 
 .player-box-table {
@@ -646,7 +692,11 @@
 }
 
 .player-box-table__highlight {
-  color: color-mix(in srgb, var(--player-team-color, var(--color-primary)) 82%, #111827);
+  color: color-mix(
+    in srgb,
+    var(--player-team-color, var(--color-primary)) 82%,
+    #111827
+  );
   font-weight: 700;
 }
 
@@ -663,44 +713,80 @@
 /* ── Dark mode: lighten team primary color for text readability ─────────── */
 /* Dark team colors need extra lift when used as text on dark MD3 surfaces.  */
 
-[data-theme="dark"] .period-scores-table__team-col {
-  color: color-mix(in srgb, var(--period-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .period-scores-table__team-col {
+  color: color-mix(
+    in srgb,
+    var(--period-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
-[data-theme="dark"] .period-scores-table .total-col {
-  color: color-mix(in srgb, var(--period-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .period-scores-table .total-col {
+  color: color-mix(
+    in srgb,
+    var(--period-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
-[data-theme="dark"] .scoring-goal__score {
-  color: color-mix(in srgb, var(--goal-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .scoring-goal__score {
+  color: color-mix(
+    in srgb,
+    var(--goal-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
-[data-theme="dark"] .three-star-card__badge {
-  background: color-mix(in srgb, var(--star-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .three-star-card__badge {
+  background: color-mix(
+    in srgb,
+    var(--star-team-color, var(--color-primary)) 55%,
+    white
+  );
   color: #0f172a;
 }
 
-[data-theme="dark"] .three-star-card__stats {
-  color: color-mix(in srgb, var(--star-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .three-star-card__stats {
+  color: color-mix(
+    in srgb,
+    var(--star-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
-[data-theme="dark"] .team-comparison-abbrev--away,
-[data-theme="dark"] .team-stat-row__value--away-leader {
-  color: color-mix(in srgb, var(--away-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .team-comparison-abbrev--away,
+[data-theme='dark'] .team-stat-row__value--away-leader {
+  color: color-mix(
+    in srgb,
+    var(--away-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
-[data-theme="dark"] .team-comparison-abbrev--home,
-[data-theme="dark"] .team-stat-row__value--home-leader {
-  color: color-mix(in srgb, var(--home-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .team-comparison-abbrev--home,
+[data-theme='dark'] .team-stat-row__value--home-leader {
+  color: color-mix(
+    in srgb,
+    var(--home-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
-[data-theme="dark"] .player-stats-team-block__title,
-[data-theme="dark"] .player-box-table__highlight {
-  color: color-mix(in srgb, var(--player-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .player-stats-team-block__title,
+[data-theme='dark'] .player-box-table__highlight {
+  color: color-mix(
+    in srgb,
+    var(--player-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
-[data-theme="dark"] .player-stats-team-block__title {
-  border-bottom-color: color-mix(in srgb, var(--player-team-color, var(--color-primary)) 55%, white);
+[data-theme='dark'] .player-stats-team-block__title {
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--player-team-color, var(--color-primary)) 55%,
+    white
+  );
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */

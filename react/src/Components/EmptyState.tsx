@@ -1,5 +1,5 @@
-import React from "react";
-import styles from "../style/EmptyState.module.css";
+import React from 'react';
+import styles from '../style/EmptyState.module.css';
 
 interface EmptyStateProps {
   title?: string;
@@ -14,18 +14,20 @@ interface EmptyStateProps {
  */
 export default function EmptyState({
   title,
-  message = "No data available",
+  message = 'No data available',
   fullPage = false,
 }: EmptyStateProps) {
   return (
     <div
-      className={fullPage ? styles["empty-state--full-page"] : styles["empty-state"]}
+      className={
+        fullPage ? styles['empty-state--full-page'] : styles['empty-state']
+      }
       role="status"
       aria-live="polite"
     >
-      <span className={styles["empty-state__icon"]} aria-hidden="true" />
-      {title && <span className={styles["empty-state__title"]}>{title}</span>}
-      <span className={styles["empty-state__message"]}>{message}</span>
+      <span className={styles['empty-state__icon']} aria-hidden="true" />
+      {title && <span className={styles['empty-state__title']}>{title}</span>}
+      <span className={styles['empty-state__message']}>{message}</span>
     </div>
   );
 }

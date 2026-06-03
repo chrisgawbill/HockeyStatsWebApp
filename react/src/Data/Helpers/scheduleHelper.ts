@@ -1,5 +1,5 @@
-import { GameBroadcast } from "../Models/gameBroadcast";
-import { ScheduledGame } from "../Models/scheduledGame";
+import { GameBroadcast } from '../Models/gameBroadcast';
+import { ScheduledGame } from '../Models/scheduledGame';
 
 /**
  * The backend (api/services/mappers/scheduleMapper.js) now returns games already
@@ -50,17 +50,19 @@ function ConvertContractToGame(g: any): ScheduledGame {
  * TypeError on a missing or malformed string rather than returning Invalid Date.
  */
 function parseLocalDate(dateStr: string): Date {
-	if (!dateStr){
-    throw new TypeError("Date string is missing or empty.");
-  } 
-
-	const parts = dateStr.split('-').map(Number);
-	if (parts.length !== 3 || parts.some(Number.isNaN)){
-    throw new TypeError(`Invalid date format: ${dateStr}. Expected 'YYYY-MM-DD'.`);
+  if (!dateStr) {
+    throw new TypeError('Date string is missing or empty.');
   }
 
-	const [year, month, day] = parts;
-	return new Date(year, month - 1, day);
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
+    throw new TypeError(
+      `Invalid date format: ${dateStr}. Expected 'YYYY-MM-DD'.`,
+    );
+  }
+
+  const [year, month, day] = parts;
+  return new Date(year, month - 1, day);
 }
 
 /**
@@ -68,15 +70,20 @@ function parseLocalDate(dateStr: string): Date {
  * the calendar grid looks games up by. Keying with the same `formatDateParam`
  * both sides use guarantees the grid can't miss a day over a Date-vs-string mismatch.
  */
-function groupGamesByDate(games: ScheduledGame[]): Record<string, ScheduledGame[]> {
-  return games.reduce((acc: Record<string, ScheduledGame[]>, game) => {
-    const key = formatDateParam(game.date);
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(game);
-    return acc;
-  }, {} as Record<string, ScheduledGame[]>);
+function groupGamesByDate(
+  games: ScheduledGame[],
+): Record<string, ScheduledGame[]> {
+  return games.reduce(
+    (acc: Record<string, ScheduledGame[]>, game) => {
+      const key = formatDateParam(game.date);
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(game);
+      return acc;
+    },
+    {} as Record<string, ScheduledGame[]>,
+  );
 }
 
 /**
@@ -84,10 +91,10 @@ function groupGamesByDate(games: ScheduledGame[]): Record<string, ScheduledGame[
  * toISOString, which is UTC) so the key matches the day the user sees.
  */
 function formatDateParam(date: Date): string {
-	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0');
-	const day = String(date.getDate()).padStart(2, '0');
-	return `${year}-${month}-${day}`;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -98,4 +105,9 @@ function ConvertContractsToGames(games: any[]): ScheduledGame[] {
   return (games ?? []).map(ConvertContractToGame);
 }
 
-export { ConvertContractsToGames, parseLocalDate, groupGamesByDate, formatDateParam };
+export {
+  ConvertContractsToGames,
+  parseLocalDate,
+  groupGamesByDate,
+  formatDateParam,
+};

@@ -7,7 +7,7 @@
 }
 
 .row-scroller-wrapper::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   right: -2rem;

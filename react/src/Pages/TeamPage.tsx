@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 
-import PageHeader from "../Components/PageHeader";
-import TeamHero from "../Components/TeamPage/TeamHero";
-import BasicInfoStrip from "../Components/TeamPage/BasicInfoStrip";
-import ScheduleStrip from "../Components/TeamPage/ScheduleStrip";
-import LoadingState from "../Components/LoadingState";
-import TeamStatsRow from "../Components/TeamPage/TeamStatsRow";
-import PlayerStatsSection from "../Components/TeamPage/PlayerStatsSection";
-import RosterSection from "../Components/TeamPage/RosterSection";
-import { localTeamList } from "../Data/LocalData/teamListData";
+import PageHeader from '../Components/PageHeader';
+import TeamHero from '../Components/TeamPage/TeamHero';
+import BasicInfoStrip from '../Components/TeamPage/BasicInfoStrip';
+import ScheduleStrip from '../Components/TeamPage/ScheduleStrip';
+import LoadingState from '../Components/LoadingState';
+import TeamStatsRow from '../Components/TeamPage/TeamStatsRow';
+import PlayerStatsSection from '../Components/TeamPage/PlayerStatsSection';
+import RosterSection from '../Components/TeamPage/RosterSection';
+import { localTeamList } from '../Data/LocalData/teamListData';
 import {
   MockTeam,
   MockStatItem,
   Position,
   RosterPlayer,
   PlayerStatLine,
-} from "../Data/LocalData/teamPageMockData";
-import { ScheduledGame } from "../Data/Models/scheduledGame";
+} from '../Data/LocalData/teamPageMockData';
+import { ScheduledGame } from '../Data/Models/scheduledGame';
 import {
   GetTeamStatsById,
   GetTeamRoster,
@@ -25,22 +25,22 @@ import {
   GetSkaterSummary,
   GetSkaterCorsi,
   GetGoalieSummary,
-} from "../Services/apiHandler";
-import { useStandingsContext } from "../Data/Context/StandingsContext";
-import { useSeason } from "../Data/Context/SeasonContext";
-import { InterfaceWithChatBot } from "../Services/genAIHandler";
-import styles from "../style/TeamPage/TeamPage.module.css";
-import { ConvertContractsToGames } from "../Data/Helpers/scheduleHelper";
+} from '../Services/apiHandler';
+import { useStandingsContext } from '../Data/Context/StandingsContext';
+import { useSeason } from '../Data/Context/SeasonContext';
+import { InterfaceWithChatBot } from '../Services/genAIHandler';
+import styles from '../style/TeamPage/TeamPage.module.css';
+import { ConvertContractsToGames } from '../Data/Helpers/scheduleHelper';
 
 /**
  * Maps NHL roster position codes into the display buckets used by the roster UI.
  */
 const POS_MAP: Record<string, Position> = {
-  C: "Center",
-  L: "Left Wing",
-  R: "Right Wing",
-  D: "Defenseman",
-  G: "Goalie",
+  C: 'Center',
+  L: 'Left Wing',
+  R: 'Right Wing',
+  D: 'Defenseman',
+  G: 'Goalie',
 };
 
 /**
@@ -49,8 +49,8 @@ const POS_MAP: Record<string, Position> = {
 function buildEmptyRoster(): Record<Position, RosterPlayer[]> {
   return {
     Center: [],
-    "Left Wing": [],
-    "Right Wing": [],
+    'Left Wing': [],
+    'Right Wing': [],
     Defenseman: [],
     Goalie: [],
   };
@@ -62,7 +62,7 @@ function buildEmptyRoster(): Record<Position, RosterPlayer[]> {
 function formatToi(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")} TOI`;
+  return `${m}:${s.toString().padStart(2, '0')} TOI`;
 }
 
 /**
@@ -79,20 +79,20 @@ function transformRoster(
     const pos = POS_MAP[p.position] as Position;
     if (!pos) continue;
     const toi = toiMap.get(p.id);
-    const stat = toi != null ? formatToi(toi) : "";
+    const stat = toi != null ? formatToi(toi) : '';
     result[pos].push({
       id: p.id,
       name: p.name,
       number: p.number ?? 0,
       stat,
-      headshot: p.headshot ?? "",
+      headshot: p.headshot ?? '',
     });
   }
   for (const pos of [
-    "Center",
-    "Left Wing",
-    "Right Wing",
-    "Defenseman",
+    'Center',
+    'Left Wing',
+    'Right Wing',
+    'Defenseman',
   ] as Position[]) {
     result[pos].sort((a, b) => {
       const aToi = toiMap.get(a.id) ?? 0;
@@ -100,7 +100,7 @@ function transformRoster(
       return bToi - aToi;
     });
   }
-  result["Goalie"].sort((a, b) => {
+  result['Goalie'].sort((a, b) => {
     const aToi = toiMap.get(a.id) ?? 0;
     const bToi = toiMap.get(b.id) ?? 0;
     return bToi - aToi;
@@ -126,8 +126,8 @@ function transformPlayerStats(
   return (summary ?? []).map(
     (p: any): PlayerStatLine => ({
       playerId: p.playerId,
-      name: p.name ?? "",
-      position: p.position ?? "",
+      name: p.name ?? '',
+      position: p.position ?? '',
       gamesPlayed: p.gamesPlayed ?? 0,
       goals: p.goals ?? 0,
       assists: p.assists ?? 0,
@@ -146,26 +146,26 @@ function transformPlayerStats(
  */
 function transformTeamStats(raw: any): MockStatItem[] {
   return [
-    { label: "Goals For / GP", value: raw.goalsForPerGame?.toFixed(2) ?? "—" },
+    { label: 'Goals For / GP', value: raw.goalsForPerGame?.toFixed(2) ?? '—' },
     {
-      label: "Goals Against / GP",
-      value: raw.goalsAgainstPerGame?.toFixed(2) ?? "—",
+      label: 'Goals Against / GP',
+      value: raw.goalsAgainstPerGame?.toFixed(2) ?? '—',
     },
     {
-      label: "Power Play %",
+      label: 'Power Play %',
       value:
         raw.powerPlayPct != null
           ? `${(raw.powerPlayPct * 100).toFixed(1)}%`
-          : "—",
+          : '—',
     },
     {
-      label: "Penalty Kill %",
+      label: 'Penalty Kill %',
       value:
         raw.penaltyKillPct != null
           ? `${(raw.penaltyKillPct * 100).toFixed(1)}%`
-          : "—",
+          : '—',
     },
-    { label: "Shots / GP", value: raw.shotsForPerGame?.toFixed(1) ?? "—" },
+    { label: 'Shots / GP', value: raw.shotsForPerGame?.toFixed(1) ?? '—' },
   ];
 }
 
@@ -183,16 +183,16 @@ export default function TeamPage() {
     fallbackPath?: string;
     activeNavPath?: string;
   } | null;
-  const triCode: string = teamId?.toUpperCase() ?? "";
+  const triCode: string = teamId?.toUpperCase() ?? '';
   const teamSourcePath = location.pathname;
   const { easternStandingsData, westernStandingsData } = useStandingsContext();
   const { season } = useSeason();
   const teamActiveNavPath =
-    routeState?.activeNavPath ?? routeState?.sourcePath ?? "/teamList";
+    routeState?.activeNavPath ?? routeState?.sourcePath ?? '/teamList';
   const teamEntry = (localTeamList as any[]).find((t) => t.triCode === triCode);
   const numericId: number = teamEntry?.id ?? 0;
-  const primaryColor: string = teamEntry?.primary ?? "#1B4F8A";
-  const pageStyle = { "--color-primary": primaryColor } as React.CSSProperties;
+  const primaryColor: string = teamEntry?.primary ?? '#1B4F8A';
+  const pageStyle = { '--color-primary': primaryColor } as React.CSSProperties;
 
   const [team, setTeam] = useState<MockTeam | null>(null);
   const [staticInfo, setStaticInfo] = useState<{
@@ -240,11 +240,12 @@ export default function TeamPage() {
 
         const raw = statsRes?.data?.[0] ?? {};
         const allStandings = [...easternStandingsData, ...westernStandingsData];
-        const s = allStandings.find(t => t.id === triCode);
+        const s = allStandings.find((t) => t.id === triCode);
 
-        const conferenceStandings = s?.conferenceName === 'Eastern'
-          ? easternStandingsData
-          : westernStandingsData;
+        const conferenceStandings =
+          s?.conferenceName === 'Eastern'
+            ? easternStandingsData
+            : westernStandingsData;
         const playoffCutoff = conferenceStandings.find(
           (t) => t.conferenceStandingsPlace === 8,
         );
@@ -257,19 +258,19 @@ export default function TeamPage() {
           playoffCutoff != null ? teamPoints - playoffCutoff.points : 0;
 
         setTeam({
-          name: raw.teamFullName ?? teamEntry?.fullName ?? "",
+          name: raw.teamFullName ?? teamEntry?.fullName ?? '',
           triCode,
           wins: s?.wins ?? raw.wins ?? 0,
           losses: s?.losses ?? raw.losses ?? 0,
           otLosses: s?.otLosses ?? raw.otLosses ?? 0,
           points: teamPoints,
           divisionRank: s?.divisionStandingsPlace ?? 0,
-          division: s?.divisionName ?? "",
-          conference: s?.conferenceName ?? "",
+          division: s?.divisionName ?? '',
+          conference: s?.conferenceName ?? '',
           conferenceRank: s?.conferenceStandingsPlace ?? 0,
           playoffLineDelta,
           founded: 0,
-          arena: "—",
+          arena: '—',
           stanleyCups: 0,
           conferenceChampionships: 0,
           hallOfFamers: 0,
@@ -294,7 +295,7 @@ export default function TeamPage() {
         setRoster(transformRoster(rosterRes.players, toiMap));
         setPlayerStats(transformPlayerStats(summaryRes, corsiRes));
       } catch (err) {
-        console.error("Error loading team data", err);
+        console.error('Error loading team data', err);
       } finally {
         setLoading(false);
       }
@@ -322,14 +323,14 @@ export default function TeamPage() {
           `hallOfFamers (number - players inducted into the Hockey Hall of Fame).`;
         const info = await InterfaceWithChatBot({ content: prompt }, triCode);
         setStaticInfo({
-          arena: info.arena ?? "—",
+          arena: info.arena ?? '—',
           founded: info.founded ?? 0,
           stanleyCups: info.stanleyCups ?? 0,
           conferenceChampionships: info.conferenceChampionships ?? 0,
           hallOfFamers: info.hallOfFamers ?? 0,
         });
       } catch (err) {
-        console.error("Error fetching static team info from AI", err);
+        console.error('Error fetching static team info from AI', err);
       }
     }
 
@@ -338,9 +339,12 @@ export default function TeamPage() {
 
   if (loading || !team) {
     return (
-      <div className={styles["team-page"]} style={pageStyle}>
+      <div className={styles['team-page']} style={pageStyle}>
         <PageHeader />
-        <div className={styles["team-page__content"]} style={{ paddingTop: "2rem" }}>
+        <div
+          className={styles['team-page__content']}
+          style={{ paddingTop: '2rem' }}
+        >
           <LoadingState label="Loading team" />
         </div>
       </div>
@@ -348,10 +352,10 @@ export default function TeamPage() {
   }
 
   return (
-    <div className={styles["team-page"]} style={pageStyle}>
+    <div className={styles['team-page']} style={pageStyle}>
       <PageHeader />
       <TeamHero team={team} />
-      <div className={styles["team-page__content"]}>
+      <div className={styles['team-page__content']}>
         <BasicInfoStrip team={staticInfo ? { ...team, ...staticInfo } : team} />
         <ScheduleStrip
           games={schedule}

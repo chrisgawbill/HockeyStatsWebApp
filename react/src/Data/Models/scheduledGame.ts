@@ -1,4 +1,4 @@
-import { GameBroadcast } from "./gameBroadcast";
+import { GameBroadcast } from './gameBroadcast';
 
 export interface ScheduledGameShape {
   gameId: number;
@@ -19,8 +19,8 @@ export interface ScheduledGameShape {
   playoffRound: number | null;
   periodType: string | null;
   seriesWins: string | null;
-  topSeedTeamAbbrev: string| null;
-  bottomSeedTeamAbbrev: string| null;
+  topSeedTeamAbbrev: string | null;
+  bottomSeedTeamAbbrev: string | null;
   gameState: string;
 }
 export class ScheduledGame implements ScheduledGameShape {
@@ -42,8 +42,8 @@ export class ScheduledGame implements ScheduledGameShape {
   playoffRound: number | null;
   periodType: string | null;
   seriesWins: string | null;
-  topSeedTeamAbbrev: string| null;
-  bottomSeedTeamAbbrev: string| null;
+  topSeedTeamAbbrev: string | null;
+  bottomSeedTeamAbbrev: string | null;
   gameState: string;
 
   constructor(
@@ -65,8 +65,8 @@ export class ScheduledGame implements ScheduledGameShape {
     playoffRound: number | null = null,
     periodType: string | null = null,
     seriesWins: string | null = null,
-    topSeedTeamAbbrev: string| null,
-    bottomSeedTeamAbbrev: string| null,
+    topSeedTeamAbbrev: string | null,
+    bottomSeedTeamAbbrev: string | null,
     gameState: string,
   ) {
     this.gameId = gameId;

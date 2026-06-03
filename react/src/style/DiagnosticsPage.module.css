@@ -54,7 +54,11 @@
 }
 
 .diagnostics-icon-btn:hover:not(:disabled) {
-  background-color: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    var(--color-surface)
+  );
   box-shadow: var(--shadow-card);
   transform: translateY(-1px);
 }
@@ -142,7 +146,8 @@
 
 .diagnostics-gate__input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
 
 .diagnostics-gate__button {
@@ -361,7 +366,11 @@
   display: block;
   height: 100%;
   border-radius: var(--border-radius-pill);
-  background: color-mix(in srgb, var(--color-primary) 55%, var(--color-muted-text));
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 55%,
+    var(--color-muted-text)
+  );
   transition: width 0.3s ease;
 }
 
@@ -379,8 +388,8 @@
 
 /* ── Dark mode: lift primary-on-dark text for readability ───────────────── */
 
-[data-theme="dark"] .cache-summary__value,
-[data-theme="dark"] .cache-table__row--largest .cache-table__section-col {
+[data-theme='dark'] .cache-summary__value,
+[data-theme='dark'] .cache-table__row--largest .cache-table__section-col {
   color: color-mix(in srgb, var(--color-primary) 70%, white);
 }
 

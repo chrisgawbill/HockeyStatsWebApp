@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { localTeamList } from "../../Data/LocalData/teamListData";
-import { ScheduledGame } from "../../Data/Models/scheduledGame";
-import shared from "../../style/shared.module.css";
-import styles from "../../style/TeamPage/TeamPage.module.css";
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { localTeamList } from '../../Data/LocalData/teamListData';
+import { ScheduledGame } from '../../Data/Models/scheduledGame';
+import shared from '../../style/shared.module.css';
+import styles from '../../style/TeamPage/TeamPage.module.css';
 
 const PAGE_SIZE = 7;
 function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 interface ScheduleStripProps {
@@ -27,7 +27,7 @@ export default function ScheduleStrip({
 }: ScheduleStripProps) {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const [slideDir, setSlideDir] = useState<"prev" | "next" | null>(null);
+  const [slideDir, setSlideDir] = useState<'prev' | 'next' | null>(null);
   const [animKey, setAnimKey] = useState(0);
 
   const weekStartIdx = useMemo(() => {
@@ -37,9 +37,7 @@ export default function ScheduleStrip({
     const daysFromMonday = today.getDay() === 0 ? 6 : today.getDay() - 1;
     const monday = new Date(today);
     monday.setDate(today.getDate() - daysFromMonday);
-    const idx = games.findIndex(
-      (g) => parseGameDate(g.date) >= monday,
-    );
+    const idx = games.findIndex((g) => parseGameDate(g.date) >= monday);
     return idx === -1 ? Math.max(0, games.length - PAGE_SIZE) : idx;
   }, [games]);
 
@@ -47,7 +45,7 @@ export default function ScheduleStrip({
 
   const mobileScrollRef = useRef<HTMLDivElement>(null);
 
-  const gamesSignature = `${games.length}:${games[0]?.gameId ?? ""}`;
+  const gamesSignature = `${games.length}:${games[0]?.gameId ?? ''}`;
   useEffect(() => {
     setPage(0);
     setSlideDir(null);
@@ -65,22 +63,22 @@ export default function ScheduleStrip({
   const canGoPrev = startIdx > 0;
   const canGoNext = startIdx + PAGE_SIZE < games.length;
 
-  const goTo = (dir: "prev" | "next") => {
+  const goTo = (dir: 'prev' | 'next') => {
     setSlideDir(dir);
-    setPage((p) => (dir === "prev" ? p - 1 : p + 1));
+    setPage((p) => (dir === 'prev' ? p - 1 : p + 1));
     setAnimKey((k) => k + 1);
   };
 
   const isGameCompleted = (game: ScheduledGame): boolean => {
-    return game.gameState === "OFF" || game.gameState === "FINAL";
+    return game.gameState === 'OFF' || game.gameState === 'FINAL';
   };
 
   const isGameInProgress = (game: ScheduledGame): boolean => {
     return (
-      game.gameState !== "FUT" &&
-      game.gameState !== "PRE" &&
-      game.gameState !== "OFF" &&
-      game.gameState !== "FINAL"
+      game.gameState !== 'FUT' &&
+      game.gameState !== 'PRE' &&
+      game.gameState !== 'OFF' &&
+      game.gameState !== 'FINAL'
     );
   };
 
@@ -89,7 +87,11 @@ export default function ScheduleStrip({
   };
 
   const getTeamResult = (game: ScheduledGame): string | null => {
-    if (!isGameCompleted(game) || game.homeScore == null || game.awayScore == null) {
+    if (
+      !isGameCompleted(game) ||
+      game.homeScore == null ||
+      game.awayScore == null
+    ) {
       return null;
     }
 
@@ -98,9 +100,9 @@ export default function ScheduleStrip({
     const oppScore = isHome ? game.awayScore : game.homeScore;
     const won = teamScore > oppScore;
 
-    if (game.periodType === "SO") return won ? "SOW" : "SOL";
-    if (game.periodType === "OT") return won ? "OTW" : "OTL";
-    return won ? "W" : "L";
+    if (game.periodType === 'SO') return won ? 'SOW' : 'SOL';
+    if (game.periodType === 'OT') return won ? 'OTW' : 'OTL';
+    return won ? 'W' : 'L';
   };
 
   const goToGameDetails = (game: ScheduledGame) => {
@@ -133,25 +135,25 @@ export default function ScheduleStrip({
       <div
         key={game.gameId}
         className={cx(
-          styles["schedule-strip__card"],
+          styles['schedule-strip__card'],
           shared.surface,
           isClickable && shared.surfaceInteractive,
-          isClickable && styles["schedule-strip__card--clickable"],
+          isClickable && styles['schedule-strip__card--clickable'],
         )}
         onClick={() => goToGameDetails(game)}
         onKeyDown={(event) => {
-          if (isClickable && (event.key === "Enter" || event.key === " ")) {
+          if (isClickable && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
             goToGameDetails(game);
           }
         }}
-        role={isClickable ? "button" : undefined}
+        role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
         aria-disabled={!isClickable}
-        style={{ "--card-index": index } as React.CSSProperties}
+        style={{ '--card-index': index } as React.CSSProperties}
       >
         {game.isPlayoff && (
-          <div className={styles["schedule-strip__playoff-badge"]}>
+          <div className={styles['schedule-strip__playoff-badge']}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="16px"
@@ -163,54 +165,56 @@ export default function ScheduleStrip({
               <path d="M280-120v-80h160v-124q-49-11-87.5-41.5T296-442q-75-9-125.5-65.5T120-640v-40q0-33 23.5-56.5T200-760h80v-80h400v80h80q33 0 56.5 23.5T840-680v40q0 76-50.5 132.5T664-442q-18 46-56.5 76.5T520-324v124h160v80H280Zm0-408v-152h-80v40q0 38 22 68.5t58 43.5Zm285 93q35-35 35-85v-240H360v240q0 50 35 85t85 35q50 0 85-35Zm115-93q36-13 58-43.5t22-68.5v-40h-80v152Zm-200-52Z" />
             </svg>
             <span>
-              {game.playoffRound != null ? `R${game.playoffRound}` : "Playoffs"}
+              {game.playoffRound != null ? `R${game.playoffRound}` : 'Playoffs'}
               {game.seriesWins != null
                 ? ` · ${game.seriesWins}`
                 : game.playoffRound != null
-                  ? " · Playoffs"
-                  : ""}
+                  ? ' · Playoffs'
+                  : ''}
             </span>
           </div>
         )}
         <img
-          className={styles["schedule-strip__logo"]}
+          className={styles['schedule-strip__logo']}
           src={opponentLogo}
           alt={opponent}
         />
-        <p className={styles["schedule-strip__opponent"]}>{opponent}</p>
+        <p className={styles['schedule-strip__opponent']}>{opponent}</p>
         {hasScore(game) && teamScore != null && oppScore != null ? (
           <p
             className={cx(
-              styles["schedule-strip__score"],
-              result && (result.includes("W") ? styles.win : styles.loss),
+              styles['schedule-strip__score'],
+              result && (result.includes('W') ? styles.win : styles.loss),
             )}
           >
             {teamScore} – {oppScore}
           </p>
         ) : (
-          <p className={styles["schedule-strip__date"]}>{formatGameDate(game.date)}</p>
+          <p className={styles['schedule-strip__date']}>
+            {formatGameDate(game.date)}
+          </p>
         )}
-        <div className={styles["schedule-strip__footer"]}>
+        <div className={styles['schedule-strip__footer']}>
           <span
             className={cx(
-              styles["schedule-strip__badge"],
+              styles['schedule-strip__badge'],
               isHome ? styles.home : styles.away,
             )}
           >
-            {isHome ? "Home" : "Away"}
+            {isHome ? 'Home' : 'Away'}
           </span>
           {result && (
             <span
               className={cx(
-                styles["schedule-strip__result"],
-                result.includes("W") ? styles.win : styles.loss,
+                styles['schedule-strip__result'],
+                result.includes('W') ? styles.win : styles.loss,
               )}
             >
               {result}
             </span>
           )}
           {isLive && (
-            <span className={cx(styles["schedule-strip__result"], styles.live)}>
+            <span className={cx(styles['schedule-strip__result'], styles.live)}>
               Live
             </span>
           )}
@@ -223,13 +227,18 @@ export default function ScheduleStrip({
     <section className={shared.section}>
       <h2 className={shared.sectionTitle}>Schedule</h2>
 
-      <div className={cx(styles["schedule-strip-wrapper"], styles["schedule-strip-wrapper--desktop"])}>
+      <div
+        className={cx(
+          styles['schedule-strip-wrapper'],
+          styles['schedule-strip-wrapper--desktop'],
+        )}
+      >
         <button
           className={cx(
-            styles["schedule-strip__nav"],
-            !canGoPrev && styles["schedule-strip__nav--hidden"],
+            styles['schedule-strip__nav'],
+            !canGoPrev && styles['schedule-strip__nav--hidden'],
           )}
-          onClick={() => goTo("prev")}
+          onClick={() => goTo('prev')}
           aria-label="Previous games"
           tabIndex={canGoPrev ? 0 : -1}
         >
@@ -251,9 +260,9 @@ export default function ScheduleStrip({
         <div
           key={animKey}
           className={cx(
-            styles["schedule-strip"],
-            slideDir === "prev" && styles["schedule-strip--prev"],
-            slideDir === "next" && styles["schedule-strip--next"],
+            styles['schedule-strip'],
+            slideDir === 'prev' && styles['schedule-strip--prev'],
+            slideDir === 'next' && styles['schedule-strip--next'],
           )}
         >
           {pageGames.map((game, index) => renderCard(game, index))}
@@ -261,10 +270,10 @@ export default function ScheduleStrip({
 
         <button
           className={cx(
-            styles["schedule-strip__nav"],
-            !canGoNext && styles["schedule-strip__nav--hidden"],
+            styles['schedule-strip__nav'],
+            !canGoNext && styles['schedule-strip__nav--hidden'],
           )}
-          onClick={() => goTo("next")}
+          onClick={() => goTo('next')}
           aria-label="Next games"
           tabIndex={canGoNext ? 0 : -1}
         >
@@ -285,10 +294,18 @@ export default function ScheduleStrip({
       </div>
 
       <div
-        className={cx(styles["schedule-strip-wrapper"], styles["schedule-strip-wrapper--mobile"])}
+        className={cx(
+          styles['schedule-strip-wrapper'],
+          styles['schedule-strip-wrapper--mobile'],
+        )}
         ref={mobileScrollRef}
       >
-        <div className={cx(styles["schedule-strip"], styles["schedule-strip--scroll"])}>
+        <div
+          className={cx(
+            styles['schedule-strip'],
+            styles['schedule-strip--scroll'],
+          )}
+        >
           {games.map((game, index) => renderCard(game, index))}
         </div>
       </div>
@@ -301,14 +318,14 @@ function parseGameDate(date: string | Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   }
 
-  const [year, month, day] = date.split("-").map(Number);
+  const [year, month, day] = date.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
 
 function formatGameDate(date: string | Date): string {
-  return parseGameDate(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  return parseGameDate(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }

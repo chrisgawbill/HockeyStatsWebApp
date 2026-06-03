@@ -49,7 +49,8 @@
 
 .calendar__cell--today {
   border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 45%, transparent);
+  box-shadow: 0 0 0 1px
+    color-mix(in srgb, var(--color-primary) 45%, transparent);
 }
 
 /* Day number doubles as a "jump into day view" affordance. */
@@ -116,7 +117,8 @@
   padding: 5px 8px;
   background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
-  border-left: 3px solid color-mix(in srgb, var(--color-primary) 38%, transparent);
+  border-left: 3px solid
+    color-mix(in srgb, var(--color-primary) 38%, transparent);
   border-radius: 10px;
   text-align: left;
   cursor: default;
@@ -131,7 +133,11 @@
 }
 
 .game-chip--clickable:hover {
-  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 12%,
+    var(--color-surface)
+  );
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
 }
@@ -281,11 +287,11 @@
 }
 
 /* --- Dark theme --- */
-:global([data-theme="dark"]) .calendar__cell--today .calendar__date {
+:global([data-theme='dark']) .calendar__cell--today .calendar__date {
   color: var(--color-text);
 }
 
-:global([data-theme="dark"]) .game-chip__abbrev,
-:global([data-theme="dark"]) .game-chip__score {
+:global([data-theme='dark']) .game-chip__abbrev,
+:global([data-theme='dark']) .game-chip__score {
   color: var(--color-text);
 }

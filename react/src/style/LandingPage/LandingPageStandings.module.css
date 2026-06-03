@@ -184,8 +184,8 @@
   }
 
   .standings-table :global(.th) svg,
-  .standings-table :global(.th) [class*="sort"],
-  .standings-table :global(.th) [aria-hidden="true"] {
+  .standings-table :global(.th) [class*='sort'],
+  .standings-table :global(.th) [aria-hidden='true'] {
     display: none !important;
   }
 
@@ -266,11 +266,11 @@
   }
 }
 
-:global([data-theme="dark"]) .standings-header h3 {
+:global([data-theme='dark']) .standings-header h3 {
   color: var(--color-text);
 }
 
-:global([data-theme="dark"]) .standings-table {
+:global([data-theme='dark']) .standings-table {
   background-color: var(--color-surface);
 }
 
@@ -310,35 +310,35 @@
   --standings-status-on-container: #331000;
 }
 
-:global([data-theme="dark"] .standings-status--presidents) {
+:global([data-theme='dark'] .standings-status--presidents) {
   --standings-status-container: #332900;
   --standings-status-accent: #f2c94c;
   --standings-status-on-accent: #241a00;
   --standings-status-on-container: #fff3bf;
 }
 
-:global([data-theme="dark"] .standings-status--conference) {
+:global([data-theme='dark'] .standings-status--conference) {
   --standings-status-container: #003545;
   --standings-status-accent: #7dd8f7;
   --standings-status-on-accent: #001f2a;
   --standings-status-on-container: #d4f4ff;
 }
 
-:global([data-theme="dark"] .standings-status--division) {
+:global([data-theme='dark'] .standings-status--division) {
   --standings-status-container: #12351a;
   --standings-status-accent: #8dd694;
   --standings-status-on-accent: #09210d;
   --standings-status-on-container: #d6f5d9;
 }
 
-:global([data-theme="dark"] .standings-status--playoffs) {
+:global([data-theme='dark'] .standings-status--playoffs) {
   --standings-status-container: #2b1b55;
   --standings-status-accent: #d0bcff;
   --standings-status-on-accent: #1f0b46;
   --standings-status-on-container: #f0e7ff;
 }
 
-:global([data-theme="dark"] .standings-status--wildcard) {
+:global([data-theme='dark'] .standings-status--wildcard) {
   --standings-status-container: #4a1d0b;
   --standings-status-accent: #ffb59c;
   --standings-status-on-accent: #331000;

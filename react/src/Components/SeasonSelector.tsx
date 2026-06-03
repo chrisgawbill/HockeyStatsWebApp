@@ -1,7 +1,10 @@
-import React from "react";
-import { useSeason } from "../Data/Context/SeasonContext";
-import { getRecentSeasonIds, formatSeasonLabel } from "../Data/Helpers/seasonHelper";
-import styles from "../style/SeasonSelector.module.css";
+import React from 'react';
+import { useSeason } from '../Data/Context/SeasonContext';
+import {
+  getRecentSeasonIds,
+  formatSeasonLabel,
+} from '../Data/Helpers/seasonHelper';
+import styles from '../style/SeasonSelector.module.css';
 
 function ChevronIcon() {
   return (
@@ -33,7 +36,10 @@ interface SeasonSelectorProps {
  * SeasonContext. Used on the Landing, Schedule, Standings, and Team pages.
  * `className` lets a host page override the default standalone spacing.
  */
-export default function SeasonSelector({ count = 10, className }: SeasonSelectorProps) {
+export default function SeasonSelector({
+  count = 10,
+  className,
+}: SeasonSelectorProps) {
   const { season, setSeason } = useSeason();
   const recent = getRecentSeasonIds(count);
   /**
@@ -45,12 +51,18 @@ export default function SeasonSelector({ count = 10, className }: SeasonSelector
     : [...recent, season].sort((a, b) => Number(b) - Number(a));
 
   return (
-    <div className={className ? `${styles["season-bar"]} ${className}` : styles["season-bar"]}>
-      <label className={styles["season-field"]}>
-        <span className={styles["season-field__label"]}>Season</span>
-        <span className={styles["season-field__control"]}>
+    <div
+      className={
+        className
+          ? `${styles['season-bar']} ${className}`
+          : styles['season-bar']
+      }
+    >
+      <label className={styles['season-field']}>
+        <span className={styles['season-field__label']}>Season</span>
+        <span className={styles['season-field__control']}>
           <select
-            className={styles["season-field__select"]}
+            className={styles['season-field__select']}
             value={season}
             onChange={(e) => setSeason(e.target.value)}
             aria-label="Select season"
@@ -61,7 +73,7 @@ export default function SeasonSelector({ count = 10, className }: SeasonSelector
               </option>
             ))}
           </select>
-          <span className={styles["season-field__chevron"]} aria-hidden="true">
+          <span className={styles['season-field__chevron']} aria-hidden="true">
             <ChevronIcon />
           </span>
         </span>

@@ -354,26 +354,26 @@
   box-shadow: none !important;
 }
 
-:global([data-theme="dark"]) .game-period-chip.overtime {
+:global([data-theme='dark']) .game-period-chip.overtime {
   color: var(--color-blue-accent);
 }
 
-:global([data-theme="dark"]) .game-playoff-badge {
+:global([data-theme='dark']) .game-playoff-badge {
   color: #ff8a65;
 }
 
-:global([data-theme="dark"]) .game-final-score {
+:global([data-theme='dark']) .game-final-score {
   color: var(--color-text);
 }
 
-:global([data-theme="dark"]) .game-card:hover {
+:global([data-theme='dark']) .game-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
-:global([data-theme="dark"]) .team-info h3 {
+:global([data-theme='dark']) .team-info h3 {
   color: var(--color-text);
 }
 
-:global([data-theme="dark"]) .game-time {
+:global([data-theme='dark']) .game-time {
   color: var(--color-text-secondary);
 }

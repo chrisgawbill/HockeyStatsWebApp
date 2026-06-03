@@ -1,31 +1,31 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   STAT_CATEGORIES,
   StatCategory,
   StatCategoryKey,
   PlayerStatLine,
-} from "../../Data/LocalData/teamPageMockData";
-import shared from "../../style/shared.module.css";
-import styles from "../../style/TeamPage/TeamPage.module.css";
+} from '../../Data/LocalData/teamPageMockData';
+import shared from '../../style/shared.module.css';
+import styles from '../../style/TeamPage/TeamPage.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
-const FALLBACK_HEADSHOT = "https://assets.nhle.com/mugs/nhl/skater/default.png";
+const FALLBACK_HEADSHOT = 'https://assets.nhle.com/mugs/nhl/skater/default.png';
 
 function getTopTen(
   players: PlayerStatLine[],
   category: StatCategory,
 ): PlayerStatLine[] {
   let eligible =
-    category.key === "faceoffWinPct"
+    category.key === 'faceoffWinPct'
       ? players.filter(
           (p) =>
             p.faceoffWinPct !== null &&
-            (p.position === "C" || p.position === "LW" || p.position === "RW"),
+            (p.position === 'C' || p.position === 'LW' || p.position === 'RW'),
         )
-      : category.key === "corsiPct"
+      : category.key === 'corsiPct'
         ? players.filter((p) => p.corsiPct !== null)
         : players;
 
@@ -52,7 +52,7 @@ interface Props {
 }
 
 export default function PlayerStatsSection({ players, headshotMap }: Props) {
-  const [selectedKey, setSelectedKey] = useState<StatCategoryKey>("goals");
+  const [selectedKey, setSelectedKey] = useState<StatCategoryKey>('goals');
 
   const selectedCategory = STAT_CATEGORIES.find((c) => c.key === selectedKey)!;
   const topTen = getTopTen(players, selectedCategory);
@@ -61,12 +61,12 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
     <section className={shared.section}>
       <h2 className={shared.sectionTitle}>Player Stats</h2>
 
-      <div className={styles["player-stat-categories"]}>
+      <div className={styles['player-stat-categories']}>
         {STAT_CATEGORIES.map((cat) => (
           <button
             key={cat.key}
             className={cx(
-              styles["player-stat-tab"],
+              styles['player-stat-tab'],
               selectedKey === cat.key && styles.active,
             )}
             onClick={() => setSelectedKey(cat.key)}
@@ -76,23 +76,27 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
         ))}
       </div>
 
-      <div className={`${styles["player-stat-leaderboard"]} ${shared.surface} ${shared.surfaceClip}`}>
-        <p className={styles["player-stat-leaderboard__title"]}>
+      <div
+        className={`${styles['player-stat-leaderboard']} ${shared.surface} ${shared.surfaceClip}`}
+      >
+        <p className={styles['player-stat-leaderboard__title']}>
           {selectedCategory.label} Leaders
         </p>
         {topTen.map((player, index) => {
           const val = player[selectedKey];
           const formatted =
-            val !== null ? selectedCategory.format(val as number) : "—";
+            val !== null ? selectedCategory.format(val as number) : '—';
           return (
             <div
               key={`${player.playerId}-${index}`}
-              className={styles["player-stat-row"]}
+              className={styles['player-stat-row']}
             >
-              <div className={styles["player-stat-row__leading"]}>
-                <span className={styles["player-stat-row__rank"]}>#{index + 1}</span>
+              <div className={styles['player-stat-row__leading']}>
+                <span className={styles['player-stat-row__rank']}>
+                  #{index + 1}
+                </span>
                 <img
-                  className={styles["player-stat-row__headshot"]}
+                  className={styles['player-stat-row__headshot']}
                   src={headshotMap.get(player.playerId) || FALLBACK_HEADSHOT}
                   alt={player.name}
                   onError={(e) => {
@@ -100,13 +104,17 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
                   }}
                 />
               </div>
-              <div className={styles["player-stat-row__info"]}>
-                <span className={styles["player-stat-row__name"]}>{player.name}</span>
-                <span className={styles["player-stat-row__pos"]}>
+              <div className={styles['player-stat-row__info']}>
+                <span className={styles['player-stat-row__name']}>
+                  {player.name}
+                </span>
+                <span className={styles['player-stat-row__pos']}>
                   {player.position} · {player.gamesPlayed} GP
                 </span>
               </div>
-              <span className={styles["player-stat-row__value"]}>{formatted}</span>
+              <span className={styles['player-stat-row__value']}>
+                {formatted}
+              </span>
             </div>
           );
         })}
