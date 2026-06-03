@@ -3,7 +3,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import './style/components.css';
-import reportWebVitals from './reportWebVitals';
 import App from './App';
 import { ListOfTeamsDataProvider } from './Data/Context/ListOfTeamsContext';
 import { ThemeProvider } from './Data/Context/ThemeContext';
@@ -23,5 +22,3 @@ root.render(
     </ListOfTeamsDataProvider>
   </ThemeProvider>,
 );
-
-reportWebVitals();

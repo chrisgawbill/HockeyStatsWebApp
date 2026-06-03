@@ -166,12 +166,6 @@ export async function GetGoalieSummary(teamId?: string, season?: string) {
     throw error;
   }
 }
-/**
- * Placeholder for a future draft endpoint. Draft lottery odds are currently
- * computed locally from league rank in LeagueStandingsHelper, so this returns
- * nothing by design.
- */
-export async function GetDraft() {}
 
 export async function GetHealth(passphrase: string) {
   try {

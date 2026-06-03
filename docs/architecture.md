@@ -82,7 +82,7 @@ Frontend HTTP calls are centralized in:
 - `GetSkaterSummary(teamId)` calls `/player/skater/summary`
 - `GetHealth(passphrase)` calls `/health` and `GetCacheReport(passphrase)` calls `/health/cache-usage`; both attach the passphrase as the `x-diagnostics-key` header (never a query string), since the backend reads it from that header (see [Diagnostics Layer](#diagnostics-layer))
 
-Note: `apiHandler.ts` also exports `GetDraft()`, but it is currently an empty stub (its body is commented out). Draft lottery odds are not fetched from an API; they are computed locally (see [Important Hockey And NHL API Background](#important-hockey-and-nhl-api-background)).
+Note: draft lottery odds are not fetched from an API; they are computed locally (see [Important Hockey And NHL API Background](#important-hockey-and-nhl-api-background)).
 
 `genAIHandler.ts` calls `/python-service` and normalizes the AI response into JSON when possible.
 
@@ -168,10 +168,7 @@ Routes are grouped by NHL domain. Most data routes accept an optional `?season=`
   - Calls `api/routes/hockey-ai.py` through a Python subprocess
   - Caches AI responses by cache key
 
-- `api/routes/index.js`
-  - `GET /`, mounted in `api/app.js` as `indexRouter`
-  - Leftover Express-generator scaffolding: it calls `res.render('index', ...)`, which expects a view engine/template this API does not configure
-  - It serves no real purpose for this app and can likely be removed; do not build on it
+There is no `/` route: the app is a JSON API with no view engine. Unmatched paths fall through to the 404 + JSON error handlers.
 
 ### NHL API Clients
 

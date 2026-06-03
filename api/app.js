@@ -6,7 +6,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
 var healthRouter = require('./routes/health');
 var standingsRouter = require('./routes/standings');
 var playerRouter = require('./routes/player');
@@ -32,10 +31,6 @@ let corsOptions = {
 
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
 app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());
@@ -43,7 +38,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
 app.use('/health', healthRouter);
 app.use('/standings', standingsRouter);
 app.use('/player', playerRouter);
