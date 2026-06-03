@@ -43,6 +43,19 @@ pnpm start        # Vite dev server
 The frontend defaults to `http://localhost:9000` for API calls. Set `VITE_API_URL`
 if the backend runs elsewhere.
 
+### Environment variables
+
+Copy the example templates and fill in real values (the real `.env` files are
+gitignored):
+
+```bash
+cp api/.env.example api/.env
+cp react/.env.example react/.env
+```
+
+`api/.env.example` documents every backend variable (cache/database config,
+`ANTHROPIC_API_KEY`, `DIAGNOSTICS_PASSPHRASE`, `PORT`, `NODE_ENV`).
+
 ## Documentation
 
 See [`docs/architecture.md`](docs/architecture.md) for the full architecture
