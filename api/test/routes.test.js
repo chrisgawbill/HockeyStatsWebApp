@@ -10,6 +10,7 @@ const CACHE_TYPES = {
 	SCHEDULE: 'schedule',
 	STANDINGS: 'standings',
 	STAT_LEADERS: 'stat-leaders',
+	TEAM: 'team',
 };
 
 const cacheState = {
@@ -46,7 +47,10 @@ function installCacheManagerMock() {
 			GetOrFetch: (...args) => cacheState.getOrFetch(...args),
 			readCache: async () => null,
 			writeCache: async () => {},
+			getCacheStorageMode: () => 'filesystem',
 			isCacheWritable: async () => true,
+			isExternalCacheConfigured: async () => false,
+			isExternalCacheReachable: async () => false,
 			getCacheUsage: async () => ({
 				sections: {},
 				largestSection: null,
@@ -73,6 +77,7 @@ const { router: scheduleRouter } = loadRouter('../routes/schedule');
 beforeEach(() => {
 	resetCacheState();
 	process.env.DIAGNOSTICS_PASSPHRASE = 'let-me-in';
+	process.env.DISABLE_DOMAIN_PERSISTENCE = 'true';
 });
 
 test('health rejects requests without diagnostics key', async () => {
@@ -145,6 +150,41 @@ test('schedule rejects invalid season before cache lookup', async () => {
 	assert.equal(response.status, 400);
 	assert.equal(cacheState.calls.length, 0);
 	assert.match(response.body.error, /Invalid season format/);
+});
+
+test('schedule landing uses game landing cache key', async () => {
+	setCacheResponse(CACHE_TYPES.SCHEDULE, 'landing_2023020001', {
+		id: 2023020001,
+		gameState: 'FINAL',
+	});
+
+	const app = makeTestApp('/schedule', scheduleRouter);
+	const response = await request(app, '/schedule/landing/2023020001');
+
+	assert.equal(response.status, 200);
+	assert.deepEqual(cacheState.calls, [
+		{ type: CACHE_TYPES.SCHEDULE, key: 'landing_2023020001' },
+	]);
+	assert.deepEqual(response.body, {
+		id: 2023020001,
+		gameState: 'FINAL',
+	});
+});
+
+test('schedule boxscore uses game boxscore cache key', async () => {
+	setCacheResponse(CACHE_TYPES.SCHEDULE, 'boxscore_2023020001', {
+		id: 2023020001,
+		homeTeam: { score: 4 },
+	});
+
+	const app = makeTestApp('/schedule', scheduleRouter);
+	const response = await request(app, '/schedule/2023020001');
+
+	assert.equal(response.status, 200);
+	assert.deepEqual(cacheState.calls, [
+		{ type: CACHE_TYPES.SCHEDULE, key: 'boxscore_2023020001' },
+	]);
+	assert.equal(response.body.homeTeam.score, 4);
 });
 
 test('standings uses season cache key and returns mapped standings', async () => {
@@ -292,4 +332,63 @@ test('team roster cache key includes team and season', async () => {
 	]);
 	assert.equal(response.body.players[0].id, 29);
 	assert.equal(response.body.players[0].name, 'Nathan MacKinnon');
+});
+
+test('team schedule cache key includes team and season', async () => {
+	setCacheResponse(CACHE_TYPES.SCHEDULE, 'team_COL_20232024', {
+		games: [
+			{
+				id: 2023020001,
+				gameDate: '2024-01-01',
+				gameState: 'FUT',
+				startTimeUTC: '2024-01-01T19:00:00Z',
+				venue: { default: 'Ball Arena' },
+				homeTeam: { abbrev: 'COL', logo: 'home.svg' },
+				awayTeam: { abbrev: 'DAL', logo: 'away.svg' },
+			},
+		],
+	});
+
+	const app = makeTestApp('/team', teamRouter);
+	const response = await request(app, '/team/schedule/COL?season=20232024');
+
+	assert.equal(response.status, 200);
+	assert.deepEqual(cacheState.calls, [
+		{ type: CACHE_TYPES.SCHEDULE, key: 'team_COL_20232024' },
+	]);
+	assert.equal(response.body.games[0].gameId, 2023020001);
+	assert.equal(response.body.games[0].homeTeam, 'COL');
+});
+
+test('team stats cache key includes selected season', async () => {
+	setCacheResponse(CACHE_TYPES.TEAM, 'summary_sorted_shotsForPerGame_20232024', {
+		data: [{ teamId: 21, wins: 50 }],
+	});
+
+	const app = makeTestApp('/team', teamRouter);
+	const response = await request(app, '/team/stats?season=20232024');
+
+	assert.equal(response.status, 200);
+	assert.deepEqual(cacheState.calls, [
+		{
+			type: CACHE_TYPES.TEAM,
+			key: 'summary_sorted_shotsForPerGame_20232024',
+		},
+	]);
+	assert.equal(response.body.data[0].teamId, 21);
+});
+
+test('single team stats cache key includes team and season', async () => {
+	setCacheResponse(CACHE_TYPES.TEAM, 'summary_21_20232024', {
+		data: [{ teamId: 21, wins: 50 }],
+	});
+
+	const app = makeTestApp('/team', teamRouter);
+	const response = await request(app, '/team/21?season=20232024');
+
+	assert.equal(response.status, 200);
+	assert.deepEqual(cacheState.calls, [
+		{ type: CACHE_TYPES.TEAM, key: 'summary_21_20232024' },
+	]);
+	assert.equal(response.body.data[0].wins, 50);
 });

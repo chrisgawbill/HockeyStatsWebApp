@@ -8,7 +8,7 @@ The most important mental model is:
 React pages/components
   -> React contexts and service functions
   -> Express API routes
-  -> NHL public APIs, filesystem cache, or Python AI subprocess
+  -> NHL public APIs, Postgres/filesystem cache, or Python AI subprocess
 ```
 
 ## Repository Layout
@@ -139,16 +139,16 @@ Routes are grouped by NHL domain. Most data routes accept an optional `?season=`
   - `GET /schedule/` — optional `?season=`
   - Fetches a season schedule by calling weekly NHL schedule endpoints, then returns `{ games }` where each game is a `ScheduleGameContract`. The fetch window depends on the season: the current season runs from October 1 through today + 28 days; a past season runs through June 30 of the following year
   - `GET /schedule/landing/:gameID`
-  - Fetches game landing data (raw passthrough)
+  - Fetches/caches game landing data (raw passthrough; short TTL)
   - `GET /schedule/:gameID`
-  - Fetches game boxscore data (raw passthrough)
+  - Fetches/caches game boxscore data (raw passthrough; short TTL)
 
 - `api/routes/team.js` (all accept optional `?season=`)
   - `GET /team/roster/:triCode` — returns a normalized `RosterContract` (`{ players }`)
   - `GET /team/schedule/:triCode` — returns `{ games }` of `ScheduleGameContract`, sorted by date
   - `GET /team/stats` — raw team summary stats (not yet normalized)
   - `GET /team/:teamId?` — raw team summary stats (not yet normalized)
-  - Uses NHL team stats and club schedule endpoints
+  - Uses NHL team stats and club schedule endpoints, with cache keys that include team/sort inputs and season
 
 - `api/routes/player.js` (all accept optional `?season=`)
   - `GET /player/skater/statLeaders/:statIndicator` — flat array of `StatLeaderContract`
@@ -203,7 +203,7 @@ Conventions for this layer:
 
 ### Backend Caching
 
-`api/utils/cacheManager.js` provides filesystem caching with TTLs and in-flight request de-duplication.
+`api/utils/cacheManager.js` provides raw-response caching with TTLs and in-flight request de-duplication. It is intentionally a cache/persistence boundary, not a domain model layer: raw NHL responses are stored, then mapped on the way out through `api/services/mappers/`.
 
 Cache types:
 
@@ -213,8 +213,31 @@ Cache types:
 - `SCHEDULE`
 - `STANDINGS`
 - `STAT_LEADERS`
+- `TEAM`
 
-Most cache entries are stored in generated folders under `api/`, such as `schedule-cache/`, `player-cache/`, and `stat-leaders-cache/`. The cache value shape is:
+Storage mode:
+
+- With no `CACHE_DATABASE_URL`, the app uses generated local folders under `api/cache/`.
+- With `CACHE_DATABASE_URL`, the app defaults to Postgres and stores rows in `app_cache`.
+- `CACHE_STORAGE=filesystem|postgres|hybrid` can override that default. `hybrid` reads Postgres first and can use local files as a secondary store.
+
+The Postgres table is created automatically if needed:
+
+```sql
+CREATE TABLE IF NOT EXISTS app_cache (
+  cache_key text PRIMARY KEY,
+  type text NOT NULL,
+  logical_key text NOT NULL,
+  timestamp_ms bigint NOT NULL,
+  data jsonb NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+```
+
+`cache_key` is `${type}:${logical_key}` and the table also has a unique `(type, logical_key)` index. Writes use `INSERT ... ON CONFLICT DO UPDATE`, so the database updates an existing season/team/stat entry instead of creating duplicate records.
+
+Filesystem cache entries use this shape:
 
 ```json
 {
@@ -224,6 +247,50 @@ Most cache entries are stored in generated folders under `api/`, such as `schedu
 ```
 
 Use `GetOrFetch(type, key, fetcher)` for new cached backend fetches. It checks the cache, prevents duplicate simultaneous fetches for the same key, writes fresh data, and returns the result.
+
+Use `CACHE_TYPES.AI` for AI-generated summaries. When Postgres storage is enabled, those summaries go into the same `app_cache` table unless a future feature needs a separate reviewed/source-attributed AI summary table.
+
+`GET /health/cache-usage` reports the active primary cache at the top level. In Postgres or hybrid cache mode, `sections`, `largestSection`, and `total` use `app_cache` byte counts; filesystem details remain available under `local`, and Postgres entry/byte counts remain available under `external`. In filesystem mode, the top-level fields continue to describe the local cache folders.
+
+### Database Migrations
+
+Domain tables live behind explicit SQL migrations under `api/db/migrations/`. Run them from the API package:
+
+```text
+cd api
+npm run db:migrate
+```
+
+The migration runner (`api/db/migrate.js`) reads `CACHE_DATABASE_URL` and `CACHE_DATABASE_SSL` from `api/.env`, creates `schema_migrations` if needed, applies only pending `.sql` files, and records each successful migration. The first migration creates:
+
+- `seasons`
+- `teams`
+- `players`
+- `team_season_snapshots`
+- `schedule_games`
+- `roster_entries`
+- `player_season_stats`
+- `stat_leaders`
+- `ai_summaries`
+
+These tables are for normalized app-facing data. Keep `app_cache` as the raw API payload cache/fallback so mapper changes and future persistence jobs can still work from original NHL response shapes.
+
+The current React app still does most schedule, standings, and team-page slicing in the browser after loading broad season data. A future Phase 2 ticket should replace that with query-backed API endpoints over the normalized tables where it reduces payload size or repeated manual filtering, while preserving client-side presentation-only projections.
+
+### Controller, Service, And Repository Layers
+
+Database-backed domain persistence follows the same broad controller/service/repository shape used in many .NET APIs:
+
+- `api/routes/` is the controller layer. Routes read HTTP inputs, fetch/cache raw NHL data, queue service work, and return the current API response contract.
+- `api/services/domain/` is the service layer. Services coordinate transactions, call DB mappers, and call repositories.
+- `api/services/mappers/db/` owns pure DB mapping. DB mappers convert raw NHL/API payloads into normalized row objects without touching the database.
+- `api/db/repositories/` is the repository layer. Repositories own SQL only; they know table/column names and expose focused read/upsert functions.
+
+Current repository modules cover seasons, teams, players, schedule games, rosters, player season stats, stat leaders, and AI summaries. Current domain services cover team season snapshots, schedules, rosters, player stats, stat leaders, and AI summaries.
+
+Keep routes thin: fetch/cache raw data, call the appropriate service when normalized persistence is desired, then return the current API response contract. Do not put SQL in route files.
+
+When `DATABASE_URL` or `CACHE_DATABASE_URL` is configured, existing routes make best-effort service calls after fetching/caching raw data. Service failures are logged and do not break the HTTP response. Set `DISABLE_DOMAIN_PERSISTENCE=true` to turn off normalized table backfills while keeping the raw cache behavior.
 
 ### Season IDs
 
@@ -294,8 +361,8 @@ DiagnosticsPage (unlinked route #/diagnostics)
 
 ### Endpoints
 
-- `GET /health` returns API status, app version, environment, current `seasonId`, cache-directory writability, whether `ANTHROPIC_API_KEY` is configured, uptime, and server time. Sensitive values are reported as booleans/status only, never as raw values.
-- `GET /health/cache-usage` returns per-section cache sizes in bytes, the largest section, and the total.
+- `GET /health` returns API status, app version, environment, current `seasonId`, cache storage mode, cache-directory writability, external cache configured/reachable flags, whether `ANTHROPIC_API_KEY` is configured, uptime, and server time. Sensitive values are reported as booleans/status only, never as raw values.
+- `GET /health/cache-usage` returns the primary cache size by section. In Postgres or hybrid cache mode, the top-level `sections`, `largestSection`, and `total` fields come from `app_cache`; filesystem details are nested under `local`, and Postgres entry/byte counts are nested under `external`.
 
 ### Authentication model
 
@@ -312,6 +379,8 @@ The single most important rule: **the backend is the only real gate.** Because t
 ## Important Hockey And NHL API Background
 
 This app depends on public NHL API response shapes. Those shapes can change without notice, so the code often uses defensive fallbacks.
+
+The app should treat NHL responses as source data used to render this app, not as a redistributable data product. The cache exists to reduce repeated upstream requests, preserve app availability, and keep raw payloads near the backend mapper boundary. Avoid building public bulk export endpoints or reselling copied NHL data without explicit permission.
 
 Useful domain terms:
 

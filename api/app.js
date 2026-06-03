@@ -18,6 +18,8 @@ const {
 
 const { spawn } = require('child_process');
 const { readCache, writeCache, CACHE_TYPES } = require('./utils/cacheManager');
+const { runServiceTask } = require('./services/domain/runServiceTask');
+const { persistAiSummary } = require('./services/domain/aiSummaryService');
 
 let corsOptions = {
 	origin: [
@@ -55,11 +57,13 @@ app.post('/python-service', async (req, res, next) => {
 
 		const cached = await readCache(CACHE_TYPES.AI, key);
 		if (cached !== null) {
+			queueAiSummaryPersistence(key, cached, message);
 			return res.send(cached);
 		}
 
 		const result = await runAIPythonScript(message);
 		await writeCache(CACHE_TYPES.AI, key, result);
+		queueAiSummaryPersistence(key, result, message);
 		res.send(result);
 	} catch (error) {
 		next(error);
@@ -120,6 +124,21 @@ const runAIPythonScript = (message) => {
 		});
 	});
 };
+
+function queueAiSummaryPersistence(cacheKey, content, prompt) {
+	const triCode = cacheKey === 'default' ? null : cacheKey;
+	if (!triCode) return;
+
+	runServiceTask(`ai summary ${triCode}`, () =>
+		persistAiSummary({
+			triCode,
+			content,
+			prompt,
+			modelProvider: 'anthropic',
+		}),
+	);
+}
+
 // Schedule cache refreshes at 8AM, 7PM, 11PM UTC
 const REFRESH_HOURS_UTC = [8, 19, 23];
 function scheduleNextRefresh() {

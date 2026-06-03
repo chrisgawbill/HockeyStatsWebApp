@@ -3,6 +3,8 @@ const { axiosNhl } = require("../services/nhlApiClient");
 const { GetOrFetch, writeCache, CACHE_TYPES } = require("../utils/cacheManager");
 const { getCurrentSeasonId, validateSeason } = require("../utils/seasonHelper");
 const { mapGame } = require("../services/mappers/scheduleMapper");
+const { runServiceTask } = require("../services/domain/runServiceTask");
+const { persistSchedule } = require("../services/domain/scheduleService");
 
 var router = express.Router();
 
@@ -89,6 +91,9 @@ router.get("/", validateSeason, async function (req, res, next) {
     const raw = await GetOrFetch(CACHE_TYPES.SCHEDULE, seasonId, () =>
       fetchSeasonSchedule(seasonId)
     );
+    runServiceTask(`season schedule ${seasonId}`, () =>
+      persistSchedule({ seasonId, schedulePayload: raw })
+    );
     res.send({ games: mapSeasonSchedule(raw) });
   } catch (e) {
     next(e);
@@ -103,8 +108,13 @@ router.get("/", validateSeason, async function (req, res, next) {
 router.get("/landing/:gameID", async function (req, res, next) {
   try {
     const url = `/gamecenter/${req.params.gameID}/landing`;
-    const response = await axiosNhl.get(url);
-    res.send(response.data);
+    const data = await GetOrFetch(
+      CACHE_TYPES.SCHEDULE,
+      `landing_${req.params.gameID}`,
+      () => axiosNhl.get(url).then((r) => r.data),
+      { ttlMs: 5 * 60 * 1000 }
+    );
+    res.send(data);
   } catch (e) {
     next(e);
   }
@@ -119,8 +129,13 @@ router.get("/landing/:gameID", async function (req, res, next) {
 router.get("/:gameID", async function (req, res, next) {
   try {
     const url = `/gamecenter/${req.params.gameID}/boxscore`;
-    const response = await axiosNhl.get(url);
-    res.send(response.data);
+    const data = await GetOrFetch(
+      CACHE_TYPES.SCHEDULE,
+      `boxscore_${req.params.gameID}`,
+      () => axiosNhl.get(url).then((r) => r.data),
+      { ttlMs: 5 * 60 * 1000 }
+    );
+    res.send(data);
   } catch (e) {
     next(e);
   }

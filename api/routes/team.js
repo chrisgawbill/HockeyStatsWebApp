@@ -4,6 +4,10 @@ const { axiosNhl, axiosNhlTeam } = require('../services/nhlApiClient');
 const { GetOrFetch, CACHE_TYPES } = require('../utils/cacheManager');
 const { mapRoster } = require('../services/mappers/rosterMapper');
 const { mapGame } = require('../services/mappers/scheduleMapper');
+const { runServiceTask } = require('../services/domain/runServiceTask');
+const { persistRoster } = require('../services/domain/rosterService');
+const { persistSchedule } = require('../services/domain/scheduleService');
+const { persistTeamSeason } = require('../services/domain/teamService');
 
 var router = express.Router();
 
@@ -39,6 +43,9 @@ router.get('/roster/:triCode', async function (req, res, next) {
 			`${triCode}_${season}`,
 			() => axiosNhl.get(`/roster/${triCode}/${season}`).then((r) => r.data),
 		);
+		runServiceTask(`roster ${triCode} ${season}`, () =>
+			persistRoster({ seasonId: season, triCode, rosterPayload: raw }),
+		);
 		res.send(mapRoster(raw));
 	} catch (e) {
 		next(e);
@@ -55,10 +62,22 @@ router.get('/schedule/:triCode', async function (req, res, next) {
 	try {
 		const { triCode } = req.params;
 		const season = req.seasonId;
-		const response = await axiosNhl.get(
-			`/club-schedule-season/${triCode}/${season}`,
+		const raw = await GetOrFetch(
+			CACHE_TYPES.SCHEDULE,
+			`team_${triCode}_${season}`,
+			() =>
+				axiosNhl
+					.get(`/club-schedule-season/${triCode}/${season}`)
+					.then((r) => r.data),
 		);
-		const games = (response.data.games ?? [])
+		runServiceTask(`club schedule ${triCode} ${season}`, () =>
+			persistSchedule({
+				seasonId: season,
+				schedulePayload: raw,
+				sourceLabel: 'clubSchedule',
+			}),
+		);
+		const games = (raw.games ?? [])
 			.map((g) =>
 				mapGame(g, { date: g.gameDate, dayAbbrev: shortDayOfWeek(g.gameDate) }),
 			)
@@ -82,8 +101,15 @@ router.get('/stats', async function (req, res, next) {
 	try {
 		const season = req.seasonId;
 		const url = `/summary?sort=shotsForPerGame&cayenneExp=seasonId=${season} and gameTypeId=2`;
-		const response = await axiosNhlTeam.get(url);
-		res.send(response.data);
+		const data = await GetOrFetch(
+			CACHE_TYPES.TEAM,
+			`summary_sorted_shotsForPerGame_${season}`,
+			() => axiosNhlTeam.get(url).then((r) => r.data),
+		);
+		runServiceTask(`team stats ${season}`, () =>
+			persistTeamSeason({ seasonId: season, teamStatsPayload: data }),
+		);
+		res.send(data);
 	} catch (e) {
 		next(e);
 	}
@@ -103,10 +129,18 @@ router.get('/:teamId?', async function (req, res, next) {
 			teamId ?
 				`teamId%3D${teamId}%20and%20seasonId%3D${season}%20and%20gameTypeId%3D2`
 			:	`seasonId%3D${season}%20and%20gameTypeId%3D2`;
-		const response = await axiosNhlTeam.get(
-			`/summary?cayenneExp=${cayenneExp}`,
+		const data = await GetOrFetch(
+			CACHE_TYPES.TEAM,
+			`summary_${teamId || 'all'}_${season}`,
+			() =>
+				axiosNhlTeam
+					.get(`/summary?cayenneExp=${cayenneExp}`)
+					.then((r) => r.data),
 		);
-		res.send(response.data);
+		runServiceTask(`team summary ${teamId || 'all'} ${season}`, () =>
+			persistTeamSeason({ seasonId: season, teamStatsPayload: data }),
+		);
+		res.send(data);
 	} catch (e) {
 		next(e);
 	}

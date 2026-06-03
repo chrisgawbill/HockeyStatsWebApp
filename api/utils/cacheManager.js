@@ -1,7 +1,10 @@
 var fs = require('fs');
 var path = require('path');
+const { Pool } = require('pg');
 
 const inFlight = new Map();
+let cachePool = null;
+let cacheTableReady = false;
 
 const CACHE_TYPES = {
 	PLAYER: 'player',
@@ -10,9 +13,18 @@ const CACHE_TYPES = {
 	SCHEDULE: 'schedule',
 	STANDINGS: 'standings',
 	STAT_LEADERS: 'stat-leaders',
+	TEAM: 'team',
 };
 
 const CACHE_ROOT = path.join(__dirname, '../cache/');
+const CACHE_SEED_ROOT = path.join(__dirname, '../cache-seed/');
+
+const CACHE_STORAGE_MODES = {
+	FILESYSTEM: 'filesystem',
+	POSTGRES: 'postgres',
+	HYBRID: 'hybrid',
+};
+const VALID_CACHE_STORAGE_MODES = new Set(Object.values(CACHE_STORAGE_MODES));
 
 const CACHE_DIRS = {
 	[CACHE_TYPES.PLAYER]: path.join(CACHE_ROOT, 'player-cache/'),
@@ -21,6 +33,7 @@ const CACHE_DIRS = {
 	[CACHE_TYPES.SCHEDULE]: path.join(CACHE_ROOT, 'schedule-cache/'),
 	[CACHE_TYPES.STANDINGS]: path.join(CACHE_ROOT, 'standings-cache/'),
 	[CACHE_TYPES.STAT_LEADERS]: path.join(CACHE_ROOT, 'stat-leaders-cache/'),
+	[CACHE_TYPES.TEAM]: path.join(CACHE_ROOT, 'team-cache/'),
 };
 
 const CACHE_TTLS = {
@@ -30,20 +43,115 @@ const CACHE_TTLS = {
 	[CACHE_TYPES.SCHEDULE]: 12 * 60 * 60 * 1000,
 	[CACHE_TYPES.STANDINGS]: 24 * 60 * 60 * 1000,
 	[CACHE_TYPES.STAT_LEADERS]: 24 * 60 * 60 * 1000,
+	[CACHE_TYPES.TEAM]: 24 * 60 * 60 * 1000,
 };
 
-async function readCache(type, key) {
+function getTtl(type, options = {}) {
+	return options.ttlMs ?? CACHE_TTLS[type];
+}
+
+function getCacheStorageMode() {
+	const requestedMode = (process.env.CACHE_STORAGE ?? '').trim().toLowerCase();
+	if (VALID_CACHE_STORAGE_MODES.has(requestedMode)) {
+		return requestedMode;
+	}
+	return process.env.CACHE_DATABASE_URL ?
+			CACHE_STORAGE_MODES.POSTGRES
+		:	CACHE_STORAGE_MODES.FILESYSTEM;
+}
+
+function usesExternalCache() {
+	const mode = getCacheStorageMode();
+	return (
+		Boolean(process.env.CACHE_DATABASE_URL) &&
+		(mode === CACHE_STORAGE_MODES.POSTGRES ||
+			mode === CACHE_STORAGE_MODES.HYBRID)
+	);
+}
+
+function usesLocalCache() {
+	const mode = getCacheStorageMode();
+	return (
+		mode === CACHE_STORAGE_MODES.FILESYSTEM ||
+		mode === CACHE_STORAGE_MODES.HYBRID
+	);
+}
+
+function isFresh(timestamp, ttlMs) {
+	return ttlMs === Infinity || Date.now() - timestamp < ttlMs;
+}
+
+function makeCacheId(type, key) {
+	return `${type}:${key}`;
+}
+
+function getCachePool() {
+	if (!process.env.CACHE_DATABASE_URL) return null;
+	if (!cachePool) {
+		cachePool = new Pool({
+			connectionString: process.env.CACHE_DATABASE_URL,
+			ssl:
+				process.env.CACHE_DATABASE_SSL === 'false' ?
+					false
+				: process.env.NODE_ENV === 'production' ||
+				  process.env.CACHE_DATABASE_SSL === 'true' ?
+					{ rejectUnauthorized: false }
+				:	undefined,
+		});
+	}
+	return cachePool;
+}
+
+async function ensureExternalCacheTable() {
+	const pool = getCachePool();
+	if (!pool || cacheTableReady) return pool;
+	await pool.query(`
+		CREATE TABLE IF NOT EXISTS app_cache (
+			cache_key text PRIMARY KEY,
+			type text NOT NULL,
+			logical_key text NOT NULL,
+			timestamp_ms bigint NOT NULL,
+			data jsonb NOT NULL,
+			created_at timestamptz NOT NULL DEFAULT now(),
+			updated_at timestamptz NOT NULL DEFAULT now()
+		)
+	`);
+	await pool.query(`
+		ALTER TABLE app_cache
+		ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now()
+	`);
+	await pool.query(`
+		ALTER TABLE app_cache
+		ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now()
+	`);
+	await pool.query(`
+		CREATE UNIQUE INDEX IF NOT EXISTS app_cache_type_logical_key_idx
+		ON app_cache (type, logical_key)
+	`);
+	await pool.query(`
+		CREATE INDEX IF NOT EXISTS app_cache_type_idx
+		ON app_cache (type)
+	`);
+	await pool.query(`
+		CREATE INDEX IF NOT EXISTS app_cache_updated_at_idx
+		ON app_cache (updated_at)
+	`);
+	cacheTableReady = true;
+	return pool;
+}
+
+async function readLocalCache(type, key, ttlMs) {
 	const filePath = path.join(CACHE_DIRS[type], `${key}.json`);
 	try {
 		const entry = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
-		if (Date.now() - entry.timestamp < CACHE_TTLS[type]) {
+		if (isFresh(entry.timestamp, ttlMs)) {
 			return entry.data;
 		}
 	} catch {}
 	return null;
 }
 
-async function writeCache(type, key, data) {
+async function writeLocalCache(type, key, data) {
 	const filePath = path.join(CACHE_DIRS[type], `${key}.json`);
 	await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
 	await fs.promises.writeFile(
@@ -52,8 +160,91 @@ async function writeCache(type, key, data) {
 	);
 }
 
-async function GetOrFetch(type, key, fetcher) {
-	const cached = await readCache(type, key);
+async function readExternalCache(type, key, ttlMs) {
+	try {
+		const pool = await ensureExternalCacheTable();
+		if (!pool) return null;
+		const result = await pool.query(
+			'SELECT timestamp_ms, data FROM app_cache WHERE cache_key = $1',
+			[makeCacheId(type, key)],
+		);
+		const row = result.rows[0];
+		if (!row) return null;
+		if (!isFresh(Number(row.timestamp_ms), ttlMs)) return null;
+		return row.data;
+	} catch (error) {
+		console.error(`Failed to read external ${type} cache for ${key}:`, error);
+		return null;
+	}
+}
+
+async function writeExternalCache(type, key, data) {
+	try {
+		const pool = await ensureExternalCacheTable();
+		if (!pool) return;
+		await pool.query(
+			`
+			INSERT INTO app_cache (cache_key, type, logical_key, timestamp_ms, data, updated_at)
+			VALUES ($1, $2, $3, $4, $5, now())
+			ON CONFLICT (cache_key)
+			DO UPDATE SET
+				timestamp_ms = EXCLUDED.timestamp_ms,
+				data = EXCLUDED.data,
+				updated_at = now()
+			`,
+			[makeCacheId(type, key), type, key, Date.now(), data],
+		);
+	} catch (error) {
+		console.error(`Failed to write external ${type} cache for ${key}:`, error);
+	}
+}
+
+async function readSeedCache(type, key) {
+	const filePath = path.join(CACHE_SEED_ROOT, `${type}-cache`, `${key}.json`);
+	try {
+		const entry = JSON.parse(await fs.promises.readFile(filePath, 'utf-8'));
+		return entry?.data ?? entry;
+	} catch {}
+	return null;
+}
+
+async function readCache(type, key, options = {}) {
+	const ttlMs = getTtl(type, options);
+
+	if (usesExternalCache()) {
+		const external = await readExternalCache(type, key, ttlMs);
+		if (external !== null) return external;
+	}
+
+	if (usesLocalCache()) {
+		const local = await readLocalCache(type, key, ttlMs);
+		if (local !== null) return local;
+	}
+
+	const seed = await readSeedCache(type, key);
+	if (seed !== null) {
+		await writeCache(type, key, seed);
+		return seed;
+	}
+
+	return null;
+}
+
+async function writeCache(type, key, data) {
+	if (usesExternalCache()) {
+		await writeExternalCache(type, key, data);
+	}
+	if (usesLocalCache()) {
+		try {
+			await writeLocalCache(type, key, data);
+		} catch (error) {
+			console.error(`Failed to write local ${type} cache for ${key}:`, error);
+		}
+	}
+}
+
+async function GetOrFetch(type, key, fetcher, options = {}) {
+	const cached = await readCache(type, key, options);
 	if (cached !== null) {
 		return cached;
 	}
@@ -76,6 +267,75 @@ async function GetOrFetch(type, key, fetcher) {
 	return await promise;
 }
 
+async function isExternalCacheConfigured() {
+	return Boolean(process.env.CACHE_DATABASE_URL);
+}
+
+async function isExternalCacheReachable() {
+	try {
+		const pool = await ensureExternalCacheTable();
+		if (!pool) return false;
+		await pool.query('SELECT 1');
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function getExternalCacheUsage() {
+	try {
+		const pool = await ensureExternalCacheTable();
+		if (!pool) return null;
+		const result = await pool.query(`
+			SELECT
+				type,
+				COUNT(*)::int AS entries,
+				COALESCE(SUM(pg_column_size(data)), 0)::bigint AS bytes
+			FROM app_cache
+			GROUP BY type
+		`);
+		const sections = {};
+		let totalEntries = 0;
+		let totalBytes = 0;
+		for (const row of result.rows) {
+			const entries = Number(row.entries);
+			const bytes = Number(row.bytes);
+			sections[row.type] = { entries, bytes };
+			totalEntries += entries;
+			totalBytes += bytes;
+		}
+		return { sections, totalEntries, totalBytes };
+	} catch (error) {
+		console.error('Failed to inspect external cache usage:', error);
+		return null;
+	}
+}
+
+function summarizeSections(sections) {
+	let total = 0;
+	for (const size of Object.values(sections)) {
+		total += size;
+	}
+	const largestSection = Object.entries(sections).reduce(
+		(largest, [type, size]) => {
+			if (size > largest.size) {
+				return { type, size };
+			}
+			return largest;
+		},
+		{ type: null, size: 0 },
+	);
+	return { sections, largestSection, total };
+}
+
+function getExternalByteSections(externalUsage) {
+	const sections = {};
+	for (const [type, section] of Object.entries(externalUsage.sections)) {
+		sections[type] = section.bytes;
+	}
+	return sections;
+}
+
 async function isCacheWritable() {
 	try {
 		await fs.promises.mkdir(CACHE_ROOT, { recursive: true });
@@ -86,23 +346,50 @@ async function isCacheWritable() {
 	}
 }
 
-async function getCacheUsage() {
-  let cacheUsage = {
-    sections : {},
-    largestSection: null,
-    total: 0,
-  }
+async function getLocalCacheUsage() {
+	const sections = {};
 	for (const [type, dir] of Object.entries(CACHE_DIRS)) {
-		cacheUsage.sections[type] = await dirSize(dir);
-		cacheUsage.total += cacheUsage.sections[type];
+		sections[type] = await dirSize(dir);
 	}
-  cacheUsage.largestSection = Object.entries(cacheUsage.sections).reduce((largest, [type, size]) => {
-    if (size > largest.size) {
-      return { type, size };
-    }
-    return largest;
-  }, { type: null, size: 0 });
-	return cacheUsage;
+	return summarizeSections(sections);
+}
+
+async function getCacheUsage() {
+	const local = await getLocalCacheUsage();
+	const externalUsage = await getExternalCacheUsage();
+	let external = {
+		configured: await isExternalCacheConfigured(),
+		reachable: false,
+		sections: {},
+		totalEntries: 0,
+		totalBytes: 0,
+	};
+	if (externalUsage) {
+		external = {
+			configured: true,
+			reachable: true,
+			...externalUsage,
+		};
+	}
+
+	const useExternalTotals = usesExternalCache();
+	const primary =
+		useExternalTotals && externalUsage ?
+			summarizeSections(getExternalByteSections(externalUsage))
+		: useExternalTotals ?
+			summarizeSections({})
+		:	local;
+
+	return {
+		storageMode: getCacheStorageMode(),
+		primaryStore:
+			useExternalTotals ?
+				CACHE_STORAGE_MODES.POSTGRES
+			:	CACHE_STORAGE_MODES.FILESYSTEM,
+		...primary,
+		local,
+		external,
+	};
 }
 
 async function dirSize(dir) {
@@ -133,5 +420,8 @@ module.exports = {
 	CACHE_TYPES,
 	GetOrFetch,
 	isCacheWritable,
+	getCacheStorageMode,
+	isExternalCacheConfigured,
+	isExternalCacheReachable,
 	getCacheUsage,
 };

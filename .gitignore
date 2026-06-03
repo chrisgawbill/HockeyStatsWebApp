@@ -15,6 +15,7 @@
 /react/dist
 
 # misc
+/.claude/
 /react/.DS_Store
 /react/.env
 /react/.env.local
@@ -26,6 +27,7 @@
 /api/routes/config.py
 /api/.env
 /api/venv/
+/api/cache/
 /api/ai-cache/
 /api/roster-cache/
 /api/player-cache/
