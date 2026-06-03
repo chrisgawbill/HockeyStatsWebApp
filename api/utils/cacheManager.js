@@ -6,6 +6,12 @@ const inFlight = new Map();
 let cachePool = null;
 let cacheTableReady = false;
 
+// How long cache DB connects/queries may take before failing. Keeps the
+// health and cache-usage endpoints (and thus the diagnostics page) responsive
+// when the cache DB is configured but unreachable.
+const CACHE_DB_TIMEOUT_MS =
+	Number(process.env.CACHE_DATABASE_TIMEOUT_MS) || 5000;
+
 const CACHE_TYPES = {
 	PLAYER: 'player',
 	ROSTER: 'roster',
@@ -97,6 +103,16 @@ function getCachePool() {
 				  process.env.CACHE_DATABASE_SSL === 'true' ?
 					{ rejectUnauthorized: false }
 				:	undefined,
+			// Fail fast instead of hanging when the cache DB is configured but
+			// unreachable/slow. Without this, health and cache-usage probes block
+			// indefinitely and the diagnostics page never loads.
+			connectionTimeoutMillis: CACHE_DB_TIMEOUT_MS,
+			statement_timeout: CACHE_DB_TIMEOUT_MS,
+			query_timeout: CACHE_DB_TIMEOUT_MS,
+		});
+		// A pool 'error' on an idle client would otherwise crash the process.
+		cachePool.on('error', (err) => {
+			console.error('Cache DB pool error:', err.message);
 		});
 	}
 	return cachePool;
