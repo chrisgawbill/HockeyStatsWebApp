@@ -14,16 +14,31 @@ interface HealthData {
 	version: string;
 	environment: string;
 	currentSeason: string;
+	cacheStorageMode: string;
 	cacheWritable: boolean;
+	externalCacheConfigured: boolean;
+	externalCacheReachable: boolean;
 	anthropicKeyConfigured: boolean;
 	uptime: number;
 	currentTime: string;
 }
 
+interface ExternalCacheData {
+	configured: boolean;
+	reachable: boolean;
+	sections: Record<string, { entries: number; bytes: number }>;
+	totalEntries: number;
+	totalBytes: number;
+	tableBytes: number;
+}
+
 interface CacheReportData {
+	storageMode: string;
+	primaryStore: string;
 	sections: Record<string, number>;
 	largestSection: { type: string | null; size: number };
 	total: number;
+	external: ExternalCacheData;
 }
 
 function formatBytes(bytes: number): string {
@@ -235,6 +250,9 @@ const DiagnosticsPage = () => {
 		const sectionRows = Object.entries(cacheReport.sections).sort(
 			(a, b) => b[1] - a[1],
 		);
+		const dbSectionRows = Object.entries(
+			cacheReport.external?.sections ?? {},
+		).sort((a, b) => b[1].bytes - a[1].bytes);
 		return (
 			<div className={styles['diagnostics-page__content']}>
 				<div className={styles['diagnostics-header']}>
@@ -270,6 +288,7 @@ const DiagnosticsPage = () => {
 								badLabel='Down'
 							/>
 						</StatCard>
+						<StatCard label='Cache Storage'>{health.cacheStorageMode}</StatCard>
 						<StatCard label='Cache Directory'>
 							<StatusBadge
 								ok={health.cacheWritable}
@@ -293,6 +312,103 @@ const DiagnosticsPage = () => {
 						</StatCard>
 					</div>
 				</section>
+
+				{cacheReport.external?.configured && (
+					<section className={styles['diagnostics-section']}>
+						<h2 className={styles['diagnostics-section__title']}>
+							Database Usage
+						</h2>
+						<div className={styles['cache-card']}>
+							<div className={styles['cache-summary']}>
+								<div className={styles['cache-summary__item']}>
+									<span className={styles['cache-summary__label']}>
+										Connection
+									</span>
+									<span className={styles['cache-summary__value']}>
+										<StatusBadge
+											ok={cacheReport.external.reachable}
+											okLabel='Reachable'
+											badLabel='Unreachable'
+										/>
+									</span>
+								</div>
+								<div className={styles['cache-summary__item']}>
+									<span className={styles['cache-summary__label']}>Entries</span>
+									<span className={styles['cache-summary__value']}>
+										{cacheReport.external.totalEntries.toLocaleString()}
+									</span>
+								</div>
+								<div className={styles['cache-summary__item']}>
+									<span className={styles['cache-summary__label']}>
+										Stored Data
+									</span>
+									<span className={styles['cache-summary__value']}>
+										{formatBytes(cacheReport.external.totalBytes)}
+									</span>
+								</div>
+								<div className={styles['cache-summary__item']}>
+									<span className={styles['cache-summary__label']}>
+										Size on Disk
+									</span>
+									<span className={styles['cache-summary__value']}>
+										{formatBytes(cacheReport.external.tableBytes)}
+									</span>
+								</div>
+							</div>
+							{!cacheReport.external.reachable ?
+								<p className={styles['cache-empty']}>
+									Database is configured but not reachable.
+								</p>
+							: dbSectionRows.length === 0 ?
+								<p className={styles['cache-empty']}>
+									No cached entries stored yet.
+								</p>
+							:	<table className={styles['cache-table']}>
+									<thead>
+										<tr>
+											<th className={styles['cache-table__section-col']}>
+												Section
+											</th>
+											<th>Entries</th>
+											<th>Stored Data</th>
+											<th className={styles['cache-table__bar-col']}>Share</th>
+										</tr>
+									</thead>
+									<tbody>
+										{dbSectionRows.map(([type, section]) => {
+											const pct =
+												cacheReport.external.totalBytes ?
+													(section.bytes /
+														cacheReport.external.totalBytes) *
+													100
+												:	0;
+											return (
+												<tr key={type}>
+													<td className={styles['cache-table__section-col']}>
+														{type}
+													</td>
+													<td>{section.entries.toLocaleString()}</td>
+													<td>{formatBytes(section.bytes)}</td>
+													<td className={styles['cache-table__bar-col']}>
+														<span className={styles['cache-bar-track']}>
+															<span
+																className={styles['cache-bar-fill']}
+																style={{ width: `${pct}%` }}
+															/>
+														</span>
+														<span className={styles['cache-bar__pct']}>
+															{pct.toFixed(0)}%
+														</span>
+													</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							}
+						</div>
+					</section>
+				)}
 
 				<section className={styles['diagnostics-section']}>
 					<h2 className={styles['diagnostics-section__title']}>Cache Usage</h2>

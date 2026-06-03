@@ -310,6 +310,13 @@ async function getExternalCacheUsage() {
 			FROM app_cache
 			GROUP BY type
 		`);
+		// pg_column_size(data) above is the size of the cached payload only.
+		// pg_total_relation_size is the real on-disk footprint of the table,
+		// including indexes, TOAST, and per-row overhead, so the diagnostics
+		// page can show both "stored data" and "size on disk".
+		const tableResult = await pool.query(
+			`SELECT pg_total_relation_size('app_cache')::bigint AS table_bytes`,
+		);
 		const sections = {};
 		let totalEntries = 0;
 		let totalBytes = 0;
@@ -320,7 +327,8 @@ async function getExternalCacheUsage() {
 			totalEntries += entries;
 			totalBytes += bytes;
 		}
-		return { sections, totalEntries, totalBytes };
+		const tableBytes = Number(tableResult.rows[0]?.table_bytes ?? 0);
+		return { sections, totalEntries, totalBytes, tableBytes };
 	} catch (error) {
 		console.error('Failed to inspect external cache usage:', error);
 		return null;
@@ -379,6 +387,7 @@ async function getCacheUsage() {
 		sections: {},
 		totalEntries: 0,
 		totalBytes: 0,
+		tableBytes: 0,
 	};
 	if (externalUsage) {
 		external = {

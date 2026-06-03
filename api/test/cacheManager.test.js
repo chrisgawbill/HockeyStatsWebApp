@@ -17,7 +17,7 @@ function restorePg() {
 	}
 }
 
-function installPgMock(cacheUsageRows) {
+function installPgMock(cacheUsageRows, tableBytes = 0) {
 	require.cache[pgPath] = {
 		id: pgPath,
 		filename: pgPath,
@@ -31,6 +31,9 @@ function installPgMock(cacheUsageRows) {
 						String(sql).includes('GROUP BY type')
 					) {
 						return { rows: cacheUsageRows };
+					}
+					if (String(sql).includes('pg_total_relation_size')) {
+						return { rows: [{ table_bytes: tableBytes }] };
 					}
 					return { rows: [] };
 				}
@@ -51,11 +54,11 @@ function restoreEnv() {
 	restorePg();
 }
 
-function loadCacheManager(env = {}, pgRows = null) {
+function loadCacheManager(env = {}, pgRows = null, tableBytes = 0) {
 	delete require.cache[cacheManagerPath];
 	restorePg();
 	if (pgRows) {
-		installPgMock(pgRows);
+		installPgMock(pgRows, tableBytes);
 	}
 	for (const key of Object.keys(originalEnv)) {
 		delete process.env[key];
@@ -118,6 +121,7 @@ test('cache usage reports postgres bytes as the primary cache when configured', 
 			{ type: 'schedule', entries: 2, bytes: 500 },
 			{ type: 'team', entries: 1, bytes: 1000 },
 		],
+		16384,
 	);
 
 	const usage = await cacheManager.getCacheUsage();
@@ -130,5 +134,10 @@ test('cache usage reports postgres bytes as the primary cache when configured', 
 	assert.equal(usage.external.reachable, true);
 	assert.equal(usage.external.totalEntries, 3);
 	assert.equal(usage.external.totalBytes, 1500);
+	assert.equal(usage.external.tableBytes, 16384);
+	assert.deepEqual(usage.external.sections, {
+		schedule: { entries: 2, bytes: 500 },
+		team: { entries: 1, bytes: 1000 },
+	});
 	assert.ok(usage.local);
 });
