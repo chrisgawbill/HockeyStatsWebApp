@@ -296,6 +296,14 @@
   text-transform: capitalize;
 }
 
+.cache-empty {
+  margin: 0;
+  padding: var(--space-lg);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
 .cache-table {
   width: 100%;
   border-collapse: collapse;
