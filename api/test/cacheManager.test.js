@@ -24,6 +24,7 @@ function installPgMock(cacheUsageRows) {
 		loaded: true,
 		exports: {
 			Pool: class {
+				on() {}
 				async query(sql) {
 					if (
 						String(sql).includes('FROM app_cache') &&

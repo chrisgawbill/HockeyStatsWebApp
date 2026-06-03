@@ -2,6 +2,10 @@ const { Pool } = require('pg');
 
 let pool = null;
 
+// Bound how long a connect/query may block so a misconfigured or unreachable
+// database fails fast instead of hanging request handlers indefinitely.
+const DB_TIMEOUT_MS = Number(process.env.DATABASE_TIMEOUT_MS) || 5000;
+
 function getDatabaseUrl() {
 	return process.env.DATABASE_URL || process.env.CACHE_DATABASE_URL;
 }
@@ -26,6 +30,12 @@ function getDbPool() {
 		pool = new Pool({
 			connectionString,
 			ssl: getSslConfig(),
+			connectionTimeoutMillis: DB_TIMEOUT_MS,
+			statement_timeout: DB_TIMEOUT_MS,
+			query_timeout: DB_TIMEOUT_MS,
+		});
+		pool.on('error', (err) => {
+			console.error('DB pool error:', err.message);
 		});
 	}
 	return pool;
