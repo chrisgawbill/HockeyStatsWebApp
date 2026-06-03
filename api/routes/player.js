@@ -11,6 +11,13 @@ const {
 	mapGoalieSummary,
 	mapStatLeaders,
 } = require('../services/mappers/playerMapper');
+const { runServiceTask } = require('../services/domain/runServiceTask');
+const {
+	persistPlayerStats,
+} = require('../services/domain/playerStatsService');
+const {
+	persistStatLeaders,
+} = require('../services/domain/statLeaderService');
 
 var router = express.Router();
 
@@ -36,6 +43,14 @@ router.get(
 							`/skater-stats-leaders/${seasonId}/2?categories=${statIndicator}&limit=10`,
 						)
 						.then((r) => r.data),
+			);
+			runServiceTask(`skater leaders ${statIndicator} ${seasonId}`, () =>
+				persistStatLeaders({
+					seasonId,
+					playerType: 'skater',
+					category: statIndicator,
+					leadersPayload: raw,
+				}),
 			);
 			res.send(mapStatLeaders(raw, statIndicator));
 		} catch (e) {
@@ -67,6 +82,14 @@ router.get(
 						)
 						.then((r) => r.data),
 			);
+			runServiceTask(`goalie leaders ${statIndicator} ${seasonId}`, () =>
+				persistStatLeaders({
+					seasonId,
+					playerType: 'goalie',
+					category: statIndicator,
+					leadersPayload: raw,
+				}),
+			);
 			res.send(mapStatLeaders(raw, statIndicator));
 		} catch (e) {
 			next(e);
@@ -93,6 +116,14 @@ router.get('/skater/summary', validateSeason, async function (req, res, next) {
 				axiosNhlStats
 					.get(`/summary?cayenneExp=${encodeURIComponent(exp)}&limit=100`)
 					.then((r) => r.data),
+		);
+		runServiceTask(`skater summary ${teamId || 'all'} ${seasonId}`, () =>
+			persistPlayerStats({
+				seasonId,
+				playerType: 'skater',
+				statsPayload: raw,
+				teamId: teamId ? Number(teamId) : null,
+			}),
 		);
 		res.send(mapSkaterSummary(raw));
 	} catch (e) {
@@ -145,6 +176,14 @@ router.get('/goalie/summary', validateSeason, async function (req, res, next) {
 				axiosNhlGoalie
 					.get(`/summary?cayenneExp=${encodeURIComponent(exp)}&limit=10`)
 					.then((r) => r.data),
+		);
+		runServiceTask(`goalie summary ${teamId || 'all'} ${seasonId}`, () =>
+			persistPlayerStats({
+				seasonId,
+				playerType: 'goalie',
+				statsPayload: raw,
+				teamId: teamId ? Number(teamId) : null,
+			}),
 		);
 		res.send(mapGoalieSummary(raw));
 	} catch (e) {

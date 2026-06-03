@@ -17,9 +17,9 @@ Status legend: ☐ not started · ◐ in progress · ☑ done
 ### What I have done
 
 - Added `GET /health` and `GET /health/cache-usage` in a dedicated route module `api/routes/health.js`, mounted at `/health` in `api/app.js`.
-- `/health` returns: `status`, `version` (from `api/package.json`), `environment`, `currentSeason` (from `seasonHelper.getCurrentSeasonId()`), `cacheWritable`, `anthropicKeyConfigured`, `uptime`, and `currentTime`.
-- `/health/cache-usage` reports per-section cache sizes in bytes, the largest section, and the total.
-- Added cache helpers `isCacheWritable()` and `getCacheUsage()` (with a `dirSize()` helper) to `api/utils/cacheManager.js`.
+- `/health` returns: `status`, `version` (from `api/package.json`), `environment`, `currentSeason` (from `seasonHelper.getCurrentSeasonId()`), `cacheStorageMode`, `cacheWritable`, external cache configured/reachable flags, `anthropicKeyConfigured`, `uptime`, and `currentTime`.
+- `/health/cache-usage` reports the active primary cache by section. In Postgres or hybrid cache mode, the top-level byte totals come from `app_cache`; filesystem details stay under `local`, and Postgres entry/byte details stay under `external`.
+- Added cache helpers `isCacheWritable()` and `getCacheUsage()` (with cache-store usage helpers) to `api/utils/cacheManager.js`.
 - Added passphrase auth in `api/utils/auth.js`: `matchesPassphrase` (SHA-256 + `crypto.timingSafeEqual`, fails closed if `DIAGNOSTICS_PASSPHRASE` is unset) and an `authCheck` middleware applied via `router.use(authCheck)`.
 - Allowed the `x-diagnostics-key` header in CORS `allowedHeaders` in `api/app.js` so browser preflight succeeds.
 - Added frontend service functions `GetHealth(passphrase)` and `GetCacheReport(passphrase)` in `react/src/Services/ApiHandler.ts`, passing the passphrase in the `x-diagnostics-key` header.
