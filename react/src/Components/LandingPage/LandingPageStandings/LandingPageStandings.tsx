@@ -6,7 +6,7 @@ import React from 'react';
 import { useStandingsData } from '../../../Data/Context/StandingsContext';
 import { StandingsTeam } from '../../../Data/Models/standingsTeam';
 import StandingsClinchLegend from './StandingsClinchLegend';
-import styles from '../../../style/LandingPage/LandingPageStandings.module.css';
+import styles from '../../../Style/LandingPage/LandingPageStandings.module.css';
 import LoadingState from '../../LoadingState';
 
 type Conference = 'Eastern' | 'Western';

@@ -5,8 +5,8 @@ import {
   RosterPlayer,
 } from '../../Data/LocalData/teamPageMockData';
 import PlayerCard from './PlayerCard';
-import shared from '../../style/shared.module.css';
-import styles from '../../style/TeamPage/TeamPage.module.css';
+import shared from '../../Style/shared.module.css';
+import styles from '../../Style/TeamPage/TeamPage.module.css';
 
 interface RosterSectionProps {
   roster: Record<Position, RosterPlayer[]>;

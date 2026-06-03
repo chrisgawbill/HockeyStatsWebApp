@@ -1,6 +1,6 @@
 import React from 'react';
 import { StandingsTeam } from '../../Data/Models/standingsTeam';
-import styles from '../../style/LandingPage/DraftLotteryOddsCard.module.css';
+import styles from '../../Style/LandingPage/DraftLotteryOddsCard.module.css';
 
 interface DraftLotteryOddsCardProps {
   team: StandingsTeam;

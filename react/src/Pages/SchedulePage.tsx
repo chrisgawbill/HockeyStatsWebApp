@@ -3,7 +3,7 @@ import { useListOfGames } from '../Data/Context/ScheduleContext';
 import PageHeader from '../Components/PageHeader';
 import { Container } from 'react-bootstrap';
 import { ScheduledGame } from '../Data/Models/scheduledGame';
-import styles from '../style/SchedulePage.module.css';
+import styles from '../Style/SchedulePage.module.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ScheduleCard from '../Components/SchedulePage/ScheduleCard';
 import ScheduleCalendar from '../Components/SchedulePage/ScheduleCalendar';

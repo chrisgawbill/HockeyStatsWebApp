@@ -1,5 +1,5 @@
 import { Row, ButtonGroup, Button } from 'react-bootstrap';
-import styles from '../../style/SchedulePage.module.css';
+import styles from '../../Style/SchedulePage.module.css';
 
 type ScheduleView = 'day' | 'week' | 'month';
 

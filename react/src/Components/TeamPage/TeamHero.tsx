@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { MockTeam } from '../../Data/LocalData/teamPageMockData';
 import { localTeamList } from '../../Data/LocalData/teamListData';
 import SeasonSelector from '../SeasonSelector';
-import styles from '../../style/TeamPage/TeamPage.module.css';
+import styles from '../../Style/TeamPage/TeamPage.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');

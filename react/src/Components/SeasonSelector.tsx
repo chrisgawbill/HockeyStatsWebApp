@@ -4,7 +4,7 @@ import {
   getRecentSeasonIds,
   formatSeasonLabel,
 } from '../Data/Helpers/seasonHelper';
-import styles from '../style/SeasonSelector.module.css';
+import styles from '../Style/SeasonSelector.module.css';
 
 function ChevronIcon() {
   return (

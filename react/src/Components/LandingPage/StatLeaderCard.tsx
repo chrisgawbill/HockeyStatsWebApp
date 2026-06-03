@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TopStatLeader } from '../../Data/Models/topStatLeader';
 import StatsLeaderModal from '../Modals/StatsLeaderModal';
-import styles from '../../style/LandingPage/StatLeaderCard.module.css';
+import styles from '../../Style/LandingPage/StatLeaderCard.module.css';
 
 interface StatLeaderCardProps {
   topStatLeader: TopStatLeader;

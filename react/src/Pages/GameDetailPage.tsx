@@ -16,8 +16,8 @@ import TeamComparison from '../Components/GameDetail/TeamComparison';
 import ThreeStars from '../Components/GameDetail/ThreeStars';
 import PlayerStatsSelection from '../Components/GameDetail/PlayerStatsSelection';
 import { getTheme } from '../Services/themeHandler';
-import shared from '../style/shared.module.css';
-import styles from '../style/GameDetailPage.module.css';
+import shared from '../Style/shared.module.css';
+import styles from '../Style/GameDetailPage.module.css';
 import LoadingState from '../Components/LoadingState';
 
 function getPeriodScores(

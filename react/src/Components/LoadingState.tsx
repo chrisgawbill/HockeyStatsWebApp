@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../style/LoadingState.module.css';
+import styles from '../Style/LoadingState.module.css';
 
 interface LoadingStateProps {
   label?: string;

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import PageHeader from '../Components/PageHeader';
 import LoadingState from '../Components/LoadingState';
 import { GetHealth, GetCacheReport } from '../Services/apiHandler';
-import styles from '../style/DiagnosticsPage.module.css';
+import styles from '../Style/DiagnosticsPage.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');

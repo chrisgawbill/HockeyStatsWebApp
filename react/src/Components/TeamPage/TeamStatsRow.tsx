@@ -1,7 +1,7 @@
 import React from 'react';
 import { MockStatItem } from '../../Data/LocalData/teamPageMockData';
-import shared from '../../style/shared.module.css';
-import styles from '../../style/TeamPage/TeamPage.module.css';
+import shared from '../../Style/shared.module.css';
+import styles from '../../Style/TeamPage/TeamPage.module.css';
 
 interface TeamStatsRowProps {
   stats: MockStatItem[];

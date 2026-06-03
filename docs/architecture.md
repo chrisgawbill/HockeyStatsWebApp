@@ -28,7 +28,7 @@ React pages/components
 │   ├── src/Components/     Reusable UI sections and widgets
 │   ├── src/Data/           Models, contexts, hooks, helpers, constants, and local data
 │   ├── src/Services/       Frontend API clients and service functions
-│   └── src/style/          CSS modules, shared CSS, and image assets
+│   └── src/Style/          CSS modules and shared CSS
 └── docs/architecture.md    This file
 ```
 

@@ -5,8 +5,8 @@ import {
   BoxscoreTeamStats,
 } from '../../Data/Models/gameDetail';
 import { getTeamPrimaryColor } from '../../Data/Helpers/teamColor';
-import shared from '../../style/shared.module.css';
-import styles from '../../style/GameDetailPage.module.css';
+import shared from '../../Style/shared.module.css';
+import styles from '../../Style/GameDetailPage.module.css';
 
 interface Props {
   homeTeam: BoxscoreTeamStats;

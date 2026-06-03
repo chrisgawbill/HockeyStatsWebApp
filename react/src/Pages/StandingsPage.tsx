@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from '../style/StandingsPage/StandingsPage.module.css';
+import styles from '../Style/StandingsPage/StandingsPage.module.css';
 import { Container, Row } from 'react-bootstrap';
 import StandingsContainer from '../Components/LandingPage/LandingPageStandings/StandingsContainer';
 import SlidingToggle from '../Components/LandingPage/LandingPageStandings/SlidingToggle';

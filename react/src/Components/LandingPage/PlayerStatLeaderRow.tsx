@@ -1,5 +1,5 @@
 import { Col, Row } from 'react-bootstrap';
-import styles from '../../style/LandingPage/LandingPageRow.module.css';
+import styles from '../../Style/LandingPage/LandingPageRow.module.css';
 import React from 'react';
 import { TopStatLeader } from '../../Data/Models/topStatLeader';
 import StatLeaderCard from './StatLeaderCard';

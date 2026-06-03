@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { GameDetailBoxscore } from '../../Data/Models/gameDetail';
 import { useTheme } from '../../Data/Context/ThemeContext';
 import { getTeamPrimaryColor } from '../../Data/Helpers/teamColor';
-import styles from '../../style/GameDetailPage.module.css';
+import styles from '../../Style/GameDetailPage.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');

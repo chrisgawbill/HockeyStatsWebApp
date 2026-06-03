@@ -2,7 +2,7 @@ import React from 'react';
 import { ScheduledGame } from '../../Data/Models/scheduledGame';
 import { formatDateParam } from '../../Data/Helpers/scheduleHelper';
 import GameChip from './GameChip';
-import styles from '../../style/ScheduleCalendar.module.css';
+import styles from '../../Style/ScheduleCalendar.module.css';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

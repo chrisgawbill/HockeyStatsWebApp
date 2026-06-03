@@ -29,7 +29,7 @@ import {
 import { useStandingsContext } from '../Data/Context/StandingsContext';
 import { useSeason } from '../Data/Context/SeasonContext';
 import { InterfaceWithChatBot } from '../Services/genAIHandler';
-import styles from '../style/TeamPage/TeamPage.module.css';
+import styles from '../Style/TeamPage/TeamPage.module.css';
 import { ConvertContractsToGames } from '../Data/Helpers/scheduleHelper';
 
 /**

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { localTeamList } from '../../Data/LocalData/teamListData';
 import { ScheduledGame } from '../../Data/Models/scheduledGame';
-import shared from '../../style/shared.module.css';
-import styles from '../../style/TeamPage/TeamPage.module.css';
+import shared from '../../Style/shared.module.css';
+import styles from '../../Style/TeamPage/TeamPage.module.css';
 
 const PAGE_SIZE = 7;
 function cx(...classes: (string | false | null | undefined)[]) {

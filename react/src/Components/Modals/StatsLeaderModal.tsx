@@ -5,7 +5,7 @@ import { CompactTable } from '@table-library/react-table-library/compact';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { getTheme } from '@table-library/react-table-library/baseline';
 
-import styles from '../../style/Modals/StatLeaderModal.module.css';
+import styles from '../../Style/Modals/StatLeaderModal.module.css';
 
 interface StatsLeaderModalProps {
   showModal: boolean;

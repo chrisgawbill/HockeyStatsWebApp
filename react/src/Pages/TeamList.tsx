@@ -3,7 +3,7 @@ import { Container } from 'react-bootstrap';
 import { Team } from '../Data/Models/team';
 import { TeamStats } from '../Data/Models/teamStats';
 import { localTeamList } from '../Data/LocalData/teamListData';
-import styles from '../style/TeamList/TeamList.module.css';
+import styles from '../Style/TeamList/TeamList.module.css';
 import PageHeader from '../Components/PageHeader';
 import { useListOfTeamsData } from '../Data/Context/ListOfTeamsContext';
 import { useNavigate } from 'react-router-dom';

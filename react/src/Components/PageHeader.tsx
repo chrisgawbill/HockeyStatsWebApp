@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../Data/Context/ThemeContext';
-import styles from '../style/PageHeader.module.css';
+import styles from '../Style/PageHeader.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');

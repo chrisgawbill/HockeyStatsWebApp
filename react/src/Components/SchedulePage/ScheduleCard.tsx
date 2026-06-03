@@ -7,7 +7,7 @@ import {
   isGameInProgress,
   getGameStatusLabel,
 } from '../../Data/Helpers/gameStatusHelper';
-import styles from '../../style/SchedulePage.module.css';
+import styles from '../../Style/SchedulePage.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
