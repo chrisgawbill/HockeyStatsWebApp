@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { TopStatLeader } from "../Models/TopStatLeader";
-import { PlayerStatLeader } from "../Models/PlayerStatLeader";
-import PlayerStatLeaderConverter from "../Helpers/PlayerStatLeaderConverter";
-import { STAT_CONFIG, StatEntry, StatLeaderType } from "../Constants/StatLeaderTypes";
+import { TopStatLeader } from "../Models/topStatLeader";
+import { PlayerStatLeader } from "../Models/playerStatLeader";
+import PlayerStatLeaderConverter from "../Helpers/playerStatLeaderConverter";
+import { STAT_CONFIG, StatEntry, StatLeaderType } from "../Constants/statLeaderTypes";
 
 /**
  * Loads the stat-leader categories for one player type (skater or goalie),

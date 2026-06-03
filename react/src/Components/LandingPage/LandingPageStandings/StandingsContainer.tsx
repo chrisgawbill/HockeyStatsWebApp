@@ -1,6 +1,6 @@
 import { Col, Row } from "react-bootstrap";
 import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
-import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
+import { StandingsTeam } from "../../../Data/Models/standingsTeam";
 import React from "react";
 import LandingPageStandingsTable from "./LandingPageStandingsTable";
 

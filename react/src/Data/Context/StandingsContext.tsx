@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { StandingsTeam } from "../Models/StandingsTeam";
-import { GetCurrentStandings } from "../../Services/ApiHandler";
-import { CreateLeagueStandingsArray } from "../Helpers/LeagueStandingsHelper";
+import { StandingsTeam } from "../Models/standingsTeam";
+import { GetCurrentStandings } from "../../Services/apiHandler";
+import { CreateLeagueStandingsArray } from "../Helpers/leagueStandingsHelper";
 import { useSeason } from "./SeasonContext";
 
 interface StandingsData {

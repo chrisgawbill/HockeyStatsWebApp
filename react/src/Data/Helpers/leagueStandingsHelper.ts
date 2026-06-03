@@ -1,4 +1,4 @@
-import { StandingsTeam } from "../Models/StandingsTeam";
+import { StandingsTeam } from "../Models/standingsTeam";
 
 /**
  * The backend (api/services/mappers/standingsMapper.js) now returns each team in

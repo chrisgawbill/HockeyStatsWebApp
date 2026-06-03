@@ -1,4 +1,4 @@
-import { PlayerStatLeader } from "../Models/PlayerStatLeader";
+import { PlayerStatLeader } from "../Models/playerStatLeader";
 
 /**
  * The backend (api/services/mappers/playerMapper.js -> mapStatLeaders) now returns

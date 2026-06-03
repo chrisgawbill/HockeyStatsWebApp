@@ -1,5 +1,5 @@
 import React from "react";
-import { POSITIONS, Position, RosterPlayer } from "../../Data/LocalData/TeamPageMockData";
+import { POSITIONS, Position, RosterPlayer } from "../../Data/LocalData/teamPageMockData";
 import PlayerCard from "./PlayerCard";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/TeamPage/TeamPage.module.css";

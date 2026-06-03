@@ -1,4 +1,4 @@
-import { GameBroadcast } from "./GameBroadcast";
+import { GameBroadcast } from "./gameBroadcast";
 
 export interface IScheduledGame {
   gameId: number;

@@ -1,5 +1,5 @@
-import { Team } from "../Models/Team";
-import { TeamStats } from "../Models/TeamStats";
+import { Team } from "../Models/team";
+import { TeamStats } from "../Models/teamStats";
 
 export function ConvertToListOfTeams(teamListData: any[], teamResponseData: any[]) {
   let teamArray: Team[] = [];

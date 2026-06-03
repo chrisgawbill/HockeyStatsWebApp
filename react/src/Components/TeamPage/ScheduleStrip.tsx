@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { localTeamList } from "../../Data/LocalData/TeamListData";
-import { ScheduledGame } from "../../Data/Models/ScheduledGame";
+import { localTeamList } from "../../Data/LocalData/teamListData";
+import { ScheduledGame } from "../../Data/Models/scheduledGame";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 

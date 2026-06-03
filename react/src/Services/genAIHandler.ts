@@ -1,4 +1,4 @@
-import { axiosExpressHandler } from "./AxiosInstance"
+import { axiosExpressHandler } from "./axiosInstance"
 
 export async function InterfaceWithChatBot(message: object, cacheKey?: string) {
     try {

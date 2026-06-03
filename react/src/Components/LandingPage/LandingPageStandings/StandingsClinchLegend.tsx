@@ -1,5 +1,5 @@
 import React from "react";
-import { CLINCH_STATUS_META, ClinchStatus } from "./ClinchStatus";
+import { CLINCH_STATUS_META, ClinchStatus } from "./clinchStatus";
 import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
 
 interface Props {

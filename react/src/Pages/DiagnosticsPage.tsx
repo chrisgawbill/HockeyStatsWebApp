@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import PageHeader from '../Components/PageHeader';
 import LoadingState from '../Components/LoadingState';
-import { GetHealth, GetCacheReport } from '../Services/ApiHandler';
+import { GetHealth, GetCacheReport } from '../Services/apiHandler';
 import styles from '../style/DiagnosticsPage.module.css';
 
 const cx = (...classes: Array<string | false | null | undefined>) =>

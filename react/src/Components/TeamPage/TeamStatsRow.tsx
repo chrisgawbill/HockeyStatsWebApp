@@ -1,5 +1,5 @@
 import React from "react";
-import { MockStatItem } from "../../Data/LocalData/TeamPageMockData";
+import { MockStatItem } from "../../Data/LocalData/teamPageMockData";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 

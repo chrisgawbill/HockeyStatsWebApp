@@ -1,4 +1,4 @@
-import { axiosExpressHandler } from './AxiosInstance';
+import { axiosExpressHandler } from './axiosInstance';
 
 /**
  * Frontend API client: one async function per backend operation. Each issues a

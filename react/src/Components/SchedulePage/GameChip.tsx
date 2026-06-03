@@ -1,12 +1,12 @@
 import React from "react";
-import { ScheduledGame } from "../../Data/Models/ScheduledGame";
+import { ScheduledGame } from "../../Data/Models/scheduledGame";
 import { useTheme } from "../../Data/Context/ThemeContext";
 import {
   convertUTCToLocal,
   hasScore,
   isGameInProgress,
   getGameStatusLabel,
-} from "../../Data/Helpers/GameStatusHelper";
+} from "../../Data/Helpers/gameStatusHelper";
 import styles from "../../style/ScheduleCalendar.module.css";
 
 const cx = (...classes: Array<string | false | null | undefined>) =>

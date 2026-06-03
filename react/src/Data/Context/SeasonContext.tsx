@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useContext, createContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getCurrentSeasonId, isValidSeasonId } from '../Helpers/SeasonHelper';
+import { getCurrentSeasonId, isValidSeasonId } from '../Helpers/seasonHelper';
 
 const SeasonContext = createContext<{
 	season: string;

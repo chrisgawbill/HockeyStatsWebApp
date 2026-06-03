@@ -4,7 +4,7 @@ import {
   StatCategory,
   StatCategoryKey,
   PlayerStatLine,
-} from "../../Data/LocalData/TeamPageMockData";
+} from "../../Data/LocalData/teamPageMockData";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 

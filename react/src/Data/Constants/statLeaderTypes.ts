@@ -1,4 +1,4 @@
-import { GetSkaterStatLeaders, GetGoalieStatLeaders } from "../../Services/ApiHandler";
+import { GetSkaterStatLeaders, GetGoalieStatLeaders } from "../../Services/apiHandler";
 
 export const STAT_LEADER_TYPES = {
   SKATER: 'skater',

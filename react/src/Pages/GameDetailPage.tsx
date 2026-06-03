@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { GetGameDetails, GetGameLanding } from "../Services/ApiHandler";
-import { BoxscoreTeamStats, GameDetailBoxscore, GameLanding, LandingScoringPeriod } from "../Data/Models/GameDetail";
+import { GetGameDetails, GetGameLanding } from "../Services/apiHandler";
+import { BoxscoreTeamStats, GameDetailBoxscore, GameLanding, LandingScoringPeriod } from "../Data/Models/gameDetail";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { useParams } from "react-router-dom";
 import PageHeader from "../Components/PageHeader";
@@ -10,7 +10,7 @@ import ScoringSummary from "../Components/GameDetail/ScoringSummary";
 import TeamComparison from "../Components/GameDetail/TeamComparison";
 import ThreeStars from "../Components/GameDetail/ThreeStars";
 import PlayerStatsSelection from "../Components/GameDetail/PlayerStatsSelection";
-import { getTheme } from "../Services/ThemeHandler";
+import { getTheme } from "../Services/themeHandler";
 import shared from "../style/shared.module.css";
 import styles from "../style/GameDetailPage.module.css";
 import LoadingState from "../Components/LoadingState";

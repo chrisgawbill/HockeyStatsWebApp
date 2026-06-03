@@ -4,7 +4,7 @@ import StandingsContainer from "./StandingsContainer";
 import SlidingToggle from "./SlidingToggle";
 import React from "react";
 import { useStandingsData } from "../../../Data/Context/StandingsContext";
-import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
+import { StandingsTeam } from "../../../Data/Models/standingsTeam";
 import StandingsClinchLegend from "./StandingsClinchLegend";
 import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
 import LoadingState from "../../LoadingState";

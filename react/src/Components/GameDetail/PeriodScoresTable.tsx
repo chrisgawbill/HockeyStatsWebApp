@@ -1,5 +1,5 @@
 import React from "react";
-import { getTeamPrimaryColor } from "../../Data/Helpers/TeamColor";
+import { getTeamPrimaryColor } from "../../Data/Helpers/teamColor";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/GameDetailPage.module.css";
 

@@ -1,4 +1,4 @@
-import { TeamStats } from "./TeamStats";
+import { TeamStats } from "./teamStats";
 
 export class Team{
     public id:number;

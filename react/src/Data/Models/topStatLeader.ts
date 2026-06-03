@@ -1,4 +1,4 @@
-import { PlayerStatLeader } from "./PlayerStatLeader";
+import { PlayerStatLeader } from "./playerStatLeader";
 
 export class TopStatLeader{
     public statIndicator:string;

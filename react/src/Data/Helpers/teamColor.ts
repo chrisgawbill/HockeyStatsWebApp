@@ -1,4 +1,4 @@
-import { localTeamList } from "../LocalData/TeamListData";
+import { localTeamList } from "../LocalData/teamListData";
 
 export function getTeamPrimaryColor(abbrev?: string): string {
   const normalizedAbbrev = abbrev?.toUpperCase();

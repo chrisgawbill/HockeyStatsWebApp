@@ -1,6 +1,6 @@
 import React from "react";
-import { BoxscoreSkater, BoxscoreGoalie, BoxscoreTeamStats } from "../../Data/Models/GameDetail";
-import { getTeamPrimaryColor } from "../../Data/Helpers/TeamColor";
+import { BoxscoreSkater, BoxscoreGoalie, BoxscoreTeamStats } from "../../Data/Models/gameDetail";
+import { getTeamPrimaryColor } from "../../Data/Helpers/teamColor";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/GameDetailPage.module.css";
 

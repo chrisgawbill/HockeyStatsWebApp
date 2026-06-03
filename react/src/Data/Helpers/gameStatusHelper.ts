@@ -1,4 +1,4 @@
-import { ScheduledGame } from "../Models/ScheduledGame";
+import { ScheduledGame } from "../Models/scheduledGame";
 
 /**
  * Small, presentation-only helpers shared by the schedule's day cards and the

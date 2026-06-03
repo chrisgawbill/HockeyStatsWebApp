@@ -5,13 +5,13 @@ import StandingsContainer from "../Components/LandingPage/LandingPageStandings/S
 import SlidingToggle from "../Components/LandingPage/LandingPageStandings/SlidingToggle";
 import PageHeader from "../Components/PageHeader";
 import { useStandingsData } from "../Data/Context/StandingsContext";
-import { StandingsTeam } from "../Data/Models/StandingsTeam";
+import { StandingsTeam } from "../Data/Models/standingsTeam";
 import StandingsClinchLegend from "../Components/LandingPage/LandingPageStandings/StandingsClinchLegend";
 import LoadingState from "../Components/LoadingState";
 import EmptyState from "../Components/EmptyState";
 import SeasonSelector from "../Components/SeasonSelector";
 import { useSeason } from "../Data/Context/SeasonContext";
-import { formatSeasonLabel } from "../Data/Helpers/SeasonHelper";
+import { formatSeasonLabel } from "../Data/Helpers/seasonHelper";
 
 type Conference = "Eastern" | "Western";
 type StandingsView = "conference" | "division";

@@ -4,9 +4,9 @@ import { useSort } from "@table-library/react-table-library/sort";
 import { useTheme } from "@table-library/react-table-library/theme";
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
+import { StandingsTeam } from "../../../Data/Models/standingsTeam";
 import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
-import { CLINCH_STATUS_META, ClinchStatus } from "./ClinchStatus";
+import { CLINCH_STATUS_META, ClinchStatus } from "./clinchStatus";
 
 interface LandingPageStandingTableProps {
   standingsData: StandingsTeam[];

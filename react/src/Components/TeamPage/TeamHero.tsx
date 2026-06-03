@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { MockTeam } from "../../Data/LocalData/TeamPageMockData";
-import { localTeamList } from "../../Data/LocalData/TeamListData";
+import { MockTeam } from "../../Data/LocalData/teamPageMockData";
+import { localTeamList } from "../../Data/LocalData/teamListData";
 import SeasonSelector from "../SeasonSelector";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 

@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { Container } from "react-bootstrap";
-import { Team } from "../Data/Models/Team";
-import { TeamStats } from "../Data/Models/TeamStats";
-import { localTeamList } from "../Data/LocalData/TeamListData";
+import { Team } from "../Data/Models/team";
+import { TeamStats } from "../Data/Models/teamStats";
+import { localTeamList } from "../Data/LocalData/teamListData";
 import styles from "../style/TeamList/TeamList.module.css";
 import PageHeader from "../Components/PageHeader";
 import { useListOfTeamsData } from "../Data/Context/ListOfTeamsContext";
 import { useNavigate } from "react-router-dom";
 import { useStandingsData } from "../Data/Context/StandingsContext";
-import { StandingsTeam } from "../Data/Models/StandingsTeam";
+import { StandingsTeam } from "../Data/Models/standingsTeam";
 import LoadingState from "../Components/LoadingState";
 
 const triCodeLookup: Record<string, string> = Object.fromEntries(

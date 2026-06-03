@@ -1,6 +1,6 @@
 import React from "react";
-import { ScheduledGame } from "../../Data/Models/ScheduledGame";
-import { formatDateParam } from "../../Data/Helpers/ScheduleHelper";
+import { ScheduledGame } from "../../Data/Models/scheduledGame";
+import { formatDateParam } from "../../Data/Helpers/scheduleHelper";
 import GameChip from "./GameChip";
 import styles from "../../style/ScheduleCalendar.module.css";
 

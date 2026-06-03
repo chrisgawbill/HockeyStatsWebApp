@@ -1,8 +1,8 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { GameDetailBoxscore } from "../../Data/Models/GameDetail";
+import { GameDetailBoxscore } from "../../Data/Models/gameDetail";
 import { useTheme } from "../../Data/Context/ThemeContext";
-import { getTeamPrimaryColor } from "../../Data/Helpers/TeamColor";
+import { getTeamPrimaryColor } from "../../Data/Helpers/teamColor";
 import styles from "../../style/GameDetailPage.module.css";
 
 const cx = (...classes: Array<string | false | null | undefined>) =>

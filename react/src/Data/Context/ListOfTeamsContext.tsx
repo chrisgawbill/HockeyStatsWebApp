@@ -5,10 +5,10 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { localTeamList } from "../LocalData/TeamListData";
-import { GetTeamStatsById } from "../../Services/ApiHandler";
-import { ConvertToListOfTeams } from "../Helpers/TeamHelpers";
-import { Team } from "../Models/Team";
+import { localTeamList } from "../LocalData/teamListData";
+import { GetTeamStatsById } from "../../Services/apiHandler";
+import { ConvertToListOfTeams } from "../Helpers/teamHelpers";
+import { Team } from "../Models/team";
 
 const ListOfTeamsContext = createContext<any>(null);
 

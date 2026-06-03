@@ -1,5 +1,5 @@
-import { GameBroadcast } from "../Models/GameBroadcast";
-import { ScheduledGame } from "../Models/ScheduledGame";
+import { GameBroadcast } from "../Models/gameBroadcast";
+import { ScheduledGame } from "../Models/scheduledGame";
 
 /**
  * The backend (api/services/mappers/scheduleMapper.js) now returns games already

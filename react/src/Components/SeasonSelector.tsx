@@ -1,6 +1,6 @@
 import React from "react";
 import { useSeason } from "../Data/Context/SeasonContext";
-import { getRecentSeasonIds, formatSeasonLabel } from "../Data/Helpers/SeasonHelper";
+import { getRecentSeasonIds, formatSeasonLabel } from "../Data/Helpers/seasonHelper";
 import styles from "../style/SeasonSelector.module.css";
 
 function ChevronIcon() {

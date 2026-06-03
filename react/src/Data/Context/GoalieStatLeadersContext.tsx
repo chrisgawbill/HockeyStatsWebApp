@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext } from "react";
-import { TopStatLeader } from "../Models/TopStatLeader";
+import { TopStatLeader } from "../Models/topStatLeader";
 import { useStatLeaders } from "../Hooks/useStatLeaders";
-import { STAT_LEADER_TYPES } from "../Constants/StatLeaderTypes";
+import { STAT_LEADER_TYPES } from "../Constants/statLeaderTypes";
 import { useSeason } from "./SeasonContext";
 
 interface GoalieLeaderContextValue {

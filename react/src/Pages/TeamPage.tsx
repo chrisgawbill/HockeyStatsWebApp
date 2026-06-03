@@ -9,15 +9,15 @@ import LoadingState from "../Components/LoadingState";
 import TeamStatsRow from "../Components/TeamPage/TeamStatsRow";
 import PlayerStatsSection from "../Components/TeamPage/PlayerStatsSection";
 import RosterSection from "../Components/TeamPage/RosterSection";
-import { localTeamList } from "../Data/LocalData/TeamListData";
+import { localTeamList } from "../Data/LocalData/teamListData";
 import {
   MockTeam,
   MockStatItem,
   Position,
   RosterPlayer,
   PlayerStatLine,
-} from "../Data/LocalData/TeamPageMockData";
-import { ScheduledGame } from "../Data/Models/ScheduledGame";
+} from "../Data/LocalData/teamPageMockData";
+import { ScheduledGame } from "../Data/Models/scheduledGame";
 import {
   GetTeamStatsById,
   GetTeamRoster,
@@ -25,12 +25,12 @@ import {
   GetSkaterSummary,
   GetSkaterCorsi,
   GetGoalieSummary,
-} from "../Services/ApiHandler";
+} from "../Services/apiHandler";
 import { useStandingsContext } from "../Data/Context/StandingsContext";
 import { useSeason } from "../Data/Context/SeasonContext";
-import { InterfaceWithChatBot } from "../Services/GenAIHandler";
+import { InterfaceWithChatBot } from "../Services/genAIHandler";
 import styles from "../style/TeamPage/TeamPage.module.css";
-import { ConvertContractsToGames } from "../Data/Helpers/ScheduleHelper";
+import { ConvertContractsToGames } from "../Data/Helpers/scheduleHelper";
 
 /**
  * Maps NHL roster position codes into the display buckets used by the roster UI.

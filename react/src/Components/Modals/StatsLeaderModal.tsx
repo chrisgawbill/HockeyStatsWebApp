@@ -1,5 +1,5 @@
 import React from "react";
-import { PlayerStatLeader } from "../../Data/Models/PlayerStatLeader";
+import { PlayerStatLeader } from "../../Data/Models/playerStatLeader";
 import { Modal, Button } from "react-bootstrap";
 import { CompactTable } from "@table-library/react-table-library/compact";
 import { useTheme } from "@table-library/react-table-library/theme";

@@ -1,11 +1,11 @@
 import { Col, Row } from "react-bootstrap";
 import styles from "../../style/LandingPage/LandingPageRow.module.css";
 import React from "react";
-import { TopStatLeader } from "../../Data/Models/TopStatLeader";
+import { TopStatLeader } from "../../Data/Models/topStatLeader";
 import StatLeaderCard from "./StatLeaderCard";
 import EmptyState from "../EmptyState";
 import { useSeason } from "../../Data/Context/SeasonContext";
-import { formatSeasonLabel } from "../../Data/Helpers/SeasonHelper";
+import { formatSeasonLabel } from "../../Data/Helpers/seasonHelper";
 
 interface PlayerStatLeaderProps {
   title: string;

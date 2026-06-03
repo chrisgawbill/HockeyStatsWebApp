@@ -67,13 +67,13 @@ These providers fetch shared data once and make it available to pages through cu
 
 Frontend HTTP calls are centralized in:
 
-- `react/src/Services/AxiosInstance.ts`
-- `react/src/Services/ApiHandler.ts`
-- `react/src/Services/GenAIHandler.ts`
+- `react/src/Services/axiosInstance.ts`
+- `react/src/Services/apiHandler.ts`
+- `react/src/Services/genAIHandler.ts`
 
-`AxiosInstance.ts` creates `axiosExpressHandler`, which points to `import.meta.env.VITE_API_URL` or falls back to `http://localhost:9000`.
+`axiosInstance.ts` creates `axiosExpressHandler`, which points to `import.meta.env.VITE_API_URL` or falls back to `http://localhost:9000`.
 
-`ApiHandler.ts` maps frontend operations to Express routes. For example:
+`apiHandler.ts` maps frontend operations to Express routes. For example:
 
 - `GetCurrentStandings()` calls `/standings`
 - `GetScheduledGames()` calls `/schedule/`
@@ -82,9 +82,9 @@ Frontend HTTP calls are centralized in:
 - `GetSkaterSummary(teamId)` calls `/player/skater/summary`
 - `GetHealth(passphrase)` calls `/health` and `GetCacheReport(passphrase)` calls `/health/cache-usage`; both attach the passphrase as the `x-diagnostics-key` header (never a query string), since the backend reads it from that header (see [Diagnostics Layer](#diagnostics-layer))
 
-Note: `ApiHandler.ts` also exports `GetDraft()`, but it is currently an empty stub (its body is commented out). Draft lottery odds are not fetched from an API; they are computed locally (see [Important Hockey And NHL API Background](#important-hockey-and-nhl-api-background)).
+Note: `apiHandler.ts` also exports `GetDraft()`, but it is currently an empty stub (its body is commented out). Draft lottery odds are not fetched from an API; they are computed locally (see [Important Hockey And NHL API Background](#important-hockey-and-nhl-api-background)).
 
-`GenAIHandler.ts` calls `/python-service` and normalizes the AI response into JSON when possible.
+`genAIHandler.ts` calls `/python-service` and normalizes the AI response into JSON when possible.
 
 ### Data Layer
 
@@ -93,7 +93,7 @@ The frontend data layer lives under `react/src/Data/`.
 Use this structure when deciding where code belongs:
 
 - `Models/`: class-like data shapes used by the UI, such as `ScheduledGame`, `Team`, `StandingsTeam`, and `PlayerStatLeader`.
-- `Helpers/`: conversion logic that wraps normalized backend contracts into app model classes (and layers on app-only logic such as draft-lottery odds). For the most-used NHL data, raw-field extraction now happens in the backend mappers (see [Backend Response Contracts](#backend-response-contracts)), so these helpers no longer parse raw NHL shapes. Also home to presentation-only helpers (`GameStatusHelper.ts` for schedule time/status formatting, `ScheduleHelper.ts` date grouping) and frontend season utilities (`SeasonHelper.ts`, see [Season Selection](#season-selection)).
+- `Helpers/`: conversion logic that wraps normalized backend contracts into app model classes (and layers on app-only logic such as draft-lottery odds). For the most-used NHL data, raw-field extraction now happens in the backend mappers (see [Backend Response Contracts](#backend-response-contracts)), so these helpers no longer parse raw NHL shapes. Also home to presentation-only helpers (`gameStatusHelper.ts` for schedule time/status formatting, `scheduleHelper.ts` date grouping) and frontend season utilities (`seasonHelper.ts`, see [Season Selection](#season-selection)).
 - `Context/`: React providers and hooks for shared state.
 - `Hooks/`: reusable custom hooks that compose services, helpers, and constants. For example, `useStatLeaders.ts` loads and tracks stat leader data using `STAT_CONFIG` and `PlayerStatLeaderConverter`.
 - `Constants/`: static configuration such as stat leader category mappings.
@@ -199,7 +199,7 @@ Conventions for this layer:
 
 - **Mappers are pure functions** with defensive fallbacks for missing or renamed NHL fields (e.g. `venue?.default ?? ""`, guarded `.default` unwraps, `faceoffWinPct > 0 ? value : null`).
 - **Map after `GetOrFetch`, not inside it.** Cached entries store the **raw** NHL response, and the route maps on the way out. This means a mapper change never requires clearing the cache, and old cache entries stay compatible.
-- **Shape translation only.** App/derived/display logic stays on the frontend (e.g. draft-lottery odds in `LeagueStandingsHelper.ts`, TOI string formatting, `pointsPctg` rounding). Corsi (SAT%) is a separate endpoint merged on the frontend by `playerId` and is intentionally not part of the skater contract.
+- **Shape translation only.** App/derived/display logic stays on the frontend (e.g. draft-lottery odds in `leagueStandingsHelper.ts`, TOI string formatting, `pointsPctg` rounding). Corsi (SAT%) is a separate endpoint merged on the frontend by `playerId` and is intentionally not part of the skater contract.
 
 ### Backend Caching
 
@@ -318,9 +318,9 @@ Two endpoints don't take a season directly and translate instead: standings is d
 
 `SeasonContext.tsx` holds the shared selection, backed by the `?season=` URL param (so a season is deep-linkable and survives refresh). `SeasonProvider` wraps the app inside `HashRouter`; `useSeason()` returns `{ season, setSeason }`. An absent or invalid param falls back to `getCurrentSeasonId()`, and `setSeason` preserves other params such as `?date=` and `?view=`.
 
-`react/src/Data/Helpers/SeasonHelper.ts` is the frontend twin of the backend helper: `getCurrentSeasonId`, `isValidSeasonId`, plus `getRecentSeasonIds(count)` and `formatSeasonLabel` ("20252026" → "2025–26") for the picker.
+`react/src/Data/Helpers/seasonHelper.ts` is the frontend twin of the backend helper: `getCurrentSeasonId`, `isValidSeasonId`, plus `getRecentSeasonIds(count)` and `formatSeasonLabel` ("20252026" → "2025–26") for the picker.
 
-The `SeasonSelector` component (Landing, Schedule, Standings, Team pages) is a controlled `<select>` over the recent seasons; a deep-linked season outside that window is appended so the control always has a matching option. Data providers/hooks (`ScheduleContext`, `StandingsContext`, `useStatLeaders`) re-fetch when `season` changes, and `ApiHandler.ts` threads `season` through the relevant calls (most via its `withParams` helper). When a selected season has no data, pages render the shared `EmptyState` component.
+The `SeasonSelector` component (Landing, Schedule, Standings, Team pages) is a controlled `<select>` over the recent seasons; a deep-linked season outside that window is appended so the control always has a matching option. Data providers/hooks (`ScheduleContext`, `StandingsContext`, `useStatLeaders`) re-fetch when `season` changes, and `apiHandler.ts` threads `season` through the relevant calls (most via its `withParams` helper). When a selected season has no data, pages render the shared `EmptyState` component.
 
 ## AI Integration
 
@@ -393,13 +393,13 @@ Useful domain terms:
 - `cayenneExp`: NHL stats API query expression. Backend code URL-encodes these expressions before sending them to NHL stats endpoints.
 - `clinchingIndicator` / `clinchIndicator`: NHL standings APIs may use either spelling. The backend `standingsMapper` normalizes this to `clinchingIndicator` so the frontend never has to.
 
-Draft lottery odds are currently calculated locally in `LeagueStandingsHelper.ts` based on league rank.
+Draft lottery odds are currently calculated locally in `leagueStandingsHelper.ts` based on league rank.
 
 ## Developer Conventions
 
 ### General
 
-- Keep frontend API calls in `react/src/Services/ApiHandler.ts` unless there is a strong reason to create a separate service.
+- Keep frontend API calls in `react/src/Services/apiHandler.ts` unless there is a strong reason to create a separate service.
 - Keep raw NHL response conversion at the backend boundary in `api/services/mappers/` for shared NHL data. Frontend helpers should wrap normalized contracts and own presentation-only or derived app logic.
 - Keep reusable display components in `react/src/Components/`.
 - Keep route-level orchestration in `react/src/Pages/`.

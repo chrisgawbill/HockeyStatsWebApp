@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useListOfGames } from '../Data/Context/ScheduleContext';
 import PageHeader from '../Components/PageHeader';
 import { Container } from 'react-bootstrap';
-import { ScheduledGame } from '../Data/Models/ScheduledGame';
+import { ScheduledGame } from '../Data/Models/scheduledGame';
 import styles from '../style/SchedulePage.module.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ScheduleCard from '../Components/SchedulePage/ScheduleCard';
@@ -13,12 +13,12 @@ import EmptyState from '../Components/EmptyState';
 import SeasonSelector from '../Components/SeasonSelector';
 import SlidingToggle from '../Components/LandingPage/LandingPageStandings/SlidingToggle';
 import { useSeason } from '../Data/Context/SeasonContext';
-import { formatSeasonLabel } from '../Data/Helpers/SeasonHelper';
+import { formatSeasonLabel } from '../Data/Helpers/seasonHelper';
 import {
 	formatDateParam,
 	groupGamesByDate,
 	parseLocalDate,
-} from '../Data/Helpers/ScheduleHelper';
+} from '../Data/Helpers/scheduleHelper';
 
 const ViewParamType = {
 	DAY: 'day',

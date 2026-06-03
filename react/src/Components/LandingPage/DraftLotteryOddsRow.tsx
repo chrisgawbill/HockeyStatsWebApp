@@ -1,7 +1,7 @@
 import { Col, Row } from "react-bootstrap";
 import styles from "../../style/LandingPage/LandingPageRow.module.css";
 import React from "react";
-import { StandingsTeam } from "../../Data/Models/StandingsTeam";
+import { StandingsTeam } from "../../Data/Models/standingsTeam";
 import DraftLotteryOddsCard from "./DraftLotteryOddsCard";
 
 interface LandingPageRowProps {

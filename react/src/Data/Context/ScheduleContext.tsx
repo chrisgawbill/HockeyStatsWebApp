@@ -6,9 +6,9 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { ScheduledGame } from "../Models/ScheduledGame";
-import { GetGameDetails, GetScheduledGames } from "../../Services/ApiHandler";
-import { ConvertContractsToGames, parseLocalDate } from "../Helpers/ScheduleHelper";
+import { ScheduledGame } from "../Models/scheduledGame";
+import { GetGameDetails, GetScheduledGames } from "../../Services/apiHandler";
+import { ConvertContractsToGames, parseLocalDate } from "../Helpers/scheduleHelper";
 import { useSeason } from "./SeasonContext";
 
 const ListOfGamesContext = createContext<any>(null);
