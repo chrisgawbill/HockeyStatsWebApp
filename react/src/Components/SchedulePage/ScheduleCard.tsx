@@ -9,8 +9,9 @@ import {
 } from '../../Data/Helpers/gameStatusHelper';
 import styles from '../../style/SchedulePage.module.css';
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(' ');
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(' ');
+}
 
 /**
  * Returns the logo URL variant for the active theme. NHL logo URLs are stored as
@@ -40,7 +41,7 @@ function handleTicketClick(ticketLink: string) {
  * matchup, score or start time, playoff badge, venue, tickets, and broadcasts;
  * a completed game is clickable through to its detail page.
  */
-const ScheduleCard = ({ game, isGameCompleted, goToGameDetails }: ScheduleCardProps) => {
+function ScheduleCard({ game, isGameCompleted, goToGameDetails }: ScheduleCardProps) {
     const { theme } = useTheme();
 	const homeLogo = themedLogoUrl(game.homeLogo, theme);
 	const awayLogo = themedLogoUrl(game.awayLogo, theme);
@@ -139,5 +140,5 @@ const ScheduleCard = ({ game, isGameCompleted, goToGameDetails }: ScheduleCardPr
 			</Row>
 		</div>
 	);
-};
+}
 export default ScheduleCard;

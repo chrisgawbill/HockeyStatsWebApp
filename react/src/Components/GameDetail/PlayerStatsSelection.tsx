@@ -138,7 +138,7 @@ function TeamPlayerStats({ team, abbrev }: { team: BoxscoreTeamStats; abbrev: st
   );
 }
 
-const PlayerStatsSelection = ({ homeTeam, awayTeam, homeAbbrev, awayAbbrev }: Props) => {
+function PlayerStatsSelection({ homeTeam, awayTeam, homeAbbrev, awayAbbrev }: Props) {
   return (
     <section className={`${styles["game-detail-section"]} ${shared.section}`}>
       <h2 className={shared.sectionTitle}>Player Stats</h2>
@@ -146,6 +146,6 @@ const PlayerStatsSelection = ({ homeTeam, awayTeam, homeAbbrev, awayAbbrev }: Pr
       <TeamPlayerStats team={homeTeam} abbrev={homeAbbrev} />
     </section>
   );
-};
+}
 
 export default PlayerStatsSelection;

@@ -22,7 +22,7 @@ function getStrengthBadge(strength: string, modifier: string): string | null {
   return null;
 }
 
-const ScoringSummary = ({ scoring }: ScoringSummaryProps) => {
+function ScoringSummary({ scoring }: ScoringSummaryProps) {
   const periodsWithGoals = scoring.filter((p) => p.goals.length > 0);
   if (periodsWithGoals.length === 0) return null;
 
@@ -84,6 +84,6 @@ const ScoringSummary = ({ scoring }: ScoringSummaryProps) => {
       </div>
     </section>
   );
-};
+}
 
 export default ScoringSummary;

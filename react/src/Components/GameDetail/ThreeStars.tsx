@@ -22,7 +22,7 @@ function formatStatLine(star: LandingThreeStar): string {
   return `${g}G  ${a}A  ${p}P`;
 }
 
-const ThreeStars = ({ stars }: ThreeStarsProps) => {
+function ThreeStars({ stars }: ThreeStarsProps) {
   return (
     <section className={`${styles["game-detail-section"]} ${shared.section}`}>
       <h2 className={shared.sectionTitle}>Three Stars</h2>
@@ -55,6 +55,6 @@ const ThreeStars = ({ stars }: ThreeStarsProps) => {
       </div>
     </section>
   );
-};
+}
 
 export default ThreeStars;

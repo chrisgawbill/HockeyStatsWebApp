@@ -3,8 +3,9 @@ import { getTeamPrimaryColor } from "../../Data/Helpers/teamColor";
 import shared from "../../style/shared.module.css";
 import styles from "../../style/GameDetailPage.module.css";
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 type TeamTotals = {
   sog: number;
@@ -33,7 +34,7 @@ const STAT_ROWS: { label: string; key: keyof TeamTotals }[] = [
   { label: "Takeaways", key: "takeaways" },
 ];
 
-const TeamComparison = ({ homeTotals, awayTotals, homeAbbrev, awayAbbrev }: TeamComparisonProps) => {
+function TeamComparison({ homeTotals, awayTotals, homeAbbrev, awayAbbrev }: TeamComparisonProps) {
   const awayColor = getTeamPrimaryColor(awayAbbrev);
   const homeColor = getTeamPrimaryColor(homeAbbrev);
 
@@ -87,6 +88,6 @@ const TeamComparison = ({ homeTotals, awayTotals, homeAbbrev, awayAbbrev }: Team
       </div>
     </section>
   );
-};
+}
 
 export default TeamComparison;

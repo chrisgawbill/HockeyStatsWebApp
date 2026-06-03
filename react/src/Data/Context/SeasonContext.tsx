@@ -43,10 +43,10 @@ function SeasonProvider({ children }: { children: ReactNode }) {
  * Returns the selected season plus a setter from SeasonContext. Throws when used
  * outside SeasonProvider so provider-order mistakes fail during development.
  */
-const useSeason = () => {
+function useSeason() {
 	const ctx = useContext(SeasonContext);
 	if (!ctx) throw new Error('useSeason must be used within SeasonProvider');
 	return ctx;
-};
+}
 
 export { SeasonProvider, useSeason };

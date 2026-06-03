@@ -4,8 +4,9 @@ import LoadingState from '../Components/LoadingState';
 import { GetHealth, GetCacheReport } from '../Services/apiHandler';
 import styles from '../style/DiagnosticsPage.module.css';
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-	classes.filter(Boolean).join(' ');
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(' ');
+}
 
 const SESSION_KEY = 'diagnostics-key';
 
@@ -139,7 +140,7 @@ function StatCard({
 	);
 }
 
-const DiagnosticsPage = () => {
+function DiagnosticsPage() {
 	const [passphrase, setPassphrase] = useState('');
 	const [health, setHealth] = useState<HealthData | null>(null);
 	const [cacheReport, setCacheReport] = useState<CacheReportData | null>(null);
@@ -487,6 +488,6 @@ const DiagnosticsPage = () => {
 			:	renderGate()}
 		</div>
 	);
-};
+}
 
 export default DiagnosticsPage;

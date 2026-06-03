@@ -8,8 +8,9 @@ import {
 import shared from "../../style/shared.module.css";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 const FALLBACK_HEADSHOT = "https://assets.nhle.com/mugs/nhl/skater/default.png";
 

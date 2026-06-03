@@ -22,7 +22,7 @@ export const StandingsContext = createContext<StandingsData | null>(null);
  * UI needs — by conference, by division, and the draft-lottery odds list — each
  * sorted into standings order. Re-fetches whenever the season changes.
  */
-const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
+function StandingsDataProvider({ children }: { children: ReactNode }) {
   const [easternStandingsData, setEasternStandingsData] = useState<StandingsTeam[]>([]);
   const [westernStandingsData, setWesternStandingsData] = useState<StandingsTeam[]>([]);
   const [metropolitanStandings, setMetropolitanStandings] = useState<StandingsTeam[]>([]);
@@ -81,15 +81,19 @@ const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </StandingsContext.Provider>
   );
-};
+}
 
-export const useStandingsContext = (): StandingsData => {
+export function useStandingsContext(): StandingsData {
   const context = useContext(StandingsContext);
   if (!context) throw new Error("useStandingsContext must be used within StandingsDataProvider");
   return context;
-};
+}
 
-export const useDraftLotteryOddsData = () => useStandingsContext().draftLotteryOdds;
+export function useDraftLotteryOddsData() {
+  return useStandingsContext().draftLotteryOdds;
+}
 
-const useStandingsData = (): StandingsData => useStandingsContext();
+function useStandingsData(): StandingsData {
+  return useStandingsContext();
+}
 export { StandingsDataProvider, useStandingsData };

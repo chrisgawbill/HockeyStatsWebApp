@@ -5,8 +5,9 @@ import { localTeamList } from "../../Data/LocalData/teamListData";
 import SeasonSelector from "../SeasonSelector";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface TeamHeroProps {
   team: MockTeam;

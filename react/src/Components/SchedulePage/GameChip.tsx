@@ -9,8 +9,9 @@ import {
 } from "../../Data/Helpers/gameStatusHelper";
 import styles from "../../style/ScheduleCalendar.module.css";
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 /**
  * Returns the logo URL variant for the active theme. NHL logo URLs are stored as

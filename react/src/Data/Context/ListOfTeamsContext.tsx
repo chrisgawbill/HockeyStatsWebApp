@@ -25,7 +25,7 @@ function hasValidGoalsPerGame(data: any): boolean {
   return typeof latest?.goalsPerGame === "number";
 }
 
-const ListOfTeamsDataProvider = ({ children }: { children: ReactNode }) => {
+function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   const teamListData = React.useRef<any[]>([]);
   const [listOfTeamsData, setListOfTeamsData] = useState<Team[]>([]);
   const [loadingListOfTeamsData, setLoadingListOfTeamsData] = useState<boolean>(true);
@@ -67,6 +67,8 @@ const ListOfTeamsDataProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </ListOfTeamsContext.Provider>
   );
-};
-const useListOfTeamsData = () => useContext(ListOfTeamsContext);
+}
+function useListOfTeamsData() {
+  return useContext(ListOfTeamsContext);
+}
 export { ListOfTeamsDataProvider, useListOfTeamsData };

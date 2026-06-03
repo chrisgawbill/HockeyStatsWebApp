@@ -5,8 +5,9 @@ import { useTheme } from "../../Data/Context/ThemeContext";
 import { getTeamPrimaryColor } from "../../Data/Helpers/teamColor";
 import styles from "../../style/GameDetailPage.module.css";
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface Props {
   boxscore: GameDetailBoxscore;

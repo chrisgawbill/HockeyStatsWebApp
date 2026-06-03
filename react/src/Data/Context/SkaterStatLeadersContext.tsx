@@ -18,7 +18,7 @@ const SkaterStatLeaderContext = createContext<SkaterLeaderContextValue | null>(n
  * Loads skater stat leaders for the current season via useStatLeaders and exposes
  * each category (goals, assists, points, faceoffs) under a named field for the UI.
  */
-const SkaterStatLeaderProvider = ({ children }: { children: ReactNode }) => {
+function SkaterStatLeaderProvider({ children }: { children: ReactNode }) {
   const { season } = useSeason();
   const { leaders, loading } = useStatLeaders(STAT_LEADER_TYPES.SKATER, season);
   return (
@@ -32,12 +32,12 @@ const SkaterStatLeaderProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </SkaterStatLeaderContext.Provider>
   );
-};
+}
 
-const useSkaterLeaderData = (): SkaterLeaderContextValue => {
+function useSkaterLeaderData(): SkaterLeaderContextValue {
   const context = useContext(SkaterStatLeaderContext);
   if (!context) throw new Error("useSkaterLeaderData must be used within SkaterStatLeaderProvider");
   return context;
-};
+}
 
 export { SkaterStatLeaderProvider, useSkaterLeaderData };

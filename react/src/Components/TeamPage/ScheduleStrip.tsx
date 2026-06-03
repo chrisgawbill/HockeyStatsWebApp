@@ -6,8 +6,9 @@ import shared from "../../style/shared.module.css";
 import styles from "../../style/TeamPage/TeamPage.module.css";
 
 const PAGE_SIZE = 7;
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface ScheduleStripProps {
   games: ScheduledGame[];

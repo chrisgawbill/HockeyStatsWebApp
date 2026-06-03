@@ -19,7 +19,7 @@ const ListOfGamesContext = createContext<any>(null);
  * season change triggers a re-fetch. Also exposes the games for a chosen day and
  * a setter to change that day.
  */
-const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
+function ListOfGamesProvider({ children }: { children: ReactNode }) {
   const [listOfGamesData, setListOfGamesData] = useState<ScheduledGame[]>([]);
   const [loadingListOfGamesData, setLoadingListOfGamesData] = useState<boolean>(true);
   const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>([]);
@@ -146,7 +146,9 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </ListOfGamesContext.Provider>
   );
-};
+}
 
-const useListOfGames = () => useContext(ListOfGamesContext);
+function useListOfGames() {
+  return useContext(ListOfGamesContext);
+}
 export { ListOfGamesProvider, useListOfGames };

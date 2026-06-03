@@ -1,8 +1,9 @@
 import React from "react";
 import styles from "../../../style/LandingPage/SlidingToggle.module.css";
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface Option<T extends string> {
   label: string;

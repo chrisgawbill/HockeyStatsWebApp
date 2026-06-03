@@ -18,7 +18,7 @@ const GoalieLeaderContext = createContext<GoalieLeaderContextValue | null>(null)
  * Loads goalie stat leaders for the current season via useStatLeaders and exposes
  * each category (wins, save %, GAA, shutouts) under a named field for the UI.
  */
-const GoalieLeaderDataProvider = ({ children }: { children: ReactNode }) => {
+function GoalieLeaderDataProvider({ children }: { children: ReactNode }) {
   const { season } = useSeason();
   const { leaders, loading } = useStatLeaders(STAT_LEADER_TYPES.GOALIE, season);
   return (
@@ -32,12 +32,12 @@ const GoalieLeaderDataProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </GoalieLeaderContext.Provider>
   );
-};
+}
 
-const useGoalieLeaderData = (): GoalieLeaderContextValue => {
+function useGoalieLeaderData(): GoalieLeaderContextValue {
   const context = useContext(GoalieLeaderContext);
   if (!context) throw new Error("useGoalieLeaderData must be used within GoalieLeaderDataProvider");
   return context;
-};
+}
 
 export { GoalieLeaderDataProvider, useGoalieLeaderData };

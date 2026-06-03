@@ -22,7 +22,7 @@ function getPeriodLabel(p: PeriodScore): string {
   return `P${p.periodNum}`;
 }
 
-const PeriodScoresTable = ({ periodScores, homeAbbrev, awayAbbrev }: PeriodScoresTableProps) => {
+function PeriodScoresTable({ periodScores, homeAbbrev, awayAbbrev }: PeriodScoresTableProps) {
   const awayTotal = periodScores.reduce((sum, p) => sum + p.awayGoals, 0);
   const homeTotal = periodScores.reduce((sum, p) => sum + p.homeGoals, 0);
   const awayColor = getTeamPrimaryColor(awayAbbrev);
@@ -62,6 +62,6 @@ const PeriodScoresTable = ({ periodScores, homeAbbrev, awayAbbrev }: PeriodScore
       </div>
     </section>
   );
-};
+}
 
 export default PeriodScoresTable;
