@@ -5,11 +5,14 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from "react";
-import { ScheduledGame } from "../Models/ScheduledGame";
-import { GetGameDetails, GetScheduledGames } from "../../Services/ApiHandler";
-import { ConvertContractsToGames, parseLocalDate } from "../Helpers/ScheduleHelper";
-import { useSeason } from "./SeasonContext";
+} from 'react';
+import { ScheduledGame } from '../Models/scheduledGame';
+import { GetGameDetails, GetScheduledGames } from '../../Services/apiHandler';
+import {
+  ConvertContractsToGames,
+  parseLocalDate,
+} from '../Helpers/scheduleHelper';
+import { useSeason } from './SeasonContext';
 
 const ListOfGamesContext = createContext<any>(null);
 
@@ -19,10 +22,13 @@ const ListOfGamesContext = createContext<any>(null);
  * season change triggers a re-fetch. Also exposes the games for a chosen day and
  * a setter to change that day.
  */
-const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
+function ListOfGamesProvider({ children }: { children: ReactNode }) {
   const [listOfGamesData, setListOfGamesData] = useState<ScheduledGame[]>([]);
-  const [loadingListOfGamesData, setLoadingListOfGamesData] = useState<boolean>(true);
-  const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>([]);
+  const [loadingListOfGamesData, setLoadingListOfGamesData] =
+    useState<boolean>(true);
+  const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>(
+    [],
+  );
   const { season } = useSeason();
 
   /**
@@ -35,7 +41,7 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
       const response = await GetScheduledGames(seasonId);
       setListOfGamesData(ConvertContractsToGames(response.games));
     } catch (error) {
-      console.error("Error fetching games: ", error);
+      console.error('Error fetching games: ', error);
     } finally {
       setLoadingListOfGamesData(false);
     }
@@ -94,15 +100,30 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
       const response = await GetGameDetails(game.gameId);
       if (!response?.homeTeam || !response?.awayTeam) return undefined;
       return new ScheduledGame(
-        game.gameId, game.date, game.gameTime, game.dayOfWeek, game.venue,
-        game.homeTeam, game.homeLogo, response.homeTeam.score ?? game.homeScore,
-        game.awayTeam, game.awayLogo, response.awayTeam.score ?? game.awayScore,
-        game.broadcasts, "", game.gameCenter, game.isPlayoff, game.playoffRound,
-        game.periodType, game.seriesWins, game.topSeedTeamAbbrev,
-        game.bottomSeedTeamAbbrev, game.gameState,
+        game.gameId,
+        game.date,
+        game.gameTime,
+        game.dayOfWeek,
+        game.venue,
+        game.homeTeam,
+        game.homeLogo,
+        response.homeTeam.score ?? game.homeScore,
+        game.awayTeam,
+        game.awayLogo,
+        response.awayTeam.score ?? game.awayScore,
+        game.broadcasts,
+        '',
+        game.gameCenter,
+        game.isPlayoff,
+        game.playoffRound,
+        game.periodType,
+        game.seriesWins,
+        game.topSeedTeamAbbrev,
+        game.bottomSeedTeamAbbrev,
+        game.gameState,
       );
     } catch (error) {
-      console.error("Error updating game: ", error);
+      console.error('Error updating game: ', error);
     }
   }
 
@@ -114,7 +135,9 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
   function doesGameNeedToUpdate(game: ScheduledGame) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return game.date < today && game.homeScore == null && game.awayScore == null;
+    return (
+      game.date < today && game.homeScore == null && game.awayScore == null
+    );
   }
 
   /**
@@ -139,14 +162,28 @@ const ListOfGamesProvider = ({ children }: { children: ReactNode }) => {
       updatePastGames();
       fetchGamesByDate(new Date());
     }
-  }, [loadingListOfGamesData, listOfGamesData, updatePastGames, fetchGamesByDate]);
+  }, [
+    loadingListOfGamesData,
+    listOfGamesData,
+    updatePastGames,
+    fetchGamesByDate,
+  ]);
 
   return (
-    <ListOfGamesContext.Provider value={{ listOfGamesData, loadingListOfGamesData, selectedDateGames, fetchGamesByDate }}>
+    <ListOfGamesContext.Provider
+      value={{
+        listOfGamesData,
+        loadingListOfGamesData,
+        selectedDateGames,
+        fetchGamesByDate,
+      }}
+    >
       {children}
     </ListOfGamesContext.Provider>
   );
-};
+}
 
-const useListOfGames = () => useContext(ListOfGamesContext);
+function useListOfGames() {
+  return useContext(ListOfGamesContext);
+}
 export { ListOfGamesProvider, useListOfGames };

@@ -1,11 +1,12 @@
-import React from "react";
-import { Button } from "react-bootstrap";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useTheme } from "../Data/Context/ThemeContext";
-import styles from "../style/PageHeader.module.css";
+import React from 'react';
+import { Button } from 'react-bootstrap';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTheme } from '../Data/Context/ThemeContext';
+import styles from '../Style/PageHeader.module.css';
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: (string | false | null | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 function HomeIcon() {
   return (
@@ -151,7 +152,7 @@ function BackIcon() {
 }
 
 function normalizeNavPath(path: string): string {
-  return path.split("?")[0];
+  return path.split('?')[0];
 }
 
 export default function PageHeader() {
@@ -160,17 +161,18 @@ export default function PageHeader() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
-  const isTeamSubPage = pathname.startsWith("/team/");
-  const isGameSubPage = pathname.startsWith("/game/");
+  const isTeamSubPage = pathname.startsWith('/team/');
+  const isGameSubPage = pathname.startsWith('/game/');
   const isSubPage = isTeamSubPage || isGameSubPage;
   const routeState = location.state as {
     sourcePath?: string;
     fallbackPath?: string;
     activeNavPath?: string;
   } | null;
-  const sourcePath = routeState?.sourcePath ?? (isGameSubPage ? "/schedule" : "/teamList");
+  const sourcePath =
+    routeState?.sourcePath ?? (isGameSubPage ? '/schedule' : '/teamList');
   const activePath = normalizeNavPath(
-    isSubPage ? routeState?.activeNavPath ?? sourcePath : pathname,
+    isSubPage ? (routeState?.activeNavPath ?? sourcePath) : pathname,
   );
 
   const handleBack = () => {
@@ -183,21 +185,21 @@ export default function PageHeader() {
   };
 
   const navItems = [
-    { label: "Home", path: "/", icon: <HomeIcon /> },
-    { label: "Schedule", path: "/schedule", icon: <CalendarIcon /> },
-    { label: "Standings", path: "/standings", icon: <BarChartIcon /> },
-    { label: "Team List", path: "/teamList", icon: <UsersIcon /> },
+    { label: 'Home', path: '/', icon: <HomeIcon /> },
+    { label: 'Schedule', path: '/schedule', icon: <CalendarIcon /> },
+    { label: 'Standings', path: '/standings', icon: <BarChartIcon /> },
+    { label: 'Team List', path: '/teamList', icon: <UsersIcon /> },
   ];
 
   return (
     <div
-      className={styles["nav-bar"]}
+      className={styles['nav-bar']}
       style={isSubPage ? { marginBottom: 0 } : undefined}
     >
-      <div className={styles["nav-back-col"]}>
+      <div className={styles['nav-back-col']}>
         {isSubPage && (
           <button
-            className={styles["nav-back-btn"]}
+            className={styles['nav-back-btn']}
             onClick={handleBack}
             aria-label="Go back"
           >
@@ -206,27 +208,30 @@ export default function PageHeader() {
         )}
       </div>
       {navItems.map(({ label, path, icon }) => (
-        <div key={path} className={styles["nav-bar-item"]}>
-          <Link to={path} style={{ width: "100%" }}>
+        <div key={path} className={styles['nav-bar-item']}>
+          <Link to={path} style={{ width: '100%' }}>
             <Button
-              className={cx(styles["nav-btn"], activePath === path && styles["active-page"])}
+              className={cx(
+                styles['nav-btn'],
+                activePath === path && styles['active-page'],
+              )}
               aria-label={label}
             >
-              <span className={styles["nav-btn__label"]}>{label}</span>
-              <span className={styles["nav-btn__icon"]}>{icon}</span>
+              <span className={styles['nav-btn__label']}>{label}</span>
+              <span className={styles['nav-btn__icon']}>{icon}</span>
             </Button>
           </Link>
         </div>
       ))}
-      <div className={styles["nav-theme-col"]}>
+      <div className={styles['nav-theme-col']}>
         <button
-          className={styles["theme-toggle-btn"]}
+          className={styles['theme-toggle-btn']}
           onClick={toggleTheme}
           aria-label={
-            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
           }
         >
-          {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
         </button>
       </div>
     </div>

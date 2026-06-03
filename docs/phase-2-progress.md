@@ -23,7 +23,7 @@ Status legend: ☐ not started · ◐ in progress · ☑ done
 - Added passphrase auth in `api/utils/auth.js`: `matchesPassphrase` (SHA-256 + `crypto.timingSafeEqual`, fails closed if `DIAGNOSTICS_PASSPHRASE` is unset) and an `authCheck` middleware applied via `router.use(authCheck)`.
 - Allowed the `x-diagnostics-key` header in CORS `allowedHeaders` in `api/app.js` so browser preflight succeeds.
 - Added frontend service functions `GetHealth(passphrase)` and `GetCacheReport(passphrase)` in `react/src/Services/ApiHandler.ts`, passing the passphrase in the `x-diagnostics-key` header.
-- Added an unlinked `DiagnosticsPage` (`react/src/Pages/DiagnosticsPage.tsx`) at the `/diagnostics` route, with a passphrase gate, status grid, and cache-usage table. Styled in `react/src/style/DiagnosticsPage.module.css`.
+- Added an unlinked `DiagnosticsPage` (`react/src/Pages/DiagnosticsPage.tsx`) at the `/diagnostics` route, with a passphrase gate, status grid, and cache-usage table. Styled in `react/src/Style/DiagnosticsPage.module.css`.
 - Passphrase is kept in `sessionStorage` so a refresh stays authenticated within the tab; wrong passphrase (401) and unreachable API are caught and surfaced without crashing the app.
 - `DIAGNOSTICS_PASSPHRASE` stored only in `api/.env` (gitignored).
 - Documented the whole layer in `docs/architecture.md` (Diagnostics Layer section).

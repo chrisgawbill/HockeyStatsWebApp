@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import { TopStatLeader } from "../Models/TopStatLeader";
-import { PlayerStatLeader } from "../Models/PlayerStatLeader";
-import PlayerStatLeaderConverter from "../Helpers/PlayerStatLeaderConverter";
-import { STAT_CONFIG, StatEntry, StatLeaderType } from "../Constants/StatLeaderTypes";
+import { useEffect, useRef, useState } from 'react';
+import { TopStatLeader } from '../Models/topStatLeader';
+import { PlayerStatLeader } from '../Models/playerStatLeader';
+import PlayerStatLeaderConverter from '../Helpers/playerStatLeaderConverter';
+import {
+  STAT_CONFIG,
+  StatEntry,
+  StatLeaderType,
+} from '../Constants/statLeaderTypes';
 
 /**
  * Loads the stat-leader categories for one player type (skater or goalie),
@@ -17,7 +21,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   const [loading, setLoading] = useState(true);
 
   const loadingRefs = useRef<Record<string, boolean>>(
-    Object.fromEntries(stats.map(s => [s.displayKey, true]))
+    Object.fromEntries(stats.map((s) => [s.displayKey, true])),
   );
 
   /**
@@ -39,8 +43,12 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
       const data = await fetcher(apiKey, season);
       const statLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(data);
       if (statLeaders.length === 0) return;
-      const topLeader = new TopStatLeader(displayKey, statLeaders[0], statLeaders);
-      setLeaders(prev => ({ ...prev, [displayKey]: topLeader }));
+      const topLeader = new TopStatLeader(
+        displayKey,
+        statLeaders[0],
+        statLeaders,
+      );
+      setLeaders((prev) => ({ ...prev, [displayKey]: topLeader }));
     } catch (error) {
       console.error(`Error fetching ${displayKey}: `, error);
     } finally {
@@ -52,7 +60,9 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   useEffect(() => {
     setLeaders({});
     setLoading(true);
-    loadingRefs.current = Object.fromEntries(stats.map(s => [s.displayKey, true]));
+    loadingRefs.current = Object.fromEntries(
+      stats.map((s) => [s.displayKey, true]),
+    );
     Promise.all(stats.map(fetchStat)).finally(checkLoadingStatus);
   }, [season]);
 

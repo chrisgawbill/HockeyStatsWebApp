@@ -1,0 +1,346 @@
+/* Standings tables */
+.landing-standings-mobile-title {
+  display: none;
+}
+
+.landing-header {
+  text-align: center;
+}
+
+.standings-header {
+  margin: var(--space-md) var(--space-xl) 0 5rem;
+  text-align: center;
+}
+
+.standings-table {
+  box-shadow: var(--shadow-card);
+  border-radius: var(--border-radius-card);
+  margin: var(--space-md) var(--space-xl) var(--space-md) 5rem;
+  max-height: 39rem;
+  overflow: auto;
+}
+
+.standings-label--mobile {
+  display: none;
+}
+
+.standings-table-teamName-col {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  overflow: hidden;
+}
+
+.standings-table-teamName-col > p {
+  display: none;
+}
+
+.standings-table-team-logo {
+  flex: 0 0 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.standings-clinch-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+  border-radius: 999px;
+  background: var(--standings-status-accent);
+  color: var(--standings-status-on-accent);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+  cursor: help;
+}
+
+.standings-clinch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  width: fit-content;
+  max-width: calc(100% - 7rem);
+  margin: 0 var(--space-xl) var(--space-sm) 5rem;
+  padding: 0.375rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  box-shadow: var(--shadow-card);
+}
+
+.standings-clinch-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem 0.25rem 0.25rem;
+  border-radius: 999px;
+  background: var(--standings-status-container);
+  color: var(--standings-status-on-container);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.standings-clinch-legend__item .standings-clinch-badge {
+  margin-left: 0;
+  cursor: default;
+}
+
+.standings-status-cell {
+  background: var(--standings-status-container) !important;
+  color: var(--standings-status-on-container) !important;
+}
+
+.standings-status-cell--first {
+  border-left-color: var(--standings-status-accent) !important;
+}
+
+.standings-status-cell:hover,
+.standings-status-cell:hover ~ .standings-status-cell {
+  background: color-mix(
+    in srgb,
+    var(--standings-status-container) 88%,
+    var(--standings-status-accent)
+  ) !important;
+  color: var(--standings-status-on-container) !important;
+}
+
+.standings-status-cell * {
+  color: var(--standings-status-on-container) !important;
+}
+
+.standings-status-cell .standings-clinch-badge,
+.standings-clinch-legend__item .standings-clinch-badge {
+  color: var(--standings-status-on-accent) !important;
+}
+
+@media only screen and (min-width: 768px) {
+  .landing-header {
+    text-align: left;
+  }
+
+  .standings-table-teamName-col > p {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+}
+
+@media only screen and (max-width: 1399px) {
+  .standings-header {
+    margin: var(--space-md) var(--space-sm) 0;
+  }
+
+  .standings-table {
+    margin: var(--space-md) 0;
+  }
+
+  .standings-clinch-legend {
+    max-width: 100%;
+    margin: 0 0 var(--space-sm);
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .landing-standings-mobile-title {
+    display: flex;
+    margin-top: var(--space-lg);
+  }
+
+  .standings-table-shell {
+    height: 34.5rem !important;
+    margin-top: var(--space-sm) !important;
+    width: 100%;
+    padding: 0;
+  }
+
+  .standings-table {
+    width: 100%;
+    margin: var(--space-md) 0;
+    max-height: 34.5rem;
+  }
+
+  .standings-table .standings-label--desktop {
+    display: none;
+  }
+
+  .standings-table .standings-label--mobile {
+    display: inline;
+  }
+
+  .standings-table :global(.th) svg,
+  .standings-table :global(.th) [class*='sort'],
+  .standings-table :global(.th) [aria-hidden='true'] {
+    display: none !important;
+  }
+
+  .standings-table :global(.th),
+  .standings-table :global(.td) {
+    min-width: 0;
+  }
+
+  .standings-table :global(.th):nth-child(1),
+  .standings-table :global(.td):nth-child(1),
+  .standings-table :global(.th):nth-child(2),
+  .standings-table :global(.td):nth-child(2),
+  .standings-table :global(.th):nth-child(4),
+  .standings-table :global(.td):nth-child(4) {
+    text-align: center;
+  }
+
+  .standings-table :global(.th):nth-child(3),
+  .standings-table :global(.td):nth-child(3) {
+    text-align: right;
+  }
+
+  .standings-table-teamName-col {
+    justify-content: center;
+    gap: 0.375rem;
+    min-width: 0;
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  .standings-table-teamName-col > p {
+    display: none;
+  }
+
+  .standings-table-team-logo {
+    flex-basis: 2rem;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .standings-clinch-badge {
+    min-width: 1.375rem;
+    height: 1.375rem;
+    margin-left: 0;
+  }
+
+  .standings-clinch-legend {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--border-radius-card);
+    padding: 0.375rem 0.5rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      black calc(100% - 1.5rem),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      black calc(100% - 1.5rem),
+      transparent
+    );
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .standings-clinch-legend::-webkit-scrollbar {
+    display: none;
+  }
+
+  .standings-clinch-legend__item {
+    min-height: 1.625rem;
+    padding-right: 0.5rem;
+    font-size: var(--text-xs);
+  }
+}
+
+:global([data-theme='dark']) .standings-header h3 {
+  color: var(--color-text);
+}
+
+:global([data-theme='dark']) .standings-table {
+  background-color: var(--color-surface);
+}
+
+/* Clinch status CSS variable themes — kept global so ClinchStatus string refs still work */
+:global(.standings-status--presidents) {
+  --standings-status-container: #fff8e1;
+  --standings-status-accent: #7d5700;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #241a00;
+}
+
+:global(.standings-status--conference) {
+  --standings-status-container: #e7f7ff;
+  --standings-status-accent: #006782;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #001f2a;
+}
+
+:global(.standings-status--division) {
+  --standings-status-container: #e8f5e9;
+  --standings-status-accent: #2e7d32;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #09210d;
+}
+
+:global(.standings-status--playoffs) {
+  --standings-status-container: #ede7f6;
+  --standings-status-accent: #5e35b1;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #1f0b46;
+}
+
+:global(.standings-status--wildcard) {
+  --standings-status-container: #ffede7;
+  --standings-status-accent: #a13d12;
+  --standings-status-on-accent: #ffffff;
+  --standings-status-on-container: #331000;
+}
+
+:global([data-theme='dark'] .standings-status--presidents) {
+  --standings-status-container: #332900;
+  --standings-status-accent: #f2c94c;
+  --standings-status-on-accent: #241a00;
+  --standings-status-on-container: #fff3bf;
+}
+
+:global([data-theme='dark'] .standings-status--conference) {
+  --standings-status-container: #003545;
+  --standings-status-accent: #7dd8f7;
+  --standings-status-on-accent: #001f2a;
+  --standings-status-on-container: #d4f4ff;
+}
+
+:global([data-theme='dark'] .standings-status--division) {
+  --standings-status-container: #12351a;
+  --standings-status-accent: #8dd694;
+  --standings-status-on-accent: #09210d;
+  --standings-status-on-container: #d6f5d9;
+}
+
+:global([data-theme='dark'] .standings-status--playoffs) {
+  --standings-status-container: #2b1b55;
+  --standings-status-accent: #d0bcff;
+  --standings-status-on-accent: #1f0b46;
+  --standings-status-on-container: #f0e7ff;
+}
+
+:global([data-theme='dark'] .standings-status--wildcard) {
+  --standings-status-container: #4a1d0b;
+  --standings-status-accent: #ffb59c;
+  --standings-status-on-accent: #331000;
+  --standings-status-on-container: #ffdbd0;
+}

@@ -1,8 +1,8 @@
-import { Col, Row } from "react-bootstrap";
-import styles from "../../../style/LandingPage/LandingPageStandings.module.css";
-import { StandingsTeam } from "../../../Data/Models/StandingsTeam";
-import React from "react";
-import LandingPageStandingsTable from "./LandingPageStandingsTable";
+import { Col, Row } from 'react-bootstrap';
+import styles from '../../../Style/LandingPage/LandingPageStandings.module.css';
+import { StandingsTeam } from '../../../Data/Models/standingsTeam';
+import React from 'react';
+import LandingPageStandingsTable from './LandingPageStandingsTable';
 
 interface StandingsContainerProps {
   standingsName: string;
@@ -19,20 +19,21 @@ export default function StandingsContainer({
     return (
       <div>
         <Row>
-          <Col className={styles["standings-header"]}>
+          <Col className={styles['standings-header']}>
             <Row>
               <h3>{standingsName}</h3>
             </Row>
           </Col>
         </Row>
         <Row>
-          <LandingPageStandingsTable standingsData={standingsData} standingFormat={standingFormat} />
+          <LandingPageStandingsTable
+            standingsData={standingsData}
+            standingFormat={standingFormat}
+          />
         </Row>
       </div>
     );
-  }else{
-    return(
-      <></>
-    );
+  } else {
+    return <></>;
   }
 }

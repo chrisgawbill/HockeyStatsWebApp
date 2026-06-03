@@ -1,0 +1,27 @@
+.landingPage-content {
+  margin: var(--space-xl) auto 0;
+  max-width: 112.5rem;
+  gap: var(--space-lg) 0;
+}
+
+.landingPage-content > [class*='col-'] {
+  padding-left: var(--space-lg);
+  padding-right: var(--space-lg);
+}
+
+@media (min-width: 1920px) {
+  .landingPage-content {
+    max-width: 90vw;
+  }
+}
+
+@media (max-width: 576px) {
+  .landingPage-content {
+    margin-top: var(--space-lg);
+  }
+
+  .landingPage-content > [class*='col-'] {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}

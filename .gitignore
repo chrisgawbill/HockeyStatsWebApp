@@ -7,6 +7,17 @@
 /react/.pnp
 /react/.pnp.js
 
+# package manager (project standardizes on pnpm)
+package-lock.json
+
+# IDE / editor
+.idea/
+*.iml
+
+# python
+__pycache__/
+*.py[cod]
+
 # testing
 /react/coverage
 

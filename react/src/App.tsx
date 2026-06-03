@@ -20,27 +20,27 @@ import { StandingsDataProvider } from './Data/Context/StandingsContext';
  * Routing-agnostic providers live higher up in index.tsx.
  */
 export default function App() {
-	return (
-		<HashRouter>
-			<SeasonProvider>
-				<StandingsDataProvider>
-					<ListOfGamesProvider>
-						<SkaterStatLeaderProvider>
-							<GoalieLeaderDataProvider>
-								<Routes>
-									<Route path='/' element={<LandingPage />} />
-									<Route path='standings' element={<StandingsPage />} />
-									<Route path='schedule' element={<SchedulePage />} />
-									<Route path='teamList' element={<TeamList />} />
-									<Route path='team/:teamId' element={<TeamPage />} />
-									<Route path='game/:gameId' element={<GameDetailPage />} />
-									<Route path='diagnostics' element={<DiagnosticsPage />} />
-								</Routes>
-							</GoalieLeaderDataProvider>
-						</SkaterStatLeaderProvider>
-					</ListOfGamesProvider>
-				</StandingsDataProvider>
-			</SeasonProvider>
-		</HashRouter>
-	);
+  return (
+    <HashRouter>
+      <SeasonProvider>
+        <StandingsDataProvider>
+          <ListOfGamesProvider>
+            <SkaterStatLeaderProvider>
+              <GoalieLeaderDataProvider>
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="standings" element={<StandingsPage />} />
+                  <Route path="schedule" element={<SchedulePage />} />
+                  <Route path="teamList" element={<TeamList />} />
+                  <Route path="team/:teamId" element={<TeamPage />} />
+                  <Route path="game/:gameId" element={<GameDetailPage />} />
+                  <Route path="diagnostics" element={<DiagnosticsPage />} />
+                </Routes>
+              </GoalieLeaderDataProvider>
+            </SkaterStatLeaderProvider>
+          </ListOfGamesProvider>
+        </StandingsDataProvider>
+      </SeasonProvider>
+    </HashRouter>
+  );
 }

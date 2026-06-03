@@ -1,8 +1,8 @@
-import { Col, Row } from "react-bootstrap";
-import styles from "../../style/LandingPage/LandingPageRow.module.css";
-import React from "react";
-import { StandingsTeam } from "../../Data/Models/StandingsTeam";
-import DraftLotteryOddsCard from "./DraftLotteryOddsCard";
+import { Col, Row } from 'react-bootstrap';
+import styles from '../../Style/LandingPage/LandingPageRow.module.css';
+import React from 'react';
+import { StandingsTeam } from '../../Data/Models/standingsTeam';
+import DraftLotteryOddsCard from './DraftLotteryOddsCard';
 
 interface LandingPageRowProps {
   title: string;
@@ -13,9 +13,9 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
   if (data.length > 1) {
     const maxOdds = Math.max(...data.map((t) => t.draftLotteryOdds));
     return (
-      <div className={styles["section-container"]}>
+      <div className={styles['section-container']}>
         <Row>
-          <Col className={styles["landing-header"]}>
+          <Col className={styles['landing-header']}>
             <h2>{title}</h2>
           </Col>
         </Row>

@@ -1,8 +1,9 @@
-import React from "react";
-import styles from "../../../style/LandingPage/SlidingToggle.module.css";
+import React from 'react';
+import styles from '../../../Style/LandingPage/SlidingToggle.module.css';
 
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(" ");
+function cx(...classes: (string | false | null | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 interface Option<T extends string> {
   label: string;
@@ -25,7 +26,10 @@ export default function SlidingToggle<T extends string>({
   value,
   onChange,
 }: Props<T>) {
-  const activeIndex = Math.max(0, options.findIndex((o) => o.value === value));
+  const activeIndex = Math.max(
+    0,
+    options.findIndex((o) => o.value === value),
+  );
   const count = options.length;
   /**
    * One indicator segment is exactly one button wide; translating by whole
@@ -37,15 +41,18 @@ export default function SlidingToggle<T extends string>({
   };
 
   return (
-    <div className={styles["sliding-toggle"]}>
+    <div className={styles['sliding-toggle']}>
       <div
-        className={styles["sliding-toggle__indicator"]}
+        className={styles['sliding-toggle__indicator']}
         style={indicatorStyle}
       />
       {options.map((opt) => (
         <button
           key={opt.value}
-          className={cx(styles["sliding-toggle__btn"], value === opt.value && styles["sliding-toggle__btn--active"])}
+          className={cx(
+            styles['sliding-toggle__btn'],
+            value === opt.value && styles['sliding-toggle__btn--active'],
+          )}
           onClick={() => onChange(opt.value)}
         >
           {opt.label}

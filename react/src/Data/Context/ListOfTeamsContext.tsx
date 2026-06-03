@@ -4,11 +4,11 @@ import React, {
   useContext,
   useEffect,
   useState,
-} from "react";
-import { localTeamList } from "../LocalData/TeamListData";
-import { GetTeamStatsById } from "../../Services/ApiHandler";
-import { ConvertToListOfTeams } from "../Helpers/TeamHelpers";
-import { Team } from "../Models/Team";
+} from 'react';
+import { localTeamList } from '../LocalData/teamListData';
+import { GetTeamStatsById } from '../../Services/apiHandler';
+import { ConvertToListOfTeams } from '../Helpers/teamHelpers';
+import { Team } from '../Models/team';
 
 const ListOfTeamsContext = createContext<any>(null);
 
@@ -22,51 +22,61 @@ function hasValidGoalsPerGame(data: any): boolean {
       )
     : null;
 
-  return typeof latest?.goalsPerGame === "number";
+  return typeof latest?.goalsPerGame === 'number';
 }
 
-const ListOfTeamsDataProvider = ({ children }: { children: ReactNode }) => {
+function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   const teamListData = React.useRef<any[]>([]);
   const [listOfTeamsData, setListOfTeamsData] = useState<Team[]>([]);
-  const [loadingListOfTeamsData, setLoadingListOfTeamsData] = useState<boolean>(true);
+  const [loadingListOfTeamsData, setLoadingListOfTeamsData] =
+    useState<boolean>(true);
 
   async function GetTeams() {
     const cachedListOfTeams = localStorage.getItem('listOfTeams-key');
     if (cachedListOfTeams) {
-        try {
-          const parsed = JSON.parse(cachedListOfTeams);
-          if (hasValidGoalsPerGame(parsed)) {
-            setListOfTeamsData(parsed);
-            setLoadingListOfTeamsData(false);
-            return;
-          }
-        } catch (error) {
-          console.error("Error parsing cached team list", error);
+      try {
+        const parsed = JSON.parse(cachedListOfTeams);
+        if (hasValidGoalsPerGame(parsed)) {
+          setListOfTeamsData(parsed);
+          setLoadingListOfTeamsData(false);
+          return;
         }
+      } catch (error) {
+        console.error('Error parsing cached team list', error);
+      }
     }
     {
       let rawLocalList: any[] = [...localTeamList];
       rawLocalList.sort((a, b) => b.fullName.localeCompare(a.fullName));
       teamListData.current = rawLocalList;
       try {
-        const teamStatsData = await GetTeamStatsById("");
+        const teamStatsData = await GetTeamStatsById('');
         const rawData: any[] = teamStatsData.data || teamStatsData;
-        const finalTeamData = ConvertToListOfTeams(teamListData.current, rawData);
-        localStorage.setItem("listOfTeams-key", JSON.stringify(finalTeamData));
+        const finalTeamData = ConvertToListOfTeams(
+          teamListData.current,
+          rawData,
+        );
+        localStorage.setItem('listOfTeams-key', JSON.stringify(finalTeamData));
         setListOfTeamsData(finalTeamData);
       } catch (error) {
-        console.error("Error fetching data: ", error);
+        console.error('Error fetching data: ', error);
       } finally {
         setLoadingListOfTeamsData(false);
       }
     }
   }
-  useEffect(() => {GetTeams()},[]);
+  useEffect(() => {
+    GetTeams();
+  }, []);
   return (
-    <ListOfTeamsContext.Provider value={{ listOfTeamsData, loadingListOfTeamsData }}>
+    <ListOfTeamsContext.Provider
+      value={{ listOfTeamsData, loadingListOfTeamsData }}
+    >
       {children}
     </ListOfTeamsContext.Provider>
   );
-};
-const useListOfTeamsData = () => useContext(ListOfTeamsContext);
+}
+function useListOfTeamsData() {
+  return useContext(ListOfTeamsContext);
+}
 export { ListOfTeamsDataProvider, useListOfTeamsData };

@@ -1,8 +1,14 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { StandingsTeam } from "../Models/StandingsTeam";
-import { GetCurrentStandings } from "../../Services/ApiHandler";
-import { CreateLeagueStandingsArray } from "../Helpers/LeagueStandingsHelper";
-import { useSeason } from "./SeasonContext";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { StandingsTeam } from '../Models/standingsTeam';
+import { GetCurrentStandings } from '../../Services/apiHandler';
+import { CreateLeagueStandingsArray } from '../Helpers/leagueStandingsHelper';
+import { useSeason } from './SeasonContext';
 
 interface StandingsData {
   easternStandingsData: StandingsTeam[];
@@ -22,11 +28,19 @@ export const StandingsContext = createContext<StandingsData | null>(null);
  * UI needs — by conference, by division, and the draft-lottery odds list — each
  * sorted into standings order. Re-fetches whenever the season changes.
  */
-const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
-  const [easternStandingsData, setEasternStandingsData] = useState<StandingsTeam[]>([]);
-  const [westernStandingsData, setWesternStandingsData] = useState<StandingsTeam[]>([]);
-  const [metropolitanStandings, setMetropolitanStandings] = useState<StandingsTeam[]>([]);
-  const [atlanticStandings, setAtlanticStandings] = useState<StandingsTeam[]>([]);
+function StandingsDataProvider({ children }: { children: ReactNode }) {
+  const [easternStandingsData, setEasternStandingsData] = useState<
+    StandingsTeam[]
+  >([]);
+  const [westernStandingsData, setWesternStandingsData] = useState<
+    StandingsTeam[]
+  >([]);
+  const [metropolitanStandings, setMetropolitanStandings] = useState<
+    StandingsTeam[]
+  >([]);
+  const [atlanticStandings, setAtlanticStandings] = useState<StandingsTeam[]>(
+    [],
+  );
   const [centralStandings, setCentralStandings] = useState<StandingsTeam[]>([]);
   const [pacificStandings, setPacificStandings] = useState<StandingsTeam[]>([]);
   const [draftLotteryOdds, setDraftLotteryOdds] = useState<StandingsTeam[]>([]);
@@ -41,12 +55,18 @@ const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
         const all: StandingsTeam[] = CreateLeagueStandingsArray(data.standings);
 
         const byConference = (name: string) =>
-          all.filter(t => t.conferenceName === name)
-             .sort((a, b) => a.conferenceStandingsPlace - b.conferenceStandingsPlace);
+          all
+            .filter((t) => t.conferenceName === name)
+            .sort(
+              (a, b) => a.conferenceStandingsPlace - b.conferenceStandingsPlace,
+            );
 
         const byDivision = (name: string) =>
-          all.filter(t => t.divisionName === name)
-             .sort((a, b) => a.divisionStandingsPlace - b.divisionStandingsPlace);
+          all
+            .filter((t) => t.divisionName === name)
+            .sort(
+              (a, b) => a.divisionStandingsPlace - b.divisionStandingsPlace,
+            );
 
         setEasternStandingsData(byConference('Eastern'));
         setWesternStandingsData(byConference('Western'));
@@ -59,12 +79,13 @@ const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
          * sorted best-odds first for the landing-page display.
          */
         setDraftLotteryOdds(
-          all.filter(t => t.draftLotteryOdds > 0)
-             .sort((a, b) => b.draftLotteryOdds - a.draftLotteryOdds)
-             .slice(0, 16)
+          all
+            .filter((t) => t.draftLotteryOdds > 0)
+            .sort((a, b) => b.draftLotteryOdds - a.draftLotteryOdds)
+            .slice(0, 16),
         );
       } catch (error) {
-        console.error("Error fetching standings: ", error);
+        console.error('Error fetching standings: ', error);
       } finally {
         setLoadingStandingsData(false);
       }
@@ -73,23 +94,37 @@ const StandingsDataProvider = ({ children }: { children: ReactNode }) => {
   }, [season]);
 
   return (
-    <StandingsContext.Provider value={{
-      easternStandingsData, westernStandingsData, metropolitanStandings,
-      atlanticStandings, centralStandings, pacificStandings,
-      draftLotteryOdds, loadingStandingsData,
-    }}>
+    <StandingsContext.Provider
+      value={{
+        easternStandingsData,
+        westernStandingsData,
+        metropolitanStandings,
+        atlanticStandings,
+        centralStandings,
+        pacificStandings,
+        draftLotteryOdds,
+        loadingStandingsData,
+      }}
+    >
       {children}
     </StandingsContext.Provider>
   );
-};
+}
 
-export const useStandingsContext = (): StandingsData => {
+export function useStandingsContext(): StandingsData {
   const context = useContext(StandingsContext);
-  if (!context) throw new Error("useStandingsContext must be used within StandingsDataProvider");
+  if (!context)
+    throw new Error(
+      'useStandingsContext must be used within StandingsDataProvider',
+    );
   return context;
-};
+}
 
-export const useDraftLotteryOddsData = () => useStandingsContext().draftLotteryOdds;
+export function useDraftLotteryOddsData() {
+  return useStandingsContext().draftLotteryOdds;
+}
 
-const useStandingsData = (): StandingsData => useStandingsContext();
+function useStandingsData(): StandingsData {
+  return useStandingsContext();
+}
 export { StandingsDataProvider, useStandingsData };

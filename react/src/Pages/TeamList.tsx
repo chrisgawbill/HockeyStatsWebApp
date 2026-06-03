@@ -1,25 +1,22 @@
-import React, { useMemo, useState } from "react";
-import { Container } from "react-bootstrap";
-import { Team } from "../Data/Models/Team";
-import { TeamStats } from "../Data/Models/TeamStats";
-import { localTeamList } from "../Data/LocalData/TeamListData";
-import styles from "../style/TeamList/TeamList.module.css";
-import PageHeader from "../Components/PageHeader";
-import { useListOfTeamsData } from "../Data/Context/ListOfTeamsContext";
-import { useNavigate } from "react-router-dom";
-import { useStandingsData } from "../Data/Context/StandingsContext";
-import { StandingsTeam } from "../Data/Models/StandingsTeam";
-import LoadingState from "../Components/LoadingState";
+import React, { useMemo, useState } from 'react';
+import { Container } from 'react-bootstrap';
+import { Team } from '../Data/Models/team';
+import { TeamStats } from '../Data/Models/teamStats';
+import { localTeamList } from '../Data/LocalData/teamListData';
+import styles from '../Style/TeamList/TeamList.module.css';
+import PageHeader from '../Components/PageHeader';
+import { useListOfTeamsData } from '../Data/Context/ListOfTeamsContext';
+import { useNavigate } from 'react-router-dom';
+import { useStandingsData } from '../Data/Context/StandingsContext';
+import { StandingsTeam } from '../Data/Models/standingsTeam';
+import LoadingState from '../Components/LoadingState';
 
 const triCodeLookup: Record<string, string> = Object.fromEntries(
   (localTeamList as any[]).map((t) => [t.fullName, t.triCode]),
 );
 
 function normalizeKey(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
+  return value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }
 
 function getCurrentStats(team: Team): TeamStats | null {
@@ -29,8 +26,8 @@ function getCurrentStats(team: Team): TeamStats | null {
   );
 }
 
-type TeamFilter = "all" | "playoff" | "lottery";
-type TeamSort = "name" | "points" | "winPct" | "goals" | "draftOdds";
+type TeamFilter = 'all' | 'playoff' | 'lottery';
+type TeamSort = 'name' | 'points' | 'winPct' | 'goals' | 'draftOdds';
 
 interface TeamCardData {
   team: Team;
@@ -46,17 +43,17 @@ function getWinPct(stats: TeamStats | null) {
 }
 
 function formatNumber(value: number | undefined, digits: number) {
-  return typeof value === "number" && Number.isFinite(value)
+  return typeof value === 'number' && Number.isFinite(value)
     ? value.toFixed(digits)
-    : "—";
+    : '—';
 }
 
 function getStatusLabel(team: TeamCardData, filter: TeamFilter) {
-  if (filter === "playoff" && team.standings?.conferenceStandingsPlace) {
+  if (filter === 'playoff' && team.standings?.conferenceStandingsPlace) {
     return `#${team.standings.conferenceStandingsPlace} ${team.standings.conferenceName}`;
   }
 
-  if (filter === "lottery" && (team.standings?.draftLotteryOdds ?? 0) > 0) {
+  if (filter === 'lottery' && (team.standings?.draftLotteryOdds ?? 0) > 0) {
     return `${team.standings?.draftLotteryOdds}% Lottery`;
   }
 
@@ -68,18 +65,18 @@ export default function TeamList() {
   const { easternStandingsData, westernStandingsData, loadingStandingsData } =
     useStandingsData();
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [conference, setConference] = useState("All");
-  const [division, setDivision] = useState("All");
-  const [filter, setFilter] = useState<TeamFilter>("all");
-  const [sortBy, setSortBy] = useState<TeamSort>("name");
+  const [search, setSearch] = useState('');
+  const [conference, setConference] = useState('All');
+  const [division, setDivision] = useState('All');
+  const [filter, setFilter] = useState<TeamFilter>('all');
+  const [sortBy, setSortBy] = useState<TeamSort>('name');
 
   const resetFilters = () => {
-    setSearch("");
-    setConference("All");
-    setDivision("All");
-    setFilter("all");
-    setSortBy("name");
+    setSearch('');
+    setConference('All');
+    setDivision('All');
+    setFilter('all');
+    setSortBy('name');
   };
 
   const standingsByTeam = useMemo(() => {
@@ -100,7 +97,7 @@ export default function TeamList() {
 
     return listOfTeamsData
       .map((team: Team) => {
-        const triCode = triCodeLookup[team.teamName] ?? "";
+        const triCode = triCodeLookup[team.teamName] ?? '';
         const standings =
           standingsByTeam.get(triCode) ??
           standingsByTeam.get(team.teamName) ??
@@ -118,30 +115,30 @@ export default function TeamList() {
           team.teamName.toLowerCase().includes(normalizedSearch) ||
           triCode.toLowerCase().includes(normalizedSearch);
         const matchesConference =
-          conference === "All" || standings?.conferenceName === conference;
+          conference === 'All' || standings?.conferenceName === conference;
         const matchesDivision =
-          division === "All" || standings?.divisionName === division;
+          division === 'All' || standings?.divisionName === division;
         const isLottery = (standings?.draftLotteryOdds ?? 0) > 0;
         const isPlayoff =
           standings?.conferenceStandingsPlace != null &&
           standings.conferenceStandingsPlace <= 8;
         const matchesFilter =
-          filter === "all" ||
-          (filter === "playoff" && isPlayoff) ||
-          (filter === "lottery" && isLottery);
+          filter === 'all' ||
+          (filter === 'playoff' && isPlayoff) ||
+          (filter === 'lottery' && isLottery);
 
         return (
           matchesSearch && matchesConference && matchesDivision && matchesFilter
         );
       })
       .sort((a: TeamCardData, b: TeamCardData) => {
-        if (sortBy === "points")
+        if (sortBy === 'points')
           return (b.stats?.points ?? 0) - (a.stats?.points ?? 0);
-        if (sortBy === "winPct") return getWinPct(b.stats) - getWinPct(a.stats);
-        if (sortBy === "goals") {
+        if (sortBy === 'winPct') return getWinPct(b.stats) - getWinPct(a.stats);
+        if (sortBy === 'goals') {
           return (b.stats?.goalsPerGame ?? 0) - (a.stats?.goalsPerGame ?? 0);
         }
-        if (sortBy === "draftOdds") {
+        if (sortBy === 'draftOdds') {
           return (
             (b.standings?.draftLotteryOdds ?? 0) -
             (a.standings?.draftLotteryOdds ?? 0)
@@ -164,15 +161,15 @@ export default function TeamList() {
   }
 
   return (
-    <Container fluid className={styles["team-list-page"]}>
+    <Container fluid className={styles['team-list-page']}>
       <PageHeader />
-      <section className={styles["team-list-toolbar"]}>
-        <div className={styles["team-list-toolbar__header"]}>
+      <section className={styles['team-list-toolbar']}>
+        <div className={styles['team-list-toolbar__header']}>
           <h1>Team List</h1>
           <p>{teams.length} teams</p>
         </div>
-        <div className={styles["team-list-controls"]}>
-          <label className={styles["team-list-search"]}>
+        <div className={styles['team-list-controls']}>
+          <label className={styles['team-list-search']}>
             <span>Search</span>
             <input
               value={search}
@@ -218,26 +215,32 @@ export default function TeamList() {
             </select>
           </label>
         </div>
-        <div className={styles["team-list-filter-chips"]} aria-label="Team filters">
+        <div
+          className={styles['team-list-filter-chips']}
+          aria-label="Team filters"
+        >
           {[
-            ["all", "All Teams"],
-            ["playoff", "Playoff"],
-            ["lottery", "Lottery"],
+            ['all', 'All Teams'],
+            ['playoff', 'Playoff'],
+            ['lottery', 'Lottery'],
           ].map(([value, label]) => (
             <button
               key={value}
-              className={filter === value ? styles["active"] : ""}
+              className={filter === value ? styles['active'] : ''}
               onClick={() => setFilter(value as TeamFilter)}
             >
               {label}
             </button>
           ))}
-          <button className={styles["team-list-reset-btn"]} onClick={resetFilters}>
+          <button
+            className={styles['team-list-reset-btn']}
+            onClick={resetFilters}
+          >
             Reset
           </button>
         </div>
       </section>
-      <div className={styles["team-card-grid"]}>
+      <div className={styles['team-card-grid']}>
         {teams.map(({ team, stats, standings, triCode }) => {
           const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${triCode}_light.svg`;
           const winPct = getWinPct(stats);
@@ -253,65 +256,75 @@ export default function TeamList() {
           return (
             <div
               key={team.teamName}
-              className={styles["team-card"]}
+              className={styles['team-card']}
               onClick={() => {
                 navigate(`/team/${triCode}`, {
                   state: {
-                    sourcePath: "/teamList",
-                    fallbackPath: "/teamList",
+                    sourcePath: '/teamList',
+                    fallbackPath: '/teamList',
                   },
                 });
               }}
             >
-              <div className={styles["team-card__top"]}>
+              <div className={styles['team-card__top']}>
                 <img
-                  className={styles["team-card__logo"]}
+                  className={styles['team-card__logo']}
                   src={logoUrl}
                   alt={team.teamName}
                 />
                 {statusLabel && (
-                  <span className={styles["team-card__status"]}>{statusLabel}</span>
+                  <span className={styles['team-card__status']}>
+                    {statusLabel}
+                  </span>
                 )}
               </div>
-              <p className={styles["team-card__name"]}>{team.teamName}</p>
-              <p className={styles["team-card__meta"]}>
-                {standings?.divisionName ?? "NHL"} · {triCode}
+              <p className={styles['team-card__name']}>{team.teamName}</p>
+              <p className={styles['team-card__meta']}>
+                {standings?.divisionName ?? 'NHL'} · {triCode}
               </p>
               {stats ? (
                 <>
-                  <p className={styles["team-card__record"]}>
+                  <p className={styles['team-card__record']}>
                     {stats.wins}-{stats.losses}-{stats.otLosses}
                   </p>
-                  <div className={styles["team-card__metrics"]}>
+                  <div className={styles['team-card__metrics']}>
                     <span>
-                      <strong className={styles["team-card__metrics-value"]}>
+                      <strong className={styles['team-card__metrics-value']}>
                         {stats.points}
                       </strong>
-                      <span className={styles["team-card__metrics-label"]}>PTS</span>
+                      <span className={styles['team-card__metrics-label']}>
+                        PTS
+                      </span>
                     </span>
                     <span>
-                      <strong className={styles["team-card__metrics-value"]}>
+                      <strong className={styles['team-card__metrics-value']}>
                         {(winPct * 100).toFixed(1)}
                       </strong>
-                      <span className={styles["team-card__metrics-label"]}>WIN%</span>
+                      <span className={styles['team-card__metrics-label']}>
+                        WIN%
+                      </span>
                     </span>
                     <span>
-                      <strong className={styles["team-card__metrics-value"]}>
+                      <strong className={styles['team-card__metrics-value']}>
                         {formatNumber(stats.goalsPerGame, 2)}
                       </strong>
-                      <span className={styles["team-card__metrics-label"]}>GF/GP</span>
+                      <span className={styles['team-card__metrics-label']}>
+                        GF/GP
+                      </span>
                     </span>
                   </div>
                 </>
               ) : (
-                <p className={styles["team-card__record"]}>—</p>
+                <p className={styles['team-card__record']}>—</p>
               )}
             </div>
           );
         })}
       </div>
       {teams.length === 0 && (
-        <p className={styles["team-list-empty"]}>No teams match the current filters.</p>
+        <p className={styles['team-list-empty']}>
+          No teams match the current filters.
+        </p>
       )}
     </Container>
   );
