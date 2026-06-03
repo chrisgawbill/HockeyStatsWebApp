@@ -331,3 +331,29 @@ Things to implement:
 - Document the local verification workflow in README.md or docs, including required env vars and what can run without NHL/API/AI network access
 - Keep tests focused on contracts and user-visible behavior; avoid brittle snapshots of large NHL payloads
 ```
+
+## 2.14 Query-backed frontend data flows
+
+- [ ] **Owner:** Either | **Depends on:** 2.4, 2.5, 2.7, 2.10
+
+Move high-volume frontend filtering and slicing onto backend query endpoints once the normalized Postgres tables are populated reliably. The frontend should still own presentation-only projections, but season/team/date/status/stat filters that can be answered directly by SQL should not require downloading broad datasets and manually filtering them in React.
+
+**Implementation prompt:**
+
+```text
+Working on HockeyStatsWebApp query-backed data flows. Read docs/architecture.md, api/db/repositories, api/services/domain, api/routes, ScheduleContext, StandingsContext, TeamPage, TeamList, SchedulePage, and the frontend helpers that filter loaded season data.
+
+Working style: junior dev learning. Walk me through it conceptually first. I'll write the code.
+
+Task: Convert frontend workflows that manually filter broad cached datasets into backend query-backed API calls over the normalized database tables.
+
+Things to implement:
+- Identify the frontend filters that currently slice large season/team datasets in React, especially schedule filters, team list filters, standings views, and team-page stat/roster tables
+- Add focused read repositories and route endpoints that query normalized tables with parameterized SQL for season, team, date range, game status/type, standings scope, stat category, and pagination/limit inputs
+- Keep existing raw-cache/NHL fetch paths as fallback behavior when the database is unavailable or not yet populated
+- Update ApiHandler and the relevant contexts/hooks to call query endpoints when filters change instead of fetching a broad season payload and manually filtering it
+- Preserve URL-backed state for season, date, view, and filter params; view/layout choices should remain frontend presentation state
+- Keep app-only display calculations on the frontend unless they are needed for efficient filtering or sorting
+- Add backend tests for query parameter validation and SQL result mapping, plus frontend tests for query construction and fallback behavior
+- Document which workflows are DB-query-backed and which still intentionally use client-side projections
+```
