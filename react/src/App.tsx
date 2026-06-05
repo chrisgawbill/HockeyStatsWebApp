@@ -1,16 +1,18 @@
-import LandingPage from './Pages/LandingPage';
+import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import StandingsPage from './Pages/StandingsPage';
-import TeamPage from './Pages/TeamPage';
-import TeamList from './Pages/TeamList';
-import SchedulePage from './Pages/SchedulePage';
-import GameDetailPage from './Pages/GameDetailPage';
-import DiagnosticsPage from './Pages/DiagnosticsPage';
 import { SkaterStatLeaderProvider } from './Data/Context/SkaterStatLeadersContext';
 import { GoalieLeaderDataProvider } from './Data/Context/GoalieStatLeadersContext';
 import { ListOfGamesProvider } from './Data/Context/ScheduleContext';
 import { SeasonProvider } from './Data/Context/SeasonContext';
 import { StandingsDataProvider } from './Data/Context/StandingsContext';
+
+const LandingPage = lazy(() => import('./Pages/LandingPage'));
+const StandingsPage = lazy(() => import('./Pages/StandingsPage'));
+const TeamPage = lazy(() => import('./Pages/TeamPage'));
+const TeamList = lazy(() => import('./Pages/TeamList'));
+const SchedulePage = lazy(() => import('./Pages/SchedulePage'));
+const GameDetailPage = lazy(() => import('./Pages/GameDetailPage'));
+const DiagnosticsPage = lazy(() => import('./Pages/DiagnosticsPage'));
 
 /**
  * Route table plus the providers that depend on routing or the selected season.
@@ -27,15 +29,17 @@ export default function App() {
           <ListOfGamesProvider>
             <SkaterStatLeaderProvider>
               <GoalieLeaderDataProvider>
-                <Routes>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="standings" element={<StandingsPage />} />
-                  <Route path="schedule" element={<SchedulePage />} />
-                  <Route path="teamList" element={<TeamList />} />
-                  <Route path="team/:teamId" element={<TeamPage />} />
-                  <Route path="game/:gameId" element={<GameDetailPage />} />
-                  <Route path="diagnostics" element={<DiagnosticsPage />} />
-                </Routes>
+                <Suspense fallback={null}>
+                  <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="standings" element={<StandingsPage />} />
+                    <Route path="schedule" element={<SchedulePage />} />
+                    <Route path="teamList" element={<TeamList />} />
+                    <Route path="team/:teamId" element={<TeamPage />} />
+                    <Route path="game/:gameId" element={<GameDetailPage />} />
+                    <Route path="diagnostics" element={<DiagnosticsPage />} />
+                  </Routes>
+                </Suspense>
               </GoalieLeaderDataProvider>
             </SkaterStatLeaderProvider>
           </ListOfGamesProvider>
