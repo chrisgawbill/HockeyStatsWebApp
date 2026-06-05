@@ -1,5 +1,6 @@
 require('dotenv').config();
 var createError = require('http-errors');
+var compression = require('compression');
 var cors = require('cors');
 var express = require('express');
 var path = require('path');
@@ -31,6 +32,7 @@ let corsOptions = {
 
 var app = express();
 
+app.use(compression());
 app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());

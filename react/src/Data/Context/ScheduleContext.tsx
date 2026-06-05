@@ -76,17 +76,18 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
       );
       if (gamesThatNeedToUpdate.length === 0) return;
 
-      const updatedGamesList: ScheduledGame[] = [...listOfGamesData];
-      for (const game of gamesThatNeedToUpdate) {
-        const updatedGame: ScheduledGame | undefined = await updateGame(game);
-        if (updatedGame) {
-          const index = updatedGamesList.findIndex(
-            (g: ScheduledGame) => g.gameId === updatedGame.gameId,
-          );
-          updatedGamesList[index] = updatedGame;
-        }
+      const updatedGames = await Promise.all(
+        gamesThatNeedToUpdate.map((game) => updateGame(game)),
+      );
+
+      const updatedMap = new Map<number, ScheduledGame>();
+      for (const game of updatedGames) {
+        if (game) updatedMap.set(game.gameId, game);
       }
-      setListOfGamesData(updatedGamesList);
+
+      setListOfGamesData((prev) =>
+        prev.map((g) => updatedMap.get(g.gameId) ?? g),
+      );
     }
   }, [listOfGamesData, loadingListOfGamesData]);
 
