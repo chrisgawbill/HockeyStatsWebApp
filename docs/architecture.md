@@ -19,8 +19,10 @@ React pages/components
 │   ├── app.js              Express app setup, middleware, routes, errors, refresh scheduler
 │   ├── bin/www             HTTP server bootstrap, listens on PORT or 9000
 │   ├── routes/             Backend route modules grouped by feature
-│   ├── services/           Shared backend API clients
-│   └── utils/              Backend helpers such as cache and season ID logic
+│   ├── services/           NHL API clients, response mappers, domain services
+│   ├── db/                 Postgres pool, migrations, repositories
+│   ├── test/               Backend tests (node --test)
+│   └── utils/              Cache manager, season helpers, diagnostics auth, field coercion
 ├── react/                  Vite + React frontend
 │   ├── src/App.tsx         Frontend route table
 │   ├── src/index.tsx       React root and global context providers
@@ -29,7 +31,7 @@ React pages/components
 │   ├── src/Data/           Models, contexts, hooks, helpers, constants, and local data
 │   ├── src/Services/       Frontend API clients and service functions
 │   └── src/Style/          CSS modules and shared CSS
-└── docs/architecture.md    This file
+└── docs/                   architecture.md (this file), phase-2-backlog.md + phase-2-progress.md (feature roadmap/journal), cleanup-backlog.md (refactor/hardening tickets), frontend-backlog.md (MD3 design tickets), exciting-features-backlog.md (feature ideas)
 ```
 
 There are separate `package.json` files for the frontend and backend. The root `package.json` is not the main app entry point.
@@ -71,7 +73,7 @@ Frontend HTTP calls are centralized in:
 - `react/src/Services/apiHandler.ts`
 - `react/src/Services/genAIHandler.ts`
 
-`axiosInstance.ts` creates `axiosExpressHandler`, which points to `import.meta.env.VITE_API_URL` or falls back to `http://localhost:9000`.
+`axiosInstance.ts` creates `axiosExpressHandler`, which points to `import.meta.env.VITE_API_URL`. In development builds it falls back to `http://localhost:9000`; in production builds a missing `VITE_API_URL` logs an error and requests fall back to relative URLs.
 
 `apiHandler.ts` maps frontend operations to Express routes. For example:
 
@@ -153,9 +155,9 @@ Routes are grouped by NHL domain. Most data routes accept an optional `?season=`
 - `api/routes/player.js` (all accept optional `?season=`)
   - `GET /player/skater/statLeaders/:statIndicator` — flat array of `StatLeaderContract`
   - `GET /player/goalie/statLeaders/:statIndicator` — flat array of `StatLeaderContract`
-  - `GET /player/skater/summary` — array of `SkaterSummaryContract`
-  - `GET /player/skater/corsi` — raw passthrough (frontend merges into skater stats by `playerId`)
-  - `GET /player/goalie/summary` — array of `GoalieSummaryContract`
+  - `GET /player/skater/summary` — array of `SkaterSummaryContract`; optional `?teamId=` scopes to one team
+  - `GET /player/skater/corsi` — raw passthrough (frontend merges into skater stats by `playerId`); optional `?teamId=`
+  - `GET /player/goalie/summary` — array of `GoalieSummaryContract`; optional `?teamId=`
   - Uses NHL skater and goalie stats endpoints
 
 - `api/routes/health.js`
@@ -217,6 +219,7 @@ Storage mode:
 - With no `CACHE_DATABASE_URL`, the app uses generated local folders under `api/cache/`.
 - With `CACHE_DATABASE_URL`, the app defaults to Postgres and stores rows in `app_cache`.
 - `CACHE_STORAGE=filesystem|postgres|hybrid` can override that default. `hybrid` reads Postgres first and can use local files as a secondary store.
+- When both stores miss, `readCache` also checks an optional seed folder, `api/cache-seed/<type>-cache/<key>.json`. A seed hit is written back into the active store(s). The folder does not exist by default; it is a hook for shipping pre-warmed cache data with a deployment.
 
 The Postgres table is created automatically if needed:
 
@@ -430,6 +433,26 @@ Draft lottery odds are currently calculated locally in `leagueStandingsHelper.ts
 - When changing prompts, keep them strict about JSON shape because the frontend expects parseable structured data.
 - For AI agents working on this codebase: inspect the relevant page, service function, backend route, helper, and model together before changing behavior. A frontend display issue may come from any layer in that chain.
 
+## Testing
+
+Backend tests live in `api/test/` and use the built-in Node test runner — no jest/supertest dependencies:
+
+```text
+cd api
+pnpm test
+```
+
+What they cover:
+
+- Mapper behavior for schedule games, standings teams, roster players, skater/goalie summaries, and stat leaders, including missing/renamed NHL fields (`mappers.test.js`, `dbMappers.test.js`)
+- `isValidSeasonId`, `getCurrentSeasonId`, and the `validateSeason` middleware (`seasonHelper.test.js`)
+- Route behavior with mocked NHL clients, diagnostics auth (401 without/with wrong key), and cache-key composition — every response-changing input (season, team, stat category) must appear in the key (`routes.test.js`)
+- Cache manager read/write/TTL behavior and small utils (`cacheManager.test.js`, `fieldValue.test.js`, `jsonParam.test.js`)
+
+`api/test/testApp.js` is a small harness that drives an Express router through fake req/res streams, so tests need no listening port. Tests never hit the NHL network or a real database.
+
+Not covered yet: frontend tests (planned in Phase 2 ticket 2.13) and anything requiring a live Postgres instance.
+
 ## Local Development
 
 Typical development setup:
@@ -460,4 +483,5 @@ The backend allows CORS from:
 
 - `TeamPage.tsx` still holds some display-shaping logic inline (grouping roster players by position, formatting TOI, building stat rows), but the raw NHL parsing it used to duplicate now lives in the backend mappers. If team page behavior grows, consider moving the remaining display transforms into helper files near `react/src/Data/Helpers/`.
 - Team summary stats (`/team/stats`, `/team/:teamId?`) and skater corsi (`/player/skater/corsi`) are not yet normalized into contracts. If they grow more consumers, add mappers for them under `api/services/mappers/`.
-- This file is the main architecture reference. The root `README.md` is a short orientation/quick-start that links here.
+- This file is the main architecture reference. The root `README.md` covers project overview, setup commands, environment variables, and the documentation index; keep the two consistent when either changes.
+- Known cleanup and refinement work (dead scaffolding, unused dependencies, small consistency fixes) is tracked separately in [cleanup-backlog.md](./cleanup-backlog.md) rather than in the Phase 2 feature backlog. Design-system alignment work lives in [frontend-backlog.md](./frontend-backlog.md), and differentiating feature ideas in [exciting-features-backlog.md](./exciting-features-backlog.md).
