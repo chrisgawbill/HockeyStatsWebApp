@@ -1,4 +1,3 @@
-import React from 'react';
 import { PlayerStatLeader } from '../../Data/Models/playerStatLeader';
 import { Modal, Button } from 'react-bootstrap';
 import { CompactTable } from '@table-library/react-table-library/compact';

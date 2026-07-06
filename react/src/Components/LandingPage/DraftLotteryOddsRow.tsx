@@ -1,6 +1,5 @@
 import { Col, Row } from 'react-bootstrap';
 import styles from '../../Style/LandingPage/LandingPageRow.module.css';
-import React from 'react';
 import { StandingsTeam } from '../../Data/Models/standingsTeam';
 import DraftLotteryOddsCard from './DraftLotteryOddsCard';
 

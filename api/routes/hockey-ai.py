@@ -18,7 +18,7 @@ def call_claude(message):
 
     client = anthropic.Anthropic(api_key=api_key)
     response = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=os.environ.get("ANTHROPIC_MODEL"),
         max_tokens=2048,
         system="You are an expert in the NHL and the sport of hockey.",
         messages=[{"role": "user", "content": message}]

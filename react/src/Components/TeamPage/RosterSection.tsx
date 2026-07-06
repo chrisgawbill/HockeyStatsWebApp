@@ -1,9 +1,8 @@
-import React from 'react';
 import {
   POSITIONS,
   Position,
   RosterPlayer,
-} from '../../Data/LocalData/teamPageMockData';
+} from '../../Data/Models/teamPageTypes';
 import PlayerCard from './PlayerCard';
 import shared from '../../Style/shared.module.css';
 import styles from '../../Style/TeamPage/TeamPage.module.css';

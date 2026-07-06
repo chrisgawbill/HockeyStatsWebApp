@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   STAT_CATEGORIES,
   StatCategory,
   StatCategoryKey,
   PlayerStatLine,
-} from '../../Data/LocalData/teamPageMockData';
+} from '../../Data/Models/teamPageTypes';
 import shared from '../../Style/shared.module.css';
 import styles from '../../Style/TeamPage/TeamPage.module.css';
 

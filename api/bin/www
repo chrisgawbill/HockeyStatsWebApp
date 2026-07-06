@@ -7,9 +7,13 @@
 var app = require('../app');
 var debug = require('debug')('api:server');
 var http = require('http');
+var { scheduleNextRefresh } = require('../services/refreshScheduler');
+var {closeDbPool} = require('../db/pool');
+var {closeCachePool} = require('../utils/cacheManager');
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
+  process.exit(1); 
 });
 
 process.on('unhandledRejection', (reason) => {
@@ -95,4 +99,27 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  scheduleNextRefresh();
 }
+
+async function shutdown(signal){
+  const forceExit = setTimeout(() => {
+    console.error(`Forcefully exiting after 10 seconds due to ${signal}`);
+    process.exit(1);
+  }, 10000);
+  forceExit.unref();
+
+  server.close(async (err) => {
+    try{
+      await closeDbPool();
+      await closeCachePool();
+      process.exit(0);
+    }catch(err){
+      console.error(`Error during shutdown: ${err}`);
+      process.exit(1);
+    }
+  });
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));                                     

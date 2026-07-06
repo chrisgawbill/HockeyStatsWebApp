@@ -23,21 +23,21 @@ async function persistPlayerStats({
 	});
 
 	return await withTransaction(async (client) => {
+		// Season row first (FK parent), then players before stats
+		// (player_season_stats references players).
 		await seasonsRepository.upsertSeason(
 			client,
 			buildSeason(seasonId, { [`${playerType}Stats`]: statsPayload ?? null }),
 		);
 
-		let playersUpserted = 0;
-		let statsUpserted = 0;
-
-		for (const { player, stats } of mapped.rows) {
-			await playersRepository.upsertPlayer(client, player);
-			await playerStatsRepository.upsertPlayerSeasonStats(client, stats);
-
-			playersUpserted += 1;
-			statsUpserted += 1;
-		}
+		const playersUpserted = await playersRepository.upsertPlayers(
+			client,
+			mapped.rows.map((row) => row.player),
+		);
+		const statsUpserted = await playerStatsRepository.upsertPlayerSeasonStats(
+			client,
+			mapped.rows.map((row) => row.stats),
+		);
 
 		return { playersUpserted, statsUpserted, skipped: mapped.skipped };
 	});

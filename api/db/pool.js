@@ -1,25 +1,11 @@
 const { Pool } = require('pg');
+const {getDatabaseUrl, getSslConfig} = require('./connectionConfig');
 
 let pool = null;
 
 // Bound how long a connect/query may block so a misconfigured or unreachable
 // database fails fast instead of hanging request handlers indefinitely.
 const DB_TIMEOUT_MS = Number(process.env.DATABASE_TIMEOUT_MS) || 5000;
-
-function getDatabaseUrl() {
-	return process.env.DATABASE_URL || process.env.CACHE_DATABASE_URL;
-}
-
-function getSslConfig() {
-	if (process.env.CACHE_DATABASE_SSL === 'false') return false;
-	if (
-		process.env.NODE_ENV === 'production' ||
-		process.env.CACHE_DATABASE_SSL === 'true'
-	) {
-		return { rejectUnauthorized: false };
-	}
-	return undefined;
-}
 
 function getDbPool() {
 	const connectionString = getDatabaseUrl();
@@ -65,7 +51,9 @@ async function withTransaction(callback) {
 }
 
 async function closeDbPool() {
-	if (!pool) return;
+	if (!pool){
+		return;
+	} 
 	await pool.end();
 	pool = null;
 }

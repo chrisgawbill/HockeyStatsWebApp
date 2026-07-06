@@ -1,6 +1,5 @@
 import { Button, Col, Row } from 'react-bootstrap';
 import styles from '../../Style/LandingPage/QuickLinks.module.css';
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 export default function QuickLinks() {
