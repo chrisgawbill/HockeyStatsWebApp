@@ -114,19 +114,38 @@ The redundancies surfaced during review are now closed out:
 
 ---
 
-## ☐ 2.4 — Backend contract and season test coverage
+## ☑ 2.4 — Backend contract and season test coverage
+
+**Completed:** 2026-06-02 (PRs #40/#41, with the Postgres cache follow-up in PR #42)
 
 ### What I have done
 
-_TODO_
+Backend tests (the original backlog scope):
+
+- Added a backend test suite under `api/test/` using the built-in Node test runner (`node --test`, no new test dependencies): `mappers.test.js`, `dbMappers.test.js`, `routes.test.js`, `seasonHelper.test.js`, `cacheManager.test.js`, `fieldValue.test.js`, `jsonParam.test.js` — 54 tests total.
+- Added `api/test/testApp.js`, a small hand-rolled harness (`makeTestApp` + `request`) that drives an Express router through mock req/res streams, so route tests need neither a listening port nor `supertest`.
+- Mapper tests cover schedule games, standings teams, roster players, skater/goalie summaries, and stat leaders, including missing/renamed NHL fields, guarded `.default` unwraps, and `clinchingIndicator`/`clinchIndicator`.
+- Season tests cover `isValidSeasonId`, `getCurrentSeasonId`, and `validateSeason` middleware success/400/default behavior.
+- Route tests cover health diagnostics auth (missing and wrong key) and season-aware routes with mocked NHL clients, and assert that cache keys include every response-changing input (season, team, stat category, schedule/standings variants).
+- Added the `npm test` script to `api/package.json`. No NHL network access in tests.
+
+Centralized cache and Postgres storage (landed with this ticket as PRs #40–#42, beyond the original backlog scope):
+
+- Centralized all caching in `api/utils/cacheManager.js` (`GetOrFetch`, per-type TTLs, in-flight request de-duplication, seed-cache fallback under `api/cache-seed/`).
+- Added Postgres cache storage: with `CACHE_DATABASE_URL` set, raw payloads go to an `app_cache` table (auto-created, `INSERT ... ON CONFLICT DO UPDATE`); `CACHE_STORAGE=filesystem|postgres|hybrid` overrides the default.
+- Added SQL migrations (`api/db/migrations/`, run via `npm run db:migrate`) creating normalized domain tables, plus a repository layer (`api/db/repositories/`), domain services (`api/services/domain/`), and pure DB mappers (`api/services/mappers/db/`). Routes make best-effort `runServiceTask` calls after each raw fetch; failures never break the HTTP response, and `DISABLE_DOMAIN_PERSISTENCE=true` turns the backfills off.
+- Documented the whole layer in `docs/architecture.md` (Backend Caching, Database Migrations, Controller/Service/Repository sections).
 
 ### What I have learned
 
-_TODO_
+- **The built-in Node test runner is enough.** `node --test` plus a ~60-line fake req/res harness replaced what would otherwise be jest + supertest — fewer dependencies to keep current in a small API package.
+- **Testing cache keys is testing behavior, not implementation.** A cache key missing one input (season, team, stat) silently serves another request's data; asserting key composition in route tests locks in the "every response-changing input is in the key" rule from 2.3.
+- **Best-effort persistence must be isolated.** Domain table writes run through `runServiceTask`, which logs failures and de-duplicates in-flight work, so a database outage degrades to raw-cache behavior instead of 500s.
+- **Store raw, map on the way out — in both stores.** The Postgres `app_cache` table stores the same raw NHL payloads as the filesystem cache, so switching storage modes (or changing a mapper) never requires a cache rebuild.
 
 ---
 
-## ☐ 2.5 — Schedule search, filters, and team calendar
+## ☐ 2.5 — Schedule filters, team calendar, and global search
 
 ### What I have done
 
@@ -198,15 +217,9 @@ _TODO_
 
 ---
 
-## ☐ 2.11 — Search across teams, players, and games
+## 2.11 — Search across teams, players, and games
 
-### What I have done
-
-_TODO_
-
-### What I have learned
-
-_TODO_
+**Merged:** team/game search folded into 2.5, player search results folded into 2.8 (see [phase-2-backlog.md](./phase-2-backlog.md#211-search-across-teams-players-and-games)).
 
 ---
 
