@@ -13,4 +13,5 @@ if (!apiBaseUrl && import.meta.env.PROD) {
 export const axiosExpressHandler = axios.create({
   baseURL: apiBaseUrl,
   withCredentials: false,
+  timeout: 15000,
 });

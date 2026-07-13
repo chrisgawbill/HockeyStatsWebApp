@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   ReactNode,
   useCallback,
@@ -10,11 +10,17 @@ import { ScheduledGame } from '../Models/scheduledGame';
 import { GetGameDetails, GetScheduledGames } from '../../Services/apiHandler';
 import {
   ConvertContractsToGames,
-  parseLocalDate,
 } from '../Helpers/scheduleHelper';
 import { useSeason } from './SeasonContext';
 
-const ListOfGamesContext = createContext<any>(null);
+interface ListOfGamesData {
+  listOfGamesData: ScheduledGame[];
+  loadingListOfGamesData: boolean;
+  selectedDateGames: ScheduledGame[];
+  fetchGamesByDate: (date: Date) => Promise<void>;
+}
+
+const ListOfGamesContext = createContext<ListOfGamesData | null>(null);
 
 /**
  * Loads the selected season's full schedule once and shares it. Every schedule
@@ -184,7 +190,10 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function useListOfGames() {
-  return useContext(ListOfGamesContext);
+function useListOfGames(): ListOfGamesData {
+  const context = useContext(ListOfGamesContext);
+  if (!context)
+    throw new Error('useListOfGames must be used within ListOfGamesProvider');
+  return context;
 }
 export { ListOfGamesProvider, useListOfGames };

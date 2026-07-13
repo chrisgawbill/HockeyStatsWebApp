@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useListOfGames } from '../Data/Context/ScheduleContext';
 import PageHeader from '../Components/PageHeader';
 import { Container } from 'react-bootstrap';

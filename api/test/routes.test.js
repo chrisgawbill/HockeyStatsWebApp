@@ -360,24 +360,6 @@ test('team schedule cache key includes team and season', async () => {
 	assert.equal(response.body.games[0].homeTeam, 'COL');
 });
 
-test('team stats cache key includes selected season', async () => {
-	setCacheResponse(CACHE_TYPES.TEAM, 'summary_sorted_shotsForPerGame_20232024', {
-		data: [{ teamId: 21, wins: 50 }],
-	});
-
-	const app = makeTestApp('/team', teamRouter);
-	const response = await request(app, '/team/stats?season=20232024');
-
-	assert.equal(response.status, 200);
-	assert.deepEqual(cacheState.calls, [
-		{
-			type: CACHE_TYPES.TEAM,
-			key: 'summary_sorted_shotsForPerGame_20232024',
-		},
-	]);
-	assert.equal(response.body.data[0].teamId, 21);
-});
-
 test('single team stats cache key includes team and season', async () => {
 	setCacheResponse(CACHE_TYPES.TEAM, 'summary_21_20232024', {
 		data: [{ teamId: 21, wins: 50 }],

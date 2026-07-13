@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from '../../../Style/LandingPage/SlidingToggle.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {

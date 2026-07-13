@@ -10,20 +10,12 @@ import { GetTeamStatsById } from '../../Services/apiHandler';
 import { ConvertToListOfTeams } from '../Helpers/teamHelpers';
 import { Team } from '../Models/team';
 
-const ListOfTeamsContext = createContext<any>(null);
-
-function hasValidGoalsPerGame(data: any): boolean {
-  if (!Array.isArray(data) || data.length === 0) return false;
-
-  const sample = data[0];
-  const latest = Array.isArray(sample?.seasonStats)
-    ? sample.seasonStats.reduce((best: any, stat: any) =>
-        !best || stat.seasonId > best.seasonId ? stat : best,
-      )
-    : null;
-
-  return typeof latest?.goalsPerGame === 'number';
+interface ListOfTeamsData {
+  listOfTeamsData: Team[];
+  loadingListOfTeamsData: boolean;
 }
+
+const ListOfTeamsContext = createContext<ListOfTeamsData | null>(null);
 
 function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   const teamListData = React.useRef<any[]>([]);
@@ -32,20 +24,6 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     useState<boolean>(true);
 
   async function GetTeams() {
-    const cachedListOfTeams = localStorage.getItem('listOfTeams-key');
-    if (cachedListOfTeams) {
-      try {
-        const parsed = JSON.parse(cachedListOfTeams);
-        if (hasValidGoalsPerGame(parsed)) {
-          setListOfTeamsData(parsed);
-          setLoadingListOfTeamsData(false);
-          return;
-        }
-      } catch (error) {
-        console.error('Error parsing cached team list', error);
-      }
-    }
-    {
       let rawLocalList: any[] = [...localTeamList];
       rawLocalList.sort((a, b) => b.fullName.localeCompare(a.fullName));
       teamListData.current = rawLocalList;
@@ -64,7 +42,6 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
         setLoadingListOfTeamsData(false);
       }
     }
-  }
   useEffect(() => {
     GetTeams();
   }, []);
@@ -76,7 +53,12 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     </ListOfTeamsContext.Provider>
   );
 }
-function useListOfTeamsData() {
-  return useContext(ListOfTeamsContext);
+function useListOfTeamsData(): ListOfTeamsData {
+  const context = useContext(ListOfTeamsContext);
+  if (!context)
+    throw new Error(
+      'useListOfTeamsData must be used within ListOfTeamsDataProvider',
+    );
+  return context;
 }
 export { ListOfTeamsDataProvider, useListOfTeamsData };

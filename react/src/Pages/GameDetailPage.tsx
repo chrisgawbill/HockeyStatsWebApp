@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GetGameDetails, GetGameLanding } from '../Services/apiHandler';
 import {
   BoxscoreTeamStats,

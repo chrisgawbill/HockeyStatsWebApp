@@ -21,21 +21,23 @@ async function persistStatLeaders({
 	});
 
 	return await withTransaction(async (client) => {
+		// Create/lock the FK-parent season row first (children reference it), then
+		// batch the children. Batching keeps the whole transaction ~a handful of
+		// statements, so the shared seasons-row lock is held only briefly.
 		await seasonsRepository.upsertSeason(
 			client,
 			buildSeason(seasonId, { [`${playerType}Leaders`]: leadersPayload ?? null }),
 		);
 
-		let playersUpserted = 0;
-		let leadersUpserted = 0;
-
-		for (const { player, leader } of mapped.rows) {
-			await playersRepository.upsertPlayer(client, player);
-			await statLeadersRepository.upsertStatLeader(client, leader);
-
-			playersUpserted += 1;
-			leadersUpserted += 1;
-		}
+		// Players before leaders: stat_leaders.player_id references players.
+		const playersUpserted = await playersRepository.upsertPlayers(
+			client,
+			mapped.rows.map((row) => row.player),
+		);
+		const leadersUpserted = await statLeadersRepository.upsertStatLeaders(
+			client,
+			mapped.rows.map((row) => row.leader),
+		);
 
 		return { playersUpserted, leadersUpserted, skipped: mapped.skipped };
 	});

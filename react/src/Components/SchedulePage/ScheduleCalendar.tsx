@@ -1,4 +1,3 @@
-import React from 'react';
 import { ScheduledGame } from '../../Data/Models/scheduledGame';
 import { formatDateParam } from '../../Data/Helpers/scheduleHelper';
 import GameChip from './GameChip';

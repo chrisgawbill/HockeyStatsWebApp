@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 const { Pool } = require('pg');
+const { getSslConfig } = require('../db/connectionConfig');
 
 const inFlight = new Map();
 let cachePool = null;
@@ -96,13 +97,7 @@ function getCachePool() {
 	if (!cachePool) {
 		cachePool = new Pool({
 			connectionString: process.env.CACHE_DATABASE_URL,
-			ssl:
-				process.env.CACHE_DATABASE_SSL === 'false' ?
-					false
-				: process.env.NODE_ENV === 'production' ||
-				  process.env.CACHE_DATABASE_SSL === 'true' ?
-					{ rejectUnauthorized: false }
-				:	undefined,
+			ssl: getSslConfig(),
 			// Fail fast instead of hanging when the cache DB is configured but
 			// unreachable/slow. Without this, health and cache-usage probes block
 			// indefinitely and the diagnostics page never loads.
@@ -116,6 +111,14 @@ function getCachePool() {
 		});
 	}
 	return cachePool;
+}
+
+async function closeCachePool() {
+	if(!cachePool){
+		return;
+	}
+	await cachePool.end();
+	cachePool = null;
 }
 
 async function ensureExternalCacheTable() {
@@ -449,4 +452,5 @@ module.exports = {
 	isExternalCacheConfigured,
 	isExternalCacheReachable,
 	getCacheUsage,
+	closeCachePool,
 };

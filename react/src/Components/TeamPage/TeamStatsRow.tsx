@@ -1,10 +1,9 @@
-import React from 'react';
-import { MockStatItem } from '../../Data/LocalData/teamPageMockData';
+import { StatItem } from '../../Data/Models/teamPageTypes';
 import shared from '../../Style/shared.module.css';
 import styles from '../../Style/TeamPage/TeamPage.module.css';
 
 interface TeamStatsRowProps {
-  stats: MockStatItem[];
+  stats: StatItem[];
 }
 
 export default function TeamStatsRow({ stats }: TeamStatsRowProps) {

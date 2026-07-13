@@ -1,4 +1,3 @@
-import React from 'react';
 import { ScheduledGame } from '../../Data/Models/scheduledGame';
 import { useTheme } from '../../Data/Context/ThemeContext';
 import {

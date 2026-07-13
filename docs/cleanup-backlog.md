@@ -2,13 +2,15 @@
 
 Refinements, consistency fixes, and dead-code removal found during a full codebase review on 2026-07-01. These are intentionally separate from [phase-2-backlog.md](./phase-2-backlog.md): none add features, and each is small enough to land independently between feature tickets.
 
-Ordering is by risk: C1/C2 are pure deletion/hygiene, C3/C4 are mechanical refactors, C5 changes runtime behavior and deserves the most care. C6/C7 are security and resilience hardening from a follow-up standards review (also 2026-07-01); C6 items 1–2 are the highest-value tickets in this file. Where an item overlaps a Phase 2 ticket, the note says so — do not duplicate that work here.
+Ordering is by risk: C1/C2 are pure deletion/hygiene, C3/C4 are mechanical refactors, C5 changes runtime behavior and deserves the most care. C6/C7 are security and resilience hardening from a follow-up standards review (also 2026-07-01); C6 items 1–2 are the highest-value tickets in this file. C8 (added 2026-07-07) is an active runtime bug — background persistence is silently failing under lock contention — and ranks alongside C6 items 1–2 in priority. Where an item overlaps a Phase 2 ticket, the note says so — do not duplicate that work here.
 
 Each ticket's **implementation prompt** is self-contained and meant to be pasted verbatim into a fresh Claude Code session (Sonnet/Opus acting as the senior dev, pairing with a junior dev who writes the code).
 
 ## C1 Remove Express-generator scaffolding
 
-- [ ] **Owner:** Either
+- [x] **Owner:** Either
+
+**Update 2026-07-07:** complete. The two remaining items landed on the `maintenance-cleanup` branch — `cookie-parser` (require, middleware, and dependency) is removed, and the legacy `api/schedule-cache/` folder is deleted from disk.
 
 **Update 2026-07-06:** most of this ticket landed in PR #46 — `api/routes/index.js` + the `indexRouter` mount, the `views/` folder + view-engine lines, the `jade` dependency, `api/public/`, and the committed `api/.idea/` are all gone. Two items remain:
 
@@ -36,7 +38,9 @@ DONE WHEN:
 
 ## C2 Dependency and package metadata hygiene
 
-- [ ] **Owner:** Either
+- [x] **Owner:** Either
+
+**Update 2026-07-07:** complete. The remaining four items landed on the `maintenance-cleanup` branch — `sequelize`/`pg-hstore` removed, `express` upgraded to `^4.22.2` (latest 4.x), the `browserslist` block removed, and both packages bumped to `2.4.0`.
 
 **Update 2026-07-06:** PR #46 already handled part of this ticket — the CRA leftovers (`src/App.test.js`, `src/setupTests.js`, `src/reportWebVitals.js`, the `web-vitals` dependency, the inert `eslintConfig` block) are deleted, the vestigial root `package.json` is cleaned up, and the repo is standardized on pnpm with the stray lockfiles and the placeholder `pnpm-workspace.yaml` removed. What remains:
 
@@ -69,7 +73,15 @@ DONE WHEN:
 
 ## C3 Backend consistency refinements
 
-- [ ] **Owner:** Either
+- [x] **Owner:** Either
+
+**Update 2026-07-07:** complete — all seven steps landed on the `maintenance-cleanup` branch. Notes on where the implementation deviated from or refined the plan:
+
+- Step 3 (team-stats consolidation): `GET /team/stats` had zero frontend callers, so it was deleted outright rather than aliased. `GET /team/:teamId?` (no id) is now the only league-wide team-summary route.
+- Step 4: shared config lives in `api/db/connectionConfig.js` (`getDatabaseUrl` + `getSslConfig`), consumed by both `db/pool.js` and `utils/cacheManager.js`; the two pools stay separate.
+- Step 5: scheduler lives in `api/services/refreshScheduler.js`, started from `bin/www`'s `onListening`. Importing `app.js` is now side-effect free.
+- Step 7 deviation: `ANTHROPIC_MODEL` is **required** with no in-code default (the ticket suggested defaulting to the old hardcoded value). Every environment must set it — `api/.env.example` documents this. **Deploy note: set `ANTHROPIC_MODEL` in production before shipping this branch or the AI endpoint fails.**
+- Step 2 caveat as predicted: `goalie_summary_*` cache entries fetched with the old `limit=10` serve truncated data until the 24h TTL expires.
 
 Small inconsistencies that make the backend harder to reason about than it needs to be:
 
@@ -112,7 +124,9 @@ DONE WHEN:
 
 ## C4 Frontend dead code removal
 
-- [ ] **Owner:** Either
+- [x] **Owner:** Either
+
+**Update 2026-07-07:** complete — landed on the `maintenance-cleanup` branch. Types moved to `react/src/Data/Models/teamPageTypes.ts` (`MockTeam` → `TeamOverview`, `MockStatItem` → `StatItem`), both dead LocalData files and `GetListOfTeams` deleted, `apiHandler.ts` collapsed onto one `get<T>()` helper, and `ScheduleContext`/`ListOfTeamsContext` are now typed with null-checked hooks. C7 step 3 (`noUnusedLocals`/`noUnusedParameters`) is now unblocked.
 
 - `react/src/Data/LocalData/teamPageMockData.ts` (441 lines) is misnamed: it holds the real TypeScript types used by `TeamPage` and six of its components (`MockTeam`, `MockStatItem`, `Position`, `RosterPlayer`, `PlayerStatLine`) plus ~380 lines of `MOCK_*` constants that nothing imports. Move the types into `react/src/Data/Models/` (dropping the `Mock` prefixes, e.g. `MockTeam` → `TeamOverview`), update the seven importers, and delete the file. Note ticket 2.7 will touch these same components — land this first or fold it into 2.7.
 - `react/src/Data/LocalData/landingPageLocalData.ts` has no importers; delete it.
@@ -150,7 +164,13 @@ DONE WHEN:
 
 ## C5 Frontend behavior refinements
 
-- [ ] **Owner:** Either
+- [x] **Owner:** Either
+
+**Update 2026-07-07:** complete — all three items landed on the `maintenance-cleanup` branch and were verified in the browser. Notes on where the implementation deviated from or refined the plan:
+
+- Step 1 (TeamPage standings race): fixed with option (b). `fetchMain` now parks the raw team-stats response in state and a `useMemo` derives record/ranks/playoff-line delta from the live `StandingsContext` at render, so a deep-linked visit self-corrects once standings resolve instead of freezing at 0. The redundant `triCode` dep was dropped from the fetch effect (`teamId` already implies it). This satisfies ticket 2.7 step 0 — do not redo the standings-race fix there.
+- Step 2 (stale team-list cache): **deviated from the written plan.** Instead of adding a `{timestamp, data}` TTL, the `localStorage` team-list cache was removed entirely — freshness is now owned by the backend DB cache. Rationale: `ListOfTeamsContext` was the only client-side *data* cache (every other context already relies on the server cache), so it was a redundant second cache layer, and the one without a TTL. `hasValidGoalsPerGame` and the `listOfTeams-key` read/write are gone; `ThemeContext`'s `localStorage` use (a user preference, not fetched data) is untouched. **Consequence: ticket 2.9 cites `ListOfTeamsContext` as its `localStorage` example — that reference is now stale. Update 2.9's READ-FIRST list when it comes up.**
+- Step 3 (twin leader contexts): merged into one `StatLeadersProvider` in `StatLeadersContext.tsx` that calls `useStatLeaders` twice (skater + goalie). `useSkaterLeaderData`/`useGoalieLeaderData` keep their names and return shapes, so only `LandingPage`'s import path and `App.tsx`'s provider nesting changed. The old `SkaterStatLeadersContext.tsx` and `GoalieStatLeadersContext.tsx` are deleted.
 
 **Update 2026-07-06:** the serial score backfill item originally listed here landed in PR #47 (`updatePastGames` now fetches with `Promise.all`). The remaining items change runtime behavior, so verify each in the browser:
 
@@ -185,7 +205,7 @@ DONE WHEN:
 
 ## C6 Backend security and reliability hardening
 
-- [ ] **Owner:** Either
+- [X] **Owner:** Either
 
 Findings from the standards review that no existing ticket covers. Items are independent; each is its own commit.
 
@@ -194,6 +214,8 @@ Findings from the standards review that no existing ticket covers. Items are ind
 - **`bin/www`'s `uncaughtException` handler logs and keeps running.** Node docs say the process is in an undefined state after an uncaught exception — log, then `process.exit(1)` and let the host restart it. Also add graceful shutdown: on SIGTERM/SIGINT, `server.close()`, then close both pg pools.
 - **No security headers.** Add `helmet()` — low stakes for a JSON API, but it's two lines.
 - **Outbound NHL requests have no timeout** (`api/services/nhlApiClient.js` — four axios instances, none set `timeout`). A hung upstream call hangs the API request and the user's spinner indefinitely.
+
+**Follow-up found during C6 step 2 (not yet fixed):** the `CACHE_DATABASE_URL` connection string carries an `sslmode=` param (e.g. `require`). Current `pg` (v8) treats `require`/`prefer`/`verify-ca` as `verify-full`, and the explicit `ssl: { ca, rejectUnauthorized: true }` from `getSslConfig()` enforces verification regardless — so it is safe today. But `pg` prints a deprecation warning: in `pg` v9 / `pg-connection-string` v3 those modes adopt weaker libpq semantics (`sslmode=require` = encrypt but do **not** verify), which would silently re-open the MITM hole C6.2 closed. `pg` is pinned at `^8.21.0`, so no automatic upgrade — but whoever bumps `pg` to v9 must make `sslmode=verify-full` explicit in the connection string (or otherwise assert verification) as part of that upgrade. One-line fix; tracked here so it is not lost.
 
 **Implementation prompt:**
 
@@ -219,7 +241,7 @@ DONE WHEN:
 
 ## C7 Frontend resilience refinements
 
-- [ ] **Owner:** Either
+- [X] **Owner:** Either
 
 - **No error boundary.** A render-time exception in any component blanks the entire SPA to a white screen. Add one `ErrorBoundary` component wrapping `<Routes>` in `App.tsx` so a broken page degrades to an error card with a "back to home" link instead.
 - **`axiosInstance.ts` sets no timeout**, so a hung backend call leaves loading states spinning forever. Add one (e.g. 15s — the AI route is slow on cold cache) so requests resolve to the callers' existing error paths.
@@ -243,4 +265,58 @@ DONE WHEN:
 - cd react && npx tsc --noEmit and pnpm build pass.
 - Manual: the throw-test shows the error card and the app recovers on navigation; the dead-backend test resolves to an error state within the timeout.
 - This box is ticked (with a note if step 3 was deferred pending C4).
+```
+
+## C8 Domain persistence lock contention — `Query read timeout` on background writes
+
+- [X] **Owner:** Either
+
+**High priority.** Found 2026-07-07 from local API logs: `Domain service task failed for goalie leaders shutouts 20252026: Error: Query read timeout` (and the same for `skater leaders goals`, `season schedule 20252026`, `season schedule 20222023`). The site works — these are fire-and-forget write-through tasks and the response was already served from the NHL payload — but the failing tasks mean stat leaders, schedules, and player stats are **silently not being persisted** to Postgres for the large payloads.
+
+**Update 2026-07-07 (environment facts — these amplify the diagnosis below):**
+
+- The database is **not local**. `api/.env` sets no `DATABASE_URL`, so `connectionConfig.js` falls back to `CACHE_DATABASE_URL`, which points at a **Neon Postgres in us-east-1**. Both the cache pool and the domain pool write to Neon over the internet; the logged timeouts were against Neon, and production (Render) uses the same database.
+- **Latency amplification.** The diagnosis below says the transaction lock is "held for seconds" — that assumed sub-millisecond local round trips. Against Neon each round trip is ~20–100ms, so a ~4,000-query schedule transaction holds the `seasons` row lock for **minutes**, and a colliding same-season task blowing the 5s `query_timeout` is near-guaranteed, not bad luck. Batching is therefore doubly the right fix: it shortens the lock hold (the contention bug) *and* collapses the network round trips (the latency cost).
+- **Neon free-tier autosuspend.** Neon scales compute to zero after idle; the first query after wake-up pays a cold start that can take a few seconds and may trip the 5s timeout **even after this fix**. A one-off timeout right after a long idle period is that transient, not this bug — do not chase it, and do not raise the timeout for it.
+- **This ticket is also the "data survives Render restarts" fix.** Render's free-tier disk is ephemeral, but the raw NHL cache already persists in Neon's `app_cache`; it is exactly these failing domain writes that are not persisting. Once this lands, remaining work is just deploy verification (explicit `DATABASE_URL` or documented fallback, Render env vars, migrations run against Neon, `/health/cache-usage` check) — small enough to fold into this ticket's step 5 rather than a separate ticket.
+
+**Diagnosis (verified in code, not just from the stack trace):**
+
+- All five domain persist services (`statLeaderService`, `scheduleService`, `playerStatsService`, `teamService`, `rosterService` in `api/services/domain/`) share one pattern: open a transaction, call `seasonsRepository.upsertSeason(...)` **first**, then loop over the payload doing sequential single-row upserts.
+- In Postgres, that first upsert takes a row-level lock on the `seasons` row **held until COMMIT**. A season schedule is ~1,300 games × 3 queries (2 team upserts + 1 game upsert) ≈ 4,000 sequential round trips, so the transaction — and the lock — is held for seconds.
+- `runServiceTask` dedupes by label only, so a single page load fires several of these concurrently for the *same season*. The second task's very first query (`upsertSeason` on the same row) blocks on the first task's lock, exceeds the pool's `query_timeout: 5000` (`api/db/pool.js`), and dies with `Query read timeout`. The two schedule tasks additionally collide with each other on the shared `teams` rows.
+- Raising the timeout would only hide the contention; the fix is to make the transactions short.
+
+**Fix, in order of leverage:**
+
+- **Batch the per-row upserts** into multi-row `INSERT ... VALUES (...), (...) ON CONFLICT ... DO UPDATE` statements (chunked), collapsing thousands of round trips into a handful of queries. This is the real fix — the transaction drops from seconds to milliseconds.
+- **Move `upsertSeason` to the end of each transaction** so the one row every same-season task touches is locked last and briefly.
+- **Serialize the background tasks** (concurrency-1 queue in `runServiceTask`) as a cheap structural guard — none of these tasks are latency-sensitive.
+
+**Implementation prompt:**
+
+```text
+ROLE: You are the senior dev pairing with me (junior dev, learning). This is a concurrency bug, so before any code: explain row-level locks, why ON CONFLICT upserts take them until COMMIT, and how the current code deadlocks itself into timeouts. Then guide me step by step. Pause after each numbered step. Do not expand scope beyond this ticket.
+
+PROJECT: HockeyStatsWebApp — Express backend in api/. Background domain-persistence tasks time out under lock contention; this ticket batches their writes and serializes the task runner.
+
+READ FIRST: docs/cleanup-backlog.md section C8 INCLUDING the environment-facts update (the DB is a remote Neon instance, not local — it changes the latency math and adds an autosuspend caveat), api/db/connectionConfig.js (the DATABASE_URL → CACHE_DATABASE_URL fallback), api/db/pool.js (the 5s query_timeout), api/services/domain/runServiceTask.js, all five persist services in api/services/domain/ (statLeaderService, scheduleService, playerStatsService, teamService, rosterService — same transaction-then-loop pattern), and the repositories they call in api/db/repositories/ (seasonsRepository, playersRepository, statLeadersRepository, teamsRepository, scheduleGamesRepository, playerStatsRepository, rostersRepository).
+
+STEPS (pause after each):
+1. Reproduce and confirm the diagnosis: load the site landing + schedule pages, watch the API logs for "Query read timeout", and explain to me which two tasks collided and on which row. Remember the DB is Neon over the internet (~20–100ms per round trip), so a schedule transaction holds its locks for minutes — reproduction should be easy. CAUTION: a single timeout on the very first query after the app has been idle is likely Neon autosuspend cold start, not this bug; distinguish the two for me.
+2. Add multi-row upsert functions to the repositories the loops call: upsertTeams, upsertPlayers, upsertStatLeaders, upsertScheduleGames, upsertPlayerSeasonStats, upsertRosterEntries. Each builds one INSERT ... VALUES (...),(...) ON CONFLICT ... DO UPDATE with the same column/COALESCE semantics as its single-row sibling. Two hard requirements you must explain to me: (a) DEDUPE rows by conflict key first — a multi-row upsert that touches the same key twice throws "cannot affect row a second time" (schedule payloads repeat the same ~32 teams ~80x each); (b) CHUNK the VALUES list (e.g. 200–500 rows per statement) to stay far below pg's 65,535 bind-parameter limit. Keep the single-row functions if anything else still uses them; delete them if not.
+3. Convert the five persist services to use the batch functions: collect the mapped rows into arrays, dedupe, then a handful of batched statements per transaction. Move upsertSeason to the END of the transaction in all five, so the hottest shared row is locked last and held for milliseconds. Keep the returned counts ({playersUpserted, leadersUpserted, ...}) meaning what they meant (unique rows written).
+4. Serialize the runner: in runServiceTask.js, keep the by-label dedupe but chain tasks through a single promise queue (concurrency 1) instead of letting them all run at once. These are background write-through tasks — throughput doesn't matter, contention does. The function's signature and fire-and-forget contract must not change for callers.
+5. Verify: restart the API, hard-load the landing page, schedule page (multiple seasons), and a team page. Logs must show zero "Query read timeout" / "Domain service task failed" lines (one transient timeout immediately after a long idle = Neon cold start; rerun before worrying), and spot-check the DB: SELECT count(*) FROM schedule_games WHERE season_id='20252026'; and the stat_leaders rows for the current season should be populated. Then the deploy half: confirm Render's env vars point at the same Neon DB (set an explicit DATABASE_URL or document the CACHE_DATABASE_URL fallback in docs/architecture.md), confirm migrations have been run against Neon, redeploy, and check /health/cache-usage reports Postgres mode plus the same DB spot-checks — this is what makes domain data survive Render's ephemeral-disk restarts.
+
+INVARIANTS:
+- Same rows end up in the DB as the single-row version would have written — batching changes performance, not semantics (COALESCE update rules included).
+- No API response contract changes; these tasks stay fire-and-forget.
+- Do NOT raise DATABASE_TIMEOUT_MS / query_timeout as the fix — if 5s still trips after batching (other than the known one-off Neon cold-start transient after idle), something is wrong; find it.
+- One commit per step (steps 2–3 may be one commit per table/service pair if that reviews easier).
+
+DONE WHEN:
+- cd api && pnpm test passes (add/adjust unit tests for the dedupe + chunking helpers).
+- The step-5 manual check shows clean logs and populated tables for a fresh season load, locally AND on the Render deployment after a restart.
+- docs/architecture.md's domain persistence section notes the batched-write + serialized-runner design and which env var production uses for the domain pool; this box is ticked.
 ```

@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from '../Style/EmptyState.module.css';
 
 interface EmptyStateProps {

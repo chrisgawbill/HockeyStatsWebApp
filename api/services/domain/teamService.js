@@ -28,6 +28,8 @@ async function persistTeamSeason({
 	});
 
 	return await withTransaction(async (client) => {
+		// Season row first (FK parent), then teams before snapshots
+		// (team_season_snapshots references both seasons and teams).
 		await seasonsRepository.upsertSeason(
 			client,
 			buildSeason(seasonId, {
@@ -36,16 +38,15 @@ async function persistTeamSeason({
 			}),
 		);
 
-		let teamsUpserted = 0;
-		let snapshotsUpserted = 0;
-
-		for (const { team, snapshot } of mapped.rows) {
-			await teamsRepository.upsertTeam(client, team);
-			await teamsRepository.upsertTeamSeasonSnapshot(client, snapshot);
-
-			teamsUpserted += 1;
-			snapshotsUpserted += 1;
-		}
+		const teamsUpserted = await teamsRepository.upsertTeams(
+			client,
+			mapped.rows.map((row) => row.team),
+		);
+		const snapshotsUpserted =
+			await teamsRepository.upsertTeamSeasonSnapshots(
+				client,
+				mapped.rows.map((row) => row.snapshot),
+			);
 
 		return { teamsUpserted, snapshotsUpserted, skipped: mapped.skipped };
 	});

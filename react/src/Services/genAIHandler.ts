@@ -1,10 +1,10 @@
 import { axiosExpressHandler } from './axiosInstance';
 
-export async function InterfaceWithChatBot(message: object, cacheKey?: string) {
+export async function InterfaceWithChatBot(message: object, triCode?: string) {
   try {
     const serializedMessage = JSON.stringify({
       ...message,
-      ...(cacheKey ? { cacheKey } : {}),
+      ...(triCode ? { cacheKey: triCode, triCode } : {}),
     });
     const response = await axiosExpressHandler.post(
       '/python-service',
