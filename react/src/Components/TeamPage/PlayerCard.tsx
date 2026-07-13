@@ -1,5 +1,4 @@
-import React from 'react';
-import { RosterPlayer } from '../../Data/LocalData/teamPageMockData';
+import { RosterPlayer } from '../../Data/Models/teamPageTypes';
 import shared from '../../Style/shared.module.css';
 import styles from '../../Style/TeamPage/TeamPage.module.css';
 

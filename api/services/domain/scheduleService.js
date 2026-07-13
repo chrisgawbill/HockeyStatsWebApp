@@ -18,28 +18,28 @@ async function persistSchedule({
 }) {
 	const mapped = mapSchedulePayload({ seasonId, schedulePayload });
 
+	const teams = [];
+	const games = [];
+	for (const { homeTeam, awayTeam, game } of mapped.rows) {
+		if (homeTeam) teams.push(homeTeam);
+		if (awayTeam) teams.push(awayTeam);
+		games.push(game);
+	}
+
 	return await withTransaction(async (client) => {
+		// Season row first (FK parent), then teams before games
+		// (schedule_games references teams). Batching dedupes the ~32 teams that
+		// the payload repeats ~80x each, so teamsUpserted now counts unique teams.
 		await seasonsRepository.upsertSeason(
 			client,
 			buildSeason(seasonId, { [sourceLabel]: schedulePayload ?? null }),
 		);
 
-		let teamsUpserted = 0;
-		let gamesUpserted = 0;
-
-		for (const { homeTeam, awayTeam, game } of mapped.rows) {
-			if (homeTeam) {
-				await teamsRepository.upsertTeam(client, homeTeam);
-				teamsUpserted += 1;
-			}
-			if (awayTeam) {
-				await teamsRepository.upsertTeam(client, awayTeam);
-				teamsUpserted += 1;
-			}
-
-			await scheduleGamesRepository.upsertScheduleGame(client, game);
-			gamesUpserted += 1;
-		}
+		const teamsUpserted = await teamsRepository.upsertTeams(client, teams);
+		const gamesUpserted = await scheduleGamesRepository.upsertScheduleGames(
+			client,
+			games,
+		);
 
 		return { gamesUpserted, teamsUpserted, skipped: mapped.skipped };
 	});

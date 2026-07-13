@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSeason } from '../Data/Context/SeasonContext';
 import {
   getRecentSeasonIds,

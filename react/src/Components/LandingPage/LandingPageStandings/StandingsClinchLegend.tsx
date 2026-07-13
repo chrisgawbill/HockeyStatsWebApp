@@ -1,4 +1,3 @@
-import React from 'react';
 import { CLINCH_STATUS_META, ClinchStatus } from './clinchStatus';
 import styles from '../../../Style/LandingPage/LandingPageStandings.module.css';
 

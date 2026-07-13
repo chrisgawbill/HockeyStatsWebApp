@@ -4,17 +4,15 @@ var compression = require('compression');
 var cors = require('cors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var helmet = require('helmet');
 
 var healthRouter = require('./routes/health');
 var standingsRouter = require('./routes/standings');
 var playerRouter = require('./routes/player');
 var teamRouter = require('./routes/team');
-const {
-	router: scheduleRouter,
-	refreshScheduleCache,
-} = require('./routes/schedule');
+const { router: scheduleRouter } = require('./routes/schedule');
+const rateLimit = require('express-rate-limit');
 
 const { spawn } = require('child_process');
 const { readCache, writeCache, CACHE_TYPES } = require('./utils/cacheManager');
@@ -30,15 +28,26 @@ let corsOptions = {
 	allowedHeaders: ['Content-Type', 'x-diagnostics-key'],
 };
 
+const rateLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 10,
+	standardHeaders: true,
+	legacyHeaders: false,
+	handler: (req, res) => {
+		res.status(429).json({ error: 'Too many requests, please try again later.' });
+	},
+});
+
 var app = express();
+app.set('trust proxy', 1);
 
 app.use(compression());
 app.use(cors(corsOptions));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(helmet());
 
 app.use('/health', healthRouter);
 app.use('/standings', standingsRouter);
@@ -46,20 +55,26 @@ app.use('/player', playerRouter);
 app.use('/team', teamRouter);
 app.use('/schedule', scheduleRouter);
 
-app.post('/python-service', async (req, res, next) => {
+app.post('/python-service', rateLimiter, async (req, res, next) => {
 	try {
 		const message = req.body.content;
 		const key = req.body.cacheKey ?? 'default';
 
+		if(key !== 'default' && !/^[A-Z]{3}$/.test(key)) {
+			return res.status(400).json({ error: 'Invalid cacheKey format.' });
+		}
+
+		const triCode = req.body.triCode;
+
 		const cached = await readCache(CACHE_TYPES.AI, key);
 		if (cached !== null) {
-			queueAiSummaryPersistence(key, cached, message);
+			queueAiSummaryPersistence(key, cached, message, triCode);
 			return res.send(cached);
 		}
 
 		const result = await runAIPythonScript(message);
 		await writeCache(CACHE_TYPES.AI, key, result);
-		queueAiSummaryPersistence(key, result, message);
+		queueAiSummaryPersistence(key, result, message, triCode);
 		res.send(result);
 	} catch (error) {
 		next(error);
@@ -121,44 +136,20 @@ const runAIPythonScript = (message) => {
 	});
 };
 
-function queueAiSummaryPersistence(cacheKey, content, prompt) {
-	const triCode = cacheKey === 'default' ? null : cacheKey;
-	if (!triCode) return;
+function queueAiSummaryPersistence(cacheKey, content, prompt, triCode) {
+	const resolvedTriCode = triCode ?? (cacheKey === 'default' ? null : cacheKey);
+	if (resolvedTriCode === null) {
+		return;
+	}
 
-	runServiceTask(`ai summary ${triCode}`, () =>
+	runServiceTask(`ai summary ${resolvedTriCode}`, () =>
 		persistAiSummary({
-			triCode,
+			triCode: resolvedTriCode,
 			content,
 			prompt,
 			modelProvider: 'anthropic',
 		}),
 	);
 }
-
-// Schedule cache refreshes at 8AM, 7PM, 11PM UTC
-const REFRESH_HOURS_UTC = [8, 19, 23];
-function scheduleNextRefresh() {
-	const now = new Date();
-	let nextMs = null;
-	for (const hour of REFRESH_HOURS_UTC) {
-		const candidate = new Date(now);
-		candidate.setUTCHours(hour, 0, 0, 0);
-		if (candidate.getTime() > now.getTime()) {
-			nextMs = candidate.getTime();
-			break;
-		}
-	}
-	if (!nextMs) {
-		const tomorrow = new Date(now);
-		tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-		tomorrow.setUTCHours(REFRESH_HOURS_UTC[0], 0, 0, 0);
-		nextMs = tomorrow.getTime();
-	}
-	setTimeout(async () => {
-		await refreshScheduleCache();
-		scheduleNextRefresh();
-	}, nextMs - now.getTime());
-}
-scheduleNextRefresh();
 
 module.exports = app;

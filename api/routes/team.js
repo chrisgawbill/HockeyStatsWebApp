@@ -93,29 +93,6 @@ router.get('/schedule/:triCode', async function (req, res, next) {
 });
 
 /**
- * GET /team/stats?season=
- * Reads a validated season, queries raw league-wide regular-season team summary
- * stats, and passes the NHL stats payload through unchanged.
- */
-router.get('/stats', async function (req, res, next) {
-	try {
-		const season = req.seasonId;
-		const url = `/summary?sort=shotsForPerGame&cayenneExp=seasonId=${season} and gameTypeId=2`;
-		const data = await GetOrFetch(
-			CACHE_TYPES.TEAM,
-			`summary_sorted_shotsForPerGame_${season}`,
-			() => axiosNhlTeam.get(url).then((r) => r.data),
-		);
-		runServiceTask(`team stats ${season}`, () =>
-			persistTeamSeason({ seasonId: season, teamStatsPayload: data }),
-		);
-		res.send(data);
-	} catch (e) {
-		next(e);
-	}
-});
-
-/**
  * GET /team/:teamId?season=
  * Reads an optional NHL team id and validated season, queries raw regular-season
  * team summary stats for that scope, and passes the NHL stats payload through
@@ -127,14 +104,14 @@ router.get('/:teamId?', async function (req, res, next) {
 		const season = req.seasonId;
 		const cayenneExp =
 			teamId ?
-				`teamId%3D${teamId}%20and%20seasonId%3D${season}%20and%20gameTypeId%3D2`
-			:	`seasonId%3D${season}%20and%20gameTypeId%3D2`;
+				`teamId=${teamId} and seasonId=${season} and gameTypeId=2`
+			:	`seasonId=${season} and gameTypeId=2`;
 		const data = await GetOrFetch(
 			CACHE_TYPES.TEAM,
 			`summary_${teamId || 'all'}_${season}`,
 			() =>
 				axiosNhlTeam
-					.get(`/summary?cayenneExp=${cayenneExp}`)
+					.get(`/summary?cayenneExp=${encodeURIComponent(cayenneExp)}`)
 					.then((r) => r.data),
 		);
 		runServiceTask(`team summary ${teamId || 'all'} ${season}`, () =>

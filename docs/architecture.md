@@ -16,11 +16,11 @@ React pages/components
 ```text
 .
 ├── api/                    Express backend
-│   ├── app.js              Express app setup, middleware, routes, errors, refresh scheduler
-│   ├── bin/www             HTTP server bootstrap, listens on PORT or 9000
+│   ├── app.js              Express app setup, middleware, routes, errors
+│   ├── bin/www             HTTP server bootstrap, listens on PORT or 9000, starts the refresh scheduler
 │   ├── routes/             Backend route modules grouped by feature
-│   ├── services/           NHL API clients, response mappers, domain services
-│   ├── db/                 Postgres pool, migrations, repositories
+│   ├── services/           NHL API clients, response mappers, domain services, refresh scheduler
+│   ├── db/                 Postgres pool + shared connection config, migrations, repositories
 │   ├── test/               Backend tests (node --test)
 │   └── utils/              Cache manager, season helpers, diagnostics auth, field coercion
 ├── react/                  Vite + React frontend
@@ -99,7 +99,7 @@ Use this structure when deciding where code belongs:
 - `Context/`: React providers and hooks for shared state.
 - `Hooks/`: reusable custom hooks that compose services, helpers, and constants. For example, `useStatLeaders.ts` loads and tracks stat leader data using `STAT_CONFIG` and `PlayerStatLeaderConverter`.
 - `Constants/`: static configuration such as stat leader category mappings.
-- `LocalData/`: local static NHL team metadata and mock-shaped page data.
+- `LocalData/`: local static NHL team metadata (`teamListData.ts`). The old mock page data is gone; the real team-page types now live in `Models/teamPageTypes.ts`.
 
 The app often receives large, inconsistent NHL API objects. For the most-used NHL data (schedule games, standings teams, roster players, skater/goalie summaries, stat leaders) the backend now normalizes these into stable contracts before they reach the frontend; helper files wrap those contracts into model classes. When adding new NHL data, prefer normalizing at the backend boundary (a mapper) over re-parsing raw shapes in the browser.
 
@@ -126,7 +126,8 @@ The backend is an Express app in `api/`. It listens on port `9000` by default.
 - route modules
 - a `/python-service` endpoint
 - a JSON error handler
-- scheduled schedule-cache refreshes
+
+The scheduled schedule-cache refresh timer lives in `api/services/refreshScheduler.js` and is started by `bin/www` after the server begins listening — importing `app.js` (as the tests do) starts no timers.
 
 ### Backend Route Modules
 
@@ -148,7 +149,6 @@ Routes are grouped by NHL domain. Most data routes accept an optional `?season=`
 - `api/routes/team.js` (all accept optional `?season=`)
   - `GET /team/roster/:triCode` — returns a normalized `RosterContract` (`{ players }`)
   - `GET /team/schedule/:triCode` — returns `{ games }` of `ScheduleGameContract`, sorted by date
-  - `GET /team/stats` — raw team summary stats (not yet normalized)
   - `GET /team/:teamId?` — raw team summary stats (not yet normalized)
   - Uses NHL team stats and club schedule endpoints, with cache keys that include team/sort inputs and season
 
@@ -169,6 +169,7 @@ Routes are grouped by NHL domain. Most data routes accept an optional `?season=`
   - Defined in `api/app.js`
   - Calls `api/routes/hockey-ai.py` through a Python subprocess
   - Caches AI responses by cache key
+  - The body carries an explicit `triCode` field for domain persistence (the old inference from `cacheKey` is kept as a fallback for one release)
 
 There is no `/` route: the app is a JSON API with no view engine. Unmatched paths fall through to the 404 + JSON error handlers.
 
@@ -216,6 +217,8 @@ Cache types:
 
 Storage mode:
 
+- Both the cache pool (`cacheManager.js`) and the domain pool (`db/pool.js`) read their connection string and SSL settings from the shared `api/db/connectionConfig.js`, so SSL behavior is defined in one place. The two pools themselves stay separate.
+- **TLS certificate verification.** When SSL is enabled (`NODE_ENV=production` or `CACHE_DATABASE_SSL=true`), `getSslConfig()` verifies the Postgres server certificate against a CA supplied via `DATABASE_CA_CERT` and connects with `rejectUnauthorized: true`. `DATABASE_CA_CERT` accepts either the PEM text itself (paste the full certificate block, e.g. into a Render env var) or a path to a `.pem` file. It is **required** whenever SSL is on: `getSslConfig()` throws (fail-closed) rather than falling back to an unverified connection, so a missing or wrong cert surfaces immediately instead of silently allowing a MITM-able link. Neon chains to Let's Encrypt's ISRG Root X1 (`https://letsencrypt.org/certs/isrgrootx1.pem`). Local development sets `CACHE_DATABASE_SSL=false`, which disables SSL entirely and bypasses the cert requirement.
 - With no `CACHE_DATABASE_URL`, the app uses generated local folders under `api/cache/`.
 - With `CACHE_DATABASE_URL`, the app defaults to Postgres and stores rows in `app_cache`.
 - `CACHE_STORAGE=filesystem|postgres|hybrid` can override that default. `hybrid` reads Postgres first and can use local files as a secondary store.
@@ -292,6 +295,10 @@ Keep routes thin: fetch/cache raw data, call the appropriate service when normal
 
 When `DATABASE_URL` or `CACHE_DATABASE_URL` is configured, existing routes make best-effort service calls after fetching/caching raw data. Service failures are logged and do not break the HTTP response. Set `DISABLE_DOMAIN_PERSISTENCE=true` to turn off normalized table backfills while keeping the raw cache behavior.
 
+**Batched writes and a serialized task runner (C8).** Each domain service opens one transaction and writes its rows with multi-row `INSERT ... ON CONFLICT DO UPDATE` upserts via `api/db/repositories/batchSql.js` (`batchUpsert` dedupes rows by their conflict key — a single `ON CONFLICT` statement may not affect the same row twice — and chunks the `VALUES` list to stay under Postgres's 65,535 bind-parameter limit), rather than a per-row loop. This keeps each transaction to a handful of statements. `upsertSeason` runs first in every service because the child tables have `NOT NULL` foreign keys to `seasons`; batching — not statement ordering — is what keeps the shared `seasons`-row lock held only briefly. `runServiceTask` (`api/services/domain/runServiceTask.js`) then chains these fire-and-forget tasks through a concurrency-1 promise queue (keeping its by-label dedupe), so two same-season tasks can never hold overlapping transactions. Together these eliminate the `Query read timeout` lock contention that previously left large payloads (season schedules, stat leaders) silently unpersisted against the remote Neon database, where each round trip costs ~20–100 ms and a per-row transaction held the season lock for minutes.
+
+**Domain pool connection (production).** The domain pool (`api/db/pool.js`) and the raw cache pool (`api/utils/cacheManager.js`) both target the same Neon Postgres instance. `connectionConfig.getDatabaseUrl()` resolves `DATABASE_URL` first, then falls back to `CACHE_DATABASE_URL`. On Render, set an explicit `DATABASE_URL` for the domain pool, or rely on the `CACHE_DATABASE_URL` fallback — both point at the same Neon DB. This is what makes normalized domain data survive Render's ephemeral-disk restarts: the raw payloads already persist in Neon's `app_cache`, and these batched domain writes persist alongside them.
+
 ### Season IDs
 
 `api/utils/seasonHelper.js` exposes two helpers. `getCurrentSeasonId()` computes the current NHL season ID — strings like `20252026`, treating October as the start of a new season. `isValidSeasonId(idStr)` validates the format (8 digits, where the first 4 + 1 equals the last 4).
@@ -341,6 +348,7 @@ TeamPage
 Important details:
 
 - The Python script requires `ANTHROPIC_API_KEY`.
+- The Claude model is read from the **required** `ANTHROPIC_MODEL` env var (the current value is `claude-sonnet-4-6`); it has no in-code default, so every environment must set it or the AI route fails. Upgrading the model is then a config change rather than a code change.
 - In development, Express tries to run `api/venv/bin/python3`.
 - In production, Express uses `python3`.
 - AI responses are cached for a long time using `CACHE_TYPES.AI`.
@@ -482,6 +490,6 @@ The backend allows CORS from:
 ## Current Maintenance Notes
 
 - `TeamPage.tsx` still holds some display-shaping logic inline (grouping roster players by position, formatting TOI, building stat rows), but the raw NHL parsing it used to duplicate now lives in the backend mappers. If team page behavior grows, consider moving the remaining display transforms into helper files near `react/src/Data/Helpers/`.
-- Team summary stats (`/team/stats`, `/team/:teamId?`) and skater corsi (`/player/skater/corsi`) are not yet normalized into contracts. If they grow more consumers, add mappers for them under `api/services/mappers/`.
+- Team summary stats (`/team/:teamId?`) and skater corsi (`/player/skater/corsi`) are not yet normalized into contracts. If they grow more consumers, add mappers for them under `api/services/mappers/`.
 - This file is the main architecture reference. The root `README.md` covers project overview, setup commands, environment variables, and the documentation index; keep the two consistent when either changes.
 - Known cleanup and refinement work (dead scaffolding, unused dependencies, small consistency fixes) is tracked separately in [cleanup-backlog.md](./cleanup-backlog.md) rather than in the Phase 2 feature backlog. Design-system alignment work lives in [frontend-backlog.md](./frontend-backlog.md), and differentiating feature ideas in [exciting-features-backlog.md](./exciting-features-backlog.md).

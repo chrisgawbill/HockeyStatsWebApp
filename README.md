@@ -63,7 +63,7 @@ cp api/.env.example api/.env
 cp react/.env.example react/.env
 ```
 
-`api/.env.example` documents every backend variable (cache/database config, `ANTHROPIC_API_KEY`, `DIAGNOSTICS_PASSPHRASE`, `PORT`, `NODE_ENV`). Everything is optional; with no configuration the app runs with a filesystem cache and no AI endpoint.
+`api/.env.example` documents every backend variable (cache/database config, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `DIAGNOSTICS_PASSPHRASE`, `PORT`, `NODE_ENV`). Everything is optional; with no configuration the app runs with a filesystem cache and no AI endpoint. The AI endpoint needs both `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` set — the model name has no in-code default.
 
 ## Testing
 

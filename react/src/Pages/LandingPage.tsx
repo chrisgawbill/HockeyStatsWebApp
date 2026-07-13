@@ -1,11 +1,9 @@
 import { Col, Container, Row } from 'react-bootstrap';
 import LandingPageStandings from '../Components/LandingPage/LandingPageStandings/LandingPageStandings';
-import React from 'react';
 import PlayerStatLeaderRow from '../Components/LandingPage/PlayerStatLeaderRow';
 import PageHeader from '../Components/PageHeader';
 import styles from '../Style/LandingPage/LandingPage.module.css';
-import { useSkaterLeaderData } from '../Data/Context/SkaterStatLeadersContext';
-import { useGoalieLeaderData } from '../Data/Context/GoalieStatLeadersContext';
+import { useSkaterLeaderData,useGoalieLeaderData } from '../Data/Context/StatLeadersContext';
 import { useDraftLotteryOddsData } from '../Data/Context/StandingsContext';
 import DraftLotteryOddsRow from '../Components/LandingPage/DraftLotteryOddsRow';
 import LoadingState from '../Components/LoadingState';

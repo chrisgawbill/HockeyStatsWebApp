@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MockTeam } from '../../Data/LocalData/teamPageMockData';
+import { TeamOverview } from '../../Data/Models/teamPageTypes';
 import { localTeamList } from '../../Data/LocalData/teamListData';
 import SeasonSelector from '../SeasonSelector';
 import styles from '../../Style/TeamPage/TeamPage.module.css';
@@ -10,7 +9,7 @@ function cx(...classes: (string | false | null | undefined)[]) {
 }
 
 interface TeamHeroProps {
-  team: MockTeam;
+  team: TeamOverview;
 }
 
 /**

@@ -1,10 +1,9 @@
-import React from 'react';
-import { MockTeam } from '../../Data/LocalData/teamPageMockData';
+import { TeamOverview } from '../../Data/Models/teamPageTypes';
 import shared from '../../Style/shared.module.css';
 import styles from '../../Style/TeamPage/TeamPage.module.css';
 
 interface BasicInfoStripProps {
-  team: MockTeam;
+  team: TeamOverview;
 }
 
 export default function BasicInfoStrip({ team }: BasicInfoStripProps) {

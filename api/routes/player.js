@@ -174,7 +174,7 @@ router.get('/goalie/summary', validateSeason, async function (req, res, next) {
 			`goalie_summary_${teamId || 'all'}_${seasonId}`,
 			() =>
 				axiosNhlGoalie
-					.get(`/summary?cayenneExp=${encodeURIComponent(exp)}&limit=10`)
+					.get(`/summary?cayenneExp=${encodeURIComponent(exp)}&limit=100`)
 					.then((r) => r.data),
 		);
 		runServiceTask(`goalie summary ${teamId || 'all'} ${seasonId}`, () =>

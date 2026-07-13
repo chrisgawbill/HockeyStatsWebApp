@@ -1,4 +1,3 @@
-import React from 'react';
 import { Team } from '../../Data/Models/team';
 import { Button, Modal } from 'react-bootstrap';
 interface TeamListModalProps {

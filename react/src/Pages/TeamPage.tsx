@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
 import PageHeader from '../Components/PageHeader';
@@ -11,12 +11,12 @@ import PlayerStatsSection from '../Components/TeamPage/PlayerStatsSection';
 import RosterSection from '../Components/TeamPage/RosterSection';
 import { localTeamList } from '../Data/LocalData/teamListData';
 import {
-  MockTeam,
-  MockStatItem,
+  TeamOverview,
+  StatItem,
   Position,
   RosterPlayer,
   PlayerStatLine,
-} from '../Data/LocalData/teamPageMockData';
+} from '../Data/Models/teamPageTypes';
 import { ScheduledGame } from '../Data/Models/scheduledGame';
 import {
   GetTeamStatsById,
@@ -144,7 +144,7 @@ function transformPlayerStats(
  * Shapes the raw NHL team summary into the labeled stat tiles the header strip
  * renders, formatting rates/percentages and falling back to "—" when absent.
  */
-function transformTeamStats(raw: any): MockStatItem[] {
+function transformTeamStats(raw: any): StatItem[] {
   return [
     { label: 'Goals For / GP', value: raw.goalsForPerGame?.toFixed(2) ?? '—' },
     {
@@ -194,7 +194,8 @@ export default function TeamPage() {
   const primaryColor: string = teamEntry?.primary ?? '#1B4F8A';
   const pageStyle = { '--color-primary': primaryColor } as React.CSSProperties;
 
-  const [team, setTeam] = useState<MockTeam | null>(null);
+  const [teamRawResponse, setTeamRawResponse] = useState<any>(null);
+
   const [staticInfo, setStaticInfo] = useState<{
     arena: string;
     founded: number;
@@ -202,7 +203,7 @@ export default function TeamPage() {
     conferenceChampionships: number;
     hallOfFamers: number;
   } | null>(null);
-  const [stats, setStats] = useState<MockStatItem[]>([]);
+  const [stats, setStats] = useState<StatItem[]>([]);
   const [schedule, setSchedule] = useState<ScheduledGame[]>([]);
   const [roster, setRoster] =
     useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
@@ -239,42 +240,7 @@ export default function TeamPage() {
         ]);
 
         const raw = statsRes?.data?.[0] ?? {};
-        const allStandings = [...easternStandingsData, ...westernStandingsData];
-        const s = allStandings.find((t) => t.id === triCode);
-
-        const conferenceStandings =
-          s?.conferenceName === 'Eastern'
-            ? easternStandingsData
-            : westernStandingsData;
-        const playoffCutoff = conferenceStandings.find(
-          (t) => t.conferenceStandingsPlace === 8,
-        );
-        const teamPoints = s?.points ?? raw.points ?? 0;
-        /**
-         * Points above or below the playoff line, using the #8 seed in the
-         * team's conference as the cutoff.
-         */
-        const playoffLineDelta =
-          playoffCutoff != null ? teamPoints - playoffCutoff.points : 0;
-
-        setTeam({
-          name: raw.teamFullName ?? teamEntry?.fullName ?? '',
-          triCode,
-          wins: s?.wins ?? raw.wins ?? 0,
-          losses: s?.losses ?? raw.losses ?? 0,
-          otLosses: s?.otLosses ?? raw.otLosses ?? 0,
-          points: teamPoints,
-          divisionRank: s?.divisionStandingsPlace ?? 0,
-          division: s?.divisionName ?? '',
-          conference: s?.conferenceName ?? '',
-          conferenceRank: s?.conferenceStandingsPlace ?? 0,
-          playoffLineDelta,
-          founded: 0,
-          arena: '—',
-          stanleyCups: 0,
-          conferenceChampionships: 0,
-          hallOfFamers: 0,
-        });
+        setTeamRawResponse(raw);
 
         const toiMap = new Map<number, number>();
         for (const p of summaryRes ?? []) {
@@ -302,7 +268,7 @@ export default function TeamPage() {
     }
 
     fetchMain();
-  }, [teamId, triCode, season]);
+  }, [teamId, season]);
 
   useEffect(() => {
     if (!triCode) return;
@@ -336,6 +302,37 @@ export default function TeamPage() {
 
     fetchStaticInfo();
   }, [teamId, triCode]);
+
+    const team: TeamOverview | null = useMemo(() => {
+    if(teamRawResponse == null){
+      return null;
+    }
+
+    const allStandings = [...easternStandingsData, ...westernStandingsData];
+    const s = allStandings.find((t) => t.id === triCode);
+    const conferenceStandings = s?.conferenceName === 'Eastern' ? easternStandingsData : westernStandingsData;
+    const playoffCutoff = conferenceStandings.find((t) => t.conferenceStandingsPlace === 8,);
+    const teamPoints = s?.points ?? teamRawResponse?.points;
+    const playoffLineDelta = playoffCutoff ? teamPoints - playoffCutoff.points : 0;
+    return {
+      name: teamRawResponse?.name,               
+      triCode,                              
+      wins: s?.wins ?? teamRawResponse?.wins,    
+      losses: s?.losses ?? teamRawResponse?.losses,
+      otLosses: s?.otLosses ?? teamRawResponse?.otLosses,
+      points: teamPoints,                   
+      divisionRank: s?.divisionStandingsPlace ?? 0,
+      division: s?.divisionName ?? '',
+      conference: s?.conferenceName ?? '',
+      conferenceRank: s?.conferenceStandingsPlace ?? 0,
+      playoffLineDelta,
+      founded: 0,                           
+      arena: '—',
+      stanleyCups: 0,                       
+      conferenceChampionships: 0,           
+      hallOfFamers: 0,   
+    }
+  }, [teamRawResponse, easternStandingsData, westernStandingsData, triCode, staticInfo]);
 
   if (loading || !team) {
     return (

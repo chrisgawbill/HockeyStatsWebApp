@@ -1,4 +1,3 @@
-import React from 'react';
 import { StandingsTeam } from '../../Data/Models/standingsTeam';
 import styles from '../../Style/LandingPage/DraftLotteryOddsCard.module.css';
 
