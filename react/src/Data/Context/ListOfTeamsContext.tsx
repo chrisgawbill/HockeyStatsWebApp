@@ -34,7 +34,6 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
           teamListData.current,
           rawData,
         );
-        localStorage.setItem('listOfTeams-key', JSON.stringify(finalTeamData));
         setListOfTeamsData(finalTeamData);
       } catch (error) {
         console.error('Error fetching data: ', error);
