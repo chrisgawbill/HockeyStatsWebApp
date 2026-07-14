@@ -18,50 +18,50 @@ const STAT_LEADER_ON_CONFLICT = `
  * leaders written.
  */
 async function upsertStatLeaders(client, leaders) {
-	return batchUpsert(
-		client,
-		{
-			table: 'stat_leaders',
-			columns: [
-				'season_id',
-				'player_id',
-				'player_type',
-				'category',
-				'rank',
-				'team_scope',
-				'value',
-				'leader_payload',
-			],
-			keyFn: (leader) =>
-				JSON.stringify([
-					leader.seasonId,
-					leader.playerType,
-					leader.category,
-					leader.teamScope ?? 'all',
-					leader.playerId,
-				]),
-			onConflict: STAT_LEADER_ON_CONFLICT,
-			toParams: (leader) => [
-				leader.seasonId,
-				leader.playerId,
-				leader.playerType,
-				leader.category,
-				leader.rank ?? null,
-				leader.teamScope ?? 'all',
-				leader.value ?? null,
-				toJsonParam(leader.leaderPayload),
-			],
-		},
-		leaders,
-	);
+  return batchUpsert(
+    client,
+    {
+      table: 'stat_leaders',
+      columns: [
+        'season_id',
+        'player_id',
+        'player_type',
+        'category',
+        'rank',
+        'team_scope',
+        'value',
+        'leader_payload',
+      ],
+      keyFn: (leader) =>
+        JSON.stringify([
+          leader.seasonId,
+          leader.playerType,
+          leader.category,
+          leader.teamScope ?? 'all',
+          leader.playerId,
+        ]),
+      onConflict: STAT_LEADER_ON_CONFLICT,
+      toParams: (leader) => [
+        leader.seasonId,
+        leader.playerId,
+        leader.playerType,
+        leader.category,
+        leader.rank ?? null,
+        leader.teamScope ?? 'all',
+        leader.value ?? null,
+        toJsonParam(leader.leaderPayload),
+      ],
+    },
+    leaders,
+  );
 }
 
 async function getStatLeaders(
-	client,
-	{ seasonId, playerType, category, teamScope = 'all' },
+  client,
+  { seasonId, playerType, category, teamScope = 'all' },
 ) {
-	const result = await client.query(
-		`
+  const result = await client.query(
+    `
 		SELECT
 			to_jsonb(stat_leaders) AS leader,
 			to_jsonb(players) AS player
@@ -73,12 +73,12 @@ async function getStatLeaders(
 			AND stat_leaders.team_scope = $4
 		ORDER BY stat_leaders.rank NULLS LAST, stat_leaders.value DESC NULLS LAST
 		`,
-		[seasonId, playerType, category, teamScope],
-	);
-	return result.rows;
+    [seasonId, playerType, category, teamScope],
+  );
+  return result.rows;
 }
 
 module.exports = {
-	upsertStatLeaders,
-	getStatLeaders,
+  upsertStatLeaders,
+  getStatLeaders,
 };

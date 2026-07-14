@@ -31,51 +31,52 @@ const PLAYER_ON_CONFLICT = `
  * number of unique players written.
  */
 async function upsertPlayers(client, players) {
-	return batchUpsert(
-		client,
-		{
-			table: 'players',
-			columns: [
-				'player_id',
-				'first_name',
-				'last_name',
-				'full_name',
-				'headshot_url',
-				'hero_image_url',
-				'birth_date',
-				'nationality_code',
-				'shoots_catches',
-				'position_code',
-				'source_payload',
-			],
-			keyFn: (player) => String(player.playerId),
-			onConflict: PLAYER_ON_CONFLICT,
-			toParams: (player) => [
-				player.playerId,
-				player.firstName ?? null,
-				player.lastName ?? null,
-				player.fullName ?? null,
-				player.headshotUrl ?? null,
-				player.heroImageUrl ?? null,
-				player.birthDate ?? null,
-				player.nationalityCode ?? null,
-				player.shootsCatches ?? null,
-				player.positionCode ?? null,
-				toJsonParam(player.sourcePayload),
-			],
-		},
-		players,
-	);
+  return batchUpsert(
+    client,
+    {
+      table: 'players',
+      columns: [
+        'player_id',
+        'first_name',
+        'last_name',
+        'full_name',
+        'headshot_url',
+        'hero_image_url',
+        'birth_date',
+        'nationality_code',
+        'shoots_catches',
+        'position_code',
+        'source_payload',
+      ],
+      keyFn: (player) => String(player.playerId),
+      onConflict: PLAYER_ON_CONFLICT,
+      toParams: (player) => [
+        player.playerId,
+        player.firstName ?? null,
+        player.lastName ?? null,
+        player.fullName ?? null,
+        player.headshotUrl ?? null,
+        player.heroImageUrl ?? null,
+        player.birthDate ?? null,
+        player.nationalityCode ?? null,
+        player.shootsCatches ?? null,
+        player.positionCode ?? null,
+        toJsonParam(player.sourcePayload),
+      ],
+    },
+    players,
+  );
 }
 
 async function getPlayer(client, playerId) {
-	const result = await client.query('SELECT * FROM players WHERE player_id = $1', [
-		playerId,
-	]);
-	return result.rows[0] ?? null;
+  const result = await client.query(
+    'SELECT * FROM players WHERE player_id = $1',
+    [playerId],
+  );
+  return result.rows[0] ?? null;
 }
 
 module.exports = {
-	upsertPlayers,
-	getPlayer,
+  upsertPlayers,
+  getPlayer,
 };

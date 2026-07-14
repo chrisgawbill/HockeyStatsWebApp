@@ -3,8 +3,8 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import { ListOfGamesProvider } from './Data/Context/ScheduleContext';
 import { SeasonProvider } from './Data/Context/SeasonContext';
 import { StandingsDataProvider } from './Data/Context/StandingsContext';
-import {StatLeadersProvider} from './Data/Context/StatLeadersContext';
-import { ErrorBoundary, getErrorMessage } from "react-error-boundary";
+import { StatLeadersProvider } from './Data/Context/StatLeadersContext';
+import { ErrorBoundary, getErrorMessage } from 'react-error-boundary';
 
 const LandingPage = lazy(() => import('./Pages/LandingPage'));
 const StandingsPage = lazy(() => import('./Pages/StandingsPage'));
@@ -28,27 +28,27 @@ export default function App() {
         <StandingsDataProvider>
           <ListOfGamesProvider>
             <StatLeadersProvider>
-                <Suspense fallback={null}>
-                  <ErrorBoundary
-                     fallbackRender={({ error, resetErrorBoundary }) => (
-                        <div role="alert">
-                          <p>Something went wrong:</p>
-                          <pre>{getErrorMessage(error)}</pre>
-                          <button onClick={resetErrorBoundary}>Try again</button>
-                        </div>
-                      )}
-                    >
-                    <Routes>
-                      <Route path="/" element={<LandingPage />} />
-                      <Route path="standings" element={<StandingsPage />} />
-                      <Route path="schedule" element={<SchedulePage />} />
-                      <Route path="teamList" element={<TeamList />} />
-                      <Route path="team/:teamId" element={<TeamPage />} />
-                      <Route path="game/:gameId" element={<GameDetailPage />} />
-                      <Route path="diagnostics" element={<DiagnosticsPage />} />
-                    </Routes>
-                  </ErrorBoundary>
-                </Suspense>
+              <Suspense fallback={null}>
+                <ErrorBoundary
+                  fallbackRender={({ error, resetErrorBoundary }) => (
+                    <div role="alert">
+                      <p>Something went wrong:</p>
+                      <pre>{getErrorMessage(error)}</pre>
+                      <button onClick={resetErrorBoundary}>Try again</button>
+                    </div>
+                  )}
+                >
+                  <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="standings" element={<StandingsPage />} />
+                    <Route path="schedule" element={<SchedulePage />} />
+                    <Route path="teamList" element={<TeamList />} />
+                    <Route path="team/:teamId" element={<TeamPage />} />
+                    <Route path="game/:gameId" element={<GameDetailPage />} />
+                    <Route path="diagnostics" element={<DiagnosticsPage />} />
+                  </Routes>
+                </ErrorBoundary>
+              </Suspense>
             </StatLeadersProvider>
           </ListOfGamesProvider>
         </StandingsDataProvider>

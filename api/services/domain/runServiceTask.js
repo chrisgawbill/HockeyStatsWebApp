@@ -10,34 +10,34 @@ const inFlightServiceTasks = new Set();
 let queueTail = Promise.resolve();
 
 function isDomainPersistenceConfigured() {
-	return Boolean(process.env.DATABASE_URL || process.env.CACHE_DATABASE_URL);
+  return Boolean(process.env.DATABASE_URL || process.env.CACHE_DATABASE_URL);
 }
 
 function runServiceTask(label, serviceFn) {
-	if (process.env.DISABLE_DOMAIN_PERSISTENCE === 'true') return null;
-	if (!isDomainPersistenceConfigured()) return null;
-	if (inFlightServiceTasks.has(label)) return null;
+  if (process.env.DISABLE_DOMAIN_PERSISTENCE === 'true') return null;
+  if (!isDomainPersistenceConfigured()) return null;
+  if (inFlightServiceTasks.has(label)) return null;
 
-	inFlightServiceTasks.add(label);
-	queueTail = queueTail
-		.then(() => serviceFn())
-		.catch((error) => {
-			// Log and swallow so one failed task never stalls the queue.
-			console.error(`Domain service task failed for ${label}:`, error);
-		})
-		.finally(() => inFlightServiceTasks.delete(label));
+  inFlightServiceTasks.add(label);
+  queueTail = queueTail
+    .then(() => serviceFn())
+    .catch((error) => {
+      // Log and swallow so one failed task never stalls the queue.
+      console.error(`Domain service task failed for ${label}:`, error);
+    })
+    .finally(() => inFlightServiceTasks.delete(label));
 
-	return null;
+  return null;
 }
 
 // Test-only seam: resolves once the currently-queued tasks have drained. Not
 // part of the fire-and-forget contract — callers never await runServiceTask.
 function whenIdle() {
-	return queueTail;
+  return queueTail;
 }
 
 module.exports = {
-	runServiceTask,
-	isDomainPersistenceConfigured,
-	whenIdle,
+  runServiceTask,
+  isDomainPersistenceConfigured,
+  whenIdle,
 };

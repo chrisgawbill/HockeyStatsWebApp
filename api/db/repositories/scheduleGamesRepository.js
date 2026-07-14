@@ -42,67 +42,67 @@ const SCHEDULE_GAME_ON_CONFLICT = `
  * the number of unique games written.
  */
 async function upsertScheduleGames(client, games) {
-	return batchUpsert(
-		client,
-		{
-			table: 'schedule_games',
-			columns: [
-				'game_id',
-				'season_id',
-				'game_type',
-				'game_date',
-				'start_time_utc',
-				'game_state',
-				'venue_name',
-				'home_team_id',
-				'away_team_id',
-				'home_tri_code',
-				'away_tri_code',
-				'home_score',
-				'away_score',
-				'period_descriptor',
-				'broadcasts',
-				'game_payload',
-			],
-			keyFn: (game) => String(game.gameId),
-			onConflict: SCHEDULE_GAME_ON_CONFLICT,
-			toParams: (game) => [
-				game.gameId,
-				game.seasonId,
-				game.gameType ?? null,
-				game.gameDate ?? null,
-				game.startTimeUtc ?? null,
-				game.gameState ?? null,
-				game.venueName ?? null,
-				game.homeTeamId ?? null,
-				game.awayTeamId ?? null,
-				game.homeTriCode ?? null,
-				game.awayTriCode ?? null,
-				game.homeScore ?? null,
-				game.awayScore ?? null,
-				toJsonParam(game.periodDescriptor, {}),
-				toJsonParam(game.broadcasts, []),
-				toJsonParam(game.gamePayload, {}),
-			],
-		},
-		games,
-	);
+  return batchUpsert(
+    client,
+    {
+      table: 'schedule_games',
+      columns: [
+        'game_id',
+        'season_id',
+        'game_type',
+        'game_date',
+        'start_time_utc',
+        'game_state',
+        'venue_name',
+        'home_team_id',
+        'away_team_id',
+        'home_tri_code',
+        'away_tri_code',
+        'home_score',
+        'away_score',
+        'period_descriptor',
+        'broadcasts',
+        'game_payload',
+      ],
+      keyFn: (game) => String(game.gameId),
+      onConflict: SCHEDULE_GAME_ON_CONFLICT,
+      toParams: (game) => [
+        game.gameId,
+        game.seasonId,
+        game.gameType ?? null,
+        game.gameDate ?? null,
+        game.startTimeUtc ?? null,
+        game.gameState ?? null,
+        game.venueName ?? null,
+        game.homeTeamId ?? null,
+        game.awayTeamId ?? null,
+        game.homeTriCode ?? null,
+        game.awayTriCode ?? null,
+        game.homeScore ?? null,
+        game.awayScore ?? null,
+        toJsonParam(game.periodDescriptor, {}),
+        toJsonParam(game.broadcasts, []),
+        toJsonParam(game.gamePayload, {}),
+      ],
+    },
+    games,
+  );
 }
 
 async function getScheduleGamesBySeason(client, seasonId) {
-	const result = await client.query(
-		`
+  const result = await client.query(
+    `
 		SELECT to_jsonb(schedule_games) AS game
 		FROM schedule_games
 		WHERE season_id = $1
 		ORDER BY game_date, start_time_utc, game_id
 		`,
-		[seasonId],
-	);
-	return result.rows;
+    [seasonId],
+  );
+  return result.rows;
 }
 
 module.exports = {
-	upsertScheduleGames,
-	getScheduleGamesBySeason,
+  upsertScheduleGames,
+  getScheduleGamesBySeason,
 };

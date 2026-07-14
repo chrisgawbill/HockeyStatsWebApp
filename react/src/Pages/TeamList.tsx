@@ -1,4 +1,4 @@
-import  { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { Team } from '../Data/Models/team';
 import { TeamStats } from '../Data/Models/teamStats';

@@ -17,41 +17,40 @@ const { mapTeamSeasonPayload } = require('../mappers/db/teamDbMapper');
  * @returns {Promise<{teamsUpserted: number, snapshotsUpserted: number, skipped: number}>}
  */
 async function persistTeamSeason({
-	seasonId,
-	teamStatsPayload,
-	standingsPayload = null,
+  seasonId,
+  teamStatsPayload,
+  standingsPayload = null,
 }) {
-	const mapped = mapTeamSeasonPayload({
-		seasonId,
-		teamStatsPayload,
-		standingsPayload,
-	});
+  const mapped = mapTeamSeasonPayload({
+    seasonId,
+    teamStatsPayload,
+    standingsPayload,
+  });
 
-	return await withTransaction(async (client) => {
-		// Season row first (FK parent), then teams before snapshots
-		// (team_season_snapshots references both seasons and teams).
-		await seasonsRepository.upsertSeason(
-			client,
-			buildSeason(seasonId, {
-				teamStats: teamStatsPayload ?? null,
-				standings: standingsPayload ?? null,
-			}),
-		);
+  return await withTransaction(async (client) => {
+    // Season row first (FK parent), then teams before snapshots
+    // (team_season_snapshots references both seasons and teams).
+    await seasonsRepository.upsertSeason(
+      client,
+      buildSeason(seasonId, {
+        teamStats: teamStatsPayload ?? null,
+        standings: standingsPayload ?? null,
+      }),
+    );
 
-		const teamsUpserted = await teamsRepository.upsertTeams(
-			client,
-			mapped.rows.map((row) => row.team),
-		);
-		const snapshotsUpserted =
-			await teamsRepository.upsertTeamSeasonSnapshots(
-				client,
-				mapped.rows.map((row) => row.snapshot),
-			);
+    const teamsUpserted = await teamsRepository.upsertTeams(
+      client,
+      mapped.rows.map((row) => row.team),
+    );
+    const snapshotsUpserted = await teamsRepository.upsertTeamSeasonSnapshots(
+      client,
+      mapped.rows.map((row) => row.snapshot),
+    );
 
-		return { teamsUpserted, snapshotsUpserted, skipped: mapped.skipped };
-	});
+    return { teamsUpserted, snapshotsUpserted, skipped: mapped.skipped };
+  });
 }
 
 module.exports = {
-	persistTeamSeason,
+  persistTeamSeason,
 };

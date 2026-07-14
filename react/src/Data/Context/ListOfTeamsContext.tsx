@@ -24,23 +24,20 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     useState<boolean>(true);
 
   async function GetTeams() {
-      let rawLocalList: any[] = [...localTeamList];
-      rawLocalList.sort((a, b) => b.fullName.localeCompare(a.fullName));
-      teamListData.current = rawLocalList;
-      try {
-        const teamStatsData = await GetTeamStatsById('');
-        const rawData: any[] = teamStatsData.data || teamStatsData;
-        const finalTeamData = ConvertToListOfTeams(
-          teamListData.current,
-          rawData,
-        );
-        setListOfTeamsData(finalTeamData);
-      } catch (error) {
-        console.error('Error fetching data: ', error);
-      } finally {
-        setLoadingListOfTeamsData(false);
-      }
+    let rawLocalList: any[] = [...localTeamList];
+    rawLocalList.sort((a, b) => b.fullName.localeCompare(a.fullName));
+    teamListData.current = rawLocalList;
+    try {
+      const teamStatsData = await GetTeamStatsById('');
+      const rawData: any[] = teamStatsData.data || teamStatsData;
+      const finalTeamData = ConvertToListOfTeams(teamListData.current, rawData);
+      setListOfTeamsData(finalTeamData);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    } finally {
+      setLoadingListOfTeamsData(false);
     }
+  }
   useEffect(() => {
     GetTeams();
   }, []);

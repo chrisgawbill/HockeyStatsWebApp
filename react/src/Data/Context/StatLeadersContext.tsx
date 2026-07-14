@@ -67,14 +67,18 @@ function StatLeadersProvider({ children }: { children: ReactNode }) {
 function useSkaterLeaderData(): SkaterLeaderContextValue {
   const context = useContext(StatLeadersContext);
   if (!context)
-    throw new Error('useSkaterLeaderData must be used within StatLeadersProvider');
+    throw new Error(
+      'useSkaterLeaderData must be used within StatLeadersProvider',
+    );
   return context.skater;
 }
 
 function useGoalieLeaderData(): GoalieLeaderContextValue {
   const context = useContext(StatLeadersContext);
   if (!context)
-    throw new Error('useGoalieLeaderData must be used within StatLeadersProvider');
+    throw new Error(
+      'useGoalieLeaderData must be used within StatLeadersProvider',
+    );
   return context.goalie;
 }
 

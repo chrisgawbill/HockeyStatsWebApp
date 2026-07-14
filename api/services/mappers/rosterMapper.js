@@ -33,10 +33,10 @@
 function mapRosterPlayer(rawPlayer) {
   const id = rawPlayer.id;
   const name =
-    `${rawPlayer.firstName?.default ?? ""} ${rawPlayer.lastName?.default ?? ""}`.trim();
+    `${rawPlayer.firstName?.default ?? ''} ${rawPlayer.lastName?.default ?? ''}`.trim();
   const number = rawPlayer.sweaterNumber ?? 0;
-  const position = rawPlayer.positionCode ?? "";
-  const headshot = rawPlayer.headshot ?? "";
+  const position = rawPlayer.positionCode ?? '';
+  const headshot = rawPlayer.headshot ?? '';
 
   return { id, name, number, position, headshot };
 }

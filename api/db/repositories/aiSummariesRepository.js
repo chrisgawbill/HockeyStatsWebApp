@@ -1,8 +1,8 @@
 const { toJsonParam } = require('./jsonParam');
 
 async function upsertAiSummary(client, summary) {
-	const result = await client.query(
-		`
+  const result = await client.query(
+    `
 		INSERT INTO ai_summaries (
 			team_id,
 			tri_code,
@@ -30,39 +30,39 @@ async function upsertAiSummary(client, summary) {
 			updated_at = now()
 		RETURNING *
 		`,
-		[
-			summary.teamId ?? null,
-			summary.triCode,
-			summary.summaryType ?? 'team_history',
-			summary.promptVersion ?? 'v1',
-			summary.modelProvider ?? null,
-			summary.modelName ?? null,
-			summary.promptHash ?? null,
-			toJsonParam(summary.content, {}),
-			toJsonParam(summary.sourceNotes, []),
-		],
-	);
-	return result.rows[0];
+    [
+      summary.teamId ?? null,
+      summary.triCode,
+      summary.summaryType ?? 'team_history',
+      summary.promptVersion ?? 'v1',
+      summary.modelProvider ?? null,
+      summary.modelName ?? null,
+      summary.promptHash ?? null,
+      toJsonParam(summary.content, {}),
+      toJsonParam(summary.sourceNotes, []),
+    ],
+  );
+  return result.rows[0];
 }
 
 async function getAiSummary(
-	client,
-	{ triCode, summaryType = 'team_history', promptVersion = 'v1' },
+  client,
+  { triCode, summaryType = 'team_history', promptVersion = 'v1' },
 ) {
-	const result = await client.query(
-		`
+  const result = await client.query(
+    `
 		SELECT *
 		FROM ai_summaries
 		WHERE tri_code = $1
 			AND summary_type = $2
 			AND prompt_version = $3
 		`,
-		[triCode, summaryType, promptVersion],
-	);
-	return result.rows[0] ?? null;
+    [triCode, summaryType, promptVersion],
+  );
+  return result.rows[0] ?? null;
 }
 
 module.exports = {
-	upsertAiSummary,
-	getAiSummary,
+  upsertAiSummary,
+  getAiSummary,
 };

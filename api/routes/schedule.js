@@ -1,10 +1,14 @@
-var express = require("express");
-const { axiosNhl } = require("../services/nhlApiClient");
-const { GetOrFetch, writeCache, CACHE_TYPES } = require("../utils/cacheManager");
-const { getCurrentSeasonId, validateSeason } = require("../utils/seasonHelper");
-const { mapGame } = require("../services/mappers/scheduleMapper");
-const { runServiceTask } = require("../services/domain/runServiceTask");
-const { persistSchedule } = require("../services/domain/scheduleService");
+var express = require('express');
+const { axiosNhl } = require('../services/nhlApiClient');
+const {
+  GetOrFetch,
+  writeCache,
+  CACHE_TYPES,
+} = require('../utils/cacheManager');
+const { getCurrentSeasonId, validateSeason } = require('../utils/seasonHelper');
+const { mapGame } = require('../services/mappers/scheduleMapper');
+const { runServiceTask } = require('../services/domain/runServiceTask');
+const { persistSchedule } = require('../services/domain/scheduleService');
 
 var router = express.Router();
 
@@ -47,12 +51,14 @@ async function fetchSeasonSchedule(seasonId) {
   const weekDates = [];
   const cur = new Date(startDate);
   while (cur <= endDate) {
-    weekDates.push(cur.toISOString().split("T")[0]);
+    weekDates.push(cur.toISOString().split('T')[0]);
     cur.setDate(cur.getDate() + 7);
   }
 
   const responses = await Promise.all(
-    weekDates.map(date => axiosNhl.get(`/schedule/${date}`).catch(() => null))
+    weekDates.map((date) =>
+      axiosNhl.get(`/schedule/${date}`).catch(() => null),
+    ),
   );
 
   const allGameWeeks = [];
@@ -85,14 +91,14 @@ async function refreshScheduleCache() {
  * raw weekly NHL schedule payload for that season, and returns mapped
  * ScheduleGameContract models in a `{ games }` envelope.
  */
-router.get("/", validateSeason, async function (req, res, next) {
+router.get('/', validateSeason, async function (req, res, next) {
   try {
     const seasonId = req.seasonId;
     const raw = await GetOrFetch(CACHE_TYPES.SCHEDULE, seasonId, () =>
-      fetchSeasonSchedule(seasonId)
+      fetchSeasonSchedule(seasonId),
     );
     runServiceTask(`season schedule ${seasonId}`, () =>
-      persistSchedule({ seasonId, schedulePayload: raw })
+      persistSchedule({ seasonId, schedulePayload: raw }),
     );
     res.send({ games: mapSeasonSchedule(raw) });
   } catch (e) {
@@ -105,14 +111,14 @@ router.get("/", validateSeason, async function (req, res, next) {
  * Accepts an NHL game id path param, loads the public gamecenter landing
  * payload, and passes it through unchanged for game-detail preview/final views.
  */
-router.get("/landing/:gameID", async function (req, res, next) {
+router.get('/landing/:gameID', async function (req, res, next) {
   try {
     const url = `/gamecenter/${req.params.gameID}/landing`;
     const data = await GetOrFetch(
       CACHE_TYPES.SCHEDULE,
       `landing_${req.params.gameID}`,
       () => axiosNhl.get(url).then((r) => r.data),
-      { ttlMs: 5 * 60 * 1000 }
+      { ttlMs: 5 * 60 * 1000 },
     );
     res.send(data);
   } catch (e) {
@@ -126,14 +132,14 @@ router.get("/landing/:gameID", async function (req, res, next) {
  * payload, and passes it through unchanged so the frontend can backfill scores
  * and render game details.
  */
-router.get("/:gameID", async function (req, res, next) {
+router.get('/:gameID', async function (req, res, next) {
   try {
     const url = `/gamecenter/${req.params.gameID}/boxscore`;
     const data = await GetOrFetch(
       CACHE_TYPES.SCHEDULE,
       `boxscore_${req.params.gameID}`,
       () => axiosNhl.get(url).then((r) => r.data),
-      { ttlMs: 5 * 60 * 1000 }
+      { ttlMs: 5 * 60 * 1000 },
     );
     res.send(data);
   } catch (e) {

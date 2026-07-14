@@ -1,10 +1,10 @@
 const { toJsonParam } = require('./jsonParam');
 
 async function upsertSeason(client, season) {
-	const startYear = Number(season.seasonId.slice(0, 4));
-	const endYear = Number(season.seasonId.slice(4, 8));
-	const result = await client.query(
-		`
+  const startYear = Number(season.seasonId.slice(0, 4));
+  const endYear = Number(season.seasonId.slice(4, 8));
+  const result = await client.query(
+    `
 		INSERT INTO seasons (
 			season_id,
 			start_year,
@@ -31,27 +31,28 @@ async function upsertSeason(client, season) {
 			updated_at = now()
 		RETURNING *
 		`,
-		[
-			season.seasonId,
-			startYear,
-			endYear,
-			season.regularSeasonStart ?? null,
-			season.regularSeasonEnd ?? null,
-			season.playoffsEnd ?? null,
-			toJsonParam(season.sourcePayload),
-		],
-	);
-	return result.rows[0];
+    [
+      season.seasonId,
+      startYear,
+      endYear,
+      season.regularSeasonStart ?? null,
+      season.regularSeasonEnd ?? null,
+      season.playoffsEnd ?? null,
+      toJsonParam(season.sourcePayload),
+    ],
+  );
+  return result.rows[0];
 }
 
 async function getSeason(client, seasonId) {
-	const result = await client.query('SELECT * FROM seasons WHERE season_id = $1', [
-		seasonId,
-	]);
-	return result.rows[0] ?? null;
+  const result = await client.query(
+    'SELECT * FROM seasons WHERE season_id = $1',
+    [seasonId],
+  );
+  return result.rows[0] ?? null;
 }
 
 module.exports = {
-	upsertSeason,
-	getSeason,
+  upsertSeason,
+  getSeason,
 };

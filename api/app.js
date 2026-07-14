@@ -20,22 +20,24 @@ const { runServiceTask } = require('./services/domain/runServiceTask');
 const { persistAiSummary } = require('./services/domain/aiSummaryService');
 
 let corsOptions = {
-	origin: [
-		'http://localhost:3000',
-		'http://localhost:5173',
-		'https://chrisgawbill.github.io',
-	],
-	allowedHeaders: ['Content-Type', 'x-diagnostics-key'],
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://chrisgawbill.github.io',
+  ],
+  allowedHeaders: ['Content-Type', 'x-diagnostics-key'],
 };
 
 const rateLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
-	max: 10,
-	standardHeaders: true,
-	legacyHeaders: false,
-	handler: (req, res) => {
-		res.status(429).json({ error: 'Too many requests, please try again later.' });
-	},
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res
+      .status(429)
+      .json({ error: 'Too many requests, please try again later.' });
+  },
 });
 
 var app = express();
@@ -56,100 +58,100 @@ app.use('/team', teamRouter);
 app.use('/schedule', scheduleRouter);
 
 app.post('/python-service', rateLimiter, async (req, res, next) => {
-	try {
-		const message = req.body.content;
-		const key = req.body.cacheKey ?? 'default';
+  try {
+    const message = req.body.content;
+    const key = req.body.cacheKey ?? 'default';
 
-		if(key !== 'default' && !/^[A-Z]{3}$/.test(key)) {
-			return res.status(400).json({ error: 'Invalid cacheKey format.' });
-		}
+    if (key !== 'default' && !/^[A-Z]{3}$/.test(key)) {
+      return res.status(400).json({ error: 'Invalid cacheKey format.' });
+    }
 
-		const triCode = req.body.triCode;
+    const triCode = req.body.triCode;
 
-		const cached = await readCache(CACHE_TYPES.AI, key);
-		if (cached !== null) {
-			queueAiSummaryPersistence(key, cached, message, triCode);
-			return res.send(cached);
-		}
+    const cached = await readCache(CACHE_TYPES.AI, key);
+    if (cached !== null) {
+      queueAiSummaryPersistence(key, cached, message, triCode);
+      return res.send(cached);
+    }
 
-		const result = await runAIPythonScript(message);
-		await writeCache(CACHE_TYPES.AI, key, result);
-		queueAiSummaryPersistence(key, result, message, triCode);
-		res.send(result);
-	} catch (error) {
-		next(error);
-	}
+    const result = await runAIPythonScript(message);
+    await writeCache(CACHE_TYPES.AI, key, result);
+    queueAiSummaryPersistence(key, result, message, triCode);
+    res.send(result);
+  } catch (error) {
+    next(error);
+  }
 });
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-	next(createError(404));
+  next(createError(404));
 });
 
 // error handler
 app.use(function (err, req, res, next) {
-	console.error(`${req.method} ${req.originalUrl} failed:`, err);
-	res
-		.status(err.status || 500)
-		.json({ error: err.message ?? 'Internal server error' });
+  console.error(`${req.method} ${req.originalUrl} failed:`, err);
+  res
+    .status(err.status || 500)
+    .json({ error: err.message ?? 'Internal server error' });
 });
 
 const runAIPythonScript = (message) => {
-	return new Promise((resolve, reject) => {
-		const pythonPath =
-			process.env.NODE_ENV === 'production' ?
-				'python3'
-			:	path.join(__dirname, 'venv/bin/python3');
-		const pythonProcess = spawn(pythonPath, [
-			path.join(__dirname, 'routes/hockey-ai.py'),
-			message,
-		]);
+  return new Promise((resolve, reject) => {
+    const pythonPath =
+      process.env.NODE_ENV === 'production'
+        ? 'python3'
+        : path.join(__dirname, 'venv/bin/python3');
+    const pythonProcess = spawn(pythonPath, [
+      path.join(__dirname, 'routes/hockey-ai.py'),
+      message,
+    ]);
 
-		let stdoutData = '';
+    let stdoutData = '';
 
-		pythonProcess.on('error', (err) => {
-			console.error('Failed to start python process: ', err);
-			reject(`Failed to start python process: ${err.message}`);
-		});
-		pythonProcess.stdout.on('data', (data) => {
-			stdoutData += data.toString();
-		});
-		pythonProcess.stderr.on('data', (data) => {
-			console.error('stderr: ' + data);
-		});
-		pythonProcess.on('close', (code) => {
-			console.log('child process exited with code: ' + code);
-			if (code !== 0) {
-				reject(`Process exited with code ${code}`);
-			} else {
-				try {
-					const jsonReponse = JSON.parse(stdoutData);
-					if (jsonReponse.error) {
-						reject(jsonReponse.error);
-					} else {
-						resolve(jsonReponse.data);
-					}
-				} catch (e) {
-					reject(`Error parsing JSON response\n${stdoutData}`);
-				}
-			}
-		});
-	});
+    pythonProcess.on('error', (err) => {
+      console.error('Failed to start python process: ', err);
+      reject(`Failed to start python process: ${err.message}`);
+    });
+    pythonProcess.stdout.on('data', (data) => {
+      stdoutData += data.toString();
+    });
+    pythonProcess.stderr.on('data', (data) => {
+      console.error('stderr: ' + data);
+    });
+    pythonProcess.on('close', (code) => {
+      console.log('child process exited with code: ' + code);
+      if (code !== 0) {
+        reject(`Process exited with code ${code}`);
+      } else {
+        try {
+          const jsonReponse = JSON.parse(stdoutData);
+          if (jsonReponse.error) {
+            reject(jsonReponse.error);
+          } else {
+            resolve(jsonReponse.data);
+          }
+        } catch (e) {
+          reject(`Error parsing JSON response\n${stdoutData}`);
+        }
+      }
+    });
+  });
 };
 
 function queueAiSummaryPersistence(cacheKey, content, prompt, triCode) {
-	const resolvedTriCode = triCode ?? (cacheKey === 'default' ? null : cacheKey);
-	if (resolvedTriCode === null) {
-		return;
-	}
+  const resolvedTriCode = triCode ?? (cacheKey === 'default' ? null : cacheKey);
+  if (resolvedTriCode === null) {
+    return;
+  }
 
-	runServiceTask(`ai summary ${resolvedTriCode}`, () =>
-		persistAiSummary({
-			triCode: resolvedTriCode,
-			content,
-			prompt,
-			modelProvider: 'anthropic',
-		}),
-	);
+  runServiceTask(`ai summary ${resolvedTriCode}`, () =>
+    persistAiSummary({
+      triCode: resolvedTriCode,
+      content,
+      prompt,
+      modelProvider: 'anthropic',
+    }),
+  );
 }
 
 module.exports = app;

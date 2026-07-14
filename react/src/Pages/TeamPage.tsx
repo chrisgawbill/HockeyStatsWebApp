@@ -123,21 +123,19 @@ function transformPlayerStats(
     if (p.playerId != null && p.satPercentage != null)
       corsiMap.set(p.playerId, p.satPercentage);
   }
-  return (summary ?? []).map(
-    (p: any): PlayerStatLine => ({
-      playerId: p.playerId,
-      name: p.name ?? '',
-      position: p.position ?? '',
-      gamesPlayed: p.gamesPlayed ?? 0,
-      goals: p.goals ?? 0,
-      assists: p.assists ?? 0,
-      points: p.points ?? 0,
-      plusMinus: p.plusMinus ?? 0,
-      penaltyMinutes: p.penaltyMinutes ?? 0,
-      faceoffWinPct: p.faceoffWinPct ?? null,
-      corsiPct: corsiMap.get(p.playerId) ?? null,
-    }),
-  );
+  return (summary ?? []).map((p: any): PlayerStatLine => ({
+    playerId: p.playerId,
+    name: p.name ?? '',
+    position: p.position ?? '',
+    gamesPlayed: p.gamesPlayed ?? 0,
+    goals: p.goals ?? 0,
+    assists: p.assists ?? 0,
+    points: p.points ?? 0,
+    plusMinus: p.plusMinus ?? 0,
+    penaltyMinutes: p.penaltyMinutes ?? 0,
+    faceoffWinPct: p.faceoffWinPct ?? null,
+    corsiPct: corsiMap.get(p.playerId) ?? null,
+  }));
 }
 
 /**
@@ -303,36 +301,49 @@ export default function TeamPage() {
     fetchStaticInfo();
   }, [teamId, triCode]);
 
-    const team: TeamOverview | null = useMemo(() => {
-    if(teamRawResponse == null){
+  const team: TeamOverview | null = useMemo(() => {
+    if (teamRawResponse == null) {
       return null;
     }
 
     const allStandings = [...easternStandingsData, ...westernStandingsData];
     const s = allStandings.find((t) => t.id === triCode);
-    const conferenceStandings = s?.conferenceName === 'Eastern' ? easternStandingsData : westernStandingsData;
-    const playoffCutoff = conferenceStandings.find((t) => t.conferenceStandingsPlace === 8,);
+    const conferenceStandings =
+      s?.conferenceName === 'Eastern'
+        ? easternStandingsData
+        : westernStandingsData;
+    const playoffCutoff = conferenceStandings.find(
+      (t) => t.conferenceStandingsPlace === 8,
+    );
     const teamPoints = s?.points ?? teamRawResponse?.points;
-    const playoffLineDelta = playoffCutoff ? teamPoints - playoffCutoff.points : 0;
+    const playoffLineDelta = playoffCutoff
+      ? teamPoints - playoffCutoff.points
+      : 0;
     return {
-      name: teamRawResponse?.name,               
-      triCode,                              
-      wins: s?.wins ?? teamRawResponse?.wins,    
+      name: teamRawResponse?.name,
+      triCode,
+      wins: s?.wins ?? teamRawResponse?.wins,
       losses: s?.losses ?? teamRawResponse?.losses,
       otLosses: s?.otLosses ?? teamRawResponse?.otLosses,
-      points: teamPoints,                   
+      points: teamPoints,
       divisionRank: s?.divisionStandingsPlace ?? 0,
       division: s?.divisionName ?? '',
       conference: s?.conferenceName ?? '',
       conferenceRank: s?.conferenceStandingsPlace ?? 0,
       playoffLineDelta,
-      founded: 0,                           
+      founded: 0,
       arena: '—',
-      stanleyCups: 0,                       
-      conferenceChampionships: 0,           
-      hallOfFamers: 0,   
-    }
-  }, [teamRawResponse, easternStandingsData, westernStandingsData, triCode, staticInfo]);
+      stanleyCups: 0,
+      conferenceChampionships: 0,
+      hallOfFamers: 0,
+    };
+  }, [
+    teamRawResponse,
+    easternStandingsData,
+    westernStandingsData,
+    triCode,
+    staticInfo,
+  ]);
 
   if (loading || !team) {
     return (

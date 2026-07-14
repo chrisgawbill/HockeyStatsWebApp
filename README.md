@@ -76,11 +76,11 @@ The suite runs offline — no NHL network access, no database required. See the 
 
 ## Documentation
 
-| Document | What it is |
-| --- | --- |
-| [docs/architecture.md](./docs/architecture.md) | How the app fits together; conventions for new code. **Read first.** |
-| [docs/phase-2-backlog.md](./docs/phase-2-backlog.md) | Feature roadmap with self-contained implementation prompts |
-| [docs/phase-2-progress.md](./docs/phase-2-progress.md) | Working journal for the Phase 2 roadmap |
-| [docs/cleanup-backlog.md](./docs/cleanup-backlog.md) | Refactor, hygiene, and hardening tickets |
-| [docs/frontend-backlog.md](./docs/frontend-backlog.md) | Material Design 3 alignment tickets |
-| [docs/exciting-features-backlog.md](./docs/exciting-features-backlog.md) | Differentiating feature ideas (mostly zero-fetch, client-side) |
+| Document                                                                 | What it is                                                           |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [docs/architecture.md](./docs/architecture.md)                           | How the app fits together; conventions for new code. **Read first.** |
+| [docs/phase-2-backlog.md](./docs/phase-2-backlog.md)                     | Feature roadmap with self-contained implementation prompts           |
+| [docs/phase-2-progress.md](./docs/phase-2-progress.md)                   | Working journal for the Phase 2 roadmap                              |
+| [docs/cleanup-backlog.md](./docs/cleanup-backlog.md)                     | Refactor, hygiene, and hardening tickets                             |
+| [docs/frontend-backlog.md](./docs/frontend-backlog.md)                   | Material Design 3 alignment tickets                                  |
+| [docs/exciting-features-backlog.md](./docs/exciting-features-backlog.md) | Differentiating feature ideas (mostly zero-fetch, client-side)       |

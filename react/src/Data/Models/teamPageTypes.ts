@@ -23,11 +23,7 @@ export interface StatItem {
 }
 
 export type Position =
-  | 'Center'
-  | 'Left Wing'
-  | 'Right Wing'
-  | 'Defenseman'
-  | 'Goalie';
+  'Center' | 'Left Wing' | 'Right Wing' | 'Defenseman' | 'Goalie';
 
 export interface RosterPlayer {
   id: number;

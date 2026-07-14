@@ -1,8 +1,8 @@
-var express = require("express");
-const { axiosNhl } = require("../services/nhlApiClient");
-const { GetOrFetch, CACHE_TYPES } = require("../utils/cacheManager");
-const { getCurrentSeasonId, validateSeason } = require("../utils/seasonHelper");
-const { mapStandingsTeam } = require("../services/mappers/standingsMapper");
+var express = require('express');
+const { axiosNhl } = require('../services/nhlApiClient');
+const { GetOrFetch, CACHE_TYPES } = require('../utils/cacheManager');
+const { getCurrentSeasonId, validateSeason } = require('../utils/seasonHelper');
+const { mapStandingsTeam } = require('../services/mappers/standingsMapper');
 
 var router = express.Router();
 
@@ -14,12 +14,12 @@ var router = express.Router();
  * @returns {Promise<string|null>} YYYY-MM-DD end date, or null if season unknown
  */
 async function getSeasonEndDate(season) {
-  const data = await GetOrFetch(
-    CACHE_TYPES.STANDINGS,
-    "season-index",
-    () => axiosNhl.get("/standings-season").then((r) => r.data)
+  const data = await GetOrFetch(CACHE_TYPES.STANDINGS, 'season-index', () =>
+    axiosNhl.get('/standings-season').then((r) => r.data),
   );
-  const match = (data.seasons ?? []).find((s) => String(s.id) === String(season));
+  const match = (data.seasons ?? []).find(
+    (s) => String(s.id) === String(season),
+  );
   return match?.standingsEnd ?? null;
 }
 
@@ -33,7 +33,7 @@ async function getSeasonEndDate(season) {
  */
 async function fetchStandings(season) {
   if (season === getCurrentSeasonId()) {
-    const response = await axiosNhl.get("/standings/now");
+    const response = await axiosNhl.get('/standings/now');
     return response.data;
   }
   const endDate = await getSeasonEndDate(season);
@@ -48,11 +48,11 @@ async function fetchStandings(season) {
  * standings payload for the correct standings date, and returns the original
  * payload with `standings` replaced by normalized StandingsTeamContract rows.
  */
-router.get("/", validateSeason, async function (req, res, next) {
+router.get('/', validateSeason, async function (req, res, next) {
   try {
     const seasonId = req.seasonId;
     const data = await GetOrFetch(CACHE_TYPES.STANDINGS, seasonId, () =>
-      fetchStandings(seasonId)
+      fetchStandings(seasonId),
     );
     const standings = (data.standings ?? [])
       .map(mapStandingsTeam)

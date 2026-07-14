@@ -63,8 +63,8 @@
 function mapSkaterSummary(raw) {
   return (raw?.data ?? []).map((p) => ({
     playerId: p.playerId,
-    name: p.skaterFullName ?? "",
-    position: p.positionCode ?? "",
+    name: p.skaterFullName ?? '',
+    position: p.positionCode ?? '',
     gamesPlayed: p.gamesPlayed ?? 0,
     goals: p.goals ?? 0,
     assists: p.assists ?? 0,
@@ -87,7 +87,7 @@ function mapGoalieSummary(raw) {
     // NOTE: the frontend read `goalieId`; the rest endpoint may also expose
     // `playerId`. Accept either so the TOI merge stays robust.
     goalieId: g.goalieId ?? g.playerId,
-    name: g.goalieFullName ?? "",
+    name: g.goalieFullName ?? '',
     gamesPlayed: g.gamesPlayed ?? 0,
     wins: g.wins ?? 0,
     losses: g.losses ?? 0,
@@ -112,14 +112,14 @@ function mapStatLeaders(raw, category) {
 
   return list.map((p) => ({
     id: p.id,
-    firstName: p.firstName?.default ?? "",
-    lastName: p.lastName?.default ?? "",
+    firstName: p.firstName?.default ?? '',
+    lastName: p.lastName?.default ?? '',
     sweaterNumber: p.sweaterNumber ?? null,
-    headshot: p.headshot ?? "",
-    teamAbbrev: p.teamAbbrev ?? "",
-    teamName: p.teamName?.default ?? "",
-    teamLogo: p.teamLogo ?? "",
-    position: p.position ?? "",
+    headshot: p.headshot ?? '',
+    teamAbbrev: p.teamAbbrev ?? '',
+    teamName: p.teamName?.default ?? '',
+    teamLogo: p.teamLogo ?? '',
+    position: p.position ?? '',
     value: p.value,
   }));
 }

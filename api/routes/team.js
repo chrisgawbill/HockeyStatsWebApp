@@ -24,9 +24,9 @@ router.use(validateSeason);
  * @returns {string}
  */
 function shortDayOfWeek(gameDate) {
-	return new Date(`${gameDate}T12:00:00`).toLocaleDateString('en-US', {
-		weekday: 'short',
-	});
+  return new Date(`${gameDate}T12:00:00`).toLocaleDateString('en-US', {
+    weekday: 'short',
+  });
 }
 
 /**
@@ -35,21 +35,21 @@ function shortDayOfWeek(gameDate) {
  * for that team/season, and returns a normalized RosterContract.
  */
 router.get('/roster/:triCode', async function (req, res, next) {
-	try {
-		const { triCode } = req.params;
-		const season = req.seasonId;
-		const raw = await GetOrFetch(
-			CACHE_TYPES.ROSTER,
-			`${triCode}_${season}`,
-			() => axiosNhl.get(`/roster/${triCode}/${season}`).then((r) => r.data),
-		);
-		runServiceTask(`roster ${triCode} ${season}`, () =>
-			persistRoster({ seasonId: season, triCode, rosterPayload: raw }),
-		);
-		res.send(mapRoster(raw));
-	} catch (e) {
-		next(e);
-	}
+  try {
+    const { triCode } = req.params;
+    const season = req.seasonId;
+    const raw = await GetOrFetch(
+      CACHE_TYPES.ROSTER,
+      `${triCode}_${season}`,
+      () => axiosNhl.get(`/roster/${triCode}/${season}`).then((r) => r.data),
+    );
+    runServiceTask(`roster ${triCode} ${season}`, () =>
+      persistRoster({ seasonId: season, triCode, rosterPayload: raw }),
+    );
+    res.send(mapRoster(raw));
+  } catch (e) {
+    next(e);
+  }
 });
 
 /**
@@ -59,37 +59,37 @@ router.get('/roster/:triCode', async function (req, res, next) {
  * returns the games sorted by calendar date.
  */
 router.get('/schedule/:triCode', async function (req, res, next) {
-	try {
-		const { triCode } = req.params;
-		const season = req.seasonId;
-		const raw = await GetOrFetch(
-			CACHE_TYPES.SCHEDULE,
-			`team_${triCode}_${season}`,
-			() =>
-				axiosNhl
-					.get(`/club-schedule-season/${triCode}/${season}`)
-					.then((r) => r.data),
-		);
-		runServiceTask(`club schedule ${triCode} ${season}`, () =>
-			persistSchedule({
-				seasonId: season,
-				schedulePayload: raw,
-				sourceLabel: 'clubSchedule',
-			}),
-		);
-		const games = (raw.games ?? [])
-			.map((g) =>
-				mapGame(g, { date: g.gameDate, dayAbbrev: shortDayOfWeek(g.gameDate) }),
-			)
-			.sort(
-				(a, b) =>
-					new Date(`${a.date}T12:00:00`).getTime() -
-					new Date(`${b.date}T12:00:00`).getTime(),
-			);
-		res.send({ games });
-	} catch (e) {
-		next(e);
-	}
+  try {
+    const { triCode } = req.params;
+    const season = req.seasonId;
+    const raw = await GetOrFetch(
+      CACHE_TYPES.SCHEDULE,
+      `team_${triCode}_${season}`,
+      () =>
+        axiosNhl
+          .get(`/club-schedule-season/${triCode}/${season}`)
+          .then((r) => r.data),
+    );
+    runServiceTask(`club schedule ${triCode} ${season}`, () =>
+      persistSchedule({
+        seasonId: season,
+        schedulePayload: raw,
+        sourceLabel: 'clubSchedule',
+      }),
+    );
+    const games = (raw.games ?? [])
+      .map((g) =>
+        mapGame(g, { date: g.gameDate, dayAbbrev: shortDayOfWeek(g.gameDate) }),
+      )
+      .sort(
+        (a, b) =>
+          new Date(`${a.date}T12:00:00`).getTime() -
+          new Date(`${b.date}T12:00:00`).getTime(),
+      );
+    res.send({ games });
+  } catch (e) {
+    next(e);
+  }
 });
 
 /**
@@ -99,28 +99,27 @@ router.get('/schedule/:triCode', async function (req, res, next) {
  * unchanged.
  */
 router.get('/:teamId?', async function (req, res, next) {
-	try {
-		const { teamId } = req.params;
-		const season = req.seasonId;
-		const cayenneExp =
-			teamId ?
-				`teamId=${teamId} and seasonId=${season} and gameTypeId=2`
-			:	`seasonId=${season} and gameTypeId=2`;
-		const data = await GetOrFetch(
-			CACHE_TYPES.TEAM,
-			`summary_${teamId || 'all'}_${season}`,
-			() =>
-				axiosNhlTeam
-					.get(`/summary?cayenneExp=${encodeURIComponent(cayenneExp)}`)
-					.then((r) => r.data),
-		);
-		runServiceTask(`team summary ${teamId || 'all'} ${season}`, () =>
-			persistTeamSeason({ seasonId: season, teamStatsPayload: data }),
-		);
-		res.send(data);
-	} catch (e) {
-		next(e);
-	}
+  try {
+    const { teamId } = req.params;
+    const season = req.seasonId;
+    const cayenneExp = teamId
+      ? `teamId=${teamId} and seasonId=${season} and gameTypeId=2`
+      : `seasonId=${season} and gameTypeId=2`;
+    const data = await GetOrFetch(
+      CACHE_TYPES.TEAM,
+      `summary_${teamId || 'all'}_${season}`,
+      () =>
+        axiosNhlTeam
+          .get(`/summary?cayenneExp=${encodeURIComponent(cayenneExp)}`)
+          .then((r) => r.data),
+    );
+    runServiceTask(`team summary ${teamId || 'all'} ${season}`, () =>
+      persistTeamSeason({ seasonId: season, teamStatsPayload: data }),
+    );
+    res.send(data);
+  } catch (e) {
+    next(e);
+  }
 });
 
 module.exports = router;

@@ -12,39 +12,39 @@ const { mapSchedulePayload } = require('../mappers/db/scheduleDbMapper');
  * club-schedule payload (`{ games: [...] }`).
  */
 async function persistSchedule({
-	seasonId,
-	schedulePayload,
-	sourceLabel = 'schedule',
+  seasonId,
+  schedulePayload,
+  sourceLabel = 'schedule',
 }) {
-	const mapped = mapSchedulePayload({ seasonId, schedulePayload });
+  const mapped = mapSchedulePayload({ seasonId, schedulePayload });
 
-	const teams = [];
-	const games = [];
-	for (const { homeTeam, awayTeam, game } of mapped.rows) {
-		if (homeTeam) teams.push(homeTeam);
-		if (awayTeam) teams.push(awayTeam);
-		games.push(game);
-	}
+  const teams = [];
+  const games = [];
+  for (const { homeTeam, awayTeam, game } of mapped.rows) {
+    if (homeTeam) teams.push(homeTeam);
+    if (awayTeam) teams.push(awayTeam);
+    games.push(game);
+  }
 
-	return await withTransaction(async (client) => {
-		// Season row first (FK parent), then teams before games
-		// (schedule_games references teams). Batching dedupes the ~32 teams that
-		// the payload repeats ~80x each, so teamsUpserted now counts unique teams.
-		await seasonsRepository.upsertSeason(
-			client,
-			buildSeason(seasonId, { [sourceLabel]: schedulePayload ?? null }),
-		);
+  return await withTransaction(async (client) => {
+    // Season row first (FK parent), then teams before games
+    // (schedule_games references teams). Batching dedupes the ~32 teams that
+    // the payload repeats ~80x each, so teamsUpserted now counts unique teams.
+    await seasonsRepository.upsertSeason(
+      client,
+      buildSeason(seasonId, { [sourceLabel]: schedulePayload ?? null }),
+    );
 
-		const teamsUpserted = await teamsRepository.upsertTeams(client, teams);
-		const gamesUpserted = await scheduleGamesRepository.upsertScheduleGames(
-			client,
-			games,
-		);
+    const teamsUpserted = await teamsRepository.upsertTeams(client, teams);
+    const gamesUpserted = await scheduleGamesRepository.upsertScheduleGames(
+      client,
+      games,
+    );
 
-		return { gamesUpserted, teamsUpserted, skipped: mapped.skipped };
-	});
+    return { gamesUpserted, teamsUpserted, skipped: mapped.skipped };
+  });
 }
 
 module.exports = {
-	persistSchedule,
+  persistSchedule,
 };

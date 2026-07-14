@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import styles from '../Style/StandingsPage/StandingsPage.module.css';
 import { Container, Row } from 'react-bootstrap';
 import StandingsContainer from '../Components/LandingPage/LandingPageStandings/StandingsContainer';

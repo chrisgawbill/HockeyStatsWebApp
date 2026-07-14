@@ -1,9 +1,5 @@
 export type ClinchStatus =
-  | 'presidents'
-  | 'conference'
-  | 'division'
-  | 'playoffs'
-  | 'wildcard';
+  'presidents' | 'conference' | 'division' | 'playoffs' | 'wildcard';
 
 export const CLINCH_STATUS_META: Record<
   ClinchStatus,

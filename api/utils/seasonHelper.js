@@ -19,7 +19,10 @@ function getCurrentSeasonId() {
  * @returns {boolean}
  */
 function isValidSeasonId(idStr) {
-  return /^\d{8}$/.test(idStr) && parseInt(idStr.slice(0, 4)) + 1 === parseInt(idStr.slice(4, 8));
+  return (
+    /^\d{8}$/.test(idStr) &&
+    parseInt(idStr.slice(0, 4)) + 1 === parseInt(idStr.slice(4, 8))
+  );
 }
 
 const INVALID_SEASON_MSG =

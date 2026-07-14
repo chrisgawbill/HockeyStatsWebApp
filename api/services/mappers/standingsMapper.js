@@ -55,16 +55,16 @@ function mapStandingsTeam(rawTeam) {
   const teamId = resolveTeamId(rawTeam);
   if (!teamId) {
     console.warn(
-      "Skipping standings team with missing ID. Keys available:",
+      'Skipping standings team with missing ID. Keys available:',
       Object.keys(rawTeam),
     );
     return null;
   }
 
-  const teamLogo = rawTeam.teamLogo ?? "";
-  const name = rawTeam.teamCommonName?.default ?? "";
-  const conferenceName = rawTeam.conferenceName ?? "";
-  const divisionName = rawTeam.divisionName ?? "";
+  const teamLogo = rawTeam.teamLogo ?? '';
+  const name = rawTeam.teamCommonName?.default ?? '';
+  const conferenceName = rawTeam.conferenceName ?? '';
+  const divisionName = rawTeam.divisionName ?? '';
   const wins = rawTeam.wins ?? 0;
   const losses = rawTeam.losses ?? 0;
   const otLosses = rawTeam.otLosses ?? 0;
@@ -75,7 +75,7 @@ function mapStandingsTeam(rawTeam) {
   const divisionSequence = rawTeam.divisionSequence ?? 0;
   const wildcardSequence = rawTeam.wildcardSequence ?? 0;
   const clinchingIndicator =
-    rawTeam.clinchingIndicator || rawTeam.clinchIndicator || "";
+    rawTeam.clinchingIndicator || rawTeam.clinchIndicator || '';
   const leagueL10Sequence = rawTeam.leagueL10Sequence ?? 0;
 
   return /** @type {StandingsTeamContract} */ ({

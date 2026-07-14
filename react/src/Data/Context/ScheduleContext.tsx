@@ -8,9 +8,7 @@ import {
 } from 'react';
 import { ScheduledGame } from '../Models/scheduledGame';
 import { GetGameDetails, GetScheduledGames } from '../../Services/apiHandler';
-import {
-  ConvertContractsToGames,
-} from '../Helpers/scheduleHelper';
+import { ConvertContractsToGames } from '../Helpers/scheduleHelper';
 import { useSeason } from './SeasonContext';
 
 interface ListOfGamesData {

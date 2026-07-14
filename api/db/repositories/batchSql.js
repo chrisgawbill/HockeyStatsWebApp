@@ -25,14 +25,14 @@ const MAX_ROWS_PER_STATEMENT = 500;
  * @returns {T[][]}
  */
 function chunk(rows, size) {
-	if (!Number.isInteger(size) || size <= 0) {
-		throw new Error(`chunk size must be a positive integer, got ${size}`);
-	}
-	const out = [];
-	for (let i = 0; i < rows.length; i += size) {
-		out.push(rows.slice(i, i + size));
-	}
-	return out;
+  if (!Number.isInteger(size) || size <= 0) {
+    throw new Error(`chunk size must be a positive integer, got ${size}`);
+  }
+  const out = [];
+  for (let i = 0; i < rows.length; i += size) {
+    out.push(rows.slice(i, i + size));
+  }
+  return out;
 }
 
 /**
@@ -47,11 +47,11 @@ function chunk(rows, size) {
  * @returns {T[]}
  */
 function dedupeByKey(rows, keyFn) {
-	const byKey = new Map();
-	for (const row of rows) {
-		byKey.set(keyFn(row), row);
-	}
-	return Array.from(byKey.values());
+  const byKey = new Map();
+  for (const row of rows) {
+    byKey.set(keyFn(row), row);
+  }
+  return Array.from(byKey.values());
 }
 
 /**
@@ -68,16 +68,16 @@ function dedupeByKey(rows, keyFn) {
  * @returns {string}
  */
 function buildValuesClause(numRows, colsPerRow, trailingLiterals = []) {
-	const tuples = [];
-	let param = 1;
-	for (let r = 0; r < numRows; r++) {
-		const placeholders = [];
-		for (let c = 0; c < colsPerRow; c++) {
-			placeholders.push(`$${param++}`);
-		}
-		tuples.push(`(${[...placeholders, ...trailingLiterals].join(', ')})`);
-	}
-	return tuples.join(', ');
+  const tuples = [];
+  let param = 1;
+  for (let r = 0; r < numRows; r++) {
+    const placeholders = [];
+    for (let c = 0; c < colsPerRow; c++) {
+      placeholders.push(`$${param++}`);
+    }
+    tuples.push(`(${[...placeholders, ...trailingLiterals].join(', ')})`);
+  }
+  return tuples.join(', ');
 }
 
 /**
@@ -97,29 +97,29 @@ function buildValuesClause(numRows, colsPerRow, trailingLiterals = []) {
  * @returns {Promise<number>} count of unique rows written (post-dedupe)
  */
 async function batchUpsert(
-	client,
-	{ table, columns, keyFn, onConflict, toParams },
-	rows,
+  client,
+  { table, columns, keyFn, onConflict, toParams },
+  rows,
 ) {
-	const unique = dedupeByKey(rows, keyFn);
-	for (const batch of chunk(unique, MAX_ROWS_PER_STATEMENT)) {
-		const values = buildValuesClause(batch.length, columns.length, ['now()']);
-		await client.query(
-			`
+  const unique = dedupeByKey(rows, keyFn);
+  for (const batch of chunk(unique, MAX_ROWS_PER_STATEMENT)) {
+    const values = buildValuesClause(batch.length, columns.length, ['now()']);
+    await client.query(
+      `
 			INSERT INTO ${table} (${columns.join(', ')}, updated_at)
 			VALUES ${values}
 			${onConflict}
 			`,
-			batch.flatMap(toParams),
-		);
-	}
-	return unique.length;
+      batch.flatMap(toParams),
+    );
+  }
+  return unique.length;
 }
 
 module.exports = {
-	MAX_ROWS_PER_STATEMENT,
-	chunk,
-	dedupeByKey,
-	buildValuesClause,
-	batchUpsert,
+  MAX_ROWS_PER_STATEMENT,
+  chunk,
+  dedupeByKey,
+  buildValuesClause,
+  batchUpsert,
 };

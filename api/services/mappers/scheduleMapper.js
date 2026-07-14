@@ -54,9 +54,9 @@
 function mapBroadcasts(rawBroadcasts = []) {
   return rawBroadcasts.filter(Boolean).map((b) => {
     const id = b.id ?? null;
-    const network = b.network ?? "";
-    const market = b.market ?? "";
-    const countryCode = b.countryCode ?? "";
+    const network = b.network ?? '';
+    const market = b.market ?? '';
+    const countryCode = b.countryCode ?? '';
 
     return { id, network, market, countryCode };
   });
@@ -72,7 +72,7 @@ function derivePlayoffRound(rawGame) {
   if (rawGame.seriesStatus?.round != null) {
     return rawGame.seriesStatus.round;
   }
-  const idStr = String(rawGame.id ?? "");
+  const idStr = String(rawGame.id ?? '');
   return idStr.length === 10 ? parseInt(idStr.slice(6, 8)) || null : null;
 }
 
@@ -89,22 +89,24 @@ function mapGame(rawGame, ctx) {
   const date = ctx.date;
   const gameTime = rawGame.startTimeUTC;
   const dayOfWeek = ctx.dayAbbrev;
-  const venue = rawGame.venue?.default ?? "";
-  const homeTeam = rawGame.homeTeam?.abbrev ?? "";
-  const homeLogo = rawGame.homeTeam?.logo ?? "";
+  const venue = rawGame.venue?.default ?? '';
+  const homeTeam = rawGame.homeTeam?.abbrev ?? '';
+  const homeLogo = rawGame.homeTeam?.logo ?? '';
   const homeScore = rawGame.homeTeam?.score ?? null;
-  const awayTeam = rawGame.awayTeam?.abbrev ?? "";
-  const awayLogo = rawGame.awayTeam?.logo ?? "";
+  const awayTeam = rawGame.awayTeam?.abbrev ?? '';
+  const awayLogo = rawGame.awayTeam?.logo ?? '';
   const awayScore = rawGame.awayTeam?.score ?? null;
   const broadcasts = mapBroadcasts(rawGame.tvBroadcasts);
-  const ticketLink = gameState === "FUT" ? (rawGame.ticketsLink ?? "") : "";
-  const gameCenter = rawGame.gameCenterLink ?? "";
+  const ticketLink = gameState === 'FUT' ? (rawGame.ticketsLink ?? '') : '';
+  const gameCenter = rawGame.gameCenterLink ?? '';
   const isPlayoff = rawGame.gameType === 3;
   const periodType = rawGame.periodDescriptor?.periodType ?? null;
 
   const series = rawGame.seriesStatus;
   const playoffRound = isPlayoff ? derivePlayoffRound(rawGame) : null;
-  const topSeedTeamAbbrev = isPlayoff ? (series?.topSeedTeamAbbrev ?? null) : null;
+  const topSeedTeamAbbrev = isPlayoff
+    ? (series?.topSeedTeamAbbrev ?? null)
+    : null;
   const bottomSeedTeamAbbrev = isPlayoff
     ? (series?.bottomSeedTeamAbbrev ?? null)
     : null;

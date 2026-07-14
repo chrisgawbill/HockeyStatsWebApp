@@ -61,7 +61,7 @@ All page components are lazy-loaded (`React.lazy` + `Suspense`), so a route's co
 The providers are split across two files by whether they depend on routing or the selected season:
 
 - `react/src/index.tsx` wraps the app in the providers that need neither — `ThemeProvider` and `ListOfTeamsDataProvider` — then renders `<App />`.
-- `react/src/App.tsx` nests the rest *inside* `HashRouter`, in this order: `SeasonProvider` → `StandingsDataProvider` → `ListOfGamesProvider` → `StatLeadersProvider` → `Routes`. `StatLeadersProvider` (`StatLeadersContext.tsx`) is one provider that loads both skater and goalie leader maps (calling `useStatLeaders` twice) and exposes them through the `useSkaterLeaderData`/`useGoalieLeaderData` hooks.
+- `react/src/App.tsx` nests the rest _inside_ `HashRouter`, in this order: `SeasonProvider` → `StandingsDataProvider` → `ListOfGamesProvider` → `StatLeadersProvider` → `Routes`. `StatLeadersProvider` (`StatLeadersContext.tsx`) is one provider that loads both skater and goalie leader maps (calling `useStatLeaders` twice) and exposes them through the `useSkaterLeaderData`/`useGoalieLeaderData` hooks.
 
 This ordering is deliberate. `SeasonProvider` (`react/src/Data/Context/SeasonContext.tsx`) reads the `?season=` URL param via `useSearchParams`, so it must sit inside `HashRouter`. The season-dependent data providers re-fetch when the selection changes, so they must sit inside `SeasonProvider`. `ThemeProvider`/`ListOfTeamsDataProvider` depend on neither, so they stay at the `index.tsx` root. See [Season Selection](#season-selection).
 
