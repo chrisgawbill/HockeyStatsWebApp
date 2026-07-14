@@ -215,12 +215,12 @@ READ FIRST, in this order:
 4. react/src/Data/Context/StandingsContext.tsx, ScheduleContext.tsx, SeasonContext.tsx
 5. api/routes/team.js and api/routes/player.js — the team-scoped endpoints and which return contracts vs raw passthrough
 6. react/src/Services/genAIHandler.ts
-7. docs/cleanup-backlog.md — sections C4 and C5 (both touch TeamPage; see step 0)
+7. docs/cleanup-backlog.md — sections C4 and C5 (both touched TeamPage and are complete; see step 0)
 
 TASK: Rebuild TeamPage into a tabbed team hub: Overview, Roster, Schedule, Skaters, Goalies, History.
 
 STEPS (pause after each):
-0. Check whether cleanup tickets C4 (moving the real types out of teamPageMockData.ts) and C5's TeamPage item are already done. If not, do those two things first inside this ticket. The C5 bug matters here: fetchMain reads easternStandingsData/westernStandingsData from StandingsContext, but its effect depends only on [teamId, triCode, season] — a deep-linked visit that lands before standings resolve renders record/ranks as 0 forever. Fix by depending on the standings data (or deriving standings-based fields at render time). More standings UI in this ticket makes that race worse, so it must be fixed first.
+0. Cleanup tickets C4 and C5 are DONE (landed in PR #50, 2026-07-13) — do not redo them. What that means for this ticket: the real TeamPage types live in react/src/Data/Models/teamPageTypes.ts (TeamOverview, StatItem, Position, RosterPlayer, PlayerStatLine — teamPageMockData.ts no longer exists), and the deep-link standings race is already fixed: fetchMain parks the raw team-stats response in state and a useMemo derives record/ranks/playoff-line delta from StandingsContext at render time. Preserve that render-time-derivation pattern when restructuring into tabs; the deep-link regression check in DONE WHEN still applies.
 1. Add the tab structure, URL-backed (?tab=overview|roster|schedule|skaters|goalies|history) and preserving the season/other params via the setSearchParams(prev => ...) pattern. Default tab: overview.
 2. Overview tab: record, division/conference rank, playoff-line delta (logic already in TeamPage), last 5 results + next 5 games, and links into the filtered schedule view from ticket 2.5 (/schedule?team=<triCode>&season=<season>).
 3. Roster tab: group by Forwards / Defensemen / Goalies from the RosterContract position codes (POS_MAP already exists). Move the grouping and TOI-formatting helpers out of TeamPage.tsx into react/src/Data/Helpers/teamPageHelper.ts.
@@ -307,7 +307,7 @@ PROJECT: HockeyStatsWebApp — React (Vite, HashRouter) frontend in react/, Expr
 READ FIRST, in this order:
 1. docs/architecture.md — sections "Global Providers" (the index.tsx vs App.tsx provider split and why it exists), "Data Layer"
 2. react/src/index.tsx and react/src/App.tsx — where providers live and the rule for which file gets which provider
-3. react/src/Data/Context/ — every provider, especially ListOfTeamsContext.tsx (an existing localStorage example, including its pitfalls noted in docs/cleanup-backlog.md C5)
+3. react/src/Data/Context/ — every provider. For an existing localStorage example, see ThemeContext.tsx (a user preference, the right kind of thing to store locally). Do NOT copy ListOfTeamsContext — its old localStorage data cache was removed in cleanup C5 precisely because caching fetched data client-side duplicated the backend cache with no TTL.
 4. react/src/Pages/LandingPage.tsx, TeamPage.tsx, and PlayerProfilePage (from ticket 2.8)
 5. react/src/Data/LocalData/teamListData.ts
 
@@ -400,11 +400,11 @@ PROJECT: HockeyStatsWebApp — React (Vite, HashRouter) frontend in react/, Expr
 
 READ FIRST, in this order:
 1. docs/architecture.md — sections "AI Integration" and "Diagnostics Layer"
-2. api/app.js — POST /python-service, runAIPythonScript, and queueAiSummaryPersistence (note: it currently infers the triCode from the cache key)
+2. api/app.js — POST /python-service (now rate-limited and tricode-validated per cleanup C6), runAIPythonScript, and queueAiSummaryPersistence (note: it prefers an explicit req.body.triCode since C3, with cache-key inference kept as a legacy fallback — this ticket removes that fallback)
 3. api/routes/hockey-ai.py and api/services/domain/aiSummaryService.js
 4. react/src/Services/genAIHandler.ts and the TeamPage History section (fetchStaticInfo in react/src/Pages/TeamPage.tsx, or its 2.7 successor) — note the prompt currently lives on the FRONTEND
 5. api/utils/cacheManager.js — CACHE_TYPES.AI has a 365-day TTL
-6. docs/cleanup-backlog.md section C3 — the explicit-triCode and configurable-model items overlap; if C3 isn't done, fold those two items in here
+6. docs/cleanup-backlog.md section C3 — DONE: the explicit-triCode and configurable-model items already landed (the frontend sends triCode; the model comes from the required ANTHROPIC_MODEL env var with no in-code default)
 
 TASK: Make the AI team-history flow schema-validated, versioned, and gracefully degradable, so malformed or stale AI output can never render as official data.
 
@@ -413,8 +413,8 @@ STEPS (pause after each):
 2. Define the contract once on each side: TEAM_HISTORY_SCHEMA_VERSION = 1 with fields arena (string), founded (number), stanleyCups (number), conferenceChampionships (number), hallOfFamers (number). Backend: a pure validator module (api/utils/ or api/services/) that returns {valid, errors}. Frontend: a TS type + a runtime guard. No zod/ajv — hand-rolled checks are fine at this size.
 3. Backend flow: run Python → JSON.parse → validate. Only VALID responses are cached (invalid responses must never poison a 365-day cache entry). On failure return a typed error body, e.g. {error: "ai_malformed"} with an appropriate status.
 4. Distinct failure modes, each with its own typed error the frontend can map to a message: key_missing (ANTHROPIC_API_KEY unset — check before spawning), python_failed (spawn/exit error), provider_error, ai_malformed (parse or schema failure).
-5. Cache key becomes ${triCode}_s${schemaVersion}_p${promptVersion} under CACHE_TYPES.AI. Bumping either version constant bypasses every stale entry; old keys age out via TTL. Update queueAiSummaryPersistence to receive the triCode explicitly instead of parsing the cache key.
-6. Python script: parameterize the model name via env var (default to the current hardcoded value). Prompt instructs: return ONLY a raw JSON object with exactly the schema fields, no markdown fences, no commentary.
+5. Cache key becomes ${triCode}_s${schemaVersion}_p${promptVersion} under CACHE_TYPES.AI. Bumping either version constant bypasses every stale entry; old keys age out via TTL. queueAiSummaryPersistence already receives an explicit triCode (C3); remove its remaining legacy cacheKey-inference fallback here.
+6. Python script: the model name is already env-var driven (required ANTHROPIC_MODEL, landed in C3) — no change needed there. Tighten the prompt: return ONLY a raw JSON object with exactly the schema fields, no markdown fences, no commentary.
 7. Frontend: the History section renders a clearly-labeled "AI-generated — may require verification" block on success, and a graceful "history unavailable" card per failure mode. TeamPage must be fully usable with AI off.
 8. Verified-fact migration: arena and founded are stable, checkable facts — add them to react/src/Data/LocalData/teamListData.ts for teams as we verify them; local data wins over AI when present, and the AI block shrinks to whatever local data lacks.
 
@@ -451,12 +451,12 @@ READ FIRST, in this order:
 3. api/package.json — the existing node --test script that must join the combined workflow
 4. react/src/Data/Helpers/ (scheduleHelper.ts, gameStatusHelper.ts, seasonHelper.ts, and scheduleFilterHelper.ts if ticket 2.5 landed), react/src/Services/apiHandler.ts (withParams), react/src/Data/Context/SeasonContext.tsx
 5. The pages to smoke test: react/src/Pages/ (LandingPage, SchedulePage, TeamPage, GameDetailPage, DiagnosticsPage, PlayerProfilePage if 2.8 landed)
-6. docs/cleanup-backlog.md section C2 — if the CRA leftovers (src/App.test.js, src/setupTests.js) still exist, delete them in step 1
+6. docs/cleanup-backlog.md section C2 — DONE: the CRA leftovers (src/App.test.js, src/setupTests.js) were already deleted, so step 1 is install-and-configure only. Note also that noUnusedLocals/noUnusedParameters are already on in react/tsconfig.json (cleanup C7)
 
 TASK: Stand up frontend testing (Vitest + Testing Library), cover the URL-backed helpers and page smoke paths, and create one combined verification command documented in README.md.
 
 STEPS (pause after each):
-1. Install devDependencies in react/: vitest, @testing-library/react, @testing-library/user-event, jsdom. Configure via vitest.config.ts (or a test block in vite.config) with environment jsdom. Delete src/App.test.js and src/setupTests.js if still present — they are broken CRA leftovers.
+1. Install devDependencies in react/: vitest, @testing-library/react, @testing-library/user-event, jsdom. Configure via vitest.config.ts (or a test block in vite.config) with environment jsdom.
 2. Pure-helper tests first (fast, no DOM): parseLocalDate/formatDateParam round-trip including the UTC-shift trap date; groupGamesByDate keying; seasonHelper (isValidSeasonId edge cases, formatSeasonLabel, getRecentSeasonIds); gameStatusHelper; withParams (drops empty values, appends only when set); the 2.5 filter helper if it exists.
 3. SeasonContext tests: render the provider inside react-router's MemoryRouter with initialEntries; assert an invalid ?season= falls back to the current season and setSeason preserves unrelated params (?date=, ?view=).
 4. Page smoke tests: render each page inside its required providers with the apiHandler module mocked (vi.mock) returning SMALL inline fixtures shaped like the backend contracts — never paste large real NHL payloads, and no snapshot tests. Assert key landmarks render (header, a known team name, an empty state). DiagnosticsPage: assert the passphrase gate shows first and a mocked 401 surfaces an error message.
@@ -554,7 +554,7 @@ STEPS (pause after each):
 2. Wire the /python-service handler to the new module. Map SDK failures onto the EXISTING typed error modes: missing ANTHROPIC_API_KEY → key_missing (check before calling), API/network errors → provider_error, schema/parse failures → ai_malformed (unchanged, still the validator's job). python_failed becomes unreachable — remove it from the backend map but leave the frontend's handling of it alone (harmless dead branch, note it for cleanup).
 3. Delete runAIPythonScript and the child_process import from app.js, then api/routes/hockey-ai.py and the venv/ directory. Search the repo and deploy config (README, architecture.md, any build scripts/Dockerfile/host config) for python references tied to the AI flow and remove them; python must no longer be needed in production.
 4. Tests: mock the SDK module (inject or override the client) to cover — happy path returns validated content and caches it; SDK throws → provider_error and NOTHING cached; key absent → key_missing without constructing a request. Port any existing tests that mocked the spawn.
-5. Timeout: give the SDK call an explicit timeout consistent with the API's other outbound calls (see cleanup C6 — if C6 set 10s for NHL calls, AI can be longer, e.g. 30s; agree with me first). A timeout maps to provider_error.
+5. Timeout: give the SDK call an explicit timeout consistent with the API's other outbound calls (cleanup C6 set 10s on the NHL clients; AI generation is slower, so e.g. 30s — agree with me first). A timeout maps to provider_error.
 
 INVARIANTS:
 - The route's request/response contract, cache keys, and TTL behavior are byte-for-byte unchanged — the frontend must not need any edits.

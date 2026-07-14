@@ -54,12 +54,14 @@ The frontend is a Vite React app using TypeScript, React Router, React Bootstrap
 
 Because this uses `HashRouter`, URLs are intended to work in static hosting environments such as GitHub Pages.
 
+All page components are lazy-loaded (`React.lazy` + `Suspense`), so a route's code is only downloaded when it is first visited. An `ErrorBoundary` (from the `react-error-boundary` package) wraps `<Routes>` so a render-time exception in one page degrades to an error card with a retry button instead of blanking the whole SPA.
+
 ### Global Providers
 
 The providers are split across two files by whether they depend on routing or the selected season:
 
 - `react/src/index.tsx` wraps the app in the providers that need neither — `ThemeProvider` and `ListOfTeamsDataProvider` — then renders `<App />`.
-- `react/src/App.tsx` nests the rest *inside* `HashRouter`, in this order: `SeasonProvider` → `StandingsDataProvider` → `ListOfGamesProvider` → `SkaterStatLeaderProvider` → `GoalieLeaderDataProvider` → `Routes`.
+- `react/src/App.tsx` nests the rest *inside* `HashRouter`, in this order: `SeasonProvider` → `StandingsDataProvider` → `ListOfGamesProvider` → `StatLeadersProvider` → `Routes`. `StatLeadersProvider` (`StatLeadersContext.tsx`) is one provider that loads both skater and goalie leader maps (calling `useStatLeaders` twice) and exposes them through the `useSkaterLeaderData`/`useGoalieLeaderData` hooks.
 
 This ordering is deliberate. `SeasonProvider` (`react/src/Data/Context/SeasonContext.tsx`) reads the `?season=` URL param via `useSearchParams`, so it must sit inside `HashRouter`. The season-dependent data providers re-fetch when the selection changes, so they must sit inside `SeasonProvider`. `ThemeProvider`/`ListOfTeamsDataProvider` depend on neither, so they stay at the `index.tsx` root. See [Season Selection](#season-selection).
 
@@ -73,7 +75,7 @@ Frontend HTTP calls are centralized in:
 - `react/src/Services/apiHandler.ts`
 - `react/src/Services/genAIHandler.ts`
 
-`axiosInstance.ts` creates `axiosExpressHandler`, which points to `import.meta.env.VITE_API_URL`. In development builds it falls back to `http://localhost:9000`; in production builds a missing `VITE_API_URL` logs an error and requests fall back to relative URLs.
+`axiosInstance.ts` creates `axiosExpressHandler`, which points to `import.meta.env.VITE_API_URL`. In development builds it falls back to `http://localhost:9000`; in production builds a missing `VITE_API_URL` logs an error and requests fall back to relative URLs. Requests time out after 15 seconds so a hung backend resolves to each caller's existing error path instead of spinning forever.
 
 `apiHandler.ts` maps frontend operations to Express routes. For example:
 
@@ -120,14 +122,17 @@ The backend is an Express app in `api/`. It listens on port `9000` by default.
 `api/app.js` is the central setup file. It configures:
 
 - environment variables with `dotenv`
+- response compression and `helmet()` security headers
 - CORS for local frontend ports and GitHub Pages
 - JSON/body parsing
 - static files
 - route modules
-- a `/python-service` endpoint
+- a `/python-service` endpoint, behind a rate limiter (10 requests per 15 minutes per IP, returning a JSON 429); `trust proxy` is set so the limiter keys on the real client IP behind Render-style proxies
 - a JSON error handler
 
 The scheduled schedule-cache refresh timer lives in `api/services/refreshScheduler.js` and is started by `bin/www` after the server begins listening — importing `app.js` (as the tests do) starts no timers.
+
+`bin/www` also owns process-level resilience: an `uncaughtException` logs and exits with code 1 (the process is in an undefined state, so the host restarts it rather than limping on), and `SIGTERM`/`SIGINT` trigger graceful shutdown — close the HTTP server, then both Postgres pools, with a 10-second force-exit fallback.
 
 ### Backend Route Modules
 
@@ -167,6 +172,7 @@ Routes are grouped by NHL domain. Most data routes accept an optional `?season=`
 
 - `POST /python-service`
   - Defined in `api/app.js`
+  - Rate-limited (10 requests per 15 minutes per IP — cached responses make legitimate use rare) and rejects a `cacheKey` that is neither `default` nor a plausible tricode (`/^[A-Z]{3}$/`), so anonymous callers cannot burn Anthropic credits or multiply cache entries
   - Calls `api/routes/hockey-ai.py` through a Python subprocess
   - Caches AI responses by cache key
   - The body carries an explicit `triCode` field for domain persistence (the old inference from `cacheKey` is kept as a fallback for one release)
@@ -181,6 +187,8 @@ There is no `/` route: the app is a JSON API with no view engine. Unmatched path
 - `axiosNhlTeam`: `https://api.nhle.com/stats/rest/en/team`
 - `axiosNhlStats`: `https://api.nhle.com/stats/rest/en/skater`
 - `axiosNhlGoalie`: `https://api.nhle.com/stats/rest/en/goalie`
+
+All four clients set a 10-second `timeout`, so a hung NHL upstream surfaces as the shared JSON error handler's 500 instead of hanging the request (and the user's spinner) indefinitely.
 
 Prefer these clients over creating new Axios instances inside route handlers.
 
