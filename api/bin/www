@@ -4,12 +4,12 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var { bootstrap } = require('#composition/server.js');
 var debug = require('debug')('api:server');
 var http = require('http');
-var { scheduleNextRefresh } = require('../services/refreshScheduler');
-var { closeDbPool } = require('../db/pool');
-var { closeCachePool } = require('../utils/cacheManager');
+var { scheduleNextRefresh } = require('#platform/refreshScheduler.js');
+var { closeDbPool } = require('#platform/pool.js');
+var { closeCachePool } = require('#platform/cacheManager.js');
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
@@ -23,6 +23,8 @@ process.on('unhandledRejection', (reason) => {
 /**
  * Get port from environment and store in Express.
  */
+
+var { app, container } = bootstrap();
 
 var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
@@ -95,7 +97,7 @@ function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
-  scheduleNextRefresh();
+  scheduleNextRefresh(() => container.scheduleService.refreshScheduleCache());
 }
 
 async function shutdown(signal) {

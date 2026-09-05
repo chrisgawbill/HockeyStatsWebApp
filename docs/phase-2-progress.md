@@ -1,5 +1,7 @@
 # Phase 2 Progress Log
 
+> **Path note (2026-09-04):** the repository was restructured — frontend to Bulletproof React (`react/src/{app,features,components,lib,styles}`) and backend to a presentation/slices/platform split (`api/src/...`). File paths mentioned below predate that move; see `docs/architecture.md` for where each file now lives.
+
 A working journal for the Phase 2 roadmap (see [phase-2-backlog.md](./phase-2-backlog.md)).
 Each task has two sections to fill in as it gets worked:
 

@@ -1,5 +1,7 @@
 # Frontend Backlog
 
+> **Path note (2026-09-04):** the repository was restructured — frontend to Bulletproof React (`react/src/{app,features,components,lib,styles}`) and backend to a presentation/slices/platform split (`api/src/...`). File paths mentioned below predate that move; see `docs/architecture.md` for where each file now lives.
+
 MD3 (Material Design 3) alignment work identified during a frontend design review on 2026-07-01. The app already has good bones — a token system in `react/src/index.css` with light/dark themes, shared surface classes, an MD3-correct `SeasonSelector`, and a responsive nav that maps to MD3's navigation bar — but most of it is "MD3-flavored" rather than MD3: the color roles, type scale, and state/elevation mechanics that make Material cohesive are approximated instead of adopted.
 
 **Decision record — no component library.** We evaluated `@material/web` (Google's official MD3 web components) and decided against it: it has been in maintenance mode pending new maintainers since mid-2024 (no roadmap, no MD3 Expressive updates), the components this app would most benefit from (card, navigation bar, data table) never left labs or were never built, and React 18 needs `@lit/react` wrappers for custom elements. MUI was also ruled out (still MD2; the team declined to implement MD3). The chosen path is MD3's **token layer** plus our own CSS. Do not relitigate this in individual tickets.

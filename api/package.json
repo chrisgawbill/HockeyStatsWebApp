@@ -2,10 +2,16 @@
   "name": "api",
   "version": "2.4.0",
   "private": true,
+  "imports": {
+    "#platform/*": "./src/platform/*",
+    "#slices/*": "./src/slices/*",
+    "#presentation/*": "./src/presentation/*",
+    "#composition/*": "./src/composition/*"
+  },
   "scripts": {
-    "db:migrate": "node db/migrate.js",
+    "db:migrate": "node src/platform/migrate.js",
     "start": "node ./bin/www",
-    "test": "node --test 'test/**/*.test.js'"
+    "test": "node --test 'src/test/**/*.test.js'"
   },
   "dependencies": {
     "axios": "^1.16.1",

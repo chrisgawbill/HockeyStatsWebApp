@@ -15,13 +15,13 @@ For the full picture — layers, conventions, caching, season handling, diagnost
 
 - **Frontend** (`react/`): React 18 + TypeScript on Vite, React Router (`HashRouter`), React Bootstrap grid, CSS Modules.
 - **Backend** (`api/`): Node + Express. Optional Postgres for response caching and normalized domain tables; a Python subprocess makes the Anthropic API call for team history.
-- **Tests** (`api/test/`): built-in Node test runner (`node --test`), no jest/supertest. Frontend tests are planned (Phase 2 ticket 2.13).
+- **Tests** (`api/src/test/`): built-in Node test runner (`node --test`), no jest/supertest. Frontend tests are planned (Phase 2 ticket 2.13).
 
 ## Repository layout
 
 ```text
-api/      Express backend (routes, services, mappers, db, utils)
-react/    Vite + React frontend (Pages, Components, Data, Services, Style)
+api/      Express backend (src/presentation, src/slices, src/platform, src/composition)
+react/    Vite + React frontend (src/app, src/features, src/components, src/lib, src/styles)
 docs/     Project documentation
 ```
 

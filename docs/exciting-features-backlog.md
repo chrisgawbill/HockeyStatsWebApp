@@ -1,5 +1,7 @@
 # Exciting Features Backlog
 
+> **Path note (2026-09-04):** the repository was restructured — frontend to Bulletproof React (`react/src/{app,features,components,lib,styles}`) and backend to a presentation/slices/platform split (`api/src/...`). File paths mentioned below predate that move; see `docs/architecture.md` for where each file now lives.
+
 Creative, differentiating feature ideas identified on 2026-07-01. The goal of this file is uniqueness: features that make the app feel like _your_ hockey app rather than a re-skin of nhl.com. It complements [phase-2-backlog.md](./phase-2-backlog.md) (core workflows) and stays out of the way of [cleanup-backlog.md](./cleanup-backlog.md) and [frontend-backlog.md](./frontend-backlog.md).
 
 **Guiding principle — derive, don't fetch.** The app already loads a full season of schedule results (`ScheduleContext`), full standings with streaks/wildcard sequences (`StandingsContext`), skater/goalie summaries, stat leaders, and locally computed draft lottery odds (`leagueStandingsHelper.ts`). Almost every ticket below is a pure client-side projection of that already-loaded data: **zero new NHL API calls, zero new backend endpoints**. Each ticket carries a **Data** line stating its cost. The one exception is E8 (Prospect Watch), which adds two tiny, long-TTL NHL fetches — flagged explicitly.
