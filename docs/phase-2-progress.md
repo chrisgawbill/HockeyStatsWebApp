@@ -1,5 +1,7 @@
 # Phase 2 Progress Log
 
+> **Path note (2026-09-04):** the repository was restructured — frontend to Bulletproof React (`react/src/{app,features,components,lib,styles}`) and backend to a presentation/slices/platform split (`api/src/...`). File paths mentioned below predate that move; see `docs/architecture.md` for where each file now lives.
+
 A working journal for the Phase 2 roadmap (see [phase-2-backlog.md](./phase-2-backlog.md)).
 Each task has two sections to fill in as it gets worked:
 
@@ -30,7 +32,7 @@ Status legend: ☐ not started · ◐ in progress · ☑ done
 
 ### What I have learned
 
-- **The backend is the only real gate.** A static SPA ships its source to the browser, and the Express endpoints are publicly reachable, so any "development-only" or hidden check in React is bypassable. Enforcement has to live in server middleware (`authCheck`), not the UI. The unlinked `/diagnostics` route is "hidden" only by obscurity — acceptable *because* the server enforces access.
+- **The backend is the only real gate.** A static SPA ships its source to the browser, and the Express endpoints are publicly reachable, so any "development-only" or hidden check in React is bypassable. Enforcement has to live in server middleware (`authCheck`), not the UI. The unlinked `/diagnostics` route is "hidden" only by obscurity — acceptable _because_ the server enforces access.
 - **Pass secrets in a header, not a query string.** Query strings leak into request logs and browser history; the `x-diagnostics-key` header avoids that. Custom headers also require listing in CORS `allowedHeaders` or the browser preflight fails.
 - **Constant-time comparison matters for secrets.** Hashing both sides with SHA-256 first gives equal-length buffers for `timingSafeEqual` and avoids leaking length or short-circuiting early on the first differing byte.
 - **Fail closed.** If `DIAGNOSTICS_PASSPHRASE` is unset, auth returns false rather than allowing access.

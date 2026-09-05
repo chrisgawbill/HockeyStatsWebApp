@@ -4,16 +4,16 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var { bootstrap } = require('#composition/server.js');
 var debug = require('debug')('api:server');
 var http = require('http');
-var { scheduleNextRefresh } = require('../services/refreshScheduler');
-var {closeDbPool} = require('../db/pool');
-var {closeCachePool} = require('../utils/cacheManager');
+var { scheduleNextRefresh } = require('#platform/refreshScheduler.js');
+var { closeDbPool } = require('#platform/pool.js');
+var { closeCachePool } = require('#platform/cacheManager.js');
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
-  process.exit(1); 
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
@@ -23,6 +23,8 @@ process.on('unhandledRejection', (reason) => {
 /**
  * Get port from environment and store in Express.
  */
+
+var { app, container } = bootstrap();
 
 var port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
@@ -70,9 +72,7 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -95,14 +95,12 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
-  scheduleNextRefresh();
+  scheduleNextRefresh(() => container.scheduleService.refreshScheduleCache());
 }
 
-async function shutdown(signal){
+async function shutdown(signal) {
   const forceExit = setTimeout(() => {
     console.error(`Forcefully exiting after 10 seconds due to ${signal}`);
     process.exit(1);
@@ -110,11 +108,11 @@ async function shutdown(signal){
   forceExit.unref();
 
   server.close(async (err) => {
-    try{
+    try {
       await closeDbPool();
       await closeCachePool();
       process.exit(0);
-    }catch(err){
+    } catch (err) {
       console.error(`Error during shutdown: ${err}`);
       process.exit(1);
     }
@@ -122,4 +120,4 @@ async function shutdown(signal){
 }
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));                                     
+process.on('SIGINT', () => shutdown('SIGINT'));

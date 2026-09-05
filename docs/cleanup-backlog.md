@@ -1,8 +1,12 @@
 # Cleanup Backlog
 
+> **Path note (2026-09-04):** the repository was restructured — frontend to Bulletproof React (`react/src/{app,features,components,lib,styles}`) and backend to a presentation/slices/platform split (`api/src/...`). File paths mentioned below predate that move; see `docs/architecture.md` for where each file now lives.
+
 Refinements, consistency fixes, and dead-code removal found during a full codebase review on 2026-07-01. These are intentionally separate from [phase-2-backlog.md](./phase-2-backlog.md): none add features, and each is small enough to land independently between feature tickets.
 
 Ordering is by risk: C1/C2 are pure deletion/hygiene, C3/C4 are mechanical refactors, C5 changes runtime behavior and deserves the most care. C6/C7 are security and resilience hardening from a follow-up standards review (also 2026-07-01); C6 items 1–2 are the highest-value tickets in this file. C8 (added 2026-07-07) is an active runtime bug — background persistence is silently failing under lock contention — and ranks alongside C6 items 1–2 in priority. Where an item overlaps a Phase 2 ticket, the note says so — do not duplicate that work here.
+
+**Status 2026-07-14:** C1–C8 are all complete — the `maintenance-cleanup` branch merged to `main` in PR #50 (2026-07-13). A post-merge review found two small leftovers, tracked as C9 below. The C6 `pg` v9 `sslmode` follow-up remains open (see the note inside C6) and stays parked until someone bumps `pg`.
 
 Each ticket's **implementation prompt** is self-contained and meant to be pasted verbatim into a fresh Claude Code session (Sonnet/Opus acting as the senior dev, pairing with a junior dev who writes the code).
 
@@ -169,7 +173,7 @@ DONE WHEN:
 **Update 2026-07-07:** complete — all three items landed on the `maintenance-cleanup` branch and were verified in the browser. Notes on where the implementation deviated from or refined the plan:
 
 - Step 1 (TeamPage standings race): fixed with option (b). `fetchMain` now parks the raw team-stats response in state and a `useMemo` derives record/ranks/playoff-line delta from the live `StandingsContext` at render, so a deep-linked visit self-corrects once standings resolve instead of freezing at 0. The redundant `triCode` dep was dropped from the fetch effect (`teamId` already implies it). This satisfies ticket 2.7 step 0 — do not redo the standings-race fix there.
-- Step 2 (stale team-list cache): **deviated from the written plan.** Instead of adding a `{timestamp, data}` TTL, the `localStorage` team-list cache was removed entirely — freshness is now owned by the backend DB cache. Rationale: `ListOfTeamsContext` was the only client-side *data* cache (every other context already relies on the server cache), so it was a redundant second cache layer, and the one without a TTL. `hasValidGoalsPerGame` and the `listOfTeams-key` read/write are gone; `ThemeContext`'s `localStorage` use (a user preference, not fetched data) is untouched. **Consequence: ticket 2.9 cites `ListOfTeamsContext` as its `localStorage` example — that reference is now stale. Update 2.9's READ-FIRST list when it comes up.**
+- Step 2 (stale team-list cache): **deviated from the written plan.** Instead of adding a `{timestamp, data}` TTL, the `localStorage` team-list cache was removed entirely — freshness is now owned by the backend DB cache. Rationale: `ListOfTeamsContext` was the only client-side _data_ cache (every other context already relies on the server cache), so it was a redundant second cache layer, and the one without a TTL. `hasValidGoalsPerGame` and the `listOfTeams-key` **read** are gone; `ThemeContext`'s `localStorage` use (a user preference, not fetched data) is untouched. _Correction 2026-07-14: the `localStorage.setItem('listOfTeams-key', ...)` **write** survived the merge — it's a dead write nothing reads; removal is tracked in C9._ Ticket 2.9's READ-FIRST list, which cited `ListOfTeamsContext` as the `localStorage` example, was updated 2026-07-14 to point at `ThemeContext` instead.
 - Step 3 (twin leader contexts): merged into one `StatLeadersProvider` in `StatLeadersContext.tsx` that calls `useStatLeaders` twice (skater + goalie). `useSkaterLeaderData`/`useGoalieLeaderData` keep their names and return shapes, so only `LandingPage`'s import path and `App.tsx`'s provider nesting changed. The old `SkaterStatLeadersContext.tsx` and `GoalieStatLeadersContext.tsx` are deleted.
 
 **Update 2026-07-06:** the serial score backfill item originally listed here landed in PR #47 (`updatePastGames` now fetches with `Promise.all`). The remaining items change runtime behavior, so verify each in the browser:
@@ -205,7 +209,7 @@ DONE WHEN:
 
 ## C6 Backend security and reliability hardening
 
-- [X] **Owner:** Either
+- [x] **Owner:** Either
 
 Findings from the standards review that no existing ticket covers. Items are independent; each is its own commit.
 
@@ -241,7 +245,7 @@ DONE WHEN:
 
 ## C7 Frontend resilience refinements
 
-- [X] **Owner:** Either
+- [x] **Owner:** Either
 
 - **No error boundary.** A render-time exception in any component blanks the entire SPA to a white screen. Add one `ErrorBoundary` component wrapping `<Routes>` in `App.tsx` so a broken page degrades to an error card with a "back to home" link instead.
 - **`axiosInstance.ts` sets no timeout**, so a hung backend call leaves loading states spinning forever. Add one (e.g. 15s — the AI route is slow on cold cache) so requests resolve to the callers' existing error paths.
@@ -269,14 +273,14 @@ DONE WHEN:
 
 ## C8 Domain persistence lock contention — `Query read timeout` on background writes
 
-- [X] **Owner:** Either
+- [x] **Owner:** Either
 
 **High priority.** Found 2026-07-07 from local API logs: `Domain service task failed for goalie leaders shutouts 20252026: Error: Query read timeout` (and the same for `skater leaders goals`, `season schedule 20252026`, `season schedule 20222023`). The site works — these are fire-and-forget write-through tasks and the response was already served from the NHL payload — but the failing tasks mean stat leaders, schedules, and player stats are **silently not being persisted** to Postgres for the large payloads.
 
 **Update 2026-07-07 (environment facts — these amplify the diagnosis below):**
 
 - The database is **not local**. `api/.env` sets no `DATABASE_URL`, so `connectionConfig.js` falls back to `CACHE_DATABASE_URL`, which points at a **Neon Postgres in us-east-1**. Both the cache pool and the domain pool write to Neon over the internet; the logged timeouts were against Neon, and production (Render) uses the same database.
-- **Latency amplification.** The diagnosis below says the transaction lock is "held for seconds" — that assumed sub-millisecond local round trips. Against Neon each round trip is ~20–100ms, so a ~4,000-query schedule transaction holds the `seasons` row lock for **minutes**, and a colliding same-season task blowing the 5s `query_timeout` is near-guaranteed, not bad luck. Batching is therefore doubly the right fix: it shortens the lock hold (the contention bug) *and* collapses the network round trips (the latency cost).
+- **Latency amplification.** The diagnosis below says the transaction lock is "held for seconds" — that assumed sub-millisecond local round trips. Against Neon each round trip is ~20–100ms, so a ~4,000-query schedule transaction holds the `seasons` row lock for **minutes**, and a colliding same-season task blowing the 5s `query_timeout` is near-guaranteed, not bad luck. Batching is therefore doubly the right fix: it shortens the lock hold (the contention bug) _and_ collapses the network round trips (the latency cost).
 - **Neon free-tier autosuspend.** Neon scales compute to zero after idle; the first query after wake-up pays a cold start that can take a few seconds and may trip the 5s timeout **even after this fix**. A one-off timeout right after a long idle period is that transient, not this bug — do not chase it, and do not raise the timeout for it.
 - **This ticket is also the "data survives Render restarts" fix.** Render's free-tier disk is ephemeral, but the raw NHL cache already persists in Neon's `app_cache`; it is exactly these failing domain writes that are not persisting. Once this lands, remaining work is just deploy verification (explicit `DATABASE_URL` or documented fallback, Render env vars, migrations run against Neon, `/health/cache-usage` check) — small enough to fold into this ticket's step 5 rather than a separate ticket.
 
@@ -284,7 +288,7 @@ DONE WHEN:
 
 - All five domain persist services (`statLeaderService`, `scheduleService`, `playerStatsService`, `teamService`, `rosterService` in `api/services/domain/`) share one pattern: open a transaction, call `seasonsRepository.upsertSeason(...)` **first**, then loop over the payload doing sequential single-row upserts.
 - In Postgres, that first upsert takes a row-level lock on the `seasons` row **held until COMMIT**. A season schedule is ~1,300 games × 3 queries (2 team upserts + 1 game upsert) ≈ 4,000 sequential round trips, so the transaction — and the lock — is held for seconds.
-- `runServiceTask` dedupes by label only, so a single page load fires several of these concurrently for the *same season*. The second task's very first query (`upsertSeason` on the same row) blocks on the first task's lock, exceeds the pool's `query_timeout: 5000` (`api/db/pool.js`), and dies with `Query read timeout`. The two schedule tasks additionally collide with each other on the shared `teams` rows.
+- `runServiceTask` dedupes by label only, so a single page load fires several of these concurrently for the _same season_. The second task's very first query (`upsertSeason` on the same row) blocks on the first task's lock, exceeds the pool's `query_timeout: 5000` (`api/db/pool.js`), and dies with `Query read timeout`. The two schedule tasks additionally collide with each other on the shared `teams` rows.
 - Raising the timeout would only hide the contention; the fix is to make the transactions short.
 
 **Fix, in order of leverage:**
@@ -319,4 +323,32 @@ DONE WHEN:
 - cd api && pnpm test passes (add/adjust unit tests for the dedupe + chunking helpers).
 - The step-5 manual check shows clean logs and populated tables for a fresh season load, locally AND on the Render deployment after a restart.
 - docs/architecture.md's domain persistence section notes the batched-write + serialized-runner design and which env var production uses for the domain pool; this box is ticked.
+```
+
+## C9 Post-merge leftovers from the C1–C8 cleanup
+
+- [ ] **Owner:** Either
+
+Found 2026-07-14 in a post-merge review of PR #50. Two small stragglers; both are pure deletions with zero behavior change.
+
+- **`react-error-boundary` is listed in `api/package.json` dependencies.** It's a React library — the C7 error-boundary work added it to the correct place (`react/package.json`), but a copy landed in the backend package too. Nothing in `api/` imports it; remove it.
+- **`ListOfTeamsContext` still has a dead `localStorage` write.** C5 step 2 removed the `listOfTeams-key` _read_ (freshness is now owned by the backend cache), but `localStorage.setItem('listOfTeams-key', JSON.stringify(finalTeamData))` in `GetTeams` survived. Nothing reads the key anymore — every load overwrites it and it just accumulates stale bytes in users' browsers. Delete the line (optionally `localStorage.removeItem('listOfTeams-key')` once, but a leftover key is harmless enough that a plain delete is fine).
+
+**Implementation prompt:**
+
+```text
+ROLE: You are the senior dev pairing with me (junior dev, learning). Explain how each leftover got left behind before we delete it; then guide me step by step. Pause after each numbered step. Do not expand scope beyond this ticket.
+
+PROJECT: HockeyStatsWebApp — Express backend in api/, Vite React frontend in react/. Two pure deletions left over from the C1–C8 cleanup merge (PR #50).
+
+READ FIRST: docs/cleanup-backlog.md section C9, api/package.json, react/src/Data/Context/ListOfTeamsContext.tsx.
+
+STEPS (pause after each):
+1. Verify then remove react-error-boundary from api/package.json dependencies (grep -rn "react-error-boundary" api --include='*.js' excluding node_modules must return nothing — the real usage is react/src/App.tsx, which keeps its own copy in react/package.json). Then cd api && pnpm install && pnpm test.
+2. Delete the localStorage.setItem('listOfTeams-key', ...) line from GetTeams in react/src/Data/Context/ListOfTeamsContext.tsx (grep first to confirm nothing reads 'listOfTeams-key'). cd react && npx tsc --noEmit && pnpm build.
+
+DONE WHEN:
+- cd api && pnpm test passes; cd react && npx tsc --noEmit and pnpm build pass.
+- Manual smoke: team list page still renders team stats; landing page unaffected.
+- grep confirms no reference to listOfTeams-key remains, and react-error-boundary appears only in react/package.json; this box is ticked.
 ```
