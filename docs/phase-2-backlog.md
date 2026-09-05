@@ -108,50 +108,6 @@ Things to implement:
 
 - [ ] **Owner:** Either | **Depends on:** 2.3, 2.4
 
-Here is the updated docs/phase-2-backlog.md.  The persona and instructions across all ticket prompts have been updated to a Socratic Staff Engineer mentor:No code dumps: It is explicitly forbidden from writing implementations, boilerplate, or code snippets for you.  High-signal nudges: It defines data structures conceptually, points you to the exact existing patterns in the codebase to reference, and reviews your code line-by-line.  Saves maximum tokens: Removing code generation from Opus cuts its output token footprint by 70–80%, keeping sessions fast, cheap, and focused entirely on architectural guidance and debugging.  Markdown# Phase 2 Backlog
-
-Future feature roadmap for HockeyStatsWebApp. 
-
-Each open ticket contains a self-contained, token-disciplined implementation prompt optimized for Claude Opus / Sonnet pairing. Prompts enforce strict path standards (Bulletproof React + Feghhi 3-Pattern Backend), anti-overengineering fences, and a **hands-off-the-keyboard mentoring style** where the model guides conceptually while you write the code.
-
----
-
-## 2.1 API health, diagnostics, and environment visibility
-
-- [x] **Owner:** Either | **Depends on:** Architecture baseline | **Done:** 2026-05-31 (see [phase-2-progress.md](./phase-2-progress.md#21--api-health-diagnostics-and-environment-visibility))
-
-Add lightweight operational visibility so local development and deployments can quickly answer whether the React app, Express API, NHL upstreams, cache folders, and optional AI integration are configured correctly.
-
----
-
-## 2.2 Normalize API response contracts
-
-- [x] **Owner:** Either | **Depends on:** 2.1 | **Done:** 2026-05-31 (see [phase-2-progress.md](./phase-2-progress.md#22--normalize-api-response-contracts))
-
-Create stable backend response shapes for schedule, standings, teams, rosters, and player stats so frontend helpers do less defensive guessing against raw NHL API objects.
-
----
-
-## 2.3 Season and date range controls
-
-- [x] **Owner:** Either | **Depends on:** 2.2 | **Done:** 2026-06-02 (see [phase-2-progress.md](./phase-2-progress.md#23--season-and-date-range-controls))
-
-Let users explore past and current seasons instead of only the season inferred by `seasonHelper` and the currently cached schedule window.
-
----
-
-## 2.4 Backend contract and season test coverage
-
-- [x] **Owner:** Either | **Depends on:** 2.2, 2.3 | **Done:** 2026-06-02 (see [phase-2-progress.md](./phase-2-progress.md#24--backend-contract-and-season-test-coverage)); shipped alongside the centralized cache manager and Postgres cache/domain persistence work (PRs #40–#42)
-
-Add focused backend tests before building more Phase 2 features on top of the normalized contracts and season-aware routes.
-
----
-
-## 2.5 Schedule Filters, Team Calendar, and Global Search
-
-- [ ] **Owner:** Either | **Depends on:** 2.3, 2.4
-
 Add client-side schedule filters (`?team=`, `?status=`, `?type=`, `?range=`) and a global team/game search dropdown in `PageHeader`. All filters and searches project over already-loaded in-memory context data (`ScheduleContext`, `teamListData`). Zero new backend endpoints, zero new network requests on filter/search changes.
 
 **Implementation prompt:**
@@ -198,6 +154,7 @@ Validation Criteria:
 - cd react && npx tsc --noEmit and pnpm build pass.
 - Changing filters fires zero network calls.
 - Deep-linking #/schedule?team=COL&status=final works on fresh reload.
+```
 
 ## 2.6 Enhanced game detail pages
 
@@ -206,7 +163,7 @@ Validation Criteria:
 Make game detail pages useful before, during, and after games by separating preview, live, and final states. The current backend still passes game landing and boxscore responses through raw, while schedule list data is normalized. This ticket should either keep detail-specific raw handling isolated in the page or introduce backend mappers for repeated detail shapes if the UI starts depending on them heavily.
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -241,7 +198,7 @@ Validation Criteria:
 - cd react && npx tsc --noEmit and pnpm build pass.
 - Handled safely across preview, live, and final game states.
 - Interval cleanly terminates on unmount.
-
+```
 ## 2.7 Team page depth: roster, schedule, leaders, and history
 
 - [ ] Owner: Either | Depends on: 2.2, 2.3, 2.5
@@ -249,7 +206,7 @@ Validation Criteria:
 Rebuild TeamPage into a URL-backed tabbed hub (?tab=overview|roster|schedule|skaters|goalies|history). Keep official NHL data strictly separated from AI-generated history.
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -285,7 +242,7 @@ Steps (Guide me through ONE at a time. No code generation):
 Validation Criteria:
 - cd react && npx tsc --noEmit and pnpm build pass.
 - Deep-linking #/team/COL?season=20232024&tab=roster restores exact tab and season on reload.
-
+```
 ## 2.8 Player profile pages
 
 - [ ] **Owner:** Either | **Depends on:** 2.2, 2.7
@@ -293,7 +250,7 @@ Validation Criteria:
 Introduce dedicated player detail views (#/player/:playerId) and integrate player names into the global search dropdown created in ticket 2.5. Reuse normalized contracts (SkaterSummaryContract, GoalieSummaryContract) and local roster data without redundant network round trips[cite: 2].
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -331,7 +288,7 @@ Validation Criteria:
 - cd react && npx tsc --noEmit and pnpm build pass.
 - Clicking player from roster and search dropdown navigates seamlessly.
 - Handles skaters and goalies correctly without layout issues.
-
+```
 ## 2.9 Favorites and personalized dashboard
 
 - [ ] **Owner:** Either | **Depends on:** 2.5, 2.7, 2.8
@@ -339,7 +296,7 @@ Validation Criteria:
 Let users mark favorite teams and players via local storage, surfacing personalized games, standings, and leaders on the landing page without requiring user accounts or backend persistence
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -375,7 +332,7 @@ Steps (Guide me through ONE at a time. No code generation):
 Validation Criteria:
 - cd react && npx tsc --noEmit and pnpm build pass.
 - Favorites persist across reloads; corrupted localStorage falls back cleanly.
-
+```
 ## 2.10 Advanced standings and playoff race views
 
 - [ ] **Owner:** Either | **Depends on:** 2.3, 2.9
@@ -383,7 +340,7 @@ Validation Criteria:
 Expand standings views to include Wildcard and League-wide tables, column sorting, clinching indicator badges, and favorite-team row highlighting
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -419,7 +376,7 @@ Steps (Guide me through ONE at a time. No code generation):
 Validation Criteria:
 - cd react && npx tsc --noEmit and pnpm build pass; cd api && pnpm test passes if backend mappers touched.
 - Wildcard seeds match official standings. Sorting works without resetting URL params.
-
+```
 ## 2.12 AI history hardening and source separation
 
 - [ ] **Owner:** Either | **Depends on:** 2.7
@@ -427,7 +384,7 @@ Validation Criteria:
 Harden the AI-backed team history pipeline: move prompt generation and schema validation to the backend, introduce versioned cache keys, and enforce typed failure modes so AI output never poisons data models or impersonates official stats
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -462,7 +419,7 @@ Validation Criteria:
 - cd api && pnpm test passes with validator tests.
 - Missing ANTHROPIC_API_KEY gracefully returns 503 without process crash.
 - Stale/broken responses fail closed.
-
+```
 ## 2.13 Frontend coverage and release readiness
 
 - [ ] **Owner:** Either | **Depends on:** 2.1 through 2.12
@@ -470,7 +427,7 @@ Validation Criteria:
 Set up a lightweight frontend test harness using Vitest and React Testing Library[cite: 2]. Cover pure helper utilities (especially scheduleFilterHelper.ts and seasonHelper.ts) and critical context projection logic
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -504,7 +461,7 @@ Steps (Guide me through ONE at a time. No code generation):
 Validation Criteria:
 - cd react && pnpm test passes cleanly.
 - Tests accurately catch boundary errors without environment leaks.
-
+```
 ## 2.14 Query-backed frontend data flows
 
 - [ ] **Owner:** Either | **Depends on:** 2.4, 2.5, 2.7, 2.10
@@ -512,7 +469,7 @@ Validation Criteria:
 Expose read queries against the normalized Postgres domain tables (schedule_games, player_season_stats, standings) to bypass heavy full-season client downloads for filtered views, while strictly maintaining the Feghhi 3-pattern architecture
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -549,7 +506,7 @@ Validation Criteria:
 - cd api && pnpm test passes.
 - All SQL uses parameter binding ($1, $2) to prevent injection.
 - Response payloads match established contract shapes[cite: 1].
-
+```
 ## 2.15 Replace the Python AI subprocess with the Anthropic Node SDK
 
 - [ ] **Owner:** Either | **Depends on:** 2.12
@@ -557,7 +514,7 @@ Validation Criteria:
 Replace the Python subprocess execution (hockey-ai.py) with direct calls to @anthropic-ai/sdk in Node.js, removing Python and venv dependencies from production
 
 **Implementation prompt:**
-
+```text
 Role: Senior Staff Engineer acting as an interactive mentor.
 Teaching Protocol:
 - DO NOT write implementation code, classes, components, or complete functions.
@@ -591,3 +548,4 @@ Steps (Guide me through ONE at a time. No code generation):
 Validation Criteria:
 - cd api && pnpm test passes with mocked SDK tests.
 - Express backend boots and runs with zero Python / venv dependencies.
+```
