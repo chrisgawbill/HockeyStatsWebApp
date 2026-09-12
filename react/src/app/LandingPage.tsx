@@ -10,6 +10,7 @@ import {
 import { useDraftLotteryOddsData } from '@/features/standings/hooks/StandingsContext';
 import DraftLotteryOddsRow from '@/features/draft-lottery/components/DraftLotteryOddsRow';
 import LoadingState from '@/components/LoadingState';
+import ErrorState from '@/components/ErrorState';
 import SeasonSelector from '@/components/SeasonSelector';
 
 /**
@@ -24,6 +25,8 @@ export default function LandingPage() {
     pointsLeaderData,
     faceoffLeadersData,
     loadingSkaterLeaderData,
+    errorSkaterLeaderData,
+    retrySkaterLeaderData,
   } = useSkaterLeaderData();
   const {
     winsLeaderData,
@@ -31,11 +34,27 @@ export default function LandingPage() {
     gaaLeaderData,
     shutoutLeaderData,
     loadingGoalieLeaderData,
+    errorGoalieLeaderData,
+    retryGoalieLeaderData,
   } = useGoalieLeaderData();
   const draftLotteryOddsData = useDraftLotteryOddsData();
 
   const loading =
     loadingSkaterLeaderData || loadingGoalieLeaderData || !draftLotteryOddsData;
+  // Skater and goalie leaders are fetched independently; a single provider
+  // only reports an error once every category within it has failed, so
+  // either one being non-null already means the stat-leaders API is down
+  // rather than one category being empty.
+  const statLeadersError = errorSkaterLeaderData ?? errorGoalieLeaderData;
+
+  /**
+   * Re-runs both stat-leader fetches together since this page renders a
+   * single combined error for either failing.
+   */
+  const retryStatLeaders = () => {
+    retrySkaterLeaderData();
+    retryGoalieLeaderData();
+  };
 
   return (
     <Container fluid>
@@ -43,6 +62,13 @@ export default function LandingPage() {
       <SeasonSelector />
       {loading ? (
         <LoadingState label="Loading data" fullPage />
+      ) : statLeadersError ? (
+        <ErrorState
+          fullPage
+          title="Couldn't load stat leaders"
+          message={statLeadersError}
+          onRetry={retryStatLeaders}
+        />
       ) : (
         <Row className={styles['landingPage-content']}>
           <Col lg={7}>

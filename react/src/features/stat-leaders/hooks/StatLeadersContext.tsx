@@ -10,6 +10,8 @@ interface SkaterLeaderContextValue {
   pointsLeaderData: TopStatLeader | undefined;
   faceoffLeadersData: TopStatLeader | undefined;
   loadingSkaterLeaderData: boolean;
+  errorSkaterLeaderData: string | null;
+  retrySkaterLeaderData: () => void;
 }
 
 interface GoalieLeaderContextValue {
@@ -18,6 +20,8 @@ interface GoalieLeaderContextValue {
   gaaLeaderData: TopStatLeader | undefined;
   shutoutLeaderData: TopStatLeader | undefined;
   loadingGoalieLeaderData: boolean;
+  errorGoalieLeaderData: string | null;
+  retryGoalieLeaderData: () => void;
 }
 
 interface StatLeadersContextValue {
@@ -33,14 +37,18 @@ const StatLeadersContext = createContext<StatLeadersContextValue | null>(null);
  */
 function StatLeadersProvider({ children }: { children: ReactNode }) {
   const { season } = useSeason();
-  const { leaders: skaterLeaders, loading: skaterLoading } = useStatLeaders(
-    STAT_LEADER_TYPES.SKATER,
-    season,
-  );
-  const { leaders: goalieLeaders, loading: goalieLoading } = useStatLeaders(
-    STAT_LEADER_TYPES.GOALIE,
-    season,
-  );
+  const {
+    leaders: skaterLeaders,
+    loading: skaterLoading,
+    error: skaterError,
+    retry: retrySkater,
+  } = useStatLeaders(STAT_LEADER_TYPES.SKATER, season);
+  const {
+    leaders: goalieLeaders,
+    loading: goalieLoading,
+    error: goalieError,
+    retry: retryGoalie,
+  } = useStatLeaders(STAT_LEADER_TYPES.GOALIE, season);
 
   const skater: SkaterLeaderContextValue = {
     goalLeaderData: skaterLeaders['Goals'],
@@ -48,6 +56,8 @@ function StatLeadersProvider({ children }: { children: ReactNode }) {
     pointsLeaderData: skaterLeaders['Points'],
     faceoffLeadersData: skaterLeaders['Faceoffs'],
     loadingSkaterLeaderData: skaterLoading,
+    errorSkaterLeaderData: skaterError,
+    retrySkaterLeaderData: retrySkater,
   };
   const goalie: GoalieLeaderContextValue = {
     winsLeaderData: goalieLeaders['Wins'],
@@ -55,6 +65,8 @@ function StatLeadersProvider({ children }: { children: ReactNode }) {
     gaaLeaderData: goalieLeaders['GAA'],
     shutoutLeaderData: goalieLeaders['Shutouts'],
     loadingGoalieLeaderData: goalieLoading,
+    errorGoalieLeaderData: goalieError,
+    retryGoalieLeaderData: retryGoalie,
   };
 
   return (

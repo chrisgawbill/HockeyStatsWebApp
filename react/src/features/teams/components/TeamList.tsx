@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStandingsData } from '@/features/standings/hooks/StandingsContext';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import LoadingState from '@/components/LoadingState';
+import ErrorState from '@/components/ErrorState';
 
 const triCodeLookup: Record<string, string> = Object.fromEntries(
   (localTeamList as any[]).map((t) => [t.fullName, t.triCode]),
@@ -61,9 +62,19 @@ function getStatusLabel(team: TeamCardData, filter: TeamFilter) {
 }
 
 export default function TeamList() {
-  const { listOfTeamsData, loadingListOfTeamsData } = useListOfTeamsData();
-  const { easternStandingsData, westernStandingsData, loadingStandingsData } =
-    useStandingsData();
+  const {
+    listOfTeamsData,
+    loadingListOfTeamsData,
+    errorListOfTeamsData,
+    refetchListOfTeams,
+  } = useListOfTeamsData();
+  const {
+    easternStandingsData,
+    westernStandingsData,
+    loadingStandingsData,
+    errorStandingsData,
+    refetchStandings,
+  } = useStandingsData();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [conference, setConference] = useState('All');
@@ -155,6 +166,28 @@ export default function TeamList() {
     sortBy,
     standingsByTeam,
   ]);
+
+  if (errorListOfTeamsData) {
+    return (
+      <ErrorState
+        fullPage
+        title="Couldn't load teams"
+        message={errorListOfTeamsData}
+        onRetry={refetchListOfTeams}
+      />
+    );
+  }
+
+  if (errorStandingsData) {
+    return (
+      <ErrorState
+        fullPage
+        title="Couldn't load standings"
+        message={errorStandingsData}
+        onRetry={refetchStandings}
+      />
+    );
+  }
 
   if (loadingListOfTeamsData || loadingStandingsData) {
     return <LoadingState label="Loading teams" fullPage />;
