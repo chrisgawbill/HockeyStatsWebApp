@@ -1,14 +1,15 @@
 /**
  * Computes the current NHL season id from today's date. The season is named for
- * its two calendar years (e.g. "20252026") and rolls over in October, so any
- * month from October on belongs to the season starting that year.
- * @returns {string} The 8-digit season id for the season in progress now.
+ * its two calendar years (e.g. "20252026") and rolls over on September 1, so
+ * any month from September on belongs to the season starting that year.
+ * @param {Date} [now] Date to compute from; defaults to the real current date.
+ *   Injectable so tests can pin the boundary instead of depending on the clock.
+ * @returns {string} The 8-digit season id for the season in progress at `now`.
  */
-function getCurrentSeasonId() {
-  const now = new Date();
+function getCurrentSeasonId(now = new Date()) {
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
-  const startYear = month >= 10 ? year : year - 1;
+  const startYear = month >= 9 ? year : year - 1;
   return `${startYear}${startYear + 1}`;
 }
 
