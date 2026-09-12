@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 import { GetTeamStatsById } from '@/features/teams/api/teamsApi';
 import { ConvertToListOfTeams } from '@/features/teams/utils/teamHelpers';
 import { Team } from '@/features/teams/types/team';

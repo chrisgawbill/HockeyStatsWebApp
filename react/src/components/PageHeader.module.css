@@ -234,3 +234,170 @@
     white-space: nowrap;
   }
 }
+
+/*
+ * Mobile search FAB: replaces the desktop inline search (hidden above via
+ * .nav-search-col's max-width: 576px rule) instead of adding a 7th touch
+ * target to the already-crowded bottom nav row. Hidden by default and only
+ * shown inside the mobile media query below so desktop never renders it.
+ */
+.mobile-search-fab {
+  display: none;
+}
+
+@media (max-width: 576px) {
+  .mobile-search-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: var(--space-md);
+    /* Clears the 60px bottom nav (see `body { padding-bottom: 60px }` above)
+       plus the home-indicator safe area, with a little breathing room on top. */
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px) + var(--space-md));
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--color-selection);
+    color: var(--color-selection-text);
+    box-shadow:
+      var(--shadow-card),
+      0 4px 10px rgba(0, 0, 0, 0.3);
+    /* Above the bottom nav (100) but below the full-screen overlay (300). */
+    z-index: 150;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .mobile-search-fab:hover,
+  .mobile-search-fab:focus-visible {
+    transform: scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-search-fab {
+    transition: none;
+  }
+}
+
+.mobile-search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.5);
+  padding: var(--space-md);
+  padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+  box-sizing: border-box;
+  animation: mobile-search-fade-in 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-search-overlay {
+    animation: none;
+  }
+}
+
+@keyframes mobile-search-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mobile-search-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.mobile-search-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.mobile-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  border-radius: var(--border-radius-pill);
+  border: 1px solid var(--color-divider);
+  background: transparent;
+  color: var(--color-text);
+  padding: 0 16px;
+  font-size: 1rem;
+}
+
+.mobile-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.mobile-search-close-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-search-close-btn:hover {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.mobile-search-results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-xs);
+}
+
+.mobile-search-result {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-divider);
+  padding: 12px 10px;
+  font-size: 1rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.mobile-search-result:hover,
+.mobile-search-result:active {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.mobile-search-empty {
+  padding: var(--space-md);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}

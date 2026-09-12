@@ -1,4 +1,4 @@
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 
 export function getTeamPrimaryColor(abbrev?: string): string {
   const normalizedAbbrev = abbrev?.toUpperCase();

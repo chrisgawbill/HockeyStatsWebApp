@@ -14,8 +14,8 @@ import {
   StatItem,
   TeamOverview,
   TeamStatsContract,
-  TeamTab,
-  TEAM_TABS,
+  TeamSection,
+  TEAM_SECTIONS,
 } from '@/features/teams/types/teamPageTypes';
 
 /**
@@ -231,13 +231,20 @@ export function buildTeamOverview(
   };
 }
 
-const VALID_TEAM_TABS = new Set(TEAM_TABS.map((t) => t.key));
+const VALID_TEAM_SECTIONS = new Set(TEAM_SECTIONS.map((s) => s.key));
 
-/** Resolves the `?tab=` param into a known tab, defaulting to `overview`. */
-export function parseTeamTab(value: string | null): TeamTab {
-  return value != null && VALID_TEAM_TABS.has(value as TeamTab)
-    ? (value as TeamTab)
-    : 'overview';
+/**
+ * Maps a legacy `?tab=` value (from previously shared links) onto the
+ * matching anchor section, for backward compatibility. `overview` — the old
+ * tab that has since been dissolved into top-level sections — resolves to
+ * its first section, `stats`. Returns null for anything unrecognized.
+ */
+export function resolveLegacyTeamTab(value: string | null): TeamSection | null {
+  if (value == null) return null;
+  if (value === 'overview') return 'stats';
+  return VALID_TEAM_SECTIONS.has(value as TeamSection)
+    ? (value as TeamSection)
+    : null;
 }
 
 /**

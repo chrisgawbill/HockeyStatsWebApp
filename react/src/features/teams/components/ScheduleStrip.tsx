@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { hasScore } from '@/features/schedule/utils/gameStatusHelper';
 import { isCompletedGameState, isInProgressGameState } from '@/lib/gameStatus';
