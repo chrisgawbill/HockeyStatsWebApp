@@ -199,6 +199,11 @@ export default function TeamPage() {
     refetchTeam();
   }, [triCode, refetchTeam]);
 
+  useEffect(() => {
+    if (!triCode) return;
+    refetchTeam();
+  }, [triCode, refetchTeam]);
+
   const team: TeamOverview | null = useMemo(() => {
     if (teamRawResponse == null) {
       return null;
