@@ -17,44 +17,19 @@ export interface TeamOverview {
   hallOfFamers: number;
 }
 
-/**
- * AI-generated franchise history fields (year founded, arena, etc). Sourced
- * from the AI chat subprocess, NOT from the NHL API — kept as its own type so
- * it is never silently merged into an official-stats view model.
- */
-export interface TeamAiHistory {
-  arena: string;
-  founded: number;
-  stanleyCups: number;
-  conferenceChampionships: number;
-  hallOfFamers: number;
-}
-
-export type AiHistoryStatus = 'loading' | 'ready' | 'error';
-
 export interface StatItem {
   label: string;
   value: string;
 }
 
 /** Anchor sections of the team detail page (`#stats`, `#roster`, etc). */
-export type TeamSection =
-  | 'stats'
-  | 'leaders'
-  | 'roster'
-  | 'schedule'
-  | 'skaters'
-  | 'goalies'
-  | 'history';
+export type TeamSection = 'stats' | 'leaders' | 'roster' | 'schedule';
 
 export const TEAM_SECTIONS: { key: TeamSection; label: string }[] = [
   { key: 'stats', label: 'Stats' },
   { key: 'leaders', label: 'Leaders' },
   { key: 'roster', label: 'Roster' },
   { key: 'schedule', label: 'Schedule' },
-  { key: 'skaters', label: 'Skaters' },
-  { key: 'goalies', label: 'Goalies' },
-  { key: 'history', label: 'History' },
 ];
 
 export type Position =
@@ -181,7 +156,9 @@ export type StatCategoryKey =
   | 'plusMinus'
   | 'penaltyMinutes'
   | 'faceoffWinPct'
-  | 'corsiPct';
+  | 'corsiPct'
+  | 'savePctg'
+  | 'goalsAgainstAverage';
 
 export interface StatCategory {
   key: StatCategoryKey;
@@ -190,6 +167,14 @@ export interface StatCategory {
   format: (val: number) => string;
   higherIsBetter: boolean;
   requiresMinGames?: boolean;
+  /**
+   * Which view model this category's values come from. Skater categories read
+   * off `PlayerStatLine`, goalie categories off `GoalieStatLine` — the two are
+   * separate arrays with different shapes (and different max-games-played,
+   * which matters for `requiresMinGames`), so the leaderboard needs to know
+   * which one to pull from before it can look up a value by key.
+   */
+  source: 'skater' | 'goalie';
 }
 
 export const STAT_CATEGORIES: StatCategory[] = [
@@ -199,6 +184,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'G',
     format: (v) => String(v),
     higherIsBetter: true,
+    source: 'skater',
   },
   {
     key: 'assists',
@@ -206,6 +192,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'A',
     format: (v) => String(v),
     higherIsBetter: true,
+    source: 'skater',
   },
   {
     key: 'points',
@@ -213,6 +200,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'P',
     format: (v) => String(v),
     higherIsBetter: true,
+    source: 'skater',
   },
   {
     key: 'plusMinus',
@@ -221,6 +209,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     format: (v) => (v > 0 ? `+${v}` : String(v)),
     higherIsBetter: true,
     requiresMinGames: true,
+    source: 'skater',
   },
   {
     key: 'penaltyMinutes',
@@ -229,6 +218,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     format: (v) => String(v),
     higherIsBetter: true,
     requiresMinGames: true,
+    source: 'skater',
   },
   {
     key: 'faceoffWinPct',
@@ -237,6 +227,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     format: (v) => `${(v * 100).toFixed(1)}%`,
     higherIsBetter: true,
     requiresMinGames: true,
+    source: 'skater',
   },
   {
     key: 'corsiPct',
@@ -245,5 +236,28 @@ export const STAT_CATEGORIES: StatCategory[] = [
     format: (v) => `${(v * 100).toFixed(1)}%`,
     higherIsBetter: true,
     requiresMinGames: true,
+    source: 'skater',
+  },
+  {
+    key: 'savePctg',
+    label: 'Save %',
+    shortLabel: 'SV%',
+    // NHL convention: three decimals with the leading zero stripped
+    // (0.915 -> ".915"), never a percentage.
+    format: (v) => v.toFixed(3).replace(/^0\./, '.'),
+    higherIsBetter: true,
+    requiresMinGames: true,
+    source: 'goalie',
+  },
+  {
+    key: 'goalsAgainstAverage',
+    label: 'Goals Against Average',
+    shortLabel: 'GAA',
+    format: (v) => v.toFixed(2),
+    // Lower is better for GAA — fewer goals allowed per game wins, unlike
+    // every other leaderboard category here.
+    higherIsBetter: false,
+    requiresMinGames: true,
+    source: 'goalie',
   },
 ];

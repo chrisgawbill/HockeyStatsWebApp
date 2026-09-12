@@ -16,12 +16,8 @@ import TeamStatsRow from '@/features/teams/components/TeamStatsRow';
 import PlayerStatsSection from '@/features/teams/components/PlayerStatsSection';
 import RosterTab from '@/features/teams/components/tabs/RosterTab';
 import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
-import SkatersTab from '@/features/teams/components/tabs/SkatersTab';
-import GoaliesTab from '@/features/teams/components/tabs/GoaliesTab';
-import HistoryTab from '@/features/teams/components/tabs/HistoryTab';
 import { localTeamList } from '@/lib/teamListData';
 import {
-  AiHistoryStatus,
   GoalieStatLine,
   GoalieSummaryContract,
   Position,
@@ -30,7 +26,6 @@ import {
   SkaterCorsiEntry,
   SkaterSummaryContract,
   StatItem,
-  TeamAiHistory,
   TeamOverview,
   TeamStatsContract,
   TeamSection,
@@ -57,7 +52,6 @@ import {
 } from '@/features/teams/api/teamsApi';
 import { useStandingsContext } from '@/features/standings/hooks/StandingsContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { InterfaceWithChatBot } from '@/lib/genAIHandler';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 
@@ -70,8 +64,7 @@ const TEAM_SECTION_KEYS = new Set(TEAM_SECTIONS.map((s) => s.key));
 /**
  * Team route (`/team/:teamId`, where the param is actually a tri-code). Pulls the
  * numeric team id and primary color from local team metadata, then loads stats,
- * roster, schedule, and player stats for the selected season in one batch, plus
- * AI-generated team history fetched separately (it isn't season-dependent).
+ * roster, schedule, and player stats for the selected season in one batch.
  *
  * The page body is a single scrolling page: every section renders at once and
  * a sticky anchor nav (`#stats`, `#roster`, ...) scrolls to and highlights the
@@ -115,9 +108,6 @@ export default function TeamPage() {
 
   const [teamRawResponse, setTeamRawResponse] =
     useState<TeamStatsContract | null>(null);
-  const [aiHistory, setAiHistory] = useState<TeamAiHistory | null>(null);
-  const [aiHistoryStatus, setAiHistoryStatus] =
-    useState<AiHistoryStatus>('loading');
   const [stats, setStats] = useState<StatItem[]>([]);
   const [schedule, setSchedule] = useState<ScheduledGame[]>([]);
   const [roster, setRoster] =
@@ -208,42 +198,6 @@ export default function TeamPage() {
     if (!triCode) return;
     refetchTeam();
   }, [triCode, refetchTeam]);
-
-  useEffect(() => {
-    if (!triCode) return;
-    setAiHistory(null);
-    setAiHistoryStatus('loading');
-
-    /**
-     * Fetches static team-history fields from the AI service once per team. This
-     * data is intentionally independent of the selected season, so season changes
-     * do not trigger another AI request.
-     */
-    async function fetchAiHistory() {
-      try {
-        const prompt =
-          `Give me basic historical information about the ${teamEntry?.fullName} NHL team. ` +
-          `Return ONLY a raw JSON object (no markdown) with exactly these fields: ` +
-          `arena (string), founded (number - year founded), stanleyCups (number), ` +
-          `conferenceChampionships (number - total conference final appearances), ` +
-          `hallOfFamers (number - players inducted into the Hockey Hall of Fame).`;
-        const info = await InterfaceWithChatBot({ content: prompt }, triCode);
-        setAiHistory({
-          arena: info.arena ?? '—',
-          founded: info.founded ?? 0,
-          stanleyCups: info.stanleyCups ?? 0,
-          conferenceChampionships: info.conferenceChampionships ?? 0,
-          hallOfFamers: info.hallOfFamers ?? 0,
-        });
-        setAiHistoryStatus('ready');
-      } catch (err) {
-        console.error('Error fetching AI-generated team history', err);
-        setAiHistoryStatus('error');
-      }
-    }
-
-    fetchAiHistory();
-  }, [teamId, triCode]);
 
   const team: TeamOverview | null = useMemo(() => {
     if (teamRawResponse == null) {
@@ -407,7 +361,11 @@ export default function TeamPage() {
           <TeamStatsRow stats={stats} />
         </section>
         <section id="leaders" className={styles['team-section']}>
-          <PlayerStatsSection players={playerStats} headshotMap={headshotMap} />
+          <PlayerStatsSection
+            players={playerStats}
+            goalies={goalieStats}
+            headshotMap={headshotMap}
+          />
         </section>
         <section id="roster" className={styles['team-section']}>
           <RosterTab roster={roster} />
@@ -419,19 +377,6 @@ export default function TeamPage() {
             sourceLabel={team.name}
             sourcePath={teamSourcePath}
             activeNavPath={teamActiveNavPath}
-          />
-        </section>
-        <section id="skaters" className={styles['team-section']}>
-          <SkatersTab players={playerStats} />
-        </section>
-        <section id="goalies" className={styles['team-section']}>
-          <GoaliesTab goalies={goalieStats} />
-        </section>
-        <section id="history" className={styles['team-section']}>
-          <HistoryTab
-            team={team}
-            aiHistory={aiHistory}
-            status={aiHistoryStatus}
           />
         </section>
       </div>

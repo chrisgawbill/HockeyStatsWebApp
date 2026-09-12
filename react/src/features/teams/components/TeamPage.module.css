@@ -640,10 +640,12 @@
 
 /* ── Player Stats ───────────────────────────────────────────────────────── */
 
+/* Wraps to multiple rows (rather than scrolling horizontally) so all 9
+   category buttons stay reachable and tappable down to ~360px wide. */
 .player-stat-categories {
   display: flex;
-  gap: 0;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  gap: 2px;
   margin-bottom: var(--space-md);
   border-bottom: 1px solid var(--color-divider);
 }
@@ -926,5 +928,9 @@
 
   .player-card__name {
     font-size: var(--text-xs);
+  }
+
+  .player-stat-tab {
+    padding: 10px 12px;
   }
 }
