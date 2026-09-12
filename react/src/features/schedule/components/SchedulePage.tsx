@@ -24,7 +24,7 @@ import {
 } from '@/features/schedule/utils/scheduleFilterHelper';
 import { parseLocalDate } from '@/lib/dateFormat';
 import { isCompletedGameState } from '@/lib/gameStatus';
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 
 const STATUS_OPTIONS: { label: string; value: '' | 'upcoming' | 'final' }[] = [
   { label: 'All', value: '' },

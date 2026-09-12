@@ -17,7 +17,7 @@ import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
 import SkatersTab from '@/features/teams/components/tabs/SkatersTab';
 import GoaliesTab from '@/features/teams/components/tabs/GoaliesTab';
 import HistoryTab from '@/features/teams/components/tabs/HistoryTab';
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 import {
   AiHistoryStatus,
   GoalieStatLine,

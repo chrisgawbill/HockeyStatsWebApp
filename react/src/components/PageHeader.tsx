@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { isCompletedGameState } from '@/lib/gameStatus';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 import styles from '@/components/PageHeader.module.css';
 
 /**

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { Team } from '@/features/teams/types/team';
 import { TeamStats } from '@/features/teams/types/teamStats';
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 import styles from '@/features/teams/components/TeamList.module.css';
 import PageHeader from '@/components/PageHeader';
 import { useListOfTeamsData } from '@/features/teams/hooks/ListOfTeamsContext';

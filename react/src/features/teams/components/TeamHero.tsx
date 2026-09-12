@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { TeamOverview } from '@/features/teams/types/teamPageTypes';
-import { localTeamList } from '@/features/teams/utils/teamListData';
+import { localTeamList } from '@/lib/teamListData';
 import SeasonSelector from '@/components/SeasonSelector';
 import styles from '@/features/teams/components/TeamPage.module.css';
 
