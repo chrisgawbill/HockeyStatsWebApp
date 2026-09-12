@@ -14,7 +14,12 @@
   padding: 0 var(--space-lg);
 }
 
-/* ── Tab nav ───────────────────────────────────────────────────────────── */
+/* ── Anchor nav (sticky, scroll-spied) ────────────────────────────────────
+ * `top` sits right below PageHeader (measured at runtime into
+ * --sticky-header-h) rather than 0, so it never fights PageHeader's own
+ * `position: sticky; top: 0;`. z-index is kept below PageHeader's (100) so
+ * PageHeader always wins if they ever overlap during a resize.
+ */
 
 .team-tabs {
   display: flex;
@@ -22,6 +27,12 @@
   overflow-x: auto;
   margin: var(--space-lg) 0;
   border-bottom: 1px solid var(--color-divider);
+  position: sticky;
+  top: var(--sticky-header-h, 0px);
+  z-index: 50;
+  background: color-mix(in srgb, var(--color-bg-subtle) 85%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .team-tab {
@@ -34,6 +45,7 @@
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text-secondary);
+  text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
   letter-spacing: 0.1px;
@@ -53,6 +65,24 @@
   border-bottom-color: var(--color-primary);
   color: var(--color-primary);
   font-weight: 600;
+}
+
+/* ── Scrolling sections ────────────────────────────────────────────────── */
+
+.team-section {
+  scroll-margin-top: calc(
+    var(--sticky-header-h, 0px) + var(--sticky-nav-h, 0px)
+  );
+}
+
+:global(html) {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html) {
+    scroll-behavior: auto;
+  }
 }
 
 /* ── Roster tab (Forwards / Defense / Goalies groups) ─────────────────── */

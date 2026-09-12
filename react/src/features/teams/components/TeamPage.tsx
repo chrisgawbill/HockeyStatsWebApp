@@ -1,10 +1,17 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 
 import PageHeader from '@/components/PageHeader';
 import TeamHero from '@/features/teams/components/TeamHero';
 import LoadingState from '@/components/LoadingState';
-import OverviewTab from '@/features/teams/components/tabs/OverviewTab';
+import TeamStatsRow from '@/features/teams/components/TeamStatsRow';
+import PlayerStatsSection from '@/features/teams/components/PlayerStatsSection';
 import RosterTab from '@/features/teams/components/tabs/RosterTab';
 import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
 import SkatersTab from '@/features/teams/components/tabs/SkatersTab';
@@ -24,14 +31,14 @@ import {
   TeamAiHistory,
   TeamOverview,
   TeamStatsContract,
-  TeamTab,
-  TEAM_TABS,
+  TeamSection,
+  TEAM_SECTIONS,
   PlayerStatLine,
 } from '@/features/teams/types/teamPageTypes';
 import {
   buildEmptyRoster,
   buildTeamOverview,
-  parseTeamTab,
+  resolveLegacyTeamTab,
   transformGoalieStats,
   transformPlayerStats,
   transformRoster,
@@ -56,19 +63,25 @@ function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
 }
 
+const TEAM_SECTION_KEYS = new Set(TEAM_SECTIONS.map((s) => s.key));
+
 /**
  * Team route (`/team/:teamId`, where the param is actually a tri-code). Pulls the
  * numeric team id and primary color from local team metadata, then loads stats,
  * roster, schedule, and player stats for the selected season in one batch, plus
  * AI-generated team history fetched separately (it isn't season-dependent).
  *
- * The page body is a URL-backed tabbed hub (`?tab=`); TeamHero above the tabs
- * is always visible and is built entirely from official standings-context data.
+ * The page body is a single scrolling page: every section renders at once and
+ * a sticky anchor nav (`#stats`, `#roster`, ...) scrolls to and highlights the
+ * section in view, rather than swapping tab content in and out. TeamHero above
+ * the nav is always visible and is built entirely from official standings-context
+ * data. Old `?tab=` links (from before this page used anchors) are redirected to
+ * the matching section on load, for backward compatibility.
  */
 export default function TeamPage() {
   const { teamId } = useParams<{ teamId: string }>();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const routeState = location.state as {
     sourcePath?: string;
     fallbackPath?: string;
@@ -83,21 +96,20 @@ export default function TeamPage() {
   const teamEntry = (localTeamList as any[]).find((t) => t.triCode === triCode);
   const numericId: number = teamEntry?.id ?? 0;
   const primaryColor: string = teamEntry?.primary ?? '#1B4F8A';
-  const pageStyle = { '--color-primary': primaryColor } as React.CSSProperties;
 
-  const tab: TeamTab = parseTeamTab(searchParams.get('tab'));
+  const pageRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const hasHandledDeepLinkRef = useRef(false);
+  const [activeSection, setActiveSection] = useState<TeamSection>(
+    TEAM_SECTIONS[0].key,
+  );
+  const [stickyOffsets, setStickyOffsets] = useState({ header: 0, nav: 0 });
 
-  /**
-   * Writes the selected tab back to the URL while preserving every sibling
-   * query param (season, etc.) — never replaces the whole search string.
-   */
-  function setTab(next: TeamTab) {
-    setSearchParams((prev) => {
-      const p = new URLSearchParams(prev);
-      p.set('tab', next);
-      return p;
-    });
-  }
+  const pageStyle = {
+    '--color-primary': primaryColor,
+    '--sticky-header-h': `${stickyOffsets.header}px`,
+    '--sticky-nav-h': `${stickyOffsets.nav}px`,
+  } as React.CSSProperties;
 
   const [teamRawResponse, setTeamRawResponse] =
     useState<TeamStatsContract | null>(null);
@@ -228,9 +240,96 @@ export default function TeamPage() {
     );
   }, [teamRawResponse, easternStandingsData, westernStandingsData, triCode]);
 
-  if (loading || !team) {
+  const contentReady = !loading && team != null;
+
+  // Measures the sticky header (PageHeader, rendered as this page's first
+  // child) and the anchor nav so their combined height can drive both the
+  // nav's own sticky offset and every section's scroll-margin-top — kept in
+  // sync with a resize listener since nav height can change when it wraps.
+  useLayoutEffect(() => {
+    if (!contentReady) return;
+
+    function measure() {
+      const headerEl = pageRef.current?.firstElementChild as HTMLElement | null;
+      const navEl = navRef.current;
+      setStickyOffsets({
+        header: headerEl?.getBoundingClientRect().height ?? 0,
+        nav: navEl?.getBoundingClientRect().height ?? 0,
+      });
+    }
+
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [contentReady]);
+
+  // Deep links: resolve `#section` (or a legacy `?tab=` link, remapped and
+  // stripped from the URL) into the section to land on, once content exists.
+  useEffect(() => {
+    if (!contentReady || hasHandledDeepLinkRef.current) return;
+    hasHandledDeepLinkRef.current = true;
+
+    const rawHash = location.hash.slice(1);
+    const hashTarget = TEAM_SECTION_KEYS.has(rawHash as TeamSection)
+      ? (rawHash as TeamSection)
+      : null;
+    const legacyTabParam = searchParams.get('tab');
+    const target = hashTarget ?? resolveLegacyTeamTab(legacyTabParam);
+
+    if (legacyTabParam != null || (target && rawHash !== target)) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('tab');
+      if (target) url.hash = target;
+      window.history.replaceState(null, '', url.toString());
+    }
+
+    if (target) {
+      setActiveSection(target);
+      requestAnimationFrame(() => {
+        document.getElementById(target)?.scrollIntoView({ block: 'start' });
+      });
+    }
+  }, [contentReady, location.hash, searchParams]);
+
+  // Scroll-spy: highlights the nav anchor for whichever section is current
+  // just below the sticky header + nav, using IntersectionObserver rather
+  // than a scroll listener.
+  useEffect(() => {
+    if (!contentReady) return;
+
+    const totalOffset = stickyOffsets.header + stickyOffsets.nav;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id as TeamSection);
+          }
+        }
+      },
+      { rootMargin: `-${totalOffset}px 0px -70% 0px`, threshold: 0 },
+    );
+
+    const elements = TEAM_SECTIONS.map((s) =>
+      document.getElementById(s.key),
+    ).filter((el): el is HTMLElement => el != null);
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [contentReady, stickyOffsets.header, stickyOffsets.nav]);
+
+  function handleNavClick(
+    event: React.MouseEvent<HTMLAnchorElement>,
+    key: TeamSection,
+  ) {
+    event.preventDefault();
+    setActiveSection(key);
+    document.getElementById(key)?.scrollIntoView({ block: 'start' });
+    window.history.pushState(null, '', `#${key}`);
+  }
+
+  if (!contentReady) {
     return (
-      <div className={styles['team-page']} style={pageStyle}>
+      <div className={styles['team-page']} style={pageStyle} ref={pageRef}>
         <PageHeader />
         <div
           className={styles['team-page__content']}
@@ -243,36 +342,41 @@ export default function TeamPage() {
   }
 
   return (
-    <div className={styles['team-page']} style={pageStyle}>
+    <div className={styles['team-page']} style={pageStyle} ref={pageRef}>
       <PageHeader />
       <TeamHero team={team} />
       <div className={styles['team-page__content']}>
-        <nav className={styles['team-tabs']} aria-label="Team sections">
-          {TEAM_TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              className={cx(styles['team-tab'], tab === t.key && styles.active)}
-              aria-current={tab === t.key ? 'page' : undefined}
-              onClick={() => setTab(t.key)}
+        <nav
+          ref={navRef}
+          className={styles['team-tabs']}
+          aria-label="Team sections"
+        >
+          {TEAM_SECTIONS.map((s) => (
+            <a
+              key={s.key}
+              href={`#${s.key}`}
+              className={cx(
+                styles['team-tab'],
+                activeSection === s.key && styles.active,
+              )}
+              aria-current={activeSection === s.key ? 'true' : undefined}
+              onClick={(event) => handleNavClick(event, s.key)}
             >
-              {t.label}
-            </button>
+              {s.label}
+            </a>
           ))}
         </nav>
 
-        {tab === 'overview' && (
-          <OverviewTab
-            team={team}
-            aiHistory={aiHistory}
-            aiHistoryStatus={aiHistoryStatus}
-            stats={stats}
-            playerStats={playerStats}
-            headshotMap={headshotMap}
-          />
-        )}
-        {tab === 'roster' && <RosterTab roster={roster} />}
-        {tab === 'schedule' && (
+        <section id="stats" className={styles['team-section']}>
+          <TeamStatsRow stats={stats} />
+        </section>
+        <section id="leaders" className={styles['team-section']}>
+          <PlayerStatsSection players={playerStats} headshotMap={headshotMap} />
+        </section>
+        <section id="roster" className={styles['team-section']}>
+          <RosterTab roster={roster} />
+        </section>
+        <section id="schedule" className={styles['team-section']}>
           <ScheduleTab
             games={schedule}
             teamAbbrev={triCode}
@@ -280,12 +384,20 @@ export default function TeamPage() {
             sourcePath={teamSourcePath}
             activeNavPath={teamActiveNavPath}
           />
-        )}
-        {tab === 'skaters' && <SkatersTab players={playerStats} />}
-        {tab === 'goalies' && <GoaliesTab goalies={goalieStats} />}
-        {tab === 'history' && (
-          <HistoryTab team={team} aiHistory={aiHistory} status={aiHistoryStatus} />
-        )}
+        </section>
+        <section id="skaters" className={styles['team-section']}>
+          <SkatersTab players={playerStats} />
+        </section>
+        <section id="goalies" className={styles['team-section']}>
+          <GoaliesTab goalies={goalieStats} />
+        </section>
+        <section id="history" className={styles['team-section']}>
+          <HistoryTab
+            team={team}
+            aiHistory={aiHistory}
+            status={aiHistoryStatus}
+          />
+        </section>
       </div>
     </div>
   );

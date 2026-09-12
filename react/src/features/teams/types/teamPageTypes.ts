@@ -37,17 +37,19 @@ export interface StatItem {
   value: string;
 }
 
-/** URL-backed tabs for the team detail hub (`?tab=`). */
-export type TeamTab =
-  | 'overview'
+/** Anchor sections of the team detail page (`#stats`, `#roster`, etc). */
+export type TeamSection =
+  | 'stats'
+  | 'leaders'
   | 'roster'
   | 'schedule'
   | 'skaters'
   | 'goalies'
   | 'history';
 
-export const TEAM_TABS: { key: TeamTab; label: string }[] = [
-  { key: 'overview', label: 'Overview' },
+export const TEAM_SECTIONS: { key: TeamSection; label: string }[] = [
+  { key: 'stats', label: 'Stats' },
+  { key: 'leaders', label: 'Leaders' },
   { key: 'roster', label: 'Roster' },
   { key: 'schedule', label: 'Schedule' },
   { key: 'skaters', label: 'Skaters' },
