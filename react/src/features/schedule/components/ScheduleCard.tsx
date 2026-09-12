@@ -1,10 +1,10 @@
 import { Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { useTheme } from '@/lib/ThemeContext';
+import { formatLocalTime } from '@/lib/dateFormat';
+import { isInProgressGameState } from '@/lib/gameStatus';
 import {
-  convertUTCToLocal,
   hasScore,
-  isGameInProgress,
   getGameStatusLabel,
 } from '@/features/schedule/utils/gameStatusHelper';
 import styles from '@/features/schedule/components/SchedulePage.module.css';
@@ -100,7 +100,7 @@ function ScheduleCard({
                     styles['game-period-chip'],
                     (game.periodType === 'OT' || game.periodType === 'SO') &&
                       styles['overtime'],
-                    isGameInProgress(game) && styles['live'],
+                    isInProgressGameState(game.gameState) && styles['live'],
                   )}
                 >
                   {statusLabel}
@@ -111,7 +111,7 @@ function ScheduleCard({
             <>
               <h3>VS</h3>
               <p className={styles['game-time']}>
-                {convertUTCToLocal(game.gameTime)}
+                {formatLocalTime(game.gameTime)}
               </p>
             </>
           )}

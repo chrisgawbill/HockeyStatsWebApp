@@ -1,6 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { GameDetailBoxscore } from '@/features/game-detail/types/gameDetail';
+import {
+  GameDetailBoxscore,
+  GameDetailStatus,
+} from '@/features/game-detail/types/gameDetail';
+import {
+  formatGameDate,
+  getLocalPuckDropTime,
+  getStateLabel,
+} from '@/features/game-detail/utils/gameDetailHelper';
 import { useTheme } from '@/lib/ThemeContext';
 import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
@@ -11,29 +19,11 @@ function cx(...classes: (string | false | null | undefined)[]) {
 
 interface Props {
   boxscore: GameDetailBoxscore;
+  status: GameDetailStatus;
   theme: any;
 }
 
-function getStateLabel(boxscore: GameDetailBoxscore): string {
-  if (boxscore.gameState === 'FUT' || boxscore.gameState === 'PRE')
-    return 'Scheduled';
-  if (boxscore.gameState === 'LIVE')
-    return `Live · P${boxscore.periodDescriptor?.number ?? ''}`;
-  if (boxscore.gameOutcome?.lastPeriodType === 'OT') return 'F/OT';
-  if (boxscore.gameOutcome?.lastPeriodType === 'SO') return 'F/SO';
-  return 'FINAL';
-}
-
-function formatGameDate(gameDate: string): string {
-  const [year, month, day] = gameDate.split('-').map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-export default function HeroScoreboard({ boxscore }: Props) {
+export default function HeroScoreboard({ boxscore, status }: Props) {
   const { theme } = useTheme();
   const location = useLocation();
 
@@ -41,9 +31,12 @@ export default function HeroScoreboard({ boxscore }: Props) {
     theme === 'dark' ? boxscore.awayTeam.darkLogo : boxscore.awayTeam.logo;
   const homeLogo =
     theme === 'dark' ? boxscore.homeTeam.darkLogo : boxscore.homeTeam.logo;
-  const stateLabel = getStateLabel(boxscore);
-  const isLive = boxscore.gameState === 'LIVE';
-  const isFuture = boxscore.gameState === 'FUT' || boxscore.gameState === 'PRE';
+  const stateLabel = getStateLabel(boxscore, status);
+  const isLive = status === 'live';
+  const isFuture = status === 'preview';
+  const puckDropTime = isFuture
+    ? getLocalPuckDropTime(boxscore.startTimeUTC)
+    : null;
   const routeState = location.state as {
     sourcePath?: string;
     sourceLabel?: string;
@@ -154,6 +147,12 @@ export default function HeroScoreboard({ boxscore }: Props) {
         <span>{boxscore.venue?.default}</span>
         <span className={styles['game-detail-meta__sep']}>·</span>
         <span>{formatGameDate(boxscore.gameDate)}</span>
+        {isFuture && (
+          <>
+            <span className={styles['game-detail-meta__sep']}>·</span>
+            <span>Puck drop {puckDropTime ?? 'TBD'}</span>
+          </>
+        )}
       </div>
     </div>
   );

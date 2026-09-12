@@ -10,6 +10,51 @@
   padding: 0 var(--space-md);
 }
 
+/* --- Filter bar (team select + status/type toggles) --- */
+.schedule-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin: 0 auto var(--space-lg);
+  padding: 0 var(--space-md);
+}
+
+.schedule-filter-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  height: 40px;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-pill);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.schedule-filter-field__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+  pointer-events: none;
+}
+
+.schedule-filter-field__select {
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.schedule-filter-field__select:focus {
+  outline: none;
+}
+
 /* --- Date navigation --- */
 .date-row {
   --bs-gutter-x: 0;
