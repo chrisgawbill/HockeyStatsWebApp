@@ -1,22 +1,42 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 
 import PageHeader from '@/components/PageHeader';
 import TeamHero from '@/features/teams/components/TeamHero';
-import BasicInfoStrip from '@/features/teams/components/BasicInfoStrip';
-import ScheduleStrip from '@/features/teams/components/ScheduleStrip';
 import LoadingState from '@/components/LoadingState';
-import TeamStatsRow from '@/features/teams/components/TeamStatsRow';
-import PlayerStatsSection from '@/features/teams/components/PlayerStatsSection';
-import RosterSection from '@/features/teams/components/RosterSection';
+import OverviewTab from '@/features/teams/components/tabs/OverviewTab';
+import RosterTab from '@/features/teams/components/tabs/RosterTab';
+import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
+import SkatersTab from '@/features/teams/components/tabs/SkatersTab';
+import GoaliesTab from '@/features/teams/components/tabs/GoaliesTab';
+import HistoryTab from '@/features/teams/components/tabs/HistoryTab';
 import { localTeamList } from '@/features/teams/utils/teamListData';
 import {
-  TeamOverview,
-  StatItem,
+  AiHistoryStatus,
+  GoalieStatLine,
+  GoalieSummaryContract,
   Position,
   RosterPlayer,
+  RosterPlayerContract,
+  SkaterCorsiEntry,
+  SkaterSummaryContract,
+  StatItem,
+  TeamAiHistory,
+  TeamOverview,
+  TeamStatsContract,
+  TeamTab,
+  TEAM_TABS,
   PlayerStatLine,
 } from '@/features/teams/types/teamPageTypes';
+import {
+  buildEmptyRoster,
+  buildTeamOverview,
+  parseTeamTab,
+  transformGoalieStats,
+  transformPlayerStats,
+  transformRoster,
+  transformTeamStats,
+} from '@/features/teams/utils/teamPageHelper';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import {
   GetTeamStatsById,
@@ -32,141 +52,8 @@ import { InterfaceWithChatBot } from '@/lib/genAIHandler';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 
-/**
- * Maps NHL roster position codes into the display buckets used by the roster UI.
- */
-const POS_MAP: Record<string, Position> = {
-  C: 'Center',
-  L: 'Left Wing',
-  R: 'Right Wing',
-  D: 'Defenseman',
-  G: 'Goalie',
-};
-
-/**
- * Builds an empty roster bucket map for component state and roster transforms.
- */
-function buildEmptyRoster(): Record<Position, RosterPlayer[]> {
-  return {
-    Center: [],
-    'Left Wing': [],
-    'Right Wing': [],
-    Defenseman: [],
-    Goalie: [],
-  };
-}
-
-/**
- * Formats a per-game time-on-ice value in seconds into the roster stat label.
- */
-function formatToi(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')} TOI`;
-}
-
-/**
- * Groups roster players by display position and sorts each group by time on ice
- * (most-used first), looking up TOI per player from `toiMap`. Players whose
- * position code isn't in POS_MAP are skipped. Returns the grouped roster.
- */
-function transformRoster(
-  players: any[],
-  toiMap: Map<number, number>,
-): Record<Position, RosterPlayer[]> {
-  const result = buildEmptyRoster();
-  for (const p of players ?? []) {
-    const pos = POS_MAP[p.position] as Position;
-    if (!pos) continue;
-    const toi = toiMap.get(p.id);
-    const stat = toi != null ? formatToi(toi) : '';
-    result[pos].push({
-      id: p.id,
-      name: p.name,
-      number: p.number ?? 0,
-      stat,
-      headshot: p.headshot ?? '',
-    });
-  }
-  for (const pos of [
-    'Center',
-    'Left Wing',
-    'Right Wing',
-    'Defenseman',
-  ] as Position[]) {
-    result[pos].sort((a, b) => {
-      const aToi = toiMap.get(a.id) ?? 0;
-      const bToi = toiMap.get(b.id) ?? 0;
-      return bToi - aToi;
-    });
-  }
-  result['Goalie'].sort((a, b) => {
-    const aToi = toiMap.get(a.id) ?? 0;
-    const bToi = toiMap.get(b.id) ?? 0;
-    return bToi - aToi;
-  });
-  return result;
-}
-
-/**
- * Builds the per-player stat lines for the team's player table from the skater
- * summary, merging in Corsi (SAT%) by playerId since it comes from a separate
- * endpoint. Missing values default to 0/null; a null faceoff percentage means
- * the player did not take faceoffs.
- */
-function transformPlayerStats(
-  summary: any[],
-  corsiData: any,
-): PlayerStatLine[] {
-  const corsiMap = new Map<number, number>();
-  for (const p of corsiData?.data ?? []) {
-    if (p.playerId != null && p.satPercentage != null)
-      corsiMap.set(p.playerId, p.satPercentage);
-  }
-  return (summary ?? []).map(
-    (p: any): PlayerStatLine => ({
-      playerId: p.playerId,
-      name: p.name ?? '',
-      position: p.position ?? '',
-      gamesPlayed: p.gamesPlayed ?? 0,
-      goals: p.goals ?? 0,
-      assists: p.assists ?? 0,
-      points: p.points ?? 0,
-      plusMinus: p.plusMinus ?? 0,
-      penaltyMinutes: p.penaltyMinutes ?? 0,
-      faceoffWinPct: p.faceoffWinPct ?? null,
-      corsiPct: corsiMap.get(p.playerId) ?? null,
-    }),
-  );
-}
-
-/**
- * Shapes the raw NHL team summary into the labeled stat tiles the header strip
- * renders, formatting rates/percentages and falling back to "—" when absent.
- */
-function transformTeamStats(raw: any): StatItem[] {
-  return [
-    { label: 'Goals For / GP', value: raw.goalsForPerGame?.toFixed(2) ?? '—' },
-    {
-      label: 'Goals Against / GP',
-      value: raw.goalsAgainstPerGame?.toFixed(2) ?? '—',
-    },
-    {
-      label: 'Power Play %',
-      value:
-        raw.powerPlayPct != null
-          ? `${(raw.powerPlayPct * 100).toFixed(1)}%`
-          : '—',
-    },
-    {
-      label: 'Penalty Kill %',
-      value:
-        raw.penaltyKillPct != null
-          ? `${(raw.penaltyKillPct * 100).toFixed(1)}%`
-          : '—',
-    },
-    { label: 'Shots / GP', value: raw.shotsForPerGame?.toFixed(1) ?? '—' },
-  ];
+function cx(...classes: (string | false | null | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
 }
 
 /**
@@ -174,10 +61,14 @@ function transformTeamStats(raw: any): StatItem[] {
  * numeric team id and primary color from local team metadata, then loads stats,
  * roster, schedule, and player stats for the selected season in one batch, plus
  * AI-generated team history fetched separately (it isn't season-dependent).
+ *
+ * The page body is a URL-backed tabbed hub (`?tab=`); TeamHero above the tabs
+ * is always visible and is built entirely from official standings-context data.
  */
 export default function TeamPage() {
   const { teamId } = useParams<{ teamId: string }>();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const routeState = location.state as {
     sourcePath?: string;
     fallbackPath?: string;
@@ -194,20 +85,31 @@ export default function TeamPage() {
   const primaryColor: string = teamEntry?.primary ?? '#1B4F8A';
   const pageStyle = { '--color-primary': primaryColor } as React.CSSProperties;
 
-  const [teamRawResponse, setTeamRawResponse] = useState<any>(null);
+  const tab: TeamTab = parseTeamTab(searchParams.get('tab'));
 
-  const [staticInfo, setStaticInfo] = useState<{
-    arena: string;
-    founded: number;
-    stanleyCups: number;
-    conferenceChampionships: number;
-    hallOfFamers: number;
-  } | null>(null);
+  /**
+   * Writes the selected tab back to the URL while preserving every sibling
+   * query param (season, etc.) — never replaces the whole search string.
+   */
+  function setTab(next: TeamTab) {
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      p.set('tab', next);
+      return p;
+    });
+  }
+
+  const [teamRawResponse, setTeamRawResponse] =
+    useState<TeamStatsContract | null>(null);
+  const [aiHistory, setAiHistory] = useState<TeamAiHistory | null>(null);
+  const [aiHistoryStatus, setAiHistoryStatus] =
+    useState<AiHistoryStatus>('loading');
   const [stats, setStats] = useState<StatItem[]>([]);
   const [schedule, setSchedule] = useState<ScheduledGame[]>([]);
   const [roster, setRoster] =
     useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
   const [playerStats, setPlayerStats] = useState<PlayerStatLine[]>([]);
+  const [goalieStats, setGoalieStats] = useState<GoalieStatLine[]>([]);
   const [headshotMap, setHeadshotMap] = useState<Map<number, string>>(
     new Map(),
   );
@@ -230,6 +132,13 @@ export default function TeamPage() {
           summaryRes,
           corsiRes,
           goalieRes,
+        ]: [
+          any,
+          { players: RosterPlayerContract[] },
+          any,
+          SkaterSummaryContract[],
+          { data?: SkaterCorsiEntry[] },
+          GoalieSummaryContract[] | null,
         ] = await Promise.all([
           GetTeamStatsById(String(numericId), season),
           GetTeamRoster(triCode, season),
@@ -239,7 +148,7 @@ export default function TeamPage() {
           GetGoalieSummary(String(numericId), season).catch(() => null),
         ]);
 
-        const raw = statsRes?.data?.[0] ?? {};
+        const raw: TeamStatsContract = statsRes?.data?.[0] ?? { name: '' };
         setTeamRawResponse(raw);
 
         const toiMap = new Map<number, number>();
@@ -260,6 +169,7 @@ export default function TeamPage() {
         setSchedule(ConvertContractsToGames(scheduleRes.games));
         setRoster(transformRoster(rosterRes.players, toiMap));
         setPlayerStats(transformPlayerStats(summaryRes, corsiRes));
+        setGoalieStats(transformGoalieStats(goalieRes));
       } catch (err) {
         console.error('Error loading team data', err);
       } finally {
@@ -272,14 +182,15 @@ export default function TeamPage() {
 
   useEffect(() => {
     if (!triCode) return;
-    setStaticInfo(null);
+    setAiHistory(null);
+    setAiHistoryStatus('loading');
 
     /**
      * Fetches static team-history fields from the AI service once per team. This
      * data is intentionally independent of the selected season, so season changes
      * do not trigger another AI request.
      */
-    async function fetchStaticInfo() {
+    async function fetchAiHistory() {
       try {
         const prompt =
           `Give me basic historical information about the ${teamEntry?.fullName} NHL team. ` +
@@ -288,64 +199,34 @@ export default function TeamPage() {
           `conferenceChampionships (number - total conference final appearances), ` +
           `hallOfFamers (number - players inducted into the Hockey Hall of Fame).`;
         const info = await InterfaceWithChatBot({ content: prompt }, triCode);
-        setStaticInfo({
+        setAiHistory({
           arena: info.arena ?? '—',
           founded: info.founded ?? 0,
           stanleyCups: info.stanleyCups ?? 0,
           conferenceChampionships: info.conferenceChampionships ?? 0,
           hallOfFamers: info.hallOfFamers ?? 0,
         });
+        setAiHistoryStatus('ready');
       } catch (err) {
-        console.error('Error fetching static team info from AI', err);
+        console.error('Error fetching AI-generated team history', err);
+        setAiHistoryStatus('error');
       }
     }
 
-    fetchStaticInfo();
+    fetchAiHistory();
   }, [teamId, triCode]);
 
   const team: TeamOverview | null = useMemo(() => {
     if (teamRawResponse == null) {
       return null;
     }
-
-    const allStandings = [...easternStandingsData, ...westernStandingsData];
-    const s = allStandings.find((t) => t.id === triCode);
-    const conferenceStandings =
-      s?.conferenceName === 'Eastern'
-        ? easternStandingsData
-        : westernStandingsData;
-    const playoffCutoff = conferenceStandings.find(
-      (t) => t.conferenceStandingsPlace === 8,
-    );
-    const teamPoints = s?.points ?? teamRawResponse?.points;
-    const playoffLineDelta = playoffCutoff
-      ? teamPoints - playoffCutoff.points
-      : 0;
-    return {
-      name: teamRawResponse?.name,
+    return buildTeamOverview(
+      teamRawResponse,
       triCode,
-      wins: s?.wins ?? teamRawResponse?.wins,
-      losses: s?.losses ?? teamRawResponse?.losses,
-      otLosses: s?.otLosses ?? teamRawResponse?.otLosses,
-      points: teamPoints,
-      divisionRank: s?.divisionStandingsPlace ?? 0,
-      division: s?.divisionName ?? '',
-      conference: s?.conferenceName ?? '',
-      conferenceRank: s?.conferenceStandingsPlace ?? 0,
-      playoffLineDelta,
-      founded: 0,
-      arena: '—',
-      stanleyCups: 0,
-      conferenceChampionships: 0,
-      hallOfFamers: 0,
-    };
-  }, [
-    teamRawResponse,
-    easternStandingsData,
-    westernStandingsData,
-    triCode,
-    staticInfo,
-  ]);
+      easternStandingsData,
+      westernStandingsData,
+    );
+  }, [teamRawResponse, easternStandingsData, westernStandingsData, triCode]);
 
   if (loading || !team) {
     return (
@@ -366,17 +247,45 @@ export default function TeamPage() {
       <PageHeader />
       <TeamHero team={team} />
       <div className={styles['team-page__content']}>
-        <BasicInfoStrip team={staticInfo ? { ...team, ...staticInfo } : team} />
-        <ScheduleStrip
-          games={schedule}
-          teamAbbrev={triCode}
-          sourceLabel={team.name}
-          sourcePath={teamSourcePath}
-          activeNavPath={teamActiveNavPath}
-        />
-        <TeamStatsRow stats={stats} />
-        <PlayerStatsSection players={playerStats} headshotMap={headshotMap} />
-        <RosterSection roster={roster} />
+        <nav className={styles['team-tabs']} aria-label="Team sections">
+          {TEAM_TABS.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              className={cx(styles['team-tab'], tab === t.key && styles.active)}
+              aria-current={tab === t.key ? 'page' : undefined}
+              onClick={() => setTab(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+
+        {tab === 'overview' && (
+          <OverviewTab
+            team={team}
+            aiHistory={aiHistory}
+            aiHistoryStatus={aiHistoryStatus}
+            stats={stats}
+            playerStats={playerStats}
+            headshotMap={headshotMap}
+          />
+        )}
+        {tab === 'roster' && <RosterTab roster={roster} />}
+        {tab === 'schedule' && (
+          <ScheduleTab
+            games={schedule}
+            teamAbbrev={triCode}
+            sourceLabel={team.name}
+            sourcePath={teamSourcePath}
+            activeNavPath={teamActiveNavPath}
+          />
+        )}
+        {tab === 'skaters' && <SkatersTab players={playerStats} />}
+        {tab === 'goalies' && <GoaliesTab goalies={goalieStats} />}
+        {tab === 'history' && (
+          <HistoryTab team={team} aiHistory={aiHistory} status={aiHistoryStatus} />
+        )}
       </div>
     </div>
   );

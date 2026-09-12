@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { localTeamList } from '@/features/teams/utils/teamListData';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
+import { hasScore } from '@/features/schedule/utils/gameStatusHelper';
+import { isCompletedGameState, isInProgressGameState } from '@/lib/gameStatus';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 
@@ -70,20 +72,11 @@ export default function ScheduleStrip({
   };
 
   const isGameCompleted = (game: ScheduledGame): boolean => {
-    return game.gameState === 'OFF' || game.gameState === 'FINAL';
+    return isCompletedGameState(game.gameState);
   };
 
   const isGameInProgress = (game: ScheduledGame): boolean => {
-    return (
-      game.gameState !== 'FUT' &&
-      game.gameState !== 'PRE' &&
-      game.gameState !== 'OFF' &&
-      game.gameState !== 'FINAL'
-    );
-  };
-
-  const hasScore = (game: ScheduledGame): boolean => {
-    return game.homeScore != null && game.awayScore != null;
+    return isInProgressGameState(game.gameState);
   };
 
   const getTeamResult = (game: ScheduledGame): string | null => {

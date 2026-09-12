@@ -124,3 +124,27 @@ export interface GameLanding {
   gameState: string;
   summary: GameLandingSummary;
 }
+
+/**
+ * Presentation-layer state derived from the raw NHL `gameState` string.
+ * Mapping lives in `utils/gameDetailHelper.ts` — components only ever see
+ * this union, never the raw string.
+ */
+export type GameDetailStatus = 'preview' | 'live' | 'final';
+
+export interface PeriodScoreViewModel {
+  periodNum: number;
+  periodType: string;
+  homeGoals: number;
+  awayGoals: number;
+}
+
+export interface TeamTotalsViewModel {
+  sog: number;
+  hits: number;
+  blockedShots: number;
+  pim: number;
+  powerPlayGoals: number;
+  giveaways: number;
+  takeaways: number;
+}

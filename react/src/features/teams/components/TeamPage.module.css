@@ -14,6 +14,145 @@
   padding: 0 var(--space-lg);
 }
 
+/* ── Tab nav ───────────────────────────────────────────────────────────── */
+
+.team-tabs {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  margin: var(--space-lg) 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.team-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 12px 18px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.team-tab:hover {
+  color: var(--color-primary);
+  box-shadow: none;
+  transform: none;
+}
+
+.team-tab.active {
+  background: transparent;
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ── Roster tab (Forwards / Defense / Goalies groups) ─────────────────── */
+
+.roster-group-section {
+  margin-bottom: var(--space-xl);
+}
+
+.roster-group-section__header {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.roster-group-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.roster-group-cards > * {
+  flex: 0 0 auto;
+  width: 8.5rem;
+}
+
+/* ── Sortable stat tables (Skaters / Goalies tabs) ─────────────────────── */
+
+.stat-table-wrapper {
+  overflow-x: auto;
+}
+
+.stat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.stat-table th {
+  text-align: right;
+  padding: var(--space-sm);
+  color: var(--color-muted-text);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.stat-table th:first-child,
+.stat-table td:first-child {
+  text-align: left;
+}
+
+.stat-table th.active-sort {
+  color: var(--color-primary);
+}
+
+.stat-table td {
+  text-align: right;
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+}
+
+/* ── History tab (AI-generated content) ────────────────────────────────── */
+
+/*
+ * Wraps every AI-generated block (Overview's franchise-history card, and the
+ * History tab) so AI content is always visually set apart from official NHL
+ * stats — a dashed accent border plus a faint tint, distinct from the solid
+ * `shared.surface` cards official stats use.
+ */
+.ai-history-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+  padding: var(--space-md);
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 40%, transparent);
+  border-radius: var(--border-radius-card);
+  background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+}
+
+.ai-history-block > * {
+  width: 100%;
+}
+
+.tab-empty-state {
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+
 /* ── Hero ──────────────────────────────────────────────────────────────── */
 
 .team-hero {
