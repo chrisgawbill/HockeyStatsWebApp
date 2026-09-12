@@ -38,8 +38,11 @@ test('isValidSeasonId rejects malformed season ids', () => {
   assert.equal(isValidSeasonId(undefined), false);
 });
 
-test('getCurrentSeasonId returns the current NHL season for this environment', () => {
-  assert.equal(getCurrentSeasonId(), '20252026');
+test('getCurrentSeasonId rolls over to the new season on September 1', () => {
+  assert.equal(getCurrentSeasonId(new Date(2026, 7, 31)), '20252026');
+  assert.equal(getCurrentSeasonId(new Date(2026, 8, 1)), '20262027');
+  assert.equal(getCurrentSeasonId(new Date(2026, 11, 15)), '20262027');
+  assert.equal(getCurrentSeasonId(new Date(2027, 0, 15)), '20262027');
 });
 
 test('validateSeason uses explicit valid season and calls next', () => {

@@ -10,6 +10,7 @@ import ScheduleCalendar from '@/features/schedule/components/ScheduleCalendar';
 import DatePicker from '@/features/schedule/components/DatePicker';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
+import ErrorState from '@/components/ErrorState';
 import SeasonSelector from '@/components/SeasonSelector';
 import SlidingToggle from '@/components/SlidingToggle';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
@@ -114,8 +115,10 @@ function SchedulePage() {
   const {
     listOfGamesData,
     loadingListOfGamesData,
+    errorListOfGamesData,
     selectedDateGames,
     fetchGamesByDate,
+    refetchGames,
   } = useListOfGames();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -366,6 +369,13 @@ function SchedulePage() {
         <SeasonSelector />
         {loadingListOfGamesData ? (
           <LoadingState label="Loading schedule" fullPage />
+        ) : errorListOfGamesData ? (
+          <ErrorState
+            fullPage
+            title="Couldn't load the schedule"
+            message={errorListOfGamesData}
+            onRetry={refetchGames}
+          />
         ) : !hasGames ? (
           <EmptyState
             fullPage

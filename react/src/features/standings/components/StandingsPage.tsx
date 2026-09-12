@@ -9,6 +9,7 @@ import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import StandingsClinchLegend from '@/features/standings/components/StandingsClinchLegend';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
+import ErrorState from '@/components/ErrorState';
 import SeasonSelector from '@/components/SeasonSelector';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
@@ -36,6 +37,8 @@ export default function StandingsPage() {
     centralStandings,
     pacificStandings,
     loadingStandingsData,
+    errorStandingsData,
+    refetchStandings,
   } = useStandingsData();
 
   const [view, setView] = useState<StandingsView>('conference');
@@ -76,6 +79,13 @@ export default function StandingsPage() {
         <SeasonSelector />
         {loadingStandingsData ? (
           <LoadingState label="Loading standings" fullPage />
+        ) : errorStandingsData ? (
+          <ErrorState
+            fullPage
+            title="Couldn't load standings"
+            message={errorStandingsData}
+            onRetry={refetchStandings}
+          />
         ) : !hasStandings ? (
           <EmptyState
             fullPage

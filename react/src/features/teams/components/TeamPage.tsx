@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -10,6 +11,7 @@ import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import TeamHero from '@/features/teams/components/TeamHero';
 import LoadingState from '@/components/LoadingState';
+import ErrorState from '@/components/ErrorState';
 import TeamStatsRow from '@/features/teams/components/TeamStatsRow';
 import PlayerStatsSection from '@/features/teams/components/PlayerStatsSection';
 import RosterTab from '@/features/teams/components/tabs/RosterTab';
@@ -126,71 +128,86 @@ export default function TeamPage() {
     new Map(),
   );
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Loads the team data that changes by selected season: summary stats,
+   * roster, club schedule, skater totals, Corsi, and optional goalie TOI. The
+   * results are shaped into the TeamPage view models and stored in state. On
+   * failure it stores a human-readable message instead of the raw axios error
+   * so the retry action below has something to render.
+   */
+  const fetchMain = useCallback(async () => {
+    setError(null);
+    try {
+      const [
+        statsRes,
+        rosterRes,
+        scheduleRes,
+        summaryRes,
+        corsiRes,
+        goalieRes,
+      ]: [
+        any,
+        { players: RosterPlayerContract[] },
+        any,
+        SkaterSummaryContract[],
+        { data?: SkaterCorsiEntry[] },
+        GoalieSummaryContract[] | null,
+      ] = await Promise.all([
+        GetTeamStatsById(String(numericId), season),
+        GetTeamRoster(triCode, season),
+        GetTeamSchedule(triCode, season),
+        GetSkaterSummary(String(numericId), season),
+        GetSkaterCorsi(String(numericId), season),
+        GetGoalieSummary(String(numericId), season).catch(() => null),
+      ]);
+
+      const raw: TeamStatsContract = statsRes?.data?.[0] ?? { name: '' };
+      setTeamRawResponse(raw);
+
+      const toiMap = new Map<number, number>();
+      for (const p of summaryRes ?? []) {
+        if (p.playerId != null && p.toiPerGame != null)
+          toiMap.set(p.playerId, p.toiPerGame);
+      }
+      for (const g of goalieRes ?? []) {
+        if (g.goalieId != null && g.toiPerGame != null)
+          toiMap.set(g.goalieId, g.toiPerGame);
+      }
+      const newHeadshotMap = new Map<number, string>();
+      for (const p of rosterRes.players ?? []) {
+        if (p.id && p.headshot) newHeadshotMap.set(p.id, p.headshot);
+      }
+      setHeadshotMap(newHeadshotMap);
+      setStats(transformTeamStats(raw));
+      setSchedule(ConvertContractsToGames(scheduleRes.games));
+      setRoster(transformRoster(rosterRes.players, toiMap));
+      setPlayerStats(transformPlayerStats(summaryRes, corsiRes));
+      setGoalieStats(transformGoalieStats(goalieRes));
+    } catch (err) {
+      console.error('Error loading team data', err);
+      setError("Couldn't load this team.");
+    } finally {
+      setLoading(false);
+    }
+  }, [numericId, triCode, season]);
+
+  /**
+   * Re-runs the season fetch for the current team/season. Shared by the
+   * mount/season-change effect and the manual "Try again" retry action so
+   * there is one fetch code path instead of two copies of the same
+   * reset-then-fetch sequence.
+   */
+  const refetchTeam = useCallback(() => {
+    setLoading(true);
+    fetchMain();
+  }, [fetchMain]);
 
   useEffect(() => {
     if (!triCode) return;
-
-    /**
-     * Loads the team data that changes by selected season: summary stats,
-     * roster, club schedule, skater totals, Corsi, and optional goalie TOI. The
-     * results are shaped into the TeamPage view models and stored in state.
-     */
-    async function fetchMain() {
-      try {
-        const [
-          statsRes,
-          rosterRes,
-          scheduleRes,
-          summaryRes,
-          corsiRes,
-          goalieRes,
-        ]: [
-          any,
-          { players: RosterPlayerContract[] },
-          any,
-          SkaterSummaryContract[],
-          { data?: SkaterCorsiEntry[] },
-          GoalieSummaryContract[] | null,
-        ] = await Promise.all([
-          GetTeamStatsById(String(numericId), season),
-          GetTeamRoster(triCode, season),
-          GetTeamSchedule(triCode, season),
-          GetSkaterSummary(String(numericId), season),
-          GetSkaterCorsi(String(numericId), season),
-          GetGoalieSummary(String(numericId), season).catch(() => null),
-        ]);
-
-        const raw: TeamStatsContract = statsRes?.data?.[0] ?? { name: '' };
-        setTeamRawResponse(raw);
-
-        const toiMap = new Map<number, number>();
-        for (const p of summaryRes ?? []) {
-          if (p.playerId != null && p.toiPerGame != null)
-            toiMap.set(p.playerId, p.toiPerGame);
-        }
-        for (const g of goalieRes ?? []) {
-          if (g.goalieId != null && g.toiPerGame != null)
-            toiMap.set(g.goalieId, g.toiPerGame);
-        }
-        const newHeadshotMap = new Map<number, string>();
-        for (const p of rosterRes.players ?? []) {
-          if (p.id && p.headshot) newHeadshotMap.set(p.id, p.headshot);
-        }
-        setHeadshotMap(newHeadshotMap);
-        setStats(transformTeamStats(raw));
-        setSchedule(ConvertContractsToGames(scheduleRes.games));
-        setRoster(transformRoster(rosterRes.players, toiMap));
-        setPlayerStats(transformPlayerStats(summaryRes, corsiRes));
-        setGoalieStats(transformGoalieStats(goalieRes));
-      } catch (err) {
-        console.error('Error loading team data', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchMain();
-  }, [teamId, season]);
+    refetchTeam();
+  }, [triCode, refetchTeam]);
 
   useEffect(() => {
     if (!triCode) return;
@@ -240,7 +257,7 @@ export default function TeamPage() {
     );
   }, [teamRawResponse, easternStandingsData, westernStandingsData, triCode]);
 
-  const contentReady = !loading && team != null;
+  const contentReady = !loading && !error && team != null;
 
   // Measures the sticky header (PageHeader, rendered as this page's first
   // child) and the anchor nav so their combined height can drive both the
@@ -325,6 +342,25 @@ export default function TeamPage() {
     setActiveSection(key);
     document.getElementById(key)?.scrollIntoView({ block: 'start' });
     window.history.pushState(null, '', `#${key}`);
+  }
+
+  if (error) {
+    return (
+      <div className={styles['team-page']} style={pageStyle} ref={pageRef}>
+        <PageHeader />
+        <div
+          className={styles['team-page__content']}
+          style={{ paddingTop: '2rem' }}
+        >
+          <ErrorState
+            fullPage
+            title="Couldn't load team"
+            message={error}
+            onRetry={refetchTeam}
+          />
+        </div>
+      </div>
+    );
   }
 
   if (!contentReady) {

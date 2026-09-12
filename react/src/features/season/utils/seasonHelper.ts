@@ -1,12 +1,13 @@
 /**
- * Current NHL season id (e.g. "20252026"). The season rolls over in October
- * (month index 9), so any later month belongs to the season starting that year.
- * Frontend twin of the backend `getCurrentSeasonId`.
+ * Current NHL season id (e.g. "20252026"). The season rolls over on September 1
+ * (month index 8), so that month and any later one belongs to the season
+ * starting that year. Frontend twin of the backend `getCurrentSeasonId`.
+ * `now` is injectable so callers (and tests) can pin the date instead of
+ * depending on the real clock.
  */
-function getCurrentSeasonId(): string {
-  const now = new Date();
+function getCurrentSeasonId(now: Date = new Date()): string {
   const year = now.getFullYear();
-  const startYear = now.getMonth() >= 9 ? year : year - 1;
+  const startYear = now.getMonth() >= 8 ? year : year - 1;
   return `${startYear}${startYear + 1}`;
 }
 

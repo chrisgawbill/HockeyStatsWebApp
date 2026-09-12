@@ -7,6 +7,7 @@ import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import StandingsClinchLegend from '@/features/standings/components/StandingsClinchLegend';
 import styles from '@/features/standings/components/LandingPageStandings.module.css';
 import LoadingState from '@/components/LoadingState';
+import ErrorState from '@/components/ErrorState';
 
 type Conference = 'Eastern' | 'Western';
 type StandingsView = 'conference' | 'division';
@@ -26,6 +27,8 @@ export default function LandingPageStandings() {
     centralStandings,
     pacificStandings,
     loadingStandingsData,
+    errorStandingsData,
+    refetchStandings,
   } = useStandingsData();
 
   const [view, setView] = useState<StandingsView>('conference');
@@ -33,6 +36,16 @@ export default function LandingPageStandings() {
 
   if (loadingStandingsData) {
     return <LoadingState label="Loading standings" />;
+  }
+
+  if (errorStandingsData) {
+    return (
+      <ErrorState
+        title="Couldn't load standings"
+        message={errorStandingsData}
+        onRetry={refetchStandings}
+      />
+    );
   }
 
   const standingsLookup: Record<
