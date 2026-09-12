@@ -1,5 +1,6 @@
 import { GameBroadcast } from '@/features/game-detail/types/gameBroadcast';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
+import { parseLocalDate } from '@/lib/dateFormat';
 
 /**
  * The backend (api/services/mappers/scheduleMapper.js) now returns games already
@@ -44,28 +45,6 @@ function ConvertContractToGame(g: any): ScheduledGame {
 }
 
 /**
- * Parses a "YYYY-MM-DD" string into a Date in the viewer's local time zone.
- * `new Date("YYYY-MM-DD")` parses as UTC and can land on the previous day once
- * rendered locally, so we split the parts and build the date by hand. Throws a
- * TypeError on a missing or malformed string rather than returning Invalid Date.
- */
-function parseLocalDate(dateStr: string): Date {
-  if (!dateStr) {
-    throw new TypeError('Date string is missing or empty.');
-  }
-
-  const parts = dateStr.split('-').map(Number);
-  if (parts.length !== 3 || parts.some(Number.isNaN)) {
-    throw new TypeError(
-      `Invalid date format: ${dateStr}. Expected 'YYYY-MM-DD'.`,
-    );
-  }
-
-  const [year, month, day] = parts;
-  return new Date(year, month - 1, day);
-}
-
-/**
  * Buckets games into a map keyed by local date string ("YYYY-MM-DD"), the form
  * the calendar grid looks games up by. Keying with the same `formatDateParam`
  * both sides use guarantees the grid can't miss a day over a Date-vs-string mismatch.
@@ -105,9 +84,4 @@ function ConvertContractsToGames(games: any[]): ScheduledGame[] {
   return (games ?? []).map(ConvertContractToGame);
 }
 
-export {
-  ConvertContractsToGames,
-  parseLocalDate,
-  groupGamesByDate,
-  formatDateParam,
-};
+export { ConvertContractsToGames, groupGamesByDate, formatDateParam };

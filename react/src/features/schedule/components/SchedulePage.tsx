@@ -17,8 +17,25 @@ import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 import {
   formatDateParam,
   groupGamesByDate,
-  parseLocalDate,
 } from '@/features/schedule/utils/scheduleHelper';
+import {
+  filterGames,
+  ScheduleFilter,
+} from '@/features/schedule/utils/scheduleFilterHelper';
+import { parseLocalDate } from '@/lib/dateFormat';
+import { isCompletedGameState } from '@/lib/gameStatus';
+
+const STATUS_OPTIONS: { label: string; value: '' | 'upcoming' | 'final' }[] = [
+  { label: 'All', value: '' },
+  { label: 'Upcoming', value: 'upcoming' },
+  { label: 'Final', value: 'final' },
+];
+
+const TYPE_OPTIONS: { label: string; value: '' | 'regular' | 'playoff' }[] = [
+  { label: 'All', value: '' },
+  { label: 'Regular', value: 'regular' },
+  { label: 'Playoff', value: 'playoff' },
+];
 
 const ViewParamType = {
   DAY: 'day',
@@ -105,6 +122,29 @@ function SchedulePage() {
   const selectedDateParam = searchParams.get('date');
   const viewParam = (searchParams.get('view') ??
     ViewParamType.DAY) as ScheduleView;
+  const teamParam = searchParams.get('team');
+  const statusParam = searchParams.get('status');
+  const typeParam = searchParams.get('type');
+
+  /**
+   * Derives the pure ScheduleFilter contract from the URL. Any value other than
+   * the recognized ones falls back to "no filter" so a malformed deep link never
+   * throws.
+   */
+  const filter: ScheduleFilter = useMemo(
+    () => ({
+      team: teamParam,
+      status:
+        statusParam === 'upcoming' || statusParam === 'final'
+          ? statusParam
+          : null,
+      gameType:
+        typeParam === 'regular' || typeParam === 'playoff' ? typeParam : null,
+    }),
+    [teamParam, statusParam, typeParam],
+  );
+  const isFilterActive =
+    filter.team != null || filter.status != null || filter.gameType != null;
 
   const selectedDate = useMemo(() => {
     if (!selectedDateParam) return null;
@@ -139,9 +179,45 @@ function SchedulePage() {
     return last;
   }, [selectedDate, sortedGames]);
 
+  /**
+   * Team options for the filter dropdown, derived from the teams that actually
+   * appear in the loaded season rather than a full league list, so the dropdown
+   * never offers a team with zero games this season.
+   */
+  const teamOptions = useMemo(() => {
+    const triCodes = new Set<string>();
+    for (const game of listOfGamesData ?? []) {
+      triCodes.add(game.homeTeam);
+      triCodes.add(game.awayTeam);
+    }
+    return Array.from(triCodes).sort();
+  }, [listOfGamesData]);
+
+  /**
+   * The loaded season, projected through the URL's team/status/type filters.
+   * Zero network requests: this only re-slices the already-fetched array.
+   */
+  const filteredSeasonGames = useMemo(
+    () =>
+      filterGames(listOfGamesData ?? [], filter, {
+        now: new Date(),
+        statusFilter: 'time',
+      }),
+    [listOfGamesData, filter],
+  );
+
+  const filteredSelectedDateGames = useMemo(
+    () =>
+      filterGames(selectedDateGames, filter, {
+        now: new Date(),
+        statusFilter: 'time',
+      }),
+    [selectedDateGames, filter],
+  );
+
   const gamesByDate = useMemo(
-    () => groupGamesByDate(listOfGamesData ?? []),
-    [listOfGamesData],
+    () => groupGamesByDate(filteredSeasonGames),
+    [filteredSeasonGames],
   );
   const visibleDates = useMemo(
     () => getDaysForView(viewParam, effectiveDate),
@@ -188,6 +264,61 @@ function SchedulePage() {
   };
 
   /**
+   * Stores or clears the team filter in the URL. An empty value ("All") removes
+   * the param entirely rather than persisting `team=`.
+   */
+  const handleTeamChange = (team: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (team) {
+          next.set('team', team);
+        } else {
+          next.delete('team');
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
+  /**
+   * Stores or clears the status filter (upcoming/final) in the URL.
+   */
+  const handleStatusChange = (status: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (status) {
+          next.set('status', status);
+        } else {
+          next.delete('status');
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
+  /**
+   * Stores or clears the game type filter (regular/playoff) in the URL.
+   */
+  const handleTypeChange = (type: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (type) {
+          next.set('type', type);
+        } else {
+          next.delete('type');
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
+  /**
    * Opens the richer day view for a calendar cell while preserving the selected
    * season and other URL params.
    */
@@ -205,7 +336,7 @@ function SchedulePage() {
    * the detail page.
    */
   const isGameCompleted = (game: ScheduledGame): boolean => {
-    return game.gameState === 'OFF' || game.gameState === 'FINAL';
+    return isCompletedGameState(game.gameState);
   };
 
   /**
@@ -245,6 +376,36 @@ function SchedulePage() {
           />
         ) : (
           <>
+            <div className={styles['schedule-filter-bar']}>
+              <label className={styles['schedule-filter-field']}>
+                <span className={styles['schedule-filter-field__label']}>
+                  Team
+                </span>
+                <select
+                  className={styles['schedule-filter-field__select']}
+                  value={filter.team ?? ''}
+                  onChange={(e) => handleTeamChange(e.target.value)}
+                  aria-label="Filter by team"
+                >
+                  <option value="">All</option>
+                  {teamOptions.map((triCode) => (
+                    <option key={triCode} value={triCode}>
+                      {triCode}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <SlidingToggle
+                options={STATUS_OPTIONS}
+                value={filter.status ?? ''}
+                onChange={handleStatusChange}
+              />
+              <SlidingToggle
+                options={TYPE_OPTIONS}
+                value={filter.gameType ?? ''}
+                onChange={handleTypeChange}
+              />
+            </div>
             <div className={styles['schedule-view-toggle']}>
               <SlidingToggle
                 options={VIEW_OPTIONS}
@@ -271,13 +432,23 @@ function SchedulePage() {
                 />
               ) : (
                 <EmptyState
-                  message={`No games scheduled for this ${viewParam}.`}
+                  message={
+                    isFilterActive
+                      ? 'No games match your filters.'
+                      : `No games scheduled for this ${viewParam}.`
+                  }
                 />
               )
-            ) : selectedDateGames.length === 0 ? (
-              <EmptyState message="No games scheduled for this day." />
+            ) : filteredSelectedDateGames.length === 0 ? (
+              <EmptyState
+                message={
+                  isFilterActive && selectedDateGames.length > 0
+                    ? 'No games match your filters.'
+                    : 'No games scheduled for this day.'
+                }
+              />
             ) : (
-              selectedDateGames.map((game: ScheduledGame) => (
+              filteredSelectedDateGames.map((game: ScheduledGame) => (
                 <ScheduleCard
                   key={game.gameId}
                   game={game}

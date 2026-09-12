@@ -1,7 +1,21 @@
+import { KeyboardEvent, useMemo, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
+import { isCompletedGameState } from '@/lib/gameStatus';
+import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
+import { localTeamList } from '@/features/teams/utils/teamListData';
 import styles from '@/components/PageHeader.module.css';
+
+/**
+ * One entry in the global search index: either a team (routes to
+ * `/team/:triCode`) or a completed game (routes to `/game/:gameId`). Upcoming/
+ * live games are left out of the index entirely since only completed games have
+ * a detail page worth searching for (ticket 2.5 scope).
+ */
+type SearchResult =
+  | { type: 'team'; id: string; label: string; triCode: string }
+  | { type: 'game'; id: string; label: string; gameId: number };
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
@@ -159,6 +173,85 @@ export default function PageHeader() {
   const { pathname } = location;
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { listOfGamesData } = useListOfGames();
+  const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [isOpen, setIsOpen] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Global search index over teams and the loaded season's completed games.
+   * Built once per team-list/game-list identity change; searching itself is a
+   * cheap `includes()` filter over this, so no debouncing is needed.
+   */
+  const searchIndex = useMemo<SearchResult[]>(() => {
+    const teamResults: SearchResult[] = localTeamList.map((team) => ({
+      type: 'team',
+      id: `team-${team.triCode}`,
+      label: `${team.fullName} (${team.triCode})`,
+      triCode: team.triCode,
+    }));
+
+    const gameResults: SearchResult[] = (listOfGamesData ?? [])
+      .filter((game) => isCompletedGameState(game.gameState))
+      .map((game) => ({
+        type: 'game',
+        id: `game-${game.gameId}`,
+        label: `${game.awayTeam} @ ${game.homeTeam} - ${game.dayOfWeek}`,
+        gameId: game.gameId,
+      }));
+
+    return [...teamResults, ...gameResults];
+  }, [listOfGamesData]);
+
+  const results = useMemo(() => {
+    const trimmed = query.trim().toLowerCase();
+    if (!trimmed) return [];
+    return searchIndex
+      .filter((item) => item.label.toLowerCase().includes(trimmed))
+      .slice(0, 8);
+  }, [query, searchIndex]);
+
+  /**
+   * Routes to a search result's detail page, carrying the same
+   * sourcePath/fallbackPath navigation state the schedule and team-list pages
+   * already use so the back button returns to wherever the search happened.
+   */
+  const goToResult = (result: SearchResult) => {
+    const back = `${location.pathname}${location.search}`;
+    const state = {
+      sourcePath: back,
+      fallbackPath: back,
+      activeNavPath: normalizeNavPath(back),
+    };
+    if (result.type === 'team') {
+      navigate(`/team/${result.triCode}`, { state });
+    } else {
+      navigate(`/game/${result.gameId}`, { state });
+    }
+    setQuery('');
+    setActiveIndex(-1);
+    setIsOpen(false);
+    searchBoxRef.current?.querySelector('input')?.blur();
+  };
+
+  const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!isOpen || results.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1) % results.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev <= 0 ? results.length - 1 : prev - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const chosen = results[activeIndex] ?? results[0];
+      if (chosen) goToResult(chosen);
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  };
 
   const isTeamSubPage = pathname.startsWith('/team/');
   const isGameSubPage = pathname.startsWith('/game/');
@@ -204,6 +297,51 @@ export default function PageHeader() {
           >
             <BackIcon />
           </button>
+        )}
+      </div>
+      <div className={styles['nav-search-col']} ref={searchBoxRef}>
+        <input
+          type="text"
+          className={styles['nav-search-input']}
+          placeholder="Search teams or games"
+          aria-label="Search teams or games"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setActiveIndex(-1);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setIsOpen(false)}
+          onKeyDown={handleSearchKeyDown}
+        />
+        {isOpen && results.length > 0 && (
+          <ul className={styles['nav-search-dropdown']} role="listbox">
+            {results.map((result, index) => (
+              <li
+                key={result.id}
+                role="option"
+                aria-selected={index === activeIndex}
+              >
+                <button
+                  type="button"
+                  className={cx(
+                    styles['nav-search-option'],
+                    index === activeIndex &&
+                      styles['nav-search-option--active'],
+                  )}
+                  onMouseDown={(e) => {
+                    // Prevent the input's onBlur from closing the dropdown before
+                    // the click registers.
+                    e.preventDefault();
+                    goToResult(result);
+                  }}
+                >
+                  {result.label}
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
       {navItems.map(({ label, path, icon }) => (

@@ -4,11 +4,18 @@ import {
   GetGameLanding,
 } from '@/features/game-detail/api/gameDetailApi';
 import {
-  BoxscoreTeamStats,
   GameDetailBoxscore,
   GameLanding,
-  LandingScoringPeriod,
 } from '@/features/game-detail/types/gameDetail';
+import {
+  LIVE_POLL_INTERVAL_MS,
+  computeTeamTotals,
+  getPeriodScores,
+  hasBoxscoreStats,
+  hasScoringSummary,
+  hasThreeStars,
+  mapGameStateToStatus,
+} from '@/features/game-detail/utils/gameDetailHelper';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
@@ -23,34 +30,6 @@ import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import LoadingState from '@/components/LoadingState';
 
-function getPeriodScores(
-  scoring: LandingScoringPeriod[],
-  homeAbbrev: string,
-  awayAbbrev: string,
-) {
-  return scoring.map((period) => ({
-    periodNum: period.periodDescriptor.number,
-    periodType: period.periodDescriptor.periodType,
-    homeGoals: period.goals.filter((g) => g.teamAbbrev.default === homeAbbrev)
-      .length,
-    awayGoals: period.goals.filter((g) => g.teamAbbrev.default === awayAbbrev)
-      .length,
-  }));
-}
-
-function computeTeamTotals(teamStats: BoxscoreTeamStats, teamSog: number) {
-  const skaters = [...teamStats.forwards, ...teamStats.defense];
-  return {
-    sog: teamSog,
-    hits: skaters.reduce((sum, p) => sum + p.hits, 0),
-    blockedShots: skaters.reduce((sum, p) => sum + p.blockedShots, 0),
-    pim: skaters.reduce((sum, p) => sum + p.pim, 0),
-    powerPlayGoals: skaters.reduce((sum, p) => sum + p.powerPlayGoals, 0),
-    giveaways: skaters.reduce((sum, p) => sum + p.giveaways, 0),
-    takeaways: skaters.reduce((sum, p) => sum + p.takeaways, 0),
-  };
-}
-
 const GameDetailPage = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const theme = useTheme(getTheme());
@@ -61,6 +40,8 @@ const GameDetailPage = () => {
 
   useEffect(() => {
     if (!gameId) return;
+    setLoading(true);
+    setError(false);
     Promise.all([
       GetGameDetails(Number(gameId)),
       GetGameLanding(Number(gameId)),
@@ -73,6 +54,33 @@ const GameDetailPage = () => {
       .finally(() => setLoading(false));
   }, [gameId]);
 
+  const status = useMemo(
+    () => mapGameStateToStatus(boxscore?.gameState),
+    [boxscore?.gameState],
+  );
+
+  // Live games only: refresh scores/boxscore on a single interval so the page
+  // updates in place. Never scheduled for preview/final games, and always
+  // cleared on unmount or when the game leaves the live state.
+  useEffect(() => {
+    if (!gameId || status !== 'live') return;
+    const intervalId = window.setInterval(() => {
+      Promise.all([
+        GetGameDetails(Number(gameId)),
+        GetGameLanding(Number(gameId)),
+      ])
+        .then(([boxData, landData]) => {
+          setBoxscore(boxData);
+          setLanding(landData);
+        })
+        .catch(() => {
+          // Transient poll failure: keep showing the last good data and try
+          // again on the next tick rather than surfacing an error state.
+        });
+    }, LIVE_POLL_INTERVAL_MS);
+    return () => window.clearInterval(intervalId);
+  }, [gameId, status]);
+
   const periodScores = useMemo(() => {
     if (!landing?.summary?.scoring || !boxscore) return [];
     return getPeriodScores(
@@ -83,18 +91,18 @@ const GameDetailPage = () => {
   }, [landing, boxscore]);
 
   const homeTotals = useMemo(() => {
-    if (!boxscore?.playerByGameStats) return null;
+    if (!hasBoxscoreStats(boxscore)) return null;
     return computeTeamTotals(
-      boxscore.playerByGameStats.homeTeam,
-      boxscore.homeTeam.sog,
+      boxscore!.playerByGameStats!.homeTeam,
+      boxscore!.homeTeam.sog,
     );
   }, [boxscore]);
 
   const awayTotals = useMemo(() => {
-    if (!boxscore?.playerByGameStats) return null;
+    if (!hasBoxscoreStats(boxscore)) return null;
     return computeTeamTotals(
-      boxscore.playerByGameStats.awayTeam,
-      boxscore.awayTeam.sog,
+      boxscore!.playerByGameStats!.awayTeam,
+      boxscore!.awayTeam.sog,
     );
   }, [boxscore]);
 
@@ -113,13 +121,13 @@ const GameDetailPage = () => {
       </div>
     );
 
-  const isFuture = boxscore.gameState === 'FUT' || boxscore.gameState === 'PRE';
+  const isPreview = status === 'preview';
 
   return (
     <div className={styles['game-detail-page']}>
       <PageHeader />
-      <HeroScoreboard boxscore={boxscore} theme={theme} />
-      {!isFuture && (
+      <HeroScoreboard boxscore={boxscore} status={status} theme={theme} />
+      {!isPreview && (
         <div className={styles['game-detail-page__content']}>
           {periodScores.length > 0 && (
             <PeriodScoresTable
@@ -128,10 +136,10 @@ const GameDetailPage = () => {
               awayAbbrev={boxscore.awayTeam.abbrev}
             />
           )}
-          {landing?.summary?.scoring && (
-            <ScoringSummary scoring={landing.summary.scoring} />
+          {hasScoringSummary(landing) && (
+            <ScoringSummary scoring={landing!.summary.scoring} />
           )}
-          {(landing?.summary?.threeStars?.length ?? 0) > 0 && (
+          {hasThreeStars(landing) && (
             <ThreeStars stars={landing!.summary.threeStars} />
           )}
           {homeTotals && awayTotals && (
@@ -142,10 +150,10 @@ const GameDetailPage = () => {
               awayAbbrev={boxscore.awayTeam.abbrev}
             />
           )}
-          {boxscore.playerByGameStats && (
+          {hasBoxscoreStats(boxscore) && (
             <PlayerStatsSelection
-              homeTeam={boxscore.playerByGameStats.homeTeam}
-              awayTeam={boxscore.playerByGameStats.awayTeam}
+              homeTeam={boxscore.playerByGameStats!.homeTeam}
+              awayTeam={boxscore.playerByGameStats!.awayTeam}
               homeAbbrev={boxscore.homeTeam.abbrev}
               awayAbbrev={boxscore.awayTeam.abbrev}
             />

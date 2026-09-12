@@ -1,9 +1,9 @@
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { useTheme } from '@/lib/ThemeContext';
+import { formatLocalTime } from '@/lib/dateFormat';
+import { isInProgressGameState } from '@/lib/gameStatus';
 import {
-  convertUTCToLocal,
   hasScore,
-  isGameInProgress,
   getGameStatusLabel,
 } from '@/features/schedule/utils/gameStatusHelper';
 import styles from '@/features/schedule/components/ScheduleCalendar.module.css';
@@ -42,14 +42,14 @@ export default function GameChip({
   const awayLogo = themedLogoUrl(game.awayLogo, theme);
 
   const completed = isGameCompleted(game);
-  const live = isGameInProgress(game);
+  const live = isInProgressGameState(game.gameState);
   const scored = hasScore(game);
   const statusLabel = getGameStatusLabel(game);
 
   const matchup = `${game.awayTeam} @ ${game.homeTeam}`;
   const label = scored
     ? `${matchup}, ${game.awayScore}–${game.homeScore}`
-    : `${matchup}, ${convertUTCToLocal(game.gameTime)}`;
+    : `${matchup}, ${formatLocalTime(game.gameTime)}`;
 
   return (
     <button
@@ -86,7 +86,7 @@ export default function GameChip({
           live && styles['game-chip__meta--live'],
         )}
       >
-        {scored ? statusLabel : convertUTCToLocal(game.gameTime)}
+        {scored ? statusLabel : formatLocalTime(game.gameTime)}
       </span>
     </button>
   );
