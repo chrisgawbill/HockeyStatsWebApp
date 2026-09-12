@@ -24,6 +24,7 @@ import {
 } from '@/features/schedule/utils/scheduleFilterHelper';
 import { parseLocalDate } from '@/lib/dateFormat';
 import { isCompletedGameState } from '@/lib/gameStatus';
+import { localTeamList } from '@/features/teams/utils/teamListData';
 
 const STATUS_OPTIONS: { label: string; value: '' | 'upcoming' | 'final' }[] = [
   { label: 'All', value: '' },
@@ -180,18 +181,15 @@ function SchedulePage() {
   }, [selectedDate, sortedGames]);
 
   /**
-   * Team options for the filter dropdown, derived from the teams that actually
-   * appear in the loaded season rather than a full league list, so the dropdown
-   * never offers a team with zero games this season.
+   * Team options for the filter dropdown, derived from the canonical local NHL
+   * team list rather than the teams appearing in the loaded season, so non-NHL
+   * clubs (exhibition/international/all-star entries) in the game feed don't
+   * leak into the filter.
    */
-  const teamOptions = useMemo(() => {
-    const triCodes = new Set<string>();
-    for (const game of listOfGamesData ?? []) {
-      triCodes.add(game.homeTeam);
-      triCodes.add(game.awayTeam);
-    }
-    return Array.from(triCodes).sort();
-  }, [listOfGamesData]);
+  const teamOptions = useMemo(
+    () => localTeamList.map((team) => team.triCode).sort(),
+    [],
+  );
 
   /**
    * The loaded season, projected through the URL's team/status/type filters.
