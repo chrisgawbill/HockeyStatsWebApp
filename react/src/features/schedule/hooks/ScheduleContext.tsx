@@ -15,8 +15,10 @@ import { useSeason } from '@/features/season/hooks/SeasonContext';
 interface ListOfGamesData {
   listOfGamesData: ScheduledGame[];
   loadingListOfGamesData: boolean;
+  errorListOfGamesData: string | null;
   selectedDateGames: ScheduledGame[];
   fetchGamesByDate: (date: Date) => Promise<void>;
+  refetchGames: () => void;
 }
 
 const ListOfGamesContext = createContext<ListOfGamesData | null>(null);
@@ -31,6 +33,9 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   const [listOfGamesData, setListOfGamesData] = useState<ScheduledGame[]>([]);
   const [loadingListOfGamesData, setLoadingListOfGamesData] =
     useState<boolean>(true);
+  const [errorListOfGamesData, setErrorListOfGamesData] = useState<
+    string | null
+  >(null);
   const [selectedDateGames, setSelectedDateGames] = useState<ScheduledGame[]>(
     [],
   );
@@ -39,18 +44,35 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   /**
    * Fetches the full schedule for one season, converts backend contracts into
    * ScheduledGame models, and stores the result for every schedule view to
-   * project locally.
+   * project locally. On failure it clears any stale games (rather than leaving
+   * the previous season's schedule on screen) and stores a human-readable
+   * message for the UI instead of the raw axios error.
    */
-  async function fetchGames(seasonId: string) {
+  const fetchGames = useCallback(async (seasonId: string) => {
+    setErrorListOfGamesData(null);
     try {
       const response = await GetScheduledGames(seasonId);
       setListOfGamesData(ConvertContractsToGames(response.games));
     } catch (error) {
       console.error('Error fetching games: ', error);
+      setErrorListOfGamesData("Couldn't load the schedule.");
+      setListOfGamesData([]);
     } finally {
       setLoadingListOfGamesData(false);
     }
-  }
+  }, []);
+
+  /**
+   * Re-runs the season fetch for the current `season`. Shared by the mount/
+   * season-change effect and the manual "Try again" retry action so there is
+   * one fetch code path instead of two copies of the same reset-then-fetch
+   * sequence.
+   */
+  const refetchGames = useCallback(() => {
+    setLoadingListOfGamesData(true);
+    setSelectedDateGames([]);
+    fetchGames(season);
+  }, [season, fetchGames]);
 
   /**
    * Filters the loaded season schedule to one local calendar day and stores it
@@ -158,10 +180,8 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    setLoadingListOfGamesData(true);
-    setSelectedDateGames([]);
-    fetchGames(season);
-  }, [season]);
+    refetchGames();
+  }, [refetchGames]);
 
   useEffect(() => {
     if (!loadingListOfGamesData && listOfGamesData.length > 0) {
@@ -180,8 +200,10 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
       value={{
         listOfGamesData,
         loadingListOfGamesData,
+        errorListOfGamesData,
         selectedDateGames,
         fetchGamesByDate,
+        refetchGames,
       }}
     >
       {children}
