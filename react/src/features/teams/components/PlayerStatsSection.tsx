@@ -4,6 +4,7 @@ import {
   StatCategory,
   StatCategoryKey,
   PlayerStatLine,
+  GoalieStatLine,
 } from '@/features/teams/types/teamPageTypes';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
@@ -14,10 +15,101 @@ function cx(...classes: (string | false | null | undefined)[]) {
 
 const FALLBACK_HEADSHOT = 'https://assets.nhle.com/mugs/nhl/skater/default.png';
 
+/**
+ * Common leaderboard row shape that both skaters and goalies map into, so the
+ * rendering below stays single-purpose instead of branching on source all
+ * through the JSX. Goalies have no `position` field, so their rows use a
+ * fixed 'G' position label.
+ */
+interface LeaderRow {
+  id: number;
+  name: string;
+  positionLabel: string;
+  gamesPlayed: number;
+  value: number | null;
+}
+
+function getSkaterValue(
+  player: PlayerStatLine,
+  key: StatCategoryKey,
+): number | null {
+  switch (key) {
+    case 'goals':
+      return player.goals;
+    case 'assists':
+      return player.assists;
+    case 'points':
+      return player.points;
+    case 'plusMinus':
+      return player.plusMinus;
+    case 'penaltyMinutes':
+      return player.penaltyMinutes;
+    case 'faceoffWinPct':
+      return player.faceoffWinPct;
+    case 'corsiPct':
+      return player.corsiPct;
+    default:
+      return null;
+  }
+}
+
+function getGoalieValue(
+  goalie: GoalieStatLine,
+  key: StatCategoryKey,
+): number | null {
+  switch (key) {
+    case 'savePctg':
+      return goalie.savePctg;
+    case 'goalsAgainstAverage':
+      return goalie.goalsAgainstAverage;
+    default:
+      return null;
+  }
+}
+
+function sortAndSlice(rows: LeaderRow[], higherIsBetter: boolean): LeaderRow[] {
+  return [...rows]
+    .sort((a, b) => {
+      const aVal = a.value ?? -Infinity;
+      const bVal = b.value ?? -Infinity;
+      return higherIsBetter ? bVal - aVal : aVal - bVal;
+    })
+    .slice(0, 10);
+}
+
+/**
+ * Builds the top-10 leaderboard for the selected category. Skater and goalie
+ * categories are backed by two separate arrays with different shapes (and
+ * different max-games-played, which `requiresMinGames` depends on), so this
+ * branches once on `category.source` and maps whichever array is relevant
+ * into the common `LeaderRow` shape before sorting/slicing.
+ */
 function getTopTen(
   players: PlayerStatLine[],
+  goalies: GoalieStatLine[],
   category: StatCategory,
-): PlayerStatLine[] {
+): LeaderRow[] {
+  if (category.source === 'goalie') {
+    let eligible = goalies.filter(
+      (g) => getGoalieValue(g, category.key) !== null,
+    );
+
+    if (category.requiresMinGames) {
+      const maxGP = Math.max(...goalies.map((g) => g.gamesPlayed), 0);
+      const minGP = Math.min(20, Math.round(maxGP * 0.25));
+      eligible = eligible.filter((g) => g.gamesPlayed >= minGP);
+    }
+
+    const rows: LeaderRow[] = eligible.map((g) => ({
+      id: g.goalieId,
+      name: g.name,
+      positionLabel: 'G',
+      gamesPlayed: g.gamesPlayed,
+      value: getGoalieValue(g, category.key),
+    }));
+    return sortAndSlice(rows, category.higherIsBetter);
+  }
+
   let eligible =
     category.key === 'faceoffWinPct'
       ? players.filter(
@@ -35,27 +127,31 @@ function getTopTen(
     eligible = eligible.filter((p) => p.gamesPlayed >= minGP);
   }
 
-  return [...eligible]
-    .sort((a, b) => {
-      const aVal = a[category.key] ?? -Infinity;
-      const bVal = b[category.key] ?? -Infinity;
-      return category.higherIsBetter
-        ? (bVal as number) - (aVal as number)
-        : (aVal as number) - (bVal as number);
-    })
-    .slice(0, 10);
+  const rows: LeaderRow[] = eligible.map((p) => ({
+    id: p.playerId,
+    name: p.name,
+    positionLabel: p.position,
+    gamesPlayed: p.gamesPlayed,
+    value: getSkaterValue(p, category.key),
+  }));
+  return sortAndSlice(rows, category.higherIsBetter);
 }
 
 interface Props {
   players: PlayerStatLine[];
+  goalies: GoalieStatLine[];
   headshotMap: Map<number, string>;
 }
 
-export default function PlayerStatsSection({ players, headshotMap }: Props) {
+export default function PlayerStatsSection({
+  players,
+  goalies,
+  headshotMap,
+}: Props) {
   const [selectedKey, setSelectedKey] = useState<StatCategoryKey>('goals');
 
   const selectedCategory = STAT_CATEGORIES.find((c) => c.key === selectedKey)!;
-  const topTen = getTopTen(players, selectedCategory);
+  const topTen = getTopTen(players, goalies, selectedCategory);
 
   return (
     <section className={shared.section}>
@@ -82,13 +178,12 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
         <p className={styles['player-stat-leaderboard__title']}>
           {selectedCategory.label} Leaders
         </p>
-        {topTen.map((player, index) => {
-          const val = player[selectedKey];
+        {topTen.map((row, index) => {
           const formatted =
-            val !== null ? selectedCategory.format(val as number) : '—';
+            row.value !== null ? selectedCategory.format(row.value) : '—';
           return (
             <div
-              key={`${player.playerId}-${index}`}
+              key={`${row.id}-${index}`}
               className={styles['player-stat-row']}
             >
               <div className={styles['player-stat-row__leading']}>
@@ -97,8 +192,8 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
                 </span>
                 <img
                   className={styles['player-stat-row__headshot']}
-                  src={headshotMap.get(player.playerId) || FALLBACK_HEADSHOT}
-                  alt={player.name}
+                  src={headshotMap.get(row.id) || FALLBACK_HEADSHOT}
+                  alt={row.name}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = FALLBACK_HEADSHOT;
                   }}
@@ -106,10 +201,10 @@ export default function PlayerStatsSection({ players, headshotMap }: Props) {
               </div>
               <div className={styles['player-stat-row__info']}>
                 <span className={styles['player-stat-row__name']}>
-                  {player.name}
+                  {row.name}
                 </span>
                 <span className={styles['player-stat-row__pos']}>
-                  {player.position} · {player.gamesPlayed} GP
+                  {row.positionLabel} · {row.gamesPlayed} GP
                 </span>
               </div>
               <span className={styles['player-stat-row__value']}>
