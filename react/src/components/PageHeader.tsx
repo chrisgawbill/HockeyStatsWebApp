@@ -1,4 +1,4 @@
-import { KeyboardEvent, useMemo, useRef, useState } from 'react';
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
@@ -102,6 +102,25 @@ function UsersIcon() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  );
+}
+
 function MoonIcon() {
   return (
     <svg
@@ -180,6 +199,15 @@ export default function PageHeader() {
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
   /**
+   * Mobile-only full-screen search overlay, opened from the floating action
+   * button below 576px. Kept entirely separate from `isOpen` (the desktop
+   * dropdown) so the two surfaces never fight over the same open/close state.
+   */
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const mobileSearchFabRef = useRef<HTMLButtonElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+
+  /**
    * Global search index over teams and the loaded season's completed games.
    * Built once per team-list/game-list identity change; searching itself is a
    * cheap `includes()` filter over this, so no debouncing is needed.
@@ -253,6 +281,46 @@ export default function PageHeader() {
     }
   };
 
+  /**
+   * Locks background scroll while the mobile search overlay covers the
+   * screen. The previous value is restored in the cleanup - not just when
+   * `isMobileSearchOpen` flips back to false - so a route change or other
+   * unmount while the overlay is open can never leave scrolling locked.
+   */
+  useEffect(() => {
+    if (!isMobileSearchOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileSearchOpen]);
+
+  /**
+   * Moves focus into the overlay's search input as soon as it opens, and
+   * back onto the FAB that triggered it once it closes (cleanup runs on
+   * close and on unmount alike), so keyboard/screen-reader users land back
+   * where they started instead of at the top of the document.
+   */
+  useEffect(() => {
+    if (!isMobileSearchOpen) return;
+    mobileSearchInputRef.current?.focus();
+    return () => {
+      mobileSearchFabRef.current?.focus();
+    };
+  }, [isMobileSearchOpen]);
+
+  const closeMobileSearch = () => {
+    setIsMobileSearchOpen(false);
+  };
+
+  const handleMobileSearchKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeMobileSearch();
+    }
+  };
+
   const isTeamSubPage = pathname.startsWith('/team/');
   const isGameSubPage = pathname.startsWith('/game/');
   const isSubPage = isTeamSubPage || isGameSubPage;
@@ -284,93 +352,160 @@ export default function PageHeader() {
   ];
 
   return (
-    <div
-      className={styles['nav-bar']}
-      style={isSubPage ? { marginBottom: 0 } : undefined}
-    >
-      <div className={styles['nav-back-col']}>
-        {isSubPage && (
-          <button
-            className={styles['nav-back-btn']}
-            onClick={handleBack}
-            aria-label="Go back"
-          >
-            <BackIcon />
-          </button>
-        )}
-      </div>
-      <div className={styles['nav-search-col']} ref={searchBoxRef}>
-        <input
-          type="text"
-          className={styles['nav-search-input']}
-          placeholder="Search teams or games"
-          aria-label="Search teams or games"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setActiveIndex(-1);
-            setIsOpen(true);
-          }}
-          onFocus={() => setIsOpen(true)}
-          onBlur={() => setIsOpen(false)}
-          onKeyDown={handleSearchKeyDown}
-        />
-        {isOpen && results.length > 0 && (
-          <ul className={styles['nav-search-dropdown']} role="listbox">
-            {results.map((result, index) => (
-              <li
-                key={result.id}
-                role="option"
-                aria-selected={index === activeIndex}
-              >
-                <button
-                  type="button"
-                  className={cx(
-                    styles['nav-search-option'],
-                    index === activeIndex &&
-                      styles['nav-search-option--active'],
-                  )}
-                  onMouseDown={(e) => {
-                    // Prevent the input's onBlur from closing the dropdown before
-                    // the click registers.
-                    e.preventDefault();
-                    goToResult(result);
-                  }}
-                >
-                  {result.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      {navItems.map(({ label, path, icon }) => (
-        <div key={path} className={styles['nav-bar-item']}>
-          <Link to={path} style={{ width: '100%' }}>
-            <Button
-              className={cx(
-                styles['nav-btn'],
-                activePath === path && styles['active-page'],
-              )}
-              aria-label={label}
+    <>
+      <div
+        className={styles['nav-bar']}
+        style={isSubPage ? { marginBottom: 0 } : undefined}
+      >
+        <div className={styles['nav-back-col']}>
+          {isSubPage && (
+            <button
+              className={styles['nav-back-btn']}
+              onClick={handleBack}
+              aria-label="Go back"
             >
-              <span className={styles['nav-btn__label']}>{label}</span>
-              <span className={styles['nav-btn__icon']}>{icon}</span>
-            </Button>
-          </Link>
+              <BackIcon />
+            </button>
+          )}
         </div>
-      ))}
-      <div className={styles['nav-theme-col']}>
-        <button
-          className={styles['theme-toggle-btn']}
-          onClick={toggleTheme}
-          aria-label={
-            theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-          }
-        >
-          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-        </button>
+        <div className={styles['nav-search-col']} ref={searchBoxRef}>
+          <input
+            type="text"
+            className={styles['nav-search-input']}
+            placeholder="Search teams or games"
+            aria-label="Search teams or games"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActiveIndex(-1);
+              setIsOpen(true);
+            }}
+            onFocus={() => setIsOpen(true)}
+            onBlur={() => setIsOpen(false)}
+            onKeyDown={handleSearchKeyDown}
+          />
+          {isOpen && results.length > 0 && (
+            <ul className={styles['nav-search-dropdown']} role="listbox">
+              {results.map((result, index) => (
+                <li
+                  key={result.id}
+                  role="option"
+                  aria-selected={index === activeIndex}
+                >
+                  <button
+                    type="button"
+                    className={cx(
+                      styles['nav-search-option'],
+                      index === activeIndex &&
+                        styles['nav-search-option--active'],
+                    )}
+                    onMouseDown={(e) => {
+                      // Prevent the input's onBlur from closing the dropdown before
+                      // the click registers.
+                      e.preventDefault();
+                      goToResult(result);
+                    }}
+                  >
+                    {result.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {navItems.map(({ label, path, icon }) => (
+          <div key={path} className={styles['nav-bar-item']}>
+            <Link to={path} style={{ width: '100%' }}>
+              <Button
+                className={cx(
+                  styles['nav-btn'],
+                  activePath === path && styles['active-page'],
+                )}
+                aria-label={label}
+              >
+                <span className={styles['nav-btn__label']}>{label}</span>
+                <span className={styles['nav-btn__icon']}>{icon}</span>
+              </Button>
+            </Link>
+          </div>
+        ))}
+        <div className={styles['nav-theme-col']}>
+          <button
+            className={styles['theme-toggle-btn']}
+            onClick={toggleTheme}
+            aria-label={
+              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+            }
+          >
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
+        </div>
       </div>
-    </div>
+      <button
+        ref={mobileSearchFabRef}
+        type="button"
+        className={styles['mobile-search-fab']}
+        onClick={() => setIsMobileSearchOpen(true)}
+        aria-label="Search teams or games"
+      >
+        <SearchIcon />
+      </button>
+      {isMobileSearchOpen && (
+        <div
+          className={styles['mobile-search-overlay']}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search teams or games"
+          onClick={closeMobileSearch}
+          onKeyDown={handleMobileSearchKeyDown}
+        >
+          <div
+            className={styles['mobile-search-panel']}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles['mobile-search-header']}>
+              <input
+                ref={mobileSearchInputRef}
+                type="text"
+                className={styles['mobile-search-input']}
+                placeholder="Search teams or games"
+                aria-label="Search teams or games"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <button
+                type="button"
+                className={styles['mobile-search-close-btn']}
+                onClick={closeMobileSearch}
+                aria-label="Close search"
+              >
+                &times;
+              </button>
+            </div>
+            <ul className={styles['mobile-search-results']} role="listbox">
+              {results.map((result) => (
+                <li key={result.id} role="option">
+                  <button
+                    type="button"
+                    className={styles['mobile-search-result']}
+                    onClick={() => {
+                      goToResult(result);
+                      closeMobileSearch();
+                    }}
+                  >
+                    {result.label}
+                  </button>
+                </li>
+              ))}
+              {query.trim() !== '' && results.length === 0 && (
+                <li className={styles['mobile-search-empty']}>
+                  No results found
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
