@@ -1,0 +1,55 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 6.5rem;
+  padding: var(--space-xs);
+  border-radius: var(--border-radius-card);
+  border: 1px solid var(--color-text);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.compact {
+  width: 4rem;
+  gap: 0;
+  padding: 2px var(--space-xs);
+  cursor: default;
+}
+
+.compact .name {
+  font-size: var(--text-xs);
+}
+
+.cost {
+  font-weight: bold;
+  font-size: var(--text-xs);
+}
+
+.name {
+  font-weight: bold;
+  font-size: var(--text-sm);
+}
+
+.text {
+  font-size: var(--text-xs);
+}
+
+.tags {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.blockReason {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}

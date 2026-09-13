@@ -84,3 +84,5 @@ The suite runs offline — no NHL network access, no database required. See the 
 | [docs/cleanup-backlog.md](./docs/cleanup-backlog.md)                     | Refactor, hygiene, and hardening tickets                             |
 | [docs/frontend-backlog.md](./docs/frontend-backlog.md)                   | Material Design 3 alignment tickets                                  |
 | [docs/exciting-features-backlog.md](./docs/exciting-features-backlog.md) | Differentiating feature ideas (mostly zero-fetch, client-side)       |
+| [docs/board-game-design.md](./docs/board-game-design.md)                 | Rink Quest board game rules spec                                     |
+| [docs/board-game-backlog.md](./docs/board-game-backlog.md)               | Rink Quest tickets (engine + UI agents)                              |

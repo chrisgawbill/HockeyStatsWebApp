@@ -21,6 +21,18 @@
   --color-selection: #ffffff;
   --color-selection-text: #1b4f8a;
 
+  --color-team-user: #1565c0;
+  --color-team-cpu: #c62828;
+  --color-ice: #eaf6ff;
+  --color-rink-line-blue: var(--color-team-user);
+  --color-rink-line-red: var(--color-team-cpu);
+  --color-tile-highlight: rgba(255, 202, 40, 0.45);
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-puck: #1a1a1a;
+  --color-puck-ring: #00bcd4;
+  /* Must stay above PageHeader's highest z-index (300, PageHeader.module.css). */
+  --z-modal: 400;
+
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -54,6 +66,16 @@
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
   --color-selection: #93c5fd;
   --color-selection-text: #1b4f8a;
+
+  --color-team-user: #64b5f6;
+  --color-team-cpu: #fc8181;
+  --color-ice: #141a24;
+  --color-rink-line-blue: var(--color-team-user);
+  --color-rink-line-red: var(--color-team-cpu);
+  --color-tile-highlight: rgba(255, 202, 40, 0.35);
+  --color-overlay: rgba(0, 0, 0, 0.65);
+  --color-puck: #050505;
+  --color-puck-ring: #00e5ff;
 }
 
 html {

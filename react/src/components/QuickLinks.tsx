@@ -25,6 +25,13 @@ export default function QuickLinks() {
             </Button>
           </Link>
         </Col>
+        <Col sm md lg={5}>
+          <Link to="/board-game">
+            <Button variant="info" className={styles['quick-links-btn']}>
+              Board Game
+            </Button>
+          </Link>
+        </Col>
       </Row>
     </div>
   );

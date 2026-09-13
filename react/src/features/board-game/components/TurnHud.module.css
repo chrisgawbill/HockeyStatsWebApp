@@ -1,0 +1,48 @@
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+.turnLabel {
+  font-weight: bold;
+}
+
+.lengthLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.possession {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.pips {
+  display: flex;
+  gap: 2px;
+}
+
+.pip {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--color-success);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+@media (max-width: 576px) {
+  .hud {
+    gap: var(--space-sm);
+  }
+
+  .actions {
+    gap: var(--space-xs);
+  }
+}
