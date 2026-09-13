@@ -48,8 +48,8 @@ export const BASE_SAVE_BY_BAND: Record<
   number
 > = {
   perfect: 20,
-  good: 45,
-  weak: 70,
+  good: 48,
+  weak: 73,
   miss: 96,
 };
 /** Save chance is clamped to this range (percent) after all modifiers. */
