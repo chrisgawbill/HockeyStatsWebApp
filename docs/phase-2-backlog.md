@@ -424,6 +424,8 @@ Validation Criteria:
 
 - [ ] **Owner:** Either | **Depends on:** 2.1 through 2.12
 
+> **Note (2026-09-12):** Vitest is already installed and configured by board-game ticket BG-A1 (`pnpm test`, `test.include` scoped to `src/features/board-game`). Step 1 of this ticket becomes: widen `test.include`, add jsdom + React Testing Library.
+
 Set up a lightweight frontend test harness using Vitest and React Testing Library[cite: 2]. Cover pure helper utilities (especially scheduleFilterHelper.ts and seasonHelper.ts) and critical context projection logic
 
 **Implementation prompt:**

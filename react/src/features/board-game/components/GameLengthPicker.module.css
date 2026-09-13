@@ -1,0 +1,22 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.title {
+  margin: 0;
+}
+
+.options {
+  display: flex;
+  gap: var(--space-md);
+}
+
+@media (max-width: 576px) {
+  .options {
+    flex-direction: column;
+    width: 100%;
+  }
+}

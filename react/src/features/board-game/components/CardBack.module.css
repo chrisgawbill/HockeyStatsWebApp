@@ -1,0 +1,19 @@
+.back {
+  width: 1.5rem;
+  height: 1.2rem;
+  border-radius: var(--border-radius-card);
+  border: 1px solid var(--color-text);
+  background-color: var(--color-team-cpu);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      var(--color-surface) 0 2px,
+      transparent 2px 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      var(--color-surface) 0 2px,
+      transparent 2px 4px
+    );
+  background-size: 8px 8px;
+}

@@ -21,6 +21,9 @@ const GameDetailPage = lazy(
 const DiagnosticsPage = lazy(
   () => import('@/features/diagnostics/components/DiagnosticsPage'),
 );
+const BoardGamePage = lazy(
+  () => import('@/features/board-game/components/BoardGamePage'),
+);
 
 /**
  * Route table plus the providers that depend on routing or the selected season.
@@ -54,6 +57,7 @@ export default function App() {
                     <Route path="team/:teamId" element={<TeamPage />} />
                     <Route path="game/:gameId" element={<GameDetailPage />} />
                     <Route path="diagnostics" element={<DiagnosticsPage />} />
+                    <Route path="board-game" element={<BoardGamePage />} />
                   </Routes>
                 </ErrorBoundary>
               </Suspense>

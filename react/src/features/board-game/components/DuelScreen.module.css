@@ -1,0 +1,181 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: min(100%, 40rem);
+  max-height: calc(100dvh - 2 * var(--space-md));
+  padding: var(--space-lg);
+  border-radius: var(--border-radius-card);
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  margin: 0;
+  text-align: center;
+  flex: none;
+}
+
+/* Only this middle section scrolls; the title stays on top and the Reveal
+   button (a sibling after this element) always stays visible below it. */
+.scrollArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.duelists {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: var(--space-md);
+}
+
+@media (max-width: 576px) {
+  .dialog {
+    width: 100%;
+    padding: var(--space-md);
+  }
+
+  .duelists {
+    flex-wrap: nowrap;
+  }
+
+  .sprite {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 8rem;
+}
+
+.sprite {
+  width: 4rem;
+  height: 4rem;
+}
+
+.panelLabel {
+  font-weight: bold;
+}
+
+.poiseBar {
+  width: 100%;
+  height: 0.6rem;
+  accent-color: var(--color-success);
+}
+
+.blockBadge {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+/* On desktop these groups are invisible to layout (display: contents) so
+   their spans join .meta's own flex row exactly as before. At <=576px they
+   become their own row each, so round+energy and the two pile counts land
+   on separate lines instead of clipping. */
+.metaTop,
+.metaPiles {
+  display: contents;
+}
+
+@media (max-width: 576px) {
+  .meta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .metaTop,
+  .metaPiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+}
+
+.energy {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.orb {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-text-secondary);
+}
+
+.orbFull {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--text-sm);
+}
+
+.planLabel {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.planCards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+}
+
+.queue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.queueLabel {
+  font-weight: bold;
+  font-size: var(--text-sm);
+}
+
+.queueEmpty {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.queueCards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.hand {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}

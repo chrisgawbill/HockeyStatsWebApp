@@ -1,0 +1,68 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.dice {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.rolling {
+  animation: dice-shake 0.3s ease;
+}
+
+@keyframes dice-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rolling {
+    animation: none;
+  }
+}
+
+.die {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  padding: 4px;
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-text);
+  border-radius: 4px;
+}
+
+.pip {
+  border-radius: 50%;
+}
+
+.pipOn {
+  border-radius: 50%;
+  background-color: var(--color-text);
+}
+
+@media (max-width: 576px) {
+  .wrapper {
+    gap: 2px;
+  }
+
+  .die {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 3px;
+  }
+}
