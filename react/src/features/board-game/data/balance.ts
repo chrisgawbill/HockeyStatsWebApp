@@ -74,6 +74,78 @@ export const SHOT_BLUE_BAND_WIDTH = 0.32;
 /** CPU shot "aim" difficulty (0-100, higher is more accurate) for its seeded band roll. */
 export const CPU_SHOT_ACCURACY = 55;
 
+/**
+ * Faceoff minigame model (BG-A15a, additive - not yet called by the running
+ * game; see `engine/faceoffModel.ts`). The faceoff stays a card duel until
+ * BG-A15b repoints it. Chris tunes these; placeholders below reason from the
+ * 700-1800ms drop hold and Chris's standing BG-A14a ruling that difficulty
+ * comes from window width, never hold speed. The window widths (BG-A15a
+ * cycle 1 retune, PM/QA finding) are anchored on human simple-visual-
+ * reaction-time research: median reaction ~250ms, trained player ~200ms,
+ * ~150ms exceptional/guess-territory - see `FACEOFF_CLEAN_WINDOW_BASE_MS`.
+ */
+/**
+ * Clean-band window at 0 anticipation, in ms, measured from the drop.
+ * Anchored on human simple-visual-reaction-time research (BG-A15a QA/PM
+ * finding): median untrained reaction is ~250ms, a trained player reaches
+ * ~200ms, ~150ms is exceptional and often a guess. 190ms sits just under
+ * "trained player" so a clean win at 0 anticipation is a real ask - a sharp
+ * press from a fast reader, not a given for anyone.
+ */
+export const FACEOFF_CLEAN_WINDOW_BASE_MS = 190;
+/**
+ * Extra clean-band ms per anticipation point (anticipation is 0-100); keep
+ * this the only anticipation-driven geometry knob, mirroring
+ * `SHOT_YELLOW_WIDTH_PER_ACCURACY`. At 1ms/point, the carded anticipation
+ * spread (25-85) walks the clean window from 215ms up to 275ms - the low
+ * end still expects a trained-player-grade press, the high end comfortably
+ * clears the ~200ms trained-player mark, so the highest-anticipation cards
+ * make a clean win genuinely achievable on a sharp press rather than
+ * theoretical.
+ */
+export const FACEOFF_WINDOW_PER_ANTICIPATION_MS = 1.0;
+/**
+ * Scrum-band window, in ms, measured from the drop; constant regardless of
+ * anticipation so a slow draw is never a write-off - exactly the role
+ * `SHOT_BLUE_BAND_WIDTH` plays for the good/blue band. 420ms clears median
+ * simple reaction time (~250ms) with real headroom, so a merely-median press
+ * still ties up the puck in a scrum instead of losing it outright late, and
+ * low-anticipation/high-grip cards can lean on grip to win the scrum rather
+ * than needing a reaction no human reliably has.
+ */
+export const FACEOFF_SCRUM_WINDOW_MS = 420;
+/** Minimum linesman hold before the drop, in ms. */
+export const FACEOFF_DROP_DELAY_MIN_MS = 700;
+/** Maximum linesman hold before the drop, in ms. */
+export const FACEOFF_DROP_DELAY_MAX_MS = 1800;
+/**
+ * Base win chance (percent) for the faceoff contest roll, by band. `jump`
+ * has no entry: a jump never rolls a contest, it's a deterministic re-drop
+ * or an outright loss (see `rollFaceoffContest`). `clean` is a real favorite
+ * before grip is applied, `scrum` sits near a coin flip so grip decides it,
+ * and `late` is a longshot but not hopeless - a big grip edge can still
+ * steal it.
+ */
+export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
+  clean: 65,
+  scrum: 48,
+  late: 25,
+};
+/** CPU faceoff "read" difficulty (0-100, higher is more anticipatory) for its seeded band roll - the faceoff analogue of `CPU_SHOT_ACCURACY`. */
+export const CPU_FACEOFF_REACTION = 50;
+/**
+ * Clean-band ms shaved off the re-drop window after a jump (a false start
+ * costs precision, not just a retry). Floored at 0 by
+ * `narrowedWindowsAfterJump`. Re-checked against the BG-A15a cycle-1 window
+ * retune and left at 30: unlike the window widths, this models a fixed
+ * jolt to reaction precision (adrenaline/self-correction after a false
+ * start), not a fraction of the window, so it doesn't need to scale with
+ * the wider windows. It stays a meaningful bite on every carded card - a
+ * 10-14% cut to the clean window across the 25-85 carded anticipation
+ * range - without being able to zero out the tightest one.
+ */
+export const FACEOFF_JUMP_WINDOW_PENALTY_MS = 30;
+
 export const CPU_TURN_ACTION_CAP = 20;
 
 /** Delay between CPU actions in useBoardGame, in ms (0 under prefers-reduced-motion). */

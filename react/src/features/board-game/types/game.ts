@@ -32,12 +32,21 @@ export type DuelKind = 'faceoff' | 'deke' | 'check' | 'intercept' | 'shot';
 /** Why a hand card can't be played right now, for the UI to explain a greyed-out card. */
 export type CardBlockReason = 'energy' | 'shotOnly' | 'checkOnly';
 
-export type CardTag = 'skill' | 'block' | 'shot' | 'check';
+export type CardTag = 'skill' | 'block' | 'shot' | 'check' | 'faceoff';
 
 export type CardEffect =
   | { type: 'damage'; amount: number }
   | { type: 'block'; amount: number }
   | { type: 'draw'; amount: number };
+
+/**
+ * Faceoff-ante outcome effect (BG-A15a): fires at contest-resolution time,
+ * not during a reveal, so it is deliberately kept off `CardEffect`. One
+ * optional enum field, exactly as additive as `accuracy`/`power` were -
+ * BG-A15b is what actually applies these.
+ */
+export type FaceoffCardEffect =
+  'backDraw' | 'stunLoser' | 'bonusMp' | 'scrumOnLoss' | 'freeJump';
 
 /** A card definition shared across the match deck. */
 export interface CardDef {
@@ -53,6 +62,12 @@ export interface CardDef {
   accuracy?: number;
   /** Shot-ante stat (BG-A14a): subtracted from the goalie's save chance and drained from its poise on a save. */
   power?: number;
+  /** Faceoff-ante stat (BG-A15a): widens the clean reaction window. Only faceoff-pool cards set this. */
+  anticipation?: number;
+  /** Faceoff-ante stat (BG-A15a): flat bonus to the contest roll, and (at BG-A15b) the size of the buff a clean win carries out. */
+  grip?: number;
+  /** Faceoff-ante effect (BG-A15a), fired at outcome time by BG-A15b. Only faceoff-pool cards set this. */
+  faceoffEffect?: FaceoffCardEffect;
 }
 
 /**
@@ -75,6 +90,29 @@ export interface ShotBandWidths {
   blueWidth: number;
 }
 
+/**
+ * A faceoff draw's reaction outcome (BG-A15a): `clean` (within the narrow
+ * on-time window), `scrum` (within the wider-but-still-timely window),
+ * `late` (anything slower), and `jump` (pressed before the drop - a false
+ * start, never produced by a random band roll, exactly as `miss` is
+ * human-only for shots).
+ */
+export type FaceoffBand = 'clean' | 'scrum' | 'late' | 'jump';
+
+/**
+ * Widths of the two nested faceoff reaction windows, in ms, both measured
+ * from the drop: `cleanWindowMs` is the outer edge of the `clean` band,
+ * `scrumWindowMs` the outer edge of the `scrum` band (which strictly
+ * contains `cleanWindowMs`, e.g. `scrumWindowMs: 260` covers a `cleanWindowMs`
+ * of up to that). Anything slower than `scrumWindowMs` is `late`. The UI
+ * (BG-B25) renders these as the drop's timing feedback and must not
+ * hardcode the numbers.
+ */
+export interface FaceoffBandWindows {
+  cleanWindowMs: number;
+  scrumWindowMs: number;
+}
+
 /** Result of rolling a goalie's save for a shot band (BG-A14a's `rollShotSave`). */
 export interface ShotSaveResult {
   band: ShotBand;
@@ -94,6 +132,20 @@ export interface ShotSaveResult {
    * Whistles play dead and routes to the faceoff phase.
    */
   covered: boolean;
+}
+
+/** Result of rolling the contest for a resolved faceoff band (BG-A15a's `rollFaceoffContest`). */
+export interface FaceoffContestResult {
+  band: FaceoffBand;
+  /** True on a `clean`/`scrum`/`late` band if the contest roll was won. Always false on a `jump` - no contest is rolled. */
+  won: boolean;
+  /** The clamped win chance actually rolled against, 0-100, for tests/UI display. 0 on a `jump`, since no contest is rolled. */
+  winChance: number;
+  /**
+   * True on a `jump` that earns a re-drop (the first jump) rather than an
+   * outright loss (a second jump). Always false on `clean`/`scrum`/`late`.
+   */
+  reDrop: boolean;
 }
 
 /** Card ids in each pile. */
