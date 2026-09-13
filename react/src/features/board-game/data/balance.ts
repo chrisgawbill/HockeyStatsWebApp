@@ -58,7 +58,7 @@ export const MAX_SAVE_CHANCE = 97;
 /** Save-chance points lost when the goalie's poise is fully drained; 0 at full poise, scales linearly in between. */
 export const POISE_SAVE_PENALTY_MAX = 15;
 /** Perfect (yellow) band width at 0 accuracy, as a fraction of the `[0,1]` track. */
-export const SHOT_YELLOW_BASE_WIDTH = 0.05;
+export const SHOT_YELLOW_BASE_WIDTH = 0.03;
 /** Extra yellow-band width per accuracy point (accuracy is 0-100); keep this the only accuracy-driven geometry knob. */
 export const SHOT_YELLOW_WIDTH_PER_ACCURACY = 0.0015;
 /** Good (light blue) band's full width; stays roughly constant across accuracy so a shot is never a write-off. */
