@@ -6,9 +6,9 @@ import {
 import { CARDS, STARTER_DECK } from '@/features/board-game/data/cards';
 import { FORMATIONS } from '@/features/board-game/data/formations';
 import { createDeck } from '@/features/board-game/engine/deck';
-import { planCards } from '@/features/board-game/engine/cpuDuelPolicy';
 import {
   canPlayCard,
+  canUnqueueCard,
   cardBlockReason,
   createDuel,
   endDuelRound,
@@ -56,10 +56,15 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     duel: null,
     lastOutcome: null,
     lastReveal: null,
+    lastShotSaveResult: null,
     winner: null,
     rngSeed,
     actionsThisTurn: 0,
     whistle: false,
+    goaliePoise: {
+      user: GOALIE_POISE_BY_LENGTH.long,
+      cpu: GOALIE_POISE_BY_LENGTH.long,
+    },
     ...overrides,
   };
 }
@@ -137,25 +142,83 @@ describe('createDuel', () => {
     expect(totalCost).toBeLessThanOrEqual(ENERGY);
     expect(plan.every((id) => duel.cpuDeck.hand.includes(id))).toBe(true);
   });
+});
 
-  it("sets the shot duel goalie's maxPoise from GOALIE_POISE_BY_LENGTH for the match length", () => {
-    const short = createDuel(
-      makeState({ length: 'short' }),
-      'shot',
-      'user-C',
-      'cpu-G',
-    );
-    expect(short.duel!.defender.maxPoise).toBe(GOALIE_POISE_BY_LENGTH.short);
-    expect(short.duel!.defender.poise).toBe(GOALIE_POISE_BY_LENGTH.short);
+describe('filtered duel draw (BG-A13)', () => {
+  const isAllowedIn = (id: string, kind: 'faceoff' | 'deke' | 'check') => {
+    const allowedIn = CARDS[id].allowedIn;
+    return allowedIn === 'any' || allowedIn.includes(kind);
+  };
 
-    const long = createDuel(
-      makeState({ length: 'long' }),
-      'shot',
-      'user-C',
-      'cpu-G',
+  it('never deals a shot- or check-only card into a faceoff hand', () => {
+    const state = makeState();
+    const duel = createDuel(state, 'faceoff', 'user-C', 'cpu-C');
+    for (const id of duel.deck.hand)
+      expect(isAllowedIn(id, 'faceoff')).toBe(true);
+    for (const id of duel.cpuDeck.hand)
+      expect(isAllowedIn(id, 'faceoff')).toBe(true);
+  });
+
+  it('never deals a shot- or check-only card into a deke hand', () => {
+    const state = makeState();
+    const duel = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
+    for (const id of duel.deck.hand) expect(isAllowedIn(id, 'deke')).toBe(true);
+    for (const id of duel.cpuDeck.hand)
+      expect(isAllowedIn(id, 'deke')).toBe(true);
+  });
+
+  it('deals a short hand (not a throw or a hang) when the eligible pool cannot fill it', () => {
+    // A check duel only allows 'any' or check-tagged cards. Stock the CPU's
+    // deck entirely with shot-only cards so its eligible pool is empty.
+    const state = makeState();
+    const [cpuDeck] = createDeck(
+      ['wrist_shot', 'wrist_shot', 'wrist_shot', 'slapshot', 'wrist_shot'],
+      1,
     );
-    expect(long.duel!.defender.maxPoise).toBe(GOALIE_POISE_BY_LENGTH.long);
-    expect(long.duel!.defender.poise).toBe(GOALIE_POISE_BY_LENGTH.long);
+    const duel = createDuel({ ...state, cpuDeck }, 'check', 'user-LD', 'cpu-C');
+    expect(duel.cpuDeck.hand).toEqual([]);
+    expect(duel.phase).toBe('duel');
+  });
+
+  it('leaves ineligible cards in the deck for a later duel of a different kind', () => {
+    const state = makeState();
+    const faceoff = createDuel(state, 'faceoff', 'user-C', 'cpu-C');
+    const remaining = [
+      ...faceoff.deck.drawPile,
+      ...faceoff.deck.discardPile,
+      ...faceoff.deck.hand,
+    ];
+    expect([...remaining].sort()).toEqual([...STARTER_DECK].sort());
+  });
+
+  it('is deterministic for a fixed seed', () => {
+    const s1 = createDuel(
+      makeState({ rngSeed: 7 }),
+      'deke',
+      'user-LW',
+      'cpu-LD',
+    );
+    const s2 = createDuel(
+      makeState({ rngSeed: 7 }),
+      'deke',
+      'user-LW',
+      'cpu-LD',
+    );
+    expect(s1.deck.hand).toEqual(s2.deck.hand);
+    expect(s1.cpuDeck.hand).toEqual(s2.cpuDeck.hand);
+    expect(s1.rngSeed).toEqual(s2.rngSeed);
+  });
+
+  it('filters the per-round redraw the same way as the opening hand', () => {
+    const state = makeState();
+    let duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
+    // Force the round to advance without a KO so a fresh hand is drawn.
+    duel = endDuelRound({ ...duel, deck: { ...duel.deck, hand: [] } });
+    expect(duel.duel).not.toBeNull();
+    for (const id of duel.deck.hand)
+      expect(isAllowedIn(id, 'check')).toBe(true);
+    for (const id of duel.cpuDeck.hand)
+      expect(isAllowedIn(id, 'check')).toBe(true);
   });
 });
 
@@ -203,16 +266,6 @@ describe('cardBlockReason', () => {
     expect(cardBlockReason(state, 0)).toBe('checkOnly');
   });
 
-  it("returns 'goalieBlockOnly' for a non-block card on the goalie side of a shot duel", () => {
-    let state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
-    state = {
-      ...state,
-      duel: { ...state.duel!, userSide: 'defender' },
-      deck: { ...state.deck, hand: ['deke'] },
-    };
-    expect(cardBlockReason(state, 0)).toBe('goalieBlockOnly');
-  });
-
   it("returns 'energy' when the card costs more than the current energy, and rule reasons take priority over it", () => {
     let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     state = {
@@ -256,6 +309,63 @@ describe('unqueueCard', () => {
   it('returns the same state for an invalid queue index', () => {
     const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     expect(unqueueCard(state, 0)).toBe(state);
+  });
+
+  it('queue-unqueue Stickhandle 5x leaves hand size, total card count, and energy unchanged', () => {
+    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+    state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
+    const total = (d: Deck) =>
+      d.hand.length +
+      d.drawPile.length +
+      d.discardPile.length +
+      d.exhaustPile.length;
+    const totalBefore = total(state.deck);
+
+    for (let i = 0; i < 5; i++) {
+      state = playCard(state, 0);
+      expect(state.deck.hand).toHaveLength(1);
+      state = unqueueCard(state, 0);
+      expect(state.deck.hand).toEqual(['stickhandle']);
+    }
+
+    expect(total(state.deck)).toBe(totalBefore);
+    expect(state.duel!.energy).toBe(ENERGY);
+    expect(state.duel!.userQueue).toEqual([]);
+    expect(state.duel!.queueDraws).toEqual([]);
+  });
+
+  it('shuffles the returned drawn card into the draw pile rather than leaving it on top', () => {
+    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+    state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
+    const queued = playCard(state, 0);
+    const drawnCardId = queued.deck.hand[0];
+    const unqueued = unqueueCard(queued, 0);
+
+    expect(unqueued.deck.drawPile).toHaveLength(
+      queued.deck.drawPile.length + 1,
+    );
+    expect(unqueued.deck.drawPile).toContain(drawnCardId);
+    // A plain append (no shuffle) would put the drawn card at the bottom
+    // deterministically; shuffling should not reproduce that exact order.
+    expect(unqueued.deck.drawPile).not.toEqual([
+      ...queued.deck.drawPile,
+      drawnCardId,
+    ]);
+  });
+
+  it('canUnqueueCard is false once a drawn card has itself been queued, and unqueueCard refuses (state unchanged)', () => {
+    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+    state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
+    let queued = playCard(state, 0);
+    // Force a known drawn card id so the follow-up queue is deterministic.
+    queued = {
+      ...queued,
+      deck: { ...queued.deck, hand: ['deke'] },
+      duel: { ...queued.duel!, queueDraws: [['deke']] },
+    };
+    queued = playCard(queued, 0);
+    expect(canUnqueueCard(queued, 0)).toBe(false);
+    expect(unqueueCard(queued, 0)).toBe(queued);
   });
 });
 
@@ -403,7 +513,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
       next.deck.drawPile.length +
       next.deck.discardPile.length +
       next.deck.exhaustPile.length;
-    expect(total).toBe(12);
+    expect(total).toBe(STARTER_DECK.length);
   });
 });
 
@@ -465,58 +575,6 @@ describe('endDuelRound (passive-human scenarios)', () => {
     expect(next.duel).toBeNull();
     expect(next.lastOutcome!.byKo).toBe(true);
     expect(next.lastOutcome!.winner).toBe('defender');
-  });
-});
-
-describe('goalies only block', () => {
-  it('canPlayCard rejects a non-block card for the goalie side of a shot duel', () => {
-    let state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
-    state = { ...state, cpuDeck: { ...state.cpuDeck, hand: ['deke'] } };
-    // Simulate the user being the goalie side: swap userSide to defender.
-    state = {
-      ...state,
-      duel: { ...state.duel!, userSide: 'defender' },
-      deck: { ...state.deck, hand: ['deke'] },
-    };
-    expect(canPlayCard(state, 0)).toBe(false);
-  });
-
-  it('planCards never plans a non-block card for the goalie side, even from a hand full of damage cards', () => {
-    const state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
-    const withDamageHand = {
-      ...state,
-      cpuDeck: {
-        ...state.cpuDeck,
-        hand: ['deke', 'wrist_shot', 'slapshot', 'toe_drag'],
-      },
-    };
-    const plan = planCards(withDamageHand, 'cpu');
-    expect(plan).toEqual([]); // none of those are block cards
-  });
-
-  it("a goalie in a shot duel never reduces shooter poise, so the shooter can never be KO'd", () => {
-    let state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
-    state = {
-      ...state,
-      deck: { ...state.deck, hand: [] },
-      cpuDeck: {
-        ...state.cpuDeck,
-        hand: ['deke', 'wrist_shot', 'slapshot', 'protect_puck'],
-      },
-    };
-    const cpuPlan = planCards(state, 'cpu');
-    // Defensive check on the plan itself: every planned card is block-only.
-    expect(
-      cpuPlan.every((id) =>
-        CARDS[id].effects.every((e) => e.type !== 'damage'),
-      ),
-    ).toBe(true);
-    state = { ...state, duel: { ...state.duel!, cpuPlan } };
-    const shooterPoiseBefore = state.duel!.attacker.poise;
-    const next = endDuelRound(state);
-    // Duel continues (goalie dealt no damage); the shooter's poise is untouched.
-    expect(next.duel).not.toBeNull();
-    expect(next.duel!.attacker.poise).toBe(shooterPoiseBefore);
   });
 });
 

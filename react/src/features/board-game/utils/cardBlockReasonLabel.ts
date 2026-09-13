@@ -16,7 +16,5 @@ export function cardBlockReasonLabel(
       return 'Only when shooting';
     case 'checkOnly':
       return 'Only when checking';
-    case 'goalieBlockOnly':
-      return 'Goalies can only block';
   }
 }

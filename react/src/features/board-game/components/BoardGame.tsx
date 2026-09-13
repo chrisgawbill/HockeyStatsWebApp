@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import type {
   Coord,
+  DuelOutcome,
   GameLength,
+  Role,
+  ShotBand,
   Skater,
 } from '@/features/board-game/types/game';
 import { useBoardGame } from '@/features/board-game/hooks/useBoardGame';
@@ -13,9 +16,14 @@ import {
   getCarrier,
   passTargets,
 } from '@/features/board-game/engine/selectors';
-import { cardBlockReason } from '@/features/board-game/engine/duel';
+import {
+  canUnqueueCard,
+  cardBlockReason,
+} from '@/features/board-game/engine/duel';
 import { describeOutcome } from '@/features/board-game/utils/describeOutcome';
 import { isStunned, sameCoord } from '@/features/board-game/engine/rink';
+import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
+import { CARDS } from '@/features/board-game/data/cards';
 import { TEAM_NAME } from '@/features/board-game/data/teams';
 import RinkBoard from '@/features/board-game/components/RinkBoard';
 import SkaterSprite from '@/features/board-game/components/SkaterSprite';
@@ -23,12 +31,25 @@ import DiceRoller from '@/features/board-game/components/DiceRoller';
 import TurnHud from '@/features/board-game/components/TurnHud';
 import GameButton from '@/features/board-game/components/GameButton';
 import DuelScreen from '@/features/board-game/components/DuelScreen';
+import ShotMinigame from '@/features/board-game/components/ShotMinigame';
 import RevealPanel from '@/features/board-game/components/RevealPanel';
 import DuelResultBanner from '@/features/board-game/components/DuelResultBanner';
 import GameOverModal from '@/features/board-game/components/GameOverModal';
 import styles from '@/features/board-game/components/BoardGamePage.module.css';
 
 type Mode = 'move' | 'pass';
+
+/** The role of `side`'s duelist in `outcome`, looked up via `skaters`. */
+function duelistRole(
+  outcome: DuelOutcome,
+  skaters: Skater[],
+  side: 'user' | 'cpu',
+): Role | undefined {
+  const attackerIsSide =
+    skaters.find((s) => s.id === outcome.attackerId)?.team === side;
+  const skaterId = attackerIsSide ? outcome.attackerId : outcome.defenderId;
+  return skaters.find((s) => s.id === skaterId)?.role;
+}
 
 export interface BoardGameProps {
   length: GameLength;
@@ -49,6 +70,13 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
 
   const isUserTurn = state.activeTeam === 'user';
   const highlighted: Coord[] = selectedId ? legalSteps(selectedId) : [];
+
+  const showMoveCue =
+    isUserTurn &&
+    mode === 'move' &&
+    selectedId === null &&
+    !cpuThinking &&
+    state.skaters.some((s) => s.team === 'user' && legalSteps(s.id).length > 0);
 
   const rollEnabled = canRoll(state) && isUserTurn;
   const endTurnEnabled = canEndTurn(state) && isUserTurn;
@@ -128,6 +156,21 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
     dispatch({ type: 'END_TURN' });
   }
 
+  /**
+   * `ShotMinigame` reports pick and band together; the reducer wants them as
+   * two actions. Dispatch both here so the component's contract stays a
+   * single callback. `AUTO_RESOLVE_SHOT` is never dispatched from the UI -
+   * the component already self-resolves under `prefers-reduced-motion` and
+   * reports that through this same `onResolve`, so dispatching it here too
+   * would double-resolve the shot.
+   */
+  function handleResolveShot(cardId: string, band: ShotBand) {
+    const handIndex = state.deck.hand.indexOf(cardId);
+    if (handIndex === -1) return;
+    dispatch({ type: 'PICK_SHOT_CARD', handIndex });
+    dispatch({ type: 'RESOLVE_SHOT_BAND', band });
+  }
+
   function renderSkater(skater: Skater) {
     const hasPuck =
       state.puck.kind === 'carried' && state.puck.skaterId === skater.id;
@@ -138,6 +181,11 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
         selected={skater.id === selectedId}
         stunned={isStunned(skater, state.turn)}
         moving={false}
+        movable={
+          showMoveCue &&
+          skater.team === 'user' &&
+          legalSteps(skater.id).length > 0
+        }
       />
     );
   }
@@ -190,6 +238,11 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
               cancel.
             </p>
           )}
+          {showMoveCue && (
+            <p className={styles.hint}>
+              Select one of your blue players to move.
+            </p>
+          )}
         </>
       )}
 
@@ -203,17 +256,37 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
         renderSkater={renderSkater}
       />
 
-      {state.phase === 'duel' && state.duel && (
+      {state.phase === 'duel' && state.duel && state.duel.kind === 'shot' && (
+        <ShotMinigame
+          cards={state.deck.hand.map((id) => CARDS[id])}
+          role={
+            state.skaters.find((s) => s.id === state.duel!.attacker.skaterId)!
+              .role
+          }
+          goaliePoise={
+            state.goaliePoise[
+              state.skaters.find((s) => s.id === state.duel!.defender.skaterId)!
+                .team
+            ]
+          }
+          goalieMaxPoise={GOALIE_POISE_BY_LENGTH[state.length]}
+          seed={state.rngSeed}
+          result={state.lastShotSaveResult}
+          onResolve={handleResolveShot}
+        />
+      )}
+
+      {state.phase === 'duel' && state.duel && state.duel.kind !== 'shot' && (
         <DuelScreen
           duel={state.duel}
           deck={state.deck}
-          cpuDeck={state.cpuDeck}
           skaters={state.skaters}
           lastReveal={state.lastReveal}
           onPlayCard={(i) => dispatch({ type: 'PLAY_CARD', handIndex: i })}
           onUnqueue={(i) => dispatch({ type: 'UNQUEUE_CARD', queueIndex: i })}
           onEndRound={() => dispatch({ type: 'END_DUEL_ROUND' })}
           blockReason={(i) => cardBlockReason(state, i)}
+          canUnqueue={(i) => canUnqueueCard(state, i)}
         />
       )}
 
@@ -222,7 +295,13 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
           summary={describeOutcome(state.lastOutcome, state.skaters)}
           onContinue={() => dispatch({ type: 'DISMISS_DUEL_RESULT' })}
         >
-          {state.lastReveal && <RevealPanel reveal={state.lastReveal} />}
+          {state.lastReveal && (
+            <RevealPanel
+              reveal={state.lastReveal}
+              userRole={duelistRole(state.lastOutcome, state.skaters, 'user')}
+              cpuRole={duelistRole(state.lastOutcome, state.skaters, 'cpu')}
+            />
+          )}
         </DuelResultBanner>
       )}
 

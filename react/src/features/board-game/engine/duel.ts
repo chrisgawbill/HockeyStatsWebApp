@@ -1,11 +1,17 @@
 import { ENERGY, MAX_ROUNDS } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
-import { discardHand, drawCards } from '@/features/board-game/engine/deck';
+import {
+  discardHand,
+  drawCards,
+  drawFilteredCards,
+  returnCardsToDeck,
+} from '@/features/board-game/engine/deck';
 import { planCpuCards } from '@/features/board-game/engine/cpuDuelPolicy';
 import {
   applyDamage,
   cardEffects,
   handSizeFor,
+  isDrawEligibleCard,
   makeDuelist,
   otherSide,
   removeIdsFromHand,
@@ -37,17 +43,25 @@ export function stunUntil(
   return team === state.activeTeam ? state.turn + 2 : state.turn + 1;
 }
 
-/** Draws both sides' hands for a round and secretly plans the CPU's cards. */
+/**
+ * Draws both sides' hands for a round and secretly plans the CPU's cards.
+ * Each hand is filtered to cards legal for that side in this duel kind
+ * (BG-A13), so a card never sits in hand dead-on-arrival; ineligible cards
+ * stay in the deck for later duels.
+ */
 function drawHandsAndPlan(state: GameState, duelBase: DuelState): GameState {
-  const [deck, seed1] = drawCards(
+  const cpuSide = otherSide(duelBase.userSide);
+  const [deck, seed1] = drawFilteredCards(
     state.deck,
     handSizeFor(duelBase.kind),
     state.rngSeed,
+    (cardId) => isDrawEligibleCard(duelBase, duelBase.userSide, cardId),
   );
-  const [cpuDeck, seed2] = drawCards(
+  const [cpuDeck, seed2] = drawFilteredCards(
     state.cpuDeck,
     handSizeFor(duelBase.kind),
     seed1,
+    (cardId) => isDrawEligibleCard(duelBase, cpuSide, cardId),
   );
   const planningState: GameState = {
     ...state,
@@ -75,14 +89,16 @@ export function createDuel(
 
   const duelBase: DuelState = {
     kind,
-    attacker: makeDuelist(state, attackerSkater),
-    defender: makeDuelist(state, defenderSkater),
+    attacker: makeDuelist(attackerSkater),
+    defender: makeDuelist(defenderSkater),
     userSide,
     round: 1,
     energy: ENERGY,
     cpuPlan: [],
     userQueue: [],
+    queueDraws: [],
     receiverId,
+    shotPickedCardId: null,
   };
 
   return {
@@ -135,9 +151,12 @@ export function playCard(state: GameState, handIndex: number): GameState {
   let deck: Deck = { ...state.deck, hand };
   let seed = state.rngSeed;
 
+  const handBeforeDraw = deck.hand;
   const { draw } = cardEffects(card, userSkater.role);
+  let drawnIds: string[] = [];
   if (draw > 0) {
     const [drawnDeck, nextSeed] = drawCards(deck, draw, seed);
+    drawnIds = drawnDeck.hand.slice(handBeforeDraw.length);
     deck = drawnDeck;
     seed = nextSeed;
   }
@@ -146,26 +165,54 @@ export function playCard(state: GameState, handIndex: number): GameState {
     ...duel,
     energy: duel.energy - card.cost,
     userQueue: [...duel.userQueue, cardId],
+    queueDraws: [...duel.queueDraws, drawnIds],
   };
   return { ...state, deck, rngSeed: seed, duel: nextDuel };
 }
 
-/** Returns a queued card to the end of the user's hand and refunds its energy. Any draw it caused stays drawn. */
+/**
+ * True if the queued card at `queueIndex` can be unqueued: every card it drew
+ * is still sitting in hand (none of them has since been queued itself).
+ */
+export function canUnqueueCard(state: GameState, queueIndex: number): boolean {
+  const duel = state.duel;
+  if (!duel) return false;
+  if (duel.userQueue[queueIndex] === undefined) return false;
+  const drawnIds = duel.queueDraws[queueIndex] ?? [];
+  return drawnIds.every((id) => state.deck.hand.includes(id));
+}
+
+/**
+ * Returns a queued card to the end of the user's hand and refunds its
+ * energy. Any cards it drew are pulled back out of hand and shuffled into
+ * the draw pile, so unqueuing can't be used to peek at the next card.
+ * Refused (state unchanged) if a drawn card has since been queued itself.
+ */
 export function unqueueCard(state: GameState, queueIndex: number): GameState {
   const duel = state.duel;
   if (!duel) return state;
   const cardId = duel.userQueue[queueIndex];
   if (cardId === undefined) return state;
+  if (!canUnqueueCard(state, queueIndex)) return state;
   const card = CARDS[cardId];
+  const drawnIds = duel.queueDraws[queueIndex] ?? [];
 
   const userQueue = duel.userQueue.filter((_, i) => i !== queueIndex);
-  const deck: Deck = { ...state.deck, hand: [...state.deck.hand, cardId] };
+  const queueDraws = duel.queueDraws.filter((_, i) => i !== queueIndex);
+  let deck: Deck = { ...state.deck, hand: [...state.deck.hand, cardId] };
+  let seed = state.rngSeed;
+  if (drawnIds.length > 0) {
+    const [returnedDeck, nextSeed] = returnCardsToDeck(deck, drawnIds, seed);
+    deck = returnedDeck;
+    seed = nextSeed;
+  }
   const nextDuel: DuelState = {
     ...duel,
     energy: duel.energy + card.cost,
     userQueue,
+    queueDraws,
   };
-  return { ...state, deck, duel: nextDuel };
+  return { ...state, deck, rngSeed: seed, duel: nextDuel };
 }
 
 /**
@@ -227,6 +274,7 @@ export function endDuelRound(state: GameState): GameState {
     [userSide]: userDuelist,
     [cpuSide]: cpuDuelist,
     userQueue: [],
+    queueDraws: [],
   } as DuelState;
   const roundState: GameState = {
     ...state,

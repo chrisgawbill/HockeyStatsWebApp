@@ -4,12 +4,16 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-md);
+  font-family: var(--font-pixel);
 }
 
 @media (max-width: 576px) {
   .page {
     padding: var(--space-sm);
     gap: var(--space-sm);
+    height: calc(100svh - var(--mobile-nav-height));
+    overflow: hidden;
+    box-sizing: border-box;
   }
 }
 

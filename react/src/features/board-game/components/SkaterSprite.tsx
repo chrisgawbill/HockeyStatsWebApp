@@ -14,6 +14,8 @@ export interface SkaterSpriteProps {
   selected: boolean;
   stunned: boolean;
   moving: boolean;
+  /** Shows an idle "you can move this skater" ring cue. Never true while `selected` is true. */
+  movable?: boolean;
 }
 
 const PALETTE: Record<string, string> = {
@@ -63,6 +65,7 @@ export default function SkaterSprite({
   selected,
   stunned,
   moving,
+  movable = false,
 }: SkaterSpriteProps) {
   const frame: SpriteFrame =
     skater.role === 'G' ? GOALIE_IDLE : moving ? SKATER_SKATE : SKATER_IDLE;
@@ -71,6 +74,7 @@ export default function SkaterSprite({
   const className = [
     styles.wrapper,
     selected ? styles.selected : '',
+    !selected && movable ? styles.movable : '',
     stunned ? styles.stunned : '',
   ]
     .filter(Boolean)

@@ -1,5 +1,6 @@
 import { COST } from '@/features/board-game/data/balance';
 import { createDuel } from '@/features/board-game/engine/duel';
+import { createShotDuel } from '@/features/board-game/engine/shotDuel';
 import {
   isAdjacent,
   isStunned,
@@ -126,7 +127,7 @@ export function handleShoot(state: GameState): GameState {
     mp: state.mp - COST.shoot,
     actionsThisTurn: state.actionsThisTurn + 1,
   };
-  return createDuel(spentState, 'shot', carrier.id, goalie.id);
+  return createShotDuel(spentState, carrier.id, goalie.id);
 }
 
 /** `CHECK`: spends 1 MP and starts a check duel against the enemy carrier. */

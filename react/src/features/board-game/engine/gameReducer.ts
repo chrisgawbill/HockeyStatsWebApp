@@ -1,3 +1,4 @@
+import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
 import { STARTER_DECK } from '@/features/board-game/data/cards';
 import { FORMATIONS, ROLES } from '@/features/board-game/data/formations';
 import {
@@ -14,6 +15,11 @@ import {
   unqueueCard,
 } from '@/features/board-game/engine/duel';
 import { rollDie } from '@/features/board-game/engine/rng';
+import {
+  autoResolveShot,
+  pickShotCard,
+  resolveShotBand,
+} from '@/features/board-game/engine/shotDuel';
 import {
   canEndTurn,
   canRoll,
@@ -71,6 +77,11 @@ export function createInitialState(
     rngSeed,
     actionsThisTurn: 0,
     whistle: false,
+    goaliePoise: {
+      user: GOALIE_POISE_BY_LENGTH[length],
+      cpu: GOALIE_POISE_BY_LENGTH[length],
+    },
+    lastShotSaveResult: null,
   };
 }
 
@@ -164,6 +175,33 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case 'END_DUEL_ROUND':
       return endDuelRound(state);
 
+    case 'PICK_SHOT_CARD':
+      return pickShotCard(state, action.handIndex);
+
+    case 'RESOLVE_SHOT_BAND': {
+      const duel = state.duel;
+      if (
+        !duel ||
+        duel.kind !== 'shot' ||
+        duel.shotPickedCardId === null ||
+        state.phase !== 'duel'
+      )
+        return state;
+      return resolveShotBand(state, duel.shotPickedCardId, action.band);
+    }
+
+    case 'AUTO_RESOLVE_SHOT': {
+      const duel = state.duel;
+      if (
+        !duel ||
+        duel.kind !== 'shot' ||
+        duel.shotPickedCardId === null ||
+        state.phase !== 'duel'
+      )
+        return state;
+      return autoResolveShot(state);
+    }
+
     case 'DISMISS_DUEL_RESULT': {
       if (state.phase !== 'duelResult' || !state.lastOutcome) return state;
       const outcome = state.lastOutcome;
@@ -180,9 +218,15 @@ export function gameReducer(state: GameState, action: Action): GameState {
           mp: 0,
           dice: null,
           lastOutcome: null,
+          lastShotSaveResult: null,
         };
       }
-      return { ...state, phase: 'move', lastOutcome: null };
+      return {
+        ...state,
+        phase: 'move',
+        lastOutcome: null,
+        lastShotSaveResult: null,
+      };
     }
 
     default:

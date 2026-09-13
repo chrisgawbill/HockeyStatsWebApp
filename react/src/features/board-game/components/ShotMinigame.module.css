@@ -1,0 +1,152 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: min(100%, 32rem);
+  max-height: calc(100dvh - 2 * var(--space-md));
+  overflow-y: auto;
+  padding: var(--space-lg);
+  border-radius: var(--border-radius-card);
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  margin: 0;
+  text-align: center;
+}
+
+.poiseRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.poiseLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.poiseBar {
+  width: 100%;
+  height: 0.6rem;
+  accent-color: var(--color-success);
+}
+
+.instructions {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.ante {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.timing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* The whole bar is the press target (click, tap, or Space/Enter via the
+   native button), not a small button — needs to work by thumb at 412px. */
+.track {
+  position: relative;
+  width: 100%;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-pill);
+  background-color: var(--color-bg-subtle);
+  cursor: pointer;
+  overflow: visible;
+}
+
+/* Widths come from the engine (bandWidthsForAccuracy) and are set inline
+   from JS — never hardcode band geometry here. */
+.blueBand,
+.yellowBand {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: var(--border-radius-pill);
+}
+
+.blueBand {
+  background-color: var(--color-shot-band-good);
+}
+
+.yellowBand {
+  background-color: var(--color-tile-highlight);
+}
+
+.indicator {
+  position: absolute;
+  top: -0.25rem;
+  bottom: -0.25rem;
+  left: 0%;
+  width: 3px;
+  background-color: var(--color-text);
+  transform: translateX(-50%);
+  animation-name: shot-indicator-sweep;
+  animation-timing-function: linear;
+  /* Bounded to one there-and-back pass (2 alternating iterations) so a
+     patient player can't just wait for a perfect line-up — see the
+     matching SWING_WINDOW_MS timer in ShotMinigame.tsx. */
+  animation-iteration-count: 2;
+  animation-direction: alternate;
+  animation-fill-mode: forwards;
+}
+
+@keyframes shot-indicator-sweep {
+  from {
+    left: 0%;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator {
+    animation: none;
+  }
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+
+.bandLabel {
+  margin: 0;
+  font-weight: bold;
+}
+
+.outcome {
+  margin: 0;
+}
+
+@media (max-width: 576px) {
+  .dialog {
+    width: 100%;
+    padding: var(--space-md);
+  }
+}
