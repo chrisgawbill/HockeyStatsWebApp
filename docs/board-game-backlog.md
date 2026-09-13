@@ -435,3 +435,77 @@ All components are dumb (props in, callbacks out) until BG-B5. For fixtures, use
 - [ ] **Both themes**, and check contrast still reads — pixel fonts have thin stems at small sizes.
 - [ ] **Verify at 1280×800 too**, so desktop doesn't regress.
 - [ ] **Out of scope:** no engine, data, or balance changes. No layout redesign, no font-size rescaling beyond what's needed to stop overflow. Don't touch the sprites themselves.
+
+## Round 6: faceoff minigame + goalie buff (Chris, 2026-09-13)
+
+**Why (Chris):** the faceoff is the last set piece that's still a generic card duel — same hand, same poise math, same screen as a deke, resolving to one flat outcome (`puck = carried by winner`). Shots also convert too often. Chris's calls, verbatim in effect: **full replacement** of the faceoff card duel, **the scrum outcome is in** (not deferred), goalies get buffed so shots land **under 56%**, and a good/perfect save gets **a chance to be covered instead of rebounding**, whistling play dead for a draw beside the net.
+
+**PM framing — why a reaction drop, not a second sweep bar.** The shot minigame's skill is *tracking* (follow a sweeping indicator, press at centre). Reskinning that for the faceoff would be cheap and would make two of the game's three set pieces feel identical. A faceoff is contested and simultaneous, and its real skill is anticipating the drop. So the faceoff is a **reaction** game that reuses the proven *shape* — ante (pick 1 of 3) → input moment → seeded roll — without reusing the *input*.
+
+**PM split:** BG-A14 taught us that one ticket spanning types + reducer + outcome + cards + balance + CPU + UI is unreviewable. Same split here: **A15a** (pure model, additive, nothing calls it) → **A15b** (integration, incl. scrum) → **B25** (UI). **A16** (goalie buff + covered puck) is separable and lands independently.
+
+### BG-A15a Faceoff reaction model, additive only (Agent A)
+- [ ] **Goal (Chris):** the faceoff stops being a card duel and becomes a one-card ante plus a reaction to the drop. This ticket is the **pure engine model only** — no React, no timers, no component. BG-B25 builds against the contract you define here.
+- [ ] **New flow the model must support:**
+  1. Ante: the centre is offered **3** faceoff-pool cards and picks **1**. The C's perk (`PERK_CENTER_FACEOFF_DRAW`, today "+1 duel card") is repointed to **draw 4, pick 1**. Don't touch the LW/RW or LD/RD perks.
+  2. The linesman holds the puck for a random **700-1800ms**, then drops it.
+  3. The UI reports a reaction, which buckets into a **band**: `clean | scrum | late | jump`.
+  4. The engine rolls the contest, seeded, and returns the outcome.
+- [ ] **Difficulty comes from window width, never from drop speed.** This is Chris's standing BG-A14a ruling carried over: the hold is random but the *windows* are what make a clean win hard. Do not tune difficulty by shortening the hold.
+- [ ] **Bands are windows on reaction time (ms):** `clean` (`t <= cleanWindow`), `scrum` (`t <= scrumWindow`), `late` (anything slower), and `jump` (pressed **before** the drop). A jump is a false start: **one** re-drop with a narrowed clean window; a second jump loses the draw outright.
+- [ ] **Two axes, both real mechanics:**
+  - **`anticipation`** widens the **clean** window only. The `scrum` window stays constant, so a slow draw is never a write-off — exactly the role `accuracy` plays for the blue band in BG-A14a.
+  - **`grip`** is a flat bonus to the contested roll **and** the size of the buff carried out of a clean win. One number, two jobs, deliberately — same design as shot `power`.
+- [ ] **Contest roll:** `winChance = BASE_WIN_BY_BAND[band] + grip - opponentGrip`, clamped, rolled through `engine/rng.ts` with the seed in state. **Never `Math.random`.** All constants named in `data/balance.ts` — Chris tunes them, so no magic numbers in engine code: `FACEOFF_CLEAN_WINDOW_BASE_MS`, `FACEOFF_WINDOW_PER_ANTICIPATION_MS`, `FACEOFF_SCRUM_WINDOW_MS`, `FACEOFF_DROP_DELAY_MIN_MS`, `FACEOFF_DROP_DELAY_MAX_MS`, `BASE_WIN_BY_BAND`, `CPU_FACEOFF_REACTION`, `FACEOFF_JUMP_WINDOW_PENALTY_MS`.
+- [ ] **CPU faceoffs** roll a band from seeded RNG against `CPU_FACEOFF_REACTION`, then go through the **identical** contest function. Do not fork a second resolution path for the CPU. Mirror `rollCpuShotBand`.
+- [ ] **Six faceoff cards** in `data/cards.ts` + the starter deck, new `'faceoff'` `CardTag`, `allowedIn: ['faceoff']`, so the 3-card ante varies. Contrasting stats so the pick is a real decision, and `text` in hockey language, not raw stats:
+
+  | Card | anticipation / grip | On a clean win |
+  |---|---|---|
+  | Quick Hands | 70 / 2 | — (pure speed) |
+  | Tie It Up | 25 / 8 | a **loss** downgrades to a scrum instead |
+  | Win It Back | 50 / 5 | back-draw: puck to your nearest D, not the C |
+  | Body the Dot | 30 / 7 | opposing C stunned 1 turn |
+  | Forehand Pull | 65 / 4 | +1 MP this turn |
+  | Cheat the Draw | 85 / -2 | a jump is free — no re-drop penalty |
+
+- [ ] **Card effects: one optional enum field, no new effect machinery.** Add `faceoffEffect?: 'backDraw' | 'stunLoser' | 'bonusMp' | 'scrumOnLoss' | 'freeJump'` to `CardDef`, exactly as additive as `accuracy`/`power` were. Do **not** extend `CardEffect` — these fire at outcome time, not during a reveal.
+- [ ] **Tests:** anticipation widens the clean window and nothing else; grip shifts the contest roll and higher grip beats lower; a jump costs a narrowed re-drop and a second jump loses; the CPU path resolves through the same function; determinism for a fixed seed.
+- [ ] **A15a IS ADDITIVE ONLY. Nothing in the running game may call your new code yet.** The existing faceoff card duel keeps working exactly as it does today and the full suite stays green with zero behaviour change. Do **not** touch `duelOutcome.ts`, the reducer, or `makeDuelist` — that is A15b.
+- [ ] **Define the contract BG-B25 consumes** and state it plainly in your report: the band type, the shape carrying the window widths, and the function the UI calls with a reaction to get an outcome. Agent B builds against it, so it must not change afterward without coming back to the PM.
+- [ ] **Out of scope:** no React, no component, no CSS, no timers, no integration. Don't change deke/check/intercept/shot resolution.
+
+### BG-A15b Integrate the faceoff minigame, incl. scrum (Agent A, after BG-A15a)
+- [ ] **Goal:** make A15a's model the real faceoff resolution path, **fully replacing** the faceoff card duel (Chris's call — not a C-only carve-out, and not a hybrid).
+- [ ] **Three outcomes — this is the fix.** Today `applyOutcome`'s `faceoff` branch always sets `carried`, which is why the draw feels inert. It becomes:
+  - **Clean win** → winner carries the puck **and** the card's `faceoffEffect` fires.
+  - **Scrum** → the puck goes **loose** on a tile adjacent to the dot, so both centres race for it. Reuses the existing `Puck = { kind: 'loose', pos }` shape — **add no new puck or outcome kinds.**
+  - **Loss** → opponent carries; their effect fires only if *they* won clean.
+- [ ] **Faceoff spots (needed by BG-A16 too).** The board is 15x7; centre ice is `(7,3)`, goalies sit at `(0,3)` and `(14,3)`. Add a named spot table in `data/rink.ts`: centre ice, plus the two end-zone dots flanking each net — roughly `col 2` and `col 12`, `rows 1` and `5`. Coordinates are Chris-tunable; put them in the data file, not inline in the reducer.
+- [ ] **A draw at a spot must not reset the whole formation.** The current whistle path teleports every skater back to its starting tile, which is right for centre ice and wrong for an end-zone draw. An end-zone faceoff moves **only the two centres** to the dot; everyone else stays where they are. Keep the full reset for centre-ice draws.
+- [ ] **Which of the two dots:** the one nearest the shooter's row, ties broken by a seeded flip. Rewards positioning rather than being arbitrary.
+- [ ] **Remove what the replacement makes dead.** The faceoff's `handSizeFor` +1 branch and any faceoff-only card-duel plumbing become unreachable once the draw no longer deals hands. Remove what is genuinely unreachable; **if unsure whether something is still reached, ask rather than delete.** Report everything you removed — same discipline as BG-A14b.
+- [ ] **Re-run the BG-A10 headless sim and report** faceoff outcome distribution (clean / scrum / late) and whether game length shifted. A scrum rate above ~35% means the windows are too tight — **report it, don't silently retune.**
+- [ ] **Out of scope:** no React, no component, no CSS. Don't change deke/check/intercept resolution.
+
+### BG-A16 Goalie buff + covered puck (Agent A, independent of A15)
+- [ ] **Goal 1 (Chris):** shots convert too often. Bring the headless-sim conversion rate **under 56%**, measured the way BG-A14b measured it. Tune `BASE_SAVE_BY_BAND` first; `POISE_SAVE_PENALTY_MAX` second. **Report the before and after numbers** — this is a measured change, not a guessed one. Note that the recent `SHOT_YELLOW_BASE_WIDTH` 0.05 -> 0.03 change already pushed the rate down, so measure from current HEAD.
+- [ ] **Keep Chris's anchor intact:** a perfect shot is still saved ~20% of the time *before* modifiers. Buff the lower bands (`good`/`weak`) ahead of `perfect` — the reward for perfect timing must not be flattened.
+- [ ] **Goal 2 (Chris):** a good/perfect save currently **always** rebounds. Add a seeded chance it is **covered** instead — the goalie smothers it, play is whistled dead, and the ensuing draw happens at one of the two dots **beside that net**, as in real hockey.
+- [ ] **Covered is a third save result, distinct from freeze.** Today `ShotSaveResult` carries `freeze` (weak/miss — possession to the goalie's team, no whistle) and `rebound` (good/perfect). Add `covered`, rolled only on a `good`/`perfect` save, against a named `SHOT_COVER_CHANCE` in `balance.ts`. A covered puck sets the existing `whistle` flag and routes to the faceoff phase.
+- [ ] **Sequencing with A15b — read this before starting.** A15b owns faceoff spots and the "don't reset the whole formation" rule. If A15b has not landed when you build this, a covered puck whistles to the **existing centre-ice faceoff**; wire the end-zone dot in as soon as A15b's spot table exists. Say in your report which of the two you shipped. Do **not** build a second, competing spot table.
+- [ ] **Tests:** cover fires only on good/perfect saves and never on weak/miss; the cover roll is seeded and deterministic; a covered puck whistles and a rebound does not; conversion rate stays under the target across the sim.
+- [ ] **Out of scope:** no React, no component, no CSS. Don't touch the faceoff *resolution* model — that's A15.
+
+### BG-B25 Faceoff minigame UI (Agent B, after BG-A15a)
+- [ ] **Goal (Chris):** the draw should feel like a draw — tense hold, sudden drop, fast hands.
+- [ ] **Build `components/FaceoffMinigame.tsx`** (+ colocated module CSS), dumb: props in, callbacks out, exactly like `ShotMinigame` and `DuelScreen`. Renders inside `ModalOverlay`, reusing their focus-management and keyboard patterns — don't reinvent them.
+- [ ] **Two steps, one screen:** the 3-card ante (reuse `CardView`, including tag colours and the perk badge — **do not build a second card renderer**), then the drop.
+- [ ] **The drop:** linesman holds the puck, a visible "set" state, then the puck drops and the reaction window opens. The hold length comes from the engine's constants — **never hardcode timings in the component**, same rule BG-B22 follows for band geometry.
+- [ ] **Jump feedback must be unmistakable:** a false start has to read instantly as *your* mistake, not as a bug. Name it in words ("Too early — re-drop"), don't rely on colour or motion alone.
+- [ ] **Colours:** the `'faceoff'` card tag needs a token pair in both `:root` and `[data-theme='dark']`. Do **not** borrow the shot or block tokens — per BG-B19/B21, tags get their own. Check it against the puck's cyan and the yellow target band so nothing reads as the same thing.
+- [ ] **Accessibility — required, not optional.** Reaction games gate harder than tracking games for motor impairment. Under `prefers-reduced-motion: reduce`, auto-resolve a band weighted by `anticipation` (the exact analogue of BG-B22's `rollBandFromAccuracy` fallback) and show the result. **That path must be genuinely competitive, not a forfeit.** Follow the existing pattern in `PuckToken.module.css` / `SkaterSprite.module.css`.
+- [ ] **Input:** click, tap, **and** keyboard (Space/Enter). At 412x915 the press target is the whole drop area, not a small button.
+- [ ] **Result:** say what happened in hockey words — the band, then won clean / tied up / lost the draw, and any buff that fired. Reuse `describeOutcome` and `RevealPanel`-style presentation where it fits.
+- [ ] **Mobile, and don't undo BG-B20:** verify at **412x915** and **1280x800** in both themes. The board page behind must still not scroll; the modal may scroll internally if tall, like the others.
+- [ ] **Out of scope:** no engine, data, or balance changes — if a number is wrong, **report it, don't edit `balance.ts`**. Don't touch the rink, the sprites, or `DuelScreen`'s own duel flow.
