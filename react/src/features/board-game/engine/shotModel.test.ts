@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BASE_SAVE_BY_BAND,
   MAX_SAVE_CHANCE,
+  SHOT_COVER_CHANCE,
 } from '@/features/board-game/data/balance';
 import {
   bandForPosition,
@@ -63,7 +64,7 @@ describe('shotModel', () => {
     expect(drained.saveChance).toBeLessThan(fresh.saveChance);
   });
 
-  it('weak/miss saves freeze; good/perfect saves rebound', () => {
+  it('weak/miss saves freeze and never cover; good/perfect saves rebound or cover, never freeze', () => {
     const [weakSave] = rollShotSave('weak', 0, 20, 20, 2);
     const [missSave] = rollShotSave('miss', 0, 20, 20, 2);
     const [goodSave] = rollShotSave('good', 0, 20, 20, 2);
@@ -71,17 +72,61 @@ describe('shotModel', () => {
     if (weakSave.saved) {
       expect(weakSave.freeze).toBe(true);
       expect(weakSave.rebound).toBe(false);
+      expect(weakSave.covered).toBe(false);
     }
     if (missSave.saved) {
       expect(missSave.freeze).toBe(true);
+      expect(missSave.covered).toBe(false);
     }
     if (goodSave.saved) {
-      expect(goodSave.rebound).toBe(true);
       expect(goodSave.freeze).toBe(false);
+      expect(goodSave.rebound).toBe(!goodSave.covered);
     }
     if (perfectSave.saved) {
-      expect(perfectSave.rebound).toBe(true);
+      expect(perfectSave.freeze).toBe(false);
+      expect(perfectSave.rebound).toBe(!perfectSave.covered);
     }
+  });
+
+  describe('covered saves (BG-A16)', () => {
+    it('never rolls covered on a weak/miss save, saved or not', () => {
+      for (let seed = 0; seed < 200; seed++) {
+        const [weakSave] = rollShotSave('weak', 0, 20, 20, seed);
+        const [missSave] = rollShotSave('miss', 0, 20, 20, seed);
+        expect(weakSave.covered).toBe(false);
+        expect(missSave.covered).toBe(false);
+      }
+    });
+
+    it('covered and rebound are never both true on a good/perfect save', () => {
+      for (let seed = 0; seed < 200; seed++) {
+        const [goodSave] = rollShotSave('good', 0, 20, 20, seed);
+        const [perfectSave] = rollShotSave('perfect', 0, 20, 20, seed);
+        expect(goodSave.covered && goodSave.rebound).toBe(false);
+        expect(perfectSave.covered && perfectSave.rebound).toBe(false);
+      }
+    });
+
+    it('finds both a covered and a rebounding outcome across seeds, against SHOT_COVER_CHANCE', () => {
+      let sawCovered = false;
+      let sawRebound = false;
+      for (let seed = 0; seed < 200 && !(sawCovered && sawRebound); seed++) {
+        const [result] = rollShotSave('perfect', 0, 20, 20, seed);
+        if (!result.saved) continue;
+        if (result.covered) sawCovered = true;
+        if (result.rebound) sawRebound = true;
+      }
+      expect(sawCovered).toBe(true);
+      expect(sawRebound).toBe(true);
+      expect(SHOT_COVER_CHANCE).toBeGreaterThan(0);
+      expect(SHOT_COVER_CHANCE).toBeLessThan(100);
+    });
+
+    it('is seeded and deterministic for a fixed seed', () => {
+      const a = rollShotSave('perfect', 0, 20, 20, 42);
+      const b = rollShotSave('perfect', 0, 20, 20, 42);
+      expect(a).toEqual(b);
+    });
   });
 
   it('save chance is clamped and never exceeds MAX_SAVE_CHANCE', () => {

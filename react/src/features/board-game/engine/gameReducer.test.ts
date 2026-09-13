@@ -328,6 +328,82 @@ describe('DISMISS_DUEL_RESULT', () => {
     expect(next.phase).toBe('move');
     expect(next.mp).toBe(2);
   });
+
+  it('a rebound (not covered) shot save returns to move, not faceoff', () => {
+    const state = makeState({
+      phase: 'duelResult',
+      mp: 1,
+      lastOutcome: {
+        kind: 'shot',
+        winner: 'defender',
+        byKo: false,
+        attackerId: 'user-C',
+        defenderId: 'cpu-G',
+        goal: false,
+        cleanSave: false,
+        summary: 'shot defender wins',
+        receiverId: null,
+      },
+      lastShotSaveResult: {
+        band: 'good',
+        saved: true,
+        saveChance: 48,
+        poiseDrain: 5,
+        freeze: false,
+        rebound: true,
+        covered: false,
+      },
+    });
+    const next = gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
+    expect(next.phase).toBe('move');
+    expect(next.whistle).toBe(false);
+  });
+
+  it('a covered save (BG-A16) whistles dead and routes to the centre-ice faceoff, same as a boxed-in-carrier reset', () => {
+    const movedSkaters = createInitialState(1, 'long').skaters.map((s) =>
+      s.id === 'cpu-LD' ? { ...s, pos: { col: 5, row: 5 } } : s,
+    );
+    const state = makeState({
+      phase: 'duelResult',
+      activeTeam: 'cpu',
+      mp: 1,
+      skaters: movedSkaters,
+      lastOutcome: {
+        kind: 'shot',
+        winner: 'defender',
+        byKo: false,
+        attackerId: 'user-C',
+        defenderId: 'cpu-G',
+        goal: false,
+        cleanSave: false,
+        summary: 'shot defender wins',
+        receiverId: null,
+      },
+      lastShotSaveResult: {
+        band: 'perfect',
+        saved: true,
+        saveChance: 20,
+        poiseDrain: 5,
+        freeze: false,
+        rebound: false,
+        covered: true,
+      },
+    });
+    const next = gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
+    expect(next.phase).toBe('faceoff');
+    expect(next.whistle).toBe(true);
+    expect(next.puck).toEqual({ kind: 'loose', pos: { col: 7, row: 3 } });
+    expect(next.mp).toBe(0);
+    expect(next.dice).toBeNull();
+    expect(next.lastOutcome).toBeNull();
+    expect(next.lastShotSaveResult).toBeNull();
+    // Full formation reset, same as the boxed-in-carrier whistle: the skater
+    // moved off its starting tile snaps back.
+    expect(next.skaters.find((s) => s.id === 'cpu-LD')!.pos).not.toEqual({
+      col: 5,
+      row: 5,
+    });
+  });
 });
 
 describe('illegal actions and gameOver', () => {

@@ -13,6 +13,7 @@ import {
   PERK_WING_SHOT_ACCURACY,
   POISE_SAVE_PENALTY_MAX,
   SHOT_BLUE_BAND_WIDTH,
+  SHOT_COVER_CHANCE,
   SHOT_YELLOW_BASE_WIDTH,
   SHOT_YELLOW_WIDTH_PER_ACCURACY,
 } from '@/features/board-game/data/balance';
@@ -93,7 +94,10 @@ export function poiseFactor(poise: number, maxPoise: number): number {
  * through `engine/rng.ts` (never `Math.random`). On a save, poise drains by
  * `power` and a `weak`/`miss` band freezes (existing clean-save path) while
  * `good`/`perfect` kicks out a rebound - the same function and outcome
- * mapping for both the human and the CPU shooter.
+ * mapping for both the human and the CPU shooter. A `good`/`perfect` save
+ * then rolls a second, separate chance (BG-A16) against `SHOT_COVER_CHANCE`
+ * for the goalie to cover the puck instead: `covered` and `rebound` are
+ * mutually exclusive, and `covered` is never rolled on a `weak`/`miss` save.
  */
 export function rollShotSave(
   band: ShotBand,
@@ -105,18 +109,31 @@ export function rollShotSave(
   const rawChance =
     BASE_SAVE_BY_BAND[band] + poiseFactor(goaliePoise, goalieMaxPoise) - power;
   const saveChance = clamp(rawChance, MIN_SAVE_CHANCE, MAX_SAVE_CHANCE);
-  const [roll, nextSeed] = nextFloat(seed);
+  const [roll, seedAfterSave] = nextFloat(seed);
   const saved = roll * 100 < saveChance;
   if (!saved) {
     return [
-      { band, saved, saveChance, poiseDrain: 0, freeze: false, rebound: false },
-      nextSeed,
+      {
+        band,
+        saved,
+        saveChance,
+        poiseDrain: 0,
+        freeze: false,
+        rebound: false,
+        covered: false,
+      },
+      seedAfterSave,
     ];
   }
   const freeze = band === 'weak' || band === 'miss';
-  const rebound = band === 'good' || band === 'perfect';
+  const canCover = band === 'good' || band === 'perfect';
+  const [coverRoll, nextSeed] = canCover
+    ? nextFloat(seedAfterSave)
+    : [1, seedAfterSave];
+  const covered = canCover && coverRoll * 100 < SHOT_COVER_CHANCE;
+  const rebound = canCover && !covered;
   return [
-    { band, saved, saveChance, poiseDrain: power, freeze, rebound },
+    { band, saved, saveChance, poiseDrain: power, freeze, rebound, covered },
     nextSeed,
   ];
 }

@@ -221,6 +221,23 @@ export function gameReducer(state: GameState, action: Action): GameState {
           lastShotSaveResult: null,
         };
       }
+      // BG-A16: a covered save whistles play dead, same reset the boxed-in-carrier
+      // whistle (END_TURN, above) uses. A15b's end-zone faceoff dots aren't landed
+      // yet, so this still lands on the existing centre-ice faceoff.
+      if (outcome.kind === 'shot' && state.lastShotSaveResult?.covered) {
+        return {
+          ...state,
+          skaters: formationSkaters(),
+          puck: { kind: 'loose', pos: CENTER_ICE },
+          phase: 'faceoff',
+          activeTeam: 'user',
+          mp: 0,
+          dice: null,
+          whistle: true,
+          lastOutcome: null,
+          lastShotSaveResult: null,
+        };
+      }
       return {
         ...state,
         phase: 'move',

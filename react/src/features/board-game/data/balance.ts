@@ -52,6 +52,14 @@ export const BASE_SAVE_BY_BAND: Record<
   weak: 73,
   miss: 96,
 };
+/**
+ * Chance (percent, BG-A16) that a `good`/`perfect` save is covered - the
+ * goalie smothers it for a whistle and a faceoff - instead of rebounding.
+ * Never rolled on a `weak`/`miss` save. Chris-tunable placeholder: 25 means
+ * roughly a quarter of good/perfect saves stop play rather than kicking out
+ * a loose puck, enough to matter without making rebounds the exception.
+ */
+export const SHOT_COVER_CHANCE = 25;
 /** Save chance is clamped to this range (percent) after all modifiers. */
 export const MIN_SAVE_CHANCE = 5;
 export const MAX_SAVE_CHANCE = 97;

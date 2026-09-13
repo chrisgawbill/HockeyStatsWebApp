@@ -22,16 +22,10 @@ export interface Skater {
 }
 
 export type Puck =
-  | { kind: 'carried'; skaterId: string }
-  | { kind: 'loose'; pos: Coord };
+  { kind: 'carried'; skaterId: string } | { kind: 'loose'; pos: Coord };
 
 export type Phase =
-  | 'faceoff'
-  | 'roll'
-  | 'move'
-  | 'duel'
-  | 'duelResult'
-  | 'gameOver';
+  'faceoff' | 'roll' | 'move' | 'duel' | 'duelResult' | 'gameOver';
 
 export type DuelKind = 'faceoff' | 'deke' | 'check' | 'intercept' | 'shot';
 
@@ -91,8 +85,15 @@ export interface ShotSaveResult {
   poiseDrain: number;
   /** True on a `weak`/`miss` save: the existing clean-save freeze path. */
   freeze: boolean;
-  /** True on a `good`/`perfect` save: kicks out a rebound. */
+  /** True on a `good`/`perfect` save that isn't covered: kicks out a rebound. */
   rebound: boolean;
+  /**
+   * True on a `good`/`perfect` save the goalie smothers instead of
+   * rebounding (BG-A16), rolled against `SHOT_COVER_CHANCE`. Mutually
+   * exclusive with `rebound` - a covered save always has `rebound: false`.
+   * Whistles play dead and routes to the faceoff phase.
+   */
+  covered: boolean;
 }
 
 /** Card ids in each pile. */
