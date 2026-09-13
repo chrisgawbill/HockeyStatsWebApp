@@ -1,6 +1,6 @@
 # Rink Quest — Board Game Backlog
 
-The rules spec is [board-game-design.md](./board-game-design.md). Work happens on branch `board-game`. The PM (Claude) hands tickets to two Sonnet agents: **Agent A** builds the engine (pure TypeScript) and **Agent B** builds the UI (React). Chris makes every executive decision.
+The rules spec is [board-game-design.md](./board-game-design.md). Work happens on branch `rink-quest-phase2`. The PM (Claude) hands tickets to two Sonnet agents: **Agent A** builds the engine (pure TypeScript) and **Agent B** builds the UI (React). Chris makes every executive decision.
 
 ## Agent Rules (read this section fully, every ticket)
 
@@ -290,3 +290,148 @@ All components are dumb (props in, callbacks out) until BG-B5. For fixtures, use
 
 ## BG-9 Integration + balance (PM with Chris)
 - [ ] Play full matches and tune `data/balance.ts`, `cards.ts`, and `intents.ts` with Chris. Then open a PR from `board-game`.
+
+## Phase 2 (branch `rink-quest-phase2`) — bugs from Chris's 2026-09-13 playtest
+
+### BG-A12 Unqueue returns drawn cards and reshuffles (Agent A)
+- [ ] **Bug:** `playCard` resolves a card's `draw` immediately; `unqueueCard` refunds energy and returns the card to hand but keeps the drawn card. Queue/unqueue Stickhandle repeatedly for an unbounded hand.
+- [ ] **Decision (Chris):** unqueue takes the drawn cards back, and the draw pile is **reshuffled** afterwards so unqueue can't be used to peek at the next card. Stickhandle's feel is unchanged: it still draws on queue and the drawn card is playable this round.
+- [ ] **Types:** `DuelState` gains `queueDraws: string[][]`, parallel to `userQueue` — entry `i` holds the card ids that queue entry `i` drew (usually `[]`).
+- [ ] **Deck helper:** add `returnCardsToDeck(deck, ids, seed): [Deck, number]` to `engine/deck.ts` — removes `ids` from hand (reuse `removeIdsFromHand`), pushes them onto the draw pile, then `shuffle`s the draw pile. No other pile changes.
+- [ ] **`playCard`:** record the ids it drew into `queueDraws`. Compare hand before/after the `drawCards` call rather than re-deriving.
+- [ ] **`unqueueCard`:** call `returnCardsToDeck` for that entry's drawn ids, drop the entry from `queueDraws`, refund energy as today. Update the JSDoc — the "Any draw it caused stays drawn" line is now wrong.
+- [ ] **Edge case:** if a drawn id is no longer in hand (the player queued it after drawing it), the unqueue is **refused** — return `state` unchanged. Export `canUnqueueCard(state, queueIndex): boolean` so the UI can grey that slot. Do not cascade-unqueue.
+- [ ] **Reset:** `queueDraws` clears with `userQueue` at reveal and on a new round.
+- [ ] **Tests** in `engine/duel.test.ts`: queue→unqueue Stickhandle 5x leaves hand size and total card count unchanged; the returned card is shuffled in, not on top; `canUnqueueCard` is false for the blocked edge case; energy round-trips.
+- [ ] **Out of scope:** no balance changes, no CPU-side changes, no UI.
+
+### BG-B18 Show perk-adjusted card numbers, and fix pile wording (Agent B)
+- [ ] **Not a bug, a visibility gap:** `CardView` renders the static `card.text` string, so an LD's Protect Puck reads "5 block" while the reveal reports 7. Position perks (`PERK_WING_SHOT_BONUS`, `PERK_DEFENSE_BONUS` in `data/balance.ts`) are invisible to the player.
+- [ ] **Decision (Chris):** live numbers **plus** a perk badge.
+- [ ] **Card text:** derive the displayed text from `card.effects` adjusted by the acting skater's role, reusing `cardEffects(card, role)` from `engine/duelShared.ts` — do not duplicate the perk math. Put the string builder in `utils/cardText.ts` with tests. Keep `card.text` as the fallback when no role is supplied.
+- [ ] **`CardView`:** new optional `role?: Role` prop. With a role, show the adjusted text and, when `perkBonus` is non-zero, a small badge reading `<ROLE> +N` (e.g. `LD +2`). No role → today's behaviour exactly.
+- [ ] **`DuelScreen`:** pass the user duelist's role to the hand and queue cards. It already has `attackerSkater`/`defenderSkater` and `duel.userSide`.
+- [ ] **`RevealPanel`:** new `userRole` / `cpuRole` props, passed down to each side's `CardView`, so the reveal's cards and its damage line finally agree.
+- [ ] **Pile wording (Chris #3):** `DuelScreen.tsx:239-244` reads "draw N / discard N", which implies a discard action the player doesn't have. Change to "Deck N · Used N".
+- [ ] **Queue slot:** once BG-A12 lands, grey a queue card whose `canUnqueueCard` is false, with a `title` of "Can't take this back - you've queued the card it drew".
+- [ ] **Styling:** badge colour from an existing token; add one to both `:root` and `[data-theme='dark']` only if nothing fits. No raw hex.
+- [ ] **Out of scope:** no engine edits, no balance changes.
+
+### BG-B19 Card tag colours and yellow energy (Agent B, Chris)
+- [ ] **Goal (Chris):** cards read at a glance by what they do. Colour comes from the card's tag; green stays reserved for bonuses; energy reads yellow.
+- [ ] **Tokens** — add to **both** `:root` and `[data-theme='dark']` in `react/src/styles/index.css`, following the existing `--color-*` naming:
+
+  | Token | Tag | Light | Dark |
+  | --- | --- | --- | --- |
+  | `--color-card-block` | `block` | `#4fc3f7` | `#81d4fa` |
+  | `--color-card-check` | `check` | `#e57373` | `#ef9a9a` |
+  | `--color-card-shot` | `shot` | `#ffb74d` | `#ffcc80` |
+  | `--color-card-skill` | `skill` (deking) | `#ba68c8` | `#ce93d8` |
+  | `--color-energy` | — | `#fbc02d` | `#ffd54f` |
+
+- [ ] **Card border:** `.card`'s border colour comes from `card.tags[0]` (every card in `data/cards.ts` has exactly one tag). Use a CSS-module class per tag and pick it in `CardView`; do **not** write inline styles or raw hex. Keep the 1px width and the existing `--color-text` border as the fallback when a tag has no class.
+- [ ] **Energy (card only, Chris 2026-09-13):** `.cost` becomes a filled yellow pip — `--color-energy` background, a dark readable foreground, small and round. The duel screen's energy orbs (`.orbFull`/`.orb` in `DuelScreen.module.css`) are **out of scope** and keep their current blue.
+- [ ] **Green stays bonuses only:** `.perkBadge` keeps `--color-success`. Do not use a green anywhere else in this ticket.
+- [ ] **Accessibility:** colour must never be the only signal — the tags row stays exactly as it is. Check the border is visible against `--color-surface` in both themes, and that `.disabled`'s 0.5 opacity still reads.
+- [ ] **Out of scope:** no engine, data, or balance changes. No card text changes. Don't touch the sprites or the rink.
+
+### BG-B20 Mobile: no page scroll, no rink stutter (Agent B, Chris)
+- [ ] **Bug (Chris, Pixel 9):** the rink visibly grows and shrinks while scrolling on mobile.
+- [ ] **Root cause (PM, confirmed):** `.boardNarrow` in `RinkBoard.module.css` sizes itself from `100dvh`. `dvh` tracks the *dynamic* viewport, which changes as mobile Chrome's URL bar hides and reveals on scroll. `.page` in `BoardGamePage.module.css` sets no height, so the column overflows, the page scrolls, the URL bar animates, `dvh` changes, and the board resizes — a feedback loop. Fixing only one half won't hold.
+- [ ] **Stop the resize:** `.boardNarrow` uses `100svh`, not `100dvh`. `svh` is the *small* viewport (URL bar visible) and does not change as the bar animates, so the board size is stable whatever the page does.
+- [ ] **Stop the scroll:** on the `max-width: 576px` breakpoint the page fills exactly one viewport and does not scroll — `.page` gets `height: 100svh` and `overflow: hidden`, and the column's children must fit. Do not put `overflow: hidden` on `body` or `html`; keep it scoped to this page so the rest of the app is untouched.
+- [ ] **Replace the magic number:** `.boardNarrow`'s `calc((100dvh - 150px) * 7 / 15)` hardcodes a 150px guess for the surrounding chrome. Let the board take the leftover space instead: give it `flex: 1`, `min-height: 0`, and its `aspect-ratio`, sizing from the flex row rather than a subtraction. The board must stay centred and must never overflow its column on either axis.
+- [ ] **Verify at real sizes**, both orientations, with the browser tools: **412×915** (Pixel 9) and **360×640** (small Android). Confirm no vertical scrollbar on the page, the whole rink plus the HUD are visible without scrolling, and the board does not change size when you attempt to scroll.
+- [ ] **Desktop must not regress:** `.board` at wide sizes keeps `width: min(100%, 960px)` and its `15 / 7` aspect ratio. Check 1280×800 still looks exactly as it does today.
+- [ ] **Modals are exempt:** `DuelScreen` and the game-over modal may scroll internally if their content is tall — that's fine and expected. This ticket is about the board page behind them.
+- [ ] **Out of scope:** no engine, data, or balance changes. Don't change the 576px breakpoint or `useIsNarrow`. Don't redesign the HUD.
+
+### BG-B21 Tell the player they can select their skaters (Agent B, Chris)
+- [ ] **Gap (Chris):** nothing tells a new player they can click their own (blue) skaters to move. There are hints for pass mode and "CPU is thinking", but the default move mode has none, and a skater only gets an outline *after* it is selected — there is no cue that it was clickable in the first place.
+- [ ] **Decision (Chris):** a hint line **and** an idle glow on the player's movable skaters. The glow must be clearly distinct from the puck's, and the two must not visually collide.
+- [ ] **Hint line:** reuse the existing `.hint` style in `BoardGamePage.module.css` (same as the pass-mode hint). Text: "Select one of your blue players to move." Wording must suit both click and tap; don't say "tap".
+- [ ] **When both cues show:** it's the user's turn, `mode === 'move'`, `selectedId === null`, the CPU isn't thinking, and at least one user skater can actually move. The moment a skater is selected, both cues disappear. They return next turn. Nothing is remembered across turns or games.
+- [ ] **Glow colour — must not collide with the puck.** The puck already owns cyan: `.puckGlow` in `SkaterSprite.module.css` is a cyan ellipse at the skater's feet, and `PuckToken` has a cyan border. Selection owns yellow (`--color-tile-highlight`). So add a new token `--color-skater-movable` in **both** `:root` and `[data-theme='dark']` of `react/src/styles/index.css`: light `#fb8c00`, dark `#ffa726`. Do not reuse `--color-card-shot` — card tokens are for cards.
+- [ ] **Glow geometry — must not collide either.** The movable cue is a ring *around the whole sprite* (on `.wrapper`), not a feet ellipse, so it is distinguishable from `.puckGlow` by shape as well as hue. It never co-occurs with `.selected` (selection clears it), but it **does** co-occur with `.puckGlow` and `.puckBadge` on a carrier who can still move — check that case specifically and make sure the orange ring, the cyan feet glow, and the corner puck badge all stay legible together.
+- [ ] **Motion:** a soft pulse, following the existing `puck-pulse` pattern in `PuckToken.module.css`, and disabled under `@media (prefers-reduced-motion: reduce)` exactly as that file does. Use a different animation name; don't alter the puck's.
+- [ ] **Accessibility:** the glow is decorative and `pointer-events: none`, like `.puckGlow`. The hint carries the actual information; don't add a second `role="status"` that would double-announce alongside the existing hints.
+- [ ] **Verify in the browser** at 412×915 and 1280×800: cue appears on your turn, vanishes on selection, returns next turn, and the carrier-who-can-move case reads clearly in **both** light and dark themes.
+- [ ] **Out of scope:** no engine, data, or balance changes. No tutorial overlay, no coach marks, no persisted "seen it" flag. Don't change the puck's own visuals.
+
+## Round 5: shot minigame + dead-card fix (Chris, 2026-09-13)
+
+**Why (Chris's playtest):** 1-3 cards are greyed out in a typical hand, especially when shooting, and faceoffs are uninteresting. Chris's call: fix the dead draws *and* add a timing minigame for shots.
+
+**PM analysis that shaped these tickets:**
+- Greyouts have three sources. `allowedIn` mismatches (`wrist_shot`/`slapshot` in a faceoff, `body_check` outside a check) are **dead draws with no decision attached** — that's the bug. Energy-cost greyouts are the actual game and stay. `goalieBlockOnly` is CPU-side and invisible to the user.
+- `duelShared.ts:33` is the **only** place `state.length` affects gameplay — short vs long is implemented entirely as goalie poise. Any change to shot resolution must re-home game length or it silently stops meaning anything.
+
+### BG-A13 Filtered duel draw (Agent A) — DONE fba2abe7
+- [ ] **Goal (Chris):** a card in hand is never unplayable *because of the duel kind*. Only energy may grey a card.
+- [ ] **Change:** a duel hand is drawn only from cards legal in that duel kind. Reuse the existing legality path — `ruleBlockReason` in `engine/duelShared.ts` already answers "may this side play this card here". Do **not** write a second legality rule, and do **not** add a weighting/propensity table; filtering is exact where weighting is probabilistic.
+- [ ] **Where:** the draw path in `engine/deck.ts` / `engine/duel.ts` used by `createDuel` and by the per-round redraw in `roundDuel`. Both must filter; a mid-duel draw that deals a dead card is the same bug.
+- [ ] **Cards stay in the deck.** Filtering changes what is *drawn into hand*, not deck contents. An ineligible card is skipped for this duel and is still there next duel. Never delete cards from `drawPile`.
+- [ ] **Empty-pool safety:** if the eligible pool can't fill the hand, deal what's eligible and stop — a short hand is correct, an infinite loop or a thrown error is not. Cover this with a test.
+- [ ] **Shot duels are out of scope here** — BG-A14 replaces them. Write this so shot-tagged cards simply never qualify for any other duel kind's pool, which is what BG-A14 needs anyway.
+- [ ] **Tests:** faceoff hand contains no `shot`- or `check`-only card; deke hand likewise; a duel whose eligible pool is smaller than `handSizeFor` deals a short hand and terminates; determinism holds for a fixed seed.
+- [ ] **Out of scope:** no balance changes, no new cards, no UI. Don't touch `ruleBlockReason`'s rules themselves.
+
+**PM split (2026-09-13):** BG-A14 was one ticket; it touches types, the reducer, `duelShared`, `duelOutcome`, `cards`, `balance` and the CPU path, which is too much for one turn-in. It is now **A14a (additive model, nothing calls it)** and **A14b (integration)**. A14a is purely additive so it cannot regress the running game, and BG-B22 can start against its contract as soon as it lands rather than waiting for integration.
+
+### BG-A14a Shot band/save model, additive only (Agent A, after BG-A13) — DONE 18ed9365
+- [ ] **PM note:** the four bullets covering persistent poise, outcome mapping, the CPU path and dead-code removal were duplicated here by the PM's ticket split and belong to A14b. Removed; the agent correctly flagged the contradiction rather than guessing.
+- [ ] **Goal (Chris):** shots stop being a card duel and become a one-card ante plus a timing swing. This ticket is the **pure engine model only** — no React, no timing loop, no component. BG-B22 builds the UI against the contract you define here.
+- [ ] **New flow the model must support:**
+  1. Ante: the shooter is offered **3** cards from the shot pool and picks **1**.
+  2. The picked card contributes **accuracy** and **power**.
+  3. The UI runs a timing bar and reports a **band**: `perfect | good | weak | miss`.
+- [ ] **Band geometry is concentric (Chris, 2026-09-13).** The target is a bullseye, not separate zones: a narrow **yellow** band in the centre is `perfect`, a wider **light blue** band surrounding it on both sides is `good`, anywhere else on the track is `weak`, and failing to press before the cycle ends is `miss`. Model this as two widths (yellow, blue) centred on the same point, so the UI can render it as nested bands.
+- [ ] **Difficulty comes from width, never from speed (Chris).** Chris's explicit constraint: if the bar moves too fast, perfect becomes frustrating. Keep the sweep readable and make `perfect` hard by making the yellow band narrow. Do not tune difficulty by accelerating the bar.
+  4. The engine rolls the save, seeded, and returns the outcome.
+- [ ] **Two axes, both real mechanics (Chris):**
+  - **Accuracy** widens the **yellow** band only, so perfect becomes more likely. The blue band stays roughly constant, which means a low-accuracy card still lands `good` reliably and a shot is never a write-off. Export both band widths as numbers the UI consumes; do not hardcode geometry in the UI.
+  - **Power** subtracts from the goalie's save chance, **and** is the amount of goalie poise drained on a save. One number, two jobs — that is deliberate, so a heavy shooter wears the goalie down for later.
+- [ ] **Save roll:** `saveChance = BASE_SAVE_BY_BAND[band] + poiseFactor(goaliePoise) - power`, clamped. Roll through `engine/rng.ts` with the seed in state. **Never `Math.random`.** Anchor `BASE_SAVE_BY_BAND` on Chris's ruling that a **perfect shot is still saved ~20% of the time**; `good`/`weak`/`miss` scale up from there. All of these live in `data/balance.ts` as named constants — Chris tunes them, so no magic numbers in engine code.
+- [ ] **New shot cards:** add **2-3** to `data/cards.ts` and the starter deck so the 3-card ante isn't the same offer every time (today the deck holds only two distinct shot cards). Give them contrasting accuracy/power so the pick is a real decision — e.g. high power / low accuracy vs the reverse. `slapshot` keeps `exhaust`. Card `text` should read in hockey language, not as raw stats.
+- [ ] **Perk change:** `PERK_WING_SHOT_BONUS` currently adds +2 damage to shot cards, which has nothing to attach to once shots deal no damage. It becomes an **accuracy** bonus for LW/RW. Keep the constant's role (one named value in `balance.ts`); update its JSDoc. Don't touch the LD/RD or C perks.
+- [ ] **Tests:** a perfect band still concedes a save at the constant's rate for a seed that rolls into it; power reduces save chance and drains poise; a drained goalie saves less than a fresh one; weak-save freezes and good-save rebounds; the CPU path resolves through the same function; determinism for a fixed seed.
+- [ ] **A14a IS ADDITIVE ONLY. Nothing in the running game may call your new code yet.** Export the band type, the two band widths, the save-roll function, the new cards and the balance constants, all covered by tests. Do **not** touch `duelOutcome.ts`, the reducer, `makeDuelist`, or the CPU's shot path — that is A14b. The existing shot card duel keeps working exactly as it does today, and the full suite must stay green with zero behaviour change.
+- [ ] **Define the contract BG-B22 will consume** and state it plainly in your report: the band type, the shape carrying the two band widths, and the function the UI calls with a band to get an outcome. Agent B builds against this, so it must not change afterward without coming back to the PM.
+- [ ] **Out of scope for A14a:** no React, no component, no CSS, no timing loop. No integration. Don't change faceoff/deke/check/intercept resolution.
+
+### BG-A14b Integrate the shot minigame (Agent A, after BG-A14a)
+- [ ] **Goal:** make A14a's model the real shot resolution path, replacing the shot card duel.
+- [ ] **Persist goalie poise (Chris).** Move the goalie's poise out of per-duel `makeDuelist` into `GameState` so it carries across the whole match, seeded from `GOALIE_POISE_BY_LENGTH` on `NEW_GAME`. Lower poise lowers the save chance. This is what keeps `length` meaningful — `duelShared.ts:33` is currently the only place `state.length` affects gameplay at all, so if you drop poise, short vs long silently stops existing.
+- [ ] **Drain on save:** a save drains poise by the shot's `power`. Keep fatigue **modest** (PM/Chris): it should shift late-game odds, not collapse the goalie into a sieve.
+- [ ] **Outcome mapping — reuse `applyOutcome`'s existing paths, add no new outcome kinds:** goal on a beat; on a save, a **`weak`** band freezes (the existing `cleanSave` path) and **`good`/`perfect`** kicks out a rebound.
+- [ ] **CPU shots** roll a band from seeded RNG against a difficulty constant in `balance.ts`, then go through the **identical** save path. Do not fork a second resolution path for the CPU.
+- [ ] **Remove the shot exemption from BG-A13:** `isDrawEligibleCard` in `duelShared.ts` has an `if (duel.kind === 'shot') return true;` early return with a comment explaining why. Once shot duels no longer draw hands, that branch and `ruleBlockReason`'s `goalieBlockOnly` become dead. Remove what is genuinely unreachable; if unsure whether something is still reached, ask rather than delete. Report everything you removed.
+- [ ] **Re-run the BG-A10 headless sim and report the scoring rate.** Before this change, shot attackers won **27%**. Report the new number. A large jump means the yellow band is too generous — report it, don't silently retune.
+- [ ] **Out of scope:** no React, no component, no CSS. Don't change faceoff/deke/check/intercept resolution.
+
+### BG-B22 Shot minigame UI (Agent B, after BG-A14a)
+- [ ] **Goal (Chris):** the shot is the most exciting moment in the game and should feel like it. Pick a card, then time your swing.
+- [ ] **Build `components/ShotMinigame.tsx`** (+ colocated module CSS), dumb: props in, callbacks out, exactly like `DuelScreen`. It renders inside `ModalOverlay` and follows `DuelScreen`'s focus-management and keyboard patterns — reuse them, don't reinvent.
+- [ ] **Two steps, one screen:** the 3-card ante (reuse `CardView`, including its tag colours and perk badge from BG-B18/B19 — do not build a second card renderer), then the timing bar.
+- [ ] **Timing bar — concentric bands (Chris):** an indicator sweeps a track over a bullseye target. A narrow **yellow** band in the centre is `perfect`; a wider **light blue** band on both sides of it is `good`; the rest of the track is `weak`. Both widths come from the engine (BG-A14 exports them) — **never hardcode them in CSS**, since accuracy changes the yellow band at runtime. Render them as nested bands so the player can read at a glance how close they came.
+- [ ] **Colours:** yellow reuses `--color-tile-highlight` (it already means "target here" for tile selection). The light blue band needs a **new token pair** in both `:root` and `[data-theme='dark']` — do **not** borrow `--color-card-block`; card tokens are for cards, per BG-B19/B21. Check it against the puck's cyan so the two don't read as the same thing.
+- [ ] **Speed (Chris):** a readable, fair sweep — roughly 1.8-2.2s per cycle, as a named constant, not a magic number. **Do not make the bar fast to make the game hard**; difficulty lives in the yellow band's width. Chris's words: too fast and perfect becomes frustrating.
+- [ ] **Accessibility:** band position and the stated result carry the meaning, not hue alone — the result text must name the band in words. Two adjacent colour bands must not be the only signal.
+- [ ] **Input:** click, tap, **and** keyboard (Space/Enter). Touch must work at 412×915 — the press target is the whole bar area, not a small button.
+- [ ] **Reduced motion (`prefers-reduced-motion: reduce`):** no sweeping animation. Auto-resolve a band weighted by the picked card's accuracy, show the result, and move on. A pure-dexterity gate would lock out anyone who can't hit it; this is required, not optional. Follow the existing pattern in `PuckToken.module.css` / `SkaterSprite.module.css`.
+- [ ] **Goalie poise bar:** now that poise persists (BG-A14), show it so the player can see the goalie wearing down. Reuse the existing `.poiseBar` `<progress>` styling from `DuelScreen.module.css` rather than a new widget.
+- [ ] **Result:** say what happened in hockey words — the band, then goal / save / rebound / freeze. Reuse `describeOutcome` and `RevealPanel`-style presentation where it fits.
+- [ ] **Mobile, and don't undo BG-B20:** verify at **412×915** and **1280×800** in both themes. The board page behind must still not scroll; the minigame may scroll internally if tall, like the other modals.
+- [ ] **Out of scope:** no engine, data, or balance changes — if a number is wrong, report it, don't edit `balance.ts`. Don't touch the rink, the sprites, or `DuelScreen`'s own duel flow.
+
+### BG-B23 Pixel font for the board game (Agent B, Chris)
+- [ ] **Goal (Chris, 2026-09-13):** the whole Rink Quest feature uses the arcade pixel font "Press Start", matching the pixelated sprites.
+- [ ] **Which font (PM decision):** use **"Press Start 2P"** from Google Fonts — same designer as the dafont "Press Start", and it's the maintained OFL release. `react/index.html` **already** loads Roboto from Google Fonts with `preconnect` to `fonts.googleapis.com` and `fonts.gstatic.com`; add this family to that existing setup. Do not add a font binary to the repo and do not download from dafont.
+- [ ] **Token, not raw names.** Add a `--font-pixel` token in `react/src/styles/index.css` next to the existing font declarations (the app's base is `'Roboto', sans-serif` at line ~112). Always include a fallback stack ending in `monospace` — the page must stay readable if the font fails to load.
+- [ ] **Scope it to this feature only.** Apply the token at the board-game page root so it inherits through the feature. **The rest of the stats app keeps Roboto** — do not change the global `body` font. Verify another route (e.g. Player Stats) is visually untouched.
+- [ ] **Carve-out — two labels stay in the current font.** `SkaterSprite.module.css` has `.roleLabel` at `0.45rem` and `.stunBadge` at `0.6rem`. Press Start 2P is far wider per glyph than Roboto and is illegible below roughly 0.7rem; at 0.45rem the role label will overflow its tile. Leave those two on the existing stack. If you think they can work, say so in your report with what size they'd need — **don't change them unilaterally**, it's Chris's call.
+- [ ] **Do not undo BG-B20.** That ticket made the mobile board fill exactly one viewport with **no page scrolling**. A wider font can push the HUD or card text back into overflow. Re-verify at **412×915** (Pixel 9) and **360×640**: no vertical scrollbar on the board page, the whole rink and HUD visible without scrolling, and the board does not resize when you try to scroll. If the font causes overflow, report it — adjust sizes, don't reintroduce scrolling.
+- [ ] **Check the tight spots specifically:** card name and text in `CardView`, the duel screen title and round/energy row, the reveal panel, and the game-over modal. Long card names in a wide font are the most likely thing to break.
+- [ ] **Both themes**, and check contrast still reads — pixel fonts have thin stems at small sizes.
+- [ ] **Verify at 1280×800 too**, so desktop doesn't regress.
+- [ ] **Out of scope:** no engine, data, or balance changes. No layout redesign, no font-size rescaling beyond what's needed to stop overflow. Don't touch the sprites themselves.

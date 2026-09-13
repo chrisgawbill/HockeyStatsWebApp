@@ -24,12 +24,47 @@ export const COST = {
   check: 1,
 };
 
-/** LW/RW bonus damage on `shot`-tagged cards. */
-export const PERK_WING_SHOT_BONUS = 2;
+/**
+ * LW/RW shot accuracy bonus (BG-A14a/b), on the same 0-100 scale as card
+ * accuracy. Replaces the old damage-scale wing bonus now that shots resolve
+ * through the ante/band model instead of card damage - see
+ * `shotAccuracyBonus` in `engine/shotModel.ts`. Chris-tunable placeholder:
+ * ~15 widens the yellow band by ~0.023 of the track, noticeable without
+ * eclipsing the card choice.
+ */
+export const PERK_WING_SHOT_ACCURACY = 15;
 /** LD/RD bonus amount on `check`/`block`-tagged card effects (damage or block). */
 export const PERK_DEFENSE_BONUS = 2;
 /** Extra cards the C draws when it is the faceoff duelist. */
 export const PERK_CENTER_FACEOFF_DRAW = 1;
+
+/**
+ * Shot minigame model (BG-A14a, additive - not yet called by the running
+ * game; see `engine/shotModel.ts`). Chris tunes these; placeholders anchored
+ * on the ruling that a perfect shot is still saved ~20% of the time.
+ */
+export const BASE_SAVE_BY_BAND: Record<
+  'perfect' | 'good' | 'weak' | 'miss',
+  number
+> = {
+  perfect: 20,
+  good: 45,
+  weak: 70,
+  miss: 96,
+};
+/** Save chance is clamped to this range (percent) after all modifiers. */
+export const MIN_SAVE_CHANCE = 5;
+export const MAX_SAVE_CHANCE = 97;
+/** Save-chance points lost when the goalie's poise is fully drained; 0 at full poise, scales linearly in between. */
+export const POISE_SAVE_PENALTY_MAX = 15;
+/** Perfect (yellow) band width at 0 accuracy, as a fraction of the `[0,1]` track. */
+export const SHOT_YELLOW_BASE_WIDTH = 0.05;
+/** Extra yellow-band width per accuracy point (accuracy is 0-100); keep this the only accuracy-driven geometry knob. */
+export const SHOT_YELLOW_WIDTH_PER_ACCURACY = 0.0015;
+/** Good (light blue) band's full width; stays roughly constant across accuracy so a shot is never a write-off. */
+export const SHOT_BLUE_BAND_WIDTH = 0.32;
+/** CPU shot "aim" difficulty (0-100, higher is more accurate) for its seeded band roll. */
+export const CPU_SHOT_ACCURACY = 55;
 
 export const CPU_TURN_ACTION_CAP = 20;
 

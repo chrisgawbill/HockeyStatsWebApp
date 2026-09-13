@@ -1,4 +1,8 @@
 .nav-bar {
+  /* App chrome declares its own font rather than inheriting the page's: the
+     board game sets a pixel font on its page root (BG-B23), and these nav
+     labels must not widen or the fixed mobile bar breaks (see BG-B20). */
+  font-family: 'Roboto', sans-serif;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
@@ -151,7 +155,7 @@
   }
 
   body {
-    padding-bottom: 60px;
+    padding-bottom: var(--mobile-nav-height);
   }
 
   .nav-back-col {
@@ -216,9 +220,12 @@
     justify-content: center;
     position: fixed;
     right: var(--space-md);
-    /* Clears the 60px bottom nav (see `body { padding-bottom: 60px }` above)
-       plus the home-indicator safe area, with a little breathing room on top. */
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px) + var(--space-md));
+    /* Clears the bottom nav (see `body { padding-bottom: var(--mobile-nav-height) }`
+       above) plus the home-indicator safe area, with a little breathing room on top. */
+    bottom: calc(
+      var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px) +
+        var(--space-md)
+    );
     width: 54px;
     height: 54px;
     border-radius: 50%;

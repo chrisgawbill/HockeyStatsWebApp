@@ -9,7 +9,10 @@
 }
 
 .boardNarrow {
-  width: min(100%, calc((100dvh - 150px) * 7 / 15));
+  flex: 1;
+  min-height: 0;
+  width: auto;
+  max-width: 100%;
   aspect-ratio: 7 / 15;
 }
 

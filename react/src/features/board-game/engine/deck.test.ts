@@ -3,6 +3,7 @@ import {
   createDeck,
   discardHand,
   drawCards,
+  drawFilteredCards,
   removeFromHand,
 } from '@/features/board-game/engine/deck';
 import type { Deck } from '@/features/board-game/types/game';
@@ -50,6 +51,66 @@ describe('drawCards', () => {
     };
     const [next] = drawCards(empty, 5, 1);
     expect(next.hand).toEqual([]);
+  });
+});
+
+describe('drawFilteredCards', () => {
+  const isVowel = (id: string) => ['a', 'e'].includes(id);
+
+  it('draws only eligible cards, leaving ineligible ones in the draw pile', () => {
+    const deck: Deck = {
+      drawPile: ['b', 'a', 'c', 'e', 'd'],
+      hand: [],
+      discardPile: [],
+      exhaustPile: [],
+    };
+    const [next] = drawFilteredCards(deck, 2, 1, isVowel);
+    expect(next.hand).toEqual(['a', 'e']);
+    expect([...next.drawPile].sort()).toEqual(['b', 'c', 'd']);
+    expect(deck.drawPile).toEqual(['b', 'a', 'c', 'e', 'd']);
+  });
+
+  it('reshuffles the discard pile in, without dropping ineligible cards from the deck', () => {
+    const deck: Deck = {
+      drawPile: ['b'],
+      hand: [],
+      discardPile: ['a', 'c'],
+      exhaustPile: [],
+    };
+    const [next] = drawFilteredCards(deck, 1, 1, isVowel);
+    expect(next.hand).toEqual(['a']);
+    // 'b' and 'c' are never eligible and are never removed from the deck.
+    expect([...next.drawPile, ...next.discardPile].sort()).toEqual(['b', 'c']);
+  });
+
+  it('deals a short hand and stops when the eligible pool cannot fill n (no throw, no infinite loop)', () => {
+    const deck: Deck = {
+      drawPile: ['b', 'c', 'd'],
+      hand: [],
+      discardPile: ['f'],
+      exhaustPile: [],
+    };
+    const [next] = drawFilteredCards(deck, 5, 1, isVowel);
+    expect(next.hand).toEqual([]);
+    // every original card is still present somewhere in the deck
+    expect([...next.drawPile, ...next.discardPile].sort()).toEqual([
+      'b',
+      'c',
+      'd',
+      'f',
+    ]);
+  });
+
+  it('is deterministic for a fixed seed', () => {
+    const deck: Deck = {
+      drawPile: ['b'],
+      hand: [],
+      discardPile: ['a', 'c', 'e'],
+      exhaustPile: [],
+    };
+    const [next1] = drawFilteredCards(deck, 2, 42, isVowel);
+    const [next2] = drawFilteredCards(deck, 2, 42, isVowel);
+    expect(next1).toEqual(next2);
   });
 });
 

@@ -1,4 +1,4 @@
-import type { GameState } from '@/features/board-game/types/game';
+import type { GameState, Role } from '@/features/board-game/types/game';
 import { CARDS } from '@/features/board-game/data/cards';
 import { TEAM_NAME } from '@/features/board-game/data/teams';
 import CardView from '@/features/board-game/components/CardView';
@@ -9,10 +9,17 @@ export type Reveal = NonNullable<GameState['lastReveal']>;
 
 export interface RevealPanelProps {
   reveal: Reveal;
+  /** Acting roles for each side's cards, so the reveal shows perk-adjusted numbers. Omit to show plain `card.text`. */
+  userRole?: Role;
+  cpuRole?: Role;
 }
 
 /** Simultaneous-reveal result for one duel round: both hands face-up plus damage/block. Dumb, read-only. */
-export default function RevealPanel({ reveal }: RevealPanelProps) {
+export default function RevealPanel({
+  reveal,
+  userRole,
+  cpuRole,
+}: RevealPanelProps) {
   return (
     <div className={styles.panel} role="status">
       <p className={styles.title}>Round {reveal.round} reveal</p>
@@ -21,7 +28,12 @@ export default function RevealPanel({ reveal }: RevealPanelProps) {
           <span className={styles.sideLabel}>{TEAM_NAME.user}</span>
           <div className={styles.cards}>
             {reveal.userCards.map((id, i) => (
-              <CardView key={`${id}-${i}`} card={CARDS[id]} compact />
+              <CardView
+                key={`${id}-${i}`}
+                card={CARDS[id]}
+                compact
+                role={userRole}
+              />
             ))}
           </div>
         </div>
@@ -29,7 +41,12 @@ export default function RevealPanel({ reveal }: RevealPanelProps) {
           <span className={styles.sideLabel}>{TEAM_NAME.cpu}</span>
           <div className={styles.cards}>
             {reveal.cpuCards.map((id, i) => (
-              <CardView key={`${id}-${i}`} card={CARDS[id]} compact />
+              <CardView
+                key={`${id}-${i}`}
+                card={CARDS[id]}
+                compact
+                role={cpuRole}
+              />
             ))}
           </div>
         </div>

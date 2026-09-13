@@ -30,6 +30,15 @@
   --color-overlay: rgba(0, 0, 0, 0.5);
   --color-puck: #1a1a1a;
   --color-puck-ring: #00bcd4;
+  --color-skater-movable: #fb8c00;
+  --color-card-block: #4fc3f7;
+  --color-card-check: #e57373;
+  --color-card-shot: #ffb74d;
+  --color-card-skill: #ba68c8;
+  --color-energy: #fbc02d;
+  --color-energy-text: #1a1a1a;
+  /** Shot minigame timing bar's "good" band (BG-B22): distinct from the puck ring's cyan and the card-block blue. */
+  --color-shot-band-good: #a5d8ff;
   /* Must stay above PageHeader's highest z-index (300, PageHeader.module.css). */
   --z-modal: 400;
 
@@ -39,12 +48,18 @@
   --space-lg: 1.5rem;
   --space-xl: 2rem;
 
+  /** Height of the fixed bottom nav on mobile (PageHeader.module.css). */
+  --mobile-nav-height: 60px;
+
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
+
+  /** Arcade pixel font for the Rink Quest board game only; falls back to monospace. */
+  --font-pixel: 'Press Start 2P', 'Courier New', monospace;
 }
 
 [data-theme='dark'] {
@@ -76,6 +91,14 @@
   --color-overlay: rgba(0, 0, 0, 0.65);
   --color-puck: #050505;
   --color-puck-ring: #00e5ff;
+  --color-skater-movable: #ffa726;
+  --color-card-block: #81d4fa;
+  --color-card-check: #ef9a9a;
+  --color-card-shot: #ffcc80;
+  --color-card-skill: #ce93d8;
+  --color-energy: #ffd54f;
+  --color-energy-text: #1a1a1a;
+  --color-shot-band-good: #74a8d0;
 }
 
 html {

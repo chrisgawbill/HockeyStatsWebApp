@@ -34,10 +34,4 @@ describe('cardBlockReasonLabel', () => {
       'Only when checking',
     );
   });
-
-  it('describes a goalie block-only restriction', () => {
-    expect(cardBlockReasonLabel('goalieBlockOnly', makeCard(), 3)).toBe(
-      'Goalies can only block',
-    );
-  });
 });

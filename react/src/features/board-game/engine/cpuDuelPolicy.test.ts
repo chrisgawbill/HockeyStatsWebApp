@@ -30,7 +30,9 @@ function makeDuel(overrides: Partial<DuelState> = {}): DuelState {
     energy: 3,
     cpuPlan: [],
     userQueue: [],
+    queueDraws: [],
     receiverId: null,
+    shotPickedCardId: null,
     ...overrides,
   };
 }
@@ -59,10 +61,12 @@ function makeState(
     duel,
     lastOutcome: null,
     lastReveal,
+    lastShotSaveResult: null,
     winner: null,
     rngSeed: 1,
     actionsThisTurn: 0,
     whistle: false,
+    goaliePoise: { user: 43, cpu: 43 },
   };
 }
 

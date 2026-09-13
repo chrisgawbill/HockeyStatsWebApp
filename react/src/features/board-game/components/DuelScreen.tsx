@@ -22,14 +22,18 @@ import styles from '@/features/board-game/components/DuelScreen.module.css';
 export interface DuelScreenProps {
   duel: DuelState;
   deck: Deck;
-  cpuDeck: Deck;
   skaters: Skater[];
   lastReveal: Reveal | null;
   onPlayCard: (handIndex: number) => void;
   onUnqueue: (queueIndex: number) => void;
   onEndRound: () => void;
   blockReason: (handIndex: number) => CardBlockReason | null;
+  /** Whether the queued card at this index can still be pulled back to hand (false once a card it drew has itself been queued). */
+  canUnqueue: (queueIndex: number) => boolean;
 }
+
+const UNQUEUE_BLOCKED_TITLE =
+  "Can't take this back - you've queued the card it drew";
 
 function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -104,13 +108,13 @@ function DuelistPanel({
 export default function DuelScreen({
   duel,
   deck,
-  cpuDeck,
   skaters,
   lastReveal,
   onPlayCard,
   onUnqueue,
   onEndRound,
   blockReason,
+  canUnqueue,
 }: DuelScreenProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const revealButtonRef = useRef<HTMLButtonElement>(null);
@@ -119,6 +123,11 @@ export default function DuelScreen({
   const attackerSkater = skaters.find((s) => s.id === duel.attacker.skaterId);
   const defenderSkater = skaters.find((s) => s.id === duel.defender.skaterId);
   const cpuSide = duel.userSide === 'attacker' ? 'defender' : 'attacker';
+  const userRole = (
+    duel.userSide === 'attacker' ? attackerSkater : defenderSkater
+  )?.role;
+  const cpuRole = (cpuSide === 'attacker' ? attackerSkater : defenderSkater)
+    ?.role;
 
   const title = `${capitalize(duel.kind)} — ${skaterLabel(attackerSkater)} vs ${skaterLabel(defenderSkater)}`;
 
@@ -176,7 +185,7 @@ export default function DuelScreen({
     if (digitMatch) {
       const index = Number(digitMatch[1]) - 1;
       if (e.shiftKey) {
-        if (index < duel.userQueue.length) {
+        if (index < duel.userQueue.length && canUnqueue(index)) {
           onUnqueue(index);
         }
       } else if (index < deck.hand.length && blockReason(index) === null) {
@@ -214,7 +223,13 @@ export default function DuelScreen({
             />
           </div>
 
-          {showReveal && lastReveal && <RevealPanel reveal={lastReveal} />}
+          {showReveal && lastReveal && (
+            <RevealPanel
+              reveal={lastReveal}
+              userRole={userRole}
+              cpuRole={cpuRole}
+            />
+          )}
 
           <div className={styles.meta}>
             <div className={styles.metaTop}>
@@ -234,16 +249,6 @@ export default function DuelScreen({
                 ))}
               </span>
             </div>
-            <div className={styles.metaPiles}>
-              <span>
-                {TEAM_NAME.user} draw {deck.drawPile.length} / discard{' '}
-                {deck.discardPile.length}
-              </span>
-              <span>
-                {TEAM_NAME.cpu} draw {cpuDeck.drawPile.length} / discard{' '}
-                {cpuDeck.discardPile.length}
-              </span>
-            </div>
           </div>
 
           <div className={styles.queue}>
@@ -254,14 +259,19 @@ export default function DuelScreen({
               </span>
             ) : (
               <div className={styles.queueCards}>
-                {duel.userQueue.map((id, i) => (
-                  <CardView
-                    key={`${id}-${i}`}
-                    card={CARDS[id]}
-                    disabled={false}
-                    onClick={() => onUnqueue(i)}
-                  />
-                ))}
+                {duel.userQueue.map((id, i) => {
+                  const unqueueable = canUnqueue(i);
+                  return (
+                    <CardView
+                      key={`${id}-${i}`}
+                      card={CARDS[id]}
+                      disabled={!unqueueable}
+                      role={userRole}
+                      title={unqueueable ? undefined : UNQUEUE_BLOCKED_TITLE}
+                      onClick={() => onUnqueue(i)}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -276,6 +286,7 @@ export default function DuelScreen({
                   disabled={reason !== null}
                   blockReason={reason}
                   energy={duel.energy}
+                  role={userRole}
                   onClick={() => onPlayCard(i)}
                 />
               );

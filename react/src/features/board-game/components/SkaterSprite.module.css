@@ -25,6 +25,32 @@
   border-radius: 2px;
 }
 
+.movable::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 2px;
+  border: 2px solid var(--color-skater-movable);
+  pointer-events: none;
+  animation: skater-movable-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skater-movable-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .movable::after {
+    animation: none;
+  }
+}
+
 .stunned {
   opacity: 0.5;
 }
@@ -38,13 +64,15 @@
   background-color: var(--color-surface);
   padding: 0 1px;
   border-radius: 2px;
+  /* Carve-out (BG-B23): Press Start 2P is illegible this small and would overflow the tile. */
+  font-family: 'Roboto', sans-serif;
 }
 
 .puckBadge {
   position: absolute;
   top: -2px;
   right: -2px;
-  width: 40%;
+  width: 34%;
   z-index: 1;
 }
 
@@ -66,4 +94,6 @@
   top: -6px;
   left: -4px;
   font-size: 0.6rem;
+  /* Carve-out (BG-B23): Press Start 2P is illegible this small. */
+  font-family: 'Roboto', sans-serif;
 }

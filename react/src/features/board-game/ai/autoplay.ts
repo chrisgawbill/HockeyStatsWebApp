@@ -5,6 +5,7 @@ import {
   createInitialState,
   gameReducer,
 } from '@/features/board-game/engine/gameReducer';
+import { pickBestShotCard } from '@/features/board-game/engine/shotDuel';
 import type {
   DuelOutcome,
   GameLength,
@@ -35,13 +36,31 @@ function stepDuel(state: GameState): GameState {
   return gameReducer(next, { type: 'END_DUEL_ROUND' });
 }
 
+/**
+ * One step of a user shot: pick the highest-power ante card (mirroring the
+ * CPU's own ante policy), then auto-resolve the band from that card's
+ * accuracy - the same path BG-B22's `prefers-reduced-motion` fallback uses,
+ * so the sim measures the user shooter the same way as the CPU shooter.
+ */
+function stepShotDuel(state: GameState): GameState {
+  const duel = state.duel!;
+  if (duel.shotPickedCardId === null) {
+    const cardId = pickBestShotCard(state.deck.hand);
+    const handIndex = state.deck.hand.indexOf(cardId);
+    return gameReducer(state, { type: 'PICK_SHOT_CARD', handIndex });
+  }
+  return gameReducer(state, { type: 'AUTO_RESOLVE_SHOT' });
+}
+
 /** One step of a headless game: both sides driven by the same board-AI policy, mirrored by team. */
 function step(state: GameState): GameState {
   switch (state.phase) {
     case 'faceoff':
       return gameReducer(state, { type: 'START_FACEOFF' });
     case 'duel':
-      return stepDuel(state);
+      return state.duel?.kind === 'shot'
+        ? stepShotDuel(state)
+        : stepDuel(state);
     case 'duelResult':
       return gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
     case 'roll':
