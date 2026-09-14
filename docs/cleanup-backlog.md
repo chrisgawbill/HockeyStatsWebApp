@@ -391,3 +391,4 @@ DONE WHEN:
 - [ ] **If you are unsure whether a comment carries real information, ASK THE PM. Do not guess, and do not delete-and-mention-it-later.** Message the orchestrator with the file, the comment verbatim, and which bucket you think it falls in, then wait for a ruling before touching it.
 - [ ] Batch your questions — collect the uncertain cases for an area and ask once, rather than a message per line.
 - [ ] "I wasn't sure so I kept it" is always an acceptable outcome and needs no permission. Only deletion needs certainty.
+- [ ] **And the PM escalates to Chris.** If a ruling isn't the PM's to make — anything touching a measured balance figure, a design ruling, or a fact that would be unrecoverable if wrong — it goes to Chris rather than being decided by the PM. The chain is: agent unsure → PM; PM unsure → Chris. Nobody guesses at a deletion.
