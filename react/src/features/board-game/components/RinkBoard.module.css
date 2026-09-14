@@ -1,11 +1,23 @@
+/* ── Board container ───────────────────────────────────────────────────── */
 .board {
   display: grid;
+  position: relative;
   width: min(100%, 960px);
   aspect-ratio: 15 / 7;
   margin: 0 auto;
   background-color: var(--color-ice);
-  border: 2px solid var(--color-text);
+  /* pixel-art rink boards: thick blue dasher border */
+  border: 6px solid var(--color-rink-boards);
+  /* rounded ends: border-radius is set inline from RINK_CORNER_RADIUS */
+  /* inner rail */
+  outline: 3px solid var(--color-rink-boards-inner);
+  outline-offset: -6px;
+  /* hard shadow for the blocky pixel-art feel */
+  box-shadow:
+    0 0 0 2px var(--color-rink-boards-shadow),
+    0 4px 16px rgba(0, 0, 0, 0.28);
   gap: 1px;
+  overflow: hidden;
 }
 
 .boardNarrow {
@@ -16,6 +28,20 @@
   aspect-ratio: 7 / 15;
 }
 
+/* ── SVG overlay ───────────────────────────────────────────────────────── */
+.rinkOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  /* Span the whole grid so it sits in-flow without shifting tile cells */
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+}
+
+/* ── Tiles ─────────────────────────────────────────────────────────────── */
 .tile {
   background-color: transparent;
   border: none;
@@ -33,27 +59,51 @@
   background-color: var(--color-tile-highlight);
 }
 
+/* Blue line: left-edge inset on wide layout */
 .tileBlueLine {
-  box-shadow: inset 2px 0 0 var(--color-rink-line-blue);
+  box-shadow: inset 3px 0 0 var(--color-rink-line-blue);
 }
 
+/* Red center line: a 3px bar centered horizontally in the tile */
 .tileRedLine {
-  box-shadow: inset 2px 0 0 var(--color-rink-line-red);
+  overflow: visible;
+}
+.tileRedLine::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  left: calc(50% - 1.5px);
+  width: 3px;
+  background: var(--color-rink-line-red);
+  pointer-events: none;
 }
 
+/* Blue line: top-edge inset on narrow (rotated) layout */
 .tileBlueLineH {
-  box-shadow: inset 0 2px 0 var(--color-rink-line-blue);
+  box-shadow: inset 0 3px 0 var(--color-rink-line-blue);
 }
 
+/* Red line: a 3px bar centered vertically in the tile (narrow/rotated layout) */
 .tileRedLineH {
-  box-shadow: inset 0 2px 0 var(--color-rink-line-red);
+  overflow: visible;
+}
+.tileRedLineH::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  top: calc(50% - 1.5px);
+  height: 3px;
+  background: var(--color-rink-line-red);
+  pointer-events: none;
 }
 
+/* Goalie tile: distinct crease-like coloring behind the net */
 .tileGoal {
-  background-color: var(--color-surface);
-  box-shadow: inset 0 0 0 2px var(--color-text);
+  background-color: var(--color-rink-net);
+  box-shadow: inset 0 0 0 2px var(--color-rink-net-border);
 }
 
+/* ── Skater / puck slots ───────────────────────────────────────────────── */
 .skaterSlot {
   background: none;
   border: none;
@@ -63,7 +113,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  z-index: 3;
 }
 
 .puckSlot {
@@ -71,5 +121,5 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }

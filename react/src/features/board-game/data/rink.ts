@@ -1,10 +1,38 @@
 import type { Coord, TeamId } from '@/features/board-game/types/game';
 
-/** Corner tiles no skater may ever occupy. */
+/**
+ * Radius of the rink's rounded ends, in tile units (horizontal along the
+ * 15-col length, vertical across the 7-row width). The board's CSS
+ * border-radius is derived from this, so the drawn boards and the playable
+ * tiles can't drift apart.
+ */
+export const RINK_CORNER_RADIUS = { x: 2.7, y: 3.5 };
+
+/**
+ * Share of a tile's area that must sit inside the rounded boards for it to be
+ * playable. Stricter than half: once the dasher border and inner rail are
+ * drawn, a ~60% tile still reads as cut off and clips the sprite on it.
+ */
+export const MIN_PLAYABLE_TILE_COVERAGE = 0.75;
+
+/**
+ * Corner tiles no skater may ever occupy: every tile with less than
+ * `MIN_PLAYABLE_TILE_COVERAGE` of its area inside the rounded boards drawn
+ * from `RINK_CORNER_RADIUS` (rink.test.ts checks this list against that
+ * geometry).
+ */
 export const UNPLAYABLE_CORNERS: Coord[] = [
   { col: 0, row: 0 },
+  { col: 1, row: 0 },
+  { col: 0, row: 1 },
+  { col: 0, row: 5 },
   { col: 0, row: 6 },
+  { col: 1, row: 6 },
+  { col: 13, row: 0 },
   { col: 14, row: 0 },
+  { col: 14, row: 1 },
+  { col: 14, row: 5 },
+  { col: 13, row: 6 },
   { col: 14, row: 6 },
 ];
 
