@@ -392,3 +392,23 @@ DONE WHEN:
 - [ ] Batch your questions — collect the uncertain cases for an area and ask once, rather than a message per line.
 - [ ] "I wasn't sure so I kept it" is always an acceptable outcome and needs no permission. Only deletion needs certainty.
 - [ ] **And the PM escalates to Chris.** If a ruling isn't the PM's to make — anything touching a measured balance figure, a design ruling, or a fact that would be unrecoverable if wrong — it goes to Chris rather than being decided by the PM. The chain is: agent unsure → PM; PM unsure → Chris. Nobody guesses at a deletion.
+
+### C-DOC1 retarget (Chris, 2026-09-14) — JSDoc is the tooltip, so keep it and tighten it
+
+TypeScript's language server already does what an internal doc tool would: a `/** */` block attached to a declaration is the hover tooltip at every call site. There is nowhere else to "move" a definition to — strip the JSDoc and you delete the mechanism. This supersedes the blanket-strip framing above.
+
+Two populations, opposite treatment:
+
+- **`/** */` JSDoc on a declaration (~292 in the board-game feature) — KEEP, but TIGHTEN.** This is the asset. Trim it; don't remove it.
+- **`//` line comments inside function bodies (~158) — the real strip target.** Invisible to hover, and mostly restate the line below. These are what "rip out the comments" should mean.
+
+**Concision standard — the point is a tooltip you can read at a glance, not an essay:**
+- [ ] One line if it fits on one line. That is most of them.
+- [ ] Multi-line only where a caller can actually get it wrong: units, ranges, invariants, ordering, a non-obvious failure mode.
+- [ ] Lead with what it *is*. No "This function...", no "Helper that...", no restating the name or the type signature in prose.
+- [ ] Never explain the obvious. `/** The board's column count. */` on `BOARD_COLS` is noise; `/** Board width in columns (col 0-14). */` earns its place by adding the range.
+- [ ] Hard cap of ~3 lines outside genuine multi-part contracts. If it needs more, the reasoning belongs in `docs/` with a one-line pointer.
+- [ ] **Readable still beats short.** Cutting a unit, a range, or a direction to save a word is a bad trade — those are the whole reason the tooltip exists.
+
+**Tooltip correctness — a new check:**
+- [ ] JSDoc only attaches to the declaration *immediately* below it. A block above a group documents only the first member. `MIN_SAVE_CHANCE` / `MAX_SAVE_CHANCE` is the live example: one comment covers "this range", so `MIN_` has a tooltip and `MAX_` has none. Give each exported declaration its own, however short.
