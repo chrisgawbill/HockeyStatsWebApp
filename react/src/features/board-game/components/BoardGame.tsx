@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type {
   Coord,
   DuelOutcome,
+  FaceoffBand,
   GameLength,
   Role,
   ShotBand,
@@ -20,6 +21,7 @@ import {
   canUnqueueCard,
   cardBlockReason,
 } from '@/features/board-game/engine/duel';
+import { faceoffBandWindowsFor } from '@/features/board-game/engine/faceoffDuel';
 import { describeOutcome } from '@/features/board-game/utils/describeOutcome';
 import { isStunned, sameCoord } from '@/features/board-game/engine/rink';
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
@@ -32,6 +34,9 @@ import TurnHud from '@/features/board-game/components/TurnHud';
 import GameButton from '@/features/board-game/components/GameButton';
 import DuelScreen from '@/features/board-game/components/DuelScreen';
 import ShotMinigame from '@/features/board-game/components/ShotMinigame';
+import FaceoffMinigame, {
+  FaceoffResultSummary,
+} from '@/features/board-game/components/FaceoffMinigame';
 import RevealPanel from '@/features/board-game/components/RevealPanel';
 import DuelResultBanner from '@/features/board-game/components/DuelResultBanner';
 import GameOverModal from '@/features/board-game/components/GameOverModal';
@@ -67,6 +72,19 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>('move');
+  /**
+   * The two anted card ids for the faceoff `lastFaceoffResult` most recently
+   * resolved: `DuelState` (which is where they otherwise live) is already
+   * cleared by `resolveDuel` in the same dispatch that produces the result,
+   * so `FaceoffResultSummary` needs its own memory of them to narrate which
+   * card's effect fired. Captured once, at the ante pick (see
+   * `handlePickFaceoffCard`), and only ever read while
+   * `state.lastOutcome?.kind === 'faceoff'` is true.
+   */
+  const [faceoffCardIds, setFaceoffCardIds] = useState<{
+    user: string;
+    cpu: string | null;
+  } | null>(null);
 
   const isUserTurn = state.activeTeam === 'user';
   const highlighted: Coord[] = selectedId ? legalSteps(selectedId) : [];
@@ -169,6 +187,34 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
     if (handIndex === -1) return;
     dispatch({ type: 'PICK_SHOT_CARD', handIndex });
     dispatch({ type: 'RESOLVE_SHOT_BAND', band });
+  }
+
+  /**
+   * `FaceoffMinigame` reports the ante pick and the drop's reaction as two
+   * separate calls (unlike `ShotMinigame`'s single `onResolve`), because the
+   * engine's `faceoffBandWindowsFor(state)` needs `duel.faceoffPickedCardId`
+   * set before it can return real window geometry for the drop step to
+   * render - see the BG-B25 contract in docs/board-game-backlog.md.
+   */
+  function handlePickFaceoffCard(cardId: string) {
+    const handIndex = state.deck.hand.indexOf(cardId);
+    if (handIndex === -1) return;
+    setFaceoffCardIds({
+      user: cardId,
+      cpu:
+        state.duel && state.duel.kind === 'faceoff'
+          ? state.duel.faceoffCpuCardId
+          : null,
+    });
+    dispatch({ type: 'PICK_FACEOFF_CARD', handIndex });
+  }
+
+  function handleResolveFaceoffBand(band: FaceoffBand) {
+    dispatch({ type: 'RESOLVE_FACEOFF_BAND', band });
+  }
+
+  function handleAutoResolveFaceoff() {
+    dispatch({ type: 'AUTO_RESOLVE_FACEOFF' });
   }
 
   function renderSkater(skater: Skater) {
@@ -276,25 +322,54 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
         />
       )}
 
-      {state.phase === 'duel' && state.duel && state.duel.kind !== 'shot' && (
-        <DuelScreen
-          duel={state.duel}
-          deck={state.deck}
-          skaters={state.skaters}
-          lastReveal={state.lastReveal}
-          onPlayCard={(i) => dispatch({ type: 'PLAY_CARD', handIndex: i })}
-          onUnqueue={(i) => dispatch({ type: 'UNQUEUE_CARD', queueIndex: i })}
-          onEndRound={() => dispatch({ type: 'END_DUEL_ROUND' })}
-          blockReason={(i) => cardBlockReason(state, i)}
-          canUnqueue={(i) => canUnqueueCard(state, i)}
-        />
-      )}
+      {state.phase === 'duel' &&
+        state.duel &&
+        state.duel.kind === 'faceoff' && (
+          <FaceoffMinigame
+            cards={state.deck.hand.map((id) => CARDS[id])}
+            cpuCard={
+              state.duel.faceoffCpuCardId
+                ? CARDS[state.duel.faceoffCpuCardId]
+                : null
+            }
+            jumped={state.duel.faceoffJumped}
+            windows={faceoffBandWindowsFor(state)}
+            seed={state.rngSeed}
+            onPickCard={handlePickFaceoffCard}
+            onResolve={handleResolveFaceoffBand}
+            onAutoResolve={handleAutoResolveFaceoff}
+          />
+        )}
+
+      {state.phase === 'duel' &&
+        state.duel &&
+        state.duel.kind !== 'shot' &&
+        state.duel.kind !== 'faceoff' && (
+          <DuelScreen
+            duel={state.duel}
+            deck={state.deck}
+            skaters={state.skaters}
+            lastReveal={state.lastReveal}
+            onPlayCard={(i) => dispatch({ type: 'PLAY_CARD', handIndex: i })}
+            onUnqueue={(i) => dispatch({ type: 'UNQUEUE_CARD', queueIndex: i })}
+            onEndRound={() => dispatch({ type: 'END_DUEL_ROUND' })}
+            blockReason={(i) => cardBlockReason(state, i)}
+            canUnqueue={(i) => canUnqueueCard(state, i)}
+          />
+        )}
 
       {state.phase === 'duelResult' && state.lastOutcome && (
         <DuelResultBanner
           summary={describeOutcome(state.lastOutcome, state.skaters)}
           onContinue={() => dispatch({ type: 'DISMISS_DUEL_RESULT' })}
         >
+          {state.lastOutcome.kind === 'faceoff' && state.lastFaceoffResult && (
+            <FaceoffResultSummary
+              result={state.lastFaceoffResult}
+              userCard={faceoffCardIds ? CARDS[faceoffCardIds.user] : null}
+              cpuCard={faceoffCardIds?.cpu ? CARDS[faceoffCardIds.cpu] : null}
+            />
+          )}
           {state.lastReveal && (
             <RevealPanel
               reveal={state.lastReveal}

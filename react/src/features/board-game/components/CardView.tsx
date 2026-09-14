@@ -30,6 +30,7 @@ const TAG_CLASS: Record<string, string> = {
   check: styles.tagCheck,
   shot: styles.tagShot,
   skill: styles.tagSkill,
+  faceoff: styles.tagFaceoff,
 };
 
 /** One card: a cost+name header row, then text and tags. Dims and disables when unplayable. */

@@ -40,6 +40,10 @@
   border-color: var(--color-card-skill);
 }
 
+.tagFaceoff {
+  border-color: var(--color-card-faceoff);
+}
+
 .compact {
   /* Wider than it looks like it needs: the feature's pixel font is ~1em per
      glyph, so 4rem left room for under 5 characters a line and shattered

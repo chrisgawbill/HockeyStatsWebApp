@@ -35,6 +35,8 @@
   --color-card-check: #e57373;
   --color-card-shot: #ffb74d;
   --color-card-skill: #ba68c8;
+  /** Faceoff card tag (BG-B25): its own token per BG-B19/B21, not borrowed from shot/block - kept clear of the puck ring's cyan and the shot bar's yellow target band. */
+  --color-card-faceoff: #ec407a;
   --color-energy: #fbc02d;
   --color-energy-text: #1a1a1a;
   /** Shot minigame timing bar's "good" band (BG-B22): distinct from the puck ring's cyan and the card-block blue. */
@@ -96,6 +98,7 @@
   --color-card-check: #ef9a9a;
   --color-card-shot: #ffcc80;
   --color-card-skill: #ce93d8;
+  --color-card-faceoff: #f48fb1;
   --color-energy: #ffd54f;
   --color-energy-text: #1a1a1a;
   --color-shot-band-good: #74a8d0;

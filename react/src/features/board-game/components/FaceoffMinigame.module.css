@@ -1,0 +1,179 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: min(100%, 32rem);
+  max-height: calc(100dvh - 2 * var(--space-md));
+  overflow-y: auto;
+  padding: var(--space-lg);
+  border-radius: var(--border-radius-card);
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  margin: 0;
+  text-align: center;
+}
+
+.cpuReady {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.instructions {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.ante {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.drop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* A false start reads in words, never colour/motion alone - this text is
+   the primary signal; .dropArea's held/open styling is secondary. */
+.jumpWarning {
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
+  color: var(--color-danger);
+}
+
+/* The whole drop zone is the press target (click, tap, or Space/Enter via
+   the native button) - needs to work by thumb at 412px, not a small button. */
+.dropArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 8rem;
+  padding: var(--space-lg);
+  border: 2px solid var(--color-divider);
+  border-radius: var(--border-radius-card);
+  background-color: var(--color-bg-subtle);
+  cursor: pointer;
+}
+
+.held {
+  border-color: var(--color-card-faceoff);
+}
+
+.open {
+  border-color: var(--color-danger);
+  background-color: var(--color-info-bg);
+}
+
+.puckIcon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--color-puck);
+  border: 2px solid var(--color-puck-ring);
+}
+
+/* Ambient tension while held - intentionally NOT tied to the real hold
+   duration (which is random and hidden), so it can't be used to time the
+   drop. Purely decorative; the word "Holding…" carries the state. */
+.held .puckIcon {
+  animation: faceoff-hold-pulse 1s ease-in-out infinite;
+}
+
+@keyframes faceoff-hold-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.8;
+  }
+}
+
+.open .puckIcon {
+  animation: faceoff-drop-flash 0.4s ease-out;
+}
+
+@keyframes faceoff-drop-flash {
+  0% {
+    transform: scale(1.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .held .puckIcon,
+  .open .puckIcon {
+    animation: none;
+  }
+}
+
+.dropLabel {
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.resultSummary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+}
+
+.headline {
+  margin: 0;
+  font-weight: bold;
+}
+
+.bandsRow {
+  display: flex;
+  gap: var(--space-md);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.resultCards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.buffLine {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-success);
+}
+
+@media (max-width: 576px) {
+  .dialog {
+    width: 100%;
+    padding: var(--space-md);
+  }
+}
