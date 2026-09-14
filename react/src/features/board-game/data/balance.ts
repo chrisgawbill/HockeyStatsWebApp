@@ -7,16 +7,21 @@ export const BOARD_COLS = 15;
 /** Board height, in rows (`row` 0-6). */
 export const BOARD_ROWS = 7;
 
-/** Starting and max poise for a non-goalie skater in a duel. */
+/** Starting/max poise for a non-goalie skater in a duel — card damage drains it (after block absorbs first); 0 poise is a KO. */
 export const SKATER_POISE = 20;
 
-/** Goalie starting/max poise by game length; kept well under 50 (past that a wall stops games ending) — see docs/board-game-design.md §3. */
+/**
+ * Goalie starting/max poise by game length — same poise concept as
+ * `SKATER_POISE`, but persists across the match and only weakens future
+ * saves (`poiseFactor`) as it drains, never KOs outright. Kept well under
+ * 50 (past that a wall stops games ending) — see docs/board-game-design.md §3.
+ */
 export const GOALIE_POISE_BY_LENGTH: Record<GameLength, number> = {
   short: 43,
   long: 44,
 };
 
-/** Energy (card-play budget) each side gets at the start of a duel round. */
+/** Energy: card-play budget per duel round, spent as `card.cost` when a card is queued/played. */
 export const ENERGY = 3;
 /** Cards dealt to hand at the start of a duel round (a centre's faceoff ante is separate - see `PERK_CENTER_FACEOFF_DRAW`). */
 export const HAND_SIZE = 5;
@@ -37,7 +42,7 @@ export const COST = {
  * See docs/board-game-design.md §8 for why 15.
  */
 export const PERK_WING_SHOT_ACCURACY = 15;
-/** LD/RD bonus amount on `check`/`block`-tagged card effects (damage or block). */
+/** LD/RD adds this to a card's damage or block points (whichever effect it has) on any `check`- or `block`-tagged card. */
 export const PERK_DEFENSE_BONUS = 2;
 /**
  * Extra card in the faceoff ante (both duelists are always C): ante size is
@@ -69,13 +74,13 @@ export const SHOT_COVER_CHANCE = 25;
 export const MIN_SAVE_CHANCE = 5;
 /** Save chance ceiling (percent) after all modifiers. */
 export const MAX_SAVE_CHANCE = 97;
-/** Save-chance points lost when the goalie's poise is fully drained; 0 at full poise, scales linearly in between. */
+/** Max save-chance penalty, in percentage points (not poise) — via `poiseFactor`, 0 at full goalie poise, scaling linearly to this full penalty at 0. */
 export const POISE_SAVE_PENALTY_MAX = 15;
 /** Perfect (yellow) band width at 0 accuracy, as a fraction of the `[0,1]` track. */
 export const SHOT_YELLOW_BASE_WIDTH = 0.03;
 /** Extra yellow-band width per accuracy point (accuracy is 0-100); keep this the only accuracy-driven geometry knob. */
 export const SHOT_YELLOW_WIDTH_PER_ACCURACY = 0.0015;
-/** Good (light blue) band's full width; stays roughly constant across accuracy so a shot is never a write-off. */
+/** Good (light blue) band's full width, as a fraction of the `[0,1]` track; constant across accuracy so a shot is never a write-off. */
 export const SHOT_BLUE_BAND_WIDTH = 0.32;
 /** CPU shot "aim" difficulty (0-100, higher is more accurate) for its seeded band roll. */
 export const CPU_SHOT_ACCURACY = 55;
