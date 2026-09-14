@@ -6,6 +6,12 @@ import {
   legalSteps,
   skaterAt,
 } from '@/features/board-game/engine/rink';
+import { BOARD_COLS, BOARD_ROWS } from '@/features/board-game/data/balance';
+import {
+  MIN_PLAYABLE_TILE_COVERAGE,
+  RINK_CORNER_RADIUS,
+  UNPLAYABLE_CORNERS,
+} from '@/features/board-game/data/rink';
 import type { GameState, Skater } from '@/features/board-game/types/game';
 
 function makeSkater(overrides: Partial<Skater> = {}): Skater {
@@ -51,6 +57,47 @@ describe('isPlayable', () => {
   it('rejects the unplayable corners', () => {
     expect(isPlayable({ col: 0, row: 0 })).toBe(false);
     expect(isPlayable({ col: 14, row: 6 })).toBe(false);
+  });
+
+  it('rejects the clipped tiles beside the corners', () => {
+    expect(isPlayable({ col: 1, row: 0 })).toBe(false);
+    expect(isPlayable({ col: 13, row: 6 })).toBe(false);
+    expect(isPlayable({ col: 0, row: 1 })).toBe(false);
+    expect(isPlayable({ col: 0, row: 5 })).toBe(false);
+    expect(isPlayable({ col: 14, row: 1 })).toBe(false);
+    expect(isPlayable({ col: 14, row: 5 })).toBe(false);
+  });
+
+  it('marks exactly the tiles too clipped by the rounded boards', () => {
+    const { x: rx, y: ry } = RINK_CORNER_RADIUS;
+    const inside = (x: number, y: number) => {
+      const cx = x < rx ? rx : x > BOARD_COLS - rx ? BOARD_COLS - rx : null;
+      const cy = y < ry ? ry : y > BOARD_ROWS - ry ? BOARD_ROWS - ry : null;
+      if (cx === null || cy === null) return true;
+      return ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+    };
+    const samples = 20;
+    const expected: string[] = [];
+    for (let row = 0; row < BOARD_ROWS; row++) {
+      for (let col = 0; col < BOARD_COLS; col++) {
+        let hits = 0;
+        for (let i = 0; i < samples; i++) {
+          for (let j = 0; j < samples; j++) {
+            if (inside(col + (i + 0.5) / samples, row + (j + 0.5) / samples))
+              hits++;
+          }
+        }
+        if (hits / samples ** 2 < MIN_PLAYABLE_TILE_COVERAGE)
+          expected.push(`${col},${row}`);
+      }
+    }
+    const actual = UNPLAYABLE_CORNERS.map((c) => `${c.col},${c.row}`);
+    expect(actual.sort()).toEqual(expected.sort());
+  });
+
+  it('keeps the tiles beside the creases playable', () => {
+    expect(isPlayable({ col: 0, row: 2 })).toBe(true);
+    expect(isPlayable({ col: 14, row: 4 })).toBe(true);
   });
 
   it('rejects goalie tiles', () => {

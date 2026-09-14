@@ -10,14 +10,16 @@ export default function BoardGamePage() {
   const [length, setLength] = useState<GameLength | null>(null);
 
   return (
-    <div className={styles.page}>
+    <>
       <PageHeader />
-      <h1 className={styles.title}>Rink Quest</h1>
-      {length === null ? (
-        <GameLengthPicker onPick={setLength} />
-      ) : (
-        <BoardGame length={length} onChangeLength={() => setLength(null)} />
-      )}
-    </div>
+      <div className={styles.page}>
+        <h1 className={styles.title}>Rink Quest</h1>
+        {length === null ? (
+          <GameLengthPicker onPick={setLength} />
+        ) : (
+          <BoardGame length={length} onChangeLength={() => setLength(null)} />
+        )}
+      </div>
+    </>
   );
 }

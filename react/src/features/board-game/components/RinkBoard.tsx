@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react';
 import type { Coord, Puck, Skater } from '@/features/board-game/types/game';
 import { BOARD_COLS, BOARD_ROWS } from '@/features/board-game/data/balance';
+import { RINK_CORNER_RADIUS } from '@/features/board-game/data/rink';
 import { TEAM_NAME } from '@/features/board-game/data/teams';
 import { useIsNarrow } from '@/features/board-game/hooks/useIsNarrow';
 import { gridPositionFor } from '@/features/board-game/utils/rinkGridPosition';
 import RinkTile from '@/features/board-game/components/RinkTile';
 import PuckToken from '@/features/board-game/components/PuckToken';
+import RinkOverlay from '@/features/board-game/components/RinkOverlay';
 import styles from '@/features/board-game/components/RinkBoard.module.css';
 
 export interface RinkBoardProps {
@@ -51,6 +53,13 @@ export default function RinkBoard({
 
   const displayCols = narrow ? BOARD_ROWS : BOARD_COLS;
   const displayRows = narrow ? BOARD_COLS : BOARD_ROWS;
+  // Rounded ends as percentages of the board box, from the same radius the
+  // engine uses to decide which corner tiles are unplayable.
+  const radiusAlongPct = (RINK_CORNER_RADIUS.x / BOARD_COLS) * 100;
+  const radiusAcrossPct = (RINK_CORNER_RADIUS.y / BOARD_ROWS) * 100;
+  const borderRadius = narrow
+    ? `${radiusAcrossPct}% / ${radiusAlongPct}%`
+    : `${radiusAlongPct}% / ${radiusAcrossPct}%`;
   const boardClassName = [styles.board, narrow ? styles.boardNarrow : '']
     .filter(Boolean)
     .join(' ');
@@ -61,8 +70,10 @@ export default function RinkBoard({
       style={{
         gridTemplateColumns: `repeat(${displayCols}, 1fr)`,
         gridTemplateRows: `repeat(${displayRows}, 1fr)`,
+        borderRadius,
       }}
     >
+      <RinkOverlay narrow={narrow} />
       {tiles.map((coord) => (
         <RinkTile
           key={coordKey(coord)}

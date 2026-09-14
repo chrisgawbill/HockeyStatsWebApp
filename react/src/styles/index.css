@@ -23,9 +23,17 @@
 
   --color-team-user: #1565c0;
   --color-team-cpu: #c62828;
-  --color-ice: #eaf6ff;
-  --color-rink-line-blue: var(--color-team-user);
-  --color-rink-line-red: var(--color-team-cpu);
+  --color-ice: #ddf0fb;
+  --color-rink-line-blue: #1565c0;
+  --color-rink-line-red: #e05c6b;
+  --color-rink-boards: #4fa8d8;
+  --color-rink-boards-inner: #a8d8f0;
+  --color-rink-boards-shadow: #2a7aaa;
+  --color-rink-corner: #4fa8d8;
+  --color-rink-circle-red: #e05c6b;
+  --color-rink-crease: rgba(224, 92, 107, 0.18);
+  --color-rink-net: rgba(200, 230, 250, 0.7);
+  --color-rink-net-border: #4fa8d8;
   --color-tile-highlight: rgba(255, 202, 40, 0.45);
   --color-overlay: rgba(0, 0, 0, 0.5);
   --color-puck: #1a1a1a;
@@ -86,9 +94,17 @@
 
   --color-team-user: #64b5f6;
   --color-team-cpu: #fc8181;
-  --color-ice: #141a24;
-  --color-rink-line-blue: var(--color-team-user);
-  --color-rink-line-red: var(--color-team-cpu);
+  --color-ice: #0d1a26;
+  --color-rink-line-blue: #64b5f6;
+  --color-rink-line-red: #ef8a97;
+  --color-rink-boards: #1a4a6e;
+  --color-rink-boards-inner: #0d2e44;
+  --color-rink-boards-shadow: #0a1e2e;
+  --color-rink-corner: #1a4a6e;
+  --color-rink-circle-red: #ef8a97;
+  --color-rink-crease: rgba(239, 138, 151, 0.18);
+  --color-rink-net: rgba(10, 25, 40, 0.7);
+  --color-rink-net-border: #1a4a6e;
   --color-tile-highlight: rgba(255, 202, 40, 0.35);
   --color-overlay: rgba(0, 0, 0, 0.65);
   --color-puck: #050505;
