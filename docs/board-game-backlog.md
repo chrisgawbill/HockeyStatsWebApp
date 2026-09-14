@@ -535,7 +535,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 **Architecture note:** this is the first feature that uses `localStorage`. Persistence lives in a dedicated module (`data/dailyStreak.ts`) outside `engine/`. Engine code reads `bonusEnergy` from `GameState` but never touches the store. The hook bridges the two: it reads the streak on mount, passes `bonusEnergy` into state at game creation, and writes a win on game over. This keeps the "no `localStorage` in engine" rule intact.
 
 ### BG-A17 Streak persistence module (Agent A)
-- [x] **Read:** design doc §9.1, §9.2. `data/balance.ts`, `types/game.ts`, `engine/duel.ts` (lines 89-95 and 305-311 — where `energy: ENERGY` is set).
+- [ ] **Read:** design doc §9.1, §9.2. `data/balance.ts`, `types/game.ts`, `engine/duel.ts` (lines 89-95 and 305-311 — where `energy: ENERGY` is set).
 - **`data/dailyStreak.ts`:** pure read/write module for the streak store. **Not in `engine/`** — this touches `localStorage`.
   - `StreakData { wins: Record<string, true>; lastWinDate: string | null }`
   - `loadStreak(): StreakData` — reads from `localStorage` key `rinkquest-streak`, returns a default if missing or malformed. Wrap every access in try/catch (private browsing, storage disabled).
@@ -548,7 +548,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no GameState changes, no reducer changes, no UI.
 
 ### BG-A18 bonusEnergy on GameState and duel energy (Agent A, after BG-A17)
-- [x] **Read:** design doc §9.2. `types/game.ts` (`GameState`), `engine/gameReducer.ts` (`createInitialState`), `engine/duel.ts` (lines 89-95 and 305-311).
+- [ ] **Read:** design doc §9.2. `types/game.ts` (`GameState`), `engine/gameReducer.ts` (`createInitialState`), `engine/duel.ts` (lines 89-95 and 305-311).
 - **Contract:**
   - `GameState` gains `bonusEnergy: number` (0 or 1).
   - `createInitialState(seed, length)` sets `bonusEnergy: 0` (the hook overrides it).
@@ -558,7 +558,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no UI, no localStorage, no streak logic. The hook (BG-B27) bridges them.
 
 ### BG-B27 Wire streak into the game hook (Agent B, after BG-A17 + BG-A18)
-- [x] **Read:** `hooks/useBoardGame.ts`, `data/dailyStreak.ts` (from BG-A17), design doc §9.2.
+- [ ] **Read:** `hooks/useBoardGame.ts`, `data/dailyStreak.ts` (from BG-A17), design doc §9.2.
 - **`hooks/useBoardGame.ts`:**
   - On mount, call `loadStreak()` and `hasStreakBonus()` to determine `bonusEnergy` (0 or 1). Store the streak data in a `useRef`.
   - Pass `bonusEnergy` into the initial `createInitialState` call and into every `NEW_GAME` dispatch.
@@ -567,7 +567,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no engine changes, no calendar UI.
 
 ### BG-B28 Streak energy badge in the duel UI (Agent B, after BG-B27)
-- [x] **Read:** `components/DuelScreen.tsx`, `components/DuelScreen.module.css` (the `.orbFull`/`.orb` energy orbs), design doc §9.2.
+- [ ] **Read:** `components/DuelScreen.tsx`, `components/DuelScreen.module.css` (the `.orbFull`/`.orb` energy orbs), design doc §9.2.
 - **When `state.bonusEnergy > 0`:**
   - The energy orb row shows 4 orbs instead of 3.
   - A small "+1⚡" badge (or a fourth orb in a distinct bonus colour) signals the bonus. Add a token `--color-energy-bonus` in both `:root` and `[data-theme='dark']` — a brighter or warmer yellow than `--color-energy`, so it reads as "extra" without being a new hue.
@@ -576,7 +576,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no engine changes, no calendar.
 
 ### BG-B29 Pixel-art streak calendar component (Agent B, after BG-B27)
-- [x] **Read:** design doc §9.3. `components/GameLengthPicker.tsx` (adjacent UI), `components/GameButton.tsx`, `data/dailyStreak.ts`.
+- [ ] **Read:** design doc §9.3. `components/GameLengthPicker.tsx` (adjacent UI), `components/GameButton.tsx`, `data/dailyStreak.ts`.
 - **`components/StreakCalendar.tsx`** + colocated `.module.css`:
   - A **monthly calendar** in a 7-column grid (Sun–Sat headers), pixel-art styled.
   - Props: `{ streakData: StreakData; streak: number; onClose: () => void }`.
@@ -595,7 +595,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no engine changes, no streak logic changes.
 
 ### BG-B30 Calendar entry point on the pre-game screen (Agent B, after BG-B29)
-- [x] **Read:** `components/BoardGamePage.tsx`, `components/GameLengthPicker.tsx`.
+- [ ] **Read:** `components/BoardGamePage.tsx`, `components/GameLengthPicker.tsx`.
 - **Pre-game screen** (before game length is picked):
   - Add a "Daily Streak" `GameButton` (variant `secondary`) below the game length picker.
   - Clicking it shows `StreakCalendar` in place of the length picker (not a modal — same page flow as the length picker itself).
