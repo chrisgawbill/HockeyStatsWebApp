@@ -509,3 +509,21 @@ All components are dumb (props in, callbacks out) until BG-B5. For fixtures, use
 - [ ] **Result:** say what happened in hockey words — the band, then won clean / tied up / lost the draw, and any buff that fired. Reuse `describeOutcome` and `RevealPanel`-style presentation where it fits.
 - [ ] **Mobile, and don't undo BG-B20:** verify at **412x915** and **1280x800** in both themes. The board page behind must still not scroll; the modal may scroll internally if tall, like the others.
 - [ ] **Out of scope:** no engine, data, or balance changes — if a number is wrong, **report it, don't edit `balance.ts`**. Don't touch the rink, the sprites, or `DuelScreen`'s own duel flow.
+
+### BG-B25 addendum — the settled contract (PM, 2026-09-14)
+
+BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris rejected ("centres should compete, shouldn't be like shot"); the second made it genuinely head-to-head. **Build against this, not against the original ticket's looser description** — an underspecified contract is what produced the rejected version.
+
+- **Both centres ante and react.** Each picks 1 card from its offer (the C draws 4, per `PERK_CENTER_FACEOFF_DRAW`) and each produces a reaction band. One function grades both sides, with no privileged path for either.
+- **The function the UI's outcome flows through** (`engine/faceoffModel.ts`):
+  ```ts
+  rollFaceoffHeadToHead(
+    userBand: 'clean'|'scrum'|'late', userGrip: number,
+    cpuBand:  'clean'|'scrum'|'late', cpuGrip: number,
+    seed: number,
+  ): [{ outcome: 'win'|'scrum'; userWins: boolean; winChance: number }, number]
+  ```
+  The UI does not call this directly — it dispatches `PICK_FACEOFF_CARD` then `RESOLVE_FACEOFF_BAND` (or `AUTO_RESOLVE_FACEOFF`), mirroring the shot's reducer actions. `engine/faceoffDuel.ts` exposes `faceoffBandWindowsFor(state)` for the window geometry, the same way `shotBandWidthsFor` serves the shot bar. **Never hardcode window or timing geometry in the component.**
+- **A scrum fires only on a genuine tie** — both sides reading the identical non-clean band. Any differing pair, `scrum` vs `late` included, goes through a real contest roll. The winner's `faceoffEffect` fires only if their band was `clean`.
+- **Reduced motion is already solved at the engine level.** `AUTO_RESOLVE_FACEOFF` samples from a human-anchored range and holds `late` at ~16% across every card. The component must use that path under `prefers-reduced-motion: reduce` and must not roll its own — one source of truth, as BG-B22 does for the shot.
+- **A jump is a false start:** one re-drop with a narrowed clean window, a second jump loses outright, and `freeJump` exempts its holder. This needs unmistakable wording in the UI ("Too early — re-drop"), never colour or motion alone.
