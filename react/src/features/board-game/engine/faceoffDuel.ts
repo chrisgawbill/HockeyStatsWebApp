@@ -1,18 +1,10 @@
 /**
  * Faceoff minigame integration: wires `faceoffModel.ts` into the real game
- * as a two-sided ante pick plus a reaction roll. Mirrors `shotDuel.ts`'s
- * shape: a centre draws a faceoff-pool ante via `drawFilteredCards` and
- * either presses the drop (`PICK_FACEOFF_CARD` then `RESOLVE_FACEOFF_BAND`)
- * or auto-resolves (`AUTO_RESOLVE_FACEOFF`).
- *
- * There is no user/CPU fork anywhere in the resolution: the CPU's band
- * comes from the exact same `rollBandFromAnticipation` a human's
- * reduced-motion/headless fallback uses, on its own anted card's
- * `anticipation`, and the exact same contest function decides the draw
- * regardless of which side is human. The CPU still resolves its own band
- * immediately (it has no UI to wait on) rather than genuinely reacting in
- * real time, but that's a timing/input detail, not a privileged resolution
- * path.
+ * as a two-sided ante pick plus a reaction roll (mirrors `shotDuel.ts`'s
+ * shape). No user/CPU fork: both sides' bands come from the same
+ * `rollBandFromAnticipation`, and the same contest function decides the
+ * draw regardless of which side is human — the CPU just resolves its band
+ * immediately since it has no UI to wait on.
  */
 import { PERK_CENTER_FACEOFF_DRAW } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
@@ -40,11 +32,7 @@ import type {
   GameState,
 } from '@/features/board-game/types/game';
 
-/**
- * Faceoff-pool ante size: 3, plus the C perk (both duelists in a faceoff
- * are always C - `PERK_CENTER_FACEOFF_DRAW` means draw 4, pick 1, not an
- * extra dealt-hand card; see the constant's own doc in `data/balance.ts`).
- */
+/** Faceoff-pool ante size: 3 plus the C perk (`PERK_CENTER_FACEOFF_DRAW`) — draw 4, pick 1, not an extra dealt-hand card. */
 export const FACEOFF_ANTE_SIZE = 3 + PERK_CENTER_FACEOFF_DRAW;
 
 function isFaceoffCard(cardId: string): boolean {
@@ -57,11 +45,9 @@ function drawFaceoffOffer(deck: Deck, seed: number): [Deck, number] {
 }
 
 /**
- * "Go for it" ante policy, mirroring `pickBestShotCard`: picks the
- * highest-`anticipation` card offered (anticipation is the stat that
- * directly drives the reaction roll, so this is the aggressive pick). Used
- * by the CPU centre here, and reused by `ai/autoplay.ts`'s headless sim to
- * drive the user centre's ante the same way.
+ * "Go for it" ante policy (mirrors `pickBestShotCard`): picks the
+ * highest-`anticipation` card offered. Used by the CPU centre, and reused
+ * by `ai/autoplay.ts`'s headless sim to drive the user centre the same way.
  */
 export function pickBestFaceoffCard(offer: string[]): string {
   return offer.reduce((best, id) =>
@@ -72,12 +58,18 @@ export function pickBestFaceoffCard(offer: string[]): string {
 }
 
 /**
- * Starts a faceoff: draws both centres' antes and has the CPU centre pick
- * and settle its card immediately (it has no UI to wait on - only its
- * *reaction*, rolled once the user's own band is known in
- * `resolveFaceoffBand`, has to wait, since it needs the user's grip too). A
- * user centre waits in phase `'duel'` for `PICK_FACEOFF_CARD` then
+ * Starts a faceoff: draws both centres' antes, and has the CPU centre pick
+ * and settle its card immediately (only its *reaction* waits, rolled in
+ * `resolveFaceoffBand` once the user's band is known). The user centre
+ * waits in phase `'duel'` for `PICK_FACEOFF_CARD` then
  * `RESOLVE_FACEOFF_BAND` (or `AUTO_RESOLVE_FACEOFF`).
+ *
+ * @example
+ * // Full user-side flow, in call order:
+ * let state = createFaceoffDuel(gameState, userCId, cpuCId);
+ * state = pickFaceoffCard(state, handIndex);   // ante the card
+ * // ...UI times the drop, measures a reaction band...
+ * state = resolveFaceoffBand(state, pickedCardId, band);
  */
 export function createFaceoffDuel(
   state: GameState,
@@ -149,12 +141,10 @@ export function pickFaceoffCard(
 }
 
 /**
- * The current faceoff's reaction windows for the user's picked card - the
- * contract the UI renders directly, never hardcoding geometry. After a
- * first jump, the clean window is narrowed (`narrowedWindowsAfterJump`)
- * unless the picked card's effect is `freeJump`, which redrops at the full,
- * unpenalized `windowsForAnticipation` instead. Null until a card is
- * picked, or outside a faceoff duel.
+ * Reaction windows for the user's picked card, for the UI to render
+ * directly (never hardcode geometry). Narrowed after a first jump
+ * (`narrowedWindowsAfterJump`) unless the card's effect is `freeJump`. Null
+ * until a card is picked, or outside a faceoff duel.
  */
 export function faceoffBandWindowsFor(
   state: GameState,
@@ -172,28 +162,15 @@ export function faceoffBandWindowsFor(
 }
 
 /**
- * Resolves a faceoff once the user centre's band is known (the UI's drop
- * reaction, or `autoResolveFaceoff`).
- *
- * Jump/re-drop is per-side, and only the user can jump at all (a jump is a
- * genuine false start - `rollBandFromAnticipation` never produces one, so
- * the CPU's own band is never in question here): on the user's FIRST
- * `jump` this duel, nothing resolves yet - just marks the duel jumped
- * (`faceoffBandWindowsFor` narrows the retry's clean window, unless the
- * picked card's effect is `freeJump`) and waits for another
- * `RESOLVE_FACEOFF_BAND`/`AUTO_RESOLVE_FACEOFF`. A SECOND `jump` forfeits
- * the draw outright for the user - no roll is made for them, though the
- * CPU still gets its own real band and can still fire its own card's
- * effect if that band was `clean`.
- *
- * Otherwise, both centres' bands are real: the CPU's is rolled fresh here
- * (its own anted card's `anticipation`, via the identical
- * `rollBandFromAnticipation` a human's reduced-motion fallback uses), and
- * the two bands + grips go through the one symmetric
- * `rollFaceoffHeadToHead` - never a separate path for either side. A
- * `scrumOnLoss` card downgrades its own bearer's loss into a scrum
- * afterward, then the user's card is settled and the draw finishes through
- * the existing `resolveDuel`/`applyOutcome` outcome table.
+ * Resolves a faceoff once the user centre's band is known (a UI drop
+ * reaction, or `autoResolveFaceoff`). Only the user can jump — the CPU's
+ * band is never in question here. A first `jump` just marks the duel
+ * jumped and waits for a retry (windows narrow via
+ * `faceoffBandWindowsFor`); a SECOND jump forfeits the draw for the user
+ * with no roll, though the CPU still gets its real band and its own
+ * `clean`-win effect. Otherwise both bands go through the shared
+ * `rollFaceoffHeadToHead`; a `scrumOnLoss` card can then downgrade its
+ * bearer's loss into a scrum.
  */
 export function resolveFaceoffBand(
   state: GameState,
@@ -229,7 +206,6 @@ export function resolveFaceoffBand(
   let seed2 = seed1;
 
   if (forfeitedByJump) {
-    // A repeat jump: no roll for the user, the CPU wins by default.
     outcome = 'loss';
   } else {
     const [contest, seed3] = rollFaceoffHeadToHead(
@@ -245,8 +221,8 @@ export function resolveFaceoffBand(
       contest.outcome === 'scrum' ? 'scrum' : contest.userWins ? 'win' : 'loss';
   }
 
-  // scrumOnLoss: converts the LOSING side's own bearer's loss into a scrum
-  // instead - symmetric, checked after the roll (or the forfeit) either way.
+  // scrumOnLoss converts the LOSING side's own bearer's loss into a scrum —
+  // checked after the roll/forfeit, symmetric either way.
   if (outcome === 'win' && cpuCard?.faceoffEffect === 'scrumOnLoss') {
     outcome = 'scrum';
   } else if (outcome === 'loss' && userCard?.faceoffEffect === 'scrumOnLoss') {
@@ -266,11 +242,10 @@ export function resolveFaceoffBand(
     [pickedCardId],
   );
 
-  // Only meaningful for turn-order bookkeeping downstream (activeTeam after
-  // DISMISS_DUEL_RESULT); puck placement itself comes entirely from
-  // `result.outcome`, read directly off `duel.faceoffResult` in
-  // `engine/duelOutcome.ts`. A scrum has no real "winner", so this
-  // attribution is an arbitrary (but deterministic) default of 'attacker'.
+  // Only for turn-order bookkeeping downstream (activeTeam after
+  // DISMISS_DUEL_RESULT) — puck placement comes entirely from
+  // `result.outcome` via `duel.faceoffResult` in duelOutcome.ts. A scrum has
+  // no real winner, so this is an arbitrary but deterministic 'attacker'.
   const winner: Side = outcome === 'loss' ? 'defender' : 'attacker';
 
   const preResolve: GameState = {
@@ -289,14 +264,11 @@ export function resolveFaceoffBand(
 }
 
 /**
- * Auto-resolves a faceoff without a real drop reaction: rolls a band
- * weighted by the picked card's anticipation, the same `rollBandFromAnticipation`
- * the reduced-motion/headless fallback uses (never `jump` - a false start
- * is human-only, exactly as `miss` is UI-only for shots), then finishes
- * through `resolveFaceoffBand` - one path, no second RNG source. Used for
- * the `prefers-reduced-motion` fallback and the headless sim (see
- * `ai/autoplay.ts`), so the user centre is measured the same way as the
- * CPU centre rather than by an unscored guess.
+ * Auto-resolves a faceoff without a real drop reaction: rolls a band from
+ * the picked card's anticipation via `rollBandFromAnticipation` (never
+ * `jump` — a false start is human-only), then finishes through
+ * `resolveFaceoffBand`. Used for `prefers-reduced-motion` and the headless
+ * sim, so the user centre is scored the same way as the CPU.
  */
 export function autoResolveFaceoff(state: GameState): GameState {
   const duel = state.duel!;
@@ -310,9 +282,8 @@ export function autoResolveFaceoff(state: GameState): GameState {
 }
 
 /**
- * Which of a pair of defending dots: the one nearest `shooterRow`, ties
- * broken by a seeded flip - rewards positioning rather than being
- * arbitrary. `dots` is always the `[row 1, row 5]` pair from
+ * Nearer of a pair of defending dots to `shooterRow`, ties broken by a
+ * seeded flip. `dots` is always the `[row 1, row 5]` pair from
  * `FACEOFF_SPOTS.defendingDots[team]`.
  */
 export function pickDefendingDot(

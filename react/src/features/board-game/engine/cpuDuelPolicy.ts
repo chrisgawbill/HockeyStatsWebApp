@@ -23,21 +23,17 @@ function cardCategory(card: CardDef): 'block' | 'damage' | 'other' {
 }
 
 /**
- * A deterministic card-planning policy for the round about to start (a game
- * rule for the NPC side, like a Spire enemy script - not a board heuristic,
- * hence it lives in engine/, not ai/). The CPU's plan is a secret
- * commitment: fixed here, only revealed in `endDuelRound`. The user side
- * can use the same policy for autoplay/sims.
+ * Deterministic card-planning policy for the round about to start — a game
+ * rule for the CPU side (like a Spire enemy script), not a board heuristic,
+ * hence engine/ not ai/. The CPU's plan is a secret commitment: fixed here,
+ * revealed only in `endDuelRound`. The user side can reuse it for autoplay/sims.
  *
- * Greedily picks cards allowed in this duel kind by value-per-energy,
- * preferring block over damage only when the OTHER side's last-round
- * revealed damage could KO `side`'s current poise again (otherwise damage
- * first). Ties break by hand order.
+ * Greedily picks allowed cards by value-per-energy, preferring block over
+ * damage only when the other side's last-round damage could KO `side`
+ * again; ties break by hand order.
  *
- * Stays within `duel.energy`, not a fresh `ENERGY` budget: for the CPU this
- * is always the full budget (its plan is computed right after the round's
- * energy reset), but for the user some energy may already be spent on
- * queued cards, so this only plans what's still affordable right now.
+ * Spends against `duel.energy`, not a fresh `ENERGY` budget — for the user,
+ * some energy may already be committed to queued cards.
  */
 export function planCards(state: GameState, side: 'user' | 'cpu'): string[] {
   const duel = state.duel;

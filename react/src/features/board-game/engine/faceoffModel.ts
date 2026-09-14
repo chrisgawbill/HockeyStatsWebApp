@@ -1,12 +1,8 @@
 /**
- * Faceoff minigame engine model, wired in by `engine/faceoffDuel.ts`. Both
- * centres resolve through the same `rollFaceoffHeadToHead` - no separate
- * path for user or CPU. Public contract for the UI: `FaceoffBand`,
- * `FaceoffBandWindows`, and `rollFaceoffHeadToHead` (shapes in
- * `types/game.ts`). Windows come from `windowsForAnticipation`; the UI must
- * not hardcode window geometry. Mirrors `shotModel.ts`'s structure: a
- * card's `anticipation`/`grip` play the same two roles `accuracy`/`power`
- * play there.
+ * Faceoff minigame model, wired in by `engine/faceoffDuel.ts`. Both centres
+ * resolve through the same `rollFaceoffHeadToHead`, never a separate CPU
+ * path. Windows come from `windowsForAnticipation` — the UI must not
+ * hardcode window geometry. Mirrors `shotModel.ts`'s structure.
  */
 import {
   BASE_WIN_BY_BAND,
@@ -30,10 +26,9 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * The two nested window widths (ms, measured from the drop) for a given
- * anticipation (0-100, clamped). The `scrum` window is constant; only the
- * `clean` window widens with anticipation. The UI consumes these numbers
- * directly and must not hardcode window geometry.
+ * The two nested window widths (ms from the drop) for a given anticipation
+ * (0-100, clamped). Only `clean` widens with anticipation; `scrum` is
+ * constant. The UI must not hardcode this geometry.
  */
 export function windowsForAnticipation(
   anticipation: number,
@@ -48,11 +43,9 @@ export function windowsForAnticipation(
 }
 
 /**
- * The re-drop's windows after a jump: the same `scrumWindowMs`, but with
- * `FACEOFF_JUMP_WINDOW_PENALTY_MS` shaved off the clean window (floored at
- * 0) - a false start costs precision on the retry, not just a second
- * attempt. The `freeJump` effect skips this and re-drops with
- * `windowsForAnticipation` unpenalized instead.
+ * Re-drop windows after a jump: same `scrumWindowMs`, with
+ * `FACEOFF_JUMP_WINDOW_PENALTY_MS` shaved off `cleanWindowMs` (floored at
+ * 0). The `freeJump` effect skips this and uses `windowsForAnticipation` unpenalized.
  */
 export function narrowedWindowsAfterJump(
   anticipation: number,
@@ -68,9 +61,8 @@ export function narrowedWindowsAfterJump(
 }
 
 /**
- * Which band a reaction time (ms, measured from the drop) falls in, given
- * the two nested windows. A negative reaction (pressed before the drop) is
- * always `jump`, regardless of window width.
+ * Band for a reaction time (ms from the drop), given the two nested
+ * windows. Negative (pressed before the drop) is always `jump`.
  */
 export function bandForReaction(
   reactionMs: number,
@@ -83,11 +75,10 @@ export function bandForReaction(
 }
 
 /**
- * Rolls the linesman's hold before the drop, in ms, uniformly between
- * `FACEOFF_DROP_DELAY_MIN_MS` and `FACEOFF_DROP_DELAY_MAX_MS`. Seeded, never
- * `Math.random` - the hold length is randomness the UI must ask the engine
- * for, not roll itself. Decides only *when* the puck drops, not reaction
- * difficulty (see docs/board-game-design.md for the design rationale).
+ * Linesman's hold before the drop, in ms, uniform between
+ * `FACEOFF_DROP_DELAY_MIN_MS` and `_MAX_MS`. Seeded — the UI must request
+ * this from the engine, never roll it locally. Decides only *when* the puck
+ * drops, not reaction difficulty.
  */
 export function rollDropDelayMs(seed: number): [number, number] {
   const [t, nextSeed] = nextFloat(seed);
@@ -98,19 +89,12 @@ export function rollDropDelayMs(seed: number): [number, number] {
 }
 
 /**
- * Rolls a random reaction time for an anticipation-driven "read" of the
- * drop and buckets it into a band. This is the ONE shared simulated-reaction
- * path for BOTH the CPU centre's own reaction AND a human centre's
- * reduced-motion/headless fallback. Sampled up to
- * `FACEOFF_REACTION_SAMPLE_CEILING_MS`, anchored on the human-reaction-time
- * research `FACEOFF_CLEAN_WINDOW_BASE_MS` cites (see
- * docs/board-game-design.md), not a self-referential multiple of the window
- * widths - so `late`'s share is a real, tunable relationship between the
- * ceiling and the (anticipation-independent) scrum window, not baked in by
- * construction. Reused as-is by `rollFaceoffHeadToHead`'s two callers in
- * `engine/faceoffDuel.ts` - no separate CPU path. Never resolves to `jump`
- * - that's a genuine human false start, only possible from a live timed
- * press.
+ * Random reaction time for an anticipation-driven "read" of the drop,
+ * bucketed into a band. The ONE shared path for both the CPU centre and a
+ * human centre's reduced-motion/headless fallback — reused as-is by
+ * `rollFaceoffHeadToHead`'s two callers. Sampled up to
+ * `FACEOFF_REACTION_SAMPLE_CEILING_MS`; never resolves to `jump` (that's a
+ * genuine human false start, only possible from a live timed press).
  */
 export function rollBandFromAnticipation(
   anticipation: number,
@@ -127,35 +111,20 @@ export function rollBandFromAnticipation(
 }
 
 /**
- * The symmetric head-to-head faceoff contest: both centres bring a real
- * band and a grip, and this ONE function decides between them - reused
- * as-is for the user's side and the CPU's side, never a separate path for
- * either. Reuses `BASE_WIN_BY_BAND` rather than inventing a second table:
+ * Symmetric head-to-head faceoff contest: both centres bring a band and a
+ * grip, and this ONE function decides between them — no separate CPU path.
+ * Same non-`clean` band on both sides is a tie: automatic `scrum`, no roll,
+ * `winChance` 0. Otherwise `winChance = 50 + (BASE_WIN_BY_BAND[userBand] -
+ * BASE_WIN_BY_BAND[cpuBand]) + (userGrip - cpuGrip)`, clamped to `[0, 100]`
+ * — equal bands cancel to grip-only odds. `faceoffEffect` firing on a clean
+ * win is the caller's job, not this function's. Full rationale:
+ * docs/board-game-design.md §8.
  *
- * - Both sides reading the SAME non-`clean` band (`scrum`/`scrum` or
- *   `late`/`late`) is a genuine tie with nothing to grade it on: an
- *   automatic **scrum** (`outcome: 'scrum'`), puck loose
- *   (`engine/duelOutcome.ts` picks the tile). No roll is made; `winChance`
- *   is 0.
- * - Otherwise (both `clean`, or the two bands differ): `winChance =
- *   50 + (BASE_WIN_BY_BAND[userBand] - BASE_WIN_BY_BAND[cpuBand]) +
- *   (userGrip - cpuGrip)`, clamped to `[0, 100]`, rolled through
- *   `engine/rng.ts`. When both bands are `clean` (or any other tie) the two
- *   base-band terms cancel exactly, so grip alone around a fair 50/50
- *   decides it - "both clean -> grip difference decides" falls out of the
- *   same formula as a degenerate case, not a special-cased branch. When the
- *   bands differ, the base-band terms add a real edge on top of grip,
- *   graded by how far one band's base value sits above the other's
- *   (`clean` beating `late` is a bigger edge than `clean` beating `scrum`,
- *   which in turn is bigger than `scrum` beating `late`) - a `scrum` read
- *   is a real, if lesser, edge over a `late` one, not a coin flip's worth of
- *   nothing.
- *
- * The winning side's card `faceoffEffect` fires only when that side's own
- * band was `'clean'` (checked by the caller, not here - this function only
- * decides who wins) - so a `scrum`-band win off the edge above still just
- * carries the puck, no bonus. See docs/board-game-design.md for the design
- * rationale (centres genuinely compete; a scrum fires only on a genuine tie).
+ * @param seed - advances on every roll; thread the returned seed into the
+ * next call, don't reuse the input.
+ * @example
+ * const [result, seed2] = rollFaceoffHeadToHead('clean', 2, 'scrum', 5, seed);
+ * // seed2, not seed, feeds whatever rolls next (e.g. pickScrumTile).
  */
 export function rollFaceoffHeadToHead(
   userBand: Exclude<FaceoffBand, 'jump'>,

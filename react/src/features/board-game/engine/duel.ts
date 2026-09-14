@@ -45,9 +45,8 @@ export function stunUntil(
 
 /**
  * Draws both sides' hands for a round and secretly plans the CPU's cards.
- * Each hand is filtered to cards legal for that side in this duel kind, so
- * a card never sits in hand dead-on-arrival; ineligible cards stay in the
- * deck for later duels.
+ * Each hand is filtered to cards legal for this duel kind, so a card never
+ * sits in hand dead-on-arrival; ineligible cards stay in the deck.
  */
 function drawHandsAndPlan(state: GameState, duelBase: DuelState): GameState {
   const cpuSide = otherSide(duelBase.userSide);
@@ -112,10 +111,9 @@ export function createDuel(
 }
 
 /**
- * Why the hand card at `handIndex` can't be played right now, or null if it
- * can - the one legality path, for the UI to explain a greyed-out card.
- * Rule restrictions (permanent for this duel) are checked before energy
- * (which changes as cards are queued).
+ * Why the hand card at `handIndex` can't be played, or null if it can — the
+ * one legality path, for the UI to explain a greyed-out card. Rule
+ * restrictions (permanent) are checked before energy (which changes as cards queue).
  */
 export function cardBlockReason(
   state: GameState,
@@ -138,8 +136,8 @@ export function canPlayCard(state: GameState, handIndex: number): boolean {
 
 /**
  * Queues the user's hand card face-down: spends its energy, moves it from
- * hand to `userQueue`, and resolves only its `draw` effect now (drawing
- * isn't combat - block and damage wait for the simultaneous reveal).
+ * hand to `userQueue`, and resolves only its `draw` effect now — block and
+ * damage wait for the simultaneous reveal.
  */
 export function playCard(state: GameState, handIndex: number): GameState {
   if (!canPlayCard(state, handIndex)) return state;
@@ -174,10 +172,7 @@ export function playCard(state: GameState, handIndex: number): GameState {
   return { ...state, deck, rngSeed: seed, duel: nextDuel };
 }
 
-/**
- * True if the queued card at `queueIndex` can be unqueued: every card it drew
- * is still sitting in hand (none of them has since been queued itself).
- */
+/** True if the queued card at `queueIndex` can be unqueued: every card it drew is still sitting in hand (none has since been queued itself). */
 export function canUnqueueCard(state: GameState, queueIndex: number): boolean {
   const duel = state.duel;
   if (!duel) return false;
@@ -187,10 +182,10 @@ export function canUnqueueCard(state: GameState, queueIndex: number): boolean {
 }
 
 /**
- * Returns a queued card to the end of the user's hand and refunds its
- * energy. Any cards it drew are pulled back out of hand and shuffled into
- * the draw pile, so unqueuing can't be used to peek at the next card.
- * Refused (state unchanged) if a drawn card has since been queued itself.
+ * Returns a queued card to the end of hand and refunds its energy. Any
+ * cards it drew are pulled back out and shuffled into the draw pile, so
+ * unqueuing can't be used to peek at the next card. Refused (state
+ * unchanged) if a drawn card has since been queued itself.
  */
 export function unqueueCard(state: GameState, queueIndex: number): GameState {
   const duel = state.duel;
@@ -221,9 +216,8 @@ export function unqueueCard(state: GameState, queueIndex: number): GameState {
 
 /**
  * Ends the round with a simultaneous reveal: resets both blocks, applies
- * block then damage from both the user's queue and the CPU's secret plan,
- * settles played cards and discards both hands, records `lastReveal`, then
- * resolves a KO, a timeout, or continues into a freshly-planned round.
+ * block then damage from both queues, settles and discards both hands,
+ * records `lastReveal`, then resolves a KO, a timeout, or the next round.
  */
 export function endDuelRound(state: GameState): GameState {
   if (!state.duel) return state;

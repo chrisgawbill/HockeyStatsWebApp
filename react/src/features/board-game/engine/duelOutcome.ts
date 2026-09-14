@@ -25,20 +25,13 @@ export interface DuelOutcomeResult {
   goal: boolean;
   /** Shot duel, defender (goalie) wins: true if the goalie took no poise damage all duel (a clean-save freeze), false on a rebound. */
   cleanSave: boolean;
-  /**
-   * `state.rngSeed` after any rolls this outcome needed (currently only the
-   * faceoff scrum tile pick). Equal to the input `state`'s `rngSeed` when
-   * nothing was rolled.
-   */
+  /** `rngSeed` after any rolls this outcome needed (currently only the faceoff scrum tile pick); unchanged if nothing was rolled. */
   rngSeed: number;
   /** MP to add on the winning side's next `ROLL_DICE` (the faceoff `bonusMp` effect). Zero otherwise. */
   bonusMp: number;
 }
 
-/**
- * The non-goalie skater on `team` nearest `tile`; prefers non-stunned skaters,
- * falling back to stunned ones. Ties keep array order. Never moves anyone.
- */
+/** Non-goalie skater on `team` nearest `tile`; prefers non-stunned, falling back to stunned. Ties keep array order. Never moves anyone. */
 function nearestSkaterOfTeam(
   state: GameState,
   team: TeamId,
@@ -69,11 +62,9 @@ function nearestDefenseman(
 }
 
 /**
- * The scrum tile for a faceoff that goes loose: seeded from the dot's free
- * orthogonal neighbours - `isPlayable` already excludes a goalie tile, a
- * corner, and off-board, and occupied tiles are filtered out here. Falls
- * back to the dot itself in the (practically unreachable on this board)
- * case every neighbour is blocked.
+ * Scrum tile for a faceoff that goes loose: seeded from the dot's free
+ * orthogonal neighbours (occupied tiles filtered out here). Falls back to
+ * the dot itself if every neighbour is blocked (practically unreachable).
  */
 function pickScrumTile(
   state: GameState,

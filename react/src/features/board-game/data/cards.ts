@@ -54,7 +54,6 @@ export const CARDS: Record<string, CardDef> = {
     allowedIn: ['shot'],
     exhaust: false,
     effects: [{ type: 'damage', amount: 7 }],
-    // Shot-ante stats (`accuracy`/`power`), used by the shot minigame - see engine/shotModel.ts.
     accuracy: 70,
     power: 4,
   },
@@ -70,7 +69,6 @@ export const CARDS: Record<string, CardDef> = {
     accuracy: 30,
     power: 9,
   },
-  // Two more shot-pool cards so the 3-card ante isn't the same offer every time.
   snap_shot: {
     id: 'snap_shot',
     name: 'Snap Shot',
@@ -95,7 +93,6 @@ export const CARDS: Record<string, CardDef> = {
     accuracy: 20,
     power: 11,
   },
-  // Six faceoff-pool cards so the 3-card ante isn't the same offer every time.
   quick_hands: {
     id: 'quick_hands',
     name: 'Quick Hands',
@@ -196,10 +193,8 @@ export const CARDS: Record<string, CardDef> = {
 };
 
 /**
- * The user's 19-card starter deck (card ids, duplicates repeated). See
- * design doc §5. One of each shot-pool and faceoff-pool card, so the shot
- * and faceoff antes (both drawn from this deck) offer real variety instead
- * of the same offer every time.
+ * User's 19-card starter deck (ids, duplicates repeated; see design doc §5).
+ * One of each shot-/faceoff-pool card so those antes offer real variety.
  */
 export const STARTER_DECK: string[] = [
   'deke',

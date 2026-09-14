@@ -10,11 +10,7 @@ export const BOARD_ROWS = 7;
 /** Starting and max poise for a non-goalie skater in a duel. */
 export const SKATER_POISE = 20;
 
-/**
- * Goalie starting/max poise by game length. Kept well under 50 - past that
- * the goalie becomes a wall and games may never end (see
- * docs/board-game-design.md §3).
- */
+/** Goalie starting/max poise by game length; kept well under 50 (past that a wall stops games ending) — see docs/board-game-design.md §3. */
 export const GOALIE_POISE_BY_LENGTH: Record<GameLength, number> = {
   short: 43,
   long: 44,
@@ -36,26 +32,23 @@ export const COST = {
 };
 
 /**
- * LW/RW shot accuracy bonus, on the same 0-100 scale as a card's own
- * `accuracy`. Applied in the shot ante - see `shotAccuracyBonus` in
- * `engine/shotModel.ts`. Reasoning behind the 15: see
- * docs/board-game-design.md §8.
+ * LW/RW shot accuracy bonus, on the same 0-100 scale as a card's `accuracy`,
+ * applied in the shot ante (`shotAccuracyBonus` in `engine/shotModel.ts`).
+ * See docs/board-game-design.md §8 for why 15.
  */
 export const PERK_WING_SHOT_ACCURACY = 15;
 /** LD/RD bonus amount on `check`/`block`-tagged card effects (damage or block). */
 export const PERK_DEFENSE_BONUS = 2;
 /**
- * Extra card in the faceoff ante: both duelists in a faceoff are always the
- * C, so the ante is `3 + PERK_CENTER_FACEOFF_DRAW` cards, pick 1 (see
- * `FACEOFF_ANTE_SIZE` in `engine/faceoffDuel.ts`).
+ * Extra card in the faceoff ante (both duelists are always C): ante size is
+ * `3 + PERK_CENTER_FACEOFF_DRAW`, pick 1 — see `FACEOFF_ANTE_SIZE` in engine/faceoffDuel.ts.
  */
 export const PERK_CENTER_FACEOFF_DRAW = 1;
 
 /**
- * Save chance by shot band (percent), before the goalie-poise and
- * shot-power modifiers `rollShotSave` applies. Chris tunes these; the
- * `perfect` ruling is deliberate, not an accident - see
- * docs/board-game-design.md §8.
+ * Save chance by shot band (percent), before poise/power modifiers in
+ * `rollShotSave`. `perfect`'s value is a deliberate ruling, not a tuning
+ * accident — see docs/board-game-design.md §8.
  */
 export const BASE_SAVE_BY_BAND: Record<
   'perfect' | 'good' | 'weak' | 'miss',
@@ -67,15 +60,14 @@ export const BASE_SAVE_BY_BAND: Record<
   miss: 96,
 };
 /**
- * Chance (percent) that a `good`/`perfect` save is covered - the goalie
- * smothers it for a whistle and a faceoff - instead of rebounding. Never
- * rolled on a `weak`/`miss` save. 25 means roughly a quarter of good/perfect
- * saves stop play rather than kicking out a loose puck, enough to matter
- * without making rebounds the exception.
+ * Chance (percent) that a `good`/`perfect` save is covered — a whistle and
+ * faceoff instead of a rebound; never rolled on `weak`/`miss`. 25 ≈ a
+ * quarter of such saves, enough to matter without making rebounds rare.
  */
 export const SHOT_COVER_CHANCE = 25;
-/** Save chance is clamped to this range (percent) after all modifiers. */
+/** Save chance floor (percent) after all modifiers. */
 export const MIN_SAVE_CHANCE = 5;
+/** Save chance ceiling (percent) after all modifiers. */
 export const MAX_SAVE_CHANCE = 97;
 /** Save-chance points lost when the goalie's poise is fully drained; 0 at full poise, scales linearly in between. */
 export const POISE_SAVE_PENALTY_MAX = 15;
@@ -89,31 +81,20 @@ export const SHOT_BLUE_BAND_WIDTH = 0.32;
 export const CPU_SHOT_ACCURACY = 55;
 
 /**
- * Clean-band window at 0 anticipation, in ms, measured from the drop.
- * Anchored on human reaction-time research so a clean win is a real ask,
- * not a given - full derivation (why 190ms and not, say, 80ms) lives in
- * docs/board-game-design.md §8.
+ * Clean-band window at 0 anticipation, in ms from the drop. Anchored on
+ * human reaction-time research; full derivation in docs/board-game-design.md §8.
  */
 export const FACEOFF_CLEAN_WINDOW_BASE_MS = 190;
 /**
- * Extra clean-band ms per anticipation point (anticipation is 0-100); keep
- * this the only anticipation-driven geometry knob, mirroring
- * `SHOT_YELLOW_WIDTH_PER_ACCURACY`. At 1ms/point, the carded anticipation
- * spread (25-85) walks the clean window from 215ms up to 275ms - the low
- * end still expects a trained-player-grade press, the high end comfortably
- * clears the ~200ms trained-player mark, so the highest-anticipation cards
- * make a clean win genuinely achievable on a sharp press rather than
- * theoretical.
+ * Extra clean-band ms per anticipation point (0-100 scale); the only
+ * anticipation-driven geometry knob (mirrors `SHOT_YELLOW_WIDTH_PER_ACCURACY`).
+ * See docs/board-game-design.md §8 for the resulting window range.
  */
 export const FACEOFF_WINDOW_PER_ANTICIPATION_MS = 1.0;
 /**
- * Scrum-band window, in ms, measured from the drop; constant regardless of
- * anticipation so a slow draw is never a write-off - exactly the role
- * `SHOT_BLUE_BAND_WIDTH` plays for the good/blue band. 420ms clears median
- * simple reaction time (~250ms) with real headroom, so a merely-median press
- * still ties up the puck in a scrum instead of losing it outright late, and
- * low-anticipation/high-grip cards can lean on grip to win the scrum rather
- * than needing a reaction no human reliably has.
+ * Scrum-band window, in ms from the drop; constant regardless of
+ * anticipation (mirrors `SHOT_BLUE_BAND_WIDTH`'s role for shots). See
+ * docs/board-game-design.md §8 for why 420ms.
  */
 export const FACEOFF_SCRUM_WINDOW_MS = 420;
 /** Minimum linesman hold before the drop, in ms. */
@@ -121,16 +102,10 @@ export const FACEOFF_DROP_DELAY_MIN_MS = 700;
 /** Maximum linesman hold before the drop, in ms. */
 export const FACEOFF_DROP_DELAY_MAX_MS = 1800;
 /**
- * Per-band base value (not a standalone win chance) used by the symmetric
- * head-to-head faceoff contest `rollFaceoffHeadToHead`. `jump` has no entry:
- * a jump never enters the contest - the jumping side either earns a re-drop
- * or forfeits outright (see `engine/faceoffDuel.ts`'s `resolveFaceoffBand`).
- * The contest takes the *difference* between the two sides' band values as
- * an edge on top of grip, so only the gaps between `clean`/`scrum`/`late`
- * matter, not their absolute size; when both sides read the same band the
- * gap is zero and grip alone decides (around a fair 50/50) unless the tied
- * band is a non-`clean` one, which is an automatic scrum instead (see
- * `rollFaceoffHeadToHead`).
+ * Per-band base value (not a win chance itself) for `rollFaceoffHeadToHead`;
+ * only the gaps between bands matter, not absolute size. No `jump` entry —
+ * see `resolveFaceoffBand` in engine/faceoffDuel.ts. Full formula:
+ * docs/board-game-design.md §8.
  */
 export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
   clean: 65,
@@ -138,27 +113,15 @@ export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
   late: 25,
 };
 /**
- * Sampling ceiling (ms) for a simulated faceoff reaction time - shared by
- * the CPU centre's own reaction and a human centre's reduced-motion/
- * headless fallback. Driven entirely by the anted card's `anticipation`
- * stat, so there's no separate "difficulty" constant, only where the
- * reaction-time roll tops out. 500ms anchors on the same human-reaction-time
- * research `FACEOFF_CLEAN_WINDOW_BASE_MS` cites (median ~250ms): twice the
- * median, so a genuinely slow read is still reachable without being baked
- * in as a coin flip. Not one of the tuned window constants above - moving
- * it doesn't retune `clean`/`scrum`, only where the simulated-reaction
- * ceiling sits.
+ * Sampling ceiling (ms) for a simulated faceoff reaction — CPU centre and
+ * the human reduced-motion/headless fallback. Not a tuned window constant;
+ * see docs/board-game-design.md §8 for the 500ms anchor.
  */
 export const FACEOFF_REACTION_SAMPLE_CEILING_MS = 500;
 /**
- * Clean-band ms shaved off the re-drop window after a jump (a false start
- * costs precision, not just a retry). Floored at 0 by
- * `narrowedWindowsAfterJump`. Models a fixed jolt to reaction precision
- * (adrenaline/self-correction after a false start), not a fraction of the
- * window, so it doesn't need to scale with the window widths. It stays a
- * meaningful bite on every carded card - a 10-14% cut to the clean window
- * across the 25-85 carded anticipation range - without being able to zero
- * out the tightest one.
+ * Clean-band ms shaved off the re-drop window after a jump; floored at 0 by
+ * `narrowedWindowsAfterJump`. A fixed ms penalty (not a fraction of the
+ * window) — see docs/board-game-design.md §8 for the resulting cut range.
  */
 export const FACEOFF_JUMP_WINDOW_PENALTY_MS = 30;
 

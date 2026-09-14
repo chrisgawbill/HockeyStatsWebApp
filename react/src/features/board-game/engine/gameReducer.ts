@@ -259,12 +259,10 @@ export function gameReducer(state: GameState, action: Action): GameState {
           lastFaceoffResult: null,
         };
       }
-      // A covered save whistles play dead and routes to the end-zone dot in
-      // front of the net it was covered in front of - the goalie's own
-      // team's dots, nearest the shooter's row (ties broken by a seeded
-      // flip, same rule as any other end-zone draw). Only the two centres
-      // move to the dot; everyone else stays put (unlike the
-      // boxed-in-carrier whistle above, which is always a full reset).
+      // A covered save whistles play dead, routing to the end-zone dot
+      // nearest the shooter's row on the goalie's own team's side (ties
+      // broken by a seeded flip). Only the two centres move; everyone else
+      // stays put (unlike the boxed-in-carrier whistle above, a full reset).
       if (outcome.kind === 'shot' && state.lastShotSaveResult?.covered) {
         const goalieTeam = state.skaters.find(
           (s) => s.id === outcome.defenderId,

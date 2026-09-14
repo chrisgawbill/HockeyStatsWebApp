@@ -1,8 +1,6 @@
 /**
- * Shot minigame engine model. Public contract for the UI: `ShotBand`,
- * `ShotBandWidths`, and `rollShotSave` (shapes in `types/game.ts`). Widths
- * come from `bandWidthsForAccuracy`; the UI must not hardcode band
- * geometry.
+ * Shot minigame engine model. Widths come from `bandWidthsForAccuracy` —
+ * the UI must not hardcode band geometry.
  */
 import {
   BASE_SAVE_BY_BAND,
@@ -34,10 +32,9 @@ export function shotAccuracyBonus(role: Role): number {
 }
 
 /**
- * The two concentric band widths for a given accuracy (0-100, clamped).
- * The blue (good) zone is constant; only the yellow (perfect) zone widens
- * with accuracy. The UI consumes these numbers directly and must not
- * hardcode band geometry.
+ * Two concentric band widths for a given accuracy (0-100, clamped). Blue
+ * (good) is constant; only yellow (perfect) widens with accuracy. The UI
+ * must not hardcode this geometry.
  */
 export function bandWidthsForAccuracy(accuracy: number): ShotBandWidths {
   const clampedAccuracy = clamp(accuracy, 0, 100);
@@ -60,9 +57,8 @@ export function bandForPosition(
 }
 
 /**
- * Rolls a random track position for an accuracy-driven aim (the CPU's shot,
- * or the UI's reduced-motion auto-resolve) and buckets it into a band. Goes
- * through the same `bandForPosition` a human's timing-bar press would.
+ * Random track position for an accuracy-driven aim (CPU shot, or the UI's
+ * reduced-motion auto-resolve), bucketed via the same `bandForPosition` a human press uses.
  */
 export function rollBandFromAccuracy(
   accuracy: number,
@@ -87,15 +83,12 @@ export function poiseFactor(poise: number, maxPoise: number): number {
 }
 
 /**
- * Rolls the goalie's save for a resolved shot band. `saveChance =
- * BASE_SAVE_BY_BAND[band] + poiseFactor(goaliePoise) - power`, clamped, rolled
- * through `engine/rng.ts` (never `Math.random`). On a save, poise drains by
- * `power` and a `weak`/`miss` band freezes (existing clean-save path) while
- * `good`/`perfect` kicks out a rebound - the same function and outcome
- * mapping for both the human and the CPU shooter. A `good`/`perfect` save
- * then rolls a second, separate chance against `SHOT_COVER_CHANCE` for the
- * goalie to cover the puck instead: `covered` and `rebound` are mutually
- * exclusive, and `covered` is never rolled on a `weak`/`miss` save.
+ * Goalie's save for a resolved band: `saveChance = BASE_SAVE_BY_BAND[band] +
+ * poiseFactor(goaliePoise) - power`, clamped, rolled through `engine/rng.ts`
+ * (never `Math.random`). On a save, poise drains by `power`; `weak`/`miss`
+ * freezes, `good`/`perfect` rolls a separate `SHOT_COVER_CHANCE` check
+ * (`covered` XOR `rebound`, never rolled on `weak`/`miss`). One shared path
+ * for both the human and CPU shooter.
  */
 export function rollShotSave(
   band: ShotBand,
