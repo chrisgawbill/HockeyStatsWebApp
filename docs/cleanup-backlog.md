@@ -412,3 +412,8 @@ Two populations, opposite treatment:
 
 **Tooltip correctness — a new check:**
 - [ ] JSDoc only attaches to the declaration *immediately* below it. A block above a group documents only the first member. `MIN_SAVE_CHANCE` / `MAX_SAVE_CHANCE` is the live example: one comment covers "this range", so `MIN_` has a tooltip and `MAX_` has none. Give each exported declaration its own, however short.
+
+**Division of labour (Chris, 2026-09-14): TS carries the types, JSDoc carries the description and the examples.** Neither does the other's job.
+- [ ] **Never restate a type in prose.** No `@param {number}`, no "takes a string and returns a boolean". TS already shows it in the tooltip, and duplicated types go stale when a signature changes and the prose doesn't.
+- [ ] **`@param`/`@returns` only when they add what the name and type cannot** — a unit, a range, an invariant, an ordering guarantee, a failure mode. `@param seed - the seed` is noise; `@param seed - advances on every roll; pass the returned one forward` earns its place. Nothing to add means omit the tag, not pad it.
+- [ ] **`@example` where a call site is genuinely non-obvious, and it does NOT count against the ~3 line cap** — that cap governs prose. Worth one: multi-step flows whose order can't be inferred from types (`createFaceoffDuel` → `pickFaceoffCard` → `resolveFaceoffBand`, the shot equivalent), and seed-threading where the returned seed must be passed forward. Not worth one: anything obvious from the signature.
