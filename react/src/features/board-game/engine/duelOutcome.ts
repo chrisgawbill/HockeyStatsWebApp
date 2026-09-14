@@ -26,12 +26,12 @@ export interface DuelOutcomeResult {
   /** Shot duel, defender (goalie) wins: true if the goalie took no poise damage all duel (a clean-save freeze), false on a rebound. */
   cleanSave: boolean;
   /**
-   * `state.rngSeed` after any rolls this outcome needed (BG-A15b: the
-   * faceoff scrum tile pick is the only one). Equal to the input `state`'s
-   * `rngSeed` when nothing was rolled.
+   * `state.rngSeed` after any rolls this outcome needed (currently only the
+   * faceoff scrum tile pick). Equal to the input `state`'s `rngSeed` when
+   * nothing was rolled.
    */
   rngSeed: number;
-  /** MP to add on the winning side's next `ROLL_DICE` (BG-A15b's `bonusMp` faceoff effect). Zero otherwise. */
+  /** MP to add on the winning side's next `ROLL_DICE` (the faceoff `bonusMp` effect). Zero otherwise. */
   bonusMp: number;
 }
 
@@ -69,11 +69,11 @@ function nearestDefenseman(
 }
 
 /**
- * The scrum tile for a faceoff that goes loose (BG-A15b): seeded from the
- * dot's free orthogonal neighbours - `isPlayable` already excludes a goalie
- * tile, a corner, and off-board, and occupied tiles are filtered out here.
- * Falls back to the dot itself in the (practically unreachable on this
- * board) case every neighbour is blocked.
+ * The scrum tile for a faceoff that goes loose: seeded from the dot's free
+ * orthogonal neighbours - `isPlayable` already excludes a goalie tile, a
+ * corner, and off-board, and occupied tiles are filtered out here. Falls
+ * back to the dot itself in the (practically unreachable on this board)
+ * case every neighbour is blocked.
  */
 function pickScrumTile(
   state: GameState,
@@ -103,12 +103,12 @@ export function applyOutcome(
 
   switch (duel.kind) {
     case 'faceoff': {
-      // BG-A15b cycle 2 (Chris's ruling): a genuine head-to-head - both
-      // centres anted, both produced a real band, and `duel.faceoffResult`
-      // (set by `resolveFaceoffBand`'s symmetric `rollFaceoffHeadToHead`)
-      // already carries the whole outcome, `scrumOnLoss` downgrade
-      // included. `winner` (from `resolveFaceoffBand`) just tells us which
-      // physical duelist that outcome favoured.
+      // Both centres anted and produced a real band, and
+      // `duel.faceoffResult` (set by `resolveFaceoffBand`'s symmetric
+      // `rollFaceoffHeadToHead`) already carries the whole outcome,
+      // including any `scrumOnLoss` downgrade. `winner` (from
+      // `resolveFaceoffBand`) just tells us which physical duelist that
+      // outcome favoured.
       const result = duel.faceoffResult!;
       const userCard = duel.faceoffPickedCardId
         ? CARDS[duel.faceoffPickedCardId]
@@ -201,7 +201,7 @@ export function applyOutcome(
         goal = true;
       } else {
         // Goalies only block, so the attacker can never KO the goalie's opponent here -
-        // a defender win in a shot duel is always a timeout now (see BG-A9).
+        // a defender win in a shot duel is always a timeout.
         const goalieDuelist = duel.defender;
         const goalieSkater = state.skaters.find(
           (s) => s.id === goalieDuelist.skaterId,
@@ -209,7 +209,6 @@ export function applyOutcome(
         const creaseTile = CREASE_FRONT[goalieSkater.team];
         const occupant = skaterAt(state, creaseTile);
         cleanSave = goalieDuelist.poise === goalieDuelist.maxPoise;
-        // PM ruling: freeze gives possession to the goalie's team without teleporting anyone.
         if (cleanSave) {
           const carrier =
             occupant ??

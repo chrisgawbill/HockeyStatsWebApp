@@ -1,24 +1,18 @@
 /**
- * Faceoff minigame integration (BG-A15b): wires BG-A15a's `faceoffModel.ts`
- * into the real game as a two-sided ante pick plus a reaction roll, fully
- * replacing the old faceoff card duel (Chris's call - no hybrid). Mirrors
- * `shotDuel.ts`'s shape: a centre draws a faceoff-pool ante via the same
- * `drawFilteredCards` BG-A13 built and either presses the drop
- * (`PICK_FACEOFF_CARD` then `RESOLVE_FACEOFF_BAND`) or auto-resolves
- * (`AUTO_RESOLVE_FACEOFF`).
+ * Faceoff minigame integration: wires `faceoffModel.ts` into the real game
+ * as a two-sided ante pick plus a reaction roll. Mirrors `shotDuel.ts`'s
+ * shape: a centre draws a faceoff-pool ante via `drawFilteredCards` and
+ * either presses the drop (`PICK_FACEOFF_CARD` then `RESOLVE_FACEOFF_BAND`)
+ * or auto-resolves (`AUTO_RESOLVE_FACEOFF`).
  *
- * BG-A15b cycle 2 (Chris's ruling: "centres should compete, shouldn't be
- * like shot"): unlike a shot's shooter/goalie split, both centres in a
- * faceoff genuinely compete - both ante a card and both produce a real
- * reaction band, resolved head-to-head by the one symmetric
- * `rollFaceoffHeadToHead`. There is no user/CPU fork anywhere in the
- * resolution: the CPU's band comes from the exact same
- * `rollBandFromAnticipation` a human's reduced-motion/headless fallback
- * uses, on its own anted card's `anticipation`, and the exact same contest
- * function decides the draw regardless of which side is human. The CPU
- * still resolves its own band immediately (it has no UI to wait on) rather
- * than genuinely reacting in real time, but that's a timing/input detail,
- * not a privileged resolution path.
+ * There is no user/CPU fork anywhere in the resolution: the CPU's band
+ * comes from the exact same `rollBandFromAnticipation` a human's
+ * reduced-motion/headless fallback uses, on its own anted card's
+ * `anticipation`, and the exact same contest function decides the draw
+ * regardless of which side is human. The CPU still resolves its own band
+ * immediately (it has no UI to wait on) rather than genuinely reacting in
+ * real time, but that's a timing/input detail, not a privileged resolution
+ * path.
  */
 import { PERK_CENTER_FACEOFF_DRAW } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
@@ -47,8 +41,8 @@ import type {
 } from '@/features/board-game/types/game';
 
 /**
- * Faceoff-pool ante size: 3, plus the C perk (both duelists in a faceoff are
- * always C - `PERK_CENTER_FACEOFF_DRAW` now means draw 4, pick 1, not an
+ * Faceoff-pool ante size: 3, plus the C perk (both duelists in a faceoff
+ * are always C - `PERK_CENTER_FACEOFF_DRAW` means draw 4, pick 1, not an
  * extra dealt-hand card; see the constant's own doc in `data/balance.ts`).
  */
 export const FACEOFF_ANTE_SIZE = 3 + PERK_CENTER_FACEOFF_DRAW;
@@ -156,7 +150,7 @@ export function pickFaceoffCard(
 
 /**
  * The current faceoff's reaction windows for the user's picked card - the
- * contract BG-B25's UI renders directly, never hardcoding geometry. After a
+ * contract the UI renders directly, never hardcoding geometry. After a
  * first jump, the clean window is narrowed (`narrowedWindowsAfterJump`)
  * unless the picked card's effect is `freeJump`, which redrops at the full,
  * unpenalized `windowsForAnticipation` instead. Null until a card is
@@ -299,10 +293,10 @@ export function resolveFaceoffBand(
  * weighted by the picked card's anticipation, the same `rollBandFromAnticipation`
  * the reduced-motion/headless fallback uses (never `jump` - a false start
  * is human-only, exactly as `miss` is UI-only for shots), then finishes
- * through `resolveFaceoffBand` - one path, no second RNG source. For
- * BG-B25's `prefers-reduced-motion` fallback, and the headless BG-A10 sim
- * (see `ai/autoplay.ts`), so the user centre is measured the same way as
- * the CPU centre rather than by an unscored guess.
+ * through `resolveFaceoffBand` - one path, no second RNG source. Used for
+ * the `prefers-reduced-motion` fallback and the headless sim (see
+ * `ai/autoplay.ts`), so the user centre is measured the same way as the
+ * CPU centre rather than by an unscored guess.
  */
 export function autoResolveFaceoff(state: GameState): GameState {
   const duel = state.duel!;
@@ -316,10 +310,10 @@ export function autoResolveFaceoff(state: GameState): GameState {
 }
 
 /**
- * Which of a pair of defending dots (BG-A15b, needed by BG-A16's covered
- * puck too): the one nearest `shooterRow`, ties broken by a seeded flip -
- * rewards positioning rather than being arbitrary. `dots` is always the
- * `[row 1, row 5]` pair from `FACEOFF_SPOTS.defendingDots[team]`.
+ * Which of a pair of defending dots: the one nearest `shooterRow`, ties
+ * broken by a seeded flip - rewards positioning rather than being
+ * arbitrary. `dots` is always the `[row 1, row 5]` pair from
+ * `FACEOFF_SPOTS.defendingDots[team]`.
  */
 export function pickDefendingDot(
   dots: Coord[],

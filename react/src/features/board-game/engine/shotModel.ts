@@ -1,9 +1,8 @@
 /**
- * Shot minigame engine model (BG-A14a). Pure and additive: nothing in the
- * running game calls this yet (BG-A14b wires it in). Contract for BG-B22:
- * `ShotBand`, `ShotBandWidths`, and `rollShotSave` (types/game.ts has the
- * shapes). Widths come from `bandWidthsForAccuracy`; the UI must not
- * hardcode band geometry.
+ * Shot minigame engine model. Public contract for the UI: `ShotBand`,
+ * `ShotBandWidths`, and `rollShotSave` (shapes in `types/game.ts`). Widths
+ * come from `bandWidthsForAccuracy`; the UI must not hardcode band
+ * geometry.
  */
 import {
   BASE_SAVE_BY_BAND,
@@ -29,16 +28,15 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** LW/RW accuracy bonus for a shot card, on the 0-100 accuracy scale (`PERK_WING_SHOT_ACCURACY`; BG-A14b applies this in the shot ante - see `shotDuel.ts`). */
+/** LW/RW accuracy bonus for a shot card, on the 0-100 accuracy scale (`PERK_WING_SHOT_ACCURACY`; applied in the shot ante - see `shotDuel.ts`). */
 export function shotAccuracyBonus(role: Role): number {
   return role === 'LW' || role === 'RW' ? PERK_WING_SHOT_ACCURACY : 0;
 }
 
 /**
- * The two concentric band widths for a given accuracy (0-100, clamped):
- * accuracy widens the yellow (perfect) zone only, per Chris's ruling; the
- * blue (good) zone stays constant so a low-accuracy card still lands `good`
- * reliably. The UI (BG-B22) consumes these numbers directly and must not
+ * The two concentric band widths for a given accuracy (0-100, clamped).
+ * The blue (good) zone is constant; only the yellow (perfect) zone widens
+ * with accuracy. The UI consumes these numbers directly and must not
  * hardcode band geometry.
  */
 export function bandWidthsForAccuracy(accuracy: number): ShotBandWidths {
@@ -95,9 +93,9 @@ export function poiseFactor(poise: number, maxPoise: number): number {
  * `power` and a `weak`/`miss` band freezes (existing clean-save path) while
  * `good`/`perfect` kicks out a rebound - the same function and outcome
  * mapping for both the human and the CPU shooter. A `good`/`perfect` save
- * then rolls a second, separate chance (BG-A16) against `SHOT_COVER_CHANCE`
- * for the goalie to cover the puck instead: `covered` and `rebound` are
- * mutually exclusive, and `covered` is never rolled on a `weak`/`miss` save.
+ * then rolls a second, separate chance against `SHOT_COVER_CHANCE` for the
+ * goalie to cover the puck instead: `covered` and `rebound` are mutually
+ * exclusive, and `covered` is never rolled on a `weak`/`miss` save.
  */
 export function rollShotSave(
   band: ShotBand,

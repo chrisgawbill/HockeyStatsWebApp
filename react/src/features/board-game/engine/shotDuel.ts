@@ -1,11 +1,10 @@
 /**
- * Shot minigame integration (BG-A14b): wires BG-A14a's band/save model into
- * the real game as an ante pick plus a save roll, replacing the old shot
- * card duel. A shot never draws a full card-duel hand or plans CPU rounds -
- * the shooter's side draws a 3-card ante from the shot pool via the same
- * `drawFilteredCards` BG-A13 built, picks one, and the engine rolls the
- * save through `rollShotSave` (identical for the user and the CPU). The
- * goalie never touches cards; its poise now lives on `GameState.goaliePoise`.
+ * Shot minigame integration: wires the band/save model into the real game
+ * as an ante pick plus a save roll. A shot never draws a full card-duel
+ * hand or plans CPU rounds - the shooter's side draws a 3-card ante from
+ * the shot pool via `drawFilteredCards`, picks one, and the engine rolls
+ * the save through `rollShotSave` (identical for the user and the CPU).
+ * The goalie never touches cards; its poise lives on `GameState.goaliePoise`.
  */
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
@@ -123,8 +122,8 @@ export function pickShotCard(state: GameState, handIndex: number): GameState {
  * Auto-resolves a shot without a timing-bar press: rolls a band weighted by
  * the picked card's accuracy (wing perk included), the same
  * `rollBandFromAccuracy` the CPU uses, then finishes through
- * `resolveShotBand` - one path, no second RNG source. For BG-B22's
- * `prefers-reduced-motion` fallback, and the headless BG-A10 sim (see
+ * `resolveShotBand` - one path, no second RNG source. Used for the
+ * `prefers-reduced-motion` fallback and the headless sim (see
  * `ai/autoplay.ts`), so the user shooter is measured the same way as the
  * CPU rather than by an unscored guess.
  */
@@ -143,7 +142,7 @@ export function autoResolveShot(state: GameState): GameState {
 
 /**
  * The timing-bar band widths for the current shot's picked card, wing perk
- * included - the contract BG-B22's UI renders directly, never hardcoding
+ * included - the contract the UI renders directly, never hardcoding
  * geometry. Null until a card is picked, or outside a shot duel.
  */
 export function shotBandWidthsFor(state: GameState): ShotBandWidths | null {

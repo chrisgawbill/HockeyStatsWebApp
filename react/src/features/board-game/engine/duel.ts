@@ -45,9 +45,9 @@ export function stunUntil(
 
 /**
  * Draws both sides' hands for a round and secretly plans the CPU's cards.
- * Each hand is filtered to cards legal for that side in this duel kind
- * (BG-A13), so a card never sits in hand dead-on-arrival; ineligible cards
- * stay in the deck for later duels.
+ * Each hand is filtered to cards legal for that side in this duel kind, so
+ * a card never sits in hand dead-on-arrival; ineligible cards stay in the
+ * deck for later duels.
  */
 function drawHandsAndPlan(state: GameState, duelBase: DuelState): GameState {
   const cpuSide = otherSide(duelBase.userSide);
@@ -303,11 +303,9 @@ export function endDuelRound(state: GameState): GameState {
 
   const nextRound = duel.round + 1;
   if (nextRound > MAX_ROUNDS) {
-    // BG-A15b: faceoff duels no longer reach this generic round machinery
-    // at all (they resolve through `engine/faceoffDuel.ts`'s ante+reaction
-    // instead), so the old poise-comparison timeout tiebreak for `faceoff`
-    // was dead code - removed. Every duel kind that still goes through here
-    // (deke/check/intercept) always favored the defender on a timeout.
+    // Faceoff duels resolve through `engine/faceoffDuel.ts`'s ante+reaction
+    // instead and never reach this timeout path. Every kind that does
+    // (deke/check/intercept) favors the defender on a timeout.
     return resolveDuel(roundState, 'defender', false);
   }
 

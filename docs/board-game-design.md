@@ -120,5 +120,25 @@ Each call returns exactly **one** action. Priority order:
 4. If the CPU doesn't have the puck, the non-stunned skater closest to the puck either steps toward it, or `CHECK`s if it's adjacent to the carrier.
 5. If there's no useful step, `END_TURN`. It must never loop forever: stop once MP is 0 or after 20 actions in the turn.
 
-## 8. Out of scope (MVP) [C]
+## 8. Shot & faceoff minigames — band mechanics
+
+`SHOOT` and the faceoff resolve through a two-band minigame instead of a card duel: an ante card sets a *width*, then a timed press (or its seeded auto-resolve fallback) lands in one of several nested bands. See `engine/shotModel.ts`/`engine/shotDuel.ts` and `engine/faceoffModel.ts`/`engine/faceoffDuel.ts`.
+
+### Shot (`ShotBand`: perfect / good / weak / miss)
+- The timing bar has two concentric zones measured from center: a **yellow** (perfect) zone and a **blue** (good) zone. `miss` is a UI-only "no press" state — the engine's own band roll (CPU, or the reduced-motion/headless fallback) never produces it.
+- **[C] Difficulty lives in band width, never in press speed.** A card's `accuracy` widens the yellow (perfect) zone only; the blue (good) zone stays a constant width, so a low-accuracy card still reliably lands at least `good`.
+- The wing (LW/RW) perk adds accuracy, not power, and applies identically whether the human or the CPU shoots.
+- Save resolution is one shared function (`rollShotSave`) for both the human and CPU shooter: `saveChance = BASE_SAVE_BY_BAND[band] + poiseFactor(goaliePoise) - power`, clamped and rolled through `engine/rng.ts`.
+- A `good`/`perfect` save additionally rolls a separate "covered" chance (`SHOT_COVER_CHANCE`); `covered` and `rebound` are mutually exclusive, and `covered` is never rolled on a `weak`/`miss` save.
+- Exact save-chance-by-band numbers (e.g. how saveable a `perfect`-band shot is) are documented alongside `BASE_SAVE_BY_BAND` in `data/balance.ts`.
+
+### Faceoff (`FaceoffBand`: clean / scrum / late / jump)
+- **[C] Centres genuinely compete — the faceoff draw is not shaped like the shot.** Unlike the shooter/goalie split, both centres ante a card and produce a real reaction band; the exact same symmetric contest function (`rollFaceoffHeadToHead`) decides the draw for both sides. There is no separate, privileged resolution path for the human or the CPU.
+- **[C] Difficulty lives in the reaction-window widths, never in how long the linesman holds the puck.** The pre-drop hold (`rollDropDelayMs`) only decides *when* the puck drops.
+- Anticipation widens the `clean` window only; the `scrum` window is a constant width, so a slow draw is never a complete write-off.
+- **[C] A scrum fires only on a genuine tie**: when both centres land the *same* non-`clean` band (`scrum`/`scrum` or `late`/`late`), the result is an automatic scrum — no roll, `winChance` is 0. Otherwise (either side `clean`, or the bands differ): `winChance = 50 + (BASE_WIN_BY_BAND[userBand] - BASE_WIN_BY_BAND[cpuBand]) + (userGrip - cpuGrip)`, clamped to `[0, 100]`. When both bands are equal (including both `clean`), the band terms cancel and grip alone decides it around a fair 50/50.
+- A `jump` (pressing before the drop) is human-only — the engine's own seeded band roll never produces one; it's a genuine false start only possible from a live timed press. A second jump in the same faceoff forfeits the draw outright to the opponent.
+- **Derivation — the human-reaction anchor.** The CPU's (and the reduced-motion/headless fallback's) simulated reaction time is sampled up to `FACEOFF_REACTION_SAMPLE_CEILING_MS`, anchored on human-reaction-time research: `FACEOFF_CLEAN_WINDOW_BASE_MS` (the clean window's base width) is set from a median human reaction time of ~250ms, not as a self-referential multiple of the window widths. The full derivation and the base window's exact value live with `FACEOFF_CLEAN_WINDOW_BASE_MS`'s own doc comment in `data/balance.ts`.
+
+## 9. Out of scope (MVP) [C]
 Deckbuilding and rewards, run maps, relics, persistence, real NHL teams, sound, and multiplayer.
