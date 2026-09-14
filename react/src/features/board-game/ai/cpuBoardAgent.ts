@@ -157,6 +157,16 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
     // any legal pass at all beats stalling forever on a fully surrounded carrier.
     const anyPassTarget = passTargets(state)[0];
     if (anyPassTarget) return { type: 'PASS', toSkaterId: anyPassTarget };
+
+    // Truly last resort: a carrier can have one free orthogonal neighbor
+    // that doesn't shorten the path to net (so `pickStepToward` calls it "no
+    // useful step") without being `isBoxedIn` (that only fires with *zero*
+    // free neighbors) - e.g. boxed in on 3 sides by its own teammates. Take
+    // that step anyway rather than looping END_TURN forever with the puck
+    // frozen in place; it's still a legal, deterministic move that changes
+    // the position enough to eventually unstick the game.
+    const anyStep = legalSteps(state, carrier.id)[0];
+    if (anyStep) return { type: 'MOVE', skaterId: carrier.id, to: anyStep };
     return { type: 'END_TURN' };
   }
 

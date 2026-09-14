@@ -91,11 +91,17 @@ describe('faceoffModel', () => {
   });
 
   describe('rollFaceoffHeadToHead (BG-A15b cycle 2: the one symmetric contest, no user/CPU fork)', () => {
-    it('neither side clean -> an automatic scrum, no roll (seed passes through unchanged)', () => {
-      const [result, nextSeed] = rollFaceoffHeadToHead('scrum', 10, 'late', 0, 7);
-      expect(result.outcome).toBe('scrum');
-      expect(result.winChance).toBe(0);
-      expect(nextSeed).toBe(7);
+    it('a tied non-clean band (both scrum, or both late) -> an automatic scrum, no roll (seed passes through unchanged)', () => {
+      const [bothScrum, seedAfterBothScrum] = rollFaceoffHeadToHead(
+        'scrum',
+        10,
+        'scrum',
+        0,
+        7,
+      );
+      expect(bothScrum.outcome).toBe('scrum');
+      expect(bothScrum.winChance).toBe(0);
+      expect(seedAfterBothScrum).toBe(7);
 
       const [bothLate, seedAfterBothLate] = rollFaceoffHeadToHead(
         'late',
@@ -106,6 +112,28 @@ describe('faceoffModel', () => {
       );
       expect(bothLate.outcome).toBe('scrum');
       expect(seedAfterBothLate).toBe(7);
+    });
+
+    it('scrum vs. late (differing, neither clean) is NOT a scrum - scrum genuinely outcompetes late via the same band-edge roll', () => {
+      // Corrected cycle-2 boundary: the scrum trigger is a TIE among
+      // non-clean bands, not merely "neither is clean" - see
+      // `rollFaceoffHeadToHead`'s doc comment for why the earlier, broader
+      // gate made a winning side's own band provably always `clean`
+      // whenever its opponent was pinned to a single non-clean band, which
+      // is exactly the flattened, not-really-competing draw Chris's ruling
+      // rejected.
+      const [result, nextSeed] = rollFaceoffHeadToHead(
+        'scrum',
+        10,
+        'late',
+        0,
+        7,
+      );
+      expect(result.outcome).toBe('win');
+      expect(result.winChance).toBe(
+        50 + (BASE_WIN_BY_BAND.scrum - BASE_WIN_BY_BAND.late) + 10,
+      );
+      expect(nextSeed).not.toBe(7);
     });
 
     it('both clean, equal grip -> a fair 50/50 (the band terms cancel exactly)', () => {
@@ -119,7 +147,7 @@ describe('faceoffModel', () => {
       expect(result.winChance).toBe(50 + (10 - 4));
     });
 
-    it("one side clean, the other not -> the base-band edge (BASE_WIN_BY_BAND difference) plus grip favours the clean side", () => {
+    it('one side clean, the other not -> the base-band edge (BASE_WIN_BY_BAND difference) plus grip favours the clean side', () => {
       const [cleanVsLate] = rollFaceoffHeadToHead('clean', 0, 'late', 0, 1);
       expect(cleanVsLate.winChance).toBe(
         50 + (BASE_WIN_BY_BAND.clean - BASE_WIN_BY_BAND.late),
@@ -158,7 +186,13 @@ describe('faceoffModel', () => {
       let seed = 5;
       let won = false;
       for (let i = 0; i < 50 && !won; i++) {
-        const [result, next] = rollFaceoffHeadToHead('clean', 0, 'late', 0, seed);
+        const [result, next] = rollFaceoffHeadToHead(
+          'clean',
+          0,
+          'late',
+          0,
+          seed,
+        );
         expect(result.winChance).toBe(
           50 + (BASE_WIN_BY_BAND.clean - BASE_WIN_BY_BAND.late),
         );

@@ -58,7 +58,11 @@ function findSeedWhere(
   tries = 5000,
 ): number {
   for (let seed = from; seed < from + tries; seed++) {
-    const result = resolveFaceoffBand({ ...state, rngSeed: seed }, pickedCardId, band);
+    const result = resolveFaceoffBand(
+      { ...state, rngSeed: seed },
+      pickedCardId,
+      band,
+    );
     if (predicate(result)) return seed;
   }
   throw new Error('no seed found in range');
@@ -151,7 +155,7 @@ describe('resolveFaceoffBand: three outcomes, symmetric head-to-head (BG-A15b cy
     expect(result.duel).toBeNull();
   });
 
-  it('SCRUM: neither side reading clean is an automatic scrum - the puck goes loose on a free tile adjacent to the dot', () => {
+  it('SCRUM: both sides reading the same non-clean band is an automatic scrum - the puck goes loose on a free tile adjacent to the dot', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -167,11 +171,13 @@ describe('resolveFaceoffBand: three outcomes, symmetric head-to-head (BG-A15b cy
         sawScrum = true;
         expect(manhattan(result.puck.pos, FACEOFF_SPOTS.centreIce)).toBe(1);
       } else {
-        // The only way a fixed 'scrum' user band ISN'T a scrum is if the
-        // CPU's own (rolled) band happened to read 'clean' this attempt -
-        // a real, favoured-but-not-guaranteed win/loss roll (band-edge
-        // favours the CPU, but grip can still carry the user through it),
-        // not a bug - see faceoffModel.test.ts for the exact edge math.
+        // A fixed 'scrum' user band ISN'T a scrum whenever the CPU's own
+        // (rolled) band differs - either 'clean' (a real, CPU-favoured
+        // win/loss roll) or 'late' (a real, user-favoured one - 'scrum'
+        // genuinely outcompetes 'late'). Only a tied 'scrum'/'scrum' read is
+        // the automatic scrum this test is really after - see
+        // `rollFaceoffHeadToHead`'s doc comment and faceoffModel.test.ts for
+        // the exact boundary and edge math.
         sawCarried = true;
         expect(result.puck.kind).toBe('carried');
       }
@@ -187,7 +193,10 @@ describe('resolveFaceoffBand: three outcomes, symmetric head-to-head (BG-A15b cy
     // The CPU's own band happens to be clean at this seed (see the seed
     // search above's else-branch reasoning) - a clean-vs-scrum pairing, so
     // it must resolve as a win/loss roll, never a scrum.
-    const seed = findSeedWhereCpuBandIs(CARDS.quick_hands.anticipation!, 'clean');
+    const seed = findSeedWhereCpuBandIs(
+      CARDS.quick_hands.anticipation!,
+      'clean',
+    );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
       'quick_hands',

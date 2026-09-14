@@ -136,10 +136,13 @@ export const FACEOFF_DROP_DELAY_MAX_MS = 1800;
  * band values as an edge on top of grip, so only the gaps between
  * `clean`/`scrum`/`late` matter, not their absolute size. When both sides
  * read the same band the gap is zero and grip alone (around a fair 50/50)
- * decides - which is why `scrum` and `late` still need real entries here
- * even though neither can ever win outright on its own (`clean` beats
- * either; two non-`clean` bands are always a scrum, never a roll) - their
- * values still set how much of an edge `clean` gets over each of them.
+ * decides - true whether that tied band is `clean` (a real roll) or not
+ * (`scrum`/`scrum` and `late`/`late` are automatic scrums instead, since
+ * there's nothing left to grade a tied non-`clean` read on; see
+ * `rollFaceoffHeadToHead`). `scrum` and `late` need real entries here
+ * because a `scrum` read genuinely outcompetes a `late` one when the two
+ * differ - their values set both that edge and how much of an edge `clean`
+ * gets over each of them.
  */
 export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
   clean: 65,

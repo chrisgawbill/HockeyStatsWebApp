@@ -141,24 +141,39 @@ export function rollBandFromAnticipation(
  * (Chris's ruling: "centres should compete, shouldn't be like shot").
  * Reuses `BASE_WIN_BY_BAND` rather than inventing a second table:
  *
- * - Neither side reads `clean`: an automatic **scrum**
- *   (`outcome: 'scrum'`) - nobody's read was sharp enough to claim it
- *   cleanly, so the puck goes loose (`engine/duelOutcome.ts` picks the
- *   tile). No roll is made; `winChance` is 0.
- * - Otherwise (at least one side is `clean`): `winChance =
+ * - Both sides read the SAME non-`clean` band (`scrum`/`scrum` or
+ *   `late`/`late`) - a genuine tie with nothing to grade it on: an
+ *   automatic **scrum** (`outcome: 'scrum'`), puck loose
+ *   (`engine/duelOutcome.ts` picks the tile). No roll is made; `winChance`
+ *   is 0. This is the corrected cycle-2 boundary - an EARLIER cycle-2 pass
+ *   gated the scrum on "neither side clean" instead of "both sides equal
+ *   and non-clean", which meant a `scrum`-band read could never out-compete
+ *   a `late`-band read at all (always an automatic scrum, regardless of the
+ *   real edge between them) - exactly the kind of flattened, not-really-
+ *   competing draw Chris's ruling rejected, and it made a winning side's own
+ *   band provably always `clean` whenever the opponent was pinned `late`
+ *   (QA finding, BG-A15b cycle 2 review: `engine/faceoffDuel.test.ts`'s
+ *   "the CPU's own card effect fires on some of its wins and not others"
+ *   proof of genuine band variance is unsatisfiable by construction under
+ *   the old boundary, for ANY sampling distribution - not a sampling bug).
+ * - Otherwise (both `clean`, or the two bands differ): `winChance =
  *   50 + (BASE_WIN_BY_BAND[userBand] - BASE_WIN_BY_BAND[cpuBand]) +
  *   (userGrip - cpuGrip)`, clamped to `[0, 100]`, rolled through
- *   `engine/rng.ts`. When both bands are `clean` the two base-band terms
- *   cancel exactly, so grip alone around a fair 50/50 decides it - "both
- *   clean -> grip difference decides" falls out of the same formula as a
- *   degenerate case, not a special-cased branch. When only one side reads
- *   `clean`, the base-band terms add a real edge on top of grip, graded by
- *   how far `clean`'s base value sits above the other band's (beating a
- *   `late` opponent is a bigger edge than beating a `scrum` opponent).
+ *   `engine/rng.ts`. When both bands are `clean` (or any other tie) the two
+ *   base-band terms cancel exactly, so grip alone around a fair 50/50
+ *   decides it - "both clean -> grip difference decides" falls out of the
+ *   same formula as a degenerate case, not a special-cased branch. When the
+ *   bands differ, the base-band terms add a real edge on top of grip,
+ *   graded by how far one band's base value sits above the other's
+ *   (`clean` beating `late` is a bigger edge than `clean` beating `scrum`,
+ *   which in turn is bigger than `scrum` beating `late`) - a `scrum` read
+ *   is a real, if lesser, edge over a `late` one, not a coin flip's worth of
+ *   nothing.
  *
  * The winning side's card `faceoffEffect` fires only when that side's own
  * band was `'clean'` (checked by the caller, not here - this function only
- * decides who wins).
+ * decides who wins) - so a `scrum`-band win off the edge above still just
+ * carries the puck, no bonus.
  */
 export function rollFaceoffHeadToHead(
   userBand: Exclude<FaceoffBand, 'jump'>,
@@ -167,7 +182,7 @@ export function rollFaceoffHeadToHead(
   cpuGrip: number,
   seed: number,
 ): [FaceoffHeadToHeadResult, number] {
-  if (userBand !== 'clean' && cpuBand !== 'clean') {
+  if (userBand === cpuBand && userBand !== 'clean') {
     return [{ outcome: 'scrum', userWins: false, winChance: 0 }, seed];
   }
   const edge = BASE_WIN_BY_BAND[userBand] - BASE_WIN_BY_BAND[cpuBand];
