@@ -352,3 +352,37 @@ DONE WHEN:
 - Manual smoke: team list page still renders team stats; landing page unaffected.
 - grep confirms no reference to listOfTeams-key remains, and react-error-boundary appears only in react/package.json; this box is ticked.
 ```
+
+## C-DOC1 Strip comment archaeology, move rationale to docs (Chris, 2026-09-14)
+
+**Goal (Chris):** rip out code comments and relocate the ones that matter into `docs/`. The board-game feature especially has accumulated heavy JSDoc, much of it narrating tickets rather than explaining code.
+
+**PM framing — this is a taxonomy, not a blanket delete.** A blanket strip would destroy real information. Several constants are indefensible without their rationale (`FACEOFF_CLEAN_WINDOW_BASE_MS = 190` is derived from human reaction time; `BASE_SAVE_BY_BAND.perfect = 20` is Chris's explicit ruling), and `data/balance.ts`'s JSDoc is the surface Chris actually tunes against. Work the three buckets below. If a comment doesn't clearly fall in one, leave it and list it in your report rather than guessing.
+
+### STRIP — delete outright
+- [ ] **Ticket archaeology.** References to BG-A13/A14a/A14b/A15a/A15b/A16/B20/B22/B25 etc. explaining *when* or *by which ticket* something changed. Git history holds this. Example: `// BG-A14b: one of each of the 4 shot-pool cards (was wrist_shot x2 + slapshot x1)`.
+- [ ] **Narrative history.** "was X, now Y", "this used to...", "replaces the old...". The current state is what a reader needs.
+- [ ] **PM process notes** embedded in code — split rationale, "Chris's call" attributions where the *what* is already clear from the code, agent-to-agent instructions.
+- [ ] **Restatement.** Comments that say what the next line plainly says.
+
+### KEEP — leave in place, these are contracts
+- [ ] **Units, ranges, scales.** `accuracy` is 0–100; widths are fractions of the `[0,1]` track; save chances are percent.
+- [ ] **Invariants a caller can violate.** "never returns `miss`"; "mutually exclusive with `rebound`"; "must not hardcode geometry in the UI".
+- [ ] **Safety rails.** "all RNG through `engine/rng.ts`, never `Math.random`" — these prevent real bugs and belong where the code is.
+- [ ] **Non-obvious *why* for a specific line**, where moving it to a doc would mean a reader never finds it.
+
+### MOVE — relocate to `docs/board-game-design.md`, then delete from source
+- [ ] **Measured values and their provenance.** Shot conversion 56.0% → ~50%; scrum 11.8%; average game 9.6 → 8.2 → 8.6 turns. Record what was measured, when, and by what method — these took real sim work to establish and are unreproducible from the code alone.
+- [ ] **Design rulings.** A perfect shot is still saved ~20% of the time. Difficulty lives in band/window width, never in speed. Centres genuinely compete; the draw is not shaped like the shot. A scrum fires only on a genuine tie.
+- [ ] **Derivations.** The human-reaction anchor (~250ms median, ~200ms trained) behind the faceoff windows, including the fact that an 80ms window made a clean win unreachable.
+
+### Constraints
+- [ ] **`data/balance.ts` is the exception — treat it conservatively.** Every constant keeps a one-line JSDoc saying what it does and its unit or scale. Chris tunes this file by reading it; a bare list of numbers is unusable. Move the *history* out, keep the *meaning* in.
+- [ ] **Zero behaviour change.** Comments and JSDoc only. No renames, no reordering, no logic edits, no "while I'm here" fixes. The full suite must stay green with an identical pass count.
+- [ ] **Every MOVE lands in docs before its comment is deleted.** Do not delete first and reconstruct later. If you cannot find a home for something, keep the comment and flag it.
+- [ ] **Do it per-area, not repo-wide in one pass** — `engine/`, then `data/`, then `components/`, then `ai/`. One commit per area, so a bad judgement call is easy to revert.
+- [ ] **Report every comment you deleted that carried a fact not now in docs.** That list is the review surface; if it's empty, say so explicitly.
+
+### Out of scope
+- [ ] Don't touch test files' descriptive comments — a test's reasoning belongs beside the assertion.
+- [ ] Don't touch `api/` or the stats app in the same pass.
