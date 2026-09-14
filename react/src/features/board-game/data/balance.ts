@@ -2,21 +2,32 @@
 
 import type { GameLength } from '@/features/board-game/types/game';
 
+/** Board width, in columns (`col` 0-14). */
 export const BOARD_COLS = 15;
+/** Board height, in rows (`row` 0-6). */
 export const BOARD_ROWS = 7;
 
+/** Starting and max poise for a non-goalie skater in a duel. */
 export const SKATER_POISE = 20;
 
-/** From the PM's sim sweep (BG-A10); 50+ turns the goalie into a wall and games may never end. */
+/**
+ * Goalie starting/max poise by game length. Kept well under 50 - past that
+ * the goalie becomes a wall and games may never end (see
+ * docs/board-game-design.md §3).
+ */
 export const GOALIE_POISE_BY_LENGTH: Record<GameLength, number> = {
   short: 43,
   long: 44,
 };
 
+/** Energy (card-play budget) each side gets at the start of a duel round. */
 export const ENERGY = 3;
+/** Cards dealt to hand at the start of a duel round (a centre's faceoff ante is separate - see `PERK_CENTER_FACEOFF_DRAW`). */
 export const HAND_SIZE = 5;
+/** Duel rounds before the defender wins on timeout. */
 export const MAX_ROUNDS = 3;
 
+/** MP cost per board action. */
 export const COST = {
   move: 1,
   pass: 2,
@@ -25,30 +36,26 @@ export const COST = {
 };
 
 /**
- * LW/RW shot accuracy bonus (BG-A14a/b), on the same 0-100 scale as card
- * accuracy. Replaces the old damage-scale wing bonus now that shots resolve
- * through the ante/band model instead of card damage - see
- * `shotAccuracyBonus` in `engine/shotModel.ts`. Chris-tunable placeholder:
- * ~15 widens the yellow band by ~0.023 of the track, noticeable without
- * eclipsing the card choice.
+ * LW/RW shot accuracy bonus, on the same 0-100 scale as a card's own
+ * `accuracy`. Applied in the shot ante - see `shotAccuracyBonus` in
+ * `engine/shotModel.ts`. Reasoning behind the 15: see
+ * docs/board-game-design.md §8.
  */
 export const PERK_WING_SHOT_ACCURACY = 15;
 /** LD/RD bonus amount on `check`/`block`-tagged card effects (damage or block). */
 export const PERK_DEFENSE_BONUS = 2;
 /**
- * Extra card in the faceoff ante (BG-A15b): both duelists in a faceoff are
- * always the C, so the ante is `3 + PERK_CENTER_FACEOFF_DRAW` cards, pick 1
- * (see `FACEOFF_ANTE_SIZE` in `engine/faceoffDuel.ts`) - draw 4, not the
- * plain 3-card offer a shot ante gets. Single-source: before BG-A15b this
- * same constant instead widened the old faceoff card duel's dealt hand by
- * one; the perk's *value* hasn't changed, only what kind of draw it grows.
+ * Extra card in the faceoff ante: both duelists in a faceoff are always the
+ * C, so the ante is `3 + PERK_CENTER_FACEOFF_DRAW` cards, pick 1 (see
+ * `FACEOFF_ANTE_SIZE` in `engine/faceoffDuel.ts`).
  */
 export const PERK_CENTER_FACEOFF_DRAW = 1;
 
 /**
- * Shot minigame model (BG-A14a, additive - not yet called by the running
- * game; see `engine/shotModel.ts`). Chris tunes these; placeholders anchored
- * on the ruling that a perfect shot is still saved ~20% of the time.
+ * Save chance by shot band (percent), before the goalie-poise and
+ * shot-power modifiers `rollShotSave` applies. Chris tunes these; the
+ * `perfect` ruling is deliberate, not an accident - see
+ * docs/board-game-design.md §8.
  */
 export const BASE_SAVE_BY_BAND: Record<
   'perfect' | 'good' | 'weak' | 'miss',
@@ -60,11 +67,11 @@ export const BASE_SAVE_BY_BAND: Record<
   miss: 96,
 };
 /**
- * Chance (percent, BG-A16) that a `good`/`perfect` save is covered - the
- * goalie smothers it for a whistle and a faceoff - instead of rebounding.
- * Never rolled on a `weak`/`miss` save. Chris-tunable placeholder: 25 means
- * roughly a quarter of good/perfect saves stop play rather than kicking out
- * a loose puck, enough to matter without making rebounds the exception.
+ * Chance (percent) that a `good`/`perfect` save is covered - the goalie
+ * smothers it for a whistle and a faceoff - instead of rebounding. Never
+ * rolled on a `weak`/`miss` save. 25 means roughly a quarter of good/perfect
+ * saves stop play rather than kicking out a loose puck, enough to matter
+ * without making rebounds the exception.
  */
 export const SHOT_COVER_CHANCE = 25;
 /** Save chance is clamped to this range (percent) after all modifiers. */
@@ -82,22 +89,10 @@ export const SHOT_BLUE_BAND_WIDTH = 0.32;
 export const CPU_SHOT_ACCURACY = 55;
 
 /**
- * Faceoff minigame model (BG-A15a, additive - not yet called by the running
- * game; see `engine/faceoffModel.ts`). The faceoff stays a card duel until
- * BG-A15b repoints it. Chris tunes these; placeholders below reason from the
- * 700-1800ms drop hold and Chris's standing BG-A14a ruling that difficulty
- * comes from window width, never hold speed. The window widths (BG-A15a
- * cycle 1 retune, PM/QA finding) are anchored on human simple-visual-
- * reaction-time research: median reaction ~250ms, trained player ~200ms,
- * ~150ms exceptional/guess-territory - see `FACEOFF_CLEAN_WINDOW_BASE_MS`.
- */
-/**
  * Clean-band window at 0 anticipation, in ms, measured from the drop.
- * Anchored on human simple-visual-reaction-time research (BG-A15a QA/PM
- * finding): median untrained reaction is ~250ms, a trained player reaches
- * ~200ms, ~150ms is exceptional and often a guess. 190ms sits just under
- * "trained player" so a clean win at 0 anticipation is a real ask - a sharp
- * press from a fast reader, not a given for anyone.
+ * Anchored on human reaction-time research so a clean win is a real ask,
+ * not a given - full derivation (why 190ms and not, say, 80ms) lives in
+ * docs/board-game-design.md §8.
  */
 export const FACEOFF_CLEAN_WINDOW_BASE_MS = 190;
 /**
@@ -126,23 +121,16 @@ export const FACEOFF_DROP_DELAY_MIN_MS = 700;
 /** Maximum linesman hold before the drop, in ms. */
 export const FACEOFF_DROP_DELAY_MAX_MS = 1800;
 /**
- * Per-band base value used by the symmetric head-to-head faceoff contest
- * (BG-A15b cycle 2's `rollFaceoffHeadToHead`), by band. `jump` has no
- * entry: a jump never enters the contest at all - the jumping side either
- * earns a re-drop or forfeits outright (see `engine/faceoffDuel.ts`'s
- * `resolveFaceoffBand`). These aren't standalone win chances any more
- * (cycle 1's one-sided model rolled a band straight against this as a flat
- * percent); the contest now takes the *difference* between the two sides'
- * band values as an edge on top of grip, so only the gaps between
- * `clean`/`scrum`/`late` matter, not their absolute size. When both sides
- * read the same band the gap is zero and grip alone (around a fair 50/50)
- * decides - true whether that tied band is `clean` (a real roll) or not
- * (`scrum`/`scrum` and `late`/`late` are automatic scrums instead, since
- * there's nothing left to grade a tied non-`clean` read on; see
- * `rollFaceoffHeadToHead`). `scrum` and `late` need real entries here
- * because a `scrum` read genuinely outcompetes a `late` one when the two
- * differ - their values set both that edge and how much of an edge `clean`
- * gets over each of them.
+ * Per-band base value (not a standalone win chance) used by the symmetric
+ * head-to-head faceoff contest `rollFaceoffHeadToHead`. `jump` has no entry:
+ * a jump never enters the contest - the jumping side either earns a re-drop
+ * or forfeits outright (see `engine/faceoffDuel.ts`'s `resolveFaceoffBand`).
+ * The contest takes the *difference* between the two sides' band values as
+ * an edge on top of grip, so only the gaps between `clean`/`scrum`/`late`
+ * matter, not their absolute size; when both sides read the same band the
+ * gap is zero and grip alone decides (around a fair 50/50) unless the tied
+ * band is a non-`clean` one, which is an automatic scrum instead (see
+ * `rollFaceoffHeadToHead`).
  */
 export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
   clean: 65,
@@ -152,38 +140,29 @@ export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
 /**
  * Sampling ceiling (ms) for a simulated faceoff reaction time - shared by
  * the CPU centre's own reaction and a human centre's reduced-motion/
- * headless fallback (BG-A15b cycle 2's `rollBandFromAnticipation`; Chris's
- * ruling that the two must be genuinely comparable, not the CPU alone).
- * Unlike `CPU_SHOT_ACCURACY` (a flat aim difficulty the shot model
- * intentionally keeps independent of the CPU's card), this reaction is
- * driven entirely by whichever card was anted (its `anticipation` stat), so
- * there's no separate "difficulty" constant - only where the reaction-time
- * roll tops out. BG-A15a's first cut reused `FACEOFF_SCRUM_WINDOW_MS * 2`
- * for this, which pinned `late` at exactly 50% of every roll regardless of
- * anticipation (the domain's midpoint always landed on the scrum window's
- * outer edge) - a QA finding, not a balance call, and one that turned out to
- * hit the reduced-motion fallback exactly as hard as the CPU once measured.
- * 500ms instead anchors on the same human-reaction-time research
- * `FACEOFF_CLEAN_WINDOW_BASE_MS` cites (median ~250ms): twice the median,
- * so a genuinely slow read is still reachable without being baked in as a
- * coin flip. Not one of the three tuned window constants above - moving it
- * doesn't retune `clean/scrum`, only where the simulated-reaction ceiling
- * sits.
+ * headless fallback. Driven entirely by the anted card's `anticipation`
+ * stat, so there's no separate "difficulty" constant, only where the
+ * reaction-time roll tops out. 500ms anchors on the same human-reaction-time
+ * research `FACEOFF_CLEAN_WINDOW_BASE_MS` cites (median ~250ms): twice the
+ * median, so a genuinely slow read is still reachable without being baked
+ * in as a coin flip. Not one of the tuned window constants above - moving
+ * it doesn't retune `clean`/`scrum`, only where the simulated-reaction
+ * ceiling sits.
  */
 export const FACEOFF_REACTION_SAMPLE_CEILING_MS = 500;
 /**
  * Clean-band ms shaved off the re-drop window after a jump (a false start
  * costs precision, not just a retry). Floored at 0 by
- * `narrowedWindowsAfterJump`. Re-checked against the BG-A15a cycle-1 window
- * retune and left at 30: unlike the window widths, this models a fixed
- * jolt to reaction precision (adrenaline/self-correction after a false
- * start), not a fraction of the window, so it doesn't need to scale with
- * the wider windows. It stays a meaningful bite on every carded card - a
- * 10-14% cut to the clean window across the 25-85 carded anticipation
- * range - without being able to zero out the tightest one.
+ * `narrowedWindowsAfterJump`. Models a fixed jolt to reaction precision
+ * (adrenaline/self-correction after a false start), not a fraction of the
+ * window, so it doesn't need to scale with the window widths. It stays a
+ * meaningful bite on every carded card - a 10-14% cut to the clean window
+ * across the 25-85 carded anticipation range - without being able to zero
+ * out the tightest one.
  */
 export const FACEOFF_JUMP_WINDOW_PENALTY_MS = 30;
 
+/** Hard cap on actions in a single CPU turn, so the CPU heuristic can never loop forever. */
 export const CPU_TURN_ACTION_CAP = 20;
 
 /** Delay between CPU actions in useBoardGame, in ms (0 under prefers-reduced-motion). */

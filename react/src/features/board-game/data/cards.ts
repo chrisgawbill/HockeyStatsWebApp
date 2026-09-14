@@ -54,7 +54,7 @@ export const CARDS: Record<string, CardDef> = {
     allowedIn: ['shot'],
     exhaust: false,
     effects: [{ type: 'damage', amount: 7 }],
-    // BG-A14a shot-ante stats (unused by the still-live card duel above).
+    // Shot-ante stats (`accuracy`/`power`), used by the shot minigame - see engine/shotModel.ts.
     accuracy: 70,
     power: 4,
   },
@@ -70,9 +70,7 @@ export const CARDS: Record<string, CardDef> = {
     accuracy: 30,
     power: 9,
   },
-  // BG-A14a: two more shot-pool cards so the 3-card ante isn't the same
-  // offer every time. BG-A14b adds them to STARTER_DECK (see below) now
-  // that the shot ante draws from it.
+  // Two more shot-pool cards so the 3-card ante isn't the same offer every time.
   snap_shot: {
     id: 'snap_shot',
     name: 'Snap Shot',
@@ -97,13 +95,7 @@ export const CARDS: Record<string, CardDef> = {
     accuracy: 20,
     power: 11,
   },
-  // BG-A15a: six faceoff-pool cards so the 3-card ante isn't the same offer
-  // every time. PM ruling: unlike the BG-A14a shot cards, these are NOT
-  // added to STARTER_DECK here - the old faceoff card duel is still live and
-  // draws from STARTER_DECK for every duel kind, so adding six cards now
-  // would change its draw sequences and break this ticket's zero-behaviour-
-  // change guarantee. BG-A15b adds them to STARTER_DECK once it repoints the
-  // faceoff to this model and the old duel is gone.
+  // Six faceoff-pool cards so the 3-card ante isn't the same offer every time.
   quick_hands: {
     id: 'quick_hands',
     name: 'Quick Hands',
@@ -205,12 +197,9 @@ export const CARDS: Record<string, CardDef> = {
 
 /**
  * The user's 19-card starter deck (card ids, duplicates repeated). See
- * design doc §5. BG-A14b: one of each of the 4 shot-pool cards (was
- * `wrist_shot` x2 + `slapshot` x1) so the 3-card shot ante - now drawn from
- * this deck - offers real variety instead of the same two cards every time.
- * BG-A15b: one of each of the 6 faceoff-pool cards so the 3-card faceoff ante
- * - now drawn from this deck - offers real variety instead of the same offer
- * every time.
+ * design doc §5. One of each shot-pool and faceoff-pool card, so the shot
+ * and faceoff antes (both drawn from this deck) offer real variety instead
+ * of the same offer every time.
  */
 export const STARTER_DECK: string[] = [
   'deke',
