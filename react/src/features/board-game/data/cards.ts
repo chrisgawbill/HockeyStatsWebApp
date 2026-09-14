@@ -204,10 +204,13 @@ export const CARDS: Record<string, CardDef> = {
 };
 
 /**
- * The user's 13-card starter deck (card ids, duplicates repeated). See
+ * The user's 19-card starter deck (card ids, duplicates repeated). See
  * design doc §5. BG-A14b: one of each of the 4 shot-pool cards (was
  * `wrist_shot` x2 + `slapshot` x1) so the 3-card shot ante - now drawn from
  * this deck - offers real variety instead of the same two cards every time.
+ * BG-A15b: one of each of the 6 faceoff-pool cards so the 3-card faceoff ante
+ * - now drawn from this deck - offers real variety instead of the same offer
+ * every time.
  */
 export const STARTER_DECK: string[] = [
   'deke',
@@ -223,4 +226,10 @@ export const STARTER_DECK: string[] = [
   'one_timer',
   'body_check',
   'poke_check',
+  'quick_hands',
+  'tie_it_up',
+  'win_it_back',
+  'body_the_dot',
+  'forehand_pull',
+  'cheat_the_draw',
 ];

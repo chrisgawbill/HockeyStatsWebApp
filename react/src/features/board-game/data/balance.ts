@@ -35,7 +35,14 @@ export const COST = {
 export const PERK_WING_SHOT_ACCURACY = 15;
 /** LD/RD bonus amount on `check`/`block`-tagged card effects (damage or block). */
 export const PERK_DEFENSE_BONUS = 2;
-/** Extra cards the C draws when it is the faceoff duelist. */
+/**
+ * Extra card in the faceoff ante (BG-A15b): both duelists in a faceoff are
+ * always the C, so the ante is `3 + PERK_CENTER_FACEOFF_DRAW` cards, pick 1
+ * (see `FACEOFF_ANTE_SIZE` in `engine/faceoffDuel.ts`) - draw 4, not the
+ * plain 3-card offer a shot ante gets. Single-source: before BG-A15b this
+ * same constant instead widened the old faceoff card duel's dealt hand by
+ * one; the perk's *value* hasn't changed, only what kind of draw it grows.
+ */
 export const PERK_CENTER_FACEOFF_DRAW = 1;
 
 /**
@@ -131,8 +138,23 @@ export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
   scrum: 48,
   late: 25,
 };
-/** CPU faceoff "read" difficulty (0-100, higher is more anticipatory) for its seeded band roll - the faceoff analogue of `CPU_SHOT_ACCURACY`. */
-export const CPU_FACEOFF_REACTION = 50;
+/**
+ * Sampling ceiling (ms) for the CPU's simulated faceoff reaction time
+ * (BG-A15b). Unlike `CPU_SHOT_ACCURACY` (a flat aim difficulty the shot
+ * model intentionally keeps independent of the CPU's card), the faceoff CPU
+ * is driven by its own anted card's `anticipation` stat - see
+ * `rollCpuFaceoffBand` - so there's no separate "difficulty" constant here,
+ * only where the reaction-time roll tops out. BG-A15a's first cut reused
+ * `FACEOFF_SCRUM_WINDOW_MS * 2` for this, which pinned `late` at exactly
+ * 50% of every roll regardless of anticipation (the domain's midpoint
+ * always landed on the scrum window's outer edge) - a QA finding, not a
+ * balance call. 500ms instead anchors on the same human-reaction-time
+ * research `FACEOFF_CLEAN_WINDOW_BASE_MS` cites (median ~250ms): twice the
+ * median, so a genuinely slow read is still reachable without being
+ * baked in as a coin flip. Not one of the three tuned window constants
+ * above - moving it doesn't retune `clean/scrum`, only the CPU's ceiling.
+ */
+export const CPU_FACEOFF_REACTION_CEILING_MS = 500;
 /**
  * Clean-band ms shaved off the re-drop window after a jump (a false start
  * costs precision, not just a retry). Floored at 0 by

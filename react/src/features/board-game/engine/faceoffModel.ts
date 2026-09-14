@@ -1,15 +1,15 @@
 /**
- * Faceoff minigame engine model (BG-A15a). Pure and additive: nothing in the
- * running game calls this yet (BG-A15b wires it in and fully replaces the
- * faceoff card duel). Contract for BG-B25: `FaceoffBand`, `FaceoffBandWindows`,
- * and `rollFaceoffContest` (types/game.ts has the shapes). Windows come from
+ * Faceoff minigame engine model (BG-A15a; wired in by BG-A15b's
+ * `engine/faceoffDuel.ts`, which fully replaced the old faceoff card duel).
+ * Contract for BG-B25: `FaceoffBand`, `FaceoffBandWindows`, and
+ * `rollFaceoffContest` (types/game.ts has the shapes). Windows come from
  * `windowsForAnticipation`; the UI must not hardcode window geometry. Mirrors
  * `shotModel.ts`'s structure: a card's `anticipation`/`grip` play the same
  * two roles `accuracy`/`power` play there.
  */
 import {
   BASE_WIN_BY_BAND,
-  CPU_FACEOFF_REACTION,
+  CPU_FACEOFF_REACTION_CEILING_MS,
   FACEOFF_CLEAN_WINDOW_BASE_MS,
   FACEOFF_DROP_DELAY_MAX_MS,
   FACEOFF_DROP_DELAY_MIN_MS,
@@ -121,11 +121,33 @@ export function rollBandFromAnticipation(
   ];
 }
 
-/** The CPU's seeded faceoff band roll against its fixed reaction difficulty. Same `rollFaceoffContest` resolves it afterward - no second path for the CPU. */
+/**
+ * The CPU's seeded faceoff band roll, driven by `anticipation` - its own
+ * anted card's stat (BG-A15b), not a flat difficulty constant, so the CPU's
+ * clean rate genuinely moves with what it draws exactly as the human's
+ * does. Same `rollFaceoffContest` resolves it afterward - no second path
+ * for the CPU. Deliberately doesn't reuse `rollBandFromAnticipation`'s
+ * domain (`windows.scrumWindowMs * 2`): that domain's `late` share is
+ * structurally fixed at 50% no matter what `anticipation` is (the domain's
+ * midpoint always sits on the scrum window's outer edge), which is fine for
+ * that function's other callers but made the CPU's reaction unresponsive to
+ * its own card. `CPU_FACEOFF_REACTION_CEILING_MS` is a fixed, card-
+ * independent ceiling instead, so `late`'s share still shrinks and grows
+ * with `anticipation` like `clean`'s does. Never resolves to `jump` - that's
+ * a human-only false start, exactly as `miss` is UI-only for shots.
+ */
 export function rollCpuFaceoffBand(
+  anticipation: number,
   seed: number,
 ): [Exclude<FaceoffBand, 'jump'>, number] {
-  return rollBandFromAnticipation(CPU_FACEOFF_REACTION, seed);
+  const windows = windowsForAnticipation(anticipation);
+  const [t, nextSeed] = nextFloat(seed);
+  const reactionMs = t * CPU_FACEOFF_REACTION_CEILING_MS;
+  // reactionMs is always >= 0 here, so bandForReaction can never return 'jump'.
+  return [
+    bandForReaction(reactionMs, windows) as Exclude<FaceoffBand, 'jump'>,
+    nextSeed,
+  ];
 }
 
 /**

@@ -30,7 +30,8 @@ export type Phase =
 export type DuelKind = 'faceoff' | 'deke' | 'check' | 'intercept' | 'shot';
 
 /** Why a hand card can't be played right now, for the UI to explain a greyed-out card. */
-export type CardBlockReason = 'energy' | 'shotOnly' | 'checkOnly';
+export type CardBlockReason =
+  'energy' | 'shotOnly' | 'checkOnly' | 'faceoffOnly';
 
 export type CardTag = 'skill' | 'block' | 'shot' | 'check' | 'faceoff';
 
@@ -183,6 +184,42 @@ export interface DuelState {
    * pick and for every other duel kind.
    */
   shotPickedCardId: string | null;
+  /**
+   * Faceoff duel only (BG-A15b): the user centre's picked ante card id, once
+   * chosen from the offer sitting in `deck.hand`. Null before the pick and
+   * for every other duel kind.
+   */
+  faceoffPickedCardId: string | null;
+  /**
+   * Faceoff duel only (BG-A15b): the CPU centre's picked ante card id,
+   * chosen immediately when the duel is created (the CPU has no UI to wait
+   * on). Null when the faceoff pool was exhausted and the CPU drew no card.
+   */
+  faceoffCpuCardId: string | null;
+  /**
+   * Faceoff duel only (BG-A15b): true once the user's draw has already had
+   * one false start this duel, so a second `jump` is a repeat (outright
+   * loss, not a re-drop) and `faceoffBandWindowsFor` narrows the clean
+   * window on the retry - unless the picked card's `freeJump` effect says
+   * otherwise.
+   */
+  faceoffJumped: boolean;
+  /**
+   * Faceoff duel only (BG-A15b): the user centre's final, non-re-drop
+   * `rollFaceoffContest` result once the band is resolved. This is the one
+   * roll that decides who gets the puck; `applyOutcome` reads it. Null
+   * until resolved.
+   */
+  faceoffUserResult: FaceoffContestResult | null;
+  /**
+   * Faceoff duel only (BG-A15b): the CPU centre's own, independent
+   * `rollFaceoffContest` result - the same contest function the user's own
+   * draw resolves through, driven by the CPU's own anted card. Doesn't
+   * decide puck possession (the user's own result does that); only gates
+   * whether the CPU's card's `faceoffEffect` fires when the CPU ends up
+   * with the puck. Null until resolved, or if the CPU drew no card.
+   */
+  faceoffCpuResult: FaceoffContestResult | null;
 }
 
 /** What both sides committed and dealt when a duel round's simultaneous reveal resolved. Damage counts after block. */
@@ -245,6 +282,30 @@ export interface GameState {
    * shot resolves, otherwise stale-but-unread between shots.
    */
   lastShotSaveResult: ShotSaveResult | null;
+  /**
+   * The real `rollFaceoffContest` result for the faceoff `RESOLVE_FACEOFF_BAND`
+   * most recently resolved (BG-A15b), mirroring `lastShotSaveResult`'s
+   * lifecycle: null on `NEW_GAME` and `DISMISS_DUEL_RESULT`, set whenever a
+   * faceoff resolves, otherwise stale-but-unread between faceoffs. This is
+   * the user centre's own result; the CPU's independent result lives only
+   * on the (by-then-cleared) `DuelState`.
+   */
+  lastFaceoffResult: FaceoffContestResult | null;
+  /**
+   * The faceoff dot the current/most recent draw happened at (BG-A15b):
+   * `FACEOFF_SPOTS.centreIce` for a new game or a boxed-in whistle, or one
+   * of `FACEOFF_SPOTS.defendingDots[team]` for a covered-puck whistle. Set
+   * whenever a whistle moves `phase` to `'faceoff'`, read by
+   * `createFaceoffDuel` (full formation reset vs. two-centres-only) and by
+   * `applyOutcome`'s scrum branch (which tile the loose puck lands on).
+   */
+  faceoffSpot: Coord;
+  /**
+   * MP to add on top of the next `ROLL_DICE` roll (BG-A15b's `bonusMp`
+   * faceoff effect). Zero except right after a clean faceoff win with that
+   * effect; `ROLL_DICE` consumes and clears it.
+   */
+  pendingBonusMp: number;
 }
 
 export type Action =
@@ -264,5 +325,11 @@ export type Action =
   | { type: 'RESOLVE_SHOT_BAND'; band: ShotBand }
   /** Shot duel only (BG-A14b): resolves without a timing-bar press, rolling a band from the picked card's accuracy - `prefers-reduced-motion` and headless play. */
   | { type: 'AUTO_RESOLVE_SHOT' }
+  /** Faceoff duel only (BG-A15b): the user centre picks their ante card, offered at `deck.hand[handIndex]`. */
+  | { type: 'PICK_FACEOFF_CARD'; handIndex: number }
+  /** Faceoff duel only (BG-A15b): the UI reports the drop's reaction band, so the engine can roll the contest. */
+  | { type: 'RESOLVE_FACEOFF_BAND'; band: FaceoffBand }
+  /** Faceoff duel only (BG-A15b): resolves without a real reaction press, rolling a band from the picked card's anticipation - `prefers-reduced-motion` and headless play. */
+  | { type: 'AUTO_RESOLVE_FACEOFF' }
   | { type: 'DISMISS_DUEL_RESULT' }
   | { type: 'NEW_GAME'; seed: number; length: GameLength };

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
 import {
   createInitialState,
   gameReducer,
@@ -359,7 +360,7 @@ describe('DISMISS_DUEL_RESULT', () => {
     expect(next.whistle).toBe(false);
   });
 
-  it('a covered save (BG-A16) whistles dead and routes to the centre-ice faceoff, same as a boxed-in-carrier reset', () => {
+  it('a covered save (BG-A16/BG-A15b) whistles dead and routes to the end-zone dot in front of the covering net, moving only the two centres', () => {
     const movedSkaters = createInitialState(1, 'long').skaters.map((s) =>
       s.id === 'cpu-LD' ? { ...s, pos: { col: 5, row: 5 } } : s,
     );
@@ -392,14 +393,23 @@ describe('DISMISS_DUEL_RESULT', () => {
     const next = gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
     expect(next.phase).toBe('faceoff');
     expect(next.whistle).toBe(true);
-    expect(next.puck).toEqual({ kind: 'loose', pos: { col: 7, row: 3 } });
     expect(next.mp).toBe(0);
     expect(next.dice).toBeNull();
     expect(next.lastOutcome).toBeNull();
     expect(next.lastShotSaveResult).toBeNull();
-    // Full formation reset, same as the boxed-in-carrier whistle: the skater
-    // moved off its starting tile snaps back.
-    expect(next.skaters.find((s) => s.id === 'cpu-LD')!.pos).not.toEqual({
+
+    // cpu-G made the save, so the draw routes to one of cpu's own two
+    // defending dots - not the old interim centre-ice path.
+    const dot = next.faceoffSpot;
+    expect(FACEOFF_SPOTS.defendingDots.cpu).toContainEqual(dot);
+    expect(next.puck).toEqual({ kind: 'loose', pos: dot });
+
+    // Only the two centres move to the dot; a skater elsewhere on the ice
+    // stays exactly where it was - unlike the boxed-in-carrier whistle
+    // above, this is not a full formation reset.
+    expect(next.skaters.find((s) => s.id === 'user-C')!.pos).toEqual(dot);
+    expect(next.skaters.find((s) => s.id === 'cpu-C')!.pos).toEqual(dot);
+    expect(next.skaters.find((s) => s.id === 'cpu-LD')!.pos).toEqual({
       col: 5,
       row: 5,
     });

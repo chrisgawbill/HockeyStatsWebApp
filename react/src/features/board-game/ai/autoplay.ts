@@ -1,6 +1,7 @@
 import { CPU_TURN_ACTION_CAP } from '@/features/board-game/data/balance';
 import { chooseActionFor } from '@/features/board-game/ai/cpuBoardAgent';
 import { planCards } from '@/features/board-game/engine/cpuDuelPolicy';
+import { pickBestFaceoffCard } from '@/features/board-game/engine/faceoffDuel';
 import {
   createInitialState,
   gameReducer,
@@ -52,15 +53,32 @@ function stepShotDuel(state: GameState): GameState {
   return gameReducer(state, { type: 'AUTO_RESOLVE_SHOT' });
 }
 
+/**
+ * One step of a user faceoff draw: pick the highest-anticipation ante card
+ * (mirroring the CPU centre's own ante policy), then auto-resolve the band
+ * from that card's anticipation - the same path BG-B25's
+ * `prefers-reduced-motion` fallback uses, so the sim measures the user
+ * centre the same way as the CPU centre.
+ */
+function stepFaceoffDuel(state: GameState): GameState {
+  const duel = state.duel!;
+  if (duel.faceoffPickedCardId === null) {
+    const cardId = pickBestFaceoffCard(state.deck.hand);
+    const handIndex = state.deck.hand.indexOf(cardId);
+    return gameReducer(state, { type: 'PICK_FACEOFF_CARD', handIndex });
+  }
+  return gameReducer(state, { type: 'AUTO_RESOLVE_FACEOFF' });
+}
+
 /** One step of a headless game: both sides driven by the same board-AI policy, mirrored by team. */
 function step(state: GameState): GameState {
   switch (state.phase) {
     case 'faceoff':
       return gameReducer(state, { type: 'START_FACEOFF' });
     case 'duel':
-      return state.duel?.kind === 'shot'
-        ? stepShotDuel(state)
-        : stepDuel(state);
+      if (state.duel?.kind === 'shot') return stepShotDuel(state);
+      if (state.duel?.kind === 'faceoff') return stepFaceoffDuel(state);
+      return stepDuel(state);
     case 'duelResult':
       return gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
     case 'roll':

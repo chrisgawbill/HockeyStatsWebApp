@@ -99,6 +99,11 @@ export function createDuel(
     queueDraws: [],
     receiverId,
     shotPickedCardId: null,
+    faceoffPickedCardId: null,
+    faceoffCpuCardId: null,
+    faceoffJumped: false,
+    faceoffUserResult: null,
+    faceoffCpuResult: null,
   };
 
   return {
@@ -299,13 +304,12 @@ export function endDuelRound(state: GameState): GameState {
 
   const nextRound = duel.round + 1;
   if (nextRound > MAX_ROUNDS) {
-    const timeoutWinner: Side =
-      duel.kind === 'faceoff'
-        ? roundDuel.attacker.poise > roundDuel.defender.poise
-          ? 'attacker'
-          : 'defender'
-        : 'defender';
-    return resolveDuel(roundState, timeoutWinner, false);
+    // BG-A15b: faceoff duels no longer reach this generic round machinery
+    // at all (they resolve through `engine/faceoffDuel.ts`'s ante+reaction
+    // instead), so the old poise-comparison timeout tiebreak for `faceoff`
+    // was dead code - removed. Every duel kind that still goes through here
+    // (deke/check/intercept) always favored the defender on a timeout.
+    return resolveDuel(roundState, 'defender', false);
   }
 
   const nextDuelBase: DuelState = {
@@ -323,11 +327,8 @@ export function resolveDuel(
   byKo: boolean,
 ): GameState {
   const duel = state.duel!;
-  const { puck, stunSkaterId, goal, cleanSave } = applyOutcome(
-    state,
-    duel,
-    winner,
-  );
+  const { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusMp } =
+    applyOutcome(state, duel, winner);
 
   let skaters = state.skaters;
   if (stunSkaterId) {
@@ -357,6 +358,8 @@ export function resolveDuel(
     ...state,
     skaters,
     puck,
+    rngSeed,
+    pendingBonusMp: bonusMp,
     deck: discardHand(state.deck),
     cpuDeck: discardHand(state.cpuDeck),
     duel: null,

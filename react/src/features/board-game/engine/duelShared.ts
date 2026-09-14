@@ -1,6 +1,5 @@
 import {
   HAND_SIZE,
-  PERK_CENTER_FACEOFF_DRAW,
   PERK_DEFENSE_BONUS,
   SKATER_POISE,
 } from '@/features/board-game/data/balance';
@@ -39,9 +38,15 @@ export function makeDuelist(skater: Skater): Duelist {
   };
 }
 
-/** Hand size for a round of this duel kind: +1 for the C-in-faceoff perk (both duelists in a faceoff are always C). */
-export function handSizeFor(kind: DuelKind): number {
-  return HAND_SIZE + (kind === 'faceoff' ? PERK_CENTER_FACEOFF_DRAW : 0);
+/**
+ * Hand size for a round of this duel kind. BG-A15b removed the old +1 C-in-
+ * faceoff perk branch here: faceoff duels no longer draw a card-duel hand
+ * at all (they resolve through `engine/faceoffDuel.ts`'s ante instead - see
+ * `PERK_CENTER_FACEOFF_DRAW`'s own doc for where that perk now lives), so
+ * this is never called with `kind === 'faceoff'` any more.
+ */
+export function handSizeFor(_kind: DuelKind): number {
+  return HAND_SIZE;
 }
 
 /**
@@ -77,15 +82,30 @@ export function isCardAllowedFor(
   return ruleBlockReason(duel, side, card) === null;
 }
 
+/** `allowedIn`'s single restricted pool, as the `CardBlockReason` explaining why a card outside it is blocked. */
+const RESTRICTED_POOL_REASON: Record<DuelKind, CardBlockReason | null> = {
+  shot: 'shotOnly',
+  check: 'checkOnly',
+  faceoff: 'faceoffOnly',
+  deke: null,
+  intercept: null,
+};
+
 /**
  * Why the game's rules (not energy) forbid `side` from playing `card` in
  * this duel, or null if the rules allow it. The one rule-legality path
  * `isCardAllowedFor` and `cardBlockReason` both build on - checked ahead of
  * energy since these restrictions are permanent for the duel, unlike energy.
  *
- * Shot duels never reach this function any more (BG-A14b: the shot minigame
- * is an ante pick, not a card duel - see `engine/shotDuel.ts`), so there is
- * no goalie-side special case here.
+ * Shot and faceoff duels never reach this function for their OWN pool's
+ * cards any more (BG-A14b/BG-A15b: both are an ante pick, not a card duel -
+ * see `engine/shotDuel.ts`/`engine/faceoffDuel.ts`), so there's no
+ * goalie- or faceoff-duelist-side special case here. It's still very much
+ * reached for a shot- or faceoff-pool card sitting in `STARTER_DECK` when a
+ * *different* kind of duel (deke/check/intercept) draws its hand -
+ * `RESTRICTED_POOL_REASON` is what keeps those cards out of a hand they're
+ * not allowed in (BG-A13's `drawFilteredCards` calls this via
+ * `isDrawEligibleCard`).
  */
 export function ruleBlockReason(
   duel: DuelState,
@@ -94,10 +114,7 @@ export function ruleBlockReason(
 ): CardBlockReason | null {
   if (card.allowedIn === 'any' || card.allowedIn.includes(duel.kind))
     return null;
-  const firstKind = card.allowedIn[0];
-  if (firstKind === 'shot') return 'shotOnly';
-  if (firstKind === 'check') return 'checkOnly';
-  return null;
+  return RESTRICTED_POOL_REASON[card.allowedIn[0]] ?? null;
 }
 
 /**

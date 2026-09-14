@@ -57,6 +57,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     lastOutcome: null,
     lastReveal: null,
     lastShotSaveResult: null,
+    lastFaceoffResult: null,
     winner: null,
     rngSeed,
     actionsThisTurn: 0,
@@ -65,6 +66,8 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
       user: GOALIE_POISE_BY_LENGTH.long,
       cpu: GOALIE_POISE_BY_LENGTH.long,
     },
+    faceoffSpot: { col: 7, row: 3 },
+    pendingBonusMp: 0,
     ...overrides,
   };
 }
@@ -121,17 +124,16 @@ describe('stunUntil', () => {
 });
 
 describe('createDuel', () => {
-  it('draws 5 cards for both sides, or 6 for a faceoff', () => {
+  // BG-A15b: the faceoff duel no longer goes through this generic
+  // hand-dealing machinery at all (it's an ante pick now - see
+  // engine/faceoffDuel.test.ts), so `handSizeFor`'s old +1-for-faceoff perk
+  // branch is gone; every remaining duel kind here draws a plain 5.
+  it('draws 5 cards for both sides', () => {
     const state = makeState();
     const check = createDuel(state, 'check', 'user-LD', 'cpu-C');
     expect(check.duel!.energy).toBe(3);
     expect(check.deck.hand).toHaveLength(5);
     expect(check.cpuDeck.hand).toHaveLength(5);
-
-    const faceoff = createDuel(state, 'faceoff', 'user-C', 'cpu-C');
-    expect(faceoff.deck.hand).toHaveLength(6);
-    expect(faceoff.cpuDeck.hand).toHaveLength(6);
-    expect(faceoff.phase).toBe('duel');
   });
 
   it("plans the CPU's round-1 cards within the energy budget", () => {
@@ -150,16 +152,12 @@ describe('filtered duel draw (BG-A13)', () => {
     return allowedIn === 'any' || allowedIn.includes(kind);
   };
 
-  it('never deals a shot- or check-only card into a faceoff hand', () => {
-    const state = makeState();
-    const duel = createDuel(state, 'faceoff', 'user-C', 'cpu-C');
-    for (const id of duel.deck.hand)
-      expect(isAllowedIn(id, 'faceoff')).toBe(true);
-    for (const id of duel.cpuDeck.hand)
-      expect(isAllowedIn(id, 'faceoff')).toBe(true);
-  });
-
-  it('never deals a shot- or check-only card into a deke hand', () => {
+  // BG-A15b: STARTER_DECK now carries the 6 faceoff-pool cards too (they're
+  // drawn by the faceoff ante instead, see engine/faceoffDuel.test.ts), so
+  // this also guards that a faceoff-only card never leaks into a deke hand -
+  // it's the same filter path a shot- or check-only card was already
+  // guarded against here.
+  it('never deals a shot-, check-, or faceoff-only card into a deke hand', () => {
     const state = makeState();
     const duel = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
     for (const id of duel.deck.hand) expect(isAllowedIn(id, 'deke')).toBe(true);
@@ -182,11 +180,11 @@ describe('filtered duel draw (BG-A13)', () => {
 
   it('leaves ineligible cards in the deck for a later duel of a different kind', () => {
     const state = makeState();
-    const faceoff = createDuel(state, 'faceoff', 'user-C', 'cpu-C');
+    const deke = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
     const remaining = [
-      ...faceoff.deck.drawPile,
-      ...faceoff.deck.discardPile,
-      ...faceoff.deck.hand,
+      ...deke.deck.drawPile,
+      ...deke.deck.discardPile,
+      ...deke.deck.hand,
     ];
     expect([...remaining].sort()).toEqual([...STARTER_DECK].sort());
   });
@@ -426,7 +424,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
   });
 
   it('a lethal queued card KOs the opponent at reveal', () => {
-    let state = createDuel(makeState(), 'faceoff', 'user-C', 'cpu-C');
+    let state = createDuel(makeState(), 'check', 'user-C', 'cpu-C');
     state = {
       ...state,
       deck: { ...state.deck, hand: ['toe_drag'] },
@@ -523,36 +521,18 @@ describe('endDuelRound (passive-human scenarios)', () => {
     expect(endDuelRound(state)).toBe(state);
   });
 
-  it('faceoff timeout: equal poise after MAX_ROUNDS goes to the defender (cpu-C), who gets the puck', () => {
-    let state = createDuel(makeState(), 'faceoff', 'user-C', 'cpu-C');
-    // Empty both hands and both plans every round, so poise stays tied at full for all 3 rounds.
-    const emptyBothSides = (s: GameState): GameState => ({
-      ...s,
-      deck: { ...s.deck, hand: [] },
-      cpuDeck: { ...s.cpuDeck, hand: [] },
-      duel: s.duel ? { ...s.duel, cpuPlan: [] } : s.duel,
-    });
-    for (let i = 0; i < 3 && state.duel; i++) {
-      state = endDuelRound(emptyBothSides(state));
-    }
-    expect(state.duel).toBeNull();
-    expect(state.lastOutcome!.winner).toBe('defender');
-    expect(state.lastOutcome!.byKo).toBe(false);
-    expect(state.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
-  });
+  // BG-A15b removed the old faceoff-specific timeout tiebreak (poise
+  // comparison) from this generic round machinery - faceoff duels no
+  // longer reach it at all (they resolve through engine/faceoffDuel.ts's
+  // ante+reaction; see engine/faceoffDuel.test.ts for its own timeout-free
+  // outcome coverage). Every remaining duel kind here already always
+  // favored the defender on a timeout, covered by the next test.
 
   it('a passive human (empty hand) never damages the CPU, so the CPU side always wins', () => {
     // check duel: user-LD is attacker, cpu-C is defender. Since the user never plays a
     // card, the CPU (defender) never takes damage - it wins by KO (if its own plan
     // lands a KO first) or by the timeout-favors-defender rule either way.
     const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    const result = driveToCompletion(state);
-    expect(result.duel).toBeNull();
-    expect(result.lastOutcome!.winner).toBe('defender');
-  });
-
-  it('faceoff: the passive user (always attacker) never damages the CPU, so the CPU (defender) wins', () => {
-    const state = createDuel(makeState(), 'faceoff', 'user-C', 'cpu-C');
     const result = driveToCompletion(state);
     expect(result.duel).toBeNull();
     expect(result.lastOutcome!.winner).toBe('defender');
@@ -591,17 +571,11 @@ describe('resolveDuel outcome table', () => {
     expect(result.cpuDeck.hand).toEqual([]);
   });
 
-  it('faceoff: attacker (user C) win gets the puck with no stun', () => {
-    const state = createDuel(makeState(), 'faceoff', 'user-C', 'cpu-C');
-    const result = resolveDuel(state, 'attacker', true);
-    expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
-    expect(
-      result.skaters.find((s) => s.id === 'user-C')!.stunnedUntilTurn,
-    ).toBeNull();
-    expect(
-      result.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
-    ).toBeNull();
-  });
+  // BG-A15b: `applyOutcome`'s `faceoff` case now reads `duel.faceoffUserResult`
+  // (set by `engine/faceoffDuel.ts`'s `resolveFaceoffBand`), so calling
+  // `resolveDuel` directly on a `faceoff` duel built by the generic
+  // `createDuel` (as the old version of this test did) no longer applies -
+  // see engine/faceoffDuel.test.ts for the real outcome-table coverage.
 
   it('check: defender (carrier) win stuns the checker and the puck stays with the carrier', () => {
     const state = {

@@ -34,4 +34,10 @@ describe('cardBlockReasonLabel', () => {
       'Only when checking',
     );
   });
+
+  it('describes a faceoff-only card', () => {
+    expect(cardBlockReasonLabel('faceoffOnly', makeCard(), 3)).toBe(
+      'Only at a faceoff',
+    );
+  });
 });

@@ -95,16 +95,16 @@ describe('faceoffModel', () => {
 
   it('the CPU path resolves through the same rollFaceoffContest as a human band', () => {
     let seed = 11;
-    const [cpuBand, seedAfterRead] = rollCpuFaceoffBand(seed);
+    const [cpuBand, seedAfterRead] = rollCpuFaceoffBand(50, seed);
     const [cpuResult] = rollFaceoffContest(cpuBand, 4, 3, false, seedAfterRead);
     expect(['clean', 'scrum', 'late']).toContain(cpuBand);
     expect(cpuResult.winChance).toBeGreaterThanOrEqual(0);
     expect(cpuResult.winChance).toBeLessThanOrEqual(100);
   });
 
-  it('rollCpuFaceoffBand never resolves to jump, across many seeds', () => {
+  it('rollCpuFaceoffBand never resolves to jump, across many seeds and anticipations', () => {
     for (let seed = 0; seed < 200; seed++) {
-      const [band] = rollCpuFaceoffBand(seed);
+      const [band] = rollCpuFaceoffBand(seed % 100, seed);
       expect(band).not.toBe('jump');
     }
   });
@@ -113,9 +113,38 @@ describe('faceoffModel', () => {
     const a = rollBandFromAnticipation(50, 321);
     const b = rollBandFromAnticipation(50, 321);
     expect(a).toEqual(b);
-    const ca = rollCpuFaceoffBand(321);
-    const cb = rollCpuFaceoffBand(321);
+    const ca = rollCpuFaceoffBand(50, 321);
+    const cb = rollCpuFaceoffBand(50, 321);
     expect(ca).toEqual(cb);
+  });
+
+  it("rollCpuFaceoffBand's late share is no longer pinned at exactly 50% (BG-A15b fix): it reflects CPU_FACEOFF_REACTION_CEILING_MS vs. the (anticipation-independent) scrum window, not half of a self-referential domain", () => {
+    // scrumWindowMs is constant regardless of anticipation (Chris's ruling,
+    // unchanged here), so late's share doesn't move with anticipation either
+    // - but unlike the old bug, it's no longer forced to land on exactly
+    // half of the sampling domain by construction: (500 - 420) / 500 = 16%.
+    const trials = 4000;
+    let late = 0;
+    for (let seed = 0; seed < trials; seed++) {
+      const [band] = rollCpuFaceoffBand(50, seed);
+      if (band === 'late') late++;
+    }
+    const lateShare = late / trials;
+    expect(lateShare).not.toBeCloseTo(0.5, 1);
+    expect(lateShare).toBeCloseTo(0.16, 1);
+  });
+
+  it('higher anticipation makes a clean CPU roll more likely too', () => {
+    const trials = 300;
+    const countClean = (anticipation: number) => {
+      let count = 0;
+      for (let seed = 0; seed < trials; seed++) {
+        const [band] = rollCpuFaceoffBand(anticipation, seed);
+        if (band === 'clean') count++;
+      }
+      return count;
+    };
+    expect(countClean(90)).toBeGreaterThan(countClean(10));
   });
 
   it('higher anticipation makes a clean roll more likely for the CPU-style random read', () => {

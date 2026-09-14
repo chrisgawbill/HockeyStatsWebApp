@@ -1,6 +1,7 @@
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
 import { STARTER_DECK } from '@/features/board-game/data/cards';
 import { FORMATIONS, ROLES } from '@/features/board-game/data/formations';
+import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
 import {
   handleCheck,
   handleMove,
@@ -9,11 +10,17 @@ import {
 } from '@/features/board-game/engine/boardActions';
 import { createDeck } from '@/features/board-game/engine/deck';
 import {
-  createDuel,
   endDuelRound,
   playCard,
   unqueueCard,
 } from '@/features/board-game/engine/duel';
+import {
+  autoResolveFaceoff,
+  createFaceoffDuel,
+  pickDefendingDot,
+  pickFaceoffCard,
+  resolveFaceoffBand,
+} from '@/features/board-game/engine/faceoffDuel';
 import { rollDie } from '@/features/board-game/engine/rng';
 import {
   autoResolveShot,
@@ -28,7 +35,6 @@ import {
 } from '@/features/board-game/engine/selectors';
 import type {
   Action,
-  Coord,
   GameLength,
   GameState,
   Skater,
@@ -36,7 +42,6 @@ import type {
 } from '@/features/board-game/types/game';
 
 const TEAMS: TeamId[] = ['user', 'cpu'];
-const CENTER_ICE: Coord = { col: 7, row: 3 };
 
 /** Every skater back on its starting tile, stuns cleared. Shared by a new game and a whistle reset. */
 function formationSkaters(): Skater[] {
@@ -67,7 +72,7 @@ export function createInitialState(
     mp: 0,
     dice: null,
     skaters: formationSkaters(),
-    puck: { kind: 'loose', pos: CENTER_ICE },
+    puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
     deck,
     cpuDeck,
     duel: null,
@@ -82,6 +87,9 @@ export function createInitialState(
       cpu: GOALIE_POISE_BY_LENGTH[length],
     },
     lastShotSaveResult: null,
+    lastFaceoffResult: null,
+    faceoffSpot: FACEOFF_SPOTS.centreIce,
+    pendingBonusMp: 0,
   };
 }
 
@@ -100,7 +108,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case 'START_FACEOFF': {
       if (state.phase !== 'faceoff') return state;
       return {
-        ...createDuel(state, 'faceoff', 'user-C', 'cpu-C'),
+        ...createFaceoffDuel(state, 'user-C', 'cpu-C'),
         whistle: false,
       };
     }
@@ -112,7 +120,8 @@ export function gameReducer(state: GameState, action: Action): GameState {
       return {
         ...state,
         dice: [d1, d2],
-        mp: d1 + d2,
+        mp: d1 + d2 + state.pendingBonusMp,
+        pendingBonusMp: 0,
         phase: 'move',
         rngSeed: seed2,
       };
@@ -154,12 +163,13 @@ export function gameReducer(state: GameState, action: Action): GameState {
         return {
           ...switched,
           skaters: formationSkaters(),
-          puck: { kind: 'loose', pos: CENTER_ICE },
+          puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
           phase: 'faceoff',
           activeTeam: 'user',
           mp: 0,
           dice: null,
           whistle: true,
+          faceoffSpot: FACEOFF_SPOTS.centreIce,
         };
       }
 
@@ -202,6 +212,33 @@ export function gameReducer(state: GameState, action: Action): GameState {
       return autoResolveShot(state);
     }
 
+    case 'PICK_FACEOFF_CARD':
+      return pickFaceoffCard(state, action.handIndex);
+
+    case 'RESOLVE_FACEOFF_BAND': {
+      const duel = state.duel;
+      if (
+        !duel ||
+        duel.kind !== 'faceoff' ||
+        duel.faceoffPickedCardId === null ||
+        state.phase !== 'duel'
+      )
+        return state;
+      return resolveFaceoffBand(state, duel.faceoffPickedCardId, action.band);
+    }
+
+    case 'AUTO_RESOLVE_FACEOFF': {
+      const duel = state.duel;
+      if (
+        !duel ||
+        duel.kind !== 'faceoff' ||
+        duel.faceoffPickedCardId === null ||
+        state.phase !== 'duel'
+      )
+        return state;
+      return autoResolveFaceoff(state);
+    }
+
     case 'DISMISS_DUEL_RESULT': {
       if (state.phase !== 'duelResult' || !state.lastOutcome) return state;
       const outcome = state.lastOutcome;
@@ -219,23 +256,43 @@ export function gameReducer(state: GameState, action: Action): GameState {
           dice: null,
           lastOutcome: null,
           lastShotSaveResult: null,
+          lastFaceoffResult: null,
         };
       }
-      // BG-A16: a covered save whistles play dead, same reset the boxed-in-carrier
-      // whistle (END_TURN, above) uses. A15b's end-zone faceoff dots aren't landed
-      // yet, so this still lands on the existing centre-ice faceoff.
+      // BG-A16/A15b: a covered save whistles play dead and routes to the
+      // end-zone dot in front of the net it was covered in front of - the
+      // goalie's own team's dots, nearest the shooter's row (ties broken by
+      // a seeded flip, same rule as any other end-zone draw). Only the two
+      // centres move to the dot; everyone else stays put (unlike the
+      // boxed-in-carrier whistle above, which is always a full reset).
       if (outcome.kind === 'shot' && state.lastShotSaveResult?.covered) {
+        const goalieTeam = state.skaters.find(
+          (s) => s.id === outcome.defenderId,
+        )!.team;
+        const shooterRow = state.skaters.find(
+          (s) => s.id === outcome.attackerId,
+        )!.pos.row;
+        const [dot, seed] = pickDefendingDot(
+          FACEOFF_SPOTS.defendingDots[goalieTeam],
+          shooterRow,
+          state.rngSeed,
+        );
         return {
           ...state,
-          skaters: formationSkaters(),
-          puck: { kind: 'loose', pos: CENTER_ICE },
+          skaters: state.skaters.map((s) =>
+            s.id === 'user-C' || s.id === 'cpu-C' ? { ...s, pos: dot } : s,
+          ),
+          puck: { kind: 'loose', pos: dot },
           phase: 'faceoff',
           activeTeam: 'user',
           mp: 0,
           dice: null,
           whistle: true,
+          faceoffSpot: dot,
+          rngSeed: seed,
           lastOutcome: null,
           lastShotSaveResult: null,
+          lastFaceoffResult: null,
         };
       }
       return {
@@ -243,6 +300,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
         phase: 'move',
         lastOutcome: null,
         lastShotSaveResult: null,
+        lastFaceoffResult: null,
       };
     }
 
