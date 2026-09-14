@@ -36,8 +36,7 @@ function makeDuel(overrides: Partial<DuelState> = {}): DuelState {
     faceoffPickedCardId: null,
     faceoffCpuCardId: null,
     faceoffJumped: false,
-    faceoffUserResult: null,
-    faceoffCpuResult: null,
+    faceoffResult: null,
     ...overrides,
   };
 }

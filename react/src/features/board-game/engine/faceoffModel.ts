@@ -1,19 +1,22 @@
 /**
  * Faceoff minigame engine model (BG-A15a; wired in by BG-A15b's
  * `engine/faceoffDuel.ts`, which fully replaced the old faceoff card duel).
- * Contract for BG-B25: `FaceoffBand`, `FaceoffBandWindows`, and
- * `rollFaceoffContest` (types/game.ts has the shapes). Windows come from
- * `windowsForAnticipation`; the UI must not hardcode window geometry. Mirrors
- * `shotModel.ts`'s structure: a card's `anticipation`/`grip` play the same
- * two roles `accuracy`/`power` play there.
+ * BG-A15b cycle 2 (Chris's ruling): the draw is a genuine head-to-head -
+ * both centres ante a card and produce a real reaction band, resolved by
+ * the ONE symmetric `rollFaceoffHeadToHead`, never a separate path for the
+ * user or the CPU. Contract for BG-B25: `FaceoffBand`, `FaceoffBandWindows`,
+ * and `rollFaceoffHeadToHead` (types/game.ts has the shapes). Windows come
+ * from `windowsForAnticipation`; the UI must not hardcode window geometry.
+ * Mirrors `shotModel.ts`'s structure: a card's `anticipation`/`grip` play
+ * the same two roles `accuracy`/`power` play there.
  */
 import {
   BASE_WIN_BY_BAND,
-  CPU_FACEOFF_REACTION_CEILING_MS,
   FACEOFF_CLEAN_WINDOW_BASE_MS,
   FACEOFF_DROP_DELAY_MAX_MS,
   FACEOFF_DROP_DELAY_MIN_MS,
   FACEOFF_JUMP_WINDOW_PENALTY_MS,
+  FACEOFF_REACTION_SAMPLE_CEILING_MS,
   FACEOFF_SCRUM_WINDOW_MS,
   FACEOFF_WINDOW_PER_ANTICIPATION_MS,
 } from '@/features/board-game/data/balance';
@@ -21,7 +24,7 @@ import { nextFloat } from '@/features/board-game/engine/rng';
 import type {
   FaceoffBand,
   FaceoffBandWindows,
-  FaceoffContestResult,
+  FaceoffHeadToHeadResult,
 } from '@/features/board-game/types/game';
 
 function clamp(value: number, min: number, max: number): number {
@@ -98,14 +101,23 @@ export function rollDropDelayMs(seed: number): [number, number] {
 }
 
 /**
- * Rolls a random reaction time for an anticipation-driven "read" of the drop
- * (the CPU's faceoff, or a reduced-motion auto-resolve) and buckets it into
- * a band. Mirrors `rollBandFromAccuracy`: the sampled domain runs from 0 to
- * double the scrum window, so `late` stays reachable with meaningful
- * probability - that span is structural (the reaction-time analogue of the
- * shot track's fixed `[0,1]` width), not a Chris-tunable dial;
- * `CPU_FACEOFF_REACTION` is the tuning knob. Never resolves to `jump` -
- * that's a human-only false start, exactly as `miss` is UI-only for shots.
+ * Rolls a random reaction time for an anticipation-driven "read" of the
+ * drop and buckets it into a band. BG-A15b cycle 2 (Chris's ruling): this
+ * is now the ONE shared simulated-reaction path for BOTH the CPU centre's
+ * own reaction AND a human centre's reduced-motion/headless fallback -
+ * previously these used two different sampling domains (cycle 1 gave the
+ * CPU its own `rollCpuFaceoffBand` after this function's original domain
+ * was found to pin `late` at an unmovable 50% regardless of anticipation,
+ * which made the reduced-motion fallback close to an automatic loss too -
+ * a second QA finding). Sampled up to `FACEOFF_REACTION_SAMPLE_CEILING_MS`,
+ * anchored on the human-reaction-time research `FACEOFF_CLEAN_WINDOW_BASE_MS`
+ * cites (median ~250ms), not a self-referential multiple of the window
+ * widths - so `late`'s share is a real, tunable relationship between the
+ * ceiling and the (anticipation-independent) scrum window, not baked in by
+ * construction. Reused as-is by `rollFaceoffHeadToHead`'s two callers in
+ * `engine/faceoffDuel.ts` - no separate CPU path. Never resolves to `jump`
+ * - that's a genuine human false start, only possible from a live timed
+ * press.
  */
 export function rollBandFromAnticipation(
   anticipation: number,
@@ -113,7 +125,7 @@ export function rollBandFromAnticipation(
 ): [Exclude<FaceoffBand, 'jump'>, number] {
   const windows = windowsForAnticipation(anticipation);
   const [t, nextSeed] = nextFloat(seed);
-  const reactionMs = t * windows.scrumWindowMs * 2;
+  const reactionMs = t * FACEOFF_REACTION_SAMPLE_CEILING_MS;
   // reactionMs is always >= 0 here, so bandForReaction can never return 'jump'.
   return [
     bandForReaction(reactionMs, windows) as Exclude<FaceoffBand, 'jump'>,
@@ -122,57 +134,45 @@ export function rollBandFromAnticipation(
 }
 
 /**
- * The CPU's seeded faceoff band roll, driven by `anticipation` - its own
- * anted card's stat (BG-A15b), not a flat difficulty constant, so the CPU's
- * clean rate genuinely moves with what it draws exactly as the human's
- * does. Same `rollFaceoffContest` resolves it afterward - no second path
- * for the CPU. Deliberately doesn't reuse `rollBandFromAnticipation`'s
- * domain (`windows.scrumWindowMs * 2`): that domain's `late` share is
- * structurally fixed at 50% no matter what `anticipation` is (the domain's
- * midpoint always sits on the scrum window's outer edge), which is fine for
- * that function's other callers but made the CPU's reaction unresponsive to
- * its own card. `CPU_FACEOFF_REACTION_CEILING_MS` is a fixed, card-
- * independent ceiling instead, so `late`'s share still shrinks and grows
- * with `anticipation` like `clean`'s does. Never resolves to `jump` - that's
- * a human-only false start, exactly as `miss` is UI-only for shots.
+ * The symmetric head-to-head faceoff contest (BG-A15b cycle 2, replacing
+ * cycle 1's one-sided `rollFaceoffContest`): both centres bring a real band
+ * and a grip, and this ONE function decides between them - reused as-is for
+ * the user's side and the CPU's side, never a separate path for either
+ * (Chris's ruling: "centres should compete, shouldn't be like shot").
+ * Reuses `BASE_WIN_BY_BAND` rather than inventing a second table:
+ *
+ * - Neither side reads `clean`: an automatic **scrum**
+ *   (`outcome: 'scrum'`) - nobody's read was sharp enough to claim it
+ *   cleanly, so the puck goes loose (`engine/duelOutcome.ts` picks the
+ *   tile). No roll is made; `winChance` is 0.
+ * - Otherwise (at least one side is `clean`): `winChance =
+ *   50 + (BASE_WIN_BY_BAND[userBand] - BASE_WIN_BY_BAND[cpuBand]) +
+ *   (userGrip - cpuGrip)`, clamped to `[0, 100]`, rolled through
+ *   `engine/rng.ts`. When both bands are `clean` the two base-band terms
+ *   cancel exactly, so grip alone around a fair 50/50 decides it - "both
+ *   clean -> grip difference decides" falls out of the same formula as a
+ *   degenerate case, not a special-cased branch. When only one side reads
+ *   `clean`, the base-band terms add a real edge on top of grip, graded by
+ *   how far `clean`'s base value sits above the other band's (beating a
+ *   `late` opponent is a bigger edge than beating a `scrum` opponent).
+ *
+ * The winning side's card `faceoffEffect` fires only when that side's own
+ * band was `'clean'` (checked by the caller, not here - this function only
+ * decides who wins).
  */
-export function rollCpuFaceoffBand(
-  anticipation: number,
+export function rollFaceoffHeadToHead(
+  userBand: Exclude<FaceoffBand, 'jump'>,
+  userGrip: number,
+  cpuBand: Exclude<FaceoffBand, 'jump'>,
+  cpuGrip: number,
   seed: number,
-): [Exclude<FaceoffBand, 'jump'>, number] {
-  const windows = windowsForAnticipation(anticipation);
-  const [t, nextSeed] = nextFloat(seed);
-  const reactionMs = t * CPU_FACEOFF_REACTION_CEILING_MS;
-  // reactionMs is always >= 0 here, so bandForReaction can never return 'jump'.
-  return [
-    bandForReaction(reactionMs, windows) as Exclude<FaceoffBand, 'jump'>,
-    nextSeed,
-  ];
-}
-
-/**
- * Rolls the contest for a resolved faceoff band. On `clean`/`scrum`/`late`:
- * `winChance = BASE_WIN_BY_BAND[band] + grip - opponentGrip`, clamped to
- * `[0, 100]`, rolled through `engine/rng.ts` (never `Math.random`) - the
- * same function for the human and the CPU draw. On `jump`: no contest is
- * rolled at all. A jump is a false start - the first one earns a re-drop
- * (`reDrop: true`, caller re-runs the reaction through
- * `narrowedWindowsAfterJump`); pass `isRepeatJump: true` for a second jump
- * in the same draw and it loses outright (`reDrop: false`, `won: false`).
- */
-export function rollFaceoffContest(
-  band: FaceoffBand,
-  grip: number,
-  opponentGrip: number,
-  isRepeatJump: boolean,
-  seed: number,
-): [FaceoffContestResult, number] {
-  if (band === 'jump') {
-    return [{ band, won: false, winChance: 0, reDrop: !isRepeatJump }, seed];
+): [FaceoffHeadToHeadResult, number] {
+  if (userBand !== 'clean' && cpuBand !== 'clean') {
+    return [{ outcome: 'scrum', userWins: false, winChance: 0 }, seed];
   }
-  const rawChance = BASE_WIN_BY_BAND[band] + grip - opponentGrip;
-  const winChance = clamp(rawChance, 0, 100);
+  const edge = BASE_WIN_BY_BAND[userBand] - BASE_WIN_BY_BAND[cpuBand];
+  const winChance = clamp(50 + edge + (userGrip - cpuGrip), 0, 100);
   const [roll, nextSeed] = nextFloat(seed);
-  const won = roll * 100 < winChance;
-  return [{ band, won, winChance, reDrop: false }, nextSeed];
+  const userWins = roll * 100 < winChance;
+  return [{ outcome: 'win', userWins, winChance }, nextSeed];
 }

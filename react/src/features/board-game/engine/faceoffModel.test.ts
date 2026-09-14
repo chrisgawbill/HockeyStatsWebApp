@@ -4,9 +4,8 @@ import {
   bandForReaction,
   narrowedWindowsAfterJump,
   rollBandFromAnticipation,
-  rollCpuFaceoffBand,
   rollDropDelayMs,
-  rollFaceoffContest,
+  rollFaceoffHeadToHead,
   windowsForAnticipation,
 } from '@/features/board-game/engine/faceoffModel';
 
@@ -46,117 +45,127 @@ describe('faceoffModel', () => {
     expect(rollDropDelayMs(42)).toEqual(rollDropDelayMs(42));
   });
 
-  it('grip shifts the contest roll and higher grip beats lower, same band/opponent/seed', () => {
-    const [lowGrip] = rollFaceoffContest('scrum', 0, 5, false, 7);
-    const [highGrip] = rollFaceoffContest('scrum', 10, 5, false, 7);
-    expect(highGrip.winChance).toBeGreaterThan(lowGrip.winChance);
-    expect(highGrip.winChance - lowGrip.winChance).toBe(10);
-  });
-
-  it('the contest roll is seeded and deterministic for a fixed seed', () => {
-    const a = rollFaceoffContest('clean', 3, 1, false, 123);
-    const b = rollFaceoffContest('clean', 3, 1, false, 123);
-    expect(a).toEqual(b);
-  });
-
-  it('a clean band concedes a win near BASE_WIN_BY_BAND.clean with matched grip, seeded', () => {
-    let seed = 5;
-    let won = false;
-    for (let i = 0; i < 50 && !won; i++) {
-      const [result, next] = rollFaceoffContest('clean', 0, 0, false, seed);
-      expect(result.winChance).toBe(BASE_WIN_BY_BAND.clean);
-      if (result.won) won = true;
-      seed = next;
-    }
-    expect(won).toBe(true);
-  });
-
-  it('the contest win chance is clamped to [0, 100]', () => {
-    const [tooHigh] = rollFaceoffContest('clean', 1000, 0, false, 1);
-    const [tooLow] = rollFaceoffContest('late', 0, 1000, false, 1);
-    expect(tooHigh.winChance).toBe(100);
-    expect(tooLow.winChance).toBe(0);
-  });
-
-  it('a jump costs a re-drop and never rolls a contest', () => {
-    const [firstJump, nextSeed] = rollFaceoffContest('jump', 20, 20, false, 9);
-    expect(firstJump.won).toBe(false);
-    expect(firstJump.reDrop).toBe(true);
-    expect(firstJump.winChance).toBe(0);
-    // No RNG was consumed on a jump - the seed passes through unchanged.
-    expect(nextSeed).toBe(9);
-  });
-
-  it('a second jump loses outright, no re-drop', () => {
-    const [secondJump] = rollFaceoffContest('jump', 20, 20, true, 9);
-    expect(secondJump.won).toBe(false);
-    expect(secondJump.reDrop).toBe(false);
-  });
-
-  it('the CPU path resolves through the same rollFaceoffContest as a human band', () => {
-    let seed = 11;
-    const [cpuBand, seedAfterRead] = rollCpuFaceoffBand(50, seed);
-    const [cpuResult] = rollFaceoffContest(cpuBand, 4, 3, false, seedAfterRead);
-    expect(['clean', 'scrum', 'late']).toContain(cpuBand);
-    expect(cpuResult.winChance).toBeGreaterThanOrEqual(0);
-    expect(cpuResult.winChance).toBeLessThanOrEqual(100);
-  });
-
-  it('rollCpuFaceoffBand never resolves to jump, across many seeds and anticipations', () => {
-    for (let seed = 0; seed < 200; seed++) {
-      const [band] = rollCpuFaceoffBand(seed % 100, seed);
-      expect(band).not.toBe('jump');
-    }
-  });
-
-  it('rollBandFromAnticipation and rollCpuFaceoffBand are deterministic for a fixed seed', () => {
-    const a = rollBandFromAnticipation(50, 321);
-    const b = rollBandFromAnticipation(50, 321);
-    expect(a).toEqual(b);
-    const ca = rollCpuFaceoffBand(50, 321);
-    const cb = rollCpuFaceoffBand(50, 321);
-    expect(ca).toEqual(cb);
-  });
-
-  it("rollCpuFaceoffBand's late share is no longer pinned at exactly 50% (BG-A15b fix): it reflects CPU_FACEOFF_REACTION_CEILING_MS vs. the (anticipation-independent) scrum window, not half of a self-referential domain", () => {
-    // scrumWindowMs is constant regardless of anticipation (Chris's ruling,
-    // unchanged here), so late's share doesn't move with anticipation either
-    // - but unlike the old bug, it's no longer forced to land on exactly
-    // half of the sampling domain by construction: (500 - 420) / 500 = 16%.
-    const trials = 4000;
-    let late = 0;
-    for (let seed = 0; seed < trials; seed++) {
-      const [band] = rollCpuFaceoffBand(50, seed);
-      if (band === 'late') late++;
-    }
-    const lateShare = late / trials;
-    expect(lateShare).not.toBeCloseTo(0.5, 1);
-    expect(lateShare).toBeCloseTo(0.16, 1);
-  });
-
-  it('higher anticipation makes a clean CPU roll more likely too', () => {
-    const trials = 300;
-    const countClean = (anticipation: number) => {
-      let count = 0;
-      for (let seed = 0; seed < trials; seed++) {
-        const [band] = rollCpuFaceoffBand(anticipation, seed);
-        if (band === 'clean') count++;
+  describe('rollBandFromAnticipation (shared by the CPU centre and the reduced-motion/headless fallback - BG-A15b cycle 2, no separate path for either)', () => {
+    it('never resolves to jump, across many seeds and anticipations', () => {
+      for (let seed = 0; seed < 200; seed++) {
+        const [band] = rollBandFromAnticipation(seed % 100, seed);
+        expect(band).not.toBe('jump');
       }
-      return count;
-    };
-    expect(countClean(90)).toBeGreaterThan(countClean(10));
+    });
+
+    it('is deterministic for a fixed seed', () => {
+      const a = rollBandFromAnticipation(50, 321);
+      const b = rollBandFromAnticipation(50, 321);
+      expect(a).toEqual(b);
+    });
+
+    it("late's share is not pinned at exactly 50% (the BG-A15a cycle-1 bug, and the fallback shared the same bug until BG-A15b cycle 2): it reflects FACEOFF_REACTION_SAMPLE_CEILING_MS vs. the (anticipation-independent) scrum window, not half of a self-referential domain", () => {
+      // scrumWindowMs is constant regardless of anticipation (Chris's
+      // ruling, unchanged here), so late's share doesn't move with
+      // anticipation either - but unlike the old bug, it's no longer
+      // forced to land on exactly half of the sampling domain by
+      // construction: (500 - 420) / 500 = 16%.
+      const trials = 4000;
+      let late = 0;
+      for (let seed = 0; seed < trials; seed++) {
+        const [band] = rollBandFromAnticipation(50, seed);
+        if (band === 'late') late++;
+      }
+      const lateShare = late / trials;
+      expect(lateShare).not.toBeCloseTo(0.5, 1);
+      expect(lateShare).toBeCloseTo(0.16, 1);
+    });
+
+    it('higher anticipation makes a clean roll more likely', () => {
+      const trials = 300;
+      const countClean = (anticipation: number) => {
+        let count = 0;
+        for (let seed = 0; seed < trials; seed++) {
+          const [band] = rollBandFromAnticipation(anticipation, seed);
+          if (band === 'clean') count++;
+        }
+        return count;
+      };
+      expect(countClean(90)).toBeGreaterThan(countClean(10));
+    });
   });
 
-  it('higher anticipation makes a clean roll more likely for the CPU-style random read', () => {
-    const trials = 300;
-    const countClean = (anticipation: number) => {
-      let count = 0;
-      for (let seed = 0; seed < trials; seed++) {
-        const [band] = rollBandFromAnticipation(anticipation, seed);
-        if (band === 'clean') count++;
+  describe('rollFaceoffHeadToHead (BG-A15b cycle 2: the one symmetric contest, no user/CPU fork)', () => {
+    it('neither side clean -> an automatic scrum, no roll (seed passes through unchanged)', () => {
+      const [result, nextSeed] = rollFaceoffHeadToHead('scrum', 10, 'late', 0, 7);
+      expect(result.outcome).toBe('scrum');
+      expect(result.winChance).toBe(0);
+      expect(nextSeed).toBe(7);
+
+      const [bothLate, seedAfterBothLate] = rollFaceoffHeadToHead(
+        'late',
+        5,
+        'late',
+        5,
+        7,
+      );
+      expect(bothLate.outcome).toBe('scrum');
+      expect(seedAfterBothLate).toBe(7);
+    });
+
+    it('both clean, equal grip -> a fair 50/50 (the band terms cancel exactly)', () => {
+      const [result] = rollFaceoffHeadToHead('clean', 4, 'clean', 4, 1);
+      expect(result.outcome).toBe('win');
+      expect(result.winChance).toBe(50);
+    });
+
+    it('both clean -> grip difference alone decides, degree-for-degree', () => {
+      const [result] = rollFaceoffHeadToHead('clean', 10, 'clean', 4, 1);
+      expect(result.winChance).toBe(50 + (10 - 4));
+    });
+
+    it("one side clean, the other not -> the base-band edge (BASE_WIN_BY_BAND difference) plus grip favours the clean side", () => {
+      const [cleanVsLate] = rollFaceoffHeadToHead('clean', 0, 'late', 0, 1);
+      expect(cleanVsLate.winChance).toBe(
+        50 + (BASE_WIN_BY_BAND.clean - BASE_WIN_BY_BAND.late),
+      );
+      const [cleanVsScrum] = rollFaceoffHeadToHead('clean', 0, 'scrum', 0, 1);
+      expect(cleanVsScrum.winChance).toBe(
+        50 + (BASE_WIN_BY_BAND.clean - BASE_WIN_BY_BAND.scrum),
+      );
+      // Beating a late opponent is a bigger edge than beating a scrum one.
+      expect(cleanVsLate.winChance).toBeGreaterThan(cleanVsScrum.winChance);
+    });
+
+    it('the same edge applies symmetrically from either side', () => {
+      const [userClean] = rollFaceoffHeadToHead('clean', 2, 'late', 5, 3);
+      const [cpuClean] = rollFaceoffHeadToHead('late', 5, 'clean', 2, 3);
+      // userClean.winChance is "user wins" chance when user is clean;
+      // cpuClean.winChance is "user wins" chance when the CPU is clean (so
+      // it should be the complement, grip terms included).
+      expect(userClean.winChance).toBe(100 - cpuClean.winChance);
+    });
+
+    it('the win chance is clamped to [0, 100]', () => {
+      const [tooHigh] = rollFaceoffHeadToHead('clean', 1000, 'late', 0, 1);
+      const [tooLow] = rollFaceoffHeadToHead('late', 0, 'clean', 1000, 1);
+      expect(tooHigh.winChance).toBe(100);
+      expect(tooLow.winChance).toBe(0);
+    });
+
+    it('is seeded and deterministic for a fixed seed', () => {
+      const a = rollFaceoffHeadToHead('clean', 3, 'scrum', 1, 123);
+      const b = rollFaceoffHeadToHead('clean', 3, 'scrum', 1, 123);
+      expect(a).toEqual(b);
+    });
+
+    it('a favoured side concedes a win near its computed win chance, seeded', () => {
+      let seed = 5;
+      let won = false;
+      for (let i = 0; i < 50 && !won; i++) {
+        const [result, next] = rollFaceoffHeadToHead('clean', 0, 'late', 0, seed);
+        expect(result.winChance).toBe(
+          50 + (BASE_WIN_BY_BAND.clean - BASE_WIN_BY_BAND.late),
+        );
+        if (result.userWins) won = true;
+        seed = next;
       }
-      return count;
-    };
-    expect(countClean(90)).toBeGreaterThan(countClean(10));
+      expect(won).toBe(true);
+    });
   });
 });

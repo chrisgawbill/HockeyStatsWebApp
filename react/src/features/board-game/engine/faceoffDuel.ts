@@ -2,17 +2,23 @@
  * Faceoff minigame integration (BG-A15b): wires BG-A15a's `faceoffModel.ts`
  * into the real game as a two-sided ante pick plus a reaction roll, fully
  * replacing the old faceoff card duel (Chris's call - no hybrid). Mirrors
- * `shotDuel.ts`'s shape: the reacting side draws a faceoff-pool ante via the
- * same `drawFilteredCards` BG-A13 built and either presses the drop
+ * `shotDuel.ts`'s shape: a centre draws a faceoff-pool ante via the same
+ * `drawFilteredCards` BG-A13 built and either presses the drop
  * (`PICK_FACEOFF_CARD` then `RESOLVE_FACEOFF_BAND`) or auto-resolves
- * (`AUTO_RESOLVE_FACEOFF`). Unlike a shot's shooter/goalie split, both
- * centres in a faceoff are real card-playing duelists, so the CPU centre
- * also antes and reacts - through the identical `rollFaceoffContest` the
- * user's own draw resolves through - rather than sitting passive like a
- * shot's goalie. The CPU resolves immediately (it has no UI to wait on);
- * its result doesn't decide puck possession (the user's own roll does -
- * see `engine/duelOutcome.ts`'s `faceoff` case) but gates whether the CPU's
- * own card's `faceoffEffect` fires when it ends up with the puck.
+ * (`AUTO_RESOLVE_FACEOFF`).
+ *
+ * BG-A15b cycle 2 (Chris's ruling: "centres should compete, shouldn't be
+ * like shot"): unlike a shot's shooter/goalie split, both centres in a
+ * faceoff genuinely compete - both ante a card and both produce a real
+ * reaction band, resolved head-to-head by the one symmetric
+ * `rollFaceoffHeadToHead`. There is no user/CPU fork anywhere in the
+ * resolution: the CPU's band comes from the exact same
+ * `rollBandFromAnticipation` a human's reduced-motion/headless fallback
+ * uses, on its own anted card's `anticipation`, and the exact same contest
+ * function decides the draw regardless of which side is human. The CPU
+ * still resolves its own band immediately (it has no UI to wait on) rather
+ * than genuinely reacting in real time, but that's a timing/input detail,
+ * not a privileged resolution path.
  */
 import { PERK_CENTER_FACEOFF_DRAW } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
@@ -26,8 +32,7 @@ import {
 import {
   narrowedWindowsAfterJump,
   rollBandFromAnticipation,
-  rollCpuFaceoffBand,
-  rollFaceoffContest,
+  rollFaceoffHeadToHead,
   windowsForAnticipation,
 } from '@/features/board-game/engine/faceoffModel';
 import { nextFloat } from '@/features/board-game/engine/rng';
@@ -37,7 +42,7 @@ import type {
   DuelState,
   FaceoffBand,
   FaceoffBandWindows,
-  FaceoffContestResult,
+  FaceoffDuelResult,
   GameState,
 } from '@/features/board-game/types/game';
 
@@ -114,8 +119,7 @@ export function createFaceoffDuel(
     faceoffPickedCardId: null,
     faceoffCpuCardId: cpuCardId,
     faceoffJumped: false,
-    faceoffUserResult: null,
-    faceoffCpuResult: null,
+    faceoffResult: null,
   };
 
   return {
@@ -175,16 +179,27 @@ export function faceoffBandWindowsFor(
 
 /**
  * Resolves a faceoff once the user centre's band is known (the UI's drop
- * reaction, or `autoResolveFaceoff`). Rolls the user's own
- * `rollFaceoffContest` first - the one roll that decides who gets the puck.
- * On a first `jump`, that's a re-drop: nothing resolves yet, just marks the
- * duel jumped and waits for another `RESOLVE_FACEOFF_BAND`/
- * `AUTO_RESOLVE_FACEOFF`. On a repeat jump or a real band, also rolls the
- * CPU centre's own independent `rollFaceoffContest` (driven by its anted
- * card's anticipation via `rollCpuFaceoffBand`, against the user's now-known
- * grip) - the same contest function for both sides, per Chris's ruling -
- * then settles the user's card and finishes through the existing
- * `resolveDuel`/`applyOutcome` outcome table.
+ * reaction, or `autoResolveFaceoff`).
+ *
+ * Jump/re-drop is per-side, and only the user can jump at all (a jump is a
+ * genuine false start - `rollBandFromAnticipation` never produces one, so
+ * the CPU's own band is never in question here): on the user's FIRST
+ * `jump` this duel, nothing resolves yet - just marks the duel jumped
+ * (`faceoffBandWindowsFor` narrows the retry's clean window, unless the
+ * picked card's effect is `freeJump`) and waits for another
+ * `RESOLVE_FACEOFF_BAND`/`AUTO_RESOLVE_FACEOFF`. A SECOND `jump` forfeits
+ * the draw outright for the user - no roll is made for them, though the
+ * CPU still gets its own real band and can still fire its own card's
+ * effect if that band was `clean`.
+ *
+ * Otherwise, both centres' bands are real: the CPU's is rolled fresh here
+ * (its own anted card's `anticipation`, via the identical
+ * `rollBandFromAnticipation` a human's reduced-motion fallback uses), and
+ * the two bands + grips go through the one symmetric
+ * `rollFaceoffHeadToHead` - never a separate path for either side. A
+ * `scrumOnLoss` card downgrades its own bearer's loss into a scrum
+ * afterward, then the user's card is settled and the draw finishes through
+ * the existing `resolveDuel`/`applyOutcome` outcome table.
  */
 export function resolveFaceoffBand(
   state: GameState,
@@ -192,25 +207,10 @@ export function resolveFaceoffBand(
   band: FaceoffBand,
 ): GameState {
   const duel = state.duel!;
-  const userCard = CARDS[pickedCardId];
-  const userGrip = userCard?.grip ?? 0;
-  const cpuCardId = duel.faceoffCpuCardId;
-  const cpuCard = cpuCardId ? CARDS[cpuCardId] : undefined;
-  const cpuGrip = cpuCard?.grip ?? 0;
 
-  const isRepeatJump = band === 'jump' && duel.faceoffJumped;
-  const [userResult, seed1] = rollFaceoffContest(
-    band,
-    userGrip,
-    cpuGrip,
-    isRepeatJump,
-    state.rngSeed,
-  );
-
-  if (userResult.reDrop) {
+  if (band === 'jump' && !duel.faceoffJumped) {
     return {
       ...state,
-      rngSeed: seed1,
       duel: {
         ...duel,
         faceoffPickedCardId: pickedCardId,
@@ -219,41 +219,75 @@ export function resolveFaceoffBand(
     };
   }
 
-  let cpuResult: FaceoffContestResult | null = null;
+  const userCard = CARDS[pickedCardId];
+  const userGrip = userCard?.grip ?? 0;
+  const cpuCardId = duel.faceoffCpuCardId;
+  const cpuCard = cpuCardId ? CARDS[cpuCardId] : undefined;
+  const cpuGrip = cpuCard?.grip ?? 0;
+  const [cpuBand, seed1] = rollBandFromAnticipation(
+    cpuCard?.anticipation ?? 0,
+    state.rngSeed,
+  );
+
+  const forfeitedByJump = band === 'jump';
+  let outcome: 'win' | 'loss' | 'scrum';
+  let winChance = 0;
   let seed2 = seed1;
-  if (cpuCard) {
-    const [cpuBand, seedA] = rollCpuFaceoffBand(
-      cpuCard.anticipation ?? 0,
-      seed2,
-    );
-    const [result, seedB] = rollFaceoffContest(
+
+  if (forfeitedByJump) {
+    // A repeat jump: no roll for the user, the CPU wins by default.
+    outcome = 'loss';
+  } else {
+    const [contest, seed3] = rollFaceoffHeadToHead(
+      band,
+      userGrip,
       cpuBand,
       cpuGrip,
-      userGrip,
-      false,
-      seedA,
+      seed1,
     );
-    cpuResult = result;
-    seed2 = seedB;
+    seed2 = seed3;
+    winChance = contest.winChance;
+    outcome =
+      contest.outcome === 'scrum' ? 'scrum' : contest.userWins ? 'win' : 'loss';
   }
+
+  // scrumOnLoss: converts the LOSING side's own bearer's loss into a scrum
+  // instead - symmetric, checked after the roll (or the forfeit) either way.
+  if (outcome === 'win' && cpuCard?.faceoffEffect === 'scrumOnLoss') {
+    outcome = 'scrum';
+  } else if (outcome === 'loss' && userCard?.faceoffEffect === 'scrumOnLoss') {
+    outcome = 'scrum';
+  }
+
+  const result: FaceoffDuelResult = {
+    userBand: forfeitedByJump ? 'jump' : band,
+    cpuBand,
+    outcome,
+    winChance,
+    forfeitedByJump,
+  };
 
   const settledDeck = settleCards(
     removeIdsFromHand(state.deck, [pickedCardId]),
     [pickedCardId],
   );
 
-  const winner: Side = userResult.won ? 'attacker' : 'defender';
+  // Only meaningful for turn-order bookkeeping downstream (activeTeam after
+  // DISMISS_DUEL_RESULT); puck placement itself comes entirely from
+  // `result.outcome`, read directly off `duel.faceoffResult` in
+  // `engine/duelOutcome.ts`. A scrum has no real "winner", so this
+  // attribution is an arbitrary (but deterministic) default of 'attacker'.
+  const winner: Side = outcome === 'loss' ? 'defender' : 'attacker';
 
   const preResolve: GameState = {
     ...state,
     deck: settledDeck,
     rngSeed: seed2,
-    lastFaceoffResult: userResult,
+    lastFaceoffResult: result,
     duel: {
       ...duel,
       faceoffPickedCardId: pickedCardId,
-      faceoffUserResult: userResult,
-      faceoffCpuResult: cpuResult,
+      faceoffResult: result,
     },
   };
 

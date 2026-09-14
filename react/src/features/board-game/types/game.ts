@@ -135,18 +135,59 @@ export interface ShotSaveResult {
   covered: boolean;
 }
 
-/** Result of rolling the contest for a resolved faceoff band (BG-A15a's `rollFaceoffContest`). */
-export interface FaceoffContestResult {
-  band: FaceoffBand;
-  /** True on a `clean`/`scrum`/`late` band if the contest roll was won. Always false on a `jump` - no contest is rolled. */
-  won: boolean;
-  /** The clamped win chance actually rolled against, 0-100, for tests/UI display. 0 on a `jump`, since no contest is rolled. */
+/**
+ * Result of the symmetric head-to-head faceoff contest (BG-A15b cycle 2's
+ * `rollFaceoffHeadToHead`): pure model output for one resolved pair of
+ * bands, from the user's point of view. `engine/faceoffDuel.ts` turns this
+ * into the richer, duel-flow-aware `FaceoffDuelResult` (jump/re-drop and
+ * `scrumOnLoss` live there, not here - this function only decides a winner
+ * given two already-real bands).
+ */
+export interface FaceoffHeadToHeadResult {
+  /**
+   * `'scrum'` when neither side read `clean` - no roll is made, `userWins`
+   * and `winChance` are both meaningless (`false`/`0`). `'win'` otherwise:
+   * a roll was made and `userWins` says who it favoured.
+   */
+  outcome: 'win' | 'scrum';
+  /** True if the user's side won the roll. Only meaningful when `outcome` is `'win'`. */
+  userWins: boolean;
+  /** The user's clamped win chance actually rolled against, 0-100, for tests/UI display. 0 on a `scrum` (no roll). */
+  winChance: number;
+}
+
+/**
+ * The user centre's-eye-view result of a fully resolved faceoff draw
+ * (BG-A15b cycle 2), surfaced on `GameState.lastFaceoffResult` for the UI
+ * (BG-B25) and read by `engine/duelOutcome.ts`'s `applyOutcome` off
+ * `DuelState.faceoffResult`. Wraps `rollFaceoffHeadToHead`'s bare
+ * win/scrum roll with the duel-flow context the UI needs to narrate the
+ * draw: both sides' actual bands, and whether a repeat jump ended it
+ * without a roll at all.
+ */
+export interface FaceoffDuelResult {
+  /**
+   * The user centre's own reaction band. `'jump'` only on a repeat false
+   * start (`forfeitedByJump: true`) - the user's first jump this duel
+   * always re-drops instead of producing a `FaceoffDuelResult` at all.
+   */
+  userBand: FaceoffBand;
+  /** The CPU centre's own reaction band. Never `'jump'` - that's a human-only false start. */
+  cpuBand: Exclude<FaceoffBand, 'jump'>;
+  /** From the user centre's side: did they win the puck, lose it, or was it a scrum. */
+  outcome: 'win' | 'loss' | 'scrum';
+  /**
+   * The user's clamped win chance actually rolled against, 0-100 (mirrors
+   * `rollFaceoffHeadToHead`'s `winChance`). 0 on a `scrum` and 0 on a
+   * repeat-jump forfeit - both resolve without a roll.
+   */
   winChance: number;
   /**
-   * True on a `jump` that earns a re-drop (the first jump) rather than an
-   * outright loss (a second jump). Always false on `clean`/`scrum`/`late`.
+   * True only when the user's SECOND jump this duel ended the draw
+   * outright: no roll was made, the CPU wins by default (its own card's
+   * `faceoffEffect` can still fire, gated on its own `cpuBand` as usual).
    */
-  reDrop: boolean;
+  forfeitedByJump: boolean;
 }
 
 /** Card ids in each pile. */
@@ -205,21 +246,12 @@ export interface DuelState {
    */
   faceoffJumped: boolean;
   /**
-   * Faceoff duel only (BG-A15b): the user centre's final, non-re-drop
-   * `rollFaceoffContest` result once the band is resolved. This is the one
-   * roll that decides who gets the puck; `applyOutcome` reads it. Null
-   * until resolved.
+   * Faceoff duel only (BG-A15b cycle 2): the fully resolved head-to-head
+   * result once both centres' bands are in - `applyOutcome` reads this to
+   * place the puck and fire effects. Null until resolved (including while
+   * a re-drop is pending).
    */
-  faceoffUserResult: FaceoffContestResult | null;
-  /**
-   * Faceoff duel only (BG-A15b): the CPU centre's own, independent
-   * `rollFaceoffContest` result - the same contest function the user's own
-   * draw resolves through, driven by the CPU's own anted card. Doesn't
-   * decide puck possession (the user's own result does that); only gates
-   * whether the CPU's card's `faceoffEffect` fires when the CPU ends up
-   * with the puck. Null until resolved, or if the CPU drew no card.
-   */
-  faceoffCpuResult: FaceoffContestResult | null;
+  faceoffResult: FaceoffDuelResult | null;
 }
 
 /** What both sides committed and dealt when a duel round's simultaneous reveal resolved. Damage counts after block. */
@@ -283,14 +315,15 @@ export interface GameState {
    */
   lastShotSaveResult: ShotSaveResult | null;
   /**
-   * The real `rollFaceoffContest` result for the faceoff `RESOLVE_FACEOFF_BAND`
-   * most recently resolved (BG-A15b), mirroring `lastShotSaveResult`'s
-   * lifecycle: null on `NEW_GAME` and `DISMISS_DUEL_RESULT`, set whenever a
-   * faceoff resolves, otherwise stale-but-unread between faceoffs. This is
-   * the user centre's own result; the CPU's independent result lives only
-   * on the (by-then-cleared) `DuelState`.
+   * The `FaceoffDuelResult` for the faceoff `RESOLVE_FACEOFF_BAND`/
+   * `AUTO_RESOLVE_FACEOFF` most recently resolved (BG-A15b), mirroring
+   * `lastShotSaveResult`'s lifecycle: null on `NEW_GAME` and
+   * `DISMISS_DUEL_RESULT`, set whenever a faceoff resolves, otherwise
+   * stale-but-unread between faceoffs. Carries both centres' bands, so the
+   * UI (BG-B25) can narrate the draw ("you were clean, they were late")
+   * without reaching into the (by-then-cleared) `DuelState`.
    */
-  lastFaceoffResult: FaceoffContestResult | null;
+  lastFaceoffResult: FaceoffDuelResult | null;
   /**
    * The faceoff dot the current/most recent draw happened at (BG-A15b):
    * `FACEOFF_SPOTS.centreIce` for a new game or a boxed-in whistle, or one

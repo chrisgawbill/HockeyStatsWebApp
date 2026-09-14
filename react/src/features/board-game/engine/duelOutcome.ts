@@ -103,28 +103,21 @@ export function applyOutcome(
 
   switch (duel.kind) {
     case 'faceoff': {
-      // BG-A15b: fully replaces the old always-carried resolution. The
-      // user centre's own `rollFaceoffContest` result (`winner`, derived
-      // from it in `resolveFaceoffBand`) decides who gets the puck; the CPU
-      // centre's independent result only gates whether *its* card's effect
-      // fires when it ends up with the puck.
-      const userResult = duel.faceoffUserResult!;
-      const cpuResult = duel.faceoffCpuResult;
+      // BG-A15b cycle 2 (Chris's ruling): a genuine head-to-head - both
+      // centres anted, both produced a real band, and `duel.faceoffResult`
+      // (set by `resolveFaceoffBand`'s symmetric `rollFaceoffHeadToHead`)
+      // already carries the whole outcome, `scrumOnLoss` downgrade
+      // included. `winner` (from `resolveFaceoffBand`) just tells us which
+      // physical duelist that outcome favoured.
+      const result = duel.faceoffResult!;
       const userCard = duel.faceoffPickedCardId
         ? CARDS[duel.faceoffPickedCardId]
         : undefined;
       const cpuCard = duel.faceoffCpuCardId
         ? CARDS[duel.faceoffCpuCardId]
         : undefined;
-      const winnerIsUser = winner === 'attacker';
-      // A card's `scrumOnLoss` protects its own bearer: if the side about
-      // to lose anted it, the loss downgrades to a scrum instead.
-      const loserCard = winnerIsUser ? cpuCard : userCard;
 
-      if (
-        userResult.band === 'scrum' ||
-        loserCard?.faceoffEffect === 'scrumOnLoss'
-      ) {
+      if (result.outcome === 'scrum') {
         const [tile, nextSeed] = pickScrumTile(
           state,
           state.faceoffSpot,
@@ -135,16 +128,18 @@ export function applyOutcome(
         break;
       }
 
+      const winnerIsUser = winner === 'attacker';
       const winnerId = winnerIsUser
         ? duel.attacker.skaterId
         : duel.defender.skaterId;
       puck = { kind: 'carried', skaterId: winnerId };
 
-      // Only a genuinely clean win/read carries the bonus - a late-band
-      // win squeaked out on grip alone still just carries the puck.
+      // The winner's effect fires only if THEIR OWN band was clean - a
+      // late-band win squeaked out on grip alone still just carries the
+      // puck, no bonus.
       const wonClean = winnerIsUser
-        ? userResult.band === 'clean'
-        : !!cpuResult && cpuResult.band === 'clean' && cpuResult.won;
+        ? result.userBand === 'clean'
+        : result.cpuBand === 'clean';
       const winningCard = winnerIsUser ? userCard : cpuCard;
 
       if (wonClean && winningCard?.faceoffEffect) {

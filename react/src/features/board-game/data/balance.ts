@@ -126,12 +126,20 @@ export const FACEOFF_DROP_DELAY_MIN_MS = 700;
 /** Maximum linesman hold before the drop, in ms. */
 export const FACEOFF_DROP_DELAY_MAX_MS = 1800;
 /**
- * Base win chance (percent) for the faceoff contest roll, by band. `jump`
- * has no entry: a jump never rolls a contest, it's a deterministic re-drop
- * or an outright loss (see `rollFaceoffContest`). `clean` is a real favorite
- * before grip is applied, `scrum` sits near a coin flip so grip decides it,
- * and `late` is a longshot but not hopeless - a big grip edge can still
- * steal it.
+ * Per-band base value used by the symmetric head-to-head faceoff contest
+ * (BG-A15b cycle 2's `rollFaceoffHeadToHead`), by band. `jump` has no
+ * entry: a jump never enters the contest at all - the jumping side either
+ * earns a re-drop or forfeits outright (see `engine/faceoffDuel.ts`'s
+ * `resolveFaceoffBand`). These aren't standalone win chances any more
+ * (cycle 1's one-sided model rolled a band straight against this as a flat
+ * percent); the contest now takes the *difference* between the two sides'
+ * band values as an edge on top of grip, so only the gaps between
+ * `clean`/`scrum`/`late` matter, not their absolute size. When both sides
+ * read the same band the gap is zero and grip alone (around a fair 50/50)
+ * decides - which is why `scrum` and `late` still need real entries here
+ * even though neither can ever win outright on its own (`clean` beats
+ * either; two non-`clean` bands are always a scrum, never a roll) - their
+ * values still set how much of an edge `clean` gets over each of them.
  */
 export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
   clean: 65,
@@ -139,22 +147,27 @@ export const BASE_WIN_BY_BAND: Record<'clean' | 'scrum' | 'late', number> = {
   late: 25,
 };
 /**
- * Sampling ceiling (ms) for the CPU's simulated faceoff reaction time
- * (BG-A15b). Unlike `CPU_SHOT_ACCURACY` (a flat aim difficulty the shot
- * model intentionally keeps independent of the CPU's card), the faceoff CPU
- * is driven by its own anted card's `anticipation` stat - see
- * `rollCpuFaceoffBand` - so there's no separate "difficulty" constant here,
- * only where the reaction-time roll tops out. BG-A15a's first cut reused
- * `FACEOFF_SCRUM_WINDOW_MS * 2` for this, which pinned `late` at exactly
- * 50% of every roll regardless of anticipation (the domain's midpoint
- * always landed on the scrum window's outer edge) - a QA finding, not a
- * balance call. 500ms instead anchors on the same human-reaction-time
- * research `FACEOFF_CLEAN_WINDOW_BASE_MS` cites (median ~250ms): twice the
- * median, so a genuinely slow read is still reachable without being
- * baked in as a coin flip. Not one of the three tuned window constants
- * above - moving it doesn't retune `clean/scrum`, only the CPU's ceiling.
+ * Sampling ceiling (ms) for a simulated faceoff reaction time - shared by
+ * the CPU centre's own reaction and a human centre's reduced-motion/
+ * headless fallback (BG-A15b cycle 2's `rollBandFromAnticipation`; Chris's
+ * ruling that the two must be genuinely comparable, not the CPU alone).
+ * Unlike `CPU_SHOT_ACCURACY` (a flat aim difficulty the shot model
+ * intentionally keeps independent of the CPU's card), this reaction is
+ * driven entirely by whichever card was anted (its `anticipation` stat), so
+ * there's no separate "difficulty" constant - only where the reaction-time
+ * roll tops out. BG-A15a's first cut reused `FACEOFF_SCRUM_WINDOW_MS * 2`
+ * for this, which pinned `late` at exactly 50% of every roll regardless of
+ * anticipation (the domain's midpoint always landed on the scrum window's
+ * outer edge) - a QA finding, not a balance call, and one that turned out to
+ * hit the reduced-motion fallback exactly as hard as the CPU once measured.
+ * 500ms instead anchors on the same human-reaction-time research
+ * `FACEOFF_CLEAN_WINDOW_BASE_MS` cites (median ~250ms): twice the median,
+ * so a genuinely slow read is still reachable without being baked in as a
+ * coin flip. Not one of the three tuned window constants above - moving it
+ * doesn't retune `clean/scrum`, only where the simulated-reaction ceiling
+ * sits.
  */
-export const CPU_FACEOFF_REACTION_CEILING_MS = 500;
+export const FACEOFF_REACTION_SAMPLE_CEILING_MS = 500;
 /**
  * Clean-band ms shaved off the re-drop window after a jump (a false start
  * costs precision, not just a retry). Floored at 0 by

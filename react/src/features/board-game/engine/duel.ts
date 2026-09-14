@@ -102,8 +102,7 @@ export function createDuel(
     faceoffPickedCardId: null,
     faceoffCpuCardId: null,
     faceoffJumped: false,
-    faceoffUserResult: null,
-    faceoffCpuResult: null,
+    faceoffResult: null,
   };
 
   return {

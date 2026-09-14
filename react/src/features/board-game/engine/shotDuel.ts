@@ -85,8 +85,7 @@ export function createShotDuel(
     faceoffPickedCardId: null,
     faceoffCpuCardId: null,
     faceoffJumped: false,
-    faceoffUserResult: null,
-    faceoffCpuResult: null,
+    faceoffResult: null,
   };
   const anteState: GameState = { ...state, duel: duelBase, lastReveal: null };
 

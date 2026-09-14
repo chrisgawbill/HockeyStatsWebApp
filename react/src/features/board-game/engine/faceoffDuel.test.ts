@@ -15,7 +15,10 @@ import {
   pickFaceoffCard,
   resolveFaceoffBand,
 } from '@/features/board-game/engine/faceoffDuel';
-import { rollFaceoffContest } from '@/features/board-game/engine/faceoffModel';
+import {
+  rollBandFromAnticipation,
+  rollFaceoffHeadToHead,
+} from '@/features/board-game/engine/faceoffModel';
 import { manhattan } from '@/features/board-game/engine/rink';
 import type { FaceoffBand, GameState } from '@/features/board-game/types/game';
 
@@ -38,23 +41,44 @@ function withFaceoffCards(
   };
 }
 
-/** The smallest seed >= `from` where the user's own contest resolves to `won`. */
-function findSeedForWin(
-  band: Exclude<FaceoffBand, 'jump'>,
-  userGrip: number,
-  cpuGrip: number,
-  won: boolean,
+/**
+ * The smallest seed >= `from` where resolving `band` (the user's real,
+ * fixed reaction) against `state`'s forced cards - CPU's band rolled fresh
+ * each try, exactly as `resolveFaceoffBand` really does it - satisfies
+ * `predicate` on the resulting state. Black-box (drives the real function,
+ * not a re-implementation of its math), so it stays correct even if the
+ * internals change.
+ */
+function findSeedWhere(
+  state: GameState,
+  pickedCardId: string,
+  band: FaceoffBand,
+  predicate: (result: GameState) => boolean,
   from = 0,
+  tries = 5000,
 ): number {
-  for (let seed = from; seed < from + 5000; seed++) {
-    const [result] = rollFaceoffContest(band, userGrip, cpuGrip, false, seed);
-    if (result.won === won) return seed;
+  for (let seed = from; seed < from + tries; seed++) {
+    const result = resolveFaceoffBand({ ...state, rngSeed: seed }, pickedCardId, band);
+    if (predicate(result)) return seed;
   }
   throw new Error('no seed found in range');
 }
 
-describe('createFaceoffDuel (ante)', () => {
-  it('draws a faceoff-pool ante (draw 4 = 3 + the C perk, pick 1) and has the CPU centre pick+settle its own card immediately', () => {
+/** The smallest seed >= `from` where the CPU's own simulated reaction (on `anticipation`) reads `band`. */
+function findSeedWhereCpuBandIs(
+  anticipation: number,
+  band: Exclude<FaceoffBand, 'jump'>,
+  from = 0,
+): number {
+  for (let seed = from; seed < from + 5000; seed++) {
+    const [rolled] = rollBandFromAnticipation(anticipation, seed);
+    if (rolled === band) return seed;
+  }
+  throw new Error('no seed found in range');
+}
+
+describe('createFaceoffDuel (both centres ante)', () => {
+  it('draws a faceoff-pool ante for the user (draw 4 = 3 + the C perk, pick 1) and has the CPU centre pick+settle its own card immediately - both real duelists, no passive side', () => {
     const state = makeFaceoffState();
     expect(state.phase).toBe('duel');
     expect(state.duel!.kind).toBe('faceoff');
@@ -102,19 +126,19 @@ describe('pickBestFaceoffCard', () => {
   });
 });
 
-describe('resolveFaceoffBand: three outcomes', () => {
-  it('CLEAN WIN: the winner carries the puck', () => {
+describe('resolveFaceoffBand: three outcomes, symmetric head-to-head (BG-A15b cycle 2)', () => {
+  it('WIN: the winner carries the puck when the user genuinely wins the head-to-head', () => {
     // The CPU's card here must not carry `scrumOnLoss`, or its own
     // protection would legitimately downgrade this to a scrum - see the
     // dedicated scrumOnLoss tests below.
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'quick_hands', 'forehand_pull');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
+    const seed = findSeedWhere(
+      state,
+      'quick_hands',
       'clean',
-      CARDS.quick_hands.grip!,
-      CARDS.forehand_pull.grip!,
-      true,
+      (r) => r.puck.kind === 'carried' && r.puck.skaterId === 'user-C',
     );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
@@ -127,32 +151,60 @@ describe('resolveFaceoffBand: three outcomes', () => {
     expect(result.duel).toBeNull();
   });
 
-  it('SCRUM (scrum band): the puck goes loose on a free tile adjacent to the dot, regardless of the contest roll', () => {
+  it('SCRUM: neither side reading clean is an automatic scrum - the puck goes loose on a free tile adjacent to the dot', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
     state = pickFaceoffCard(state, 0);
-    for (let seed = 0; seed < 20; seed++) {
+    let sawScrum = false;
+    let sawCarried = false;
+    for (let seed = 0; seed < 200; seed++) {
       const result = resolveFaceoffBand(
         { ...state, rngSeed: seed },
         'quick_hands',
         'scrum',
       );
-      expect(result.puck.kind).toBe('loose');
       if (result.puck.kind === 'loose') {
+        sawScrum = true;
         expect(manhattan(result.puck.pos, FACEOFF_SPOTS.centreIce)).toBe(1);
+      } else {
+        // The only way a fixed 'scrum' user band ISN'T a scrum is if the
+        // CPU's own (rolled) band happened to read 'clean' this attempt -
+        // a real, favoured-but-not-guaranteed win/loss roll (band-edge
+        // favours the CPU, but grip can still carry the user through it),
+        // not a bug - see faceoffModel.test.ts for the exact edge math.
+        sawCarried = true;
+        expect(result.puck.kind).toBe('carried');
       }
     }
+    expect(sawScrum).toBe(true);
+    expect(sawCarried).toBe(true);
   });
 
-  it('LOSS: the opponent carries when the user does not win', () => {
+  it('a one-sided clean vs. non-clean band is NOT a scrum - it is a real, band-edge-favoured win/loss roll', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
+    // The CPU's own band happens to be clean at this seed (see the seed
+    // search above's else-branch reasoning) - a clean-vs-scrum pairing, so
+    // it must resolve as a win/loss roll, never a scrum.
+    const seed = findSeedWhereCpuBandIs(CARDS.quick_hands.anticipation!, 'clean');
+    const result = resolveFaceoffBand(
+      { ...state, rngSeed: seed },
+      'quick_hands',
+      'scrum',
+    );
+    expect(result.puck.kind).toBe('carried');
+  });
+
+  it('LOSS: the opponent carries when the CPU wins the head-to-head', () => {
+    let state = makeFaceoffState();
+    state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
+    state = pickFaceoffCard(state, 0);
+    const seed = findSeedWhere(
+      state,
+      'quick_hands',
       'late',
-      CARDS.quick_hands.grip!,
-      CARDS.quick_hands.grip!,
-      false,
+      (r) => r.puck.kind === 'carried' && r.puck.skaterId === 'cpu-C',
     );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
@@ -163,7 +215,7 @@ describe('resolveFaceoffBand: three outcomes', () => {
     expect(result.lastOutcome!.winner).toBe('defender');
   });
 
-  it('a repeat jump loses outright (no second re-drop)', () => {
+  it('a repeat jump forfeits the draw outright for the user (no second re-drop) - the CPU still gets its own real band', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -177,19 +229,21 @@ describe('resolveFaceoffBand: three outcomes', () => {
     const secondJump = resolveFaceoffBand(firstJump, 'quick_hands', 'jump');
     expect(secondJump.duel).toBeNull();
     expect(secondJump.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
+    expect(secondJump.lastFaceoffResult!.forfeitedByJump).toBe(true);
+    expect(secondJump.lastFaceoffResult!.userBand).toBe('jump');
   });
 });
 
 describe('faceoffEffect: backDraw', () => {
-  it('a clean win with that card sends the puck to the winner’s nearest D instead of the C', () => {
+  it("a clean win with that card sends the puck to the winner's nearest D instead of the C", () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'win_it_back', 'quick_hands');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
+    const seed = findSeedWhere(
+      state,
+      'win_it_back',
       'clean',
-      CARDS.win_it_back.grip!,
-      CARDS.quick_hands.grip!,
-      true,
+      (r) => r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
     );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
@@ -212,11 +266,11 @@ describe('faceoffEffect: stunLoser', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'body_the_dot', 'quick_hands');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
+    const seed = findSeedWhere(
+      state,
+      'body_the_dot',
       'clean',
-      CARDS.body_the_dot.grip!,
-      CARDS.quick_hands.grip!,
-      true,
+      (r) => r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
     );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
@@ -231,15 +285,15 @@ describe('faceoffEffect: stunLoser', () => {
 });
 
 describe('faceoffEffect: bonusMp', () => {
-  it('a clean win with that card adds 1 MP to the winning side’s next roll', () => {
+  it("a clean win with that card adds 1 MP to the winning side's next roll", () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'forehand_pull', 'quick_hands');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
+    const seed = findSeedWhere(
+      state,
+      'forehand_pull',
       'clean',
-      CARDS.forehand_pull.grip!,
-      CARDS.quick_hands.grip!,
-      true,
+      (r) => r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
     );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
@@ -257,14 +311,15 @@ describe('faceoffEffect: bonusMp', () => {
   });
 
   it('a plain (non-bonus) clean win does not add MP', () => {
+    // Neither card here carries scrumOnLoss, so a user win stays a plain win.
     let state = makeFaceoffState();
-    state = withFaceoffCards(state, 'quick_hands', 'tie_it_up');
+    state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
+    const seed = findSeedWhere(
+      state,
+      'quick_hands',
       'clean',
-      CARDS.quick_hands.grip!,
-      CARDS.tie_it_up.grip!,
-      true,
+      (r) => r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
     );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
@@ -276,16 +331,34 @@ describe('faceoffEffect: bonusMp', () => {
 });
 
 describe('faceoffEffect: scrumOnLoss', () => {
-  it("downgrades what would otherwise be a loss for the card's bearer into a scrum", () => {
+  it("downgrades what would otherwise be a clean loss for the card's bearer into a scrum", () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'tie_it_up', 'body_the_dot');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
-      'late',
-      CARDS.tie_it_up.grip!,
-      CARDS.body_the_dot.grip!,
-      false,
-    );
+    const cpuAnticipation = CARDS.body_the_dot.anticipation!;
+    const cpuGrip = CARDS.body_the_dot.grip!;
+    const userGrip = CARDS.tie_it_up.grip!;
+    // Construct (with tie_it_up's OWN real grip, not a stand-in card) a
+    // seed where the CPU's band genuinely reads clean AND the head-to-head
+    // roll genuinely favours the CPU - i.e. this exact matchup really
+    // would be a clean loss for tie_it_up's bearer without its protection.
+    let seed = 0;
+    for (; ; seed++) {
+      const [cpuBand, seedAfterCpuBand] = rollBandFromAnticipation(
+        cpuAnticipation,
+        seed,
+      );
+      if (cpuBand !== 'clean') continue;
+      const [contest] = rollFaceoffHeadToHead(
+        'late',
+        userGrip,
+        cpuBand,
+        cpuGrip,
+        seedAfterCpuBand,
+      );
+      if (contest.outcome === 'win' && !contest.userWins) break;
+      if (seed > 5000) throw new Error('no seed found in range');
+    }
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
       'tie_it_up',
@@ -301,11 +374,11 @@ describe('faceoffEffect: scrumOnLoss', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'tie_it_up', 'quick_hands');
     state = pickFaceoffCard(state, 0);
-    const seed = findSeedForWin(
+    const seed = findSeedWhere(
+      state,
+      'tie_it_up',
       'clean',
-      CARDS.tie_it_up.grip!,
-      CARDS.quick_hands.grip!,
-      true,
+      (r) => r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
     );
     const result = resolveFaceoffBand(
       { ...state, rngSeed: seed },
@@ -347,8 +420,8 @@ describe('faceoffEffect: freeJump', () => {
   });
 });
 
-describe('the CPU centre resolves through the same rollFaceoffContest as the user', () => {
-  it("its own card's effect fires on some of its wins and not others - proof it runs a real, independent contest rather than a fixed rule", () => {
+describe('the CPU centre goes through the identical head-to-head contest as the user (no privileged path)', () => {
+  it("the CPU's own card effect fires on some of its wins and not others - proof its band genuinely varies rather than being fixed", () => {
     const base = pickFaceoffCard(
       withFaceoffCards(makeFaceoffState(), 'quick_hands', 'body_the_dot'),
       0,
@@ -371,6 +444,24 @@ describe('the CPU centre resolves through the same rollFaceoffContest as the use
     }
     expect(sawFired).toBe(true);
     expect(sawNotFired).toBe(true);
+  });
+
+  it('the user can win outright off a clean band exactly like the CPU can - the identical formula runs from either side', () => {
+    let state = makeFaceoffState();
+    state = withFaceoffCards(state, 'body_the_dot', 'quick_hands');
+    state = pickFaceoffCard(state, 0);
+    const seed = findSeedWhere(
+      state,
+      'body_the_dot',
+      'clean',
+      (r) => r.puck.kind === 'carried' && r.puck.skaterId === 'user-C',
+    );
+    const result = resolveFaceoffBand(
+      { ...state, rngSeed: seed },
+      'body_the_dot',
+      'clean',
+    );
+    expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
   });
 });
 
