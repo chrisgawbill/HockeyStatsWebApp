@@ -33,3 +33,20 @@ export const LINE_COLUMNS = {
   redLine: [7],
   cpuBlueLine: [9, 10],
 };
+
+/** Faceoff spot locations on the board. Coordinates are Chris-tunable. */
+export const FACEOFF_SPOTS = {
+  /** Centre ice faceoff dot. */
+  centreIce: { col: 7, row: 3 },
+  /** End-zone faceoff dots (pair) for each team's defensive end, keyed by team. */
+  defendingDots: {
+    user: [
+      { col: 2, row: 1 },
+      { col: 2, row: 5 },
+    ],
+    cpu: [
+      { col: 12, row: 1 },
+      { col: 12, row: 5 },
+    ],
+  } as Record<TeamId, Coord[]>,
+};

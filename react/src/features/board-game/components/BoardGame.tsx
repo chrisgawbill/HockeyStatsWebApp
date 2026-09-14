@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type {
   Coord,
   DuelOutcome,
+  FaceoffBand,
   GameLength,
   Role,
   ShotBand,
@@ -20,6 +21,7 @@ import {
   canUnqueueCard,
   cardBlockReason,
 } from '@/features/board-game/engine/duel';
+import { faceoffBandWindowsFor } from '@/features/board-game/engine/faceoffDuel';
 import { describeOutcome } from '@/features/board-game/utils/describeOutcome';
 import { isStunned, sameCoord } from '@/features/board-game/engine/rink';
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
@@ -32,6 +34,9 @@ import TurnHud from '@/features/board-game/components/TurnHud';
 import GameButton from '@/features/board-game/components/GameButton';
 import DuelScreen from '@/features/board-game/components/DuelScreen';
 import ShotMinigame from '@/features/board-game/components/ShotMinigame';
+import FaceoffMinigame, {
+  FaceoffResultSummary,
+} from '@/features/board-game/components/FaceoffMinigame';
 import RevealPanel from '@/features/board-game/components/RevealPanel';
 import DuelResultBanner from '@/features/board-game/components/DuelResultBanner';
 import GameOverModal from '@/features/board-game/components/GameOverModal';
@@ -67,6 +72,16 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>('move');
+  /**
+   * The two anted card ids for the most recently resolved faceoff:
+   * `DuelState` is already cleared by the time a result exists, so
+   * `FaceoffResultSummary` needs its own memory of them. Captured once at
+   * the ante pick (`handlePickFaceoffCard`).
+   */
+  const [faceoffCardIds, setFaceoffCardIds] = useState<{
+    user: string;
+    cpu: string | null;
+  } | null>(null);
 
   const isUserTurn = state.activeTeam === 'user';
   const highlighted: Coord[] = selectedId ? legalSteps(selectedId) : [];
@@ -158,17 +173,43 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
 
   /**
    * `ShotMinigame` reports pick and band together; the reducer wants them as
-   * two actions. Dispatch both here so the component's contract stays a
-   * single callback. `AUTO_RESOLVE_SHOT` is never dispatched from the UI -
-   * the component already self-resolves under `prefers-reduced-motion` and
-   * reports that through this same `onResolve`, so dispatching it here too
-   * would double-resolve the shot.
+   * two actions, dispatched here. Never also dispatch `AUTO_RESOLVE_SHOT` -
+   * the component's reduced-motion path already reports through this same
+   * callback, so that would double-resolve the shot.
    */
   function handleResolveShot(cardId: string, band: ShotBand) {
     const handIndex = state.deck.hand.indexOf(cardId);
     if (handIndex === -1) return;
     dispatch({ type: 'PICK_SHOT_CARD', handIndex });
     dispatch({ type: 'RESOLVE_SHOT_BAND', band });
+  }
+
+  /**
+   * `FaceoffMinigame` reports the ante pick and the drop's reaction as two
+   * separate calls (unlike `ShotMinigame`'s single `onResolve`): the pick
+   * must dispatch first because `faceoffBandWindowsFor(state)` needs
+   * `duel.faceoffPickedCardId` set before it can return real window geometry
+   * for the drop step to render.
+   */
+  function handlePickFaceoffCard(cardId: string) {
+    const handIndex = state.deck.hand.indexOf(cardId);
+    if (handIndex === -1) return;
+    setFaceoffCardIds({
+      user: cardId,
+      cpu:
+        state.duel && state.duel.kind === 'faceoff'
+          ? state.duel.faceoffCpuCardId
+          : null,
+    });
+    dispatch({ type: 'PICK_FACEOFF_CARD', handIndex });
+  }
+
+  function handleResolveFaceoffBand(band: FaceoffBand) {
+    dispatch({ type: 'RESOLVE_FACEOFF_BAND', band });
+  }
+
+  function handleAutoResolveFaceoff() {
+    dispatch({ type: 'AUTO_RESOLVE_FACEOFF' });
   }
 
   function renderSkater(skater: Skater) {
@@ -276,25 +317,54 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
         />
       )}
 
-      {state.phase === 'duel' && state.duel && state.duel.kind !== 'shot' && (
-        <DuelScreen
-          duel={state.duel}
-          deck={state.deck}
-          skaters={state.skaters}
-          lastReveal={state.lastReveal}
-          onPlayCard={(i) => dispatch({ type: 'PLAY_CARD', handIndex: i })}
-          onUnqueue={(i) => dispatch({ type: 'UNQUEUE_CARD', queueIndex: i })}
-          onEndRound={() => dispatch({ type: 'END_DUEL_ROUND' })}
-          blockReason={(i) => cardBlockReason(state, i)}
-          canUnqueue={(i) => canUnqueueCard(state, i)}
-        />
-      )}
+      {state.phase === 'duel' &&
+        state.duel &&
+        state.duel.kind === 'faceoff' && (
+          <FaceoffMinigame
+            cards={state.deck.hand.map((id) => CARDS[id])}
+            cpuCard={
+              state.duel.faceoffCpuCardId
+                ? CARDS[state.duel.faceoffCpuCardId]
+                : null
+            }
+            jumped={state.duel.faceoffJumped}
+            windows={faceoffBandWindowsFor(state)}
+            seed={state.rngSeed}
+            onPickCard={handlePickFaceoffCard}
+            onResolve={handleResolveFaceoffBand}
+            onAutoResolve={handleAutoResolveFaceoff}
+          />
+        )}
+
+      {state.phase === 'duel' &&
+        state.duel &&
+        state.duel.kind !== 'shot' &&
+        state.duel.kind !== 'faceoff' && (
+          <DuelScreen
+            duel={state.duel}
+            deck={state.deck}
+            skaters={state.skaters}
+            lastReveal={state.lastReveal}
+            onPlayCard={(i) => dispatch({ type: 'PLAY_CARD', handIndex: i })}
+            onUnqueue={(i) => dispatch({ type: 'UNQUEUE_CARD', queueIndex: i })}
+            onEndRound={() => dispatch({ type: 'END_DUEL_ROUND' })}
+            blockReason={(i) => cardBlockReason(state, i)}
+            canUnqueue={(i) => canUnqueueCard(state, i)}
+          />
+        )}
 
       {state.phase === 'duelResult' && state.lastOutcome && (
         <DuelResultBanner
           summary={describeOutcome(state.lastOutcome, state.skaters)}
           onContinue={() => dispatch({ type: 'DISMISS_DUEL_RESULT' })}
         >
+          {state.lastOutcome.kind === 'faceoff' && state.lastFaceoffResult && (
+            <FaceoffResultSummary
+              result={state.lastFaceoffResult}
+              userCard={faceoffCardIds ? CARDS[faceoffCardIds.user] : null}
+              cpuCard={faceoffCardIds?.cpu ? CARDS[faceoffCardIds.cpu] : null}
+            />
+          )}
           {state.lastReveal && (
             <RevealPanel
               reveal={state.lastReveal}

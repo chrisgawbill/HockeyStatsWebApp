@@ -1,6 +1,5 @@
 import {
   HAND_SIZE,
-  PERK_CENTER_FACEOFF_DRAW,
   PERK_DEFENSE_BONUS,
   SKATER_POISE,
 } from '@/features/board-game/data/balance';
@@ -25,10 +24,9 @@ export function otherSide(side: Side): Side {
 }
 
 /**
- * A fresh duelist for `skater`: full skater poise, no block. Goalies never
- * pass through here (BG-A14b moved goalie poise to `GameState.goaliePoise`,
- * persisted across the match) - the shot duel builds its own duelist shapes
- * in `engine/shotDuel.ts`.
+ * Fresh duelist for `skater`: full skater poise, no block. Goalies never
+ * pass through here — their poise lives on `GameState.goaliePoise` instead;
+ * the shot duel builds its own duelist shapes.
  */
 export function makeDuelist(skater: Skater): Duelist {
   return {
@@ -39,17 +37,18 @@ export function makeDuelist(skater: Skater): Duelist {
   };
 }
 
-/** Hand size for a round of this duel kind: +1 for the C-in-faceoff perk (both duelists in a faceoff are always C). */
-export function handSizeFor(kind: DuelKind): number {
-  return HAND_SIZE + (kind === 'faceoff' ? PERK_CENTER_FACEOFF_DRAW : 0);
+/**
+ * Hand size for a round of this duel kind. Never called with `kind ===
+ * 'faceoff'` — faceoffs resolve through `engine/faceoffDuel.ts`'s ante instead.
+ */
+export function handSizeFor(_kind: DuelKind): number {
+  return HAND_SIZE;
 }
 
 /**
- * Bonus amount a position perk adds to a card's damage or block effect.
- * BG-A14b: the LW/RW wing perk no longer lives here - shot cards never
- * reach `cardEffects`/`perkBonus` any more (the shot ante scores on
- * accuracy/power directly, not card effects), so its wing bonus is now
- * `shotAccuracyBonus` in `engine/shotModel.ts` instead.
+ * Bonus a position perk adds to a card's damage/block effect. Shot cards
+ * never reach this — the shot ante scores on accuracy/power directly; see
+ * `shotAccuracyBonus` in engine/shotModel.ts for that bonus instead.
  */
 export function perkBonus(
   role: Role,
@@ -65,10 +64,7 @@ export function perkBonus(
   return 0;
 }
 
-/**
- * True if `side` may play `card` in this duel: `allowedIn` passes. The one
- * legality path `canPlayCard` and `planCards` both use.
- */
+/** True if `side` may play `card` in this duel — the one legality path `canPlayCard`/`planCards` both use. */
 export function isCardAllowedFor(
   duel: DuelState,
   side: Side,
@@ -77,15 +73,26 @@ export function isCardAllowedFor(
   return ruleBlockReason(duel, side, card) === null;
 }
 
+/** `allowedIn`'s single restricted pool, as the `CardBlockReason` explaining why a card outside it is blocked. */
+const RESTRICTED_POOL_REASON: Record<DuelKind, CardBlockReason | null> = {
+  shot: 'shotOnly',
+  check: 'checkOnly',
+  faceoff: 'faceoffOnly',
+  deke: null,
+  intercept: null,
+};
+
 /**
  * Why the game's rules (not energy) forbid `side` from playing `card` in
- * this duel, or null if the rules allow it. The one rule-legality path
- * `isCardAllowedFor` and `cardBlockReason` both build on - checked ahead of
- * energy since these restrictions are permanent for the duel, unlike energy.
+ * this duel, or null if allowed — the one rule-legality path
+ * `isCardAllowedFor`/`cardBlockReason` build on. Checked ahead of energy
+ * since these restrictions are permanent for the duel.
  *
- * Shot duels never reach this function any more (BG-A14b: the shot minigame
- * is an ante pick, not a card duel - see `engine/shotDuel.ts`), so there is
- * no goalie-side special case here.
+ * Shot/faceoff duels never reach this for their OWN pool's cards (those
+ * resolve as an ante pick, not a card duel). It's still reached when a
+ * shot- or faceoff-pool card sits in a *different* kind's hand —
+ * `RESTRICTED_POOL_REASON` is what keeps it out of a hand it's not allowed
+ * in (`drawFilteredCards` calls this via `isDrawEligibleCard`).
  */
 export function ruleBlockReason(
   duel: DuelState,
@@ -94,21 +101,14 @@ export function ruleBlockReason(
 ): CardBlockReason | null {
   if (card.allowedIn === 'any' || card.allowedIn.includes(duel.kind))
     return null;
-  const firstKind = card.allowedIn[0];
-  if (firstKind === 'shot') return 'shotOnly';
-  if (firstKind === 'check') return 'checkOnly';
-  return null;
+  return RESTRICTED_POOL_REASON[card.allowedIn[0]] ?? null;
 }
 
 /**
- * True if `cardId` may be drawn into `side`'s hand for this duel: rule-legal
- * per `ruleBlockReason`, ignoring energy (energy only greys a card already
- * in hand). Used to filter the initial and per-round hand draws so no
- * dead-for-this-duel card ever reaches hand (BG-A13).
- *
- * BG-A14b removed the shot-duel exemption this used to carry: shot duels no
- * longer draw a card-duel hand at all (see `engine/shotDuel.ts`'s own
- * shot-pool filter), so this is never called with `duel.kind === 'shot'`.
+ * True if `cardId` may be drawn into `side`'s hand: rule-legal per
+ * `ruleBlockReason`, ignoring energy. Filters the initial and per-round
+ * hand draws so no dead-for-this-duel card ever reaches hand. Never called
+ * with `duel.kind === 'shot'` — shot duels don't draw a card-duel hand at all.
  */
 export function isDrawEligibleCard(
   duel: DuelState,

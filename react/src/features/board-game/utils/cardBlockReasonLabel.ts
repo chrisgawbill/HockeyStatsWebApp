@@ -16,5 +16,7 @@ export function cardBlockReasonLabel(
       return 'Only when shooting';
     case 'checkOnly':
       return 'Only when checking';
+    case 'faceoffOnly':
+      return 'Only at a faceoff';
   }
 }

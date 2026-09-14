@@ -1,11 +1,8 @@
 /**
- * Shot minigame integration (BG-A14b): wires BG-A14a's band/save model into
- * the real game as an ante pick plus a save roll, replacing the old shot
- * card duel. A shot never draws a full card-duel hand or plans CPU rounds -
- * the shooter's side draws a 3-card ante from the shot pool via the same
- * `drawFilteredCards` BG-A13 built, picks one, and the engine rolls the
- * save through `rollShotSave` (identical for the user and the CPU). The
- * goalie never touches cards; its poise now lives on `GameState.goaliePoise`.
+ * Shot minigame integration: wires the band/save model into the real game
+ * as an ante pick plus a save roll. Never draws a card-duel hand or plans
+ * CPU rounds. The goalie never touches cards — its poise lives on
+ * `GameState.goaliePoise`.
  */
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
@@ -44,9 +41,8 @@ function drawShotOffer(deck: Deck, seed: number): [Deck, number] {
 }
 
 /**
- * Simple "go for it" ante policy: picks the highest-power card offered. Used
- * by the CPU shooter here, and reused by `ai/autoplay.ts`'s headless sim to
- * drive the user shooter's ante the same way.
+ * "Go for it" ante policy: picks the highest-power card offered. Used by
+ * the CPU shooter, and reused by `ai/autoplay.ts` for the user's headless ante.
  */
 export function pickBestShotCard(offer: string[]): string {
   return offer.reduce((best, id) =>
@@ -55,11 +51,17 @@ export function pickBestShotCard(offer: string[]): string {
 }
 
 /**
- * Starts a shot: builds the duel shell (no card hands, no CPU plan - a shot
- * isn't a card duel) and draws the shooter's ante. A user shooter waits in
- * phase `'duel'` for `PICK_SHOT_CARD` then `RESOLVE_SHOT_BAND`; a CPU
- * shooter has no UI, so it picks its card and rolls its band immediately
- * and resolves in this same call, through the identical `resolveShotBand`.
+ * Starts a shot: builds the duel shell (no hands, no CPU plan) and draws
+ * the shooter's ante. A user shooter waits in phase `'duel'` for
+ * `PICK_SHOT_CARD` then `RESOLVE_SHOT_BAND`; a CPU shooter has no UI, so it
+ * picks and resolves immediately in this same call.
+ *
+ * @example
+ * // Full user-side flow, in call order:
+ * let state = createShotDuel(gameState, shooterId, goalieId);
+ * state = pickShotCard(state, handIndex);   // ante the card
+ * // ...UI times the press, measures a band...
+ * state = resolveShotBand(state, pickedCardId, band);
  */
 export function createShotDuel(
   state: GameState,
@@ -82,6 +84,10 @@ export function createShotDuel(
     queueDraws: [],
     receiverId: null,
     shotPickedCardId: null,
+    faceoffPickedCardId: null,
+    faceoffCpuCardId: null,
+    faceoffJumped: false,
+    faceoffResult: null,
   };
   const anteState: GameState = { ...state, duel: duelBase, lastReveal: null };
 
@@ -116,13 +122,11 @@ export function pickShotCard(state: GameState, handIndex: number): GameState {
 }
 
 /**
- * Auto-resolves a shot without a timing-bar press: rolls a band weighted by
- * the picked card's accuracy (wing perk included), the same
- * `rollBandFromAccuracy` the CPU uses, then finishes through
- * `resolveShotBand` - one path, no second RNG source. For BG-B22's
- * `prefers-reduced-motion` fallback, and the headless BG-A10 sim (see
- * `ai/autoplay.ts`), so the user shooter is measured the same way as the
- * CPU rather than by an unscored guess.
+ * Auto-resolves a shot without a timing-bar press: rolls a band from the
+ * picked card's accuracy (wing perk included) via `rollBandFromAccuracy`,
+ * then finishes through `resolveShotBand`. Used for
+ * `prefers-reduced-motion` and the headless sim, so the user is scored the
+ * same way as the CPU.
  */
 export function autoResolveShot(state: GameState): GameState {
   const duel = state.duel!;
@@ -138,9 +142,8 @@ export function autoResolveShot(state: GameState): GameState {
 }
 
 /**
- * The timing-bar band widths for the current shot's picked card, wing perk
- * included - the contract BG-B22's UI renders directly, never hardcoding
- * geometry. Null until a card is picked, or outside a shot duel.
+ * Timing-bar band widths for the current shot's picked card (wing perk
+ * included), for the UI to render directly. Null until picked, or outside a shot duel.
  */
 export function shotBandWidthsFor(state: GameState): ShotBandWidths | null {
   const duel = state.duel;
@@ -156,15 +159,12 @@ export function shotBandWidthsFor(state: GameState): ShotBandWidths | null {
 }
 
 /**
- * Resolves a shot once its band is known (the UI's timing-bar press, or the
- * CPU's `rollCpuShotBand`): rolls `rollShotSave` (the one save path for
- * both shooters), drains the defending goalie's persistent poise by the
- * card's power on a save, settles the picked card, and finishes through the
- * existing `resolveDuel` outcome table - a beat scores, a `weak`/`miss` save
- * freezes (`cleanSave`), a `good`/`perfect` save rebounds. No new outcome
- * kinds: the freeze/rebound split is expressed as a synthetic defender
- * poise/maxPoise pair so `applyOutcome`'s existing shot branch picks the
- * right path.
+ * Resolves a shot once its band is known (a UI press, or `rollCpuShotBand`):
+ * rolls `rollShotSave`, drains the goalie's persistent poise by the card's
+ * power on a save, settles the picked card, then finishes through
+ * `resolveDuel`. No new outcome kinds — freeze/rebound is expressed as a
+ * synthetic defender poise/maxPoise pair so `applyOutcome`'s existing shot
+ * branch picks the right path.
  */
 export function resolveShotBand(
   state: GameState,
@@ -200,9 +200,8 @@ export function resolveShotBand(
   );
 
   const winner: Side = result.saved ? 'defender' : 'attacker';
-  // Synthetic poise/maxPoise, local to this call: only used so
-  // `applyOutcome`'s existing shot branch (poise === maxPoise -> freeze,
-  // otherwise -> rebound) picks the right path from `result.freeze`.
+  // Synthetic, local to this call: only exists so applyOutcome's shot
+  // branch (poise === maxPoise -> freeze) reads `result.freeze` correctly.
   const syntheticDefender = {
     ...duel.defender,
     maxPoise: 1,

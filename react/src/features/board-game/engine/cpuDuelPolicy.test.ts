@@ -33,6 +33,10 @@ function makeDuel(overrides: Partial<DuelState> = {}): DuelState {
     queueDraws: [],
     receiverId: null,
     shotPickedCardId: null,
+    faceoffPickedCardId: null,
+    faceoffCpuCardId: null,
+    faceoffJumped: false,
+    faceoffResult: null,
     ...overrides,
   };
 }
@@ -62,11 +66,14 @@ function makeState(
     lastOutcome: null,
     lastReveal,
     lastShotSaveResult: null,
+    lastFaceoffResult: null,
     winner: null,
     rngSeed: 1,
     actionsThisTurn: 0,
     whistle: false,
     goaliePoise: { user: 43, cpu: 43 },
+    faceoffSpot: { col: 7, row: 3 },
+    pendingBonusMp: 0,
   };
 }
 

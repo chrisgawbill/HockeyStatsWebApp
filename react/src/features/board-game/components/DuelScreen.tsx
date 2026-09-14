@@ -133,9 +133,8 @@ export default function DuelScreen({
 
   const showReveal = lastReveal !== null && lastReveal.round === duel.round - 1;
 
-  // Keeps focus inside the dialog after a card queues/unqueues (its button
-  // unmounts) or a new round starts: first playable hand card, else the
-  // first queued card, else the Reveal button.
+  // Keeps focus inside the dialog after a queue/unqueue unmounts its button,
+  // or a new round starts: first playable hand card, else queued card, else Reveal.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;

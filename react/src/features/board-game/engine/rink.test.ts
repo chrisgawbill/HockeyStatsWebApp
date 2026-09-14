@@ -35,11 +35,14 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     lastOutcome: null,
     lastReveal: null,
     lastShotSaveResult: null,
+    lastFaceoffResult: null,
     winner: null,
     rngSeed: 1,
     actionsThisTurn: 0,
     whistle: false,
     goaliePoise: { user: 43, cpu: 43 },
+    faceoffSpot: { col: 7, row: 3 },
+    pendingBonusMp: 0,
     ...overrides,
   };
 }

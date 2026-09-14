@@ -122,6 +122,46 @@ describe('resolveShotBand', () => {
     expect(found).toBe(true);
   });
 
+  it('a covered save (BG-A16) whistles and routes to the faceoff phase on dismiss; a rebound does not', () => {
+    let foundCovered = false;
+    let foundRebound = false;
+    for (let seed = 1; seed <= 200 && !(foundCovered && foundRebound); seed++) {
+      const state = pickedState(seed);
+      const cardId = state.duel!.shotPickedCardId!;
+      const next = resolveShotBand(state, cardId, 'perfect');
+      if (next.phase !== 'duelResult' || next.lastOutcome!.goal) continue;
+
+      const result = next.lastShotSaveResult!;
+      if (!foundCovered && result.covered) {
+        expect(result.rebound).toBe(false);
+        const dismissed = gameReducer(next, { type: 'DISMISS_DUEL_RESULT' });
+        expect(dismissed.phase).toBe('faceoff');
+        expect(dismissed.whistle).toBe(true);
+        foundCovered = true;
+      }
+      if (!foundRebound && result.rebound) {
+        expect(result.covered).toBe(false);
+        const dismissed = gameReducer(next, { type: 'DISMISS_DUEL_RESULT' });
+        expect(dismissed.phase).toBe('move');
+        expect(dismissed.whistle).toBe(false);
+        foundRebound = true;
+      }
+    }
+    expect(foundCovered).toBe(true);
+    expect(foundRebound).toBe(true);
+  });
+
+  it('the cover roll is seeded and deterministic for a fixed seed', () => {
+    const stateA = pickedState(5);
+    const stateB = pickedState(5);
+    const cardIdA = stateA.duel!.shotPickedCardId!;
+    const cardIdB = stateB.duel!.shotPickedCardId!;
+    const nextA = resolveShotBand(stateA, cardIdA, 'perfect');
+    const nextB = resolveShotBand(stateB, cardIdB, 'perfect');
+    expect(nextA.lastShotSaveResult).toEqual(nextB.lastShotSaveResult);
+    expect(nextA.rngSeed).toBe(nextB.rngSeed);
+  });
+
   it('poise persists across shots: a drained goalie saves less than a fresh one over many trials', () => {
     let freshSaves = 0;
     let drainedSaves = 0;

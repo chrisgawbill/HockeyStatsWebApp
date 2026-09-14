@@ -1,9 +1,6 @@
 /**
- * Shot minigame engine model (BG-A14a). Pure and additive: nothing in the
- * running game calls this yet (BG-A14b wires it in). Contract for BG-B22:
- * `ShotBand`, `ShotBandWidths`, and `rollShotSave` (types/game.ts has the
- * shapes). Widths come from `bandWidthsForAccuracy`; the UI must not
- * hardcode band geometry.
+ * Shot minigame engine model. Widths come from `bandWidthsForAccuracy` —
+ * the UI must not hardcode band geometry.
  */
 import {
   BASE_SAVE_BY_BAND,
@@ -13,6 +10,7 @@ import {
   PERK_WING_SHOT_ACCURACY,
   POISE_SAVE_PENALTY_MAX,
   SHOT_BLUE_BAND_WIDTH,
+  SHOT_COVER_CHANCE,
   SHOT_YELLOW_BASE_WIDTH,
   SHOT_YELLOW_WIDTH_PER_ACCURACY,
 } from '@/features/board-game/data/balance';
@@ -28,17 +26,15 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** LW/RW accuracy bonus for a shot card, on the 0-100 accuracy scale (`PERK_WING_SHOT_ACCURACY`; BG-A14b applies this in the shot ante - see `shotDuel.ts`). */
+/** LW/RW accuracy bonus for a shot card, on the 0-100 accuracy scale (`PERK_WING_SHOT_ACCURACY`; applied in the shot ante - see `shotDuel.ts`). */
 export function shotAccuracyBonus(role: Role): number {
   return role === 'LW' || role === 'RW' ? PERK_WING_SHOT_ACCURACY : 0;
 }
 
 /**
- * The two concentric band widths for a given accuracy (0-100, clamped):
- * accuracy widens the yellow (perfect) zone only, per Chris's ruling; the
- * blue (good) zone stays constant so a low-accuracy card still lands `good`
- * reliably. The UI (BG-B22) consumes these numbers directly and must not
- * hardcode band geometry.
+ * Two concentric band widths for a given accuracy (0-100, clamped). Blue
+ * (good) is constant; only yellow (perfect) widens with accuracy. The UI
+ * must not hardcode this geometry.
  */
 export function bandWidthsForAccuracy(accuracy: number): ShotBandWidths {
   const clampedAccuracy = clamp(accuracy, 0, 100);
@@ -61,9 +57,8 @@ export function bandForPosition(
 }
 
 /**
- * Rolls a random track position for an accuracy-driven aim (the CPU's shot,
- * or the UI's reduced-motion auto-resolve) and buckets it into a band. Goes
- * through the same `bandForPosition` a human's timing-bar press would.
+ * Random track position for an accuracy-driven aim (CPU shot, or the UI's
+ * reduced-motion auto-resolve), bucketed via the same `bandForPosition` a human press uses.
  */
 export function rollBandFromAccuracy(
   accuracy: number,
@@ -88,12 +83,12 @@ export function poiseFactor(poise: number, maxPoise: number): number {
 }
 
 /**
- * Rolls the goalie's save for a resolved shot band. `saveChance =
- * BASE_SAVE_BY_BAND[band] + poiseFactor(goaliePoise) - power`, clamped, rolled
- * through `engine/rng.ts` (never `Math.random`). On a save, poise drains by
- * `power` and a `weak`/`miss` band freezes (existing clean-save path) while
- * `good`/`perfect` kicks out a rebound - the same function and outcome
- * mapping for both the human and the CPU shooter.
+ * Goalie's save for a resolved band: `saveChance = BASE_SAVE_BY_BAND[band] +
+ * poiseFactor(goaliePoise) - power`, clamped, rolled through `engine/rng.ts`
+ * (never `Math.random`). On a save, poise drains by `power`; `weak`/`miss`
+ * freezes, `good`/`perfect` rolls a separate `SHOT_COVER_CHANCE` check
+ * (`covered` XOR `rebound`, never rolled on `weak`/`miss`). One shared path
+ * for both the human and CPU shooter.
  */
 export function rollShotSave(
   band: ShotBand,
@@ -105,18 +100,31 @@ export function rollShotSave(
   const rawChance =
     BASE_SAVE_BY_BAND[band] + poiseFactor(goaliePoise, goalieMaxPoise) - power;
   const saveChance = clamp(rawChance, MIN_SAVE_CHANCE, MAX_SAVE_CHANCE);
-  const [roll, nextSeed] = nextFloat(seed);
+  const [roll, seedAfterSave] = nextFloat(seed);
   const saved = roll * 100 < saveChance;
   if (!saved) {
     return [
-      { band, saved, saveChance, poiseDrain: 0, freeze: false, rebound: false },
-      nextSeed,
+      {
+        band,
+        saved,
+        saveChance,
+        poiseDrain: 0,
+        freeze: false,
+        rebound: false,
+        covered: false,
+      },
+      seedAfterSave,
     ];
   }
   const freeze = band === 'weak' || band === 'miss';
-  const rebound = band === 'good' || band === 'perfect';
+  const canCover = band === 'good' || band === 'perfect';
+  const [coverRoll, nextSeed] = canCover
+    ? nextFloat(seedAfterSave)
+    : [1, seedAfterSave];
+  const covered = canCover && coverRoll * 100 < SHOT_COVER_CHANCE;
+  const rebound = canCover && !covered;
   return [
-    { band, saved, saveChance, poiseDrain: power, freeze, rebound },
+    { band, saved, saveChance, poiseDrain: power, freeze, rebound, covered },
     nextSeed,
   ];
 }

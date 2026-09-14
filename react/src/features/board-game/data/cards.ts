@@ -54,7 +54,6 @@ export const CARDS: Record<string, CardDef> = {
     allowedIn: ['shot'],
     exhaust: false,
     effects: [{ type: 'damage', amount: 7 }],
-    // BG-A14a shot-ante stats (unused by the still-live card duel above).
     accuracy: 70,
     power: 4,
   },
@@ -70,9 +69,6 @@ export const CARDS: Record<string, CardDef> = {
     accuracy: 30,
     power: 9,
   },
-  // BG-A14a: two more shot-pool cards so the 3-card ante isn't the same
-  // offer every time. BG-A14b adds them to STARTER_DECK (see below) now
-  // that the shot ante draws from it.
   snap_shot: {
     id: 'snap_shot',
     name: 'Snap Shot',
@@ -97,6 +93,83 @@ export const CARDS: Record<string, CardDef> = {
     accuracy: 20,
     power: 11,
   },
+  quick_hands: {
+    id: 'quick_hands',
+    name: 'Quick Hands',
+    cost: 1,
+    text: 'A lightning-quick read on the drop.',
+    tags: ['faceoff'],
+    allowedIn: ['faceoff'],
+    exhaust: false,
+    effects: [],
+    anticipation: 70,
+    grip: 2,
+  },
+  tie_it_up: {
+    id: 'tie_it_up',
+    name: 'Tie It Up',
+    cost: 1,
+    text: 'Ties up the puck rather than give it away clean.',
+    tags: ['faceoff'],
+    allowedIn: ['faceoff'],
+    exhaust: false,
+    effects: [],
+    anticipation: 25,
+    grip: 8,
+    faceoffEffect: 'scrumOnLoss',
+  },
+  win_it_back: {
+    id: 'win_it_back',
+    name: 'Win It Back',
+    cost: 2,
+    text: 'Pulls it back to the point instead of the circle.',
+    tags: ['faceoff'],
+    allowedIn: ['faceoff'],
+    exhaust: false,
+    effects: [],
+    anticipation: 50,
+    grip: 5,
+    faceoffEffect: 'backDraw',
+  },
+  body_the_dot: {
+    id: 'body_the_dot',
+    name: 'Body the Dot',
+    cost: 2,
+    text: 'Leans on the opposing centre through the whistle.',
+    tags: ['faceoff'],
+    allowedIn: ['faceoff'],
+    exhaust: false,
+    effects: [],
+    anticipation: 30,
+    grip: 7,
+    faceoffEffect: 'stunLoser',
+  },
+  forehand_pull: {
+    id: 'forehand_pull',
+    name: 'Forehand Pull',
+    cost: 1,
+    text: 'A clean forehand pull off the draw.',
+    tags: ['faceoff'],
+    allowedIn: ['faceoff'],
+    exhaust: false,
+    effects: [],
+    anticipation: 65,
+    grip: 4,
+    faceoffEffect: 'bonusMp',
+  },
+  cheat_the_draw: {
+    id: 'cheat_the_draw',
+    name: 'Cheat the Draw',
+    cost: 1,
+    text: 'Jumps the drop without fear of a whistle.',
+    tags: ['faceoff'],
+    allowedIn: ['faceoff'],
+    exhaust: false,
+    effects: [],
+    anticipation: 85,
+    grip: -2,
+    faceoffEffect: 'freeJump',
+  },
   body_check: {
     id: 'body_check',
     name: 'Body Check',
@@ -120,10 +193,8 @@ export const CARDS: Record<string, CardDef> = {
 };
 
 /**
- * The user's 13-card starter deck (card ids, duplicates repeated). See
- * design doc §5. BG-A14b: one of each of the 4 shot-pool cards (was
- * `wrist_shot` x2 + `slapshot` x1) so the 3-card shot ante - now drawn from
- * this deck - offers real variety instead of the same two cards every time.
+ * User's 19-card starter deck (ids, duplicates repeated; see design doc §5).
+ * One of each shot-/faceoff-pool card so those antes offer real variety.
  */
 export const STARTER_DECK: string[] = [
   'deke',
@@ -139,4 +210,10 @@ export const STARTER_DECK: string[] = [
   'one_timer',
   'body_check',
   'poke_check',
+  'quick_hands',
+  'tie_it_up',
+  'win_it_back',
+  'body_the_dot',
+  'forehand_pull',
+  'cheat_the_draw',
 ];
