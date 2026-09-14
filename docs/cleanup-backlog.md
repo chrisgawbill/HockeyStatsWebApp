@@ -386,3 +386,8 @@ DONE WHEN:
 ### Out of scope
 - [ ] Don't touch test files' descriptive comments — a test's reasoning belongs beside the assertion.
 - [ ] Don't touch `api/` or the stats app in the same pass.
+
+### Escalation rule (Chris, 2026-09-14) — applies to every C-DOC1 area
+- [ ] **If you are unsure whether a comment carries real information, ASK THE PM. Do not guess, and do not delete-and-mention-it-later.** Message the orchestrator with the file, the comment verbatim, and which bucket you think it falls in, then wait for a ruling before touching it.
+- [ ] Batch your questions — collect the uncertain cases for an area and ask once, rather than a message per line.
+- [ ] "I wasn't sure so I kept it" is always an acceptable outcome and needs no permission. Only deletion needs certainty.
