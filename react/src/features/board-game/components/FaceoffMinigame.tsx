@@ -24,10 +24,10 @@ export interface FaceoffMinigameProps {
   /** True once this duel has already had one false start - narrows the re-drop's clean window (already folded into `windows`) and drives the "Too early" wording. */
   jumped: boolean;
   /**
-   * This duel's reaction windows for the picked card, from the engine's
+   * This duel's reaction windows for the picked card, from
    * `faceoffBandWindowsFor(state)` - null until the ante is picked. Never
-   * hardcode window geometry in this component; these numbers are the only
-   * source of truth for where clean/scrum/late fall.
+   * hardcode window geometry here; these are the only source of truth for
+   * where clean/scrum/late fall.
    */
   windows: FaceoffBandWindows | null;
   /** RNG seed for the linesman's hold-length roll only - the real contest roll is entirely the engine's job once a band is reported. */
@@ -44,11 +44,9 @@ type Step = 'ante' | 'drop';
 type DropPhase = 'held' | 'open';
 
 /**
- * Grace period (ms) added past `scrumWindowMs` before an un-pressed drop
- * auto-resolves as `late`, so the modal never hangs open forever. Purely a
- * dead-man's-switch - `late` already covers every reaction slower than
- * `scrumWindowMs` regardless of how much slower, so this buffer changes
- * nothing about the contest's fairness or difficulty.
+ * Grace period (ms) past `scrumWindowMs` before an un-pressed drop
+ * auto-resolves as `late`, so the modal never hangs open. Dead-man's-switch
+ * only - doesn't affect the contest's fairness or difficulty.
  */
 const LATE_GRACE_MS = 500;
 
@@ -125,14 +123,11 @@ export interface FaceoffResultSummaryProps {
 }
 
 /**
- * The faceoff's own result narration (band, then clean win / tied up /
- * lost, plus any buff that fired): meant as `DuelResultBanner`'s `children`,
- * the same slot `RevealPanel` fills for the other duel kinds, once
- * `GameState.lastOutcome.kind === 'faceoff'`. A named export alongside the
- * default `FaceoffMinigame` rather than a second component file - the ante+
- * drop screen unmounts the instant the engine resolves (`resolveDuel` flips
- * `phase` to `'duelResult'` in the same dispatch that reports the band), so
- * the result has to live in the screen that is actually still mounted then.
+ * The faceoff's result narration (band, then clean win / tied up / lost,
+ * plus any buff that fired) - meant as `DuelResultBanner`'s `children`, the
+ * slot `RevealPanel` fills for other duel kinds. A separate named export
+ * because the ante+drop screen unmounts the instant the engine resolves, so
+ * this has to live in the component still mounted once a result exists.
  */
 export function FaceoffResultSummary({
   result,
@@ -171,13 +166,10 @@ export function FaceoffResultSummary({
 }
 
 /**
- * Faceoff ante + drop minigame (BG-B25). Dumb: props in, callbacks out,
- * same pattern as `ShotMinigame`. Never rolls a band itself outside the
+ * Faceoff ante + drop minigame. Dumb: props in, callbacks out, same pattern
+ * as `ShotMinigame`. Never rolls a band itself outside the
  * `prefers-reduced-motion` path, which hands off entirely to the engine's
- * own `AUTO_RESOLVE_FACEOFF` rather than sampling a band client-side - the
- * one source of truth BG-A15a's `rollBandFromAnticipation` already is for
- * the CPU centre's own reaction. Wiring this into the running game
- * (BoardGame.tsx) is part of this ticket, same as it was for the shot.
+ * `AUTO_RESOLVE_FACEOFF` rather than sampling a band client-side.
  */
 export default function FaceoffMinigame({
   cards,
@@ -220,11 +212,9 @@ export default function FaceoffMinigame({
     setStep('drop');
   }
 
-  // The linesman's hold: rolled fresh (from the engine, never hardcoded)
-  // every time we enter the drop step, and again on a re-drop after the
-  // first jump (`jumped` flips true without unmounting this component,
-  // since the duel isn't over yet). Deliberately NOT tied to any visible
-  // countdown - the whole point is the drop is unpredictable.
+  // Rolls the hold fresh from the engine on every entry to 'drop', including
+  // a re-drop after a jump. Deliberately not tied to a visible countdown -
+  // the drop must stay unpredictable.
   useEffect(() => {
     if (step !== 'drop' || reducedMotion) return;
     firedRef.current = false;
@@ -239,9 +229,7 @@ export default function FaceoffMinigame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, jumped, reducedMotion]);
 
-  // Dead-man's switch: an un-pressed drop past the scrum window is already
-  // `late` regardless of how much slower - this just stops the modal from
-  // waiting forever if the player never presses at all.
+  // Dead-man's switch so the modal can't wait forever on a never-pressed drop.
   useEffect(() => {
     if (step !== 'drop' || dropPhase !== 'open' || !windows) return;
     const timer = setTimeout(() => {

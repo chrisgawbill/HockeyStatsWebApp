@@ -35,7 +35,7 @@ export interface ShotMinigameProps {
   onResolve: (cardId: string, band: ShotBand) => void;
 }
 
-/** Duration of one one-way pass of the timing indicator. Named per Chris's ruling: difficulty lives in band width, never bar speed. */
+/** Duration (ms) of one one-way sweep of the timing indicator. Fixed - difficulty lives in band width, never bar speed. */
 const SWEEP_CYCLE_MS = 2000;
 
 /** Bounded swing: one there-and-back pass (2 alternating iterations) before an un-pressed shot resolves as a miss. */
@@ -71,11 +71,10 @@ function isTypingTarget(target: EventTarget | null): boolean {
 }
 
 /**
- * Shot ante + timing-bar minigame (BG-B22). Dumb: props in, callbacks out,
- * same pattern as `DuelScreen`. Does not call the reducer or import from
- * `hooks/`, and does not roll the save itself — `result` is supplied by the
- * caller once the engine has resolved it. Wiring this into the running game
- * is a separate ticket.
+ * Shot ante + timing-bar minigame. Dumb: props in, callbacks out, same
+ * pattern as `DuelScreen`. Does not call the reducer or import from
+ * `hooks/`, and does not roll the save itself - `result` is supplied by the
+ * caller once the engine has resolved it.
  */
 export default function ShotMinigame({
   cards,

@@ -40,11 +40,9 @@ function coordKey(c: Coord): string {
 
 /**
  * Shortest-path distance from every reachable tile to `target`, treating
- * every occupied tile except `mover`'s own (it's about to vacate it) and
- * `target` itself as an obstacle. A plain manhattan distance can send a
- * one-step-lookahead picker back and forth forever around a single blocker
- * (each detour looks equally good from the other's tile); routing on actual
- * reachability instead makes every step genuinely closer, so it converges.
+ * every occupied tile (except `mover`'s own, and `target` itself) as an
+ * obstacle. Real reachability, not manhattan distance - manhattan can send
+ * a one-step-lookahead picker oscillating forever around a single blocker.
  */
 function distancesTo(
   state: GameState,
@@ -153,18 +151,15 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
     const step = pickStepToward(state, carrier.id, netTarget);
     if (step) return { type: 'MOVE', skaterId: carrier.id, to: step };
 
-    // Last resort when boxed in with no forward-gaining pass or useful step:
-    // any legal pass at all beats stalling forever on a fully surrounded carrier.
+    // Last resort: any legal pass beats stalling forever on a surrounded carrier.
     const anyPassTarget = passTargets(state)[0];
     if (anyPassTarget) return { type: 'PASS', toSkaterId: anyPassTarget };
 
-    // Truly last resort: a carrier can have one free orthogonal neighbor
-    // that doesn't shorten the path to net (so `pickStepToward` calls it "no
-    // useful step") without being `isBoxedIn` (that only fires with *zero*
-    // free neighbors) - e.g. boxed in on 3 sides by its own teammates. Take
-    // that step anyway rather than looping END_TURN forever with the puck
-    // frozen in place; it's still a legal, deterministic move that changes
-    // the position enough to eventually unstick the game.
+    // Truly last resort: a carrier can have one free neighbor that doesn't
+    // shorten the path to net (so pickStepToward finds "no useful step")
+    // without being isBoxedIn (zero free neighbors) - e.g. boxed in by its
+    // own teammates. Take the step anyway rather than looping END_TURN with
+    // the puck frozen in place.
     const anyStep = legalSteps(state, carrier.id)[0];
     if (anyStep) return { type: 'MOVE', skaterId: carrier.id, to: anyStep };
     return { type: 'END_TURN' };

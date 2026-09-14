@@ -40,7 +40,7 @@ function stepDuel(state: GameState): GameState {
 /**
  * One step of a user shot: pick the highest-power ante card (mirroring the
  * CPU's own ante policy), then auto-resolve the band from that card's
- * accuracy - the same path BG-B22's `prefers-reduced-motion` fallback uses,
+ * accuracy - the same `prefers-reduced-motion` fallback path the UI uses,
  * so the sim measures the user shooter the same way as the CPU shooter.
  */
 function stepShotDuel(state: GameState): GameState {
@@ -56,9 +56,9 @@ function stepShotDuel(state: GameState): GameState {
 /**
  * One step of a user faceoff draw: pick the highest-anticipation ante card
  * (mirroring the CPU centre's own ante policy), then auto-resolve the band
- * from that card's anticipation - the same path BG-B25's
- * `prefers-reduced-motion` fallback uses, so the sim measures the user
- * centre the same way as the CPU centre.
+ * from that card's anticipation - the same `prefers-reduced-motion`
+ * fallback path the UI uses, so the sim measures the user centre the same
+ * way as the CPU centre.
  */
 function stepFaceoffDuel(state: GameState): GameState {
   const duel = state.duel!;
@@ -91,8 +91,8 @@ function step(state: GameState): GameState {
 
 /**
  * Plays a full seeded game headlessly, both sides driven by `chooseActionFor`.
- * Used for the BG-A5 balance sim and its tests. Stops early past `maxTurns`
- * or a generous overall step budget, in case a bug causes a true stall.
+ * Used for balance sims and their tests. Stops early past `maxTurns` or a
+ * generous overall step budget, in case a bug causes a true stall.
  */
 export function playHeadlessGame(
   seed: number,

@@ -73,13 +73,10 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>('move');
   /**
-   * The two anted card ids for the faceoff `lastFaceoffResult` most recently
-   * resolved: `DuelState` (which is where they otherwise live) is already
-   * cleared by `resolveDuel` in the same dispatch that produces the result,
-   * so `FaceoffResultSummary` needs its own memory of them to narrate which
-   * card's effect fired. Captured once, at the ante pick (see
-   * `handlePickFaceoffCard`), and only ever read while
-   * `state.lastOutcome?.kind === 'faceoff'` is true.
+   * The two anted card ids for the most recently resolved faceoff:
+   * `DuelState` is already cleared by the time a result exists, so
+   * `FaceoffResultSummary` needs its own memory of them. Captured once at
+   * the ante pick (`handlePickFaceoffCard`).
    */
   const [faceoffCardIds, setFaceoffCardIds] = useState<{
     user: string;
@@ -176,11 +173,9 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
 
   /**
    * `ShotMinigame` reports pick and band together; the reducer wants them as
-   * two actions. Dispatch both here so the component's contract stays a
-   * single callback. `AUTO_RESOLVE_SHOT` is never dispatched from the UI -
-   * the component already self-resolves under `prefers-reduced-motion` and
-   * reports that through this same `onResolve`, so dispatching it here too
-   * would double-resolve the shot.
+   * two actions, dispatched here. Never also dispatch `AUTO_RESOLVE_SHOT` -
+   * the component's reduced-motion path already reports through this same
+   * callback, so that would double-resolve the shot.
    */
   function handleResolveShot(cardId: string, band: ShotBand) {
     const handIndex = state.deck.hand.indexOf(cardId);
@@ -191,10 +186,10 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
 
   /**
    * `FaceoffMinigame` reports the ante pick and the drop's reaction as two
-   * separate calls (unlike `ShotMinigame`'s single `onResolve`), because the
-   * engine's `faceoffBandWindowsFor(state)` needs `duel.faceoffPickedCardId`
-   * set before it can return real window geometry for the drop step to
-   * render - see the BG-B25 contract in docs/board-game-backlog.md.
+   * separate calls (unlike `ShotMinigame`'s single `onResolve`): the pick
+   * must dispatch first because `faceoffBandWindowsFor(state)` needs
+   * `duel.faceoffPickedCardId` set before it can return real window geometry
+   * for the drop step to render.
    */
   function handlePickFaceoffCard(cardId: string) {
     const handIndex = state.deck.hand.indexOf(cardId);
