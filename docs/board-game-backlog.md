@@ -528,6 +528,84 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Reduced motion is already solved at the engine level.** `AUTO_RESOLVE_FACEOFF` samples from a human-anchored range and holds `late` at ~16% across every card. The component must use that path under `prefers-reduced-motion: reduce` and must not roll its own — one source of truth, as BG-B22 does for the shot.
 - **A jump is a false start:** one re-drop with a narrowed clean window, a second jump loses outright, and `freeJump` exempts its holder. This needs unmistakable wording in the UI ("Too early — re-drop"), never colour or motion alone.
 
+## Round 7: daily streak calendar (Chris, 2026-09-14)
+
+**Why (Chris):** give players a reason to come back each day. A win streak grants +1 energy per duel round. A pixel-art monthly calendar shows the streak visually. See design doc §9.
+
+**Architecture note:** this is the first feature that uses `localStorage`. Persistence lives in a dedicated module (`data/dailyStreak.ts`) outside `engine/`. Engine code reads `bonusEnergy` from `GameState` but never touches the store. The hook bridges the two: it reads the streak on mount, passes `bonusEnergy` into state at game creation, and writes a win on game over. This keeps the "no `localStorage` in engine" rule intact.
+
+### BG-A17 Streak persistence module (Agent A)
+- [ ] **Read:** design doc §9.1, §9.2. `data/balance.ts`, `types/game.ts`, `engine/duel.ts` (lines 89-95 and 305-311 — where `energy: ENERGY` is set).
+- **`data/dailyStreak.ts`:** pure read/write module for the streak store. **Not in `engine/`** — this touches `localStorage`.
+  - `StreakData { wins: Record<string, true>; lastWinDate: string | null }`
+  - `loadStreak(): StreakData` — reads from `localStorage` key `rinkquest-streak`, returns a default if missing or malformed. Wrap every access in try/catch (private browsing, storage disabled).
+  - `recordWin(data: StreakData): StreakData` — adds today's ISO date to `wins`, sets `lastWinDate`, garbage-collects entries older than 60 days, writes to `localStorage`, returns the updated data.
+  - `currentStreak(data: StreakData): number` — counts consecutive calendar days ending at today (inclusive) that have a win. If today has no win, counts consecutive days ending at yesterday.
+  - `hasStreakBonus(data: StreakData): boolean` — true when `currentStreak >= 1`.
+  - `todayKey(): string` — today's date as `YYYY-MM-DD` in local timezone.
+- **No imports from `engine/`, `hooks/`, or `components/`.** May import from `types/` and `data/`.
+- **Tests** in `data/dailyStreak.test.ts`: streak counts correctly across consecutive days; a gap resets; garbage collection drops old entries; malformed localStorage returns the default; `recordWin` is idempotent for the same day.
+- **Out of scope:** no GameState changes, no reducer changes, no UI.
+
+### BG-A18 bonusEnergy on GameState and duel energy (Agent A, after BG-A17)
+- [ ] **Read:** design doc §9.2. `types/game.ts` (`GameState`), `engine/gameReducer.ts` (`createInitialState`), `engine/duel.ts` (lines 89-95 and 305-311).
+- **Contract:**
+  - `GameState` gains `bonusEnergy: number` (0 or 1).
+  - `createInitialState(seed, length)` sets `bonusEnergy: 0` (the hook overrides it).
+  - `NEW_GAME` action gains an optional `bonusEnergy?: number` field. `createInitialState` uses it when provided, else 0.
+- **Duel energy:** in `engine/duel.ts`, the two places that set `energy: ENERGY` (duel creation at ~line 95 and next-round reset at ~line 309) become `energy: ENERGY + state.bonusEnergy`. The CPU's energy stays at `ENERGY` — the bonus is user-only, so the CPU's `cpuPlan` planning budget (in `cpuDuelPolicy.ts`) is unchanged.
+- **Tests:** a game with `bonusEnergy: 1` starts duel rounds with energy 4; a game with `bonusEnergy: 0` starts with 3; the CPU always plans with 3 regardless.
+- **Out of scope:** no UI, no localStorage, no streak logic. The hook (BG-B27) bridges them.
+
+### BG-B27 Wire streak into the game hook (Agent B, after BG-A17 + BG-A18)
+- [ ] **Read:** `hooks/useBoardGame.ts`, `data/dailyStreak.ts` (from BG-A17), design doc §9.2.
+- **`hooks/useBoardGame.ts`:**
+  - On mount, call `loadStreak()` and `hasStreakBonus()` to determine `bonusEnergy` (0 or 1). Store the streak data in a `useRef`.
+  - Pass `bonusEnergy` into the initial `createInitialState` call and into every `NEW_GAME` dispatch.
+  - When the game ends with `winner === 'user'`, call `recordWin()` and update the ref. This is the only write path.
+- **Return shape:** add `streakData: StreakData` and `streak: number` to `UseBoardGame` so the UI can show the calendar and streak count.
+- **Out of scope:** no engine changes, no calendar UI.
+
+### BG-B28 Streak energy badge in the duel UI (Agent B, after BG-B27)
+- [ ] **Read:** `components/DuelScreen.tsx`, `components/DuelScreen.module.css` (the `.orbFull`/`.orb` energy orbs), design doc §9.2.
+- **When `state.bonusEnergy > 0`:**
+  - The energy orb row shows 4 orbs instead of 3.
+  - A small "+1⚡" badge (or a fourth orb in a distinct bonus colour) signals the bonus. Add a token `--color-energy-bonus` in both `:root` and `[data-theme='dark']` — a brighter or warmer yellow than `--color-energy`, so it reads as "extra" without being a new hue.
+  - The `ShotMinigame` and `FaceoffMinigame` don't show energy, so no changes there.
+- **Accessibility:** the badge text carries the meaning; colour alone is not sufficient.
+- **Out of scope:** no engine changes, no calendar.
+
+### BG-B29 Pixel-art streak calendar component (Agent B, after BG-B27)
+- [ ] **Read:** design doc §9.3. `components/GameLengthPicker.tsx` (adjacent UI), `components/GameButton.tsx`, `data/dailyStreak.ts`.
+- **`components/StreakCalendar.tsx`** + colocated `.module.css`:
+  - A **monthly calendar** in a 7-column grid (Sun–Sat headers), pixel-art styled.
+  - Props: `{ streakData: StreakData; streak: number; onClose: () => void }`.
+  - Each day cell shows:
+    - Won days: a small filled puck icon (a 5×5 or 7×7 pixel circle in `--color-puck`, rendered as an inline SVG or CSS shape — not an emoji).
+    - Today: highlighted border using `--color-tile-highlight`.
+    - Future days: hidden or dimmed, no interaction.
+    - Past days without a win: empty.
+  - **Header:** month/year name, left/right arrows to navigate months (up to 2 months back, since GC drops entries older than 60 days).
+  - **Streak display:** "🔥 N-day streak" (or "No streak" when 0) prominently above the grid, using `--font-pixel`. The fire is the one emoji exception for this feature.
+  - **Reward line:** when `streak >= 1`, show "+1⚡ bonus energy today" below the streak count.
+  - **Pixel border:** a stepped/aliased border around the calendar panel, matching the Rink Quest aesthetic. Use `image-rendering: pixelated` and box-shadow steps or a border-image, not a smooth `border-radius`.
+  - **Close:** a "Back" `GameButton` at the bottom.
+- **Responsive:** at 412×915, the calendar fills width with `--space-sm` gutters; at 1280×800 it's centred and no wider than ~400px.
+- **Both themes.** Verify contrast on day cells in dark mode.
+- **Out of scope:** no engine changes, no streak logic changes.
+
+### BG-B30 Calendar entry point on the pre-game screen (Agent B, after BG-B29)
+- [ ] **Read:** `components/BoardGamePage.tsx`, `components/GameLengthPicker.tsx`.
+- **Pre-game screen** (before game length is picked):
+  - Add a "Daily Streak" `GameButton` (variant `secondary`) below the game length picker.
+  - Clicking it shows `StreakCalendar` in place of the length picker (not a modal — same page flow as the length picker itself).
+  - The calendar's "Back" returns to the length picker.
+  - If the player has an active streak, show a one-line summary on the pre-game screen: "🔥 N-day streak · +1⚡ today" — so they see the reward before starting.
+- **State:** `BoardGamePage` gains a local `view: 'picker' | 'calendar'` state, defaulting to `'picker'`.
+- **Out of scope:** no engine changes. The calendar is read-only from this screen.
+
+---
+
 ### BG-B26 Rink styling: nav placement + unplayable half-tiles (Claude, Chris asked for the code change, 2026-09-14)
 - [x] **Nav:** `BoardGamePage` rendered `PageHeader` inside the padded `.page`, so the nav sat below a strip of page padding instead of flush at the top like every other page. It now renders as a sibling before `.page`, matching Schedule and Standings.
 - [x] **Half-tiles:** the rounded rink boards clip the end columns. `data/rink.ts` now owns `RINK_CORNER_RADIUS` (tile units); `RinkBoard` derives its CSS `border-radius` from it (swapped for the narrow layout, which previously inherited the wide radius). Every tile with less than `MIN_PLAYABLE_TILE_COVERAGE` (0.75) of its area inside the boards is in `UNPLAYABLE_CORNERS`: cols 0 and 14 at rows 0, 1, 5, 6, plus cols 1 and 13 at rows 0 and 6. A first pass used "half or less", but a ~61% tile (col 1, row 0) still read as cut off once the border and rail were drawn and clipped the sprite on it (Chris's 2026-09-14 playtest); the next-worst tiles sit at 88%, so 0.75 separates them cleanly. `rink.test.ts` checks the list against the geometry, so changing the radius without updating the list fails the suite.

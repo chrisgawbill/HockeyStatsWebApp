@@ -142,5 +142,39 @@ Each call returns exactly **one** action. Priority order:
 - **Derivation — the human-reaction anchor.** `FACEOFF_CLEAN_WINDOW_BASE_MS` (190ms) is anchored on human simple-visual-reaction-time research: median untrained reaction ~250ms, a trained player ~200ms, ~150ms is exceptional and often a guess. 190ms sits just under the trained-player mark, so a clean win at 0 anticipation is a real ask, not a given. An earlier pass used 80ms, which sat below every one of those floors and made a clean win unreachable for any human at any card - don't lower this constant without re-deriving from the same anchor. The CPU's (and the reduced-motion/headless fallback's) simulated reaction time is sampled up to `FACEOFF_REACTION_SAMPLE_CEILING_MS`, anchored on the same research (twice the median), not as a self-referential multiple of the window widths.
 - **Window-width derivations.** `FACEOFF_WINDOW_PER_ANTICIPATION_MS` (1ms/point) walks the clean window across the carded anticipation range (25-85) from 215ms to 275ms: the low end still expects a trained-player-grade press, the high end comfortably clears the ~200ms trained mark, so the highest-anticipation cards make a clean win genuinely achievable on a sharp press rather than theoretical. `FACEOFF_SCRUM_WINDOW_MS` (420ms, constant) clears median simple reaction time (~250ms) with real headroom, so a merely-median press still ties up a scrum instead of losing outright late, and low-anticipation/high-grip cards can lean on grip to win instead of needing a reaction no human reliably has. `FACEOFF_JUMP_WINDOW_PENALTY_MS` (30ms) is a fixed jolt to reaction precision after a false start (not a fraction of the window, so it doesn't scale with window width) — a meaningful 10-14% cut to the clean window across the carded anticipation range, without zeroing out the tightest one.
 
-## 9. Out of scope (MVP) [C]
-Deckbuilding and rewards, run maps, relics, persistence, real NHL teams, sound, and multiplayer.
+## 9. Daily streak & rewards [C]
+
+A daily streak calendar gives players a reason to come back. One win per calendar day counts as a "game played." Consecutive days build a streak; the streak grants a small in-game bonus for that session. **No server, no accounts** — `localStorage` only, scoped to the board-game feature (this is the one exception to the "no `localStorage`" engine rule; persistence lives in a dedicated module outside `engine/`, and `engine/` code never reads or writes it).
+
+### 9.1 Streak tracking
+- **Calendar day** is determined in the player's local timezone. A win on any game length counts. Losses don't count — you have to earn the day.
+- **Streak** is the count of consecutive calendar days with at least one win, ending at today. If yesterday has no win, the streak resets to 0 (or 1 once today's win lands).
+- **Persisted shape** (`localStorage` key `rinkquest-streak`):
+  ```
+  {
+    wins: Record<string, true>    // keys are ISO date strings "YYYY-MM-DD"
+    lastWinDate: string | null    // most recent win date
+  }
+  ```
+  No server round-trip; all reads are synchronous. Writes happen only on a win (`phase === 'gameOver'` and `winner === 'user'`). The calendar UI reads the same store.
+- **Garbage collection:** on every write, drop entries older than 60 days so the store doesn't grow forever.
+
+### 9.2 Daily reward: bonus energy **[C]**
+- A streak of **1+ days** (i.e. you won yesterday or today) grants **+1 energy per duel round** for every game played that calendar day. The bonus applies to the user only, never the CPU.
+- The bonus is surfaced on `GameState` as `bonusEnergy: number` (0 or 1), set at game creation time from the streak store. `engine/` code reads it but never writes it — the hook sets it on `NEW_GAME`. The duel's per-round energy becomes `ENERGY + state.bonusEnergy`.
+- **Streak of 0** (no win yesterday, no win yet today): no bonus. Win today to start (or resume) the streak for tomorrow.
+- **UI:** a small "+1⚡" badge on the energy orbs during a duel, so the player knows why they have 4 instead of 3.
+
+### 9.3 Calendar view
+- A pixel-art **monthly calendar** accessible from the pre-game screen (before picking game length). Shows the current month with:
+  - Each day as a tile in a 7-column (Sun–Sat) grid.
+  - Won days marked with a filled puck icon or check.
+  - Today highlighted.
+  - The current streak length displayed prominently.
+  - Navigation arrows to view previous months (read-only history, up to 60 days back).
+- **Pixel aesthetic:** uses `--font-pixel`, pixel-border styling, and the existing board-game colour tokens. Matches the Rink Quest look, not the stats-app look.
+- **No future days shown** beyond the current date's row.
+- **Responsive:** works at 412×915 (mobile) and 1280×800 (desktop) in both themes.
+
+## 10. Out of scope (MVP) [C]
+Deckbuilding and rewards beyond the daily streak, run maps, relics, real NHL teams, sound, and multiplayer.
