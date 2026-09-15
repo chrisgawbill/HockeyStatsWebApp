@@ -1,19 +1,20 @@
 /**
  * 16x16 pixel sprite frames. Palette: `.` transparent, `J` jersey (team color
- * via `currentColor`), `S` skin, `H` helmet, `K` stick, `P` pants, `W` skate.
+ * via `currentColor`), `S` skin, `H` helmet, `V` visor, `A` jersey accent
+ * stripe, `K` stick shaft, `B` stick blade, `P` pants, `W` skate.
  */
 export type SpriteFrame = string[];
 
 export const SKATER_IDLE: SpriteFrame = [
   '................',
   '......HHHH......',
-  '.....HHHHHH.....',
+  '.....HHHVHH.....',
   '.....SSSSSS.....',
   '......SSSS......',
-  '.....JJJJJJ.....',
-  '....JJJJJJJJ....',
-  '....JJJJJJJJ....',
-  '....JJJJJJJJKKK.',
+  '.....JJJJAJ.....',
+  '....JJJJJAJJ....',
+  '....JJJJJAJJ....',
+  '....JJJJJAJJKKB.',
   '....PPP..PPP....',
   '....PPP..PPP....',
   '....PPP..PPP....',
@@ -26,13 +27,13 @@ export const SKATER_IDLE: SpriteFrame = [
 export const SKATER_SKATE: SpriteFrame = [
   '................',
   '......HHHH......',
-  '.....HHHHHH.....',
+  '.....HHHVHH.....',
   '.....SSSSSS.....',
   '......SSSS......',
-  '.....JJJJJJ.....',
-  '....JJJJJJJJ....',
-  '....JJJJJJJJ....',
-  '....JJJJJJJJKKK.',
+  '.....JJJJAJ.....',
+  '....JJJJJAJJ....',
+  '....JJJJJAJJ....',
+  '....JJJJJAJJKKB.',
   '....PP....PPP...',
   '....PP...PPP....',
   '....WW...WWW....',
@@ -45,7 +46,7 @@ export const SKATER_SKATE: SpriteFrame = [
 export const GOALIE_IDLE: SpriteFrame = [
   '................',
   '......HHHH......',
-  '.....HHHHHH.....',
+  '.....HHHVHH.....',
   '.....SSSSSS.....',
   '......SSSS......',
   '.....JJJJJJ.....',

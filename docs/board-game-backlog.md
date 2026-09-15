@@ -576,7 +576,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no engine changes, no calendar.
 
 ### BG-B29 Pixel-art streak calendar component (Agent B, after BG-B27)
-- [ ] **Read:** design doc §9.3. `components/GameLengthPicker.tsx` (adjacent UI), `components/GameButton.tsx`, `data/dailyStreak.ts`.
+- [x] **Read:** design doc §9.3. `components/GameLengthPicker.tsx` (adjacent UI), `components/GameButton.tsx`, `data/dailyStreak.ts`.
 - **`components/StreakCalendar.tsx`** + colocated `.module.css`:
   - A **monthly calendar** in a 7-column grid (Sun–Sat headers), pixel-art styled.
   - Props: `{ streakData: StreakData; streak: number; onClose: () => void }`.
@@ -595,7 +595,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no engine changes, no streak logic changes.
 
 ### BG-B30 Calendar entry point on the pre-game screen (Agent B, after BG-B29)
-- [ ] **Read:** `components/BoardGamePage.tsx`, `components/GameLengthPicker.tsx`.
+- [x] **Read:** `components/BoardGamePage.tsx`, `components/GameLengthPicker.tsx`.
 - **Pre-game screen** (before game length is picked):
   - Add a "Daily Streak" `GameButton` (variant `secondary`) below the game length picker.
   - Clicking it shows `StreakCalendar` in place of the length picker (not a modal — same page flow as the length picker itself).

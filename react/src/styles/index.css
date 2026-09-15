@@ -39,6 +39,8 @@
   --color-puck: #1a1a1a;
   --color-puck-ring: #00bcd4;
   --color-skater-movable: #fb8c00;
+  --color-skater-pants: #2c3e50;
+  --color-skater-visor: #263238;
   --color-card-block: #4fc3f7;
   --color-card-check: #e57373;
   --color-card-shot: #ffb74d;
@@ -112,6 +114,8 @@
   --color-puck: #050505;
   --color-puck-ring: #00e5ff;
   --color-skater-movable: #ffa726;
+  --color-skater-pants: #3f5871;
+  --color-skater-visor: #0a0e14;
   --color-card-block: #81d4fa;
   --color-card-check: #ef9a9a;
   --color-card-shot: #ffcc80;
