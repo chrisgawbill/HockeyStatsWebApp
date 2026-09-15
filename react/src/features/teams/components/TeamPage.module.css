@@ -103,6 +103,84 @@
   width: 8.5rem;
 }
 
+/* ── Roster lines (forward lines / defense pairs) ──────────────────────── */
+
+.roster-line-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+/* One lifted unit per line/pair (surfaceElevated comes from the shared
+   class); the line-number badge and player slots lay out inside it. */
+.roster-line-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md) var(--space-sm) 2.75rem;
+}
+
+.roster-line-row__badge {
+  position: absolute;
+  top: 50%;
+  left: var(--space-sm);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.roster-line-row__slot {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 6rem;
+}
+
+.roster-line-row__divider {
+  align-self: stretch;
+  width: 1px;
+  margin-right: var(--space-sm);
+  background: var(--color-divider);
+}
+
+/* Player content inside a line row: same markup as the standalone card, no
+   surface/border/shadow of its own since the row already provides that. */
+.player-card--slot {
+  padding: 0;
+  margin-bottom: 0;
+  cursor: default;
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .roster-line-row {
+    flex-direction: column;
+    padding-left: var(--space-md);
+    padding-top: 2.25rem;
+  }
+
+  .roster-line-row__badge {
+    top: var(--space-sm);
+    left: var(--space-md);
+    transform: none;
+  }
+
+  .roster-line-row__divider {
+    display: none;
+  }
+}
+
 /* ── Sortable stat tables (Skaters / Goalies tabs) ─────────────────────── */
 
 .stat-table-wrapper {
@@ -337,6 +415,14 @@
   position: relative;
 }
 
+/* Reserve room for the absolutely-positioned prev/next buttons inside the
+   wrapper's own box (rather than the buttons sitting outside it via negative
+   offsets), so they can't run past the page's own edge padding and off the
+   viewport on wide-but-not-full-bleed layouts. */
+.schedule-strip-wrapper--desktop {
+  padding: 0 calc(36px + var(--space-sm));
+}
+
 .schedule-strip {
   flex: 1;
   display: grid;
@@ -402,11 +488,11 @@
 }
 
 .schedule-strip__nav:first-child {
-  left: calc((36px + var(--space-sm)) * -1);
+  left: 0;
 }
 
 .schedule-strip__nav:last-child {
-  right: calc((36px + var(--space-sm)) * -1);
+  right: 0;
 }
 
 .schedule-strip__nav:hover {

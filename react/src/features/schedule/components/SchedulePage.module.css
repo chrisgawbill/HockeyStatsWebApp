@@ -130,21 +130,32 @@
 
 /* --- Game cards --- */
 .game-card {
+  position: relative;
+  isolation: isolate;
   background: color-mix(in srgb, var(--color-primary) 3%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border: 1px solid var(--aero-border-highlight);
   border-radius: var(--border-radius-card);
   overflow: hidden;
   max-width: 64rem;
   margin: 0 auto var(--space-md);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+  box-shadow: var(--elevation-1);
   transition:
     box-shadow 0.2s ease,
     transform 0.15s ease;
 }
 
+.game-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--aero-sheen);
+  pointer-events: none;
+  z-index: -1;
+}
+
 .game-card:hover {
   background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--elevation-2);
   transform: translateY(-2px);
 }
 

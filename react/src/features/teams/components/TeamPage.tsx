@@ -52,6 +52,8 @@ import {
 } from '@/features/teams/api/teamsApi';
 import { useStandingsContext } from '@/features/standings/hooks/StandingsContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useTheme } from '@/lib/ThemeContext';
+import { toDarkModeAccentColor } from '@/features/teams/utils/teamColor';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 
@@ -86,11 +88,17 @@ export default function TeamPage() {
   const teamSourcePath = location.pathname;
   const { easternStandingsData, westernStandingsData } = useStandingsContext();
   const { season } = useSeason();
+  const { theme } = useTheme();
   const teamActiveNavPath =
     routeState?.activeNavPath ?? routeState?.sourcePath ?? '/teamList';
   const teamEntry = (localTeamList as any[]).find((t) => t.triCode === triCode);
   const numericId: number = teamEntry?.id ?? 0;
   const primaryColor: string = teamEntry?.primary ?? '#1B4F8A';
+  // Team brand colors are picked for a light background and read as
+  // low-contrast text on the dark theme — lighten (same hue) rather than
+  // use the raw brand hex when --color-primary substitutes for it here.
+  const primaryColorForTheme =
+    theme === 'dark' ? toDarkModeAccentColor(primaryColor) : primaryColor;
 
   const pageRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -101,7 +109,7 @@ export default function TeamPage() {
   const [stickyOffsets, setStickyOffsets] = useState({ header: 0, nav: 0 });
 
   const pageStyle = {
-    '--color-primary': primaryColor,
+    '--color-primary': primaryColorForTheme,
     '--sticky-header-h': `${stickyOffsets.header}px`,
     '--sticky-nav-h': `${stickyOffsets.nav}px`,
   } as React.CSSProperties;

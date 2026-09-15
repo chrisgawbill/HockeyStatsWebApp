@@ -6,6 +6,7 @@ import {
   Position,
   PositionGroup,
   POSITION_GROUPS,
+  RosterLine,
   RosterPlayer,
   RosterPlayerContract,
   SkaterCorsiEntry,
@@ -105,6 +106,68 @@ export function groupRosterByPositionGroup(
     result[group] = POSITIONS_BY_GROUP[group].flatMap((pos) => roster[pos]);
   }
   return result;
+}
+
+/**
+ * Zips several already TOI-sorted position arrays together by index, one
+ * player per array per group, skipping any position that's run out at that
+ * index. Groups within `labeledCount` get "<labelPrefix> N"; anything past
+ * that gets an empty label (overflow, rendered unlabeled by the caller
+ * rather than implying a fake numbered line/pair).
+ */
+function zipIntoLines(
+  positionArrays: RosterPlayer[][],
+  labelPrefix: string,
+  labeledCount: number,
+): RosterLine[] {
+  const maxLen = Math.max(...positionArrays.map((arr) => arr.length), 0);
+  const lines: RosterLine[] = [];
+  for (let i = 0; i < maxLen; i++) {
+    const players = positionArrays
+      .map((arr) => arr[i])
+      .filter((p): p is RosterPlayer => p != null);
+    if (players.length === 0) continue;
+    lines.push({
+      label: i < labeledCount ? `${labelPrefix} ${i + 1}` : '',
+      players,
+    });
+  }
+  return lines;
+}
+
+/**
+ * Builds forward "lines" by zipping the TOI-sorted Center/Left Wing/Right
+ * Wing arrays index-by-index — index 0 of each is that position's most-used
+ * player, so line 1 is the highest-ice-time trio, and so on. This isn't real
+ * coach-assigned line data (unavailable from the NHL stats API); it's an
+ * ice-time-based approximation, which is why only the first 4 trios get a
+ * numbered "Line N" label and the rest render unlabeled.
+ */
+export function buildForwardLines(
+  roster: Record<Position, RosterPlayer[]>,
+): RosterLine[] {
+  // LW-C-RW: the conventional left-to-right order a line is drawn/announced in.
+  return zipIntoLines(
+    [roster['Left Wing'], roster.Center, roster['Right Wing']],
+    'Line',
+    4,
+  );
+}
+
+/** Same idea as {@link buildForwardLines}, pairing the TOI-sorted Defenseman array two at a time. */
+export function buildDefensePairs(
+  roster: Record<Position, RosterPlayer[]>,
+): RosterLine[] {
+  const defense = roster.Defenseman;
+  const pairs: RosterLine[] = [];
+  for (let i = 0; i < defense.length; i += 2) {
+    const pairIndex = i / 2;
+    pairs.push({
+      label: pairIndex < 3 ? `Pair ${pairIndex + 1}` : '',
+      players: defense.slice(i, i + 2),
+    });
+  }
+  return pairs;
 }
 
 /**

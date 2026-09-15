@@ -1,8 +1,20 @@
 .button {
+  position: relative;
+  isolation: isolate;
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--border-radius-pill);
   border: 1px solid var(--color-text);
   cursor: pointer;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aero-sheen);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .button:disabled {
@@ -13,12 +25,14 @@
 .secondary {
   background-color: var(--color-surface);
   color: var(--color-text);
+  box-shadow: var(--elevation-1);
 }
 
 .primary {
   background-color: var(--color-primary);
   color: var(--color-white);
-  border-color: var(--color-primary);
+  border-color: var(--aero-border-highlight);
+  box-shadow: var(--elevation-1);
 }
 
 .stacked {

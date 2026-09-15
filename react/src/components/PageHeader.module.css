@@ -315,6 +315,7 @@
     align-items: center;
     justify-content: center;
     position: fixed;
+    isolation: isolate;
     right: var(--space-md);
     /* Clears the bottom nav (see `body { padding-bottom: var(--mobile-nav-height) }`
        above) plus the home-indicator safe area, with a little breathing room on top. */
@@ -325,16 +326,24 @@
     width: 54px;
     height: 54px;
     border-radius: 50%;
-    border: none;
+    border: 1px solid var(--aero-border-highlight);
     background-color: var(--color-selection);
     color: var(--color-selection-text);
-    box-shadow:
-      var(--shadow-card),
-      0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--elevation-2);
     /* Above the bottom nav (100) but below the full-screen overlay (300). */
     z-index: 150;
     cursor: pointer;
     transition: transform 0.15s ease;
+  }
+
+  .mobile-search-fab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--aero-sheen);
+    pointer-events: none;
+    z-index: -1;
   }
 
   .mobile-search-fab:hover,

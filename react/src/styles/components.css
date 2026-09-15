@@ -63,6 +63,64 @@
   transform: translateY(-2px);
 }
 
+/* Opaque "Aero atmosphere" tier: the nav bar's sheen + top highlight +
+   elevation shadow (PageHeader.module.css .nav-bar), generalized for lifted
+   chrome elsewhere (dialogs, clickable cards). Deliberately no blur/
+   translucency - that stays exclusive to the nav bar's glass treatment. */
+.md3-surface--elevated,
+.surfaceElevated {
+  position: relative;
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid var(--aero-border-highlight);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--elevation-1);
+  isolation: isolate;
+}
+
+.md3-surface--elevated::before,
+.surfaceElevated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aero-sheen);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.md3-surface--elevated.md3-surface--interactive:hover,
+.surfaceElevated.surfaceInteractive:hover {
+  box-shadow: var(--elevation-2);
+}
+
+/* React-bootstrap Modal chrome (TeamListModal, StatsLeaderModal, ...): give
+   every modal the same elevated Aero treatment as the nav bar/other lifted
+   surfaces, in one place rather than per-modal. */
+.modal-content {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--aero-border-highlight);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--elevation-2);
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aero-sheen);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.modal-header,
+.modal-footer {
+  border-color: var(--color-divider);
+}
+
 .md3-chip {
   border-radius: var(--border-radius-pill);
   font-size: var(--text-xs);

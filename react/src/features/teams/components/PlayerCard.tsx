@@ -4,16 +4,28 @@ import styles from '@/features/teams/components/TeamPage.module.css';
 
 interface PlayerCardProps {
   player: RosterPlayer;
+  /**
+   * "card" (default): the standalone elevated card used in flat roster
+   * grids. "slot": just the headshot/number/name/stat content with no
+   * surface/border/shadow of its own, for when a parent container (e.g.
+   * RosterLineRow) already provides the elevated surface — avoids nesting
+   * two lifted surfaces inside each other.
+   */
+  variant?: 'card' | 'slot';
 }
 
 const FALLBACK_HEADSHOT = 'https://assets.nhle.com/mugs/nhl/skater/default.png';
 
-export default function PlayerCard({ player }: PlayerCardProps) {
+export default function PlayerCard({ player, variant = 'card' }: PlayerCardProps) {
   const headshotUrl = player.headshot || FALLBACK_HEADSHOT;
 
   return (
     <div
-      className={`${styles['player-card']} ${shared.surface} ${shared.surfaceInteractive}`}
+      className={
+        variant === 'card'
+          ? `${styles['player-card']} ${shared.surfaceElevated} ${shared.surfaceInteractive}`
+          : `${styles['player-card']} ${styles['player-card--slot']}`
+      }
     >
       <div className={styles['player-card__img-wrap']}>
         <img

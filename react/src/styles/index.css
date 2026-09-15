@@ -77,6 +77,21 @@
 
   /** Arcade pixel font for the Rink Quest board game only; falls back to monospace. */
   --font-pixel: 'Press Start 2P', 'Courier New', monospace;
+
+  /* Aero "atmosphere" vocabulary, generalized from the nav bar
+     (PageHeader.module.css .nav-bar/.nav-btn) for opaque surfaces elsewhere:
+     a soft top sheen + a bright top edge highlight + layered elevation
+     shadows. No blur/translucency here - that stays exclusive to the nav
+     bar's glass chrome. */
+  --aero-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.14) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  --aero-border-highlight: rgba(255, 255, 255, 0.6);
+  --elevation-1: 0 1px 10px rgba(0, 0, 0, 0.12);
+  --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 
 [data-theme='dark'] {
@@ -128,6 +143,19 @@
   --color-energy-text: #1a1a1a;
   --color-energy-bonus: #fff59d;
   --color-shot-band-good: #74a8d0;
+
+  /* Dark surfaces need a dimmer sheen/highlight than light ones, or the top
+     edge blows out to solid white - see --aero-sheen/--aero-border-highlight
+     in :root above. */
+  --aero-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.05) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  --aero-border-highlight: rgba(255, 255, 255, 0.22);
+  --elevation-1: 0 1px 10px rgba(0, 0, 0, 0.35);
+  --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
 html {

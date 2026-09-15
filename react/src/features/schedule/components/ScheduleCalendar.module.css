@@ -48,9 +48,22 @@
 }
 
 .calendar__cell--today {
+  position: relative;
+  isolation: isolate;
   border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-  box-shadow: 0 0 0 1px
-    color-mix(in srgb, var(--color-primary) 45%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 45%, transparent),
+    var(--elevation-1);
+}
+
+.calendar__cell--today::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aero-sheen);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Day number doubles as a "jump into day view" affordance. */
@@ -129,7 +142,19 @@
 }
 
 .game-chip--clickable {
+  position: relative;
+  isolation: isolate;
   cursor: pointer;
+}
+
+.game-chip--clickable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aero-sheen);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .game-chip--clickable:hover {
@@ -138,7 +163,7 @@
     var(--color-primary) 12%,
     var(--color-surface)
   );
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--elevation-1);
   transform: translateY(-1px);
 }
 

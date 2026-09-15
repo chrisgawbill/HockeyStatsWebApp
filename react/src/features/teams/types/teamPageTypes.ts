@@ -47,6 +47,19 @@ export interface RosterPlayer {
   headshot?: string;
 }
 
+/**
+ * A line-based grouping of forwards ("Line 1"..."Line 4") or defense pairs
+ * ("Pair 1"..."Pair 3"), built by zipping each position's already
+ * time-on-ice-sorted roster arrays together (see `buildForwardLines` /
+ * `buildDefensePairs` in teamPageHelper.ts). An empty `label` marks overflow
+ * groups beyond the numbered lines/pairs, which render unlabeled rather than
+ * implying a fake "Line 5".
+ */
+export interface RosterLine {
+  label: string;
+  players: RosterPlayer[];
+}
+
 export const POSITIONS: Position[] = [
   'Center',
   'Left Wing',

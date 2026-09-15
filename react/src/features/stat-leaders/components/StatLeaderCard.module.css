@@ -1,4 +1,6 @@
 .stat-leader-block {
+  position: relative;
+  isolation: isolate;
   height: 5rem;
   min-width: 16rem;
   background-color: color-mix(
@@ -6,11 +8,31 @@
     var(--color-primary) 4%,
     var(--color-surface)
   );
-  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border: 1px solid var(--aero-border-highlight);
   margin: var(--space-md) 0 var(--space-md) 3rem;
   border-radius: var(--border-radius-card);
+  box-shadow: var(--elevation-1);
   display: flex;
   align-items: center;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.stat-leader-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aero-sheen);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.stat-leader-block:hover {
+  box-shadow: var(--elevation-2);
+  transform: translateY(-2px);
 }
 
 .stat-leader-block-picture {
