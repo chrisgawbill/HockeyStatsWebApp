@@ -46,7 +46,6 @@ export interface UseBoardGame {
 export function useBoardGame(
   initialSeed: number,
   length: GameLength,
-  /** Google sign-in session token (BG-B31), or `null` when signed out. */
   authToken: string | null = null,
 ): UseBoardGame {
   const [streakData, setStreakData] = useState<StreakData>(() => loadStreak());
@@ -113,9 +112,6 @@ export function useBoardGame(
     streakDataRef.current = updated;
     setStreakData(updated);
 
-    // Fire-and-forget: sync the win to the server without blocking gameplay.
-    // Errors are logged and swallowed, matching every other step of the
-    // optional Google sign-in sync (see docs/board-game-backlog.md, BG-B31).
     if (authToken) {
       pushRemoteStreak(authToken, updated).catch((error) => {
         console.error('Failed to sync streak after win:', error);
