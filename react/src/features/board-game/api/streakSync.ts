@@ -2,13 +2,6 @@ import axios from 'axios';
 import { get, post, put } from '@/lib/apiClient';
 import type { StreakData } from '@/features/board-game/data/dailyStreak';
 
-/**
- * The one deliberate network boundary inside `features/board-game` (see the
- * "Board game exception" note in `docs/architecture.md`): optional Google
- * sign-in used only to back up and sync the local daily streak across
- * devices. Never called automatically for an anonymous player.
- */
-
 function authHeader(token: string) {
   return { headers: { Authorization: `Bearer ${token}` } };
 }
@@ -24,10 +17,7 @@ export async function googleSignIn(
 
 /**
  * Resolves a stored session token to the signed-in user's email, or `null`
- * if the token is missing/expired/invalid (401) — this is the one deviation
- * from `apiClient.get`'s throw-on-error pattern, kept local to this
- * function: an expired session should fall back to signed-out silently,
- * never throw into the render tree.
+ * for an expired/invalid session.
  */
 export async function fetchSession(token: string): Promise<{ email: string } | null> {
   try {
@@ -45,11 +35,7 @@ export async function fetchRemoteStreak(token: string): Promise<StreakData> {
   return get<StreakData>('/api/board-game/streak', undefined, authHeader(token));
 }
 
-/**
- * Pushes a (typically already client-merged) streak to the server, which
- * merges it with whatever it already has and returns the merged result —
- * never a blind overwrite on either side.
- */
+/** Pushes the local/server-merged streak; the server merges again before saving. */
 export async function pushRemoteStreak(
   token: string,
   data: StreakData,
