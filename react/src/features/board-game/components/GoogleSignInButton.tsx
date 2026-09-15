@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from '@/features/board-game/components/GoogleSignInButton.module.css';
 
-/**
- * Minimal shape of the Google Identity Services global this component needs.
- * No @types package is installed for GSI; this covers only `initialize` and
- * `renderButton`, loaded via the script tag in index.html (BG-B23's Google
- * Fonts preconnect is the model for that tag).
- */
 interface GoogleIdConfiguration {
   client_id: string;
   callback: (response: { credential: string }) => void;
@@ -36,22 +30,13 @@ declare global {
 }
 
 export interface GoogleSignInButtonProps {
-  /** Called with the Google ID token once the user completes sign-in. */
   onCredential: (credential: string) => void;
 }
 
-/** True once `window.google.accounts.id` is available (GSI script loaded). */
 function isGoogleIdentityReady(): boolean {
   return typeof window !== 'undefined' && window.google?.accounts?.id != null;
 }
 
-/**
- * Google's branding rules give no API to trigger the "Sign in with Google"
- * credential flow from a custom button, and even their custom-button fallback
- * fixes the G logo, CTA text, and color/font/padding (see the BG-B31 ticket
- * for the research). So this renders Google's own button unmodified and frames
- * it in the game's pixel-art chrome instead of trying to reskin the button.
- */
 function resolveGoogleButtonTheme(): 'outline' | 'filled_black' {
   if (typeof document === 'undefined') return 'outline';
   const explicit = document.documentElement.getAttribute('data-theme');
@@ -63,7 +48,7 @@ function resolveGoogleButtonTheme(): 'outline' | 'filled_black' {
   return prefersDark ? 'filled_black' : 'outline';
 }
 
-/** Pixel-art-framed "Sign in with Google" button (BG-B31). */
+/** Renders Google's branded sign-in button inside the game's frame. */
 export default function GoogleSignInButton({
   onCredential,
 }: GoogleSignInButtonProps) {
@@ -76,9 +61,6 @@ export default function GoogleSignInButton({
 
   useEffect(() => {
     if (ready || !clientId) return;
-    // The GSI script tag in index.html loads async; poll briefly rather than
-    // depending on a load-event listener, since the script may already be
-    // cached/loaded before this effect runs.
     const interval = window.setInterval(() => {
       if (isGoogleIdentityReady()) {
         setReady(true);
