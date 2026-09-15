@@ -30,6 +30,8 @@ export interface DuelScreenProps {
   blockReason: (handIndex: number) => CardBlockReason | null;
   /** Whether the queued card at this index can still be pulled back to hand (false once a card it drew has itself been queued). */
   canUnqueue: (queueIndex: number) => boolean;
+  /** Daily-streak bonus energy for the user (0 or 1, BG-A18/B27). Adds a 4th energy orb. */
+  bonusEnergy: number;
 }
 
 const UNQUEUE_BLOCKED_TITLE =
@@ -115,6 +117,7 @@ export default function DuelScreen({
   onEndRound,
   blockReason,
   canUnqueue,
+  bonusEnergy,
 }: DuelScreenProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const revealButtonRef = useRef<HTMLButtonElement>(null);
@@ -235,17 +238,34 @@ export default function DuelScreen({
               <span>
                 Round {duel.round}/{MAX_ROUNDS}
               </span>
-              <span
-                className={styles.energy}
-                role="img"
-                aria-label={`${duel.energy} of ${ENERGY} energy`}
-              >
-                {Array.from({ length: ENERGY }, (_, i) => (
-                  <span
-                    key={i}
-                    className={i < duel.energy ? styles.orbFull : styles.orb}
-                  />
-                ))}
+              <span className={styles.energyGroup}>
+                <span
+                  className={styles.energy}
+                  role="img"
+                  aria-label={`${duel.energy} of ${ENERGY + bonusEnergy} energy`}
+                >
+                  {Array.from({ length: ENERGY + bonusEnergy }, (_, i) => {
+                    const isBonusOrb = bonusEnergy > 0 && i === ENERGY;
+                    const filled = i < duel.energy;
+                    return (
+                      <span
+                        key={i}
+                        className={
+                          isBonusOrb
+                            ? filled
+                              ? styles.orbBonusFull
+                              : styles.orbBonus
+                            : filled
+                              ? styles.orbFull
+                              : styles.orb
+                        }
+                      />
+                    );
+                  })}
+                </span>
+                {bonusEnergy > 0 && (
+                  <span className={styles.bonusBadge}>+1⚡ bonus</span>
+                )}
               </span>
             </div>
           </div>

@@ -47,6 +47,8 @@
   --color-card-faceoff: #ec407a;
   --color-energy: #fbc02d;
   --color-energy-text: #1a1a1a;
+  /** Daily-streak bonus energy orb (BG-B28): brighter/more saturated yellow than --color-energy, so the +1 orb reads as "extra" without a new hue. */
+  --color-energy-bonus: #ffeb3b;
   /** Shot minigame timing bar's "good" band (BG-B22): distinct from the puck ring's cyan and the card-block blue. */
   --color-shot-band-good: #a5d8ff;
   /* Must stay above PageHeader's highest z-index (300, PageHeader.module.css). */
@@ -117,6 +119,7 @@
   --color-card-faceoff: #f48fb1;
   --color-energy: #ffd54f;
   --color-energy-text: #1a1a1a;
+  --color-energy-bonus: #fff59d;
   --color-shot-band-good: #74a8d0;
 }
 

@@ -567,7 +567,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no engine changes, no calendar UI.
 
 ### BG-B28 Streak energy badge in the duel UI (Agent B, after BG-B27)
-- [ ] **Read:** `components/DuelScreen.tsx`, `components/DuelScreen.module.css` (the `.orbFull`/`.orb` energy orbs), design doc §9.2.
+- [x] **Read:** `components/DuelScreen.tsx`, `components/DuelScreen.module.css` (the `.orbFull`/`.orb` energy orbs), design doc §9.2.
 - **When `state.bonusEnergy > 0`:**
   - The energy orb row shows 4 orbs instead of 3.
   - A small "+1⚡" badge (or a fourth orb in a distinct bonus colour) signals the bonus. Add a token `--color-energy-bonus` in both `:root` and `[data-theme='dark']` — a brighter or warmer yellow than `--color-energy`, so it reads as "extra" without being a new hue.
