@@ -2,531 +2,413 @@
 
 > A focused product/design track for making HockeyStatsWebApp feel like a designed hockey product rather than a generic statistics dashboard.
 >
-> This backlog intentionally sits alongside `docs/frontend-backlog.md` and `docs/exciting-features-backlog.md`. It does **not** replace the existing MD3 work or the existing E1–E9 feature ideas.
+> This backlog sits alongside `docs/frontend-backlog.md` and `docs/exciting-features-backlog.md`. It does not replace them.
 >
-> **Design direction:** use the existing MD3 token foundation as the structural system, then add a restrained Aero/glass visual personality on top. Do not attempt a wholesale Material Design 3 component-library migration. The existing frontend backlog already chose MD3 tokens + custom CSS rather than a component library.
+> **Design direction:** use MD3 as the foundation for structure, states, and accessibility. Use restrained Aero/glass treatment for personality. Do not try to fully implement MD3 across the app.
 >
-> **Product direction:** build three distinctive experiences in sequence:
-> 1. **Game Story** — explain what actually happened in a game.
+> **Product direction:** build three distinctive experiences:
+> 1. **Game Story** — explain what happened in a game.
 > 2. **Team DNA** — explain what kind of team this is.
-> 3. **Playoff What-If** — let fans explore how outcomes change the race.
+> 3. **Playoff What-If** — let fans explore how results change the race.
 >
-> The goal is not to finish every ticket. A junior designer/developer should be able to complete the design system foundation and one flagship experience well, then use the same system to improve existing screens.
+> The goal is quality, not finishing every ticket. D1 + D2 + F1 is already a successful project.
 
-## Working rules for this backlog
+## Working rules
 
-- **Design first, implementation second.** Each feature should have a small written UX spec before substantial code is written.
-- **Use existing data before adding APIs.** Prefer projections of `ScheduleContext`, `StandingsContext`, team data, and existing game-detail data.
-- **No giant redesign.** Work screen-by-screen. Keep existing routes and information architecture unless a ticket explicitly changes them.
-- **MD3 underneath, Aero above.** Use semantic design tokens, accessible contrast, predictable states, and familiar controls. Aero is the surface treatment, not the information architecture.
-- **Glass is an accent.** Do not put every table, card, and paragraph inside translucent glass. Dense statistics need solid, readable surfaces.
-- **Motion explains state.** Avoid decorative animation that makes data harder to scan.
-- **Junior-friendly means reversible.** Prefer small components, pure helpers, and one responsibility per ticket.
-- **Stop when the acceptance criteria are met.** Record unrelated discoveries rather than expanding scope.
+These rules apply to every ticket:
+
+- **Look first, then change.** Read the existing code before deciding what to build.
+- **Use existing data first.** Do not add API work unless the feature truly needs data the app does not have.
+- **Keep it small.** Change the smallest number of files and screens that solve the ticket.
+- **Explain in plain English.** Avoid jargon unless it is useful. If a technical term matters, explain it briefly.
+- **Work one step at a time.** Do not generate a giant implementation all at once.
+- **Do not over-engineer.** Prefer the simplest code that fits the existing project. Do not add abstractions just because they sound clean.
+- **Keep calculations easy to test.** When a calculation is more than a couple of lines, consider putting it in a small helper outside React.
+- **Ask before expanding scope.** If required data or behavior is missing, stop and explain the problem before adding a backend, library, or major refactor.
+- **Accessibility and readability beat visual effects.**
+- **Stop when the ticket is done.** Log unrelated improvements for later instead of adding them now.
 
 ---
 
 # D1 — Establish the HockeyStats visual foundation
 
-- [ ] **Owner:** Design + frontend | **Depends on:** existing `docs/frontend-backlog.md` F1–F4 where applicable | **Data:** none
+- [ ] **Depends on:** existing MD3 work in `docs/frontend-backlog.md` where applicable | **Data:** none
 
-Create the visual foundation that the three signature experiences will share. This is the "design system lite" ticket, not a complete MD3 implementation.
+Create a small visual foundation that the new features can share. This is **not** a complete MD3 implementation or a new component library.
 
-### What this should accomplish
+Define simple shared decisions for:
 
-Define a small, reusable set of decisions for:
+- typography
+- semantic colors
+- surfaces
+- spacing
+- borders/radius
+- elevation
+- interactive states
+- light/dark themes
+- one subtle Aero/glass treatment
 
-- typography hierarchy
-- page background and surface hierarchy
-- primary/secondary/tertiary semantic colors
-- borders and outlines
-- corner radius scale
-- elevation/shadow scale
-- buttons and interactive states
-- selected/hover/focus/disabled states
-- compact data surfaces
-- responsive spacing
-- light/dark theme behavior
-
-The existing token work in `react/src/index.css` / current style architecture should be extended rather than replaced.
-
-### Implementation prompt
+### Prompt for the developer
 
 ```text
-ROLE: You are the senior frontend engineer pairing with me. I am a junior developer learning the codebase. Explain the reasoning before implementation. Give me one numbered step at a time and pause so I can implement it. Do not generate a giant replacement file for me.
+You are mentoring me while I work on HockeyStatsWebApp. I am a junior developer. I will write the code.
 
-PROJECT: HockeyStatsWebApp. React + TypeScript + Vite + CSS Modules. The repository was recently moved toward Bulletproof React paths under react/src/{app,features,components,lib,styles}; check docs/architecture.md before assuming an old path.
+Please explain things in plain English, give me one small step at a time, and wait for me before moving on. Do not give me a giant code dump.
 
-READ FIRST:
-1. docs/architecture.md
-2. docs/frontend-backlog.md — especially F1–F5 and the decision record about MD3/custom CSS
-3. Current global token/style files under react/src/styles/ and/or react/src/index.css
-4. Two or three existing pages and their CSS modules
-5. One existing component that already handles focus/hover/disabled states well
+Before coding, read:
+- docs/architecture.md
+- the MD3 section of docs/frontend-backlog.md
+- the current global style/token files
+- two existing pages and their CSS
 
-TASK: Establish a small HockeyStats visual foundation that uses MD3 principles underneath and a restrained Aero/glass visual personality above it.
+Goal: make a small, reusable visual foundation for the new HockeyStats features.
 
-IMPORTANT DESIGN RULE:
-- Do NOT install a Material component library.
-- Do NOT rewrite the whole app.
-- Do NOT make every surface glass.
-- Do NOT introduce arbitrary one-off colors in page CSS.
-- Preserve accessibility and readable data tables over visual effects.
+First tell me what styling/tokens already exist. Then:
+1. Add only the missing semantic tokens we actually need.
+2. Keep the names simple: primary, surface, outline, success, warning, danger, etc.
+3. Add a subtle Aero/glass treatment for important hero/summary areas.
+4. Keep dense statistics on solid, readable surfaces.
+5. Make hover, focus, selected, and disabled states consistent.
+6. Apply the new system to one existing page as a small example.
+7. Check light mode, dark mode, keyboard focus, and mobile width.
+8. Add a short note explaining the visual rules.
 
-STEPS:
-1. Inventory: identify the existing tokens and style conventions. Write down what already exists before changing anything.
-2. Design decisions: choose a small scale for typography, spacing, radius, elevation, and semantic colors. Explain why each scale is small enough for a junior project to maintain.
-3. Token implementation: add only the missing semantic tokens. Prefer names such as primary, on-primary, surface, surface-container, outline, success, warning, danger rather than page-specific names.
-4. Aero treatment: define one or two reusable surface patterns (for example, a subtle translucent hero surface and a solid data surface). Make sure the data surface is the default for dense content.
-5. Interactive states: standardize hover, focus-visible, active, selected, and disabled behavior. Do not use transform/scale hover effects for controls unless there is a clear reason.
-6. Typography: apply the hierarchy to one representative page only. Do not migrate the whole application in this ticket.
-7. Theme check: verify light and dark themes and test the focus state with keyboard navigation.
-8. Document: add a short section to docs explaining the visual rules so future tickets do not invent their own styles.
+Do not:
+- install a Material UI library
+- rewrite the whole app
+- make everything glass
+- add lots of abstractions
+- add animation yet
 
-INVARIANTS:
-- Existing routes keep working.
-- No new runtime dependency.
-- No raw hex values in new page/component CSS when a semantic token can be used.
-- Light and dark themes both remain usable.
-- Dense statistics remain higher contrast than decorative surfaces.
+If you find a bigger problem, tell me before fixing it.
 
-OUT OF SCOPE:
-- Full app redesign
-- Replacing React Bootstrap grid if it is still needed for layout
-- Building a component library
-- Redesigning every existing page
-- Motion system beyond basic interaction states
-
-DONE WHEN:
-- TypeScript/build checks pass.
-- A reviewer can understand the new visual tokens without reading every page.
-- One representative page demonstrates the new visual language.
-- Keyboard focus is visible.
-- Both themes are legible.
-- The implementation is small enough that a junior developer can explain every new token.
+Done when the build/typecheck passes, one page shows the new system, both themes are readable, and I understand every new token.
 ```
 
 ---
 
 # D2 — Apply the visual foundation to Home → Game → Team
 
-- [ ] **Owner:** Design + frontend | **Depends on:** D1 | **Data:** existing data only
+- [ ] **Depends on:** D1 | **Data:** existing data only
 
-Use the new foundation on three existing surfaces rather than attempting a full application migration. These screens become the visual "spine" of the product.
+Apply the new visual language to three important screens. Do not redesign the whole app.
 
-### Target screens
+- **Home:** help users understand where they are and what matters.
+- **Game:** make the game state the main focus.
+- **Team:** create a clean pattern for a data-rich team page.
 
-1. **Home:** orient the user quickly: what is happening, what matters, where to go.
-2. **Game:** establish the visual language for a high-attention hockey event.
-3. **Team:** establish the visual language for a data-rich entity page.
-
-### Implementation prompt
+### Prompt for the developer
 
 ```text
-ROLE: Senior frontend engineer mentoring a junior developer. I will write the code. Explain one step, let me implement it, then review before moving on.
+You are mentoring me while I work on HockeyStatsWebApp. I am a junior developer and I will write the code.
 
-READ FIRST:
-1. docs/design-feature-backlog.md D1
-2. docs/architecture.md
-3. Current Home/landing page
-4. Current GameDetailPage
-5. Current TeamPage
-6. Their CSS modules and shared layout components
+Explain things in plain English. Give me one small change at a time. Do not generate the whole redesign for me.
 
-TASK: Apply D1's visual language to Home, Game Detail, and Team without redesigning their information architecture.
+Read:
+- D1 in docs/design-feature-backlog.md
+- docs/architecture.md
+- the current Home, Game Detail, and Team pages
+- their CSS and shared layout components
 
-STEPS:
-1. Make a quick screen inventory: identify the hero, primary action, dense data, secondary information, and empty/loading/error states on each page.
-2. Pick one visual hierarchy change per page. Do not make ten changes at once.
-3. Home: create a stronger entry hierarchy and reserve the Aero treatment for the most important hero/summary surface.
-4. Game: make score/state the dominant visual anchor, with dense stats using solid readable surfaces.
-5. Team: establish a repeatable entity-page hierarchy that can later host Team DNA.
-6. Check responsive behavior at approximately 576px, 768px, and desktop width. Fix overflow before polishing.
-7. Check both themes and keyboard focus.
-8. Capture a short before/after note in this ticket describing the design decisions.
+Goal: make Home, Game, and Team feel like the same product.
 
-INVARIANTS:
-- No route changes.
-- No new API calls.
-- Do not duplicate existing components if a shared component can be reused safely.
-- Do not add visual effects that reduce table/chart readability.
+For each page:
+1. Tell me what the most important thing is for the user.
+2. Make one or two hierarchy improvements using D1's tokens.
+3. Use Aero only for a focal area.
+4. Keep tables and dense stats simple and readable.
+5. Check mobile and keyboard focus.
 
-OUT OF SCOPE:
-- Game Story
-- Team DNA
-- Playoff What-If
-- Full navigation redesign
-- Migrating every legacy page
+Do not:
+- redesign navigation
+- add new API calls
+- rebuild components without a reason
+- migrate every page
+- start Game Story, Team DNA, or Playoff What-If yet
 
-DONE WHEN:
-- Home, Game, and Team visibly share the same design language.
-- Each page still works on mobile.
-- Existing data and links remain intact.
-- Build/type checks pass.
+If the existing code makes the requested change awkward, explain the simplest option before we refactor anything.
+
+Done when the three pages share a clear visual language, existing data/links still work, mobile works, and build/typecheck passes.
 ```
 
 ---
 
 # F1 — Game Story: turn a game into a visual narrative
 
-- [ ] **Owner:** Design + frontend | **Depends on:** D1, preferably D2 | **Data:** existing game-detail + schedule data; no new endpoint unless the required event fields are genuinely absent
+- [ ] **Depends on:** D1, preferably D2 | **Data:** existing game-detail data
 
-**Flagship feature #1.** Instead of presenting a box score as a wall of numbers, answer the fan question: **"What actually happened in this game?"**
+**Flagship feature #1.** Answer the fan's question: **"What actually happened?"**
 
-The experience should tell a compact story such as:
+The first version should be simple:
 
-- who struck first
-- when the game changed direction
-- how the lead moved
-- which period was decisive
-- whether special teams mattered
-- how the final score was reached
+- final/live score and game state
+- scoring timeline
+- lead changes
+- important period changes
+- 2–4 factual turning points
+- a few useful stats that help explain the result
 
-A simple version can use a period/goal timeline, score-state changes, key statistical turning points, and a concise generated/derived narrative. Avoid pretending to have richer event data if the API does not provide it.
+Do not invent a "momentum" story when the data cannot support it.
 
-### UX concept
-
-The user lands on a game and sees:
-
-1. **Hero:** final/live score + game state.
-2. **Story timeline:** major scoring events in chronological order.
-3. **Momentum/lead strip:** visual score state across the game.
-4. **Turning point cards:** derived moments such as "Colorado took its first lead in the 2nd."
-5. **Numbers that explain the story:** shots, PP, faceoffs, etc. only where useful.
-
-### Implementation prompt
+### Prompt for the developer
 
 ```text
-ROLE: Senior frontend engineer mentoring a junior developer. I am learning. I write the implementation. Guide me one step at a time and pause after each step. Do not generate a full feature in one response.
+You are mentoring me while I build a Game Story feature. I am a junior developer and I will write the code.
 
-READ FIRST:
-1. docs/architecture.md
-2. docs/design-feature-backlog.md D1 and F1
-3. Existing GameDetailPage and its current types/helpers/api files
-4. Existing normalized schedule/game models
-5. Any existing game-event/scoring-event data already returned by the game detail endpoint
-6. docs/exciting-features-backlog.md to ensure we are not duplicating another ticket
+Explain things in plain English. Work one small step at a time. Do not give me the complete feature in one response.
 
-PRODUCT QUESTION:
-How can a fan understand the story of a hockey game without reading the entire box score?
+Read:
+- docs/architecture.md
+- D1 and F1 in docs/design-feature-backlog.md
+- the current Game Detail page
+- its types/helpers/data code
+- the actual game-detail data returned by the app
 
-TASK: Build a "Game Story" section on the existing game detail experience.
+Goal: let a fan understand a completed game in about 10 seconds without reading the whole box score.
 
-FIRST RULE: Do not assume the API contains fields we have not inspected. If a desired visual requires unavailable event data, stop and document the gap before changing the backend.
+First, inspect the data and tell me what we actually have. Do not assume fields exist.
 
-STEPS:
-1. Data inventory: list exactly which game events, scores, periods, shots, special teams, and timestamps are available. Mark each as available/not available.
-2. Story contract: design a small typed view model for the story. Keep raw NHL response handling in the existing game-detail helper boundary.
-3. Pure derivation: create a pure helper for chronological scoring events, lead changes, period summaries, and a small set of turning-point facts. Keep the helper independent from React.
-4. Timeline: render a readable vertical or horizontal scoring timeline. Each event must have an accessible text equivalent.
-5. Lead state: create a compact visual showing whether the game was tied, home-led, away-led, or in overtime at each scoring transition. Do not fake continuous "momentum" when only scoring events are known.
-6. Turning points: derive 2–4 factual observations from available data. Examples: first lead, largest lead, tied-after-two, special-teams edge. Avoid subjective claims such as "the team dominated" unless the data supports a clear rule.
-7. Responsive layout: desktop may use a split composition; mobile should become a single chronological flow.
-8. Empty states: historical games may have incomplete detail. Render the best available story rather than blanking the entire page.
-9. Visual polish: use D1 tokens. Aero treatment may be used for the story hero, while timeline/data surfaces stay readable.
-10. Manual verification: compare one completed game with the official game record and verify every displayed event.
+Then build the smallest useful version:
+1. Show scoring events in order.
+2. Show when the lead changed or the game was tied.
+3. Show 2–4 factual turning points, such as first lead or largest lead.
+4. Use shots, special teams, or other stats only when they help explain the story.
+5. Make the timeline easy to scan on mobile.
+6. Make sure visual events also have readable text.
+7. Use the D1 design system. Aero can be used for the hero, not every card.
+8. Check one real completed game against its official record.
 
-INVARIANTS:
-- No invented statistics or events.
-- Pure derivation logic is unit-testable.
-- Existing game navigation state is preserved.
-- Accessible text remains available when visual timeline elements are hidden.
-- No chart library unless the project already has one that clearly fits.
+If something we want is not in the existing data, stop and tell me. Do not immediately add an API or backend endpoint.
 
-OUT OF SCOPE:
-- Live play-by-play reconstruction if the current endpoint cannot support it
-- AI-generated commentary
-- New backend endpoint solely for convenience
-- Rebuilding GameDetailPage from scratch
-- A generic charting framework
+Do not:
+- add AI commentary
+- invent events or statistics
+- build a generic chart system
+- rewrite the whole Game Detail page
+- add a library unless there is a real need
 
-DONE WHEN:
-- A completed game has a clear visual story in under 10 seconds of scanning.
-- Every story fact can be traced to existing data.
-- Mobile and dark theme work.
-- Missing event data degrades gracefully.
-- Typecheck/build/tests pass.
+If you think a more complicated solution would be better, explain it as a future option instead of building it now.
+
+Done when a real completed game has a clear story, missing data is handled gracefully, mobile/dark mode work, and build/typecheck/tests pass.
 ```
 
 ---
 
 # F2 — Team DNA: show what kind of team this is
 
-- [ ] **Owner:** Design + frontend | **Depends on:** D1, D2, ideally E2 team-form helpers | **Data:** existing season schedule + standings/team stats; zero new fetches preferred
+- [ ] **Depends on:** D1, D2; reuse E2 helpers if available | **Data:** existing season data
 
-**Flagship feature #2.** Give each team a visual identity based on measurable tendencies rather than another table of totals.
+**Flagship feature #2.** Give each team a visual fingerprint based on measurable tendencies.
 
-Potential dimensions:
+Possible dimensions:
 
-- scoring environment
 - goal differential
-- home vs road performance
+- scoring environment
+- home/road performance
 - recent form
-- ability to protect a lead / frequency of comebacks if derivable
-- special-teams profile if available
-- pace/consistency across the season
+- comeback/lead protection if derivable
+- special teams if already available
+- pace/consistency if the data supports it
 
-The design should feel closer to a "team fingerprint" than a radar chart stuffed with arbitrary numbers.
+The result should feel like a useful team profile, not a pile of numbers.
 
-### UX concept
-
-A team page section titled **Team DNA** with:
-
-- 4–6 clearly labeled dimensions
-- short plain-language interpretations
-- a visual fingerprint/profile
-- comparison to league average only where the required league data is already loaded
-- a "this season" label so the user knows the scope
-
-### Implementation prompt
+### Prompt for the developer
 
 ```text
-ROLE: Senior frontend engineer mentoring a junior developer. I write the code. Explain the reasoning, then give me one implementation step at a time.
+You are mentoring me while I build Team DNA. I am a junior developer and I will write the code.
 
-READ FIRST:
-1. docs/architecture.md
-2. docs/design-feature-backlog.md D1 and F2
-3. TeamPage and its current helper/model files
-4. ScheduleContext / standings context under the current Bulletproof React paths
-5. docs/exciting-features-backlog.md E2 if it has landed or is in progress
-6. Existing team stats available without another fetch
+Explain things in plain English. Give me one step at a time. Keep the solution simple.
 
-TASK: Add a "Team DNA" visual profile to the Team page.
+Read:
+- docs/architecture.md
+- D1 and F2 in docs/design-feature-backlog.md
+- the current Team page
+- existing team-form helpers
+- existing season/standings data
+- E2 in docs/exciting-features-backlog.md if it already exists
 
-DESIGN WARNING:
-Do not automatically choose a radar chart. First determine whether the dimensions can be compared meaningfully. Prefer a clearer custom profile if a radar chart would imply false precision.
+Goal: help a fan answer, "What kind of team is this?"
 
-STEPS:
-1. Data audit: list candidate metrics that are actually available for the selected season. Reject metrics that require new data just for this feature.
-2. Choose dimensions: select 4–6 metrics that answer distinct questions. Avoid six versions of scoring rate.
-3. Define normalization: decide how each metric becomes a comparable visual value. If league-average normalization is unavailable, use a clearly labeled team-only scale instead.
-4. Create a pure `teamDnaHelper` with small functions for each derived metric. No React imports.
-5. Define the view model: labels, value, display value, direction (higher/lower/balanced), and a short factual explanation.
-6. Build the visual fingerprint. Favor horizontal profiles, segmented bars, or compact cards over a decorative radar if the data is easier to read that way.
-7. Add a compact mobile layout. Nothing should require horizontal scrolling.
-8. Add plain-language labels. Example: "Road form — 58% points" rather than "Away P%" when space allows.
-9. Add a small methodology note: season, sample size, and whether values are team-only or league-relative.
-10. Test against one strong team, one middle team, and one struggling team so the visualization does not collapse to the same shape.
+First, list the team metrics we already have. Prefer no new API calls.
 
-INVARIANTS:
-- No fabricated metrics.
-- No hidden normalization.
-- All calculations live in pure helpers.
-- The visual is supplementary; raw values remain readable.
-- Existing TeamPage tabs/URL state remain intact.
+Then:
+1. Pick 4–6 useful metrics that describe different parts of the team.
+2. Explain each metric in plain language.
+3. Calculate the values with the simplest reasonable helper code.
+4. Choose a clear visual. Do not use a radar chart just because it looks impressive.
+5. Keep the actual numbers visible.
+6. If you normalize a value, explain what the scale means.
+7. Add a short note saying which season/data the profile uses.
+8. Make it work on mobile and dark mode.
+9. Test it with a strong, average, and struggling team.
 
-OUT OF SCOPE:
-- Player-level DNA
-- Historical multi-season DNA
-- Machine learning/team clustering
-- New backend endpoints
-- A league-wide ranking page
+Do not:
+- add machine learning
+- add league-wide clustering
+- add historical comparisons yet
+- create a new API just for this
+- hide the numbers behind the graphic
 
-DONE WHEN:
-- A user can describe the team's style/profile after a quick scan.
-- Values have clear definitions.
-- The feature remains useful in past seasons with available data.
-- Mobile and dark theme work.
-- Typecheck/build/tests pass.
+If a metric needs complicated new data, leave it out and tell me why.
+
+Done when a fan can quickly describe the team's profile, the values are understandable, and build/typecheck/tests pass.
 ```
 
 ---
 
 # F3 — Playoff What-If: let fans change the future
 
-- [ ] **Owner:** Design + frontend | **Depends on:** D1, preferably E1 playoff-race derivations | **Data:** existing standings + schedule; zero new fetches
+- [ ] **Depends on:** D1, preferably E1 playoff helpers | **Data:** existing standings + schedule
 
-**Flagship feature #3.** Turn playoff standings from a static snapshot into a lightweight sandbox.
+**Flagship feature #3.** Let fans change a few future game results and immediately see how the playoff race changes.
 
-A fan can change selected future game outcomes and immediately see the projected playoff race change.
+Example: **"What if my team wins the next 5?"**
 
-Example interaction:
+Show:
 
-> "What if my team wins the next 5?"
-
-The app adjusts the projected standings and shows:
-
-- new points
+- projected points
 - playoff position
-- cutline distance
-- teams displaced
-- biggest movement
+- movement
+- cutline distance where available
+- biggest movers
 
-### Important scope constraint
+Start with a simple deterministic scenario. This is **not** an official playoff odds calculator.
 
-This is **not** a perfect NHL playoff simulator. Start with deterministic what-if scenarios over selected future games. A future ticket can add Monte Carlo simulation.
-
-### Implementation prompt
+### Prompt for the developer
 
 ```text
-ROLE: Senior frontend engineer mentoring a junior developer. I am a junior developer and will write the code. Guide me conceptually and one step at a time. Do not give me a complete implementation upfront.
+You are mentoring me while I build Playoff What-If. I am a junior developer and I will write the code.
 
-READ FIRST:
-1. docs/architecture.md
-2. docs/design-feature-backlog.md D1 and F3
-3. docs/exciting-features-backlog.md E1 and E4 — understand existing playoff and lottery derivations before duplicating anything
-4. Current standings/schedule contexts and their helper files
-5. Existing StandingsPage and URL-state patterns
+Explain things in plain English. Work one small step at a time. Do not give me a full implementation upfront.
 
-TASK: Build a deterministic "Playoff What-If" experience using already-loaded standings and future schedule games.
+Read:
+- docs/architecture.md
+- D1 and F3 in docs/design-feature-backlog.md
+- E1 in docs/exciting-features-backlog.md
+- current standings and schedule data
+- the current Standings page
 
-CORE USER STORY:
-I want to change a few upcoming game outcomes and instantly understand how that changes my team's playoff position.
+Goal: let a fan change a few upcoming results and immediately see how the standings would change.
 
-STEPS:
-1. Data model: identify the minimum future-game fields required: game id, teams, date, current status, and enough information to assign a winner. Confirm them from actual models.
-2. Scenario state: design a local scenario object/map keyed by game ID. Do not mutate context data.
-3. Projection helper: create a pure helper that applies scenario results to a copied standings projection. Keep original standings untouched.
-4. Scope the math: start with points only. Clearly document how a selected win/loss affects points and what happens for OT/SO if the scenario needs it. Do not pretend to calculate exact NHL tiebreakers.
-5. Build the interaction: show a short list of upcoming games with simple outcome controls such as Home win / Away win / Reset. Make the controls understandable without a legend.
-6. Results view: show before vs after points, playoff position, and movement. Highlight the user's selected team and the largest movers.
-7. Add a "reset scenario" action and make sure browser refresh returns to the default scenario unless there is a compelling existing URL-state pattern.
-8. Empty/edge states: past season, no remaining games, and teams already mathematically resolved.
-9. Visual polish: use D1. Make the changed values visually obvious but avoid aggressive animation.
-10. Add a small methodology disclaimer: deterministic scenario, simplified tiebreakers, not official NHL playoff odds.
+First, inspect the existing game and standings models. Tell me the smallest amount of data we need.
 
-INVARIANTS:
-- Scenario changes cause zero network requests.
-- Context data is never mutated.
-- Projection math is pure and testable.
-- Existing standings remain available as the baseline.
-- No random simulation in this ticket.
+Then build the simple version:
+1. Keep scenario choices in local state. Do not change the real standings data.
+2. Give upcoming games simple controls such as Home win, Away win, and Reset.
+3. Write the simplest helper needed to apply those results to a copy of the standings.
+4. Start with points and position. Only handle tiebreakers that the existing data supports safely.
+5. Show before vs. after for the selected team and important movers.
+6. Make Reset return to the original standings.
+7. Handle seasons with no remaining games.
+8. Make it clear that this is a simplified scenario, not official playoff odds.
 
-OUT OF SCOPE:
-- Monte Carlo odds
-- Exact NHL tiebreaker engine
-- Saving/shareable scenarios
-- Authentication
-- Backend changes
+Changing a scenario should not make a network request.
 
-DONE WHEN:
-- A user can change at least three upcoming results and immediately see a coherent before/after projection.
-- Reset returns exactly to the original standings.
-- No network requests occur during scenario editing.
-- Past seasons and season-end states do not crash.
-- Typecheck/build/tests pass.
+Do not:
+- add Monte Carlo simulation yet
+- build a perfect NHL tiebreaker engine
+- add accounts or saved scenarios
+- add backend work unless the existing data truly cannot support the feature
+
+If you discover a hard data problem, stop and explain it before expanding the project.
+
+Done when several future results can be changed, the projection updates correctly, Reset works, and build/typecheck/tests pass.
 ```
 
 ---
 
-# F4 — Signature interaction polish: make the product feel alive
+# F4 — Signature interaction polish
 
-- [ ] **Owner:** Design + frontend | **Depends on:** D1 + at least one of F1/F2/F3 | **Data:** none
+- [ ] **Depends on:** D1 + one completed signature feature | **Data:** none
 
-Add a small, coherent motion language to the signature experience that was actually built. This is the final polish pass, not a general animation project.
+Add a few small animations to the strongest feature. This is polish, not an animation project.
 
-### Rules
-
-- Motion communicates change, hierarchy, or navigation.
-- Keep transitions short.
-- Respect `prefers-reduced-motion`.
-- Never animate a dense table simply because it can be animated.
-- Avoid scale/translate hover gimmicks.
-
-### Implementation prompt
+### Prompt for the developer
 
 ```text
-ROLE: Senior frontend engineer mentoring a junior developer. I write the code. Work one small step at a time.
+You are mentoring me on a final motion pass. I am a junior developer and I will write the code.
 
-READ FIRST:
-1. docs/design-feature-backlog.md D1 and the completed signature feature ticket
-2. Existing CSS transition conventions
-3. Any existing reduced-motion handling
+Explain things simply and make one change at a time.
 
-TASK: Add a tiny motion language to the strongest signature feature only.
+Read D1 and the completed signature feature.
 
-STEPS:
-1. Identify three moments where motion improves comprehension: entering a feature, changing a scenario/state, and revealing a secondary detail.
-2. Define one transition duration/easing convention using existing tokens where possible.
-3. Implement one motion at a time and verify it does not change layout unexpectedly.
-4. Add `prefers-reduced-motion` handling.
-5. Remove any animation that is decorative rather than informative.
-6. Test keyboard interactions and mobile performance.
+Goal: make the feature feel responsive without making it feel like an animation demo.
 
-OUT OF SCOPE:
-- Page-wide animation
-- Parallax
-- Scroll-jacking
-- Animated backgrounds
-- New animation libraries
+Find only three useful moments:
+- entering the feature
+- changing a value or state
+- revealing secondary information
 
-DONE WHEN:
-- The feature feels responsive without feeling like a demo.
-- Reduced-motion users get an equivalent experience.
-- No layout jumps or distracting loops remain.
+Then:
+1. Use simple CSS transitions where possible.
+2. Keep them short and subtle.
+3. Respect prefers-reduced-motion.
+4. Check keyboard and mobile interactions.
+5. Remove anything that is decorative rather than useful.
+
+Do not add an animation library, parallax, animated backgrounds, or page-wide motion.
+
+If an animation creates a layout problem, remove it rather than adding a complicated fix.
+
+Done when the feature feels responsive, reduced-motion users get an equivalent experience, and there are no distracting layout jumps.
 ```
 
 ---
 
-# F5 — Portfolio-quality pass: document the design decisions
+# F5 — Portfolio-quality pass
 
-- [ ] **Owner:** Design | **Depends on:** D1, D2, and at least one flagship feature | **Data:** none
+- [ ] **Depends on:** D1 + at least one signature feature | **Data:** none
 
-Turn the work into a coherent case study inside the repository. This is useful for future contributors as well as a portfolio review.
+Create a short design record that explains what was built and why. Keep it useful to another developer, not just a portfolio essay.
 
-### Capture
-
-- problem statement
-- target user question
-- before/after screenshots or links where practical
-- design principles
-- important rejected ideas
-- data constraints
-- accessibility decisions
-- what is derived locally vs fetched
-- what remains intentionally unfinished
-
-### Implementation prompt
+### Prompt for the developer
 
 ```text
-ROLE: Senior engineer/designer helping a junior developer document finished work. Keep this concise and factual.
+You are helping me document the work I finished. I am a junior developer.
 
-READ FIRST:
-1. docs/design-feature-backlog.md
-2. docs/frontend-backlog.md
-3. docs/exciting-features-backlog.md
-4. The completed flagship feature ticket
+Keep this short, plain, and factual.
 
-TASK: Add a short design decision record for the work completed in this backlog.
+Read:
+- docs/design-feature-backlog.md
+- docs/frontend-backlog.md
+- docs/exciting-features-backlog.md
+- the completed feature ticket
 
-STEPS:
-1. Write the user problem in one paragraph.
-2. Write the design direction in 4–6 bullets.
-3. Explain why MD3 is used as a structural foundation rather than copied literally as the visual identity.
-4. Explain where Aero/glass is used and where it is intentionally avoided.
-5. Explain the flagship feature's core interaction and why it is useful.
-6. Record data limitations and any simplifications honestly.
-7. Record accessibility/reduced-motion decisions.
-8. Add links to the implementation tickets and any relevant screenshots/assets.
+Write a short design note covering:
+1. The user problem.
+2. The main design decisions.
+3. Why MD3 is the foundation instead of the exact visual style.
+4. Where Aero/glass is used and where it is avoided.
+5. What the flagship feature does and why it helps fans.
+6. Important data limitations or simplifications.
+7. Accessibility and reduced-motion decisions.
+8. What we intentionally did not build yet.
 
-DONE WHEN:
-- Another developer can understand why the UI looks the way it does.
-- A portfolio reviewer can understand the problem, process, and outcome without reading source code.
-- No marketing claims are presented as technical facts.
+Keep it concise. Do not turn it into a long technical essay.
 ```
 
 ---
 
-# Suggested execution order
+# Suggested order
 
 ### Milestone 1 — Make the foundation
 
-- [ ] D1 Visual foundation
-- [ ] D2 Home → Game → Team application
+- [ ] D1 — Visual foundation
+- [ ] D2 — Home → Game → Team
 
 ### Milestone 2 — Build one memorable thing
 
-- [ ] F1 Game Story
-- [ ] F4 Motion polish
+- [ ] F1 — Game Story
+- [ ] F4 — Motion polish
 
 ### Milestone 3 — Add the two supporting ideas if scope allows
 
-- [ ] F2 Team DNA
-- [ ] F3 Playoff What-If
+- [ ] F2 — Team DNA
+- [ ] F3 — Playoff What-If
 
 ### Milestone 4 — Package the work
 
-- [ ] F5 Portfolio-quality design record
+- [ ] F5 — Portfolio-quality design record
 
 **Recommended stopping point:** D1 + D2 + F1 + F4 is already a strong junior designer/developer project. F2 and F3 should be treated as follow-on features, not reasons to dilute the quality of Game Story.
 
