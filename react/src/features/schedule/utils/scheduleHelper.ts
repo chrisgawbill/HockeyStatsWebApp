@@ -84,4 +84,38 @@ function ConvertContractsToGames(games: any[]): ScheduledGame[] {
   return (games ?? []).map(ConvertContractToGame);
 }
 
-export { ConvertContractsToGames, groupGamesByDate, formatDateParam };
+/**
+ * Resolves the date SchedulePage should anchor its day/week/month view on:
+ * an explicit `selectedDate` wins whenever it falls within the loaded season's
+ * game-date range, otherwise `today` is used if it's in range, and failing that
+ * the season's last game date. With no games loaded at all, `selectedDate` wins
+ * if present, else `today`. `today` is injectable (like `getCurrentSeasonId`
+ * injects `now`) so callers/tests aren't tied to the real clock.
+ */
+function resolveEffectiveDate(
+  selectedDate: Date | null,
+  sortedGames: ScheduledGame[],
+  today: Date = new Date(),
+): Date {
+  if (sortedGames.length === 0) {
+    return selectedDate ?? new Date();
+  }
+  const first = sortedGames[0].date;
+  const last = sortedGames[sortedGames.length - 1].date;
+  if (selectedDate && selectedDate >= first && selectedDate <= last) {
+    return selectedDate;
+  }
+  const normalizedToday = new Date(today);
+  normalizedToday.setHours(0, 0, 0, 0);
+  if (normalizedToday >= first && normalizedToday <= last) {
+    return normalizedToday;
+  }
+  return last;
+}
+
+export {
+  ConvertContractsToGames,
+  groupGamesByDate,
+  formatDateParam,
+  resolveEffectiveDate,
+};

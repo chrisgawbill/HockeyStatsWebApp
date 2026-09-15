@@ -18,6 +18,7 @@ import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 import {
   formatDateParam,
   groupGamesByDate,
+  resolveEffectiveDate,
 } from '@/features/schedule/utils/scheduleHelper';
 import {
   filterGames,
@@ -168,20 +169,10 @@ function SchedulePage() {
     [listOfGamesData],
   );
 
-  const effectiveDate = useMemo(() => {
-    if (sortedGames.length === 0) {
-      return selectedDate ?? new Date();
-    }
-    const first = sortedGames[0].date;
-    const last = sortedGames[sortedGames.length - 1].date;
-    if (selectedDate && selectedDate >= first && selectedDate <= last) {
-      return selectedDate;
-    }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (today >= first && today <= last) return today;
-    return last;
-  }, [selectedDate, sortedGames]);
+  const effectiveDate = useMemo(
+    () => resolveEffectiveDate(selectedDate, sortedGames),
+    [selectedDate, sortedGames],
+  );
 
   /**
    * Team options for the filter dropdown, derived from the canonical local NHL

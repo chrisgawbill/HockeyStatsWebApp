@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['src/features/board-game/**/*.test.ts', 'src/lib/**/*.test.ts'],
+    include: ['src/**/*.test.ts'],
     environment: 'node',
   },
 });

@@ -7,7 +7,10 @@ import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import StandingsClinchLegend from '@/features/standings/components/StandingsClinchLegend';
 import styles from '@/features/standings/components/LandingPageStandings.module.css';
 import LoadingState from '@/components/LoadingState';
+import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
+import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 
 type Conference = 'Eastern' | 'Western';
 type StandingsView = 'conference' | 'division';
@@ -33,6 +36,7 @@ export default function LandingPageStandings() {
 
   const [view, setView] = useState<StandingsView>('conference');
   const [conference, setConference] = useState<Conference>('Eastern');
+  const { season } = useSeason();
 
   if (loadingStandingsData) {
     return <LoadingState label="Loading standings" />;
@@ -44,6 +48,23 @@ export default function LandingPageStandings() {
         title="Couldn't load standings"
         message={errorStandingsData}
         onRetry={refetchStandings}
+      />
+    );
+  }
+
+  const hasStandings =
+    easternStandingsData.length > 0 ||
+    westernStandingsData.length > 0 ||
+    metropolitanStandings.length > 0 ||
+    atlanticStandings.length > 0 ||
+    centralStandings.length > 0 ||
+    pacificStandings.length > 0;
+
+  if (!hasStandings) {
+    return (
+      <EmptyState
+        title="No standings"
+        message={`No standings available for ${formatSeasonLabel(season)}.`}
       />
     );
   }
