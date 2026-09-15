@@ -3,7 +3,6 @@ import { TeamOverview } from '@/features/teams/types/teamPageTypes';
 import { localTeamList } from '@/lib/teamListData';
 import SeasonSelector from '@/components/SeasonSelector';
 import styles from '@/features/teams/components/TeamPage.module.css';
-import '@/styles/teamPageRetro.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
