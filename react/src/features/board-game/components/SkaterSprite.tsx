@@ -21,9 +21,12 @@ export interface SkaterSpriteProps {
 const PALETTE: Record<string, string> = {
   H: 'var(--color-text)',
   S: 'var(--color-muted-text)',
+  V: 'var(--color-skater-visor)',
   K: 'var(--color-text-secondary)',
-  P: 'var(--color-text-secondary)',
+  B: 'var(--color-puck)',
+  P: 'var(--color-skater-pants)',
   W: 'var(--color-text)',
+  A: 'var(--color-white)',
 };
 
 interface Run {
