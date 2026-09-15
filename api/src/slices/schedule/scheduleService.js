@@ -96,21 +96,21 @@ function createScheduleService({ nhlApi, cache, seasons, runServiceTask }) {
    * Fetches a whole season's schedule from the NHL weekly endpoint. The NHL only
    * serves a week at a time, so this walks the season in 7-day steps and merges
    * every week's games into one raw `{ gameWeek }` payload (failed weeks are
-   * skipped rather than failing the whole fetch).
+   * skipped rather than failing the whole fetch). Always walks the full season
+   * (September 1 of the start year through June 30 of the end year) regardless
+   * of whether `seasonId` is the current season or a past one — the current
+   * season's cache entry is kept fresh separately by the scheduled refresh
+   * (see platform/refreshScheduler.js), not by narrowing this range, so
+   * schedule/date logic elsewhere (SchedulePage's date paging, the
+   * explicit-date-vs-today fallback, preseason games) can rely on the full
+   * season actually being loaded.
    * @param {string} seasonId
    * @returns {Promise<{ gameWeek: any[] }>} Raw, unmapped weekly payloads combined.
    */
   async function fetchSeasonSchedule(seasonId) {
     const startYear = Number(seasonId.slice(0, 4));
-    const startDate = new Date(`${startYear}-10-01`);
-
-    let endDate;
-    if (seasonId === seasons.getCurrentSeasonId()) {
-      endDate = new Date();
-      endDate.setDate(endDate.getDate() + 28);
-    } else {
-      endDate = new Date(`${startYear + 1}-06-30`);
-    }
+    const startDate = new Date(`${startYear}-09-01`);
+    const endDate = new Date(`${startYear + 1}-06-30`);
 
     const weekDates = [];
     const cur = new Date(startDate);
