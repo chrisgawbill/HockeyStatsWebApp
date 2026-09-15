@@ -53,6 +53,41 @@ export function recordWin(data: StreakData): StreakData {
   return updated;
 }
 
+/**
+ * Raw overwrite of the stored streak, without any of `recordWin`'s "record a
+ * win" side effects (day-increment logic, garbage collection, bonus-energy
+ * implications). Used to persist a server-merged result locally after a
+ * Google sign-in sync (`mergeStreakData` + `streakSync.ts`).
+ */
+export function saveStreak(data: StreakData): void {
+  try {
+    getStorage()?.setItem(STREAK_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // Storage may be unavailable or quota-blocked; the caller keeps working
+    // with the in-memory value for the current session.
+  }
+}
+
+/**
+ * Pure merge of a local and remote `StreakData`, mirroring the backend's
+ * merge rule exactly (`api/src/slices/boardGameStreak/boardGameStreakService.js`'s
+ * `mergeStreaks`): union of `wins` keys (a win recorded on either side is
+ * never lost — every value is the literal `true`, so overlapping keys never
+ * conflict), and `lastWinDate` is the lexicographically later of the two ISO
+ * date strings, falling back to whichever side is non-null when one is null.
+ */
+export function mergeStreakData(local: StreakData, remote: StreakData): StreakData {
+  const wins = { ...local.wins, ...remote.wins };
+  const lastWinDate = laterDateKey(local.lastWinDate, remote.lastWinDate);
+  return { wins, lastWinDate };
+}
+
+function laterDateKey(x: string | null, y: string | null): string | null {
+  if (!x) return y ?? null;
+  if (!y) return x;
+  return x > y ? x : y;
+}
+
 export function currentStreak(data: StreakData): number {
   let cursor = data.wins[todayKey()] ? startOfToday() : addCalendarDays(-1);
   let streak = 0;

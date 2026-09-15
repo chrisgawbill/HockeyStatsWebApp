@@ -59,16 +59,23 @@ function duelistRole(
 export interface BoardGameProps {
   length: GameLength;
   onChangeLength: () => void;
+  /** Google sign-in session token (BG-B31), or `null` when signed out. */
+  authToken: string | null;
 }
 
 /**
  * Owns one match's `useBoardGame` hook (fresh per mount, i.e. per length
  * pick) and dispatches actions; it computes no rules itself.
  */
-export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
+export default function BoardGame({
+  length,
+  onChangeLength,
+  authToken,
+}: BoardGameProps) {
   const { state, dispatch, legalSteps, newGame, cpuThinking } = useBoardGame(
     Date.now(),
     length,
+    authToken,
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>('move');

@@ -1,0 +1,110 @@
+.wrapper {
+  position: relative;
+}
+
+/* Matches PageHeader's Aero-glass nav-back-btn chrome (same size, glossy
+   gradient ring) rather than the board game's pixel-art skin: this renders
+   inside the shared global nav bar, not the game's own panels. */
+.badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.08)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.badge:hover,
+.badge:focus-visible {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0.14)
+  );
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.initial {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+}
+
+.dropdown {
+  position: absolute;
+  /* Flush against the badge (no gap): a gap here would be dead space that
+     isn't part of any hoverable descendant of .wrapper, so the mouse
+     leaving the badge on the way down to the menu would close it before
+     it could be reached. The visual breathing room comes from padding-top
+     instead, which is still part of the element's hoverable box. */
+  top: 100%;
+  right: 0;
+  min-width: 180px;
+  /* Light frosted glass: still the clean readable card, with a touch of the
+     same blur/translucency as the nav bar rather than a flat opaque fill. */
+  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 6px var(--space-xs) var(--space-xs);
+  box-sizing: border-box;
+  z-index: 110;
+  font-family: 'Roboto', sans-serif;
+}
+
+.dropdownEmail {
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  word-break: break-word;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius-card);
+  padding: var(--space-sm);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.dropdownItem:hover,
+.dropdownItem:focus-visible {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+/* The nav bar docks to the bottom of the viewport on mobile, so the menu
+   has to open upward from the badge instead of downward off-screen. */
+@media (max-width: 576px) {
+  .dropdown {
+    top: auto;
+    bottom: 100%;
+    padding: var(--space-xs) var(--space-xs) 6px;
+  }
+}

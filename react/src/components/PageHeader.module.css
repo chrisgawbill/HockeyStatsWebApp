@@ -7,7 +7,13 @@
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   box-sizing: border-box;
-  background-color: var(--color-primary);
+  /* Aero-glass bar: a translucent, blurred tint of the brand color rather
+     than a flat fill, so whatever scrolls underneath shows through softly. */
+  background: color-mix(in srgb, var(--color-primary) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
   padding: var(--space-sm);
   margin-bottom: var(--space-md);
   display: flex;
@@ -16,6 +22,24 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  isolation: isolate;
+}
+
+/* Glossy top sheen: the classic Aero highlight, a soft white fade across the
+   upper half of the bar. Sits behind all real content (z-index: -1 within
+   the bar's own isolated stacking context) and never intercepts clicks. */
+.nav-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.08) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
 }
 
 .nav-back-col {
@@ -37,8 +61,9 @@
   width: 100%;
   height: 32px;
   border-radius: var(--border-radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
   color: white;
   padding: 0 12px;
   font-size: 0.85rem;
@@ -50,7 +75,7 @@
 
 .nav-search-input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .nav-search-dropdown {
@@ -102,10 +127,18 @@
 }
 
 .nav-btn {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: rgba(255, 255, 255, 0.8) !important;
+  /* Aero glass pill: a vertical sheen (bright top, fading down) plus an inset
+     top highlight, the same recipe as .nav-bar's ::before but on each button. */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22),
+    rgba(255, 255, 255, 0.04)
+  ) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
   border-radius: var(--border-radius-pill) !important;
   padding: 6px 16px;
   font-weight: 500;
@@ -118,18 +151,29 @@
 
 .nav-btn:hover,
 .nav-btn:focus {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 255, 255, 0.1)
+  ) !important;
   color: white !important;
 }
 
 .nav-btn.active-page {
-  background-color: var(--color-selection) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(255, 255, 255, 0.68)
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.2) !important;
   color: var(--color-selection-text) !important;
 }
 
 .nav-btn.active-page:hover,
 .nav-btn.active-page:focus {
-  background-color: var(--color-selection) !important;
   color: var(--color-selection-text) !important;
   opacity: 0.92;
 }
@@ -138,6 +182,14 @@
   display: none;
   align-items: center;
   justify-content: center;
+}
+
+.nav-corner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2px 4px;
 }
 
 @media (max-width: 576px) {
@@ -150,8 +202,9 @@
     margin-bottom: 0;
     padding: var(--space-xs) 2px;
     padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom: none;
   }
 
   body {
@@ -165,8 +218,13 @@
   }
 
   .nav-back-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0.08)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -181,7 +239,11 @@
   }
 
   .nav-back-btn:hover {
-    background: rgba(255, 255, 255, 0.28);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42),
+      rgba(255, 255, 255, 0.14)
+    );
   }
 
   .nav-bar-item {

@@ -1,5 +1,5 @@
 require('dotenv').config({
-  path: require('path').join(__dirname, '..', '.env'),
+  path: require('path').join(__dirname, '..', '..', '.env'),
 });
 
 const fs = require('fs');

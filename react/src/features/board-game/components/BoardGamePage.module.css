@@ -33,6 +33,13 @@
   color: var(--color-energy-bonus);
 }
 
+.authRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
 .whistle {
   margin: 0;
   padding: var(--space-xs) var(--space-md);

@@ -3,6 +3,9 @@ const nhlApi = require('#platform/nhlApiClient.js');
 const seasons = require('#platform/seasonHelper.js');
 const { runServiceTask } = require('#platform/runServiceTask.js');
 const { runAIPythonScript } = require('#platform/aiRunner.js');
+const { withTransaction } = require('#platform/pool.js');
+const googleAuth = require('#platform/googleAuthClient.js');
+const sessionJwt = require('#platform/sessionJwt.js');
 
 const {
   createScheduleService,
@@ -21,6 +24,10 @@ const {
 const {
   createAiSummaryService,
 } = require('#slices/aiSummaries/aiSummaryService.js');
+const { createAuthService } = require('#slices/auth/authService.js');
+const {
+  createBoardGameStreakService,
+} = require('#slices/boardGameStreak/boardGameStreakService.js');
 
 /**
  * Composition root: the one place that knows which concrete platform adapters
@@ -40,6 +47,9 @@ function createContainer(overrides = {}) {
     seasons,
     runServiceTask,
     runAIPythonScript,
+    withTransaction,
+    googleAuth,
+    sessionJwt,
     ...overrides,
   };
 
@@ -50,6 +60,8 @@ function createContainer(overrides = {}) {
   const playerStatsService = createPlayerStatsService(platform);
   const statLeaderService = createStatLeaderService(platform);
   const aiSummaryService = createAiSummaryService(platform);
+  const authService = createAuthService(platform);
+  const boardGameStreakService = createBoardGameStreakService(platform);
 
   return {
     ...platform,
@@ -60,6 +72,8 @@ function createContainer(overrides = {}) {
     playerStatsService,
     statLeaderService,
     aiSummaryService,
+    authService,
+    boardGameStreakService,
   };
 }
 

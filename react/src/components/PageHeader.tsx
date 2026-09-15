@@ -1,4 +1,11 @@
-import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  KeyboardEvent,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Button } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { isCompletedGameState } from '@/lib/gameStatus';
@@ -162,7 +169,16 @@ function normalizeNavPath(path: string): string {
   return path.split('?')[0];
 }
 
-export default function PageHeader() {
+export interface PageHeaderProps {
+  /**
+   * Optional content rendered in a small fixed-size slot after the nav
+   * items (e.g. the board game's Google sign-in avatar badge). PageHeader
+   * itself has no idea what this is — it just reserves the corner.
+   */
+  corner?: ReactNode;
+}
+
+export default function PageHeader({ corner }: PageHeaderProps = {}) {
   const location = useLocation();
   const { pathname } = location;
   const navigate = useNavigate();
@@ -404,6 +420,7 @@ export default function PageHeader() {
             </Link>
           </div>
         ))}
+        {corner && <div className={styles['nav-corner']}>{corner}</div>}
       </div>
       <button
         ref={mobileSearchFabRef}

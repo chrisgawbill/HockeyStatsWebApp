@@ -1,0 +1,41 @@
+.frame {
+  display: inline-flex;
+  padding: 6px;
+  background-color: var(--color-surface);
+  image-rendering: pixelated;
+  /* Stepped pixel corners, matching StreakCalendar's chrome. */
+  clip-path: polygon(
+    0% 6px,
+    6px 6px,
+    6px 0%,
+    calc(100% - 6px) 0%,
+    calc(100% - 6px) 6px,
+    100% 6px,
+    100% calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    6px 100%,
+    6px calc(100% - 6px),
+    0% calc(100% - 6px)
+  );
+  /* Layered hard-edged shadows fake a stepped pixel-art border around the
+     Google-rendered button, which we can't reskin directly (branding rules). */
+  box-shadow:
+    0 0 0 2px var(--color-bg),
+    0 0 0 4px var(--color-primary);
+}
+
+.slot {
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unavailable {
+  font-family: var(--font-pixel);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+}

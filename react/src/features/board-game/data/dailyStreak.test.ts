@@ -3,7 +3,9 @@ import {
   currentStreak,
   hasStreakBonus,
   loadStreak,
+  mergeStreakData,
   recordWin,
+  saveStreak,
   todayKey,
   type StreakData,
 } from '@/features/board-game/data/dailyStreak';
@@ -172,6 +174,94 @@ describe('dailyStreak', () => {
     expect(recordWin({ wins: {}, lastWinDate: null })).toEqual({
       wins: { '2026-03-10': true },
       lastWinDate: '2026-03-10',
+    });
+  });
+
+  it('saveStreak round-trips through loadStreak without win-recording side effects', () => {
+    const storage = makeStorage();
+    vi.stubGlobal('localStorage', storage);
+
+    const data: StreakData = {
+      wins: { '2026-01-01': true, '2026-03-05': true },
+      lastWinDate: '2026-03-05',
+    };
+
+    saveStreak(data);
+
+    expect(loadStreak()).toEqual(data);
+    // No garbage collection or "today" injection like recordWin performs.
+    expect(storage.setItem).toHaveBeenCalledTimes(1);
+  });
+
+  it('saveStreak silently tolerates storage errors', () => {
+    vi.stubGlobal('localStorage', {
+      ...makeStorage(),
+      setItem: vi.fn(() => {
+        throw new Error('quota');
+      }),
+    });
+
+    expect(() => saveStreak({ wins: {}, lastWinDate: null })).not.toThrow();
+  });
+
+  describe('mergeStreakData', () => {
+    it('unions disjoint wins keys', () => {
+      const local: StreakData = { wins: { '2026-03-08': true }, lastWinDate: '2026-03-08' };
+      const remote: StreakData = { wins: { '2026-03-09': true }, lastWinDate: '2026-03-09' };
+
+      expect(mergeStreakData(local, remote)).toEqual({
+        wins: { '2026-03-08': true, '2026-03-09': true },
+        lastWinDate: '2026-03-09',
+      });
+    });
+
+    it('does not duplicate overlapping keys', () => {
+      const local: StreakData = {
+        wins: { '2026-03-08': true, '2026-03-09': true },
+        lastWinDate: '2026-03-09',
+      };
+      const remote: StreakData = {
+        wins: { '2026-03-09': true, '2026-03-10': true },
+        lastWinDate: '2026-03-10',
+      };
+
+      expect(mergeStreakData(local, remote)).toEqual({
+        wins: { '2026-03-08': true, '2026-03-09': true, '2026-03-10': true },
+        lastWinDate: '2026-03-10',
+      });
+    });
+
+    it('picks the lexicographically later lastWinDate regardless of side', () => {
+      const earlierLocal: StreakData = { wins: {}, lastWinDate: '2026-03-05' };
+      const laterRemote: StreakData = { wins: {}, lastWinDate: '2026-03-09' };
+      expect(mergeStreakData(earlierLocal, laterRemote).lastWinDate).toBe('2026-03-09');
+
+      const laterLocal: StreakData = { wins: {}, lastWinDate: '2026-03-09' };
+      const earlierRemote: StreakData = { wins: {}, lastWinDate: '2026-03-05' };
+      expect(mergeStreakData(laterLocal, earlierRemote).lastWinDate).toBe('2026-03-09');
+    });
+
+    it('falls back to whichever side is non-null when one lastWinDate is null', () => {
+      expect(
+        mergeStreakData(
+          { wins: {}, lastWinDate: null },
+          { wins: {}, lastWinDate: '2026-03-09' },
+        ).lastWinDate,
+      ).toBe('2026-03-09');
+
+      expect(
+        mergeStreakData(
+          { wins: {}, lastWinDate: '2026-03-09' },
+          { wins: {}, lastWinDate: null },
+        ).lastWinDate,
+      ).toBe('2026-03-09');
+    });
+
+    it('returns null when both sides are null', () => {
+      expect(
+        mergeStreakData({ wins: {}, lastWinDate: null }, { wins: {}, lastWinDate: null })
+          .lastWinDate,
+      ).toBeNull();
     });
   });
 });

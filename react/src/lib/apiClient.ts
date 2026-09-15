@@ -45,3 +45,39 @@ export async function get<T = any>(
     throw error;
   }
 }
+
+/**
+ * Shared POST wrapper: returns `response.data`, and logs then re-throws so
+ * callers keep their own error UI.
+ */
+export async function post<T = any>(
+  path: string,
+  data?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  try {
+    const response = await axiosExpressHandler.post<T>(path, data, config);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching data: ', error);
+    throw error;
+  }
+}
+
+/**
+ * Shared PUT wrapper: returns `response.data`, and logs then re-throws so
+ * callers keep their own error UI.
+ */
+export async function put<T = any>(
+  path: string,
+  data?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  try {
+    const response = await axiosExpressHandler.put<T>(path, data, config);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching data: ', error);
+    throw error;
+  }
+}
