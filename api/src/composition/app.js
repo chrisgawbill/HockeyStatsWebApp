@@ -16,6 +16,8 @@ const { createPlayerRouter } = require('#presentation/routes/player.js');
 const { createTeamRouter } = require('#presentation/routes/team.js');
 const { createScheduleRouter } = require('#presentation/routes/schedule.js');
 const { createAiRouter } = require('#presentation/routes/ai.js');
+const { createAuthRouter } = require('#presentation/routes/auth.js');
+const { createBoardGameRouter } = require('#presentation/routes/boardGame.js');
 
 const corsOptions = {
   origin: [
@@ -23,7 +25,9 @@ const corsOptions = {
     'http://localhost:5173',
     'https://chrisgawbill.github.io',
   ],
-  allowedHeaders: ['Content-Type', 'x-diagnostics-key'],
+  // 'Authorization' is required for the bearer-token board-game auth routes
+  // (this stays a bearer-token API, not a cookie session: no `credentials`).
+  allowedHeaders: ['Content-Type', 'x-diagnostics-key', 'Authorization'],
 };
 
 /**
@@ -52,6 +56,8 @@ function createApp(container) {
   app.use('/team', createTeamRouter(container));
   app.use('/schedule', createScheduleRouter(container));
   app.use('/python-service', createAiRouter(container));
+  app.use('/api/auth', createAuthRouter(container));
+  app.use('/api/board-game', createBoardGameRouter(container));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

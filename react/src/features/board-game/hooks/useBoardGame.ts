@@ -30,6 +30,7 @@ import {
   recordWin,
   type StreakData,
 } from '@/features/board-game/data/dailyStreak';
+import { pushRemoteStreak } from '@/features/board-game/api/streakSync';
 
 export interface UseBoardGame {
   state: GameState;
@@ -45,6 +46,8 @@ export interface UseBoardGame {
 export function useBoardGame(
   initialSeed: number,
   length: GameLength,
+  /** Google sign-in session token (BG-B31), or `null` when signed out. */
+  authToken: string | null = null,
 ): UseBoardGame {
   const [streakData, setStreakData] = useState<StreakData>(() => loadStreak());
   const streakDataRef = useRef(streakData);
@@ -109,7 +112,16 @@ export function useBoardGame(
     const updated = recordWin(streakDataRef.current);
     streakDataRef.current = updated;
     setStreakData(updated);
-  }, [state.phase, state.winner]);
+
+    // Fire-and-forget: sync the win to the server without blocking gameplay.
+    // Errors are logged and swallowed, matching every other step of the
+    // optional Google sign-in sync (see docs/board-game-backlog.md, BG-B31).
+    if (authToken) {
+      pushRemoteStreak(authToken, updated).catch((error) => {
+        console.error('Failed to sync streak after win:', error);
+      });
+    }
+  }, [state.phase, state.winner, authToken]);
 
   const streak = useMemo(() => currentStreak(streakData), [streakData]);
 
