@@ -1,0 +1,152 @@
+/* Team surfaces: Material 3 structure with the app's Aero chrome. */
+[class*="team-list-page"],
+[class*="team-page"] {
+  color-scheme: light dark;
+}
+
+[class*="team-list-toolbar"] {
+  padding-top: var(--space-md);
+}
+
+[class*="team-list-controls"] input,
+[class*="team-list-controls"] select {
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 96%, white) 0%, var(--color-surface) 100%);
+  box-shadow: var(--elevation-1), inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-list-controls"] input:focus,
+[class*="team-list-controls"] select:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent), inset 0 1px 0 var(--aero-border-highlight), var(--elevation-1);
+}
+
+[class*="team-list-filter-chips"] button {
+  box-shadow: inset 0 1px 0 var(--aero-border-highlight), var(--elevation-1);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+[class*="team-list-filter-chips"] button:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 var(--aero-border-highlight), var(--elevation-2);
+}
+
+[class*="team-card"] {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 94%, white) 0%, var(--color-surface) 100%);
+  border-color: color-mix(in srgb, var(--color-primary) 24%, transparent);
+  box-shadow: var(--elevation-1), inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-card"]::before,
+[class*="info-card"]::before,
+[class*="schedule-strip__card"]::before,
+[class*="roster-line-row"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 45%;
+  background: var(--aero-sheen);
+  pointer-events: none;
+}
+
+[class*="team-card"]:hover {
+  box-shadow: var(--elevation-2), inset 0 1px 0 var(--aero-border-highlight);
+  transform: translateY(-2px);
+}
+
+[class*="team-card__metrics"] span {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, transparent);
+  box-shadow: inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-page"] [class*="team-tabs"] {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-radius: var(--border-radius-card);
+  padding: 4px;
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  box-shadow: var(--elevation-1), inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-page"] [class*="team-tab"] {
+  border-radius: calc(var(--border-radius-card) - 4px);
+  border-bottom: 0;
+  transition: color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+[class*="team-page"] [class*="team-tab"]:hover {
+  background: color-mix(in srgb, var(--color-primary) 7%, transparent);
+}
+
+[class*="team-page"] [class*="team-tab"].active {
+  background: color-mix(in srgb, var(--color-primary) 13%, var(--color-surface));
+  box-shadow: inset 0 1px 0 var(--aero-border-highlight), var(--elevation-1);
+}
+
+[class*="team-page"] [class*="team-hero"] {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 92%, #10243d), color-mix(in srgb, var(--color-primary) 62%, #0f1117));
+  border: 1px solid color-mix(in srgb, white 20%, var(--color-primary));
+  border-radius: 0 0 var(--border-radius-card) var(--border-radius-card);
+  box-shadow: var(--elevation-2), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+[class*="team-page"] [class*="team-hero"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--aero-sheen);
+  pointer-events: none;
+}
+
+[class*="team-page"] [class*="team-hero"] > * {
+  position: relative;
+  z-index: 1;
+}
+
+[class*="team-page"] [class*="info-card"],
+[class*="team-page"] [class*="schedule-strip__card"],
+[class*="team-page"] [class*="roster-line-row"] {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border-radius: var(--border-radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--elevation-1), inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-page"] [class*="info-card"] {
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+[class*="team-page"] [class*="info-card"]:hover,
+[class*="team-page"] [class*="schedule-strip__card--clickable"]:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-2), inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-page"] [class*="schedule-strip__nav"] {
+  border-color: color-mix(in srgb, var(--color-primary) 28%, transparent);
+  background: var(--color-surface);
+  box-shadow: var(--elevation-1), inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-page"] [class*="stat-table"] {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border-radius: var(--border-radius-card);
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: var(--elevation-1), inset 0 1px 0 var(--aero-border-highlight);
+}
+
+[class*="team-page"] [class*="stat-table"] th {
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface));
+}
+
+[class*="team-page"] [class*="ai-history-block"] {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--color-primary) 24%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  box-shadow: var(--elevation-1), inset 0 1px 0 var(--aero-border-highlight);
+}
