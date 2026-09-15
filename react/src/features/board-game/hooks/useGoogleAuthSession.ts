@@ -13,12 +13,7 @@ import {
 import { decodeGoogleProfile } from '@/features/board-game/data/googleCredential';
 
 const AUTH_TOKEN_KEY = 'rinkquest-auth-token';
-/**
- * Display-only cache (avatar picture) for the nav bar badge, keyed
- * separately from the token since it's cosmetic, not part of the session's
- * identity check — `fetchSession`'s `email` is what actually confirms the
- * token is still valid.
- */
+
 const AUTH_PROFILE_KEY = 'rinkquest-auth-profile';
 
 interface CachedProfile {
@@ -26,14 +21,10 @@ interface CachedProfile {
 }
 
 export interface GoogleAuthSession {
-  /** Current session token, or `null` when signed out. Passed to `useBoardGame` for win sync. */
   token: string | null;
   email: string | null;
-  /** Avatar picture URL from the Google credential, if present. Display-only. */
   picture: string | null;
-  /** Exchanges a Google Identity Services credential for a session, then syncs the local streak. */
   signIn: (credential: string) => void;
-  /** Clears the session. Local streak data is untouched. */
   signOut: () => void;
 }
 
@@ -53,8 +44,7 @@ function storeToken(token: string | null): void {
       globalThis.localStorage?.removeItem(AUTH_TOKEN_KEY);
     }
   } catch {
-    // Storage unavailable/quota-blocked; the session still works in-memory
-    // for this tab, it just won't survive a reload.
+    // Storage may be unavailable; keep the session in memory.
   }
 }
 
@@ -77,17 +67,10 @@ function storeCachedProfile(profile: CachedProfile | null): void {
       globalThis.localStorage?.removeItem(AUTH_PROFILE_KEY);
     }
   } catch {
-    // Same as storeToken: cosmetic cache only, fine to lose silently.
+    // Cosmetic cache only; losing it is harmless.
   }
 }
 
-/**
- * Owns the board game's optional Google sign-in session (BG-B31). Anonymous
- * play is never affected: every step here after the initial credential
- * exchange tolerates a network failure by logging and falling back to
- * signed-out, rather than throwing into the render tree (see the Round 8
- * rationale in docs/board-game-backlog.md).
- */
 export function useGoogleAuthSession(): GoogleAuthSession {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
@@ -95,9 +78,6 @@ export function useGoogleAuthSession(): GoogleAuthSession {
     () => readCachedProfile()?.picture ?? null,
   );
 
-  // On mount, if a token is already stored, confirm it's still valid. The
-  // cached picture (set above) renders immediately so the badge doesn't
-  // flash empty while this resolves; email/token stay null until confirmed.
   useEffect(() => {
     const stored = readStoredToken();
     if (!stored) return;
@@ -110,7 +90,6 @@ export function useGoogleAuthSession(): GoogleAuthSession {
           setToken(stored);
           setEmail(session.email);
         } else {
-          // Expired/invalid: fall back to signed-out silently, no error toast.
           storeToken(null);
           storeCachedProfile(null);
           setPicture(null);
@@ -142,10 +121,6 @@ export function useGoogleAuthSession(): GoogleAuthSession {
           setPicture(profile.picture);
         }
 
-        // Reconcile the local and server streaks. Any failure here is
-        // logged and swallowed — the user is still signed in, local play
-        // keeps working, and the next sync attempt (e.g. the next win)
-        // gets another chance.
         try {
           const remote = await fetchRemoteStreak(newToken);
           const merged = mergeStreakData(loadStreak(), remote);
