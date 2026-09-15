@@ -74,7 +74,18 @@ function createStatLeaderService({ nhlApi, cache, runServiceTask }) {
       () =>
         axiosNhl
           .get(`/${endpoint}/${seasonId}/2?categories=${category}&limit=10`)
-          .then((r) => r.data),
+          .then((r) => r.data)
+          .catch((error) => {
+            // The NHL API 404s a category (rather than returning an empty
+            // list) when nobody currently qualifies for it yet — routine
+            // early in a season, e.g. no goalie has a shutout after a
+            // handful of games. Treat that as "no leaders yet", not a
+            // failure; any other status/network error still propagates.
+            if (error?.status === 404 || error?.response?.status === 404) {
+              return {};
+            }
+            throw error;
+          }),
     );
     runServiceTask(`${playerType} leaders ${category} ${seasonId}`, () =>
       persistStatLeaders({
