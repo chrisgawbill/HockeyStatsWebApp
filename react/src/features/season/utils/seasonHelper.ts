@@ -22,6 +22,23 @@ function isValidSeasonId(id: string): boolean {
 }
 
 /**
+ * Returns the calendar range `[start, end]` a season id spans: local midnight
+ * September 1 of the start year through local midnight June 30 of the end
+ * year. This is the season's real calendar boundary — independent of which
+ * dates happen to have games loaded — so navigation/selection logic can be
+ * bounded by the season itself rather than by the loaded schedule data.
+ * Callers are expected to pass an already-valid `seasonId` (e.g. from
+ * `useSeason()`); this does not re-validate the shape.
+ */
+function getSeasonDateRange(seasonId: string): [Date, Date] {
+  const startYear = Number(seasonId.slice(0, 4));
+  const endYear = Number(seasonId.slice(4));
+  const start = new Date(startYear, 8, 1);
+  const end = new Date(endYear, 5, 30);
+  return [start, end];
+}
+
+/**
  * Returns the most recent `count` season ids, current season first.
  */
 function getRecentSeasonIds(count: number = 10): string[] {
@@ -44,6 +61,7 @@ function formatSeasonLabel(id: string): string {
 export {
   getCurrentSeasonId,
   isValidSeasonId,
+  getSeasonDateRange,
   getRecentSeasonIds,
   formatSeasonLabel,
 };

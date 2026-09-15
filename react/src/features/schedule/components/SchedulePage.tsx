@@ -14,7 +14,10 @@ import ErrorState from '@/components/ErrorState';
 import SeasonSelector from '@/components/SeasonSelector';
 import SlidingToggle from '@/components/SlidingToggle';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
+import {
+  formatSeasonLabel,
+  getSeasonDateRange,
+} from '@/features/season/utils/seasonHelper';
 import {
   formatDateParam,
   groupGamesByDate,
@@ -160,18 +163,14 @@ function SchedulePage() {
     }
   }, [selectedDateParam]);
 
-  const sortedGames = useMemo(
-    () =>
-      [...(listOfGamesData ?? [])].sort(
-        (a: ScheduledGame, b: ScheduledGame) =>
-          a.date.getTime() - b.date.getTime(),
-      ),
-    [listOfGamesData],
+  const seasonDateRange = useMemo(
+    () => getSeasonDateRange(season),
+    [season],
   );
 
   const effectiveDate = useMemo(
-    () => resolveEffectiveDate(selectedDate, sortedGames),
-    [selectedDate, sortedGames],
+    () => resolveEffectiveDate(selectedDate, seasonDateRange),
+    [selectedDate, seasonDateRange],
   );
 
   /**
@@ -413,7 +412,7 @@ function SchedulePage() {
               />
             </div>
             <DatePicker
-              sortedGames={sortedGames}
+              seasonRange={seasonDateRange}
               selectedDate={effectiveDate}
               view={viewParam}
               onDateChange={handleDateChange}

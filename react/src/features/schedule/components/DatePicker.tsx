@@ -4,7 +4,8 @@ import styles from '@/features/schedule/components/SchedulePage.module.css';
 type ScheduleView = 'day' | 'week' | 'month';
 
 type DatePickerProps = {
-  sortedGames: { date: Date }[];
+  /** The selected season's calendar boundaries, from `getSeasonDateRange`. */
+  seasonRange: [Date, Date];
   selectedDate: Date;
   view: ScheduleView;
   onDateChange: (date: Date) => void;
@@ -64,6 +65,37 @@ function stepAnchor(date: Date, view: ScheduleView, direction: 1 | -1): Date {
 }
 
 /**
+ * Computes prev/next disabled state and the clamped stepped date for a pager
+ * bounded by `seasonRange`. Extracted as a pure function (independent of
+ * React) so the season-boundary navigation rules — e.g. "September 2026,
+ * being the season's first month, cannot page further back" — can be unit
+ * tested directly.
+ */
+function getNavState(
+  selectedDate: Date,
+  view: ScheduleView,
+  seasonRange: [Date, Date],
+): {
+  isPrevDisabled: boolean;
+  isNextDisabled: boolean;
+  stepTo: (direction: 1 | -1) => Date;
+} {
+  const [lowerBound, upperBound] = seasonRange;
+  const [periodStart, periodEnd] = periodBounds(selectedDate, view);
+
+  return {
+    isPrevDisabled: toDateKey(periodStart) <= toDateKey(lowerBound),
+    isNextDisabled: toDateKey(periodEnd) >= toDateKey(upperBound),
+    stepTo: (direction: 1 | -1) => {
+      let next = stepAnchor(selectedDate, view, direction);
+      if (toDateKey(next) < toDateKey(lowerBound)) next = lowerBound;
+      if (toDateKey(next) > toDateKey(upperBound)) next = upperBound;
+      return next;
+    },
+  };
+}
+
+/**
  * Formats the visible schedule period as a day, week range, or month label for
  * the pager header.
  */
@@ -88,31 +120,29 @@ function formatPeriodLabel(date: Date, view: ScheduleView): string {
 
 /**
  * Prev/next pager for the schedule, stepping by the active view's unit (day, week,
- * or month). The arrows are bounded by the loaded season — the first and last game
- * dates in `sortedGames` — so the user can't page past where games exist.
+ * or month). The arrows are bounded by the selected season's actual calendar
+ * range (`seasonRange`, Sept 1 – June 30) rather than by which dates happen to
+ * have games loaded, so a month with no scheduled games yet (e.g. early
+ * September before the first preseason game) is still reachable and pageable.
  */
 const DatePicker = ({
-  sortedGames,
+  seasonRange,
   selectedDate,
   view,
   onDateChange,
 }: DatePickerProps) => {
-  const lowerBound: Date = sortedGames[0].date;
-  const upperBound: Date = sortedGames[sortedGames.length - 1].date;
-
-  const [periodStart, periodEnd] = periodBounds(selectedDate, view);
-  const isPrevButtonDisabled = toDateKey(periodStart) <= toDateKey(lowerBound);
-  const isNextButtonDisabled = toDateKey(periodEnd) >= toDateKey(upperBound);
+  const {
+    isPrevDisabled: isPrevButtonDisabled,
+    isNextDisabled: isNextButtonDisabled,
+    stepTo,
+  } = getNavState(selectedDate, view, seasonRange);
 
   /**
-   * Steps the current anchor by one view unit, clamps it inside the loaded
-   * season bounds, and emits the resulting date to the parent page.
+   * Steps the current anchor by one view unit, clamps it inside the season's
+   * calendar bounds, and emits the resulting date to the parent page.
    */
   const goTo = (direction: 1 | -1) => {
-    let next = stepAnchor(selectedDate, view, direction);
-    if (toDateKey(next) < toDateKey(lowerBound)) next = lowerBound;
-    if (toDateKey(next) > toDateKey(upperBound)) next = upperBound;
-    onDateChange(next);
+    onDateChange(stepTo(direction));
   };
 
   return (
@@ -166,3 +196,5 @@ const DatePicker = ({
   );
 };
 export default DatePicker;
+export { getNavState };
+export type { ScheduleView };

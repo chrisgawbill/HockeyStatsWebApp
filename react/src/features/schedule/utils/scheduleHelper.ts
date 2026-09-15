@@ -86,32 +86,36 @@ function ConvertContractsToGames(games: any[]): ScheduledGame[] {
 }
 
 /**
- * Resolves the date SchedulePage should anchor its day/week/month view on:
- * an explicit `selectedDate` wins whenever it falls within the loaded season's
- * game-date range, otherwise `today` is used if it's in range, and failing that
- * the season's last game date. With no games loaded at all, `selectedDate` wins
- * if present, else `today`. `today` is injectable (like `getCurrentSeasonId`
- * injects `now`) so callers/tests aren't tied to the real clock.
+ * Resolves the date SchedulePage should anchor its day/week/month view on,
+ * bounded by the selected season's actual calendar range (Sept 1 – June 30,
+ * from `getSeasonDateRange`) rather than by which dates happen to have games
+ * loaded. Precedence:
+ *   1. an explicit `selectedDate` wins whenever it falls inside the season's
+ *      date range,
+ *   2. otherwise `today` is used when it falls inside the season's range,
+ *   3. otherwise the season's own boundary closest to `today` (its start if
+ *      `today` is before the season, its end if `today` is after it).
+ * `today` is injectable (like `getCurrentSeasonId` injects `now`) so
+ * callers/tests aren't tied to the real clock.
  */
 function resolveEffectiveDate(
   selectedDate: Date | null,
-  sortedGames: ScheduledGame[],
+  seasonRange: [Date, Date],
   today: Date = new Date(),
 ): Date {
-  if (sortedGames.length === 0) {
-    return selectedDate ?? new Date();
-  }
-  const first = sortedGames[0].date;
-  const last = sortedGames[sortedGames.length - 1].date;
-  if (selectedDate && selectedDate >= first && selectedDate <= last) {
+  const [start, end] = seasonRange;
+
+  if (selectedDate && selectedDate >= start && selectedDate <= end) {
     return selectedDate;
   }
+
   const normalizedToday = new Date(today);
   normalizedToday.setHours(0, 0, 0, 0);
-  if (normalizedToday >= first && normalizedToday <= last) {
+  if (normalizedToday >= start && normalizedToday <= end) {
     return normalizedToday;
   }
-  return last;
+
+  return normalizedToday < start ? start : end;
 }
 
 export {

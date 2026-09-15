@@ -264,16 +264,31 @@
   }
 
   /* Month at 7 tiny columns: drop text, keep logos + score so the day still
-     reads at a glance; tap the day to open the full list in day view. */
+     reads at a glance; tap the day to open the full list in day view.
+     A max-height cap plus internal scroll keeps one busy day from stretching
+     the whole week's row — overflow games stay reachable via "+N more". */
   .calendar--month .calendar__cell {
     min-height: 4.5rem;
+    max-height: 8rem;
     padding: 3px;
+    overflow: hidden;
   }
 
+  .calendar--month .calendar__games {
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  /* One compact row per game instead of two stacked logo rows: away logo +
+     score, an inline separator, then home score + logo, all in a single
+     flex row. */
   .calendar--month .game-chip {
-    padding: 3px 4px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 3px;
     border-left-width: 2px;
-    gap: 1px;
+    gap: var(--space-xs);
   }
 
   .calendar--month .game-chip__abbrev,
@@ -282,13 +297,25 @@
   }
 
   .calendar--month .game-chip__team {
-    justify-content: space-between;
-    gap: 3px;
+    flex: 0 1 auto;
+    gap: 2px;
+    font-size: 0.7rem;
+  }
+
+  .calendar--month .game-chip__team + .game-chip__team::before {
+    content: '–';
+    flex: 0 0 auto;
+    color: var(--color-text-secondary);
+    font-weight: 600;
   }
 
   .calendar--month .game-chip__team img {
     height: 1rem;
     width: 1rem;
+  }
+
+  .calendar--month .game-chip__score {
+    font-size: 0.7rem;
   }
 }
 
