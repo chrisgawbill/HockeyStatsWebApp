@@ -535,7 +535,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 **Architecture note:** this is the first feature that uses `localStorage`. Persistence lives in a dedicated module (`data/dailyStreak.ts`) outside `engine/`. Engine code reads `bonusEnergy` from `GameState` but never touches the store. The hook bridges the two: it reads the streak on mount, passes `bonusEnergy` into state at game creation, and writes a win on game over. This keeps the "no `localStorage` in engine" rule intact.
 
 ### BG-A17 Streak persistence module (Agent A)
-- [ ] **Read:** design doc §9.1, §9.2. `data/balance.ts`, `types/game.ts`, `engine/duel.ts` (lines 89-95 and 305-311 — where `energy: ENERGY` is set).
+- [x] **Read:** design doc §9.1, §9.2. `data/balance.ts`, `types/game.ts`, `engine/duel.ts` (lines 89-95 and 305-311 — where `energy: ENERGY` is set).
 - **`data/dailyStreak.ts`:** pure read/write module for the streak store. **Not in `engine/`** — this touches `localStorage`.
   - `StreakData { wins: Record<string, true>; lastWinDate: string | null }`
   - `loadStreak(): StreakData` — reads from `localStorage` key `rinkquest-streak`, returns a default if missing or malformed. Wrap every access in try/catch (private browsing, storage disabled).
@@ -548,7 +548,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no GameState changes, no reducer changes, no UI.
 
 ### BG-A18 bonusEnergy on GameState and duel energy (Agent A, after BG-A17)
-- [ ] **Read:** design doc §9.2. `types/game.ts` (`GameState`), `engine/gameReducer.ts` (`createInitialState`), `engine/duel.ts` (lines 89-95 and 305-311).
+- [x] **Read:** design doc §9.2. `types/game.ts` (`GameState`), `engine/gameReducer.ts` (`createInitialState`), `engine/duel.ts` (lines 89-95 and 305-311).
 - **Contract:**
   - `GameState` gains `bonusEnergy: number` (0 or 1).
   - `createInitialState(seed, length)` sets `bonusEnergy: 0` (the hook overrides it).
@@ -558,7 +558,7 @@ BG-A15b landed in two cycles. The first produced an asymmetric draw that Chris r
 - **Out of scope:** no UI, no localStorage, no streak logic. The hook (BG-B27) bridges them.
 
 ### BG-B27 Wire streak into the game hook (Agent B, after BG-A17 + BG-A18)
-- [ ] **Read:** `hooks/useBoardGame.ts`, `data/dailyStreak.ts` (from BG-A17), design doc §9.2.
+- [x] **Read:** `hooks/useBoardGame.ts`, `data/dailyStreak.ts` (from BG-A17), design doc §9.2.
 - **`hooks/useBoardGame.ts`:**
   - On mount, call `loadStreak()` and `hasStreakBonus()` to determine `bonusEnergy` (0 or 1). Store the streak data in a `useRef`.
   - Pass `bonusEnergy` into the initial `createInitialState` call and into every `NEW_GAME` dispatch.

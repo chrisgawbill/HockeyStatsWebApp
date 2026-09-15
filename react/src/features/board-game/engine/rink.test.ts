@@ -29,6 +29,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
   return {
     phase: 'move',
     length: 'long',
+    bonusEnergy: 0,
     activeTeam: 'user',
     turn: 1,
     mp: 3,
