@@ -20,6 +20,7 @@ describe('createInitialState', () => {
   it('sets formations, a loose center puck, and the opening faceoff phase', () => {
     const state = createInitialState(1, 'long');
     expect(state.phase).toBe('faceoff');
+    expect(state.bonusEnergy).toBe(0);
     expect(state.activeTeam).toBe('user');
     expect(state.turn).toBe(1);
     expect(state.puck).toEqual({ kind: 'loose', pos: { col: 7, row: 3 } });
@@ -28,6 +29,10 @@ describe('createInitialState', () => {
       row: 3,
     });
     expect(state.skaters).toHaveLength(12);
+  });
+
+  it('accepts a daily-streak bonus at game creation', () => {
+    expect(createInitialState(1, 'long', 1).bonusEnergy).toBe(1);
   });
 });
 
@@ -435,9 +440,11 @@ describe('illegal actions and gameOver', () => {
       type: 'NEW_GAME',
       seed: 5,
       length: 'short',
+      bonusEnergy: 1,
     });
     expect(fresh.phase).toBe('faceoff');
     expect(fresh.length).toBe('short');
+    expect(fresh.bonusEnergy).toBe(1);
   });
 });
 

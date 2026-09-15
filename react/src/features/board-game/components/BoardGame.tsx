@@ -350,6 +350,7 @@ export default function BoardGame({ length, onChangeLength }: BoardGameProps) {
             onEndRound={() => dispatch({ type: 'END_DUEL_ROUND' })}
             blockReason={(i) => cardBlockReason(state, i)}
             canUnqueue={(i) => canUnqueueCard(state, i)}
+            bonusEnergy={state.bonusEnergy}
           />
         )}
 

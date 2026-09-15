@@ -60,6 +60,7 @@ function formationSkaters(): Skater[] {
 export function createInitialState(
   seed: number,
   length: GameLength,
+  bonusEnergy = 0,
 ): GameState {
   const [deck, seed1] = createDeck(STARTER_DECK, seed);
   const [cpuDeck, rngSeed] = createDeck(STARTER_DECK, seed1);
@@ -67,6 +68,7 @@ export function createInitialState(
   return {
     phase: 'faceoff',
     length,
+    bonusEnergy: bonusEnergy > 0 ? 1 : 0,
     activeTeam: 'user',
     turn: 1,
     mp: 0,
@@ -101,7 +103,7 @@ export function otherTeam(team: TeamId): TeamId {
 /** The single state-change entry point. Returns the same reference for any illegal action. */
 export function gameReducer(state: GameState, action: Action): GameState {
   if (action.type === 'NEW_GAME')
-    return createInitialState(action.seed, action.length);
+    return createInitialState(action.seed, action.length, action.bonusEnergy);
   if (state.phase === 'gameOver') return state;
 
   switch (action.type) {

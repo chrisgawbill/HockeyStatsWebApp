@@ -1,4 +1,5 @@
 import { CARDS } from '@/features/board-game/data/cards';
+import { ENERGY } from '@/features/board-game/data/balance';
 import {
   cardEffects,
   isCardAllowedFor,
@@ -32,8 +33,9 @@ function cardCategory(card: CardDef): 'block' | 'damage' | 'other' {
  * damage only when the other side's last-round damage could KO `side`
  * again; ties break by hand order.
  *
- * Spends against `duel.energy`, not a fresh `ENERGY` budget — for the user,
- * some energy may already be committed to queued cards.
+ * The user spends against `duel.energy`, which may include a daily-streak
+ * bonus or already-committed queued cards. The CPU always plans against the
+ * base `ENERGY` budget; the streak bonus is user-only.
  */
 export function planCards(state: GameState, side: 'user' | 'cpu'): string[] {
   const duel = state.duel;
@@ -72,7 +74,7 @@ export function planCards(state: GameState, side: 'user' | 'cpu'): string[] {
   });
 
   const plan: string[] = [];
-  let energyLeft = duel.energy;
+  let energyLeft = side === 'cpu' ? ENERGY : duel.energy;
   for (const candidate of candidates) {
     if (candidate.cost > energyLeft) continue;
     plan.push(candidate.cardId);

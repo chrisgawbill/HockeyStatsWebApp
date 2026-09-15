@@ -26,6 +26,13 @@
   color: var(--color-text-secondary);
 }
 
+.streakSummary {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: var(--text-xs);
+  color: var(--color-energy-bonus);
+}
+
 .whistle {
   margin: 0;
   padding: var(--space-xs) var(--space-md);

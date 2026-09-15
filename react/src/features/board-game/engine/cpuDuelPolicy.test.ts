@@ -4,6 +4,7 @@ import {
   planCpuCards,
 } from '@/features/board-game/engine/cpuDuelPolicy';
 import { CARDS } from '@/features/board-game/data/cards';
+import { ENERGY } from '@/features/board-game/data/balance';
 import type {
   DuelState,
   GameState,
@@ -51,6 +52,7 @@ function makeState(
   return {
     phase: 'duel',
     length: 'long',
+    bonusEnergy: 0,
     activeTeam: 'user',
     turn: 1,
     mp: 0,
@@ -140,6 +142,20 @@ describe('planCpuCards', () => {
     const state = makeState(['body_check'], duel, 'LD');
     const plan = planCpuCards(state);
     expect(plan).toEqual(['body_check']);
+  });
+
+  it('plans CPU cards with the base energy budget even when the user has bonus energy', () => {
+    const duel = makeDuel({ energy: ENERGY + 1 });
+    const state = {
+      ...makeState(['toe_drag', 'toe_drag'], duel),
+      bonusEnergy: 1,
+    };
+
+    const plan = planCpuCards(state);
+    const totalCost = plan.reduce((sum, id) => sum + CARDS[id].cost, 0);
+
+    expect(plan).toEqual(['toe_drag']);
+    expect(totalCost).toBeLessThanOrEqual(ENERGY);
   });
 });
 

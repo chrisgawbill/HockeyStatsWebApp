@@ -282,6 +282,8 @@ export interface DuelOutcome {
 export interface GameState {
   phase: Phase;
   length: GameLength;
+  /** Daily-streak energy bonus for the user only. Set at game creation; engine code reads it but does not mutate it. */
+  bonusEnergy: number;
   activeTeam: TeamId;
   turn: number;
   mp: number;
@@ -365,4 +367,9 @@ export type Action =
   /** Faceoff duel only (BG-A15b): resolves without a real reaction press, rolling a band from the picked card's anticipation - `prefers-reduced-motion` and headless play. */
   | { type: 'AUTO_RESOLVE_FACEOFF' }
   | { type: 'DISMISS_DUEL_RESULT' }
-  | { type: 'NEW_GAME'; seed: number; length: GameLength };
+  | {
+      type: 'NEW_GAME';
+      seed: number;
+      length: GameLength;
+      bonusEnergy?: number;
+    };

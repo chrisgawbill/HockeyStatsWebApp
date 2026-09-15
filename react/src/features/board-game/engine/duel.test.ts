@@ -45,6 +45,7 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
   return {
     phase: 'move',
     length: 'long',
+    bonusEnergy: 0,
     activeTeam: 'user',
     turn: 1,
     mp: 3,
@@ -144,6 +145,26 @@ describe('createDuel', () => {
     expect(totalCost).toBeLessThanOrEqual(ENERGY);
     expect(plan.every((id) => duel.cpuDeck.hand.includes(id))).toBe(true);
   });
+
+  it('adds daily-streak bonus energy to the user duel budget only', () => {
+    const state = makeState({
+      bonusEnergy: 1,
+      cpuDeck: {
+        drawPile: ['toe_drag', 'toe_drag'],
+        hand: [],
+        discardPile: [],
+        exhaustPile: [],
+      },
+    });
+    const duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
+    const cpuPlanCost = duel.duel!.cpuPlan.reduce(
+      (sum, id) => sum + CARDS[id].cost,
+      0,
+    );
+
+    expect(duel.duel!.energy).toBe(ENERGY + 1);
+    expect(cpuPlanCost).toBe(ENERGY - 1);
+  });
 });
 
 describe('filtered duel draw (BG-A13)', () => {
@@ -217,6 +238,26 @@ describe('filtered duel draw (BG-A13)', () => {
       expect(isAllowedIn(id, 'check')).toBe(true);
     for (const id of duel.cpuDeck.hand)
       expect(isAllowedIn(id, 'check')).toBe(true);
+  });
+
+  it('resets the next user duel round to base energy plus the daily-streak bonus', () => {
+    let duel = createDuel(
+      makeState({ bonusEnergy: 1 }),
+      'check',
+      'user-LD',
+      'cpu-C',
+    );
+    duel = {
+      ...duel,
+      deck: { ...duel.deck, hand: [] },
+      cpuDeck: { ...duel.cpuDeck, hand: [] },
+      duel: { ...duel.duel!, cpuPlan: [] },
+    };
+
+    const next = endDuelRound(duel);
+
+    expect(next.duel!.round).toBe(2);
+    expect(next.duel!.energy).toBe(ENERGY + 1);
   });
 });
 

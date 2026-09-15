@@ -125,6 +125,33 @@
   background-color: var(--color-primary);
 }
 
+.energyGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Bonus orb (BG-B28, streak energy): distinct fill colour from the regular
+   orbs, plus the .bonusBadge text below so the meaning isn't colour-only. */
+.orbBonus {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-energy-bonus);
+}
+
+.orbBonusFull {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--color-energy-bonus);
+}
+
+.bonusBadge {
+  font-size: var(--text-xs);
+  color: var(--color-energy-bonus);
+}
+
 .plan {
   display: flex;
   flex-direction: column;

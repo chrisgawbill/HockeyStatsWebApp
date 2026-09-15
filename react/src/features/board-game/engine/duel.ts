@@ -92,7 +92,7 @@ export function createDuel(
     defender: makeDuelist(defenderSkater),
     userSide,
     round: 1,
-    energy: ENERGY,
+    energy: ENERGY + state.bonusEnergy,
     cpuPlan: [],
     userQueue: [],
     queueDraws: [],
@@ -306,7 +306,7 @@ export function endDuelRound(state: GameState): GameState {
   const nextDuelBase: DuelState = {
     ...roundDuel,
     round: nextRound,
-    energy: ENERGY,
+    energy: ENERGY + state.bonusEnergy,
   };
   return drawHandsAndPlan(roundState, nextDuelBase);
 }
