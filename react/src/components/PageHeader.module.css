@@ -200,8 +200,14 @@
     left: 0;
     right: 0;
     margin-bottom: 0;
-    padding: var(--space-xs) 2px;
+    /* Coherent spacing scheme: one horizontal/vertical pair of tokens on the
+       bar itself, a matching gap between the row's children (back column,
+       search-hidden slot's siblings, the 5 nav items, corner slot), and zero
+       nested padding inside each child below - see .nav-back-col,
+       .nav-bar-item and .nav-corner. */
+    padding: var(--space-xs) var(--space-sm);
     padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
+    gap: var(--space-xs);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.25);
     border-bottom: none;
@@ -213,7 +219,7 @@
 
   .nav-back-col {
     display: flex;
-    padding: 2px 2px;
+    padding: 0;
     min-width: 32px;
   }
 
@@ -247,7 +253,7 @@
   }
 
   .nav-bar-item {
-    padding: 2px 2px;
+    padding: 0;
   }
 
   .nav-btn__label {
@@ -259,9 +265,37 @@
   }
 
   .nav-btn {
-    padding: 8px 4px !important;
+    /* min-height (not padding math) guarantees the >=44px touch target
+       regardless of the 20px icon's own size; flex centers the icon inside
+       it so the button doesn't need symmetric padding to look centered. */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: var(--space-xs) !important;
     font-size: 0.78rem;
     white-space: nowrap;
+  }
+
+  .nav-corner {
+    padding: 0;
+  }
+}
+
+/* At the very narrowest phone widths, tighten the bar's own padding and the
+   gap between items (never the 44px touch target) so 5 icons plus an
+   optional back button and corner slot still fit on one row without
+   wrapping or clipping. */
+@media (max-width: 340px) {
+  .nav-bar {
+    padding-left: var(--space-xs);
+    padding-right: var(--space-xs);
+    gap: 2px;
+  }
+
+  .nav-btn {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
   }
 }
 
