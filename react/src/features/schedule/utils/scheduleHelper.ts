@@ -35,6 +35,7 @@ function ConvertContractToGame(g: any): ScheduledGame {
     g.ticketLink,
     g.gameCenter,
     g.isPlayoff,
+    g.isPreseason,
     g.playoffRound,
     g.periodType,
     g.seriesWins,

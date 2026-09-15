@@ -62,6 +62,7 @@ test('mapGame handles missing venue scores and guarded defaults', () => {
     ticketLink: 'https://tickets.example',
     gameCenter: '/gamecenter/2023020001',
     isPlayoff: false,
+    isPreseason: false,
     playoffRound: null,
     periodType: null,
     seriesWins: null,
@@ -116,6 +117,23 @@ test('mapGame maps playoff fields', () => {
   assert.equal(result.seriesWins, '3-2');
   assert.equal(result.topSeedTeamAbbrev, 'COL');
   assert.equal(result.bottomSeedTeamAbbrev, 'DAL');
+});
+
+test('mapGame marks preseason games via gameType 1', () => {
+  const result = mapGame(
+    {
+      id: 2024010001,
+      gameState: 'FUT',
+      startTimeUTC: '2024-09-22T19:00:00Z',
+      gameType: 1,
+      homeTeam: { abbrev: 'COL' },
+      awayTeam: { abbrev: 'DAL' },
+    },
+    { date: '2024-09-22', dayAbbrev: 'Sun' },
+  );
+
+  assert.equal(result.isPreseason, true);
+  assert.equal(result.isPlayoff, false);
 });
 
 test('resolveTeamId uses NHL fallback chain', () => {

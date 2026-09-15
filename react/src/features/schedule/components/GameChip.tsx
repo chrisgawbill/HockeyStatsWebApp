@@ -57,6 +57,7 @@ export default function GameChip({
       className={cx(
         styles['game-chip'],
         completed && styles['game-chip--clickable'],
+        game.isPreseason && styles['game-chip--preseason'],
         live && styles['game-chip--live'],
       )}
       onClick={() => completed && onSelect(game)}

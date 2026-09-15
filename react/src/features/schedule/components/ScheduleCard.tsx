@@ -65,6 +65,9 @@ function ScheduleCard({
           <h3>{game.homeTeam}</h3>
         </Col>
         <Col className={styles['vs']}>
+          {game.isPreseason && (
+            <div className={styles['game-preseason-badge']}>Preseason</div>
+          )}
           {game.isPlayoff && (
             <div className={styles['game-playoff-badge']}>
               <svg

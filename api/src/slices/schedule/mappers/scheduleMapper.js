@@ -37,6 +37,7 @@
  * @property {string}      ticketLink    - only for future games, else ""
  * @property {string}      gameCenter    - gameCenterLink
  * @property {boolean}     isPlayoff     - gameType === 3
+ * @property {boolean}     isPreseason   - gameType === 1
  * @property {number|null} playoffRound
  * @property {string|null} periodType    - periodDescriptor.periodType
  * @property {string|null} seriesWins    - "top-bottom" wins, e.g. "3-2"
@@ -100,6 +101,7 @@ function mapGame(rawGame, ctx) {
   const ticketLink = gameState === 'FUT' ? (rawGame.ticketsLink ?? '') : '';
   const gameCenter = rawGame.gameCenterLink ?? '';
   const isPlayoff = rawGame.gameType === 3;
+  const isPreseason = rawGame.gameType === 1;
   const periodType = rawGame.periodDescriptor?.periodType ?? null;
 
   const series = rawGame.seriesStatus;
@@ -133,6 +135,7 @@ function mapGame(rawGame, ctx) {
     ticketLink,
     gameCenter,
     isPlayoff,
+    isPreseason,
     playoffRound,
     periodType,
     seriesWins,

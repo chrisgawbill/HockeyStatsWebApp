@@ -143,6 +143,7 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
         '',
         game.gameCenter,
         game.isPlayoff,
+        game.isPreseason,
         game.playoffRound,
         game.periodType,
         game.seriesWins,

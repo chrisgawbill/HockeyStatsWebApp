@@ -16,6 +16,7 @@ export interface ScheduledGameShape {
   ticketLink: string;
   gameCenter: string;
   isPlayoff: boolean;
+  isPreseason: boolean;
   playoffRound: number | null;
   periodType: string | null;
   seriesWins: string | null;
@@ -39,6 +40,7 @@ export class ScheduledGame implements ScheduledGameShape {
   ticketLink: string;
   gameCenter: string;
   isPlayoff: boolean;
+  isPreseason: boolean;
   playoffRound: number | null;
   periodType: string | null;
   seriesWins: string | null;
@@ -62,6 +64,7 @@ export class ScheduledGame implements ScheduledGameShape {
     ticketLink: string,
     gameCenter: string,
     isPlayoff: boolean = false,
+    isPreseason: boolean = false,
     playoffRound: number | null = null,
     periodType: string | null = null,
     seriesWins: string | null = null,
@@ -84,6 +87,7 @@ export class ScheduledGame implements ScheduledGameShape {
     this.ticketLink = ticketLink;
     this.gameCenter = gameCenter;
     this.isPlayoff = isPlayoff;
+    this.isPreseason = isPreseason;
     this.playoffRound = playoffRound;
     this.periodType = periodType;
     this.seriesWins = seriesWins;
