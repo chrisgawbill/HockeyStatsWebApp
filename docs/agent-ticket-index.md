@@ -743,6 +743,83 @@ Move only domain-free motion vocabulary and generic interaction behavior. Do not
 
 ---
 
+### IDEA LIB2 — Library API consolidation & fast integration
+**Source:** follow-up to LIB1  
+**Depends on:** LIB1 complete and verified with HockeyStats as a real consumer  
+**Route:** GPT-5.4 Mini in audit → targeted consolidation → verification phases. Use GPT-5.6 Sol only for evidence-backed package/runtime architecture problems.  
+**Goal:** After extraction proves the boundary, simplify the library’s public API, remove overlapping shared logic, and make consuming the Aero/MD3 experience language fast, predictable, and difficult to misuse without introducing a framework-sized abstraction.
+
+**Principle**
+LIB1 proves portability. LIB2 optimizes the boundary based on real usage. Do not design an ideal API from imagination; use HockeyStats plus the non-hockey smoke consumer as evidence for what should be consolidated.
+
+### Phase A — consumer/API audit
+- Inspect actual imports/usages in HockeyStats and the non-hockey smoke consumer.
+- Inventory public exports, configuration steps, duplicated wrappers/helpers, repeated token mappings, repeated preference/motion setup, and consumer boilerplate.
+- Identify overlapping logic that now exists on both sides of the package boundary.
+- Classify findings: `DUPLICATE`, `NECESSARY CONSUMER CONFIG`, `LIBRARY RESPONSIBILITY`, or `NOT WORTH ABSTRACTING`.
+- Identify measurable integration/runtime friction before optimizing it.
+- Propose a small consolidation plan; do not rewrite the API yet if the change would be breaking or architectural without human approval.
+
+### Phase B — API cleanup
+- Reduce the public surface to a small set of intentional entry points.
+- Prefer one obvious import/setup path for the common case.
+- Consolidate duplicate domain-free token/theme/motion/preference logic into the library.
+- Keep HockeyStats-specific semantics/configuration in HockeyStats.
+- Remove deprecated/duplicate exports only after consumers migrate.
+- Keep naming consistent and discoverable.
+- Avoid barrel/export structures that materially hurt tree-shaking or create circular dependencies.
+
+### Phase C — fast connection
+- Minimize setup needed for a new React consumer while keeping configuration explicit.
+- Prefer static CSS/tokens and lightweight initialization over runtime indirection.
+- Avoid repeated theme/preference calculations across components.
+- Ensure shared CSS/assets are loaded once through the intended entry point.
+- Measure package/build/runtime effects where practical; optimize only observed overhead.
+- Do not add caching, memoization, providers, context layers, code generation, or build plugins without a demonstrated need.
+
+### Phase D — deduplication
+- Remove overlapping domain-free helpers/styles from HockeyStats after the library replacement is verified.
+- Detect accidental duplicate CSS/token definitions and competing sources of truth.
+- Preserve app-specific accessibility behavior, semantic markup, and feature logic where those properly belong to the consumer.
+- Do not force feature-specific logic into the library merely to eliminate duplication.
+
+### Phase E — verification
+Use a fresh verifier when the API/boundary changes are substantial:
+- library + HockeyStats build/typecheck/tests
+- confirm intended dependency/import path
+- verify no duplicate shared implementation remains for migrated primitives
+- smoke-test a fresh/minimal non-hockey consumer using the documented common path
+- browser-check representative HockeyStats/RinkQuest surfaces, light/dark, focus, reduced motion, and responsive behavior
+- compare any claimed performance/build improvement with evidence
+
+**Developer-experience target**
+A developer starting a new React project should be able to understand the normal integration path from a short README section and reach the design language with minimal imports/configuration. Do not optimize for “one magic line” if it hides important theme/accessibility responsibilities.
+
+**Constraints**
+- No redesign of Aero/MD3.
+- No HockeyStats/RinkQuest domain logic in the library.
+- No speculative abstraction or generic plugin system.
+- No new runtime dependency unless human-approved and justified by measured value.
+- No public breaking API change without human approval.
+- Do not optimize bundle/runtime performance without evidence.
+- Do not collapse distinct accessibility responsibilities merely to reduce code.
+- Prefer deleting duplication over introducing a new abstraction when deletion is sufficient.
+
+**Acceptance**
+- Common consumer setup is shorter/clearer than immediately after LIB1.
+- Public exports have one clear responsibility and unnecessary overlap is removed.
+- Migrated shared primitives have one authoritative implementation.
+- HockeyStats-specific configuration remains visibly separate from portable library logic.
+- No circular dependency or duplicate shared-style loading is introduced.
+- A minimal non-hockey React consumer can integrate from the documented path without repository knowledge.
+- Any claimed speed/bundle/runtime improvement is backed by before/after evidence.
+- HockeyStats/RinkQuest visuals, themes, motion preferences, focus/accessibility behavior, and relevant tests remain correct.
+
+**Verify:** import/API inventory → duplicate-source check → library/HockeyStats checks → minimal consumer integration → representative browser QA → evidence for any performance claim.  
+**Out of scope:** new design features, component-suite expansion, registry/release automation, monorepo conversion, speculative caching, generalized plugin architecture.
+
+---
+
 ## Later candidates
 
 | Status | Ticket | Source | Note |
