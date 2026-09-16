@@ -108,14 +108,14 @@ const GameDetailPage = () => {
 
   if (loading)
     return (
-      <div className={styles['game-detail-page']}>
+      <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
         <PageHeader />
         <LoadingState label="Loading game" />
       </div>
     );
   if (error || !boxscore)
     return (
-      <div className={styles['game-detail-page']}>
+      <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
         <PageHeader />
         <div className={shared.errorState}>Game data unavailable.</div>
       </div>
@@ -124,11 +124,13 @@ const GameDetailPage = () => {
   const isPreview = status === 'preview';
 
   return (
-    <div className={styles['game-detail-page']}>
+    <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
       <PageHeader />
       <HeroScoreboard boxscore={boxscore} status={status} theme={theme} />
       {!isPreview && (
-        <div className={styles['game-detail-page__content']}>
+        <div
+          className={`${styles['game-detail-page__content']} ${shared.pageContent}`}
+        >
           {periodScores.length > 0 && (
             <PeriodScoresTable
               periodScores={periodScores}

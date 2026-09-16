@@ -12,6 +12,8 @@ import DraftLotteryOddsRow from '@/features/draft-lottery/components/DraftLotter
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 import SeasonSelector from '@/components/SeasonSelector';
+import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 
 /**
  * Home route. Composes skater leaders, goalie leaders, draft-lottery odds, and
@@ -19,6 +21,7 @@ import SeasonSelector from '@/components/SeasonSelector';
  * them are ready. `?season=` (via SeasonSelector) drives every section.
  */
 export default function LandingPage() {
+  const { season } = useSeason();
   const {
     goalLeaderData,
     assistLeaderData,
@@ -60,6 +63,11 @@ export default function LandingPage() {
     <Container fluid className="ds-page-shell">
       <PageHeader />
       <SeasonSelector />
+      <header className={styles['landingPage-intro']}>
+        <p className={styles['landingPage-kicker']}>Season overview</p>
+        <h1>{formatSeasonLabel(season)} at a glance</h1>
+        <p>Track the teams, leaders, and stories shaping the season.</p>
+      </header>
       {loading ? (
         <LoadingState label="Loading data" fullPage />
       ) : statLeadersError ? (

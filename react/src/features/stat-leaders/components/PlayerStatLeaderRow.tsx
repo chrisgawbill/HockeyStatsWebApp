@@ -26,7 +26,7 @@ export default function PlayerStatLeaderRow({
   );
 
   return (
-    <div>
+    <div className={styles['stat-leader-row']}>
       <Row>
         <Col className={styles['landing-header']}>
           <h2>{title}</h2>

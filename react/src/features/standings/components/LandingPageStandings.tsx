@@ -90,7 +90,7 @@ export default function LandingPageStandings() {
   };
 
   return (
-    <Container>
+    <Container fluid className={styles['landing-standings']}>
       <Row className={styles['landing-standings-mobile-title']}>
         <Col className={styles['landing-header']}>
           <h2>Standings</h2>

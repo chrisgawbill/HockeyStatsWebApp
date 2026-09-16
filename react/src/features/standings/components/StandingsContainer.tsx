@@ -17,13 +17,15 @@ export default function StandingsContainer({
   if (standingsData.length > 1) {
     return (
       <div>
-        <Row>
-          <Col className={styles['standings-header']}>
-            <Row>
-              <h3>{standingsName}</h3>
-            </Row>
-          </Col>
-        </Row>
+        {standingsName && (
+          <Row>
+            <Col className={styles['standings-header']}>
+              <Row>
+                <h3>{standingsName}</h3>
+              </Row>
+            </Col>
+          </Row>
+        )}
         <Row>
           <LandingPageStandingsTable
             standingsData={standingsData}

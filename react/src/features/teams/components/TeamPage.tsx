@@ -9,6 +9,7 @@ import React, {
 import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 
 import PageHeader from '@/components/PageHeader';
+import shared from '@/styles/shared.module.css';
 import TeamHero from '@/features/teams/components/TeamHero';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
@@ -313,7 +314,11 @@ export default function TeamPage() {
 
   if (error) {
     return (
-      <div className={styles['team-page']} style={pageStyle} ref={pageRef}>
+      <div
+        className={`${styles['team-page']} ${shared.pageShell}`}
+        style={pageStyle}
+        ref={pageRef}
+      >
         <PageHeader />
         <div
           className={styles['team-page__content']}
@@ -332,7 +337,11 @@ export default function TeamPage() {
 
   if (!contentReady) {
     return (
-      <div className={styles['team-page']} style={pageStyle} ref={pageRef}>
+      <div
+        className={`${styles['team-page']} ${shared.pageShell}`}
+        style={pageStyle}
+        ref={pageRef}
+      >
         <PageHeader />
         <div
           className={styles['team-page__content']}
@@ -345,10 +354,16 @@ export default function TeamPage() {
   }
 
   return (
-    <div className={styles['team-page']} style={pageStyle} ref={pageRef}>
+    <div
+      className={`${styles['team-page']} ${shared.pageShell}`}
+      style={pageStyle}
+      ref={pageRef}
+    >
       <PageHeader />
       <TeamHero team={team} />
-      <div className={styles['team-page__content']}>
+      <div
+        className={`${styles['team-page__content']} ${shared.pageContent}`}
+      >
         <nav
           ref={navRef}
           className={styles['team-tabs']}
