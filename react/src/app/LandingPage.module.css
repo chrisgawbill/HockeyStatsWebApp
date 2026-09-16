@@ -2,12 +2,29 @@
   margin: var(--space-xl) auto 0;
   max-width: 112.5rem;
   gap: var(--space-lg) 0;
+  animation: landing-content-reveal 360ms ease-out 80ms both;
 }
 
 .landingPage-intro {
   max-width: 112.5rem;
   margin: var(--space-xl) auto 0;
   padding: var(--space-lg) var(--space-lg) 0;
+  animation: landing-intro-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes landing-intro-enter {
+  from { opacity: 0; transform: translateY(0.35rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes landing-content-reveal {
+  from { opacity: 0; transform: translateY(0.45rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landingPage-intro,
+  .landingPage-content { animation: none; }
 }
 
 .landingPage-kicker {

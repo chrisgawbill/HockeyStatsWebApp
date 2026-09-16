@@ -81,6 +81,12 @@
   margin-top: var(--space-lg);
   margin-bottom: var(--space-md);
   padding: var(--space-lg);
+  animation: team-form-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes team-form-enter {
+  from { opacity: 0; transform: translateY(0.35rem); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .form-panel__header,
@@ -249,6 +255,7 @@
 .dna-panel {
   margin: var(--space-md) 0 var(--space-lg);
   padding: var(--space-lg);
+  animation: dna-panel-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 .dna-panel__header,
@@ -309,12 +316,51 @@
   height: 100%;
   border-radius: inherit;
   background: var(--color-primary);
+  transition: width 320ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .dna-metric__description {
   display: block;
   margin-top: var(--space-xs);
   font-size: var(--text-xs);
+  animation: dna-description-reveal 220ms ease-out both;
+  animation-delay: calc(120ms + (var(--dna-index, 0) * 45ms));
+}
+
+@keyframes dna-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dna-description-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(0.2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dna-panel,
+  .dna-metric__description {
+    animation: none;
+  }
+
+  .dna-metric__track > span {
+    transition: none;
+  }
+
+  .form-panel,
+  .form-strip__result { animation: none; transition: none; }
 }
 
 @media (max-width: 576px) {
