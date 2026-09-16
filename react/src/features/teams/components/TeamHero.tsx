@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { TeamOverview } from '@/features/teams/types/teamPageTypes';
 import { localTeamList } from '@/lib/teamListData';
-import SeasonSelector from '@/components/SeasonSelector';
 import styles from '@/features/teams/components/TeamPage.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
@@ -71,7 +70,6 @@ export default function TeamHero({ team }: TeamHeroProps) {
             {team.name}
           </span>
         </nav>
-        <SeasonSelector className={styles['team-hero__season']} />
       </div>
       <div className={styles['team-hero__body']}>
         <img

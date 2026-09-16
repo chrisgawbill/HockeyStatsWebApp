@@ -30,7 +30,8 @@
   font-size: var(--text-sm);
   font-weight: 600;
   text-decoration: none;
-  transition: color var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
+  transition: color var(--ds-motion-duration-short)
+    var(--ds-motion-easing-standard);
 }
 .breadcrumbBack:hover,
 .breadcrumbBack:focus-visible {
@@ -84,11 +85,6 @@
   gap: var(--space-md);
   box-shadow: var(--elevation-1);
 }
-.controls > .seasonControl {
-  grid-column: 1 / -1;
-  justify-self: center;
-  margin: 0;
-}
 .control {
   display: grid;
   gap: var(--space-xs);
@@ -97,11 +93,6 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-}
-.seasonControl {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .control select {
   width: 100%;
@@ -117,13 +108,18 @@
   letter-spacing: normal;
   text-transform: none;
   transition:
-    border-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    border-color var(--ds-motion-duration-short)
+      var(--ds-motion-easing-standard),
     box-shadow var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
-    background-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
+    background-color var(--ds-motion-duration-short)
+      var(--ds-motion-easing-standard);
 }
 .control select:focus-visible {
   border-color: var(--color-primary);
-  box-shadow: var(--ds-focus-ring, 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent));
+  box-shadow: var(
+    --ds-focus-ring,
+    0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent)
+  );
 }
 .summary {
   text-align: center;
@@ -152,7 +148,8 @@
   min-width: 0;
   box-shadow: var(--elevation-1);
   transition:
-    background-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    background-color var(--ds-motion-duration-short)
+      var(--ds-motion-easing-standard),
     box-shadow var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
     transform var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
 }
@@ -198,14 +195,23 @@
 }
 
 @keyframes matchup-content-enter {
-  from { opacity: 0; transform: translateY(0.35rem); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .content,
   .control select,
-  .meeting { animation: none; transition: none; }
+  .meeting {
+    animation: none;
+    transition: none;
+  }
 }
 @media (max-width: 600px) {
   .content {
@@ -224,9 +230,6 @@
   }
   .hero {
     padding: var(--space-md);
-  }
-  .controls > .seasonControl {
-    justify-self: stretch;
   }
   .meeting {
     align-items: flex-start;

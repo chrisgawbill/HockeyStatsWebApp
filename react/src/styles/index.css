@@ -1,23 +1,10 @@
 :root {
-  --color-primary: #1b4f8a;
-  --color-primary-dark: #163f70;
   --color-blue-accent: #1565c0;
   --color-white: #ffffff;
-  --color-bg: #f7f7f5;
   --color-bg-subtle: #f8f9fa;
-  --color-surface: #ffffff;
-  --color-text: #212121;
-  --color-text-secondary: #37474f;
-  --color-muted-text: #90a4ae;
-  --color-success: #43a047;
-  --color-danger: #e53935;
   --color-info-bg: #e3f2fd;
-  --color-divider: rgba(0, 0, 0, 0.08);
   --color-subtle-divider: rgba(0, 0, 0, 0.05);
   --color-chip-bg: rgba(0, 0, 0, 0.07);
-  --border-radius-card: 12px;
-  --border-radius-pill: 20px;
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.12);
   --color-selection: #ffffff;
   --color-selection-text: #1b4f8a;
   --color-team-user: #1565c0;
@@ -72,20 +59,6 @@
   --text-2xl: 1.5rem;
   /** Arcade pixel font for the Rink Quest board game only; falls back to monospace. */
   --font-pixel: 'Press Start 2P', 'Courier New', monospace;
-  /* Aero "atmosphere" vocabulary, generalized from the nav bar
-     (PageHeader.module.css .nav-bar/.nav-btn) for opaque surfaces elsewhere:
-     a soft top sheen + a bright top edge highlight + layered elevation
-     shadows. No blur/translucency here - that stays exclusive to the nav
-     bar's glass chrome. */
-  --aero-sheen: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.14) 45%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  --aero-border-highlight: rgba(255, 255, 255, 0.6);
-  --elevation-1: 0 1px 10px rgba(0, 0, 0, 0.12);
-  --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.18);
   --scrollbar-track: rgba(0, 0, 0, 0.08);
   --scrollbar-thumb: #8a95a6;
   --scrollbar-thumb-hover: #6f7b8e;
@@ -93,22 +66,11 @@
 }
 
 [data-theme='dark'] {
-  --color-primary: #5b9bd5;
-  --color-primary-dark: #4a80c4;
   --color-blue-accent: #64b5f6;
-  --color-bg: #0f1117;
   --color-bg-subtle: #161b27;
-  --color-surface: #1e2130;
-  --color-text: #e2e8f0;
-  --color-text-secondary: #a0aec0;
-  --color-muted-text: #718096;
-  --color-success: #68d391;
-  --color-danger: #fc8181;
   --color-info-bg: rgba(66, 153, 225, 0.15);
-  --color-divider: rgba(255, 255, 255, 0.08);
   --color-subtle-divider: rgba(255, 255, 255, 0.05);
   --color-chip-bg: rgba(255, 255, 255, 0.07);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
   --color-selection: #93c5fd;
   --color-selection-text: #1b4f8a;
   --color-team-user: #64b5f6;
@@ -140,18 +102,6 @@
   --color-energy-text: #1a1a1a;
   --color-energy-bonus: #fff59d;
   --color-shot-band-good: #74a8d0;
-  /* Dark surfaces need a dimmer sheen/highlight than light ones, or the top
-     edge blows out to solid white - see --aero-sheen/--aero-border-highlight
-     in :root above. */
-  --aero-sheen: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.16) 0%,
-    rgba(255, 255, 255, 0.05) 45%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  --aero-border-highlight: rgba(255, 255, 255, 0.22);
-  --elevation-1: 0 1px 10px rgba(0, 0, 0, 0.35);
-  --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.45);
   --scrollbar-track: rgba(255, 255, 255, 0.06);
   --scrollbar-thumb: #4b5568;
   --scrollbar-thumb-hover: #5b667a;
@@ -192,7 +142,9 @@ html::-webkit-scrollbar-thumb,
     var(--scrollbar-thumb) 100%
   );
   background-clip: padding-box;
-  box-shadow: inset 0 1px 0 var(--scrollbar-highlight), 0 1px 3px rgba(0, 0, 0, 0.24);
+  box-shadow:
+    inset 0 1px 0 var(--scrollbar-highlight),
+    0 1px 3px rgba(0, 0, 0, 0.24);
 }
 
 html::-webkit-scrollbar-thumb:hover,

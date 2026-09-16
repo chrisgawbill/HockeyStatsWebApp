@@ -1,29 +1,22 @@
-import { axiosExpressHandler } from '@/lib/axiosInstance';
+import { post } from '@/lib/apiClient';
 
-export async function InterfaceWithChatBot(message: object, triCode?: string) {
-  try {
-    const serializedMessage = JSON.stringify({
-      ...message,
-      ...(triCode ? { cacheKey: triCode, triCode } : {}),
-    });
-    const response = await axiosExpressHandler.post(
-      '/python-service',
-      serializedMessage,
-      {
-        headers: { 'Content-Type': 'application/json' },
-      },
-    );
-    const raw = response.data;
-    if (typeof raw === 'object' && raw !== null) return raw;
-    const str = String(raw);
-    const start = str.indexOf('{');
-    const end = str.lastIndexOf('}');
-    if (start !== -1 && end > start) {
-      return JSON.parse(str.slice(start, end + 1));
-    }
-    throw new Error('No JSON object found in AI response');
-  } catch (error) {
-    console.error('Error fetching data: ', error);
-    throw error;
+export async function InterfaceWithChatBot(
+  message: object,
+  triCode?: string,
+): Promise<object> {
+  const serializedMessage = JSON.stringify({
+    ...message,
+    ...(triCode ? { cacheKey: triCode, triCode } : {}),
+  });
+  const raw = await post<unknown>('/python-service', serializedMessage, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (typeof raw === 'object' && raw !== null) return raw;
+  const str = String(raw);
+  const start = str.indexOf('{');
+  const end = str.lastIndexOf('}');
+  if (start !== -1 && end > start) {
+    return JSON.parse(str.slice(start, end + 1));
   }
+  throw new Error('No JSON object found in AI response');
 }

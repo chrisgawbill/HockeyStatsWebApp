@@ -662,7 +662,7 @@ EXPANSION: none | <reason>
 ---
 
 
-### ACTIVE LIB1 — Extract portable Aero/MD3 experience library
+### DONE LIB1 — Extract portable Aero/MD3 experience library
 **Source:** D1/D3 portability follow-up  
 **Depends on:** D3 complete; D3-QA findings that affect shared design primitives should be resolved or explicitly deferred  
 **Route:** GPT-5.4 Mini orchestrated in bounded phases. Use a fresh QA subagent for consumer-app verification. GPT-5.6 Sol only for package/build/tooling problems that cannot be resolved within the existing architecture.  
@@ -743,7 +743,7 @@ Move only domain-free motion vocabulary and generic interaction behavior. Do not
 
 ---
 
-### IDEA LIB2 — Library API consolidation & fast integration
+### DONE LIB2 — Library API consolidation & fast integration
 **Source:** follow-up to LIB1  
 **Depends on:** LIB1 complete and verified with HockeyStats as a real consumer  
 **Route:** GPT-5.4 Mini in audit → targeted consolidation → verification phases. Use GPT-5.6 Sol only for evidence-backed package/runtime architecture problems.  
@@ -820,7 +820,7 @@ A developer starting a new React project should be able to understand the normal
 
 ---
 
-### IDEA ARCH1 — Extract HockeyStats API into an independent service repo
+### DONE ARCH1 — Extract HockeyStats API into an independent service repo
 **Source:** architecture follow-up after LIB1  
 **Depends on:** LIB1 complete; preferably run after LIB2 so the frontend/library boundary is stable  
 **Route:** GPT-5.4 Mini in bounded inventory → extraction → deployment → consumer verification phases. Use GPT-5.6 Sol only for evidence-backed cross-repo/runtime architecture problems.  
@@ -922,7 +922,7 @@ Use a fresh verifier/browser-capable QA path where applicable:
 
 ---
 
-### IDEA ARCH1B — Clean REST contract & typed frontend client
+### DONE ARCH1B — Clean REST contract & typed frontend client
 **Source:** post-ARCH1 stabilization step before considering GraphQL  
 **Depends on:** ARCH1 complete and independently deployed/verified  
 **Route:** GPT-5.4 Mini; default single-agent for bounded API/client cleanup, with fresh QA only for contract changes spanning multiple feature flows. GPT-5.6 Sol only for evidence-backed contract/runtime ambiguity.  
@@ -1022,8 +1022,8 @@ Conclusion must be one of: `NO CURRENT SIGNAL`, `REVISIT LATER`, or `EVALUATION 
 
 ## Active
 
-- LIB1 — Phase A extraction inventory and approval proposal
-
 ## Completed
+
+- ARCH1B — Clean REST contract & typed frontend client
 
 Use existing progress/backlog completion markers as historical truth; do not duplicate the Phase 2 progress log here.

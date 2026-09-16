@@ -1,4 +1,5 @@
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
+import { StandingsTeamDto } from '@/features/standings/api/standingsApi';
 
 /**
  * The backend (api/services/mappers/standingsMapper.js) now returns each team in
@@ -6,7 +7,9 @@ import { StandingsTeam } from '@/features/standings/types/standingsTeam';
  * pointPctg). This helper only layers on app/display logic: pointsPctg rounding
  * and the locally-computed draft-lottery odds + trend.
  */
-export function CreateLeagueStandingsArray(initialStandings: any[]) {
+export function CreateLeagueStandingsArray(
+  initialStandings: StandingsTeamDto[],
+) {
   let leageuStandingsArray: StandingsTeam[] = [];
   for (let i = 0; i < initialStandings.length; i++) {
     const responseTeam = initialStandings[i];

@@ -41,8 +41,10 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     teamListData.current = rawLocalList;
     try {
       const teamStatsData = await GetTeamStatsById('');
-      const rawData: any[] = teamStatsData.data || teamStatsData;
-      const finalTeamData = ConvertToListOfTeams(teamListData.current, rawData);
+      const finalTeamData = ConvertToListOfTeams(
+        teamListData.current,
+        teamStatsData.data,
+      );
       setListOfTeamsData(finalTeamData);
     } catch (error) {
       console.error('Error fetching data: ', error);

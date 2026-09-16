@@ -1,6 +1,7 @@
 import {
   GetSkaterStatLeaders,
   GetGoalieStatLeaders,
+  StatLeaderDto,
 } from '@/features/stat-leaders/api/statLeadersApi';
 
 export const STAT_LEADER_TYPES = {
@@ -18,7 +19,7 @@ export interface StatEntry {
 
 interface StatLeaderConfig {
   stats: StatEntry[];
-  fetcher: (statIndicator: string, season?: string) => Promise<any>;
+  fetcher: (statIndicator: string, season?: string) => Promise<StatLeaderDto[]>;
 }
 
 /**

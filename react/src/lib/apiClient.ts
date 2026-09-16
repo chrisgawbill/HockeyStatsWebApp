@@ -1,83 +1,93 @@
-import { AxiosRequestConfig } from 'axios';
-import { axiosExpressHandler } from '@/lib/axiosInstance';
+import axios, { AxiosRequestConfig } from 'axios';
 
 /**
- * Shared HTTP core for the frontend API layer. Feature slices own their own
- * endpoint functions under `features/<feature>/api/`; each issues a GET through
- * this `get` helper, returns `response.data`, and logs then re-throws on failure
- * so callers can surface their own loading/empty states. Season-aware calls take
- * an optional `season` and thread it through `withParams`.
+ * The one frontend HTTP/configuration boundary. Feature slices own endpoint
+ * functions under `features/<feature>/api/`; they use these helpers and return
+ * transport DTOs. Feature mappers then turn DTOs into UI/domain models.
  */
 
 export const DIAGNOSTICS_HEADER = 'x-diagnostics-key';
 
+const apiBaseUrl =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://localhost:9000' : undefined);
+
+if (!apiBaseUrl && import.meta.env.PROD) {
+  console.error(
+    'VITE_API_URL is not configured. API requests will use relative URLs.',
+  );
+}
+
+const apiHttp = axios.create({
+  baseURL: apiBaseUrl,
+  withCredentials: false,
+  timeout: 15000,
+});
+
+export type QueryParams = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+
 /**
- * Appends only the defined params to `path` as a query string (empty/undefined
- * values are dropped), so `?season=` etc. is added only when actually set.
+ * Keeps query values out of feature URL construction. Axios omits null and
+ * undefined values when serializing, so optional parameters are not emitted.
  */
-export function withParams(
-  path: string,
-  params: Record<string, string | undefined>,
-): string {
-  const search = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value) search.set(key, value);
+async function request<T>(config: AxiosRequestConfig): Promise<T> {
+  try {
+    const response = await apiHttp.request<T>(config);
+    return response.data;
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
   }
-  const qs = search.toString();
-  return qs ? `${path}?${qs}` : path;
+}
+
+function cleanQueryParams(params?: QueryParams): QueryParams | undefined {
+  if (!params) return undefined;
+  return Object.fromEntries(
+    Object.entries(params).filter(
+      ([, value]) => value !== null && value !== undefined && value !== '',
+    ),
+  );
 }
 
 /**
- * Shared GET wrapper: applies `withParams` when params are given, returns
- * `response.data`, and logs then re-throws so callers keep their own error UI.
+ * Shared GET wrapper. Feature callers retain ownership of user-facing error UI.
  */
-export async function get<T = any>(
+export function get<T>(
   path: string,
-  params?: Record<string, string | undefined>,
+  params?: QueryParams,
   config?: AxiosRequestConfig,
 ): Promise<T> {
-  try {
-    const url = params ? withParams(path, params) : path;
-    const response = await axiosExpressHandler.get<T>(url, config);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching data: ', error);
-    throw error;
-  }
+  return request<T>({
+    ...config,
+    method: 'get',
+    url: path,
+    params: cleanQueryParams(params),
+  });
 }
 
 /**
  * Shared POST wrapper: returns `response.data`, and logs then re-throws so
  * callers keep their own error UI.
  */
-export async function post<T = any>(
+export function post<T>(
   path: string,
   data?: unknown,
   config?: AxiosRequestConfig,
 ): Promise<T> {
-  try {
-    const response = await axiosExpressHandler.post<T>(path, data, config);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching data: ', error);
-    throw error;
-  }
+  return request<T>({ ...config, method: 'post', url: path, data });
 }
 
 /**
  * Shared PUT wrapper: returns `response.data`, and logs then re-throws so
  * callers keep their own error UI.
  */
-export async function put<T = any>(
+export function put<T>(
   path: string,
   data?: unknown,
   config?: AxiosRequestConfig,
 ): Promise<T> {
-  try {
-    const response = await axiosExpressHandler.put<T>(path, data, config);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching data: ', error);
-    throw error;
-  }
+  return request<T>({ ...config, method: 'put', url: path, data });
 }

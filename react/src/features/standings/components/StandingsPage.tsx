@@ -10,7 +10,6 @@ import StandingsClinchLegend from '@/features/standings/components/StandingsClin
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
-import SeasonSelector from '@/components/SeasonSelector';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
@@ -79,7 +78,6 @@ export default function StandingsPage() {
     <>
       <PageHeader />
       <Container fluid className={styles['standings-page']}>
-        <SeasonSelector />
         {loadingStandingsData ? (
           <LoadingState label="Loading standings" fullPage />
         ) : errorStandingsData ? (
@@ -135,7 +133,9 @@ export default function StandingsPage() {
               ))}
             </Row>
             {loadingListOfGamesData ? (
-              <p className={styles['playoff-race-loading']}>Loading playoff race…</p>
+              <p className={styles['playoff-race-loading']}>
+                Loading playoff race…
+              </p>
             ) : (
               <Row>
                 <div className={styles['playoff-race-grid']}>
