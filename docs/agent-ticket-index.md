@@ -29,31 +29,52 @@ The PM may suggest splitting a ticket if it is too large, but the human approves
 
 ## Prepared candidates
 
-### IDEA D1 — Visual foundation
+### IDEA D1 — Portable Aero/MD3 visual foundation
 **Source:** `docs/design-feature-backlog.md`  
 **Route:** GPT-5.4 Mini  
-**Goal:** Establish a small reusable MD3 foundation with restrained Aero/glass personality.
+**Goal:** Establish a small reusable Aero/MD3 design language that HockeyStats consumes but that can be carried into future projects without HockeyStats-specific code.
+
+**Architecture intent**
+```text
+Portable Aero/MD3 core
+        ↓
+HockeyStats theme/config
+        ↓
+HockeyStats components/pages
+```
+The core owns generic visual language; HockeyStats owns hockey semantics.
 
 **Scope**
-- Inspect existing tokens/global styles and representative pages.
-- Add only missing semantic design tokens/states.
-- Define one restrained Aero/glass treatment for focal surfaces.
-- Apply the foundation to one existing page as proof.
+- Inspect existing tokens/global styles and representative pages before changing structure.
+- Create a clearly bounded portable style-language layer inside the repo rather than scattering new primitives through HockeyStats page CSS.
+- Put generic semantic tokens in the portable core: color roles, typography, spacing, radius, elevation, borders, interactive/focus states, surfaces, and restrained glass/Aero treatment.
+- Keep project branding/configuration separate where practical so another project can supply its own seed/colors without rewriting the core.
+- Provide a minimal documented import/entry point or equivalent boundary showing how another React project could consume the core.
+- Apply the portable foundation through the HockeyStats theme/config to one existing page as proof.
+- Document what belongs in the reusable core versus the HockeyStats layer.
 
 **Constraints**
-- No component/CSS framework.
+- Build an extractable design-language foundation, **not** a published npm package in D1.
+- No component/CSS framework and no new dependency unless the human explicitly approves it.
+- Do not build a giant component library. Generic components such as Button/Card/Chip can be future tickets.
+- No hockey-specific names, team colors, score states, rivalry states, schedule concepts, or data behavior inside the portable core.
+- Do not prematurely abstract every existing HockeyStats style. Only new/foundation primitives need the clean boundary now.
 - No app-wide redesign.
 - Dense statistics remain on solid readable surfaces.
-- Preserve light/dark themes and accessibility.
+- Preserve light/dark themes, keyboard focus, accessibility, and responsive behavior.
+- Prefer CSS/custom properties and simple project-agnostic primitives over runtime machinery.
 
 **Acceptance**
-- One representative page uses the foundation coherently.
+- The reusable core has no HockeyStats/domain-specific dependencies or naming.
+- HockeyStats consumes the core through an obvious project-level theme/configuration boundary.
+- A developer could move the core to another React project without bringing HockeyStats components/data with it; document the minimal files/entry point needed.
+- One representative HockeyStats page uses the foundation coherently.
 - Light/dark/mobile/focus states remain readable.
 - Build/typecheck pass.
-- New visual rules are documented briefly.
+- A short portability note documents: core contents, HockeyStats-specific layer, how to reuse it elsewhere, and what is intentionally deferred.
 
-**Verify:** smallest relevant frontend typecheck/build + targeted manual visual checks.  
-**Out of scope:** full MD3 migration, animation, navigation redesign.
+**Verify:** smallest relevant frontend typecheck/build + targeted manual visual checks + inspect the portable core for HockeyStats/domain imports/names.  
+**Out of scope:** publishing/versioning an npm package, monorepo/package extraction, full component library, full MD3 migration, animation, navigation redesign, migrating every existing style.
 
 ---
 
