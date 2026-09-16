@@ -1,0 +1,21 @@
+/* HockeyStats consumes the portable core through this project-level mapping. */
+:root,
+[data-theme='dark'] {
+  --color-primary: var(--ds-color-primary);
+  --color-primary-dark: var(--ds-color-primary-container);
+  --color-surface: var(--ds-color-surface);
+  --color-bg: var(--ds-color-surface-container-low);
+  --color-text: var(--ds-color-on-surface);
+  --color-text-secondary: var(--ds-color-on-surface-variant);
+  --color-muted-text: var(--ds-color-outline);
+  --color-success: var(--ds-color-success);
+  --color-danger: var(--ds-color-danger);
+  --color-divider: var(--ds-color-outline-variant);
+  --border-radius-card: var(--ds-radius-medium);
+  --border-radius-pill: var(--ds-radius-full);
+  --shadow-card: var(--ds-elevation-1);
+  --aero-sheen: var(--ds-aero-sheen);
+  --aero-border-highlight: var(--ds-aero-border);
+  --elevation-1: var(--ds-elevation-1);
+  --elevation-2: var(--ds-elevation-2);
+}

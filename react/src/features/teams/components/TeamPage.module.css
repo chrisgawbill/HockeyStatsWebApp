@@ -165,19 +165,38 @@
 
 @media (max-width: 576px) {
   .roster-line-row {
-    flex-direction: column;
-    padding-left: var(--space-md);
-    padding-top: 2.25rem;
+    flex-wrap: nowrap;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) 2.75rem;
   }
 
   .roster-line-row__badge {
-    top: var(--space-sm);
+    top: 50%;
     left: var(--space-md);
-    transform: none;
+    transform: translateY(-50%);
   }
 
   .roster-line-row__divider {
-    display: none;
+    margin-right: var(--space-xs);
+  }
+
+  .roster-line-row__slot {
+    min-width: 0;
+  }
+
+  .player-card--slot .player-card__img-wrap {
+    margin-bottom: var(--space-xs);
+  }
+
+  .player-card--slot .player-card__headshot {
+    width: 48px;
+    height: 48px;
+  }
+
+  .player-card--slot .player-card__name {
+    font-size: 0.6875rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
   }
 }
 

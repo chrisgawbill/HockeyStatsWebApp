@@ -1,6 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import ReactDOM from 'react-dom/client';
+import '@/design-system/core.css';
 import '@/styles/index.css';
+import '@/styles/theme.css';
 import '@/styles/components.css';
 import App from '@/app/App';
 import { ListOfTeamsDataProvider } from '@/features/teams/hooks/ListOfTeamsContext';
