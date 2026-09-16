@@ -87,6 +87,82 @@ Done when the build/typecheck passes, one page shows the new system, both themes
 
 ---
 
+# D1B — Condense CSS without changing the design
+
+- [ ] **Depends on:** D1 | **Data:** none
+
+Clean up the CSS created or touched during the visual work. The goal is **less CSS, not less design**.
+
+Look for:
+
+- duplicate rules
+- overlapping selectors
+- repeated spacing, colors, radii, shadows, or transitions
+- selectors that can safely share a rule
+- one-off values that should use existing tokens
+- styles that are no longer used
+- page-level styles that duplicate shared styles
+- unnecessary overrides or specificity battles
+
+Keep the existing visual intent. Do not simplify by making different UI elements look the same when they are intentionally different.
+
+### Prompt for the developer
+
+```text
+You are mentoring me while I clean up the CSS in HockeyStatsWebApp. I am a junior developer and I will make the changes.
+
+Explain things in plain English. Work one small group of CSS changes at a time. Do not rewrite all the CSS in one giant response.
+
+Goal: reduce the amount of CSS while keeping the design exactly as intentional as possible.
+
+First, inspect the CSS touched by D1 and the shared/global CSS. Identify:
+- duplicate rules
+- overlapping selectors
+- repeated values
+- unused styles
+- unnecessary overrides
+- styles that should use existing design tokens
+
+Then clean it up in small steps:
+1. Combine rules that truly have the same purpose.
+2. Remove styles that are clearly unused.
+3. Replace repeated values with existing tokens when that improves consistency.
+4. Remove unnecessary overrides and specificity battles.
+5. Keep intentionally different states and components separate.
+6. Do not create a new abstraction just to save a few lines.
+7. After each group, check that the UI still looks the same.
+
+The target is fewer CSS lines and less duplication, while retaining:
+- MD3 structure and states
+- Aero/glass personality
+- light/dark themes
+- responsive behavior
+- accessibility and focus states
+- readable dense statistics
+
+Do not:
+- redesign the UI
+- remove styling just because it is visually subtle
+- merge unrelated selectors
+- replace everything with utility classes
+- install a CSS framework
+- change component behavior
+
+If you are unsure whether two styles are intentionally different, leave them alone and explain why.
+
+Done when:
+- CSS is measurably smaller or less duplicated
+- no important design detail was lost
+- there are fewer conflicting/overriding rules
+- light/dark/mobile states still work
+- keyboard focus still works
+- build/typecheck/tests pass
+
+At the end, briefly report what was removed or consolidated and roughly how much CSS was reduced. Keep the report short.
+```
+
+---
+
 # D2 — Apply the visual foundation to Home → Game → Team
 
 - [ ] **Depends on:** D1 | **Data:** existing data only
@@ -394,6 +470,7 @@ Keep it concise. Do not turn it into a long technical essay.
 ### Milestone 1 — Make the foundation
 
 - [ ] D1 — Visual foundation
+- [ ] D1B — CSS consolidation
 - [ ] D2 — Home → Game → Team
 
 ### Milestone 2 — Build one memorable thing
@@ -410,7 +487,7 @@ Keep it concise. Do not turn it into a long technical essay.
 
 - [ ] F5 — Portfolio-quality design record
 
-**Recommended stopping point:** D1 + D2 + F1 + F4 is already a strong junior designer/developer project. F2 and F3 should be treated as follow-on features, not reasons to dilute the quality of Game Story.
+**Recommended stopping point:** D1 + D1B + D2 + F1 + F4 is already a strong junior designer/developer project. F2 and F3 should be treated as follow-on features, not reasons to dilute the quality of Game Story.
 
 ## Design north star
 
