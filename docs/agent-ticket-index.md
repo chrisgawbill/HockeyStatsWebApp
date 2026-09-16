@@ -137,34 +137,73 @@ The core owns generic visual language; HockeyStats owns hockey semantics.
 ### IDEA F1 — Game Story
 **Source:** `docs/design-feature-backlog.md`  
 **Depends on:** D1; D2 preferred  
-**Route:** GPT-5.4 Mini; escalate to GPT-5.6 Sol only if game-data derivation becomes ambiguous.  
+**Route:** GPT-5.4 Mini for both implementation phases; GPT-5.6 Luna QA after each phase; escalate to GPT-5.6 Sol only for genuinely ambiguous game-data reasoning.  
 **Goal:** Let a fan understand a completed game quickly from a factual visual narrative.
 
+**Execution shape**
+F1 remains one human-approved ticket, but the PM must run it as two bounded implementation phases. Do not combine data derivation and presentation into one worker pass.
+
+### Phase A — factual derivation
 **Scope**
-- Inspect actual existing game-detail data first.
-- Ordered scoring events.
-- Lead/tie changes.
-- 2–4 factual turning points derivable from existing data.
-- Supporting stats only when useful.
-- Mobile-scannable presentation.
+- Inspect the actual existing game-detail contracts/models and representative payloads first; never assume a field exists.
+- Add or extend pure, unit-testable helpers for only facts supported by the data.
+- Derive ordered scoring events, tie states, lead changes, first lead, and largest lead where the source data makes them deterministic.
+- Identify 2–4 candidate turning-point facts using explicit deterministic rules, not subjective narrative scoring.
+- Use special-teams/period/overtime context only when the existing contract exposes enough information reliably.
 
 **Constraints**
-- Existing data first; no invented fields/events.
-- No AI commentary.
+- No UI work in Phase A beyond what is strictly required to compile.
+- No invented events, statistics, motives, momentum, or causal claims.
 - No new API/backend work without human approval.
-- No generic chart framework.
-- Reuse D1 design language.
+- If a desired fact is ambiguous or unsupported, omit it and report the data gap.
+- Do not create increasingly complex heuristics just to satisfy the feature list.
 
-**Acceptance**
-- A real completed game renders a clear factual story.
-- Missing data degrades gracefully.
-- One real game is cross-checked against its official record.
-- Mobile/dark mode work.
+**Phase A acceptance**
+- Derivation logic is pure and separated from React presentation.
+- Representative helper cases cover ties, lead changes, and edge/missing data where relevant.
+- Derived facts for at least one real completed game can be reconciled with source game data.
+- Relevant tests/typecheck pass.
+
+**Phase A QA gate**
+GPT-5.6 Luna verifies the derivation acceptance criteria before Phase B starts. On FAIL, repair Phase A first. Do not begin presentation while factual derivation is unverified.
+
+### Phase B — presentation
+**Scope**
+- Render the verified Phase A facts as a fast-scanning Game Story on the existing Game Detail experience.
+- Show scoring events in order, lead/tie changes, and 2–4 verified factual turning points.
+- Add supporting stats only when they materially clarify the story.
+- Make the timeline readable on mobile and accessible without relying on color/visual position alone.
+- Reuse D1's portable design language and the HockeyStats theme/config boundary.
+
+**Portable-design rule**
+- Do not create new generic visual primitives inside Game Story CSS if D1 already provides the concept.
+- If F1 reveals a genuinely reusable generic primitive (for example a Timeline/Card/Chip pattern), keep the F1 implementation minimal and flag the reusable primitive as a follow-up candidate rather than expanding D1 or building a component library inside this ticket.
+- Hockey/game-specific presentation stays in HockeyStats; generic design-language primitives stay domain-free.
+
+**Phase B constraints**
+- No AI/generated commentary.
+- No generic chart/timeline framework.
+- No Game Detail rewrite.
+- No new dependency without human approval.
+- Preserve existing navigation/data behavior.
+- Aero/glass remains a focal treatment; dense supporting stats stay readable.
+
+**Phase B acceptance**
+- A real completed game renders a clear factual story that can be understood quickly.
+- Every narrative statement shown is traceable to verified derivation/source data.
+- Missing/partial data degrades gracefully.
+- One real completed game is cross-checked against its official/source record.
+- Mobile, keyboard accessibility, light/dark mode work.
 - Relevant build/typecheck/tests pass.
 
-**Verify:** frontend checks + one real completed-game comparison.  
-**Out of scope:** generated commentary, new data acquisition, Game Detail rewrite.
+**Complexity escalation**
+- Mechanical/local failures stay with GPT-5.4 Mini.
+- Escalate to GPT-5.6 Sol only when the existing data creates a genuinely ambiguous hockey-logic problem that cannot be resolved from contracts/source examples.
+- Before inventing a heuristic, changing a data contract, adding an endpoint, or expanding scope, stop and return the decision to the human.
+- A stronger model may reason about the existing scope; it may not broaden it.
 
+**Verify:** Phase A helper tests/typecheck + source-data reconciliation; then Phase B frontend checks + one real completed-game comparison + targeted mobile/theme/accessibility checks.  
+**Out of scope:** generated commentary, subjective momentum claims, new data acquisition, backend/API expansion, generic visualization framework, Game Detail rewrite, reusable component-library expansion.
 ---
 
 ### IDEA E2 — Team form and momentum
