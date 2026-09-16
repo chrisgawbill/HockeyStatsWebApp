@@ -29,7 +29,7 @@ The PM may suggest splitting a ticket if it is too large, but the human approves
 
 ## Prepared candidates
 
-### IDEA D1 — Portable Aero/MD3 visual foundation
+### ACTIVE D1 — Portable Aero/MD3 visual foundation
 **Source:** `docs/design-feature-backlog.md`  
 **Route:** GPT-5.4 Mini  
 **Goal:** Establish a small reusable Aero/MD3 design language that HockeyStats consumes but that can be carried into future projects without HockeyStats-specific code.
@@ -206,11 +206,11 @@ The core owns generic visual language; HockeyStats owns hockey semantics.
 
 ## Ready
 
-None — waiting for human selection.
+None.
 
 ## Active
 
-None.
+D1 — Portable Aero/MD3 visual foundation
 
 ## Completed
 

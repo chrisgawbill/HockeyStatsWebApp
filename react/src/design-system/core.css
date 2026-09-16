@@ -1,0 +1,114 @@
+/*
+ * Portable visual-language core.
+ *
+ * This file deliberately knows nothing about a specific product. A different
+ * React project can copy it and provide its own mapping/configuration layer.
+ */
+:root {
+  --ds-color-primary: #3f5f90;
+  --ds-color-on-primary: #ffffff;
+  --ds-color-primary-container: #d8e2ff;
+  --ds-color-on-primary-container: #001a41;
+  --ds-color-surface: #fbf8ff;
+  --ds-color-surface-container-low: #f5f2fa;
+  --ds-color-surface-container: #efedf4;
+  --ds-color-surface-container-high: #e9e7ef;
+  --ds-color-on-surface: #1a1b20;
+  --ds-color-on-surface-variant: #44474f;
+  --ds-color-outline: #74777f;
+  --ds-color-outline-variant: #c4c6cf;
+  --ds-color-success: #2e7d32;
+  --ds-color-on-success: #ffffff;
+  --ds-color-warning: #8a5000;
+  --ds-color-on-warning: #ffffff;
+  --ds-color-danger: #ba1a1a;
+  --ds-color-on-danger: #ffffff;
+
+  --ds-font-family: 'Roboto', sans-serif;
+  --ds-font-size-label: 0.75rem;
+  --ds-font-size-body: 1rem;
+  --ds-font-size-title: 1.375rem;
+  --ds-font-size-display: 2rem;
+  --ds-font-weight-regular: 400;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-bold: 700;
+
+  --ds-space-1: 0.25rem;
+  --ds-space-2: 0.5rem;
+  --ds-space-3: 1rem;
+  --ds-space-4: 1.5rem;
+  --ds-space-5: 2rem;
+  --ds-radius-small: 0.25rem;
+  --ds-radius-medium: 0.75rem;
+  --ds-radius-large: 1rem;
+  --ds-radius-full: 999px;
+
+  --ds-elevation-1: 0 1px 10px rgba(0, 0, 0, 0.12);
+  --ds-elevation-2: 0 4px 16px rgba(0, 0, 0, 0.18);
+  --ds-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 35%, transparent);
+  --ds-aero-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  --ds-aero-border: rgba(255, 255, 255, 0.6);
+  --ds-aero-page-background: var(--ds-color-surface);
+}
+
+[data-theme='dark'] {
+  --ds-color-primary: #aec6ff;
+  --ds-color-on-primary: #0b305f;
+  --ds-color-primary-container: #244777;
+  --ds-color-on-primary-container: #d8e2ff;
+  --ds-color-surface: #121318;
+  --ds-color-surface-container-low: #1a1b20;
+  --ds-color-surface-container: #1e1f25;
+  --ds-color-surface-container-high: #292a2f;
+  --ds-color-on-surface: #e3e2e9;
+  --ds-color-on-surface-variant: #c4c6cf;
+  --ds-color-outline: #8e9099;
+  --ds-color-outline-variant: #44474f;
+  --ds-color-success: #81c784;
+  --ds-color-on-success: #103713;
+  --ds-color-warning: #ffb95c;
+  --ds-color-on-warning: #482900;
+  --ds-color-danger: #ffb4ab;
+  --ds-color-on-danger: #690005;
+  --ds-elevation-1: 0 1px 10px rgba(0, 0, 0, 0.35);
+  --ds-elevation-2: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --ds-aero-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+  --ds-aero-border: rgba(255, 255, 255, 0.22);
+}
+
+.ds-page-shell {
+  min-height: 100vh;
+  background: var(--ds-aero-page-background);
+  color: var(--ds-color-on-surface);
+}
+
+.ds-focusable:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.ds-aero-surface {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--ds-aero-border);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-1);
+  background: var(--ds-color-surface-container);
+}
+
+.ds-aero-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--ds-aero-sheen);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-focusable,
+  .ds-aero-surface {
+    transition: none;
+  }
+}

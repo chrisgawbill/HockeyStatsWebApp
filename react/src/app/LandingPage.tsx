@@ -57,7 +57,7 @@ export default function LandingPage() {
   };
 
   return (
-    <Container fluid>
+    <Container fluid className="ds-page-shell">
       <PageHeader />
       <SeasonSelector />
       {loading ? (
