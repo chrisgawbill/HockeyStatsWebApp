@@ -43,16 +43,28 @@ Optimize for successful work per token, not model prestige or release date. Pref
 
 GLM models remain optional fallbacks when useful, but they are not part of the default route.
 
+### Adaptive orchestration
+
+Do not spawn subagents merely because roles exist on paper. Choose the smallest execution shape that gives reliable verification.
+
+- **Single-agent:** mechanical or small, well-bounded tickets with deterministic verification. One Luna or GPT-5.4 Mini worker implements and runs the checks itself.
+- **Worker + independent QA:** normal tickets where logic, UI behavior, or acceptance criteria benefit from a fresh verifier. GPT-5.4 Mini implements; Luna verifies only the risky/meaningful criteria.
+- **Multi-agent/phased:** use only when work has genuinely separable contexts, can run independently, or a fresh context materially reduces reasoning load. Do not parallelize tightly coupled edits.
+- **Escalation:** GPT-5.6 Sol only for evidence-backed reasoning complexity. GPT-6 Astra requires explicit human approval.
+
+Independent QA is not mandatory when deterministic tests/typecheck/build fully verify a low-risk change. Conversely, passing a build is not enough when the ticket contains domain logic or meaningful visual/behavioral acceptance criteria.
+
 ### Escalation ladder
 
-1. GPT-5.6 Luna PM scopes the ticket.
+1. PM classifies both model tier and execution shape.
 2. Route mechanical work to Luna; normal code to GPT-5.4 Mini.
-3. GPT-5.6 Luna QA verifies.
-4. FAIL: send only failed assertion + relevant trace to the same coder.
-5. Escalate to GPT-5.6 Sol only when deeper reasoning is actually needed.
-6. Maximum 3 repair cycles total.
-7. Before cycle 4, stop and return control to the human.
-8. GPT-6 Astra requires explicit human approval.
+3. Worker performs the smallest relevant deterministic checks.
+4. Add Luna QA only when independent verification adds value.
+5. On FAIL, send only failed assertion + relevant trace to the same coder.
+6. Escalate to GPT-5.6 Sol only when deeper reasoning is actually needed.
+7. Maximum 3 repair cycles total.
+8. Before cycle 4, stop and return control to the human.
+9. GPT-6 Astra requires explicit human approval.
 
 A model upgrade never authorizes a scope upgrade.
 
@@ -72,7 +84,7 @@ MODEL ROUTING:
 - COMPLEX/FAILED REASONING: GPT-5.6 Sol.
 - EXCEPTIONAL: GPT-6 Astra only after human approval.
 - QA: GPT-5.6 Luna.
-Choose the cheapest tier likely to succeed on the first attempt. A stronger model does not receive broader scope.
+Choose the cheapest tier likely to succeed on the first attempt. Also choose SINGLE-AGENT, WORKER+QA, or MULTI-AGENT based on whether separate context actually improves reliability. Never spawn an agent just to satisfy a role label. A stronger model does not receive broader scope.
 
 CODER DISPATCH FORMAT:
 TICKET: <id/title>
@@ -93,7 +105,7 @@ RETURN: PASS|FAIL; verified assertions; on FAIL failing assertion + <=10 relevan
 
 FAILURE LOOP: Forward only actionable failure evidence. Reuse the current coder for local/mechanical fixes. Escalate to GPT-5.6 Sol only for genuine reasoning/architecture complexity. Maximum 3 repair cycles. Before cycle 4 stop and report failing criterion, attempts, likely cause, and smallest human decision needed.
 
-PASS: Return exactly 3 concise sentences: what changed; what QA verified; important caveat or 'No known caveats.'
+PASS: Return exactly 3 concise sentences: what changed; what was verified; important caveat or 'No known caveats.' Then append one compact line: EXECUTION: single-agent | multi-agent — if multi-agent, list only role → model → purpose.
 
 CONTEXT: One ticket per worker session. Prefer fresh worker context after completion. Never paste successful raw logs or repeat background the worker can read. Record durable decisions in repo docs and delete temporary handoffs.
 
