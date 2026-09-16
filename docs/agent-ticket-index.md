@@ -456,6 +456,149 @@ Generic motion tokens, state behavior, and reusable surface/interaction primitiv
 
 ---
 
+### IDEA D3-QA — Premium polish visual & accessibility QA
+**Source:** follow-up to D3  
+**Depends on:** D3 implementation pushed to main  
+**Route:** Dedicated QA subagent. Prefer GPT-5.4 Mini for browser/visual reasoning; use Luna only for mechanical checklist follow-up. This ticket is audit-only: no application-code edits.  
+**Goal:** Independently inspect the finished site on desktop and mobile, capture evidence, and identify the smallest set of real gaps preventing HockeyStats from reaching a premium consumer-product level of polish while preserving its Aero + MD3 identity.
+
+**Quality bar**
+“Apple-level” is a fit-and-finish benchmark, not a request to copy Apple UI. Judge restraint, consistency, clarity, responsiveness, smoothness, accessibility, state quality, spacing, hierarchy, and attention to edge cases. Do not recommend replacing Aero/MD3 with Apple styling.
+
+**Execution shape**
+Use one fresh QA subagent so the review is independent from the D3 implementation context. Start from the running site, not a speculative code review. Inspect code only to confirm the cause of an observed issue or verify accessibility behavior. Do not spawn additional subagents unless a concrete blocker requires a separate accessibility/performance check.
+
+### A — Desktop visual QA
+At a representative desktop viewport, inspect:
+- global navigation and page transitions
+- Home
+- Team + Team DNA/form
+- Game Detail + Game Story
+- Standings + playoff race
+- Schedule
+- Matchup explorer
+- any other signature surface changed by D3
+
+Capture screenshots of representative pages/states. Do not screenshot every route/state.
+
+Look for observable gaps only:
+- spacing/alignment/rhythm inconsistencies
+- weak hierarchy or crowded/empty composition
+- inconsistent radii, borders, elevation, glass, typography, icons, hit areas, or states
+- abrupt/janky state changes or unnecessary motion
+- layout shift/loading roughness
+- clipped/overflowing content
+- interactions that feel visually unfinished
+- inconsistent application of the portable Aero/MD3 language
+
+### B — Mobile visual QA
+Repeat the representative journey at a common narrow mobile viewport. Capture screenshots sufficient to show real findings.
+
+Specifically check:
+- bottom/top navigation ergonomics and safe spacing
+- touch target size/separation
+- horizontal overflow and dense statistics
+- wrapping/truncation
+- sticky/fixed UI collisions
+- viewport-height issues
+- modal/popover/selector usability
+- content hierarchy at narrow widths
+- scroll smoothness and whether animations remain useful rather than distracting
+
+Do not treat desktop/mobile visual differences as bugs when they are intentional responsive design.
+
+### C — Accessibility & user-preference QA
+Check the experience with the same seriousness expected from a polished consumer product, using current web semantics rather than imitating platform-specific Apple APIs.
+
+Verify, where applicable:
+- keyboard-only navigation and logical focus order
+- visible focus indication
+- semantic controls/labels and accessible names
+- headings/landmarks
+- contrast and legibility in light/dark themes
+- content and state are not communicated by color alone
+- zoom/text enlargement does not break core flows
+- touch targets are reasonably usable
+- `prefers-reduced-motion: reduce` removes/nonessential motion while preserving meaning
+- `prefers-color-scheme`/existing theme behavior remains coherent
+- loading, empty, error, selected, expanded, and disabled states remain understandable to assistive technology
+- no obvious keyboard traps or focus loss during dynamic UI changes
+
+Use automated accessibility tooling already available in the project/browser when cheap, but manually verify meaningful findings. Do not add a new dependency just to run this audit.
+
+### D — Smoothness/perceived-performance check
+Only report performance problems that are observable or measurable:
+- visible layout shifts
+- delayed interaction feedback
+- scroll/animation stutter
+- expensive-feeling view changes
+- content appearing in a distracting sequence
+
+Do not prescribe memoization, virtualization, lazy loading, or architectural changes without evidence.
+
+**Screenshot evidence**
+- Store QA screenshots in a clearly named temporary/report location rather than mixing them into product assets.
+- Keep the set small: enough desktop/mobile screenshots to demonstrate findings, not a visual archive.
+- Every reported visual gap should reference a screenshot or a reproducible interaction/state when practical.
+- Screenshots are QA evidence, not a request to redesign from static images alone.
+
+**Finding severity**
+Use only:
+- **P0 — blocker:** prevents a core flow or creates a serious accessibility barrier.
+- **P1 — polish gap:** clearly undermines premium fit-and-finish or usability and is worth fixing.
+- **P2 — optional refinement:** noticeable but low-value; do not automatically create implementation work.
+
+Avoid subjective nitpicks. If a finding cannot explain user impact in one sentence, omit it.
+
+**Constraints**
+- AUDIT ONLY. Do not modify application code.
+- Do not redesign the product.
+- Do not imitate Apple visuals/components/branding.
+- Do not recommend a new library/framework unless an observed blocker truly cannot be addressed with the current stack.
+- Do not create a giant WCAG compliance project from minor findings.
+- Do not chase pixel-perfect differences that have no usability/consistency impact.
+- Prefer 5–10 high-confidence findings over dozens of speculative ones.
+- Keep context targeted; do not reread every source file.
+- Existing D1/D3 portable design language remains the source of truth.
+
+**Acceptance**
+- Representative desktop and mobile journeys were actually rendered and inspected.
+- Screenshots document the important states/findings.
+- Reduced-motion, keyboard/focus, light/dark, responsive layout, and basic semantic accessibility were exercised.
+- Findings distinguish genuine gaps from optional refinement.
+- Each P0/P1 finding includes: page/state, desktop/mobile/both, observable evidence, user impact, and the smallest plausible fix direction.
+- No code was changed.
+- Final report is concise enough for the human to choose what becomes a follow-up ticket.
+
+**Return**
+```text
+QA: PASS | GAPS FOUND
+COVERAGE: <desktop pages> | <mobile pages> | <accessibility/preferences checked>
+SCREENSHOTS: <paths/names>
+
+P0/P1 FINDINGS:
+1. <page/state> — <desktop|mobile|both> — <evidence> — <impact> — <smallest fix direction>
+
+P2 OPTIONAL:
+- <only worthwhile refinements>
+
+ACCESSIBILITY:
+- <verified behaviors + concrete gaps>
+
+SMOOTHNESS:
+- <only observed/measured issues>
+
+RECOMMENDED FOLLOW-UPS:
+- <max 3 bounded ticket candidates; do not implement>
+EXECUTION: single QA subagent
+CONTEXT: targeted | expanded
+EXPANSION: none | <reason>
+```
+
+**Out of scope:** implementation, visual redesign, exhaustive standards certification, every device/browser combination, new dependency adoption, speculative performance optimization.
+
+---
+
 ## Later candidates
 
 | Status | Ticket | Source | Note |
