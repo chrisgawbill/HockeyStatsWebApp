@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
   pages: write
   id-token: write
 
@@ -25,6 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: https://npm.pkg.github.com
 
       - uses: pnpm/action-setup@v4
         with:
@@ -34,6 +36,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --ignore-workspace
         working-directory: react
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate API URL
         run: |
