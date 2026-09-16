@@ -2,6 +2,10 @@
   text-align: center;
 }
 
+.stat-leader-row {
+  min-width: 0;
+}
+
 .row-scroller-wrapper {
   position: relative;
 }
@@ -61,6 +65,13 @@
   display: inline-block;
   float: none;
   scroll-snap-align: start;
+}
+
+@media only screen and (min-width: 768px) {
+  .stat-leader-row .row-scroller > .row-scroller-column {
+    flex: 0 0 18rem;
+    width: 18rem;
+  }
 }
 
 @media only screen and (min-width: 768px) {

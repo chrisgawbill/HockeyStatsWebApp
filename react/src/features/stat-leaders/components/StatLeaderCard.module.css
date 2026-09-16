@@ -94,7 +94,8 @@
 
 @media only screen and (min-width: 768px) {
   .stat-leader-block {
-    min-width: 300px;
+    min-width: 0;
+    width: 100%;
     margin: var(--space-md) 0;
     transition:
       box-shadow 0.2s ease,
@@ -122,7 +123,7 @@
 
 @media only screen and (min-width: 768px) and (max-width: 1399px) {
   .stat-leader-block {
-    min-width: 220px;
+    width: 100%;
   }
 }
 

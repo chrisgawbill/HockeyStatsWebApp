@@ -105,7 +105,7 @@ The core owns generic visual language; HockeyStats owns hockey semantics.
 
 ---
 
-### IDEA D2 — Home → Game → Team consistency
+### DONE D2 — Home → Game → Team consistency
 **Source:** `docs/design-feature-backlog.md`  
 **Depends on:** D1  
 **Route:** GPT-5.4 Mini  

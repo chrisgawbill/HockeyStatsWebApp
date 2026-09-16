@@ -1,3 +1,15 @@
+.pageShell {
+  min-height: 100vh;
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.pageContent {
+  width: 100%;
+  max-width: 112.5rem;
+  margin: 0 auto;
+}
+
 .section {
   margin-bottom: var(--space-xl);
 }
