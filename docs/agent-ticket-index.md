@@ -456,154 +456,211 @@ Generic motion tokens, state behavior, and reusable surface/interaction primitiv
 
 ---
 
-### IDEA D3-QA — Premium polish visual & accessibility QA
+### IDEA D3-QA-SITE — Main site premium polish & accessibility QA
 **Source:** follow-up to D3  
 **Depends on:** D3 implementation pushed to main  
-**Route:** Dedicated QA subagent. Prefer GPT-5.4 Mini for browser/visual reasoning; use Luna only for mechanical checklist follow-up. This ticket is audit-only: no application-code edits.  
-**Goal:** Independently inspect the finished site on desktop and mobile, capture evidence, and identify the smallest set of real gaps preventing HockeyStats from reaching a premium consumer-product level of polish while preserving its Aero + MD3 identity.
+**Route:** Fresh dedicated GPT-5.4 Mini QA subagent. Audit-only; no application-code edits.  
+**Goal:** Independently inspect **every main-site page/route** on desktop and mobile, capture representative screenshots, and identify the smallest set of real gaps preventing HockeyStats from reaching a premium consumer-product level of polish while preserving Aero + MD3.
 
 **Quality bar**
-“Apple-level” is a fit-and-finish benchmark, not a request to copy Apple UI. Judge restraint, consistency, clarity, responsiveness, smoothness, accessibility, state quality, spacing, hierarchy, and attention to edge cases. The game experience in particular should feel intentionally designed for the device rather than a responsive desktop compromise. Do not recommend replacing Aero/MD3 with Apple styling.
+“Apple-level” means fit-and-finish, not Apple imitation: restraint, consistency, hierarchy, spacing, immediate feedback, smooth state changes, perceived speed, accessibility, and excellent edge-case handling. Keep the D1 Aero/MD3 language.
 
-**Execution shape**
-Use one fresh QA subagent so the review is independent from the D3 implementation context. Start from the running site, not a speculative code review. Inspect code only to confirm the cause of an observed issue or verify accessibility behavior. Do not spawn additional subagents unless a concrete blocker requires a separate accessibility/performance check.
+**Scope**
+- First enumerate the current user-facing main-site routes/pages from routing/navigation; do not rely on a stale hard-coded page list.
+- Exclude RinkQuest from this ticket; it has its own QA ticket.
+- Render and inspect **every discovered main-site page** at representative desktop and mobile widths.
+- Exercise meaningful page states when cheaply reachable: loaded, loading, empty, error, selected/expanded, and season/team variations where relevant.
+- Capture a small screenshot set per problem cluster rather than every possible state.
 
-### A — Desktop visual QA
-At a representative desktop viewport, inspect:
-- global navigation and page transitions
-- Home
-- Team + Team DNA/form
-- Game Detail + Game Story
-- Standings + playoff race
-- Schedule
-- Matchup explorer
-- any other signature surface changed by D3
+**Visual/interaction QA**
+Check observable gaps in:
+- spacing, alignment, responsive rhythm, hierarchy, typography, iconography
+- radii, borders, elevation, Aero/glass restraint, MD3 states
+- navigation, controls, hover/pressed/focus/selected/disabled feedback
+- wrapping, truncation, overflow, dense-data readability
+- loading/content transitions, layout shift, abrupt state changes
+- mobile touch targets, fixed/sticky collisions, viewport-height issues
+- visual consistency across pages and signature features
+- smoothness/perceived performance only when observable or measurable
 
-Capture screenshots of representative pages/states. Do not screenshot every route/state.
+**Accessibility & preferences**
+Verify across representative flows:
+- keyboard-only navigation, logical focus order, visible focus, no traps
+- semantic controls/labels, accessible names, headings/landmarks
+- light/dark contrast and legibility; information not conveyed by color alone
+- zoom/text enlargement without breaking core flows
+- reasonable touch targets
+- `prefers-reduced-motion: reduce` preserves meaning and removes nonessential motion
+- existing theme/`prefers-color-scheme` behavior remains coherent
+- dynamic loading/empty/error/selected/expanded/disabled states remain understandable
 
-Look for observable gaps only:
-- spacing/alignment/rhythm inconsistencies
-- weak hierarchy or crowded/empty composition
-- inconsistent radii, borders, elevation, glass, typography, icons, hit areas, or states
-- abrupt/janky state changes or unnecessary motion
-- layout shift/loading roughness
-- clipped/overflowing content
-- interactions that feel visually unfinished
-- RinkQuest game cards whose gameplay hierarchy, readability, or feedback does not feel deliberately composed for mobile
-- the RinkQuest playable rink feeling like a desktop game surface merely shrunk onto mobile rather than intentionally composed for touch and the viewport
-- inconsistent application of the portable Aero/MD3 language
-
-### B — Mobile visual QA
-Repeat the representative journey at a common narrow mobile viewport. Capture screenshots sufficient to show real findings.
-
-Specifically check:
-- bottom/top navigation ergonomics and safe spacing
-- touch target size/separation
-- horizontal overflow and dense statistics
-- wrapping/truncation
-- sticky/fixed UI collisions
-- viewport-height issues
-- modal/popover/selector usability
-- content hierarchy at narrow widths
-- **RinkQuest game-card readability:** make the RinkQuest game cards easy to scan and play from on a phone; check hierarchy, text/number legibility, truncation/wrapping, spacing, touch targets, card state/feedback, and whether secondary information competes with the primary game action
-- **RinkQuest rink/game surface:** treat the playable RinkQuest rink as a first-class mobile game surface; verify it fits the viewport, remains legible and tappable, preserves useful rink proportions, avoids tiny labels/targets/controls, clearly communicates interactive/state changes, and does not require awkward horizontal scrolling or zooming for normal play
-- for RinkQuest rink interactions/overlays, verify touch targets, selected/focus/pressed states, labels, feedback, and information density work at phone size; prioritize playability and immediate feedback over preserving desktop composition
-- scroll smoothness and whether animations remain useful rather than distracting
-
-Do not treat desktop/mobile visual differences as bugs when they are intentional responsive design.
-
-### C — Accessibility & user-preference QA
-Check the experience with the same seriousness expected from a polished consumer product, using current web semantics rather than imitating platform-specific Apple APIs.
-
-Verify, where applicable:
-- keyboard-only navigation and logical focus order
-- visible focus indication
-- semantic controls/labels and accessible names
-- headings/landmarks
-- contrast and legibility in light/dark themes
-- content and state are not communicated by color alone
-- zoom/text enlargement does not break core flows
-- touch targets are reasonably usable
-- `prefers-reduced-motion: reduce` removes/nonessential motion while preserving meaning
-- `prefers-color-scheme`/existing theme behavior remains coherent
-- loading, empty, error, selected, expanded, and disabled states remain understandable to assistive technology
-- no obvious keyboard traps or focus loss during dynamic UI changes
-
-Use automated accessibility tooling already available in the project/browser when cheap, but manually verify meaningful findings. Do not add a new dependency just to run this audit.
-
-### D — Smoothness/perceived-performance check
-Only report performance problems that are observable or measurable:
-- visible layout shifts
-- delayed interaction feedback
-- scroll/animation stutter
-- expensive-feeling view changes
-- content appearing in a distracting sequence
-
-Do not prescribe memoization, virtualization, lazy loading, or architectural changes without evidence.
-
-**Screenshot evidence**
-- Store QA screenshots in a clearly named temporary/report location rather than mixing them into product assets.
-- Keep the set small: enough desktop/mobile screenshots to demonstrate findings, not a visual archive.
-- Every reported visual gap should reference a screenshot or a reproducible interaction/state when practical.
-- Screenshots are QA evidence, not a request to redesign from static images alone.
+Use existing browser/project accessibility tooling when cheap. Do not add a dependency solely for this audit.
 
 **Finding severity**
-Use only:
-- **P0 — blocker:** prevents a core flow or creates a serious accessibility barrier.
-- **P1 — polish gap:** clearly undermines premium fit-and-finish or usability and is worth fixing.
-- **P2 — optional refinement:** noticeable but low-value; do not automatically create implementation work.
+- **P0:** core-flow failure or serious accessibility barrier.
+- **P1:** clear premium-polish/usability/accessibility gap worth fixing.
+- **P2:** optional refinement; do not automatically create work.
 
-Avoid subjective nitpicks. If a finding cannot explain user impact in one sentence, omit it.
+Prefer 5–12 high-confidence cross-site findings over a long nitpick list. A repeated systemic issue counts as one finding with affected pages listed.
 
 **Constraints**
-- AUDIT ONLY. Do not modify application code.
-- Do not redesign the product.
-- Do not imitate Apple visuals/components/branding.
-- Do not recommend a new library/framework unless an observed blocker truly cannot be addressed with the current stack.
-- Do not create a giant WCAG compliance project from minor findings.
-- Do not chase pixel-perfect differences that have no usability/consistency impact.
-- Prefer 5–10 high-confidence findings over dozens of speculative ones.
-- Keep context targeted; do not reread every source file.
-- Existing D1/D3 portable design language remains the source of truth.
+- AUDIT ONLY; no app-code edits.
+- No redesign, Apple visual imitation, new framework/library, speculative optimization, or exhaustive certification exercise.
+- Inspect code only to confirm an observed issue/cause.
+- Keep context targeted; screenshots and rendered behavior are primary evidence.
 
 **Acceptance**
-- Representative desktop and mobile journeys were actually rendered and inspected.
-- Screenshots document the important states/findings.
-- Reduced-motion, keyboard/focus, light/dark, responsive layout, and basic semantic accessibility were exercised.
-- Findings distinguish genuine gaps from optional refinement.
-- RinkQuest mobile game cards and the playable rink/game surface receive explicit findings or an explicit “no meaningful gap observed” result.
-- Each P0/P1 finding includes: page/state, desktop/mobile/both, observable evidence, user impact, and the smallest plausible fix direction.
-- No code was changed.
-- Final report is concise enough for the human to choose what becomes a follow-up ticket.
+- Every discovered main-site page is covered on desktop and mobile or explicitly marked blocked with reason.
+- Screenshot evidence demonstrates important findings.
+- Keyboard/focus, reduced motion, themes, responsive layout, zoom/text sizing, and basic semantic accessibility are exercised.
+- Each P0/P1 includes page/state, desktop/mobile/both, evidence, user impact, and smallest fix direction.
+- Final report proposes at most 3 bounded follow-up ticket clusters; no fixes are implemented.
 
 **Return**
 ```text
 QA: PASS | GAPS FOUND
-COVERAGE: <desktop pages> | <mobile pages> | <accessibility/preferences checked>
+ROUTES: <covered | blocked>
+COVERAGE: desktop | mobile | accessibility/preferences
 SCREENSHOTS: <paths/names>
 
 P0/P1 FINDINGS:
 1. <page/state> — <desktop|mobile|both> — <evidence> — <impact> — <smallest fix direction>
 
 P2 OPTIONAL:
-- <only worthwhile refinements>
+- <worthwhile refinements only>
 
 ACCESSIBILITY:
 - <verified behaviors + concrete gaps>
 
 SMOOTHNESS:
-- <only observed/measured issues>
+- <observed/measured issues only>
 
 RECOMMENDED FOLLOW-UPS:
-- <max 3 bounded ticket candidates; do not implement>
+- <max 3 bounded ticket clusters; do not implement>
 EXECUTION: single QA subagent
 CONTEXT: targeted | expanded
 EXPANSION: none | <reason>
 ```
 
-**Out of scope:** implementation, visual redesign, exhaustive standards certification, every device/browser combination, new dependency adoption, speculative performance optimization.
+**Out of scope:** RinkQuest, implementation, Apple imitation, exhaustive standards certification, every browser/device combination, new dependencies.
 
 ---
+
+### IDEA D3-QA-RQ — RinkQuest premium game polish & accessibility QA
+**Source:** follow-up to D3  
+**Depends on:** D3 implementation pushed to main  
+**Route:** Fresh dedicated GPT-5.4 Mini QA subagent. Audit-only; no application-code edits.  
+**Goal:** Independently QA RinkQuest as a polished touch-first game experience on desktop and mobile, with special attention to mobile game cards, the playable rink, feedback, smoothness, and accessibility.
+
+**Quality bar**
+Treat “Apple-level” as the execution standard of a highly polished first-party consumer game: immediate comprehension, deliberate touch ergonomics, responsive feedback, smooth state changes, restraint, accessibility, and no desktop-to-mobile compromises. Preserve HockeyStats/RinkQuest Aero + MD3 identity; do not copy Apple Game Center/iOS styling.
+
+**Scope**
+- Discover the current RinkQuest route(s), gameplay states, and controls from the running app.
+- Exercise the primary play loop on desktop and mobile.
+- Capture screenshots of the main RinkQuest states needed to demonstrate findings.
+- Prioritize actual playability over preserving desktop composition on mobile.
+
+**RinkQuest game cards**
+Check:
+- primary gameplay action/information is immediately scannable
+- text/numbers/status hierarchy remains readable at phone width
+- wrapping/truncation and secondary metadata do not obscure the task
+- touch targets and separation are comfortable
+- selected/correct/incorrect/disabled/pressed states provide clear feedback
+- cards remain visually coherent with Aero/MD3 without excessive glass/noise
+
+**Playable rink**
+Treat the rink as a first-class mobile game surface:
+- fits the usable viewport without awkward horizontal scrolling/zooming for normal play
+- preserves useful rink proportions while prioritizing tap accuracy
+- targets, labels, overlays, markers, and controls remain legible/tappable
+- selected/focus/pressed/correct/incorrect states are immediately understandable
+- interaction feedback is prompt and not dependent on color alone
+- overlays/tooltips do not obscure the next action
+- orientation/viewport changes do not leave the rink in a broken state
+- mobile composition may intentionally differ from desktop when that improves play
+
+**Game feel & smoothness**
+Observe:
+- tap/click-to-feedback latency
+- state transitions between question/action/result/next state
+- distracting layout shifts
+- animation/scroll stutter
+- whether motion helps comprehension or delays play
+- loading/restart/reset transitions and repeated-play flow
+
+Report only observable/measurable issues; do not prescribe speculative React optimizations.
+
+**Accessibility & preferences**
+Verify:
+- full keyboard path where the game interaction can reasonably support it
+- visible focus and logical focus movement
+- semantic/accessibly named controls
+- gameplay state/result not conveyed only through color
+- reasonable mobile touch targets
+- text enlargement/zoom does not make the core game unusable
+- `prefers-reduced-motion: reduce` removes nonessential motion without removing gameplay feedback
+- light/dark themes remain legible
+- dynamic result/state changes are understandable to assistive technology where applicable
+
+**Finding severity**
+- **P0:** blocks play or creates a serious accessibility barrier.
+- **P1:** clearly makes RinkQuest feel unfinished, harder to play, or less accessible.
+- **P2:** optional refinement.
+
+Prefer 5–10 high-confidence findings. Do not turn subjective game-design preferences into defects without observable user impact.
+
+**Constraints**
+- AUDIT ONLY; no app-code edits.
+- No redesign, Apple/iOS imitation, animation library, new dependency, or gameplay feature expansion.
+- Do not turn this into a generalized game-engine/accessibility rewrite.
+- Keep context targeted; rendered gameplay and screenshots are primary evidence.
+- Recommend the smallest fix direction, not implementation plans.
+
+**Acceptance**
+- Primary RinkQuest loop is inspected on desktop and mobile.
+- Mobile game cards and playable rink each receive explicit findings or an explicit “no meaningful gap observed.”
+- Screenshots cover the important game states/findings.
+- Touch, keyboard/focus, reduced motion, themes, zoom/text sizing, and non-color feedback are exercised.
+- Each P0/P1 includes state, desktop/mobile/both, evidence, user impact, and smallest fix direction.
+- Final report proposes at most 3 bounded follow-up tickets; no fixes are implemented.
+
+**Return**
+```text
+QA: PASS | GAPS FOUND
+COVERAGE: desktop play loop | mobile play loop | accessibility/preferences
+SCREENSHOTS: <paths/names>
+
+P0/P1 FINDINGS:
+1. <RinkQuest state> — <desktop|mobile|both> — <evidence> — <impact> — <smallest fix direction>
+
+GAME CARDS:
+- <findings or no meaningful gap observed>
+
+RINK:
+- <findings or no meaningful gap observed>
+
+ACCESSIBILITY:
+- <verified behaviors + concrete gaps>
+
+GAME FEEL:
+- <observed smoothness/feedback issues>
+
+P2 OPTIONAL:
+- <worthwhile refinements only>
+
+RECOMMENDED FOLLOW-UPS:
+- <max 3 bounded tickets; do not implement>
+EXECUTION: single QA subagent
+CONTEXT: targeted | expanded
+EXPANSION: none | <reason>
+```
+
+**Out of scope:** main-site pages, implementation, new gameplay features, Apple imitation, exhaustive certification, every device/browser combination.
+
+---
+
 
 ## Later candidates
 
