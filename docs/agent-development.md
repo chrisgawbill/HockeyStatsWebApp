@@ -8,7 +8,15 @@ The human developer is the product owner and final decision-maker. Agents work o
 
 ## Context policy
 
-Read only: `docs/architecture.md`, the selected ticket, directly relevant source files, and explicit dependencies. Do not preload every backlog or progress log.
+Context movement is a primary optimization target. Use progressive disclosure instead of broad repository reading.
+
+1. Start with `AGENTS.md` and only the selected compact ticket block.
+2. Search `docs/architecture.md` and read only relevant sections.
+3. Inspect directly named/relevant source files; use targeted symbol search and useful ranges for large files.
+4. Expand to neighboring files only to resolve a concrete dependency or uncertainty.
+5. Read legacy backlog/progress/history only when a specific missing fact cannot be obtained from current code/docs.
+
+Do not recursively browse for general understanding. Once the implementation path is known, stop discovery and implement. Do not reread unchanged files unless a test/failure creates a reason. Suppress successful raw command output and avoid repeating source/context between agents.
 
 ## Model routing
 
@@ -105,9 +113,12 @@ RETURN: PASS|FAIL; verified assertions; on FAIL failing assertion + <=10 relevan
 
 FAILURE LOOP: Forward only actionable failure evidence. Reuse the current coder for local/mechanical fixes. Escalate to GPT-5.6 Sol only for genuine reasoning/architecture complexity. Maximum 3 repair cycles. Before cycle 4 stop and report failing criterion, attempts, likely cause, and smallest human decision needed.
 
-PASS: Return exactly 3 concise sentences: what changed; what was verified; important caveat or 'No known caveats.' Then append one compact line: EXECUTION: single-agent | multi-agent — if multi-agent, list only role → model → purpose.
+PASS: Return exactly 3 concise sentences: what changed; what was verified; important caveat or 'No known caveats.' Then append:
+EXECUTION: single-agent | multi-agent — if multi-agent, list only role → model → purpose
+CONTEXT: targeted | expanded
+EXPANSION: none | <one short reason>
 
-CONTEXT: One ticket per worker session. Prefer fresh worker context after completion. Never paste successful raw logs or repeat background the worker can read. Record durable decisions in repo docs and delete temporary handoffs.
+CONTEXT: One ticket per worker session. Prefer fresh worker context after completion. Begin at the lowest context tier in AGENTS.md and expand only for a concrete blocker. Prefer targeted search/ranges over whole-file reads. Never paste successful raw logs, reread unchanged files without cause, or repeat background the worker can inspect. Record durable decisions in repo docs and delete temporary handoffs.
 
 ## Worker prompt
 
