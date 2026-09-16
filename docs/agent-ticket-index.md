@@ -1,35 +1,196 @@
 # Agent Ticket Index
 
-Short execution queue for agent-driven development. Detailed ticket requirements stay in the linked backlog files.
+Short human-controlled execution queue for agent-driven development.
 
 See `docs/agent-development.md` before dispatching any agent.
 
+## PM selection protocol
+
+When no ticket is `READY` or `ACTIVE`, the PM must:
+1. Inspect this index plus only the source sections for plausible next tickets.
+2. Present the human with **2–3 candidates maximum**.
+3. For each candidate give exactly: `ID — outcome — model tier — why now`.
+4. Do not rank them as objectively best; explain tradeoffs when useful.
+5. Wait for the human to select one.
+6. Only the selected ticket becomes `READY`.
+7. Create the compact execution contract below, then mark it `ACTIVE` when dispatched.
+8. After QA PASS, mark `DONE`. Do not automatically start another ticket.
+
+The PM may suggest splitting a ticket if it is too large, but the human approves the split.
+
 ## Queue rules
 
-- The human developer decides what becomes `READY`.
-- Agents work one `READY` ticket at a time.
-- The PM may recommend a next ticket but may not silently promote or start it.
-- Keep this file short. Do not copy full ticket prompts here.
-- If a detailed backlog ticket contains an old mentoring/persona prompt, use its goal/scope/acceptance criteria but follow `docs/agent-development.md` for agent behavior.
+- The human decides what becomes `READY`.
+- One `ACTIVE` ticket at a time by default.
+- Detailed legacy prompts are reference material, not runtime prompts.
+- Use the compact contracts in this file when present.
+- `docs/architecture.md` wins over stale paths in historical backlog text.
+- Model routing follows `docs/agent-development.md`.
 
-## Current candidates
+## Prepared candidates
 
-| Status | Ticket | Source | Notes |
+### IDEA D1 — Visual foundation
+**Source:** `docs/design-feature-backlog.md`  
+**Route:** GPT-5.4 Mini  
+**Goal:** Establish a small reusable MD3 foundation with restrained Aero/glass personality.
+
+**Scope**
+- Inspect existing tokens/global styles and representative pages.
+- Add only missing semantic design tokens/states.
+- Define one restrained Aero/glass treatment for focal surfaces.
+- Apply the foundation to one existing page as proof.
+
+**Constraints**
+- No component/CSS framework.
+- No app-wide redesign.
+- Dense statistics remain on solid readable surfaces.
+- Preserve light/dark themes and accessibility.
+
+**Acceptance**
+- One representative page uses the foundation coherently.
+- Light/dark/mobile/focus states remain readable.
+- Build/typecheck pass.
+- New visual rules are documented briefly.
+
+**Verify:** smallest relevant frontend typecheck/build + targeted manual visual checks.  
+**Out of scope:** full MD3 migration, animation, navigation redesign.
+
+---
+
+### IDEA D1B — Condense CSS
+**Source:** `docs/design-feature-backlog.md`  
+**Depends on:** D1  
+**Route:** GPT-5.6 Luna if changes are purely mechanical; GPT-5.4 Mini otherwise.  
+**Goal:** Reduce CSS duplication without changing intentional design.
+
+**Scope**
+- CSS touched by D1 plus shared/global CSS.
+- Remove clearly unused rules.
+- Consolidate truly duplicate rules/values.
+- Reuse existing tokens where appropriate.
+
+**Constraints**
+- Zero intentional visual/behavior change.
+- Do not merge intentionally different states/components.
+- No new CSS framework or abstraction solely to reduce line count.
+
+**Acceptance**
+- CSS is measurably smaller or less duplicated.
+- Light/dark/mobile/focus behavior is preserved.
+- Build/typecheck/tests pass.
+
+**Verify:** frontend checks + targeted before/after visual comparison.  
+**Out of scope:** redesign or unrelated CSS cleanup.
+
+---
+
+### IDEA D2 — Home → Game → Team consistency
+**Source:** `docs/design-feature-backlog.md`  
+**Depends on:** D1  
+**Route:** GPT-5.4 Mini  
+**Goal:** Apply the D1 visual language to Home, Game Detail, and Team without redesigning the app.
+
+**Scope**
+- Improve hierarchy on the three pages.
+- Reuse D1 tokens/states.
+- Aero only for focal areas.
+- Preserve readable data-heavy surfaces.
+
+**Constraints**
+- No navigation redesign.
+- No new API calls.
+- No unnecessary component rebuilds.
+- Do not begin signature features.
+
+**Acceptance**
+- Three pages clearly share the same visual language.
+- Existing data/navigation still work.
+- Mobile/focus/light/dark states work.
+- Build/typecheck pass.
+
+**Verify:** frontend checks + manual checks on all three pages.  
+**Out of scope:** sitewide migration, Game Story, Team DNA, Playoff What-If.
+
+---
+
+### IDEA F1 — Game Story
+**Source:** `docs/design-feature-backlog.md`  
+**Depends on:** D1; D2 preferred  
+**Route:** GPT-5.4 Mini; escalate to GPT-5.6 Sol only if game-data derivation becomes ambiguous.  
+**Goal:** Let a fan understand a completed game quickly from a factual visual narrative.
+
+**Scope**
+- Inspect actual existing game-detail data first.
+- Ordered scoring events.
+- Lead/tie changes.
+- 2–4 factual turning points derivable from existing data.
+- Supporting stats only when useful.
+- Mobile-scannable presentation.
+
+**Constraints**
+- Existing data first; no invented fields/events.
+- No AI commentary.
+- No new API/backend work without human approval.
+- No generic chart framework.
+- Reuse D1 design language.
+
+**Acceptance**
+- A real completed game renders a clear factual story.
+- Missing data degrades gracefully.
+- One real game is cross-checked against its official record.
+- Mobile/dark mode work.
+- Relevant build/typecheck/tests pass.
+
+**Verify:** frontend checks + one real completed-game comparison.  
+**Out of scope:** generated commentary, new data acquisition, Game Detail rewrite.
+
+---
+
+### IDEA E2 — Team form and momentum
+**Source:** `docs/exciting-features-backlog.md`  
+**Route:** GPT-5.4 Mini  
+**Goal:** Derive useful recent-form visuals from schedule data already loaded by the app.
+
+**Scope**
+- Pure team-form helper.
+- Last-N form strip.
+- Rolling points-percentage sparkline.
+- Home/road and goal-differential summaries.
+- Mount on Team page; standings integration only if it fits cleanly.
+
+**Constraints**
+- Zero new fetches/dependencies.
+- Pure calculations outside React.
+- Inline SVG; no chart library.
+- Existing design tokens only.
+
+**Acceptance**
+- Derived values match source schedule data for a checked team.
+- Past/current seasons do not crash.
+- Mobile and both themes remain legible.
+- Typecheck/build pass.
+
+**Verify:** frontend checks + manual comparison for one team.  
+**Out of scope:** player form, xG/shot data, backend work.
+
+## Later candidates
+
+| Status | Ticket | Source | Note |
 |---|---|---|---|
-| IDEA | D1 — Visual foundation | `docs/design-feature-backlog.md` | Foundation for the Aero/MD3 direction; human selects when ready. |
-| IDEA | D1B — Condense CSS | `docs/design-feature-backlog.md` | Do after D1; mechanical work suited to a low-cost coding model. |
-| IDEA | D2 — Home → Game → Team visual consistency | `docs/design-feature-backlog.md` | Depends on D1. |
-| IDEA | F1 — Game Story | `docs/design-feature-backlog.md` | Distinctive product feature; existing game-detail data. |
-| IDEA | F2 — Team DNA | `docs/design-feature-backlog.md` | Distinctive product feature; keep derivation client-side where possible. |
-| IDEA | F3 — Playoff What-If | `docs/design-feature-backlog.md` | Higher reasoning/logic burden; likely stronger coder/QA tier. |
-| IDEA | E1 — Playoff race command center | `docs/exciting-features-backlog.md` | Pure derivation; no new fetches. |
-| IDEA | E2 — Team form and momentum | `docs/exciting-features-backlog.md` | Pure helper + small SVG UI; good bounded ticket. |
+| IDEA | F2 — Team DNA | `docs/design-feature-backlog.md` | Better after D1/D2; can reuse E2. |
+| IDEA | F3 — Playoff What-If | `docs/design-feature-backlog.md` | Logic-heavy; preferably after playoff helper work. |
+| IDEA | E1 — Playoff race command center | `docs/exciting-features-backlog.md` | Pure derivation; larger rules surface. |
 | IDEA | E3 — Head-to-head matchup explorer | `docs/exciting-features-backlog.md` | Reuses loaded schedule data. |
+| IDEA | F4 — Signature interaction polish | `docs/design-feature-backlog.md` | Only after a signature feature exists. |
+
+## Ready
+
+None — waiting for human selection.
 
 ## Active
 
-None. The human developer should explicitly promote the next ticket to `READY`.
+None.
 
 ## Completed
 
-Use existing progress/backlog completion markers as historical truth. Do not duplicate the full Phase 2 progress log here.
+Use existing progress/backlog completion markers as historical truth; do not duplicate the Phase 2 progress log here.
