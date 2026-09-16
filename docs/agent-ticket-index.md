@@ -489,8 +489,8 @@ Look for observable gaps only:
 - layout shift/loading roughness
 - clipped/overflowing content
 - interactions that feel visually unfinished
-- game cards that do not present the result/status/team hierarchy with premium clarity
-- the rink/ice visualization feeling like a desktop surface merely shrunk onto mobile rather than intentionally composed for the viewport
+- RinkQuest game cards whose gameplay hierarchy, readability, or feedback does not feel deliberately composed for mobile
+- the RinkQuest playable rink feeling like a desktop game surface merely shrunk onto mobile rather than intentionally composed for touch and the viewport
 - inconsistent application of the portable Aero/MD3 language
 
 ### B — Mobile visual QA
@@ -505,9 +505,9 @@ Specifically check:
 - viewport-height issues
 - modal/popover/selector usability
 - content hierarchy at narrow widths
-- **game-card readability:** team/score/status hierarchy, truncation/wrapping, spacing, touch targets, scanability, and whether secondary metadata competes with the game result
-- **rink/game surface:** treat the rink/ice visualization as a first-class mobile surface; verify it fits the viewport, remains legible, preserves useful proportions, avoids tiny labels/controls, and does not require awkward horizontal scrolling or zooming for the primary experience
-- when the rink contains interaction/overlays, verify touch targets, selected/focus states, labels, and information density work at phone size
+- **RinkQuest game-card readability:** make the RinkQuest game cards easy to scan and play from on a phone; check hierarchy, text/number legibility, truncation/wrapping, spacing, touch targets, card state/feedback, and whether secondary information competes with the primary game action
+- **RinkQuest rink/game surface:** treat the playable RinkQuest rink as a first-class mobile game surface; verify it fits the viewport, remains legible and tappable, preserves useful rink proportions, avoids tiny labels/targets/controls, clearly communicates interactive/state changes, and does not require awkward horizontal scrolling or zooming for normal play
+- for RinkQuest rink interactions/overlays, verify touch targets, selected/focus/pressed states, labels, feedback, and information density work at phone size; prioritize playability and immediate feedback over preserving desktop composition
 - scroll smoothness and whether animations remain useful rather than distracting
 
 Do not treat desktop/mobile visual differences as bugs when they are intentional responsive design.
@@ -571,7 +571,7 @@ Avoid subjective nitpicks. If a finding cannot explain user impact in one senten
 - Screenshots document the important states/findings.
 - Reduced-motion, keyboard/focus, light/dark, responsive layout, and basic semantic accessibility were exercised.
 - Findings distinguish genuine gaps from optional refinement.
-- Mobile game cards and the rink/game surface receive explicit findings or an explicit “no meaningful gap observed” result.
+- RinkQuest mobile game cards and the playable rink/game surface receive explicit findings or an explicit “no meaningful gap observed” result.
 - Each P0/P1 finding includes: page/state, desktop/mobile/both, observable evidence, user impact, and the smallest plausible fix direction.
 - No code was changed.
 - Final report is concise enough for the human to choose what becomes a follow-up ticket.
