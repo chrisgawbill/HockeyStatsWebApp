@@ -820,6 +820,108 @@ A developer starting a new React project should be able to understand the normal
 
 ---
 
+### IDEA ARCH1 — Extract HockeyStats API into an independent service repo
+**Source:** architecture follow-up after LIB1  
+**Depends on:** LIB1 complete; preferably run after LIB2 so the frontend/library boundary is stable  
+**Route:** GPT-5.4 Mini in bounded inventory → extraction → deployment → consumer verification phases. Use GPT-5.6 Sol only for evidence-backed cross-repo/runtime architecture problems.  
+**Goal:** Separate HockeyStats data/API responsibilities from the frontend into an independent repository and Render service, while keeping HockeyStatsWebApp and the portable Aero/MD3 library independently deployable/consumable.
+
+**Target architecture**
+```text
+HockeyStats API repo
+      │
+      └── Render API service
+                │ HTTPS/JSON
+                ▼
+HockeyStatsWebApp repo ───── imports ─────► Aero/MD3 library repo
+      │
+      └── frontend deployment
+
+The design library never depends on or calls the HockeyStats API.
+```
+
+**Human checkpoint**
+Before creating/moving repositories or changing production deployment, return an inventory and proposed boundary. The human approves: API repo name/location, service boundary, migration approach, Render service changes, environment-variable names, and any contract strategy. Do not delete/move production code or alter live Render services before approval.
+
+### Phase A — boundary inventory
+- Inspect current frontend/backend/API/proxy/server/data-fetching code and current Render/deployment configuration.
+- Classify relevant code/config as `API`, `FRONTEND`, `SHARED CONTRACT`, `DEPLOYMENT`, or `UNCERTAIN`.
+- Identify existing API endpoints, frontend consumers, environment variables, CORS/origin assumptions, secrets, caching/proxy behavior, and health/start commands.
+- Identify code that only exists because frontend and API currently share a repo/process.
+- Propose the smallest extraction that preserves behavior; do not redesign the backend.
+- Flag any shared types/contracts that would become duplicated, but do not create a contracts package unless real duplication warrants a separate human-approved follow-up.
+
+### Phase B — independent API repo
+After approval:
+- Create the approved API repository and move only backend/API responsibilities.
+- Preserve current framework, endpoint behavior, response semantics, and data-source behavior unless a change is required for separation and approved.
+- Add minimal README/setup, environment-variable documentation, health/start/build commands, and targeted API checks.
+- Keep secrets out of source and history.
+- Keep frontend/UI/design-library code out of the API repo.
+- Avoid adding frameworks, ORMs, gateways, queues, or infrastructure merely because the API now has its own repo.
+
+### Phase C — explicit frontend contract boundary
+- HockeyStatsWebApp calls the API through one obvious configuration/base-URL boundary.
+- Keep API DTO/JSON mapping at the frontend boundary rather than leaking transport shapes throughout React components.
+- Preserve existing frontend domain models/helpers where appropriate.
+- Remove obsolete same-repo/proxy assumptions only after remote API consumption works.
+- The Aero/MD3 library remains domain-free and has zero API/network knowledge.
+- Do not create a shared-contract package unless duplication is already causing measurable maintenance friction and the human separately approves it.
+
+### Phase D — independent Render deployment
+- Configure/prepare the API repo for its own Render Web Service using the existing runtime requirements.
+- Configure frontend deployment to consume the API service URL through environment configuration.
+- Treat frontend and API as independently deployable services; one should not require rebuilding the other for unrelated changes.
+- Configure only necessary CORS/origin behavior; do not use unrestricted production CORS as a convenience unless explicitly justified/approved.
+- Preserve secrets/environment separation between services.
+- Do not alter DNS/custom domains, paid service tiers, production data, or destructive Render settings without human approval.
+- Prefer existing Render capabilities/configuration; no new infrastructure platform.
+
+### Phase E — migration verification
+Use a fresh verifier/browser-capable QA path where applicable:
+- API build/start/health and targeted endpoint checks
+- frontend build/typecheck/tests against configured API boundary
+- representative Home/Team/Game/Standings/Schedule/signature-feature data flows
+- RinkQuest only where it actually consumes API data
+- browser check for loading/error states caused by network separation
+- confirm design-library dependency remains independent
+- confirm no secrets or backend-only code landed in frontend/library repos
+- confirm API and frontend can be built/deployed independently
+
+**Performance & reliability**
+- Establish baseline request behavior before changing it.
+- Watch for accidental duplicate requests, proxy hops, CORS preflights caused by poor request design, lost caching, or slower critical data paths introduced by extraction.
+- Fix only observed regressions; do not introduce Redis/CDN/custom caching/queues/speculative infrastructure without evidence and human approval.
+- “Fast connection” means preserving or improving observed request behavior with the simplest architecture, not adding infrastructure.
+
+**Constraints**
+- No backend rewrite during extraction.
+- No new API framework/runtime/database unless human-approved.
+- No design-library network/API coupling.
+- No speculative microservices; one API service is the default.
+- No automatic shared-types/contracts package.
+- No public API breaking changes without human approval.
+- No production Render mutation before the checkpoint/approval.
+- No secrets committed to any repo.
+- Keep contexts separated by phase when that reduces cross-repo rereading.
+
+**Acceptance**
+- Independent API repo exists at the approved location and contains only appropriate backend/API responsibilities.
+- HockeyStatsWebApp consumes the API through an explicit environment-configured boundary.
+- Aero/MD3 library remains independent of HockeyStats/API code.
+- Existing representative API behavior/data remains correct after extraction.
+- Frontend and API can build/deploy independently.
+- Render configuration clearly maps the API repo to its API service and the frontend repo to its frontend service.
+- Necessary CORS/origin and environment configuration is documented and no secrets are committed.
+- No accidental duplicate API implementation remains in HockeyStatsWebApp for migrated responsibilities.
+- Any observed performance regression from separation is resolved or explicitly reported before completion.
+- Relevant builds/typechecks/tests/browser checks pass.
+
+**Verify:** boundary inventory → human approval → API checks → frontend contract checks → independent build/deploy config verification → representative browser data-flow QA → secret/domain-coupling scan.  
+**Out of scope:** backend rewrite, microservices, new database, public API redesign, GraphQL migration, shared-contract package unless separately approved, new hosting provider, speculative caching/infrastructure.
+
+---
+
 ## Later candidates
 
 | Status | Ticket | Source | Note |
