@@ -1,4 +1,3 @@
-import { Col, Row } from 'react-bootstrap';
 import styles from '@/features/standings/components/LandingPageStandings.module.css';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import LandingPageStandingsTable from '@/features/standings/components/LandingPageStandingsTable';
@@ -18,20 +17,18 @@ export default function StandingsContainer({
     return (
       <div>
         {standingsName && (
-          <Row>
-            <Col className={styles['standings-header']}>
-              <Row>
+          <div className={styles['standings-header']}>
+              <div>
                 <h3>{standingsName}</h3>
-              </Row>
-            </Col>
-          </Row>
+              </div>
+          </div>
         )}
-        <Row>
+        <div>
           <LandingPageStandingsTable
             standingsData={standingsData}
             standingFormat={standingFormat}
           />
-        </Row>
+        </div>
       </div>
     );
   } else {

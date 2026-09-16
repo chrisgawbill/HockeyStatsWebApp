@@ -4,7 +4,6 @@ import {
   getRecentSeasonIds,
   formatSeasonLabel,
 } from '@/features/season/utils/seasonHelper';
-import shared from '@/styles/shared.module.css';
 import styles from '@/components/SeasonSelector.module.css';
 
 function ChevronIcon() {
@@ -181,7 +180,7 @@ export default function SeasonSelector({
             id={listboxId}
             role="listbox"
             aria-label="Select season"
-            className={`${styles['season-field__listbox']} ${shared.surfaceElevated}`}
+            className={`${styles['season-field__listbox']} ds-aero-surface`}
           >
             {seasons.map((id, i) => (
               <li

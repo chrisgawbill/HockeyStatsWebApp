@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import PageHeader from '@/components/PageHeader';
-import { Container } from 'react-bootstrap';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import styles from '@/features/schedule/components/SchedulePage.module.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -351,7 +350,7 @@ function SchedulePage() {
   return (
     <>
       <PageHeader />
-      <Container fluid className={styles['schedule-page']}>
+      <main className={`${styles['schedule-page']} ds-page-shell ds-container`}>
         {loadingListOfGamesData ? (
           <LoadingState label="Loading schedule" fullPage />
         ) : errorListOfGamesData ? (
@@ -452,7 +451,7 @@ function SchedulePage() {
             )}
           </>
         )}
-      </Container>
+      </main>
     </>
   );
 }

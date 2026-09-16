@@ -67,7 +67,7 @@
   font-size: var(--text-sm);
 }
 
-.landingPage-content > [class*='col-'] {
+.landingPage-content > section {
   padding-left: var(--space-lg);
   padding-right: var(--space-lg);
 }
@@ -89,7 +89,7 @@
     margin-top: var(--space-lg);
   }
 
-  .landingPage-content > [class*='col-'] {
+  .landingPage-content > section {
     padding-left: var(--space-md);
     padding-right: var(--space-md);
   }

@@ -1,5 +1,7 @@
 import { Team } from '@/features/teams/types/team';
-import { Button, Modal } from 'react-bootstrap';
+import { useId } from 'react';
+import AppDialog from '@/components/AppDialog';
+import styles from '@/features/teams/components/TeamListModal.module.css';
 interface TeamListModalProps {
   showModal: boolean;
   setShowModal: Function;
@@ -10,16 +12,19 @@ export default function TeamListModal({
   setShowModal,
   team,
 }: TeamListModalProps) {
+  const titleId = useId();
   return (
-    <Modal show={showModal} onHide={handleModalClose}>
-      <Modal.Header>{team.teamName}</Modal.Header>
-      <Modal.Body></Modal.Body>
-      <Modal.Footer>
-        <Button variant="outline-danger" onClick={handleModalClose}>
+    <AppDialog open={showModal} onClose={handleModalClose} labelledBy={titleId}>
+      <header className={styles.header}>
+        <h2 id={titleId}>{team.teamName}</h2>
+      </header>
+      <div className={styles.body} />
+      <footer className={styles.footer}>
+        <button type="button" className={`ds-button ${styles.close}`} onClick={handleModalClose}>
           Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        </button>
+      </footer>
+    </AppDialog>
   );
   function handleModalClose() {
     setShowModal(false);

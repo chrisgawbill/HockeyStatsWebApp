@@ -1,38 +1,35 @@
-import { Button, Col, Row } from 'react-bootstrap';
 import styles from '@/components/QuickLinks.module.css';
 import { Link } from 'react-router-dom';
 
 export default function QuickLinks() {
   return (
     <div id="quick-links-container">
-      <Row>
-        <Col className={styles['landing-header']}>
+      <div className={styles['landing-header']}>
           <h2>Quick Links</h2>
-        </Col>
-      </Row>
-      <Row>
-        <Col sm md lg={5}>
+      </div>
+      <div className="ds-grid">
+        <div>
           <Link to="/teamList">
-            <Button variant="info" className={styles['quick-links-btn']}>
+            <button className={`ds-button ${styles['quick-links-btn']}`}>
               Teams List
-            </Button>
+            </button>
           </Link>
-        </Col>
-        <Col sm md lg={5}>
+        </div>
+        <div>
           <Link to="/standings">
-            <Button variant="info" className={styles['quick-links-btn']}>
+            <button className={`ds-button ${styles['quick-links-btn']}`}>
               Standings
-            </Button>
+            </button>
           </Link>
-        </Col>
-        <Col sm md lg={5}>
+        </div>
+        <div>
           <Link to="/board-game">
-            <Button variant="info" className={styles['quick-links-btn']}>
+            <button className={`ds-button ${styles['quick-links-btn']}`}>
               Board Game
-            </Button>
+            </button>
           </Link>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </div>
   );
 }

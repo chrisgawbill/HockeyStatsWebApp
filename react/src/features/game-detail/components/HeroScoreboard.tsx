@@ -21,7 +21,6 @@ function cx(...classes: (string | false | null | undefined)[]) {
 interface Props {
   boxscore: GameDetailBoxscore;
   status: GameDetailStatus;
-  theme: any;
 }
 
 export default function HeroScoreboard({ boxscore, status }: Props) {

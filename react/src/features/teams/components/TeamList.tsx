@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Container } from 'react-bootstrap';
 import { Team } from '@/features/teams/types/team';
 import { TeamStats } from '@/features/teams/types/teamStats';
 import { localTeamList } from '@/lib/teamListData';
@@ -194,7 +193,7 @@ export default function TeamList() {
   }
 
   return (
-    <Container fluid className={styles['team-list-page']}>
+    <main className={`${styles['team-list-page']} ds-page-shell ds-container`}>
       <PageHeader />
       <section className={styles['team-list-toolbar']}>
         <div className={styles['team-list-toolbar__header']}>
@@ -359,6 +358,6 @@ export default function TeamList() {
           No teams match the current filters.
         </p>
       )}
-    </Container>
+    </main>
   );
 }
