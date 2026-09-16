@@ -32,7 +32,7 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   /**
    * Fetches season stats for every team and merges them onto the local team
    * list. Stores a human-readable message for the UI instead of the raw
-   * axios error on failure.
+   * API error on failure.
    */
   const GetTeams = useCallback(async () => {
     setErrorListOfTeamsData(null);

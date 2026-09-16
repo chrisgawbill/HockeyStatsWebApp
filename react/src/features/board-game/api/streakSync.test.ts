@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StreakData } from '@/features/board-game/data/dailyStreak';
 
@@ -7,6 +6,11 @@ const post = vi.fn();
 const put = vi.fn();
 
 vi.mock('@/lib/apiClient', () => ({
+  ApiError: class ApiError extends Error {
+    constructor(public readonly status: number) {
+      super();
+    }
+  },
   get: (...args: unknown[]) => get(...args),
   post: (...args: unknown[]) => post(...args),
   put: (...args: unknown[]) => put(...args),
@@ -18,6 +22,7 @@ import {
   googleSignIn,
   pushRemoteStreak,
 } from '@/features/board-game/api/streakSync';
+import { ApiError } from '@/lib/apiClient';
 
 describe('streakSync', () => {
   beforeEach(() => {
@@ -49,22 +54,20 @@ describe('streakSync', () => {
   });
 
   it('fetchSession returns null (does not throw) on a 401', async () => {
-    const error = new AxiosError('Unauthorized');
-    error.response = { status: 401 } as AxiosError['response'];
+    const error = new ApiError(401, 'Unauthorized');
     get.mockRejectedValue(error);
 
     await expect(fetchSession('expired-token')).resolves.toBeNull();
   });
 
   it('fetchSession rethrows non-401 errors', async () => {
-    const error = new AxiosError('Server error');
-    error.response = { status: 500 } as AxiosError['response'];
+    const error = new ApiError(500, 'Server Error');
     get.mockRejectedValue(error);
 
     await expect(fetchSession('token-1')).rejects.toBe(error);
   });
 
-  it('fetchSession rethrows non-axios errors', async () => {
+  it('fetchSession rethrows non-status errors', async () => {
     const error = new Error('network down');
     get.mockRejectedValue(error);
 
@@ -72,7 +75,10 @@ describe('streakSync', () => {
   });
 
   it('fetchRemoteStreak GETs the streak with a bearer header', async () => {
-    const streak: StreakData = { wins: { '2026-03-10': true }, lastWinDate: '2026-03-10' };
+    const streak: StreakData = {
+      wins: { '2026-03-10': true },
+      lastWinDate: '2026-03-10',
+    };
     get.mockResolvedValue(streak);
 
     const result = await fetchRemoteStreak('token-1');
@@ -84,7 +90,10 @@ describe('streakSync', () => {
   });
 
   it('pushRemoteStreak PUTs the streak and returns the server-merged result', async () => {
-    const local: StreakData = { wins: { '2026-03-10': true }, lastWinDate: '2026-03-10' };
+    const local: StreakData = {
+      wins: { '2026-03-10': true },
+      lastWinDate: '2026-03-10',
+    };
     const merged: StreakData = {
       wins: { '2026-03-09': true, '2026-03-10': true },
       lastWinDate: '2026-03-10',

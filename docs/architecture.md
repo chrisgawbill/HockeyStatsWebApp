@@ -26,5 +26,5 @@ NHL stats app: React (Vite) frontend + independently deployed HockeyStatsAPI Exp
 │   │   ├── hooks/     # Contexts and domain hooks (e.g., useStatLeaders)
 │   │   ├── types/     # Domain models/contracts
 │   │   └── utils/     # Presentation mappers, pure calculations (draft odds)
-├── lib/               # axiosInstance (15s timeout), apiClient core, genAIHandler, shared cross-feature primitives (gameStatus, dateFormat)
+├── lib/               # fetch apiClient (15s timeout), genAIHandler, shared cross-feature primitives (gameStatus, dateFormat)
 └── styles/            # Global styling, tokens, reset

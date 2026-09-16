@@ -46,7 +46,7 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
    * ScheduledGame models, and stores the result for every schedule view to
    * project locally. On failure it clears any stale games (rather than leaving
    * the previous season's schedule on screen) and stores a human-readable
-   * message for the UI instead of the raw axios error.
+   * message for the UI instead of the raw API error.
    */
   const fetchGames = useCallback(async (seasonId: string) => {
     setErrorListOfGamesData(null);

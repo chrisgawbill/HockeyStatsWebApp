@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { get, post, put } from '@/lib/apiClient';
+import { ApiError, get, post, put } from '@/lib/apiClient';
 import type { StreakData } from '@/features/board-game/data/dailyStreak';
 
 function authHeader(token: string) {
@@ -19,11 +18,17 @@ export async function googleSignIn(
  * Resolves a stored session token to the signed-in user's email, or `null`
  * for an expired/invalid session.
  */
-export async function fetchSession(token: string): Promise<{ email: string } | null> {
+export async function fetchSession(
+  token: string,
+): Promise<{ email: string } | null> {
   try {
-    return await get<{ email: string }>('/api/auth/me', undefined, authHeader(token));
+    return await get<{ email: string }>(
+      '/api/auth/me',
+      undefined,
+      authHeader(token),
+    );
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
+    if (error instanceof ApiError && error.status === 401) {
       return null;
     }
     throw error;
@@ -32,7 +37,11 @@ export async function fetchSession(token: string): Promise<{ email: string } | n
 
 /** Fetches the signed-in user's server-side streak backup. */
 export async function fetchRemoteStreak(token: string): Promise<StreakData> {
-  return get<StreakData>('/api/board-game/streak', undefined, authHeader(token));
+  return get<StreakData>(
+    '/api/board-game/streak',
+    undefined,
+    authHeader(token),
+  );
 }
 
 /** Pushes the local/server-merged streak; the server merges again before saving. */

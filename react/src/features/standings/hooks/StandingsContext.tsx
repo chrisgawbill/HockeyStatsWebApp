@@ -57,7 +57,7 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
    * Fetches one season's standings and splits them into the slices above. On
    * failure it resets every slice (rather than leaving the previous season's
    * standings on screen after a failed season change) and stores a
-   * human-readable message for the UI instead of the raw axios error.
+   * human-readable message for the UI instead of the raw API error.
    */
   const fetchStandings = useCallback(async (seasonId: string) => {
     setErrorStandingsData(null);

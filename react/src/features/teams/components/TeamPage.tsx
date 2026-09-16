@@ -149,7 +149,7 @@ export default function TeamPage() {
    * Loads the team data that changes by selected season: summary stats,
    * roster, club schedule, skater totals, Corsi, and optional goalie TOI. The
    * results are shaped into the TeamPage view models and stored in state. On
-   * failure it stores a human-readable message instead of the raw axios error
+   * failure it stores a human-readable message instead of the raw API error
    * so the retry action below has something to render.
    */
   const fetchMain = useCallback(async () => {
