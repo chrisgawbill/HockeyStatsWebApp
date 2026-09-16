@@ -279,7 +279,7 @@ GPT-5.6 Luna verifies the derivation acceptance criteria before Phase B starts. 
 
 ---
 
-### IDEA E1 — Playoff race command center
+### DONE E1 — Playoff race command center
 **Source:** `docs/exciting-features-backlog.md`  
 **Route:** GPT-5.4 Mini in two bounded phases; Luna QA gate for playoff math; GPT-5.6 Sol only for unresolved rule/data ambiguity.  
 **Goal:** Show a transparent, simplified playoff-race view from standings and schedule data already loaded by the app.

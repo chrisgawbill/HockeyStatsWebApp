@@ -13,6 +13,8 @@ import ErrorState from '@/components/ErrorState';
 import SeasonSelector from '@/components/SeasonSelector';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
+import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
+import PlayoffRacePanel from '@/features/standings/components/PlayoffRacePanel';
 
 type Conference = 'Eastern' | 'Western';
 type StandingsView = 'conference' | 'division';
@@ -44,6 +46,7 @@ export default function StandingsPage() {
   const [view, setView] = useState<StandingsView>('conference');
   const [conference, setConference] = useState<Conference>('Eastern');
   const { season } = useSeason();
+  const { listOfGamesData, loadingListOfGamesData } = useListOfGames();
 
   const hasStandings =
     easternStandingsData.length > 0 || westernStandingsData.length > 0;
@@ -131,6 +134,24 @@ export default function StandingsPage() {
                 />
               ))}
             </Row>
+            {loadingListOfGamesData ? (
+              <p className={styles['playoff-race-loading']}>Loading playoff race…</p>
+            ) : (
+              <Row>
+                <div className={styles['playoff-race-grid']}>
+                  <PlayoffRacePanel
+                    conference="Eastern"
+                    standings={easternStandingsData}
+                    games={listOfGamesData}
+                  />
+                  <PlayoffRacePanel
+                    conference="Western"
+                    standings={westernStandingsData}
+                    games={listOfGamesData}
+                  />
+                </div>
+              </Row>
+            )}
           </>
         )}
       </Container>
