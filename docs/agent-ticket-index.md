@@ -322,7 +322,7 @@ Phase A verifies pure playoff-race derivation before any substantial UI work. Ph
 
 ---
 
-### IDEA E3 — Head-to-head matchup explorer
+### DONE E3 — Head-to-head matchup explorer
 **Source:** `docs/exciting-features-backlog.md`  
 **Depends on:** E2 preferred for reusable form display  
 **Route:** GPT-5.4 Mini; default single-agent with deterministic helper verification.  
@@ -334,7 +334,7 @@ Phase A verifies pure playoff-race derivation before any substantial UI work. Ph
 - Add a deep-linkable matchup view with two team selectors and selected season.
 - Show series results, aggregate goals, upcoming meetings, and team form when already available.
 - Add a minimal pre-filled entry point from Game Detail; other entry points are follow-ups unless trivial.
-
+z
 **Constraints**
 - No new endpoint; team-selector changes are client-side projections.
 - Preserve existing URL/search-param and route-state conventions.

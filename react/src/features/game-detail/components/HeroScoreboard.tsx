@@ -10,6 +10,7 @@ import {
   getStateLabel,
 } from '@/features/game-detail/utils/gameDetailHelper';
 import { useTheme } from '@/lib/ThemeContext';
+import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 
@@ -26,6 +27,7 @@ interface Props {
 export default function HeroScoreboard({ boxscore, status }: Props) {
   const { theme } = useTheme();
   const location = useLocation();
+  const { season } = useSeason();
 
   const awayLogo =
     theme === 'dark' ? boxscore.awayTeam.darkLogo : boxscore.awayTeam.logo;
@@ -154,6 +156,12 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
           </>
         )}
       </div>
+      <Link
+        className={styles['game-detail-matchup-link']}
+        to={`/matchup?teamA=${boxscore.awayTeam.abbrev}&teamB=${boxscore.homeTeam.abbrev}&season=${season}`}
+      >
+        View season series
+      </Link>
     </div>
   );
 }
