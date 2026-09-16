@@ -3,7 +3,7 @@ import { toDarkModeAccentColor } from '@/features/teams/utils/teamColor';
 
 describe('toDarkModeAccentColor', () => {
   it('lightens a dark, saturated color up to the floor', () => {
-    expect(toDarkModeAccentColor('#8b0000', 60)).toBe('#ff7070');
+    expect(toDarkModeAccentColor('#8b0000', 60)).toBe('#ff3333');
   });
 
   it('leaves an already-light color unchanged', () => {

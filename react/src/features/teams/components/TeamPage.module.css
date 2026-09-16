@@ -75,6 +75,198 @@
   );
 }
 
+/* ── Team form ─────────────────────────────────────────────────────────── */
+
+.form-panel {
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-md);
+  padding: var(--space-lg);
+}
+
+.form-panel__header,
+.form-panel__grid {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.form-panel__header {
+  align-items: flex-start;
+}
+
+.form-panel__grid {
+  align-items: stretch;
+  margin-top: var(--space-lg);
+}
+
+.form-panel__grid > div {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.form-panel__caption,
+.form-panel__label {
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+
+.form-panel__caption {
+  margin: var(--space-xs) 0 0;
+}
+
+.form-panel__recent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+}
+
+.form-panel__subheading {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: 0 0 var(--space-sm);
+}
+
+.form-strip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  min-height: 1.5rem;
+}
+
+.form-strip__result {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  color: var(--color-white);
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.form-strip__result--w {
+  background: var(--color-success);
+}
+
+.form-strip__result--l {
+  background: var(--color-danger);
+}
+
+.form-strip__result--otl {
+  background: var(--color-tertiary, #d18b1f);
+}
+
+.form-strip__empty {
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+
+.points-sparkline {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: 72px;
+  color: var(--color-primary);
+}
+
+.points-sparkline__reference {
+  stroke: var(--color-divider);
+  stroke-dasharray: 3 3;
+}
+
+.points-sparkline__line {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
+.split-bars {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.split-bars__column {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.split-bars__heading,
+.split-bars__metric {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+}
+
+.split-bars__heading {
+  justify-content: space-between;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.split-bars__metric {
+  margin-top: var(--space-xs);
+  color: var(--color-muted-text);
+}
+
+.split-bars__metric strong {
+  color: var(--color-text-secondary);
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+.split-bars__track {
+  flex: 1;
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: var(--border-radius-pill);
+  background: var(--color-divider);
+}
+
+.split-bars__track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.split-bars__fill--for {
+  background: var(--color-success);
+}
+
+.split-bars__fill--against {
+  background: var(--color-danger);
+}
+
+@media (max-width: 576px) {
+  .form-panel {
+    padding: var(--space-md);
+  }
+
+  .form-panel__header,
+  .form-panel__grid {
+    flex-direction: column;
+  }
+
+  .form-panel__recent {
+    align-items: flex-start;
+  }
+
+  .form-strip {
+    justify-content: flex-start;
+  }
+
+  .form-panel__grid {
+    gap: var(--space-lg);
+  }
+}
+
 /* ── Roster tab (Forwards / Defense / Goalies groups) ─────────────────── */
 
 .roster-group-section {
