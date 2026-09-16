@@ -14,5 +14,6 @@ minimumReleaseAgeExclude:
   - '@rolldown/binding-openharmony-arm64@1.2.9'
   - '@rolldown/binding-win32-arm64-msvc@1.2.9'
   - '@rolldown/binding-win32-x64-msvc@1.2.9'
+  - '@chrisgawbill/aero-md3-core@0.1.3'
 onlyBuiltDependencies:
   - esbuild
