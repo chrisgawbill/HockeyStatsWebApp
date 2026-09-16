@@ -32,6 +32,11 @@ jobs:
           version: 10
           run_install: false
 
+      - name: Configure GitHub Packages authentication
+        run: pnpm config set "//npm.pkg.github.com/:_authToken" "$NODE_AUTH_TOKEN"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install dependencies
         run: pnpm install --ignore-workspace
         working-directory: react
