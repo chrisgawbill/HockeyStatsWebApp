@@ -134,7 +134,7 @@ The core owns generic visual language; HockeyStats owns hockey semantics.
 
 ---
 
-### ACTIVE F1 — Game Story
+### DONE F1 — Game Story
 **Source:** `docs/design-feature-backlog.md`  
 **Depends on:** D1; D2 preferred  
 **Route:** GPT-5.4 Mini for both implementation phases; GPT-5.6 Luna QA after each phase; escalate to GPT-5.6 Sol only for genuinely ambiguous game-data reasoning.  
@@ -206,7 +206,7 @@ GPT-5.6 Luna verifies the derivation acceptance criteria before Phase B starts. 
 **Out of scope:** generated commentary, subjective momentum claims, new data acquisition, backend/API expansion, generic visualization framework, Game Detail rewrite, reusable component-library expansion.
 ---
 
-### ACTIVE E2 — Team form and momentum
+### DONE E2 — Team form and momentum
 **Source:** `docs/exciting-features-backlog.md`  
 **Route:** GPT-5.4 Mini. Default execution is single-agent; add GPT-5.6 Luna QA only if helper/domain logic cannot be covered adequately by deterministic checks.  
 **Goal:** Derive useful recent-form visuals from schedule data already loaded by the app.
@@ -354,7 +354,7 @@ z
 
 ---
 
-### IDEA F4 — Signature interaction polish
+### DONE F4 — Signature interaction polish
 **Source:** `docs/design-feature-backlog.md`  
 **Depends on:** D1 + at least one completed signature feature (F1/F2/F3)  
 **Route:** GPT-5.6 Luna for clearly mechanical CSS-only polish; GPT-5.4 Mini when state/React behavior is involved. Default single-agent.  

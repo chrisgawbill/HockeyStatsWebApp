@@ -38,11 +38,12 @@ export default function TeamDna({ metrics, season }: TeamDnaProps) {
         </p>
       ) : (
         <div className={styles['dna-metrics']} role="list">
-          {metrics.map((metric) => (
+          {metrics.map((metric, index) => (
             <div
               className={styles['dna-metric']}
               role="listitem"
               key={metric.key}
+              style={{ '--dna-index': index } as React.CSSProperties}
             >
               <div className={styles['dna-metric__heading']}>
                 <span>{metric.label}</span>
