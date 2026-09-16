@@ -1,0 +1,101 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+.content {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--space-lg);
+}
+.controls,
+.summary,
+.meeting {
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+.controls > :global(.season-bar) {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+.control {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+.control select {
+  min-height: 2.75rem;
+  padding: 0 10px;
+  border: 1px solid var(--color-divider);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.summary {
+  text-align: center;
+}
+.record {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xl);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.goals {
+  color: var(--color-muted-text);
+}
+.meeting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+.score {
+  font-size: 1.25rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.date {
+  color: var(--color-muted-text);
+}
+.sectionTitle {
+  margin: var(--space-lg) 0 var(--space-md);
+}
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+.formCard {
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+}
+.formTitle {
+  margin: 0 0 var(--space-md);
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.formCard :global(.form-strip) {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .controls,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  .meeting {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .record {
+    gap: var(--space-md);
+    font-size: 1.1rem;
+  }
+}

@@ -18,6 +18,9 @@ const SchedulePage = lazy(
 const GameDetailPage = lazy(
   () => import('@/features/game-detail/components/GameDetailPage'),
 );
+const MatchupPage = lazy(
+  () => import('@/features/matchup/components/MatchupPage'),
+);
 const DiagnosticsPage = lazy(
   () => import('@/features/diagnostics/components/DiagnosticsPage'),
 );
@@ -56,6 +59,7 @@ export default function App() {
                     <Route path="teamList" element={<TeamList />} />
                     <Route path="team/:teamId" element={<TeamPage />} />
                     <Route path="game/:gameId" element={<GameDetailPage />} />
+                    <Route path="matchup" element={<MatchupPage />} />
                     <Route path="diagnostics" element={<DiagnosticsPage />} />
                     <Route path="board-game" element={<BoardGamePage />} />
                   </Routes>
