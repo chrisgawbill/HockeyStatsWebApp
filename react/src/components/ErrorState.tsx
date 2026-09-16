@@ -20,6 +20,8 @@ export default function ErrorState({
   fullPage = false,
   onRetry,
 }: ErrorStateProps) {
+  const TitleTag = fullPage ? 'h1' : 'h2';
+
   return (
     <div
       className={
@@ -28,7 +30,7 @@ export default function ErrorState({
       role="alert"
     >
       <span className={styles['error-state__icon']} aria-hidden="true" />
-      {title && <span className={styles['error-state__title']}>{title}</span>}
+      {title && <TitleTag className={styles['error-state__title']}>{title}</TitleTag>}
       <span className={styles['error-state__message']}>{message}</span>
       {onRetry && (
         <button

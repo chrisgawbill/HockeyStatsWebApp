@@ -6,11 +6,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Button } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { isCompletedGameState } from '@/lib/gameStatus';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { localTeamList } from '@/lib/teamListData';
+import { useTheme } from '@/lib/ThemeContext';
 import styles from '@/components/PageHeader.module.css';
 
 /**
@@ -165,6 +165,23 @@ function BackIcon() {
   );
 }
 
+function ThemeToggle() {
+  const { theme, setPreference } = useTheme();
+  const nextTheme = theme === 'dark' ? 'light' : 'dark';
+
+  return (
+    <button
+      type="button"
+      className={styles['theme-toggle']}
+      onClick={() => setPreference(nextTheme)}
+      aria-label={`Switch to ${nextTheme} theme`}
+      title={`Switch to ${nextTheme} theme`}
+    >
+      {nextTheme === 'dark' ? 'Dark' : 'Light'}
+    </button>
+  );
+}
+
 function normalizeNavPath(path: string): string {
   return path.split('?')[0];
 }
@@ -308,6 +325,24 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
     if (e.key === 'Escape') {
       e.preventDefault();
       closeMobileSearch();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = Array.from(
+        e.currentTarget.querySelectorAll<HTMLElement>(
+          'input:not([disabled]), button:not([disabled])',
+        ),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   };
 
@@ -344,84 +379,91 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
 
   return (
     <>
-      <div
+      <nav
+        aria-label="Primary"
         className={styles['nav-bar']}
         style={isSubPage ? { marginBottom: 0 } : undefined}
       >
-        <div className={styles['nav-back-col']}>
-          {isSubPage && (
-            <button
-              className={styles['nav-back-btn']}
-              onClick={handleBack}
-              aria-label="Go back"
-            >
-              <BackIcon />
-            </button>
-          )}
-        </div>
-        <div className={styles['nav-search-col']} ref={searchBoxRef}>
-          <input
-            type="text"
-            className={styles['nav-search-input']}
-            placeholder="Search teams or games"
-            aria-label="Search teams or games"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setActiveIndex(-1);
-              setIsOpen(true);
-            }}
-            onFocus={() => setIsOpen(true)}
-            onBlur={() => setIsOpen(false)}
-            onKeyDown={handleSearchKeyDown}
-          />
-          {isOpen && results.length > 0 && (
-            <ul className={styles['nav-search-dropdown']} role="listbox">
-              {results.map((result, index) => (
-                <li
-                  key={result.id}
-                  role="option"
-                  aria-selected={index === activeIndex}
-                >
-                  <button
-                    type="button"
-                    className={cx(
-                      styles['nav-search-option'],
-                      index === activeIndex &&
-                        styles['nav-search-option--active'],
-                    )}
-                    onMouseDown={(e) => {
-                      // Prevent the input's onBlur from closing the dropdown before
-                      // the click registers.
-                      e.preventDefault();
-                      goToResult(result);
-                    }}
+        <div className={styles['nav-inner']}>
+          <span className={styles['nav-brand']}>HockeyStats</span>
+          <div className={styles['nav-back-col']}>
+            {isSubPage && (
+              <button
+                className={styles['nav-back-btn']}
+                onClick={handleBack}
+                aria-label="Go back"
+              >
+                <BackIcon />
+              </button>
+            )}
+          </div>
+          <div className={styles['nav-search-col']} ref={searchBoxRef}>
+            <input
+              type="text"
+              className={styles['nav-search-input']}
+              placeholder="Search teams or games"
+              aria-label="Search teams or games"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setActiveIndex(-1);
+                setIsOpen(true);
+              }}
+              onFocus={() => setIsOpen(true)}
+              onBlur={() => setIsOpen(false)}
+              onKeyDown={handleSearchKeyDown}
+            />
+            {isOpen && results.length > 0 && (
+              <ul className={styles['nav-search-dropdown']} role="listbox">
+                {results.map((result, index) => (
+                  <li
+                    key={result.id}
+                    role="option"
+                    aria-selected={index === activeIndex}
                   >
-                    {result.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        {navItems.map(({ label, path, icon }) => (
-          <div key={path} className={styles['nav-bar-item']}>
-            <Link to={path} style={{ width: '100%' }}>
-              <Button
+                    <button
+                      type="button"
+                      className={cx(
+                        styles['nav-search-option'],
+                        index === activeIndex &&
+                          styles['nav-search-option--active'],
+                      )}
+                      onMouseDown={(e) => {
+                        // Prevent the input's onBlur from closing the dropdown before
+                        // the click registers.
+                        e.preventDefault();
+                        goToResult(result);
+                      }}
+                    >
+                      {result.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          {navItems.map(({ label, path, icon }) => (
+            <div key={path} className={styles['nav-bar-item']}>
+              <Link
+                to={path}
                 className={cx(
                   styles['nav-btn'],
                   activePath === path && styles['active-page'],
                 )}
                 aria-label={label}
+                aria-current={activePath === path ? 'page' : undefined}
               >
                 <span className={styles['nav-btn__label']}>{label}</span>
                 <span className={styles['nav-btn__icon']}>{icon}</span>
-              </Button>
-            </Link>
+              </Link>
+            </div>
+          ))}
+          {corner && <div className={styles['nav-corner']}>{corner}</div>}
+          <div className={styles['nav-theme-toggle']}>
+            <ThemeToggle />
           </div>
-        ))}
-        {corner && <div className={styles['nav-corner']}>{corner}</div>}
-      </div>
+        </div>
+      </nav>
       <button
         ref={mobileSearchFabRef}
         type="button"
@@ -462,6 +504,9 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
               >
                 &times;
               </button>
+            </div>
+            <div className={styles['mobile-search-theme']}>
+              <ThemeToggle />
             </div>
             <ul className={styles['mobile-search-results']} role="listbox">
               {results.map((result) => (

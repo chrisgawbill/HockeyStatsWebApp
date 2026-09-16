@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import type { Coord, Puck, Skater } from '@/features/board-game/types/game';
 import { BOARD_COLS, BOARD_ROWS } from '@/features/board-game/data/balance';
 import { RINK_CORNER_RADIUS } from '@/features/board-game/data/rink';
@@ -64,6 +64,44 @@ export default function RinkBoard({
     .filter(Boolean)
     .join(' ');
 
+  function handleTileKeyDown(
+    coord: Coord,
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) {
+    if (
+      !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)
+    )
+      return;
+    event.preventDefault();
+
+    const direction = {
+      ArrowUp: { col: 0, row: -1 },
+      ArrowDown: { col: 0, row: 1 },
+      ArrowLeft: { col: -1, row: 0 },
+      ArrowRight: { col: 1, row: 0 },
+    }[event.key];
+    if (!direction) return;
+
+    const candidates = highlighted.filter((candidate) => {
+      const col = candidate.col - coord.col;
+      const row = candidate.row - coord.row;
+      return direction.col * col + direction.row * row > 0;
+    });
+    candidates.sort((a, b) => {
+      const aDistance =
+        Math.abs(a.col - coord.col) + Math.abs(a.row - coord.row);
+      const bDistance =
+        Math.abs(b.col - coord.col) + Math.abs(b.row - coord.row);
+      return aDistance - bDistance;
+    });
+    const next = candidates[0];
+    if (!next) return;
+    const button = document.querySelector<HTMLButtonElement>(
+      `[data-rink-tile="${coordKey(next)}"]`,
+    );
+    button?.focus();
+  }
+
   return (
     <div
       className={boardClassName}
@@ -80,7 +118,9 @@ export default function RinkBoard({
           coord={coord}
           highlighted={highlightedKeys.has(coordKey(coord))}
           narrow={narrow}
+          actionable={highlightedKeys.has(coordKey(coord))}
           onClick={() => onTileClick(coord)}
+          onKeyDown={(event) => handleTileKeyDown(coord, event)}
         />
       ))}
       {loosePuckCoord && (
