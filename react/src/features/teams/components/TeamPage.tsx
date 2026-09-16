@@ -57,6 +57,17 @@ import { useTheme } from '@/lib/ThemeContext';
 import { toDarkModeAccentColor } from '@/features/teams/utils/teamColor';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
+import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
+import FormStrip from '@/features/teams/components/FormStrip';
+import PointsPaceSparkline from '@/features/teams/components/PointsPaceSparkline';
+import SplitBars from '@/features/teams/components/SplitBars';
+import {
+  cumulativeGoalDiff,
+  getTeamResults,
+  homeRoadSplits,
+  lastN,
+  rollingPointsPct,
+} from '@/features/teams/utils/teamFormHelper';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
@@ -89,6 +100,7 @@ export default function TeamPage() {
   const teamSourcePath = location.pathname;
   const { easternStandingsData, westernStandingsData } = useStandingsContext();
   const { season } = useSeason();
+  const { listOfGamesData } = useListOfGames();
   const { theme } = useTheme();
   const teamActiveNavPath =
     routeState?.activeNavPath ?? routeState?.sourcePath ?? '/teamList';
@@ -226,6 +238,17 @@ export default function TeamPage() {
   }, [teamRawResponse, easternStandingsData, westernStandingsData, triCode]);
 
   const contentReady = !loading && !error && team != null;
+
+  const teamForm = useMemo(() => {
+    const results = getTeamResults(listOfGamesData, triCode);
+    return {
+      results,
+      recent: lastN(results, 10),
+      pace: rollingPointsPct(results, 10),
+      goalDiff: cumulativeGoalDiff(results),
+      splits: homeRoadSplits(results),
+    };
+  }, [listOfGamesData, triCode, season]);
 
   // Measures the sticky header (PageHeader, rendered as this page's first
   // child) and the anchor nav so their combined height can drive both the
@@ -387,6 +410,39 @@ export default function TeamPage() {
 
         <section id="stats" className={styles['team-section']}>
           <TeamStatsRow stats={stats} />
+          <section
+            className={`${styles['form-panel']} ${shared.surface}`}
+            aria-labelledby="team-form-heading"
+          >
+            <div className={styles['form-panel__header']}>
+              <div>
+                <h2 id="team-form-heading" className={shared.sectionTitle}>
+                  Team Form
+                </h2>
+                <p className={styles['form-panel__caption']}>
+                  {teamForm.results.length} completed games · goal differential{' '}
+                  {teamForm.goalDiff > 0 ? '+' : ''}
+                  {teamForm.goalDiff}
+                </p>
+              </div>
+              <div className={styles['form-panel__recent']}>
+                <span className={styles['form-panel__label']}>Last 10</span>
+                <FormStrip results={teamForm.recent} />
+              </div>
+            </div>
+            <div className={styles['form-panel__grid']}>
+              <div>
+                <h3 className={styles['form-panel__subheading']}>
+                  Rolling points percentage
+                </h3>
+                <PointsPaceSparkline values={teamForm.pace} />
+              </div>
+              <div>
+                <h3 className={styles['form-panel__subheading']}>Home / Road</h3>
+                <SplitBars {...teamForm.splits} />
+              </div>
+            </div>
+          </section>
         </section>
         <section id="leaders" className={styles['team-section']}>
           <PlayerStatsSection

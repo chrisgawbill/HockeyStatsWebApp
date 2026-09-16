@@ -206,7 +206,7 @@ GPT-5.6 Luna verifies the derivation acceptance criteria before Phase B starts. 
 **Out of scope:** generated commentary, subjective momentum claims, new data acquisition, backend/API expansion, generic visualization framework, Game Detail rewrite, reusable component-library expansion.
 ---
 
-### IDEA E2 — Team form and momentum
+### ACTIVE E2 — Team form and momentum
 **Source:** `docs/exciting-features-backlog.md`  
 **Route:** GPT-5.4 Mini. Default execution is single-agent; add GPT-5.6 Luna QA only if helper/domain logic cannot be covered adequately by deterministic checks.  
 **Goal:** Derive useful recent-form visuals from schedule data already loaded by the app.
