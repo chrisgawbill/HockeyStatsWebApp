@@ -463,7 +463,7 @@ Generic motion tokens, state behavior, and reusable surface/interaction primitiv
 **Goal:** Independently inspect the finished site on desktop and mobile, capture evidence, and identify the smallest set of real gaps preventing HockeyStats from reaching a premium consumer-product level of polish while preserving its Aero + MD3 identity.
 
 **Quality bar**
-“Apple-level” is a fit-and-finish benchmark, not a request to copy Apple UI. Judge restraint, consistency, clarity, responsiveness, smoothness, accessibility, state quality, spacing, hierarchy, and attention to edge cases. Do not recommend replacing Aero/MD3 with Apple styling.
+“Apple-level” is a fit-and-finish benchmark, not a request to copy Apple UI. Judge restraint, consistency, clarity, responsiveness, smoothness, accessibility, state quality, spacing, hierarchy, and attention to edge cases. The game experience in particular should feel intentionally designed for the device rather than a responsive desktop compromise. Do not recommend replacing Aero/MD3 with Apple styling.
 
 **Execution shape**
 Use one fresh QA subagent so the review is independent from the D3 implementation context. Start from the running site, not a speculative code review. Inspect code only to confirm the cause of an observed issue or verify accessibility behavior. Do not spawn additional subagents unless a concrete blocker requires a separate accessibility/performance check.
@@ -489,6 +489,8 @@ Look for observable gaps only:
 - layout shift/loading roughness
 - clipped/overflowing content
 - interactions that feel visually unfinished
+- game cards that do not present the result/status/team hierarchy with premium clarity
+- the rink/ice visualization feeling like a desktop surface merely shrunk onto mobile rather than intentionally composed for the viewport
 - inconsistent application of the portable Aero/MD3 language
 
 ### B — Mobile visual QA
@@ -503,6 +505,9 @@ Specifically check:
 - viewport-height issues
 - modal/popover/selector usability
 - content hierarchy at narrow widths
+- **game-card readability:** team/score/status hierarchy, truncation/wrapping, spacing, touch targets, scanability, and whether secondary metadata competes with the game result
+- **rink/game surface:** treat the rink/ice visualization as a first-class mobile surface; verify it fits the viewport, remains legible, preserves useful proportions, avoids tiny labels/controls, and does not require awkward horizontal scrolling or zooming for the primary experience
+- when the rink contains interaction/overlays, verify touch targets, selected/focus states, labels, and information density work at phone size
 - scroll smoothness and whether animations remain useful rather than distracting
 
 Do not treat desktop/mobile visual differences as bugs when they are intentional responsive design.
@@ -566,6 +571,7 @@ Avoid subjective nitpicks. If a finding cannot explain user impact in one senten
 - Screenshots document the important states/findings.
 - Reduced-motion, keyboard/focus, light/dark, responsive layout, and basic semantic accessibility were exercised.
 - Findings distinguish genuine gaps from optional refinement.
+- Mobile game cards and the rink/game surface receive explicit findings or an explicit “no meaningful gap observed” result.
 - Each P0/P1 finding includes: page/state, desktop/mobile/both, observable evidence, user impact, and the smallest plausible fix direction.
 - No code was changed.
 - Final report is concise enough for the human to choose what becomes a follow-up ticket.
