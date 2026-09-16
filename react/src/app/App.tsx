@@ -5,6 +5,16 @@ import { SeasonProvider } from '@/features/season/hooks/SeasonContext';
 import { StandingsDataProvider } from '@/features/standings/hooks/StandingsContext';
 import { StatLeadersProvider } from '@/features/stat-leaders/hooks/StatLeadersContext';
 import { ErrorBoundary, getErrorMessage } from 'react-error-boundary';
+import LoadingState from '@/components/LoadingState';
+import ErrorState from '@/components/ErrorState';
+
+function RouteLoadingFallback() {
+  return (
+    <div className="ds-page-shell">
+      <LoadingState label="Loading page" fullPage />
+    </div>
+  );
+}
 
 const LandingPage = lazy(() => import('@/app/LandingPage'));
 const StandingsPage = lazy(
@@ -42,13 +52,16 @@ export default function App() {
         <StandingsDataProvider>
           <ListOfGamesProvider>
             <StatLeadersProvider>
-              <Suspense fallback={null}>
+              <Suspense fallback={<RouteLoadingFallback />}>
                 <ErrorBoundary
                   fallbackRender={({ error, resetErrorBoundary }) => (
-                    <div role="alert">
-                      <p>Something went wrong:</p>
-                      <pre>{getErrorMessage(error)}</pre>
-                      <button onClick={resetErrorBoundary}>Try again</button>
+                    <div className="ds-page-shell">
+                      <ErrorState
+                        fullPage
+                        title="Something went wrong"
+                        message={getErrorMessage(error)}
+                        onRetry={resetErrorBoundary}
+                      />
                     </div>
                   )}
                 >

@@ -123,6 +123,7 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
               styles['game-detail-state-chip'],
               isLive && styles['game-detail-state-chip--live'],
             )}
+            aria-live={isLive ? 'polite' : undefined}
           >
             {stateLabel}
           </span>

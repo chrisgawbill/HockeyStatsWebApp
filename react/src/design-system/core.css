@@ -46,6 +46,11 @@
   --ds-elevation-1: 0 1px 10px rgba(0, 0, 0, 0.12);
   --ds-elevation-2: 0 4px 16px rgba(0, 0, 0, 0.18);
   --ds-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 35%, transparent);
+  --ds-motion-duration-short: 150ms;
+  --ds-motion-duration-medium: 250ms;
+  --ds-motion-duration-long: 360ms;
+  --ds-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ds-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
   --ds-aero-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
   --ds-aero-border: rgba(255, 255, 255, 0.6);
   --ds-aero-page-background: var(--ds-color-surface);
@@ -107,6 +112,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-motion-duration-short: 0ms;
+    --ds-motion-duration-medium: 0ms;
+    --ds-motion-duration-long: 0ms;
+  }
+
   .ds-focusable,
   .ds-aero-surface {
     transition: none;

@@ -33,6 +33,7 @@
   background: color-mix(in srgb, var(--color-bg-subtle) 85%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 .team-tab {
@@ -50,14 +51,20 @@
   white-space: nowrap;
   letter-spacing: 0.1px;
   transition:
-    color 0.15s ease,
-    border-color 0.15s ease;
+    color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    border-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    background-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
 }
 
 .team-tab:hover {
   color: var(--color-primary);
   box-shadow: none;
   transform: none;
+}
+
+.team-tab:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: -3px;
 }
 
 .team-tab.active {
@@ -67,12 +74,25 @@
   font-weight: 600;
 }
 
+.team-tab:active {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
 /* ── Scrolling sections ────────────────────────────────────────────────── */
 
 .team-section {
   scroll-margin-top: calc(
     var(--sticky-header-h, 0px) + var(--sticky-nav-h, 0px)
   );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-tab,
+  .form-panel,
+  .dna-panel {
+    transition: none;
+    animation: none;
+  }
 }
 
 /* ── Team form ─────────────────────────────────────────────────────────── */

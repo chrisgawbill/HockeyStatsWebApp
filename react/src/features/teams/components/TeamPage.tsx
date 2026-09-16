@@ -222,11 +222,6 @@ export default function TeamPage() {
     refetchTeam();
   }, [triCode, refetchTeam]);
 
-  useEffect(() => {
-    if (!triCode) return;
-    refetchTeam();
-  }, [triCode, refetchTeam]);
-
   const team: TeamOverview | null = useMemo(() => {
     if (teamRawResponse == null) {
       return null;
@@ -377,7 +372,7 @@ export default function TeamPage() {
           className={styles['team-page__content']}
           style={{ paddingTop: '2rem' }}
         >
-          <LoadingState label="Loading team" />
+          <LoadingState label="Loading team" fullPage />
         </div>
       </div>
     );

@@ -6,8 +6,68 @@
 .content {
   max-width: 72rem;
   margin: 0 auto;
-  padding: var(--space-lg);
+  padding: var(--space-xl) var(--space-lg) calc(var(--space-xl) * 2);
   animation: matchup-content-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+.hero {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+}
+.intro {
+  margin-bottom: var(--space-lg);
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+}
+.breadcrumbBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
+}
+.breadcrumbBack:hover,
+.breadcrumbBack:focus-visible {
+  color: var(--color-primary);
+}
+.breadcrumbBack:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 3px;
+}
+.breadcrumbSep,
+.breadcrumbCurrent {
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+.breadcrumbCurrent {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.intro h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.intro > p:last-child {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+.kicker {
+  margin: 0 0 var(--space-xs);
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .controls,
 .summary,
@@ -15,28 +75,51 @@
   padding: var(--space-lg);
   margin-bottom: var(--space-lg);
 }
+.hero .controls {
+  margin-bottom: 0;
+}
 .controls {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-md);
+  box-shadow: var(--elevation-1);
 }
-.controls > :global(.season-bar) {
+.controls > .seasonControl {
   grid-column: 1 / -1;
   justify-self: center;
+  margin: 0;
 }
 .control {
   display: grid;
-  gap: 6px;
-  font-weight: 600;
+  gap: var(--space-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.seasonControl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .control select {
+  width: 100%;
   min-height: 2.75rem;
-  padding: 0 10px;
+  padding: 0 var(--space-sm);
   border: 1px solid var(--color-divider);
-  border-radius: 6px;
+  border-radius: var(--border-radius-card);
   background: var(--color-surface);
   color: var(--color-text);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  transition:
+    border-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    box-shadow var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    background-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
 }
 .control select:focus-visible {
   border-color: var(--color-primary);
@@ -44,6 +127,12 @@
 }
 .summary {
   text-align: center;
+  box-shadow: var(--elevation-1);
+}
+.summary h2 {
+  margin: 0 0 var(--space-md);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 600;
 }
 .record {
   display: flex;
@@ -60,6 +149,17 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
+  min-width: 0;
+  box-shadow: var(--elevation-1);
+  transition:
+    background-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    box-shadow var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    transform var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
+}
+.meeting:hover {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+  box-shadow: var(--elevation-2);
+  transform: translateY(-1px);
 }
 .score {
   font-size: 1.25rem;
@@ -80,6 +180,7 @@
 }
 .formCard {
   padding: var(--space-md) var(--space-lg) var(--space-lg);
+  box-shadow: var(--elevation-1);
 }
 .formTitle {
   margin: 0 0 var(--space-md);
@@ -91,6 +192,10 @@
   justify-content: flex-start;
   flex-wrap: wrap;
 }
+.formStrip {
+  justify-content: space-between;
+  width: 100%;
+}
 
 @keyframes matchup-content-enter {
   from { opacity: 0; transform: translateY(0.35rem); }
@@ -99,16 +204,30 @@
 
 @media (prefers-reduced-motion: reduce) {
   .content,
-  .control select { animation: none; transition: none; }
+  .control select,
+  .meeting { animation: none; transition: none; }
 }
 @media (max-width: 600px) {
+  .content {
+    padding: var(--space-lg) var(--space-md) calc(var(--space-xl) * 2);
+  }
   .controls,
   .formGrid {
     grid-template-columns: 1fr;
   }
+  .controls {
+    padding: var(--space-md);
+  }
+  .hero {
+    padding: var(--space-md);
+  }
+  .controls > .seasonControl {
+    justify-self: stretch;
+  }
   .meeting {
     align-items: flex-start;
     flex-direction: column;
+    gap: var(--space-xs);
   }
   .record {
     gap: var(--space-md);

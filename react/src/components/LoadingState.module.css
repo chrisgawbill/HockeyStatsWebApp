@@ -8,6 +8,8 @@
   color: var(--color-muted-text);
   font-size: var(--text-base);
   font-weight: 600;
+  contain: layout;
+  animation: state-enter var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;
 }
 
 .loading-state--full-page {
@@ -30,5 +32,21 @@
 @keyframes loading-state-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes state-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-state__spinner {
+    animation: none;
+  }
+
+  .loading-state,
+  .loading-state--full-page {
+    animation: none;
   }
 }

@@ -40,7 +40,7 @@ export default function SlidingToggle<T extends string>({
   };
 
   return (
-    <div className={styles['sliding-toggle']}>
+    <div className={styles['sliding-toggle']} role="group">
       <div
         className={styles['sliding-toggle__indicator']}
         style={indicatorStyle}
@@ -48,6 +48,8 @@ export default function SlidingToggle<T extends string>({
       {options.map((opt) => (
         <button
           key={opt.value}
+          type="button"
+          aria-pressed={value === opt.value}
           className={cx(
             styles['sliding-toggle__btn'],
             value === opt.value && styles['sliding-toggle__btn--active'],

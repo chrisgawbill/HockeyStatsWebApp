@@ -7,4 +7,14 @@
   background-color: var(--color-overlay);
   z-index: var(--z-modal);
   padding: var(--space-md);
+  animation: modal-overlay-enter var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;
+}
+
+@keyframes modal-overlay-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay { animation: none; }
 }

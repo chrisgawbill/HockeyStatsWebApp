@@ -3,6 +3,15 @@
   padding-bottom: 2rem;
 }
 
+.schedule-page :global(.sliding-toggle),
+.schedule-filter-field,
+.date-row :global(.btn-group) {
+  transition:
+    border-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    box-shadow var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    background-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
+}
+
 /* --- View toggle (Daily / Weekly / Monthly) --- */
 .schedule-view-toggle {
   max-width: 30rem;
@@ -17,8 +26,13 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
+  max-width: 64rem;
   margin: 0 auto var(--space-lg);
   padding: 0 var(--space-md);
+}
+
+.schedule-filter-bar > :global(.sliding-toggle) {
+  width: min(100%, 18rem);
 }
 
 .schedule-filter-field {
@@ -53,6 +67,16 @@
 
 .schedule-filter-field__select:focus {
   outline: none;
+}
+
+.schedule-filter-field__select:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.schedule-filter-field:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 /* --- Date navigation --- */
@@ -102,13 +126,17 @@
 }
 
 .date-row :global(.btn-group) > :global(.btn):hover:not(:disabled),
-.date-row :global(.btn-group) > :global(.btn):focus {
+.date-row :global(.btn-group) > :global(.btn):focus-visible {
   background-color: color-mix(
     in srgb,
     var(--color-primary) 10%,
     transparent
   ) !important;
   color: var(--color-primary-dark) !important;
+}
+
+.date-row :global(.btn-group) > :global(.btn):active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .schedule-nav-btn {
@@ -320,6 +348,24 @@
     margin-bottom: var(--space-xl);
   }
 
+  .schedule-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+    margin-bottom: var(--space-lg);
+  }
+
+  .schedule-filter-bar > :global(.sliding-toggle),
+  .schedule-filter-field {
+    width: 100%;
+    max-width: 30rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .schedule-filter-field {
+    justify-content: space-between;
+  }
+
   .schedule-date-label {
     font-size: var(--text-sm);
   }
@@ -444,4 +490,13 @@
 
 :global([data-theme='dark']) .game-time {
   color: var(--color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .schedule-page :global(.sliding-toggle),
+  .schedule-filter-field,
+  .date-row :global(.btn-group),
+  .date-row :global(.btn-group) > :global(.btn) {
+    transition: none;
+  }
 }
