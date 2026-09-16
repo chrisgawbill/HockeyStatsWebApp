@@ -132,7 +132,7 @@ export interface GameLanding {
  */
 export type GameDetailStatus = 'preview' | 'live' | 'final';
 
-export interface PeriodScoreViewModel {
+export interface PeriodGoalBreakdownViewModel {
   periodNum: number;
   periodType: string;
   homeGoals: number;
