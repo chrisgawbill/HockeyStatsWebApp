@@ -249,7 +249,7 @@ None.
 
 ## Active
 
-D1 — Portable Aero/MD3 visual foundation
+None.
 
 ## Completed
 
