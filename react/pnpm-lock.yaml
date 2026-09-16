@@ -70,7 +70,7 @@ importers:
 packages:
 
   '@chrisgawbill/aero-md3-core@0.1.2':
-    resolution: {integrity: sha512-BCr97uzQMqj2dGVBq+Tt1LqrsXcGsUW+4wdLtASu3E4+D1fKdz1pXGDnmvh7pnOsyz3Otdb+y6hVNXic1rYd6w==}
+    resolution: {integrity: sha512-7J4ABhfv9aPS2dZLpniM317JFSEmS7kPop5aqMg+Hg3xs2AWFuy1tc6yimwgXu7FTc9hwFIITbAqz691xGo2Mw==}
 
 
   '@babel/code-frame@7.29.0':
