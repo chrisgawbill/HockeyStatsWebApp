@@ -14,33 +14,67 @@ Focused visual-polish backlog for the HockeyStats site after the initial Aero/MD
 
 ---
 
-## UI-01 — Fix global navigation width, spacing, and mobile crowding
+## UI-01 — Fix global navigation width, mobile nav, and season selector
 
-**Goal:** Make the global Aero navigation feel intentional, full-width, and comfortable instead of inset/cramped.
+**Goal:** Make the global Aero navigation feel intentional, full-width, and comfortable on desktop, while turning the mobile bottom navigation + season control into clean, deliberate app chrome rather than a crowded stack of floating controls.
 
-**Read:** `react/src/components/PageHeader.tsx`, `react/src/components/PageHeader.module.css`, `react/src/app/index.tsx`, Aero layout/control primitives in `aero-md3-core`.
+**Read:** `react/src/components/PageHeader.tsx`, `react/src/components/PageHeader.module.css`, `react/src/components/SeasonSelector.tsx`, `react/src/components/SeasonSelector.module.css`, `react/src/app/index.tsx`, global mobile page-bottom spacing, and relevant Aero layout/control primitives in `aero-md3-core`.
 
-**Problem:** The header currently derives its width from Bootstrap gutter variables and uses negative margins to simulate full bleed. That makes the nav visually dependent on the surrounding container and can leave it feeling narrower than the viewport. Mobile also packs back navigation, five main destinations, season control, search access, and utility actions into a very small area.
+**Problems visible in current UI:**
+- Desktop header derives width from Bootstrap gutter variables and negative margins, so it can look inset instead of spanning the viewport.
+- Mobile primary navigation is visually cramped: five destinations plus back/search/utility behavior compete inside a small fixed area.
+- The selected nav item has noticeably more visual weight than neighboring items, which makes spacing look uneven.
+- The season selector sits as a floating pill above the bottom nav and visually overlaps the page/nav boundary instead of reading as an intentional control row.
+- The current mobile bar uses a large fixed top padding to make room for the selector, coupling layout to one specific control height.
+- The search FAB, season selector, bottom nav, and page content can visually compete in the same lower-screen region.
+- Fixed chrome must reserve its real height so cards/content never disappear underneath it.
 
-**Change:**
-- Make the nav chrome span the actual viewport width independently of the page content container.
-- Remove Bootstrap-gutter coupling from header sizing.
-- Keep page content constrained separately so full-width chrome does not force full-width content.
-- Rework desktop spacing so brand, search, season selector, nav destinations, and utilities have clear breathing room.
-- On mobile, reduce simultaneous competition between controls. Keep primary navigation obvious and move secondary controls into a compact secondary row, overlay, menu, or other simple pattern if needed.
-- Preserve the fixed bottom-nav behavior if it still produces the clearest mobile navigation, but it must not feel packed edge-to-edge.
-- Keep safe-area support, keyboard focus, active-state clarity, and >=44px touch targets.
-- If the width/spacing solution is generally reusable, add the needed shell/chrome primitive to `aero-md3-core` instead of baking another one-off recipe into HockeyStats.
+**Change — desktop:**
+- Make nav chrome span the actual viewport width independently of the constrained page-content container.
+- Remove Bootstrap-gutter coupling and negative-margin width calculations from header sizing.
+- Keep content centered/constrained separately from full-width chrome.
+- Rebalance brand, search, season selector, nav destinations, and utility spacing so controls do not read as one compressed strip.
+- Keep the current Aero/MD3 language, but avoid adding more one-off gradients/borders when an Aero primitive should own the treatment.
 
-**Do not:** Add a new navigation dependency, redesign route structure, hide primary destinations behind a menu on desktop, or shrink touch targets to make items fit.
+**Change — mobile primary nav:**
+- Keep the bottom navigation if it remains the clearest pattern, but make it a true full-width mobile app bar anchored to the viewport edges and safe area.
+- Give the five primary destinations equal, predictable slots. The active item may be highlighted, but must not distort the geometry of the row.
+- Keep each destination >=44px tall and large enough to tap without relying on tiny icon hit areas.
+- Use consistent horizontal insets/gaps rather than shrinking individual buttons until they fit.
+- Prevent clipping/wrapping at 320px width; if secondary controls cannot fit, move them out of the primary row rather than reducing tap targets.
+- Keep the active state obvious in both themes without making inactive items visually disappear.
+- Search/back/utility actions must not create a sixth/seventh cramped slot in the primary five-item row.
+
+**Change — mobile season selector:**
+- Treat the season control as its own compact secondary chrome row/control, not as an absolutely-positioned pill that happens to sit over the nav.
+- It may visually attach to the bottom nav, but its layout must be structurally separate so changing its height does not require magic top padding on the nav.
+- Center it intentionally and give it enough breathing room from both page content and the primary nav row.
+- Preserve a >=44px usable target where practical, readable season text, chevron state, keyboard focus, and screen-reader labeling.
+- The listbox must open in the direction with available space on mobile (normally upward above a bottom bar), remain inside the viewport, and never render behind the nav/search FAB.
+- Long/alternate season labels must not widen the control enough to collide with neighboring chrome.
+- Avoid covering the last visible card/row: page bottom padding must be derived from the combined fixed chrome height (primary nav + season row + safe area), not a stale hard-coded approximation.
+
+**Change — mobile search/back relationship:**
+- Keep search easy to reach, but ensure the FAB does not collide with the season selector or obscure nav labels/icons.
+- Back navigation should appear only when useful and must not compress the five persistent destinations below their target size.
+- Prefer one clear spatial hierarchy: page content -> season/secondary control -> primary nav, with the search action positioned deliberately outside that row.
+
+**Reusable-library rule:** If full-bleed app chrome, equal-slot mobile navigation, or compact control-bar spacing is generally reusable, add the smallest additive primitive/token to `aero-md3-core` and consume it here. Keep route names, hockey-specific behavior, and season data logic in HockeyStats.
+
+**Do not:** Add a navigation dependency; redesign route structure; hide primary destinations behind a hamburger menu; shrink touch targets to make controls fit; hard-code another selector height into body padding; or solve overlap by adding arbitrary z-index values without fixing layout ownership.
 
 **Done when:**
-- Desktop nav visually reaches the viewport edges while page content remains centered/constrained.
+- Desktop nav reaches the viewport edges while page content remains centered/constrained.
 - No horizontal overflow at common desktop widths.
-- Mobile nav has visibly more breathing room and does not clip/wrap at 320px, 375px, 390px, and 430px widths.
-- Season selector/search/utility controls remain reachable without crowding the primary nav.
+- At 320px, 375px, 390px, and 430px widths, all five primary nav destinations remain visible, evenly spaced, unwrapped, and >=44px tall.
+- The active destination does not change the width/position of neighboring destinations.
+- The season selector reads as an intentional secondary control, does not overlap page content, and does not require magic nav padding to make room for itself.
+- Opening the season selector on mobile keeps the entire listbox visible/scrollable above the bottom chrome and above the search FAB.
+- Search, back, season selector, and primary nav do not overlap one another in portrait orientation.
+- The last page card/row can scroll fully above the fixed chrome.
+- Safe-area insets work on devices with a home indicator.
 - Keyboard focus and active-route states are clearly visible in light/dark themes.
-- Browser screenshots are captured for desktop and the four mobile widths above.
+- Browser screenshots are captured at desktop plus 320px, 375px, 390px, and 430px mobile widths, including one screenshot with the season menu open.
 
 ---
 
