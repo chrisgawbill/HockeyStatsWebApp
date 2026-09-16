@@ -209,7 +209,11 @@
 }
 @media (max-width: 600px) {
   .content {
-    padding: var(--space-lg) var(--space-md) calc(var(--space-xl) * 2);
+    padding: var(--space-lg) var(--space-md)
+      calc(
+        var(--space-xl) * 2 + var(--mobile-nav-height) +
+          env(safe-area-inset-bottom, 0px)
+      );
   }
   .controls,
   .formGrid {

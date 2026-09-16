@@ -13,7 +13,7 @@
 }
 
 .loading-state--full-page {
-  min-height: 60vh;
+  min-height: 42vh;
 }
 
 .loading-state__spinner {

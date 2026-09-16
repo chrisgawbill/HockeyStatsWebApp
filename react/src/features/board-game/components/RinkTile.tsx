@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import type { KeyboardEvent } from 'react';
 import type { Coord } from '@/features/board-game/types/game';
 import {
   LINE_COLUMNS,
@@ -12,7 +13,9 @@ export interface RinkTileProps {
   coord: Coord;
   highlighted: boolean;
   narrow: boolean;
+  actionable: boolean;
   onClick: () => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLButtonElement>) => void;
 }
 
 /** One rink tile: draws line/goal markings and hides unplayable corners. */
@@ -20,7 +23,9 @@ export default function RinkTile({
   coord,
   highlighted,
   narrow,
+  actionable,
   onClick,
+  onKeyDown,
 }: RinkTileProps) {
   const isCorner = UNPLAYABLE_CORNERS.some((c) => sameCoord(c, coord));
   const isGoal = !isCorner && !isPlayable(coord);
@@ -37,6 +42,7 @@ export default function RinkTile({
 
   const className = [
     styles.tile,
+    !actionable ? styles.tileStatic : '',
     highlighted ? styles.tileHighlighted : '',
     isBlueLine ? (narrow ? styles.tileBlueLineH : styles.tileBlueLine) : '',
     isRedLine ? (narrow ? styles.tileRedLineH : styles.tileRedLine) : '',
@@ -45,13 +51,19 @@ export default function RinkTile({
     .filter(Boolean)
     .join(' ');
 
+  if (!actionable) {
+    return <div className={className} style={style} />;
+  }
+
   return (
     <button
       type="button"
       className={className}
       style={style}
       onClick={onClick}
-      aria-label={`Tile ${coord.col},${coord.row}`}
+      onKeyDown={onKeyDown}
+      data-rink-tile={`${coord.col},${coord.row}`}
+      aria-label={`Move to tile ${coord.col},${coord.row}`}
     />
   );
 }

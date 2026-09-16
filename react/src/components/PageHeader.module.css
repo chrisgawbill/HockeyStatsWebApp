@@ -25,6 +25,24 @@
   isolation: isolate;
 }
 
+.nav-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: min(100%, 72rem);
+  margin: 0 auto;
+}
+
+.nav-brand {
+  flex: 0 0 auto;
+  padding: 0 var(--space-sm);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 /* Glossy top sheen: the classic Aero highlight, a soft white fade across the
    upper half of the bar. Sits behind all real content (z-index: -1 within
    the bar's own isolated stacking context) and never intercepts clicks. */
@@ -149,6 +167,9 @@
     0 1px 2px rgba(0, 0, 0, 0.1) !important;
   color: rgba(255, 255, 255, 0.85) !important;
   border-radius: var(--border-radius-pill) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px 16px;
   font-weight: 500;
   width: 100%;
@@ -208,6 +229,34 @@
   padding: 2px 4px;
 }
 
+.nav-theme-toggle {
+  flex: 0 0 auto;
+  padding: 2px 4px;
+}
+
+.theme-toggle {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--border-radius-pill);
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.95);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
 @media (max-width: 576px) {
   .nav-bar {
     position: fixed;
@@ -223,10 +272,18 @@
        .nav-bar-item and .nav-corner. */
     padding: var(--space-xs) var(--space-sm);
     padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
-    gap: var(--space-xs);
+    gap: 0;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.25);
     border-bottom: none;
+  }
+
+  .nav-inner {
+    width: 100%;
+  }
+
+  .nav-brand {
+    display: none;
   }
 
   body {
@@ -297,6 +354,10 @@
 
   .nav-corner {
     padding: 0;
+  }
+
+  .nav-theme-toggle {
+    display: none;
   }
 }
 
@@ -424,6 +485,12 @@
   gap: var(--space-sm);
   padding: var(--space-sm);
   border-bottom: 1px solid var(--color-divider);
+}
+
+.mobile-search-theme {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-sm) 0;
 }
 
 .mobile-search-input {

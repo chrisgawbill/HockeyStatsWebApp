@@ -13,7 +13,7 @@
 }
 
 .error-state--full-page {
-  min-height: 60vh;
+  min-height: 42vh;
 }
 
 .error-state__icon {
@@ -37,6 +37,7 @@
 }
 
 .error-state__title {
+  margin: 0;
   color: var(--color-text);
   font-size: var(--text-lg);
   font-weight: 700;

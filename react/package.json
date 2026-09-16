@@ -16,7 +16,7 @@
     "react-dom": "^18.3.1",
     "react-error-boundary": "^6.1.2",
     "react-horizontal-scrolling-menu": "^4.1.4",
-    "react-router-dom": "^6.30.3"
+    "react-router-dom": "^7.18.4"
   },
   "scripts": {
     "start": "vite",
@@ -31,7 +31,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "prettier": "^3.8.3",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21",
-    "vitest": "^2.1.9"
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   }
 }

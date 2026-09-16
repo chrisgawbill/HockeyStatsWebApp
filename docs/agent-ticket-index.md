@@ -456,7 +456,7 @@ Generic motion tokens, state behavior, and reusable surface/interaction primitiv
 
 ---
 
-### IDEA D3-QA-SITE — Main site premium polish & accessibility QA
+### DONE D3-QA-SITE — Main site premium polish & accessibility QA
 **Source:** follow-up to D3  
 **Depends on:** D3 implementation pushed to main  
 **Route:** Fresh dedicated GPT-5.4 Mini QA subagent. Audit-only; no application-code edits.  
@@ -546,7 +546,7 @@ EXPANSION: none | <reason>
 
 ---
 
-### IDEA D3-QA-RQ — RinkQuest premium game polish & accessibility QA
+### DONE D3-QA-RQ — RinkQuest premium game polish & accessibility QA
 **Source:** follow-up to D3  
 **Depends on:** D3 implementation pushed to main  
 **Route:** Fresh dedicated GPT-5.4 Mini QA subagent. Audit-only; no application-code edits.  
@@ -662,7 +662,7 @@ EXPANSION: none | <reason>
 ---
 
 
-### IDEA LIB1 — Extract portable Aero/MD3 experience library
+### ACTIVE LIB1 — Extract portable Aero/MD3 experience library
 **Source:** D1/D3 portability follow-up  
 **Depends on:** D3 complete; D3-QA findings that affect shared design primitives should be resolved or explicitly deferred  
 **Route:** GPT-5.4 Mini orchestrated in bounded phases. Use a fresh QA subagent for consumer-app verification. GPT-5.6 Sol only for package/build/tooling problems that cannot be resolved within the existing architecture.  
@@ -832,7 +832,7 @@ A developer starting a new React project should be able to understand the normal
 
 ## Active
 
-None.
+- LIB1 — Phase A extraction inventory and approval proposal
 
 ## Completed
 
