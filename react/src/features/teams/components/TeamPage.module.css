@@ -244,9 +244,91 @@
   background: var(--color-danger);
 }
 
+/* ── Team DNA ─────────────────────────────────────────────────────────── */
+
+.dna-panel {
+  margin: var(--space-md) 0 var(--space-lg);
+  padding: var(--space-lg);
+}
+
+.dna-panel__header,
+.dna-metric__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.dna-panel__header {
+  align-items: flex-start;
+}
+
+.dna-panel__caption,
+.dna-panel__scale,
+.dna-metric__description,
+.dna-panel__empty {
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+
+.dna-panel__caption {
+  margin: var(--space-xs) 0 0;
+}
+
+.dna-panel__scale {
+  white-space: nowrap;
+}
+
+.dna-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-lg) var(--space-xl);
+  margin-top: var(--space-lg);
+}
+
+.dna-metric__heading {
+  align-items: baseline;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.dna-metric__heading strong {
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.dna-metric__track {
+  height: 0.45rem;
+  margin-top: var(--space-xs);
+  overflow: hidden;
+  border-radius: var(--border-radius-pill);
+  background: var(--color-divider);
+}
+
+.dna-metric__track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}
+
+.dna-metric__description {
+  display: block;
+  margin-top: var(--space-xs);
+  font-size: var(--text-xs);
+}
+
 @media (max-width: 576px) {
   .form-panel {
     padding: var(--space-md);
+  }
+
+  .dna-panel {
+    padding: var(--space-md);
+  }
+
+  .dna-metrics {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
   }
 
   .form-panel__header,

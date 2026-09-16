@@ -247,7 +247,7 @@ GPT-5.6 Luna verifies the derivation acceptance criteria before Phase B starts. 
 **Verify:** targeted helper tests/checks → frontend typecheck/build → one-team source-data comparison → brief mobile/light/dark check.  
 **Out of scope:** player form, xG/shot data, backend work, standings-row integration unless trivial, reusable chart framework, generalized multi-sport analytics engine.
 
-### IDEA F2 — Team DNA
+### DONE F2 — Team DNA
 **Source:** `docs/design-feature-backlog.md`  
 **Depends on:** D1, D2; reuse E2 helpers/data if available  
 **Route:** GPT-5.4 Mini; default single-agent. Add Luna QA only for normalized/derived metric correctness that targeted tests do not cover.  

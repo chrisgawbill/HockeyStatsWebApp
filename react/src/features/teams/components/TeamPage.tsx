@@ -61,6 +61,7 @@ import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import FormStrip from '@/features/teams/components/FormStrip';
 import PointsPaceSparkline from '@/features/teams/components/PointsPaceSparkline';
 import SplitBars from '@/features/teams/components/SplitBars';
+import TeamDna from '@/features/teams/components/TeamDna';
 import {
   cumulativeGoalDiff,
   getTeamResults,
@@ -68,6 +69,7 @@ import {
   lastN,
   rollingPointsPct,
 } from '@/features/teams/utils/teamFormHelper';
+import { buildTeamDna } from '@/features/teams/utils/teamDnaHelper';
 
 function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
@@ -249,6 +251,11 @@ export default function TeamPage() {
       splits: homeRoadSplits(results),
     };
   }, [listOfGamesData, triCode, season]);
+
+  const teamDna = useMemo(
+    () => buildTeamDna({ stats: teamRawResponse ?? { name: '' }, ...teamForm }),
+    [teamForm, teamRawResponse],
+  );
 
   // Measures the sticky header (PageHeader, rendered as this page's first
   // child) and the anchor nav so their combined height can drive both the
@@ -443,6 +450,7 @@ export default function TeamPage() {
               </div>
             </div>
           </section>
+          <TeamDna metrics={teamDna} season={season} />
         </section>
         <section id="leaders" className={styles['team-section']}>
           <PlayerStatsSection
