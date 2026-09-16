@@ -386,6 +386,76 @@ Phase A verifies pure playoff-race derivation before any substantial UI work. Ph
 
 ---
 
+### IDEA D3 — Product-level polish and motion
+**Source:** agent ticket index  
+**Depends on:** D1, D2; ideally after core signature features stabilize  
+**Route:** GPT-5.4 Mini. Use phased, page-cluster execution rather than a single repo-wide edit. Luna QA may verify performance/accessibility criteria; GPT-5.6 Sol only for evidence-backed rendering/performance problems.  
+**Goal:** Raise HockeyStats to the fit-and-finish standard associated with highly polished consumer products while preserving its own Aero + MD3 visual identity.
+
+**Product principle**
+“Apple-level polished” means quality of execution, not copying Apple’s visual language. Keep HockeyStats recognizably Aero/MD3: translucent focal surfaces, MD3 state/semantic structure, existing typography/color personality, and the portable D1 foundation. Borrow the qualities of premium product design: restraint, consistency, immediate feedback, smooth state changes, excellent spacing, strong hierarchy, perceived speed, and obsessive edge-case handling.
+
+**Execution shape**
+Run as a sequence of bounded polish passes. The PM should inspect first, select the highest-impact page/interaction cluster, complete and verify it, then return to the human before broadening to another cluster. Do not “polish the whole repo” in one worker context.
+
+### Phase A — polish audit
+- Inspect representative desktop/mobile flows: navigation, Home, Team, Game Detail, Standings, Schedule, and one signature feature.
+- Identify only observable polish gaps: inconsistent spacing/radii/elevation, abrupt state changes, layout shift, weak loading/empty/error transitions, unclear pressed/focus states, janky scrolling/rendering, visual inconsistency, or unnecessarily slow-feeling interactions.
+- Reuse browser/performance evidence when available; do not speculate about optimization.
+- Produce a short prioritized set of page/interaction clusters. Human approves the first implementation cluster.
+
+### Phase B — motion language
+- Add a small domain-free motion vocabulary to the portable D1 design language: duration tiers, easing roles, and reduced-motion behavior.
+- Prefer CSS transitions/animations and browser-native behavior.
+- Use motion to communicate state, hierarchy, continuity, or direct manipulation—not decoration.
+- Appropriate examples: subtle surface/selection transitions, content reveal, tab/view changes, button press feedback, expandable areas, loading-to-content transitions, and small data-value changes.
+- Keep most micro-interactions short and responsive; longer transitions require a clear continuity reason.
+- No animation should delay access to information.
+
+### Phase C — interaction and visual refinement
+For the approved cluster only:
+- Normalize spacing, alignment, hit targets, state layers, border/elevation behavior, and responsive rhythm using D1 tokens.
+- Give interactive elements coherent hover/pressed/focus/selected/disabled feedback.
+- Smooth abrupt but meaningful UI state changes without animating everything.
+- Refine loading, empty, error, skeleton, and content-arrival states to reduce perceived roughness.
+- Prevent content jumps where dimensions can be known/reserved.
+- Preserve dense-stat readability; glass remains selective rather than becoming a universal surface.
+
+### Phase D — perceived and actual performance
+- Measure before changing performance-sensitive code.
+- Look for unnecessary React rerenders, expensive repeated derivations, oversized work on interaction paths, layout thrashing, and avoidable image/content shifts only where evidence points.
+- Prefer memoization/code changes only when they solve an observed issue; do not blanket-add memo/useMemo/useCallback.
+- Keep interactions responsive during loading and avoid blocking UI work where practical.
+- Do not trade correctness, accessibility, or maintainability for tiny synthetic gains.
+
+**Portable-design rule**
+Generic motion tokens, state behavior, and reusable surface/interaction primitives belong in the D1 portable core only when they remain project/domain agnostic. Hockey-specific animation or semantics stay in HockeyStats. Document any new portable primitives so the polish language can travel to future projects.
+
+**Constraints**
+- Do not imitate Apple UI, macOS/iOS components, fonts, icons, or branding.
+- Preserve Aero + MD3 rather than replacing it with minimal white/black “Apple-like” styling.
+- No animation library/new dependency without human approval.
+- No page-wide gratuitous animation, parallax, animated backgrounds, spring-everything behavior, or motion that competes with stats.
+- Respect `prefers-reduced-motion`; functionality and hierarchy must remain clear with motion disabled.
+- Do not hide performance problems behind longer animations.
+- Do not perform unrelated feature work or architecture rewrites.
+- Do not optimize without evidence.
+
+**Acceptance**
+- The approved page/interaction cluster feels visually and behaviorally consistent with D1/D2 and has no obvious abrupt/janky transitions in normal use.
+- Interactive states are consistent across mouse, touch, and keyboard.
+- Loading/content transitions avoid preventable layout shifts and communicate progress cleanly.
+- Motion uses the shared vocabulary and reduced-motion produces an equivalent stable experience.
+- Any performance code change has a documented observed problem and a before/after verification.
+- Mobile and desktop, light/dark, keyboard/focus, and common empty/loading/error states are checked.
+- Build/typecheck/relevant tests pass.
+- Portable motion/polish primitives are documented briefly for reuse in future projects.
+
+**Verify:** targeted visual/interaction audit → reduced-motion + keyboard/touch checks → relevant performance evidence for any performance edits → mobile/desktop + light/dark sanity → frontend checks.  
+**Out of scope:** Apple visual imitation, total redesign, new feature development, animation framework, speculative micro-optimization, whole-site rewrite in one pass.
+
+---
+
 ## Later candidates
 
 | Status | Ticket | Source | Note |
