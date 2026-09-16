@@ -11,7 +11,6 @@ import DatePicker from '@/features/schedule/components/DatePicker';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
-import SeasonSelector from '@/components/SeasonSelector';
 import SlidingToggle from '@/components/SlidingToggle';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import {
@@ -112,7 +111,7 @@ function getDaysForView(view: ScheduleView, targetDate: Date): Date[] {
  * Schedule route. Reads the whole season from ScheduleContext and renders one of
  * three views chosen by the `?view=day|week|month` URL param: the tall day cards
  * or the shared week/month calendar grid. `?date=` anchors which day/week/month
- * is shown and `?season=` (via SeasonSelector) is the only param that re-fetches;
+ * is shown and `?season=` (via the global nav selector) is the only param that re-fetches;
  * day/week/month are pure client-side projections of the already-loaded games.
  */
 function SchedulePage() {
@@ -163,10 +162,7 @@ function SchedulePage() {
     }
   }, [selectedDateParam]);
 
-  const seasonDateRange = useMemo(
-    () => getSeasonDateRange(season),
-    [season],
-  );
+  const seasonDateRange = useMemo(() => getSeasonDateRange(season), [season]);
 
   const effectiveDate = useMemo(
     () => resolveEffectiveDate(selectedDate, seasonDateRange),
@@ -356,7 +352,6 @@ function SchedulePage() {
     <>
       <PageHeader />
       <Container fluid className={styles['schedule-page']}>
-        <SeasonSelector />
         {loadingListOfGamesData ? (
           <LoadingState label="Loading schedule" fullPage />
         ) : errorListOfGamesData ? (

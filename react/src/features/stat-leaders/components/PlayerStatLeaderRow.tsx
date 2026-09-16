@@ -12,9 +12,9 @@ interface PlayerStatLeaderProps {
 }
 
 /**
- * A titled, horizontally scrolling row of stat-leader cards. Drops categories
- * that haven't loaded (undefined) and falls back to an EmptyState, naming the
- * season, when none of them are available.
+ * A titled grid of stat-leader cards. Drops categories that haven't loaded
+ * (undefined) and falls back to an EmptyState, naming the season, when none of
+ * them are available.
  */
 export default function PlayerStatLeaderRow({
   title,

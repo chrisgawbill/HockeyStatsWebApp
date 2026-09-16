@@ -77,8 +77,20 @@
 
 @media only screen and (min-width: 768px) {
   .stat-leader-row .row-scroller > .row-scroller-column {
-    flex: 0 0 18rem;
-    width: 18rem;
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .stat-leader-row .row-scroller {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-sm);
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .stat-leader-row .row-scroller-wrapper::after {
+    display: none;
   }
 }
 

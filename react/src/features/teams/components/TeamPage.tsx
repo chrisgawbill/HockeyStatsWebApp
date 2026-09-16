@@ -23,8 +23,6 @@ import {
   GoalieSummaryContract,
   Position,
   RosterPlayer,
-  RosterPlayerContract,
-  SkaterCorsiEntry,
   SkaterSummaryContract,
   StatItem,
   TeamOverview,
@@ -50,7 +48,11 @@ import {
   GetSkaterSummary,
   GetSkaterCorsi,
   GetGoalieSummary,
+  SkaterCorsiResponseDto,
+  TeamRosterResponseDto,
+  TeamStatsResponseDto,
 } from '@/features/teams/api/teamsApi';
+import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import { useStandingsContext } from '@/features/standings/hooks/StandingsContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { useTheme } from '@/lib/ThemeContext';
@@ -161,11 +163,11 @@ export default function TeamPage() {
         corsiRes,
         goalieRes,
       ]: [
-        any,
-        { players: RosterPlayerContract[] },
-        any,
+        TeamStatsResponseDto,
+        TeamRosterResponseDto,
+        ScheduleResponseDto,
         SkaterSummaryContract[],
-        { data?: SkaterCorsiEntry[] },
+        SkaterCorsiResponseDto,
         GoalieSummaryContract[] | null,
       ] = await Promise.all([
         GetTeamStatsById(String(numericId), season),
@@ -176,7 +178,7 @@ export default function TeamPage() {
         GetGoalieSummary(String(numericId), season).catch(() => null),
       ]);
 
-      const raw: TeamStatsContract = statsRes?.data?.[0] ?? { name: '' };
+      const raw: TeamStatsContract = statsRes.data[0] ?? { name: '' };
       setTeamRawResponse(raw);
 
       const toiMap = new Map<number, number>();
@@ -386,9 +388,7 @@ export default function TeamPage() {
     >
       <PageHeader />
       <TeamHero team={team} />
-      <div
-        className={`${styles['team-page__content']} ${shared.pageContent}`}
-      >
+      <div className={`${styles['team-page__content']} ${shared.pageContent}`}>
         <nav
           ref={navRef}
           className={styles['team-tabs']}
@@ -440,7 +440,9 @@ export default function TeamPage() {
                 <PointsPaceSparkline values={teamForm.pace} />
               </div>
               <div>
-                <h3 className={styles['form-panel__subheading']}>Home / Road</h3>
+                <h3 className={styles['form-panel__subheading']}>
+                  Home / Road
+                </h3>
                 <SplitBars {...teamForm.splits} />
               </div>
             </div>

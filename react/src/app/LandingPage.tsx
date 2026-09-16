@@ -11,14 +11,13 @@ import { useDraftLotteryOddsData } from '@/features/standings/hooks/StandingsCon
 import DraftLotteryOddsRow from '@/features/draft-lottery/components/DraftLotteryOddsRow';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
-import SeasonSelector from '@/components/SeasonSelector';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 
 /**
  * Home route. Composes skater leaders, goalie leaders, draft-lottery odds, and
  * standings from their shared contexts; shows a single loading state until all of
- * them are ready. `?season=` (via SeasonSelector) drives every section.
+ * them are ready. The global nav season selector drives every section.
  */
 export default function LandingPage() {
   const { season } = useSeason();
@@ -62,11 +61,12 @@ export default function LandingPage() {
   return (
     <Container fluid className="ds-page-shell">
       <PageHeader />
-      <SeasonSelector />
       <header className={styles['landingPage-intro']}>
-        <p className={styles['landingPage-kicker']}>Season overview</p>
-        <h1>{formatSeasonLabel(season)} at a glance</h1>
-        <p>Track the teams, leaders, and stories shaping the season.</p>
+        <div className={styles['landingPage-intro-copy']}>
+          <p className={styles['landingPage-kicker']}>Season overview</p>
+          <h1>{formatSeasonLabel(season)} at a glance</h1>
+          <p>Track the teams, leaders, and stories shaping the season.</p>
+        </div>
       </header>
       {loading ? (
         <LoadingState label="Loading data" fullPage />

@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
-import SeasonSelector from '@/components/SeasonSelector';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import FormStrip from '@/features/teams/components/FormStrip';
@@ -121,7 +120,6 @@ export default function MatchupPage() {
                 ))}
               </select>
             </label>
-            <SeasonSelector className={styles.seasonControl} />
           </div>
         </section>
         {loadingListOfGamesData ? (

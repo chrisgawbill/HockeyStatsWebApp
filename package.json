@@ -1,7 +1,7 @@
 {
   "name": "hockeystatswebapp",
   "version": "1.0.0",
-  "description": "Hockey statistics web app: a Vite + React frontend (react/) and an Express backend (api/). See docs/architecture.md.",
+  "description": "Hockey statistics web app: a Vite + React frontend using the independent HockeyStatsAPI service. See docs/architecture.md.",
   "private": true,
   "repository": {
     "type": "git",

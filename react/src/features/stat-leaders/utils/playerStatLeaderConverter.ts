@@ -1,4 +1,5 @@
 import { PlayerStatLeader } from '@/features/stat-leaders/types/playerStatLeader';
+import { StatLeaderDto } from '@/features/stat-leaders/api/statLeadersApi';
 
 /**
  * The backend (api/services/mappers/playerMapper.js -> mapStatLeaders) now returns
@@ -6,7 +7,7 @@ import { PlayerStatLeader } from '@/features/stat-leaders/types/playerStatLeader
  * `.default` unwrapping already done defensively server-side. This converter just
  * wraps each contract in the PlayerStatLeader model the UI expects.
  */
-export default function PlayerStatLeaderConverter(leaders: any[]) {
+export default function PlayerStatLeaderConverter(leaders: StatLeaderDto[]) {
   let playerStatLeaderArray: PlayerStatLeader[] = [];
   if (!Array.isArray(leaders)) return playerStatLeaderArray;
 

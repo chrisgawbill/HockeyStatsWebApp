@@ -1,9 +1,10 @@
 import { Team } from '@/features/teams/types/team';
 import { TeamStats } from '@/features/teams/types/teamStats';
+import { TeamHistoryDto } from '@/features/teams/api/teamsApi';
 
 export function ConvertToListOfTeams(
-  teamListData: any[],
-  teamResponseData: any[],
+  teamListData: { id: number; fullName: string }[],
+  teamResponseData: TeamHistoryDto[],
 ) {
   let teamArray: Team[] = [];
   for (let i = 0; i < teamListData.length; i++) {
@@ -28,7 +29,7 @@ export function ConvertToListOfTeams(
   }
   return teamArray;
 }
-function CreateHistoricalTeamStatsList(teamResponseData: any[]) {
+function CreateHistoricalTeamStatsList(teamResponseData: TeamHistoryDto[]) {
   return teamResponseData.map((data) => {
     const seasonId = data.seasonId;
     const wins = data.wins;
@@ -41,7 +42,7 @@ function CreateHistoricalTeamStatsList(teamResponseData: any[]) {
     const goalsAgainst = data.goalsAgainst;
     const goalsAgainstPerGame = data.goalsAgainstPerGame;
     const goalsFor = data.goalsFor;
-    const goalsForPerGame = data.goalsForPerGame ?? data.goalsPerGame;
+    const goalsForPerGame = data.goalsForPerGame ?? data.goalsPerGame ?? 0;
     const penaltyKillPct = data.penaltyKillPct;
     const powerPlayPct = data.powerPlayPct;
     const shotsAgainstPerGame = data.shotsAgainstPerGame;

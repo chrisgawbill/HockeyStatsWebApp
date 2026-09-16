@@ -4,6 +4,8 @@ import LoadingState from '@/components/LoadingState';
 import {
   GetHealth,
   GetCacheReport,
+  CacheReportDto,
+  HealthDataDto,
 } from '@/features/diagnostics/api/diagnosticsApi';
 import styles from '@/features/diagnostics/components/DiagnosticsPage.module.css';
 
@@ -12,38 +14,6 @@ function cx(...classes: (string | false | null | undefined)[]) {
 }
 
 const SESSION_KEY = 'diagnostics-key';
-
-interface HealthData {
-  status: string;
-  version: string;
-  environment: string;
-  currentSeason: string;
-  cacheStorageMode: string;
-  cacheWritable: boolean;
-  externalCacheConfigured: boolean;
-  externalCacheReachable: boolean;
-  anthropicKeyConfigured: boolean;
-  uptime: number;
-  currentTime: string;
-}
-
-interface ExternalCacheData {
-  configured: boolean;
-  reachable: boolean;
-  sections: Record<string, { entries: number; bytes: number }>;
-  totalEntries: number;
-  totalBytes: number;
-  tableBytes: number;
-}
-
-interface CacheReportData {
-  storageMode: string;
-  primaryStore: string;
-  sections: Record<string, number>;
-  largestSection: { type: string | null; size: number };
-  total: number;
-  external: ExternalCacheData;
-}
 
 function formatBytes(bytes: number): string {
   if (!bytes) return '0 B';
@@ -145,8 +115,8 @@ function StatCard({
 
 function DiagnosticsPage() {
   const [passphrase, setPassphrase] = useState('');
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [cacheReport, setCacheReport] = useState<CacheReportData | null>(null);
+  const [health, setHealth] = useState<HealthDataDto | null>(null);
+  const [cacheReport, setCacheReport] = useState<CacheReportDto | null>(null);
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState(false);

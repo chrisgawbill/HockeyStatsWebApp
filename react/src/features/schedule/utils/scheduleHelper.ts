@@ -1,4 +1,5 @@
 import { GameBroadcast } from '@/features/game-detail/types/gameBroadcast';
+import { ScheduleGameDto } from '@/features/schedule/api/scheduleApi';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { parseLocalDate } from '@/lib/dateFormat';
 
@@ -14,9 +15,9 @@ import { parseLocalDate } from '@/lib/dateFormat';
  * ScheduledGame model the UI renders, building its GameBroadcast list along the
  * way. The contract's `date` string is parsed as a local date to avoid UTC shift.
  */
-function ConvertContractToGame(g: any): ScheduledGame {
+function ConvertContractToGame(g: ScheduleGameDto): ScheduledGame {
   const broadcasts: GameBroadcast[] = (g.broadcasts ?? []).map(
-    (b: any) => new GameBroadcast(b.id, b.network, b.market, b.countryCode),
+    (b) => new GameBroadcast(b.id, b.network, b.market, b.countryCode),
   );
 
   return new ScheduledGame(
@@ -39,8 +40,8 @@ function ConvertContractToGame(g: any): ScheduledGame {
     g.playoffRound,
     g.periodType,
     g.seriesWins,
-    g.topSeedTeamAbbrev,
-    g.bottomSeedTeamAbbrev,
+    g.topSeedTeamAbbrev ?? null,
+    g.bottomSeedTeamAbbrev ?? null,
     g.gameState,
   );
 }
@@ -81,7 +82,7 @@ function formatDateParam(date: Date): string {
  * Wraps an array of backend schedule contracts into ScheduledGame models. Empty
  * or missing arrays produce an empty result.
  */
-function ConvertContractsToGames(games: any[]): ScheduledGame[] {
+function ConvertContractsToGames(games: ScheduleGameDto[]): ScheduledGame[] {
   return (games ?? []).map(ConvertContractToGame);
 }
 

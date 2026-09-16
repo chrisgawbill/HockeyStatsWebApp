@@ -1,11 +1,11 @@
 # HockeyStatsWebApp
 
-A hockey statistics web app. A React frontend renders NHL schedules, standings, team pages, player stat leaders, and game details; an Express backend proxies and caches public NHL APIs, normalizes their responses into stable contracts, and exposes one AI-backed endpoint for team history background.
+A hockey statistics web app. A React frontend renders NHL schedules, standings, team pages, player stat leaders, and game details; the independent [HockeyStatsAPI](https://github.com/chrisgawbill/HockeyStatsAPI) service proxies and caches public NHL APIs, normalizes their responses into stable contracts, and exposes one AI-backed endpoint for team history background.
 
 ```text
 React pages/components
   -> React contexts and service functions
-  -> Express API routes
+  -> HTTPS/JSON HockeyStatsAPI service
   -> NHL public APIs, Postgres/filesystem cache, or Python AI subprocess
 ```
 
@@ -14,28 +14,20 @@ For the full picture — layers, conventions, caching, season handling, diagnost
 ## Tech stack
 
 - **Frontend** (`react/`): React 18 + TypeScript on Vite, React Router (`HashRouter`), React Bootstrap grid, CSS Modules.
-- **Backend** (`api/`): Node + Express. Optional Postgres for response caching and normalized domain tables; a Python subprocess makes the Anthropic API call for team history.
-- **Tests** (`api/src/test/`): built-in Node test runner (`node --test`), no jest/supertest. Frontend tests are planned (Phase 2 ticket 2.13).
+- **API** ([HockeyStatsAPI](https://github.com/chrisgawbill/HockeyStatsAPI)): Node + Express. Optional Postgres for response caching and normalized domain tables; a Python subprocess makes the Anthropic API call for team history.
+- **Tests**: API tests live in HockeyStatsAPI and use Node's built-in test runner; frontend tests use Vitest.
 
 ## Repository layout
 
 ```text
-api/      Express backend (src/presentation, src/slices, src/platform, src/composition)
 react/    Vite + React frontend (src/app, src/features, src/components, src/lib, src/styles)
+HockeyStatsAPI  Independent Express API service (separate repository)
 docs/     Project documentation
 ```
 
 ## Getting started
 
 This project standardizes on [pnpm](https://pnpm.io/).
-
-**Backend** (listens on `PORT` or 9000):
-
-```bash
-cd api
-pnpm install
-pnpm start
-```
 
 **Frontend** (Vite dev server):
 
@@ -45,34 +37,21 @@ pnpm install
 pnpm start
 ```
 
-The frontend defaults to `http://localhost:9000` for API calls. Set `VITE_API_URL` if the backend runs elsewhere.
-
-Optional — apply the Postgres domain-table migrations (requires `CACHE_DATABASE_URL` in `api/.env`):
-
-```bash
-cd api
-pnpm run db:migrate
-```
+The deployed frontend uses `https://hockeystatsapi.onrender.com` through the GitHub Actions `VITE_API_URL` variable. Local development defaults to `http://localhost:9000`; set `VITE_API_URL` if the API runs elsewhere.
 
 ### Environment variables
 
 Copy the example templates and fill in real values (the real `.env` files are gitignored):
 
 ```bash
-cp api/.env.example api/.env
 cp react/.env.example react/.env
 ```
 
-`api/.env.example` documents every backend variable (cache/database config, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `DIAGNOSTICS_PASSPHRASE`, `PORT`, `NODE_ENV`). Everything is optional; with no configuration the app runs with a filesystem cache and no AI endpoint. The AI endpoint needs both `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` set — the model name has no in-code default.
+Backend environment variables and migrations are documented in the [HockeyStatsAPI repository](https://github.com/chrisgawbill/HockeyStatsAPI).
 
 ## Testing
 
-```bash
-cd api
-pnpm test
-```
-
-The suite runs offline — no NHL network access, no database required. See the Testing section of [docs/architecture.md](./docs/architecture.md#testing) for what it covers.
+API tests run in HockeyStatsAPI; frontend tests run from `react/` with `pnpm test`. See the Testing section of [docs/architecture.md](./docs/architecture.md#testing) for what the frontend suite covers.
 
 ## Documentation
 
