@@ -662,6 +662,87 @@ EXPANSION: none | <reason>
 ---
 
 
+### IDEA LIB1 — Extract portable Aero/MD3 experience library
+**Source:** D1/D3 portability follow-up  
+**Depends on:** D3 complete; D3-QA findings that affect shared design primitives should be resolved or explicitly deferred  
+**Route:** GPT-5.4 Mini orchestrated in bounded phases. Use a fresh QA subagent for consumer-app verification. GPT-5.6 Sol only for package/build/tooling problems that cannot be resolved within the existing architecture.  
+**Goal:** Move the domain-free Aero/MD3 design language—including tokens, themes, interaction states, accessibility/user-preference behavior, and motion primitives—into a new independent repository/package that HockeyStatsWebApp imports as a real consumer.
+
+**Human checkpoint**
+Creating a new repository/package boundary is intentional for this ticket, but the human must approve the proposed repository/package name, package manager/build approach, and initial public API before extraction begins. Do not create/publish a registry package or make the repository public without explicit approval.
+
+**Library principle**
+Extract the reusable **experience language**, not HockeyStats. The new library should own project-agnostic visual and behavioral primitives. HockeyStats keeps hockey semantics, data, layouts, feature components, team/rivalry/status meaning, and app-specific composition.
+
+### Phase A — extraction inventory & boundary
+- Inspect the current D1/D3 portable layer and actual consumers.
+- Inventory candidates: semantic color/theme tokens, typography, spacing, radii, elevation, surfaces/glass, focus/hover/pressed/selected/disabled states, motion duration/easing, reduced-motion behavior, color-scheme/theme behavior, and generic accessibility-oriented CSS/interaction primitives.
+- Classify each item: `PORTABLE`, `HOCKEYSTATS`, or `UNCERTAIN`.
+- Identify any accidental HockeyStats coupling/imports.
+- Propose the smallest initial library API and repository/package structure.
+- Return the proposal to the human for approval before creating/extracting.
+
+### Phase B — independent library
+After approval:
+- Create the new repository using the approved name/location.
+- Move/copy only approved domain-free primitives into it.
+- Provide one documented import/entry point and minimal theme/configuration surface.
+- Keep runtime dependencies at zero or near-zero; any new dependency requires human approval.
+- Preserve tree-shakeable/simple consumption where practical; do not build elaborate plugin architecture.
+- Include concise documentation for installation/local development, theming, accessibility/preferences, motion, and what intentionally remains app-specific.
+- Add only high-value tests/checks for stable public behavior (for example token/build integrity or small primitive behavior); do not create a giant test framework.
+
+### Phase C — HockeyStats becomes consumer
+- Replace duplicated local portable primitives with imports from the independent library.
+- Keep HockeyStats theme seed/config and hockey-specific semantics in HockeyStats.
+- Avoid a flag-day rewrite: migrate only the shared layer needed to prove real consumption.
+- Remove duplicate source only after the imported version is verified.
+- Preserve current visuals/behavior unless an explicitly approved QA fix is included.
+
+### Phase D — consumer QA
+Use a fresh browser-capable QA subagent:
+- build/typecheck both library and HockeyStats
+- verify HockeyStats resolves the library through the intended dependency path rather than a hidden local duplicate
+- render representative desktop/mobile HockeyStats pages and RinkQuest surfaces that exercise the shared language
+- verify light/dark, keyboard focus, touch states, reduced motion, zoom/text sizing, and other extracted preference/accessibility behavior
+- confirm no HockeyStats/domain imports or naming exist in the library
+- confirm the library can be consumed by a tiny non-hockey example/smoke consumer without HockeyStats code
+
+**Accessibility portability**
+The library may provide generic defaults/primitives that help consumers respect accessibility and user preferences, such as focus visibility, reduced motion, theme/color-scheme hooks, state semantics/styling, legibility-oriented tokens, and documented touch/contrast guidance. Do **not** claim the library makes a consuming app automatically accessible; semantic markup, labels, focus management, content, contrast choices, and feature-specific behavior remain consumer responsibilities.
+
+**Motion portability**
+Move only domain-free motion vocabulary and generic interaction behavior. Do not export HockeyStats/RinkQuest choreography as generic primitives merely because it already exists.
+
+**Versioning/distribution**
+- Initial success is an independent repo/package that HockeyStats can consume through the approved development dependency method.
+- Publishing to npm/another registry, CI release automation, semantic-release tooling, changelog bots, docs sites, Storybook, monorepo conversion, and broad versioning automation are separate future decisions unless explicitly approved.
+- Prefer the simplest versioning approach needed for one real consumer.
+
+**Constraints**
+- No HockeyStats, NHL, team, game, rivalry, schedule, standings, or RinkQuest semantics in the library.
+- No giant component framework or attempt to recreate Material UI.
+- No new styling/runtime framework unless human-approved.
+- Do not extract feature components just to increase library size.
+- Do not change the design language during extraction; this is primarily a boundary/migration ticket.
+- Do not make the repo/package public or publish externally without explicit human approval.
+- Keep contexts separated: library extraction and HockeyStats migration may use separate worker contexts when that reduces rereading.
+
+**Acceptance**
+- Independent repository/package exists at the human-approved location/name.
+- HockeyStats imports and uses the independent library as a genuine dependency for the approved shared layer.
+- Shared tokens/themes/states/motion/preferences are no longer maintained as duplicate HockeyStats-owned source.
+- Library contains no hockey/domain-specific imports or names.
+- Light/dark, focus, reduced motion, touch/interaction states, and representative responsive visuals remain correct in HockeyStats.
+- A minimal non-hockey smoke consumer can import the library without HockeyStats code.
+- Documentation clearly separates what the library guarantees from accessibility responsibilities of consuming apps.
+- Relevant library + HockeyStats build/typecheck/tests pass.
+
+**Verify:** dependency-boundary check → library checks → HockeyStats checks → non-hockey smoke consumer → browser QA on representative desktop/mobile + accessibility/preferences.  
+**Out of scope:** public registry publishing, docs website, Storybook, full generic component suite, monorepo migration, automatic accessibility certification, feature extraction, redesign.
+
+---
+
 ## Later candidates
 
 | Status | Ticket | Source | Note |
