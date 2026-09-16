@@ -41,16 +41,19 @@
   --color-shot-band-good: #a5d8ff;
   /* Must stay above PageHeader's highest z-index (300, PageHeader.module.css). */
   --z-modal: 400;
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  /** Height of the fixed bottom nav on mobile (PageHeader.module.css). */
-  /* Matches the mobile nav bar's rendered height: var(--space-xs) padding
-     top/bottom (8px) + the 44px min-height nav buttons + 1px top border. See
-     PageHeader.module.css's @media (max-width: 576px) block. */
-  --mobile-nav-height: 56px;
+  --space-xs: var(--ds-space-1);
+  --space-sm: var(--ds-space-2);
+  --space-md: var(--ds-space-3);
+  --space-lg: var(--ds-space-4);
+  --space-xl: var(--ds-space-5);
+  --ds-layout-max-width: 80rem;
+  --page-content-width: var(--ds-layout-max-width);
+  --page-gutter: var(--ds-space-3);
+  --page-section-gap: var(--ds-space-5);
+  --page-block-start: var(--ds-space-4);
+  --page-block-end: var(--ds-space-5);
+  /** Measured by PageHeader so fixed mobile chrome always reserves its real height. */
+  --mobile-chrome-height: 0px;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -63,6 +66,15 @@
   --scrollbar-thumb: #8a95a6;
   --scrollbar-thumb-hover: #6f7b8e;
   --scrollbar-highlight: rgba(255, 255, 255, 0.55);
+}
+
+@media (max-width: 576px) {
+  :root {
+    --page-gutter: var(--ds-space-2);
+    --page-section-gap: var(--ds-space-4);
+    --page-block-start: var(--ds-space-3);
+    --page-block-end: var(--ds-space-4);
+  }
 }
 
 [data-theme='dark'] {
@@ -166,6 +178,7 @@ html::-webkit-scrollbar-thumb:hover,
 
 body {
   margin: 0;
+  overflow-x: clip;
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: 'Roboto', sans-serif;

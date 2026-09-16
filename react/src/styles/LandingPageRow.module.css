@@ -16,7 +16,13 @@
 
 .section-container > .odds-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media only screen and (max-width: 900px) {
+  .section-container > .odds-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .row-scroller-wrapper {
@@ -124,8 +130,9 @@
     padding-right: 0;
   }
 
-  .section-container > .ds-grid {
+  .section-container > .odds-grid {
     --bs-gutter-x: var(--space-md);
+    grid-template-columns: 1fr;
     max-width: 26rem;
     margin-left: auto;
     margin-right: auto;
