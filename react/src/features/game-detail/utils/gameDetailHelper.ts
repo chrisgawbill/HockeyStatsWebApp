@@ -4,7 +4,7 @@ import {
   GameDetailStatus,
   GameLanding,
   LandingScoringPeriod,
-  PeriodScoreViewModel,
+  PeriodGoalBreakdownViewModel,
   TeamTotalsViewModel,
 } from '@/features/game-detail/types/gameDetail';
 import { formatLocalTime, formatLongDate } from '@/lib/dateFormat';
@@ -64,11 +64,11 @@ export function getLocalPuckDropTime(
 }
 
 /** Per-period home/away goal counts, derived from the landing scoring feed. */
-export function getPeriodScores(
+export function getPeriodGoalsBreakdown(
   scoring: LandingScoringPeriod[],
   homeAbbrev: string,
   awayAbbrev: string,
-): PeriodScoreViewModel[] {
+): PeriodGoalBreakdownViewModel[] {
   return scoring.map((period) => ({
     periodNum: period.periodDescriptor.number,
     periodType: period.periodDescriptor.periodType,

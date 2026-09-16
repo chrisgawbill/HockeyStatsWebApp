@@ -10,17 +10,18 @@ import {
 import {
   LIVE_POLL_INTERVAL_MS,
   computeTeamTotals,
-  getPeriodScores,
+  getPeriodGoalsBreakdown,
   hasBoxscoreStats,
   hasScoringSummary,
   hasThreeStars,
   mapGameStateToStatus,
 } from '@/features/game-detail/utils/gameDetailHelper';
+import { getGameStoryFacts } from '@/features/game-detail/utils/gameStoryHelper';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import HeroScoreboard from '@/features/game-detail/components/HeroScoreboard';
-import PeriodScoresTable from '@/features/game-detail/components/PeriodScoresTable';
+import PeriodGoalsBreakdownTable from '@/features/game-detail/components/PeriodScoresTable';
 import ScoringSummary from '@/features/game-detail/components/ScoringSummary';
 import TeamComparison from '@/features/game-detail/components/TeamComparison';
 import ThreeStars from '@/features/game-detail/components/ThreeStars';
@@ -29,6 +30,7 @@ import { getTheme } from '@/lib/themeHandler';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import LoadingState from '@/components/LoadingState';
+import GameStory from '@/features/game-detail/components/GameStory';
 
 const GameDetailPage = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -81,14 +83,24 @@ const GameDetailPage = () => {
     return () => window.clearInterval(intervalId);
   }, [gameId, status]);
 
-  const periodScores = useMemo(() => {
+  const periodGoalsBreakdown = useMemo(() => {
     if (!landing?.summary?.scoring || !boxscore) return [];
-    return getPeriodScores(
+    return getPeriodGoalsBreakdown(
       landing.summary.scoring,
       boxscore.homeTeam.abbrev,
       boxscore.awayTeam.abbrev,
     );
   }, [landing, boxscore]);
+
+  const gameStoryFacts = useMemo(
+    () =>
+      getGameStoryFacts(
+        landing,
+        boxscore?.awayTeam.abbrev ?? '',
+        boxscore?.homeTeam.abbrev ?? '',
+      ),
+    [landing, boxscore],
+  );
 
   const homeTotals = useMemo(() => {
     if (!hasBoxscoreStats(boxscore)) return null;
@@ -131,9 +143,15 @@ const GameDetailPage = () => {
         <div
           className={`${styles['game-detail-page__content']} ${shared.pageContent}`}
         >
-          {periodScores.length > 0 && (
-            <PeriodScoresTable
-              periodScores={periodScores}
+          <GameStory
+            facts={gameStoryFacts}
+            boxscore={boxscore}
+            homeTotals={homeTotals}
+            awayTotals={awayTotals}
+          />
+          {periodGoalsBreakdown.length > 0 && (
+            <PeriodGoalsBreakdownTable
+              periodGoalsBreakdown={periodGoalsBreakdown}
               homeAbbrev={boxscore.homeTeam.abbrev}
               awayAbbrev={boxscore.awayTeam.abbrev}
             />

@@ -134,7 +134,7 @@ The core owns generic visual language; HockeyStats owns hockey semantics.
 
 ---
 
-### IDEA F1 — Game Story
+### ACTIVE F1 — Game Story
 **Source:** `docs/design-feature-backlog.md`  
 **Depends on:** D1; D2 preferred  
 **Route:** GPT-5.4 Mini for both implementation phases; GPT-5.6 Luna QA after each phase; escalate to GPT-5.6 Sol only for genuinely ambiguous game-data reasoning.  
@@ -249,7 +249,7 @@ None.
 
 ## Active
 
-None.
+- F1 — Game Story (Phase B implemented; manual UI verification pending)
 
 ## Completed
 
