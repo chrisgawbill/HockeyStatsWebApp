@@ -38,6 +38,7 @@ jobs:
         working-directory: react
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm_config_registry: https://npm.pkg.github.com
 
       - name: Validate API URL
         run: |
