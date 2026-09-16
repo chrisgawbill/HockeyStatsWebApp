@@ -29,7 +29,7 @@ The PM may suggest splitting a ticket if it is too large, but the human approves
 
 ## Prepared candidates
 
-### ACTIVE D1 — Portable Aero/MD3 visual foundation
+### DONE D1 — Portable Aero/MD3 visual foundation
 **Source:** `docs/design-feature-backlog.md`  
 **Route:** GPT-5.4 Mini  
 **Goal:** Establish a small reusable Aero/MD3 design language that HockeyStats consumes but that can be carried into future projects without HockeyStats-specific code.
@@ -78,7 +78,7 @@ The core owns generic visual language; HockeyStats owns hockey semantics.
 
 ---
 
-### IDEA D1B — Condense CSS
+### DONE D1B — Condense CSS
 **Source:** `docs/design-feature-backlog.md`  
 **Depends on:** D1  
 **Route:** GPT-5.6 Luna if changes are purely mechanical; GPT-5.4 Mini otherwise.  
