@@ -1,0 +1,25 @@
+.header,
+.footer {
+  padding: var(--space-md);
+  border-color: var(--color-divider);
+}
+
+.close {
+  min-width: 5rem;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.body {
+  min-height: 2rem;
+  padding: var(--space-md);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-divider);
+}

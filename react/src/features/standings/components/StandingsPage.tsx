@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import styles from '@/features/standings/components/StandingsPage.module.css';
-import { Container, Row } from 'react-bootstrap';
 import StandingsContainer from '@/features/standings/components/StandingsContainer';
 import SlidingToggle from '@/components/SlidingToggle';
 import PageHeader from '@/components/PageHeader';
@@ -77,7 +76,7 @@ export default function StandingsPage() {
   return (
     <>
       <PageHeader />
-      <Container fluid className={styles['standings-page']}>
+      <main className={`${styles['standings-page']} ds-page-shell ds-container`}>
         {loadingStandingsData ? (
           <LoadingState label="Loading standings" fullPage />
         ) : errorStandingsData ? (
@@ -95,7 +94,7 @@ export default function StandingsPage() {
           />
         ) : (
           <>
-            <Row
+            <div
               className={`${styles['standings-page-toggle-row']} mb-2 justify-content-center`}
             >
               <SlidingToggle
@@ -106,8 +105,8 @@ export default function StandingsPage() {
                 value={view}
                 onChange={setView}
               />
-            </Row>
-            <Row
+            </div>
+            <div
               className={`${styles['standings-page-toggle-row']} mb-2 justify-content-center`}
             >
               <SlidingToggle
@@ -118,11 +117,11 @@ export default function StandingsPage() {
                 value={conference}
                 onChange={setConference}
               />
-            </Row>
+            </div>
             <div className={styles['standings-page-legend-row']}>
               <StandingsClinchLegend className={styles['standings-legend']} />
             </div>
-            <Row className={styles['standings-page-table-container']}>
+            <div className={styles['standings-page-table-container']}>
               {standingsLookup[view][conference].map((entry) => (
                 <StandingsContainer
                   key={entry.name}
@@ -131,13 +130,13 @@ export default function StandingsPage() {
                   standingFormat={entry.format}
                 />
               ))}
-            </Row>
+            </div>
             {loadingListOfGamesData ? (
               <p className={styles['playoff-race-loading']}>
                 Loading playoff race…
               </p>
             ) : (
-              <Row>
+              <div>
                 <div className={styles['playoff-race-grid']}>
                   <PlayoffRacePanel
                     conference="Eastern"
@@ -150,11 +149,11 @@ export default function StandingsPage() {
                     games={listOfGamesData}
                   />
                 </div>
-              </Row>
+              </div>
             )}
           </>
         )}
-      </Container>
+      </main>
     </>
   );
 }

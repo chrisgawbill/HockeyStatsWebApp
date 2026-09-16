@@ -1,4 +1,3 @@
-import { Col, Container, Row } from 'react-bootstrap';
 import { useState } from 'react';
 import StandingsContainer from '@/features/standings/components/StandingsContainer';
 import SlidingToggle from '@/components/SlidingToggle';
@@ -90,13 +89,13 @@ export default function LandingPageStandings() {
   };
 
   return (
-    <Container fluid className={styles['landing-standings']}>
-      <Row className={styles['landing-standings-mobile-title']}>
-        <Col className={styles['landing-header']}>
+    <section className={`${styles['landing-standings']} ds-stack`}>
+      <div className={styles['landing-standings-mobile-title']}>
+        <div className={styles['landing-header']}>
           <h2>Standings</h2>
-        </Col>
-      </Row>
-      <Row className="mb-2">
+        </div>
+      </div>
+      <div>
         <SlidingToggle
           options={[
             { label: 'Conference', value: 'conference' as StandingsView },
@@ -105,8 +104,8 @@ export default function LandingPageStandings() {
           value={view}
           onChange={setView}
         />
-      </Row>
-      <Row className="mb-2">
+      </div>
+      <div>
         <SlidingToggle
           options={[
             { label: 'Eastern', value: 'Eastern' as Conference },
@@ -115,17 +114,17 @@ export default function LandingPageStandings() {
           value={conference}
           onChange={setConference}
         />
-      </Row>
+      </div>
       <StandingsClinchLegend />
       {standingsLookup[view][conference].map((entry) => (
-        <Row key={entry.name}>
+        <div key={entry.name}>
           <StandingsContainer
             standingsName={entry.name}
             standingsData={entry.data}
             standingFormat={entry.format}
           />
-        </Row>
+        </div>
       ))}
-    </Container>
+    </section>
   );
 }

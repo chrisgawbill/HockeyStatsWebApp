@@ -5,7 +5,7 @@
 
 .schedule-page :global(.sliding-toggle),
 .schedule-filter-field,
-.date-row :global(.btn-group) {
+.date-row.ds-button-group {
   transition:
     border-color var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
     box-shadow var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
@@ -87,7 +87,7 @@
   padding: 0 var(--space-md);
 }
 
-.date-row :global(.btn-group) {
+.date-row.ds-button-group {
   width: 100%;
   max-width: 42rem;
   background-color: color-mix(
@@ -103,7 +103,7 @@
   align-items: center;
 }
 
-.date-row :global(.btn-group) > :global(.btn) {
+.date-row.ds-button-group > .ds-button {
   background: transparent !important;
   border: none !important;
   border-radius: var(--border-radius-pill) !important;
@@ -117,7 +117,7 @@
   white-space: nowrap;
 }
 
-.date-row :global(.btn-group) > :global(.btn).schedule-nav-btn {
+.date-row.ds-button-group > .schedule-nav-btn {
   padding: 6px 12px;
   min-width: 44px;
   display: flex;
@@ -125,8 +125,8 @@
   justify-content: center;
 }
 
-.date-row :global(.btn-group) > :global(.btn):hover:not(:disabled),
-.date-row :global(.btn-group) > :global(.btn):focus-visible {
+.date-row.ds-button-group > .ds-button:hover:not(:disabled),
+.date-row.ds-button-group > .ds-button:focus-visible {
   background-color: color-mix(
     in srgb,
     var(--color-primary) 10%,
@@ -135,7 +135,7 @@
   color: var(--color-primary-dark) !important;
 }
 
-.date-row :global(.btn-group) > :global(.btn):active:not(:disabled) {
+.date-row.ds-button-group > .ds-button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
@@ -202,6 +202,7 @@
 
 /* --- Matchup row --- */
 .game-row {
+  display: flex;
   align-items: center;
   padding-top: var(--space-md);
   padding-bottom: var(--space-md);
@@ -215,7 +216,7 @@
   gap: 0.75rem;
 }
 
-.game-row > :global(.col):last-child {
+.game-row > .team-info:last-child {
   justify-content: flex-end;
 }
 
@@ -318,6 +319,7 @@
 
 /* --- Game details footer --- */
 .game-details {
+  display: flex;
   align-items: center;
   padding-top: 0.6rem;
   padding-bottom: 0.6rem;
@@ -328,7 +330,7 @@
   margin: 0;
 }
 
-.game-details :global(.text-center) {
+.game-details .text-center {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -412,11 +414,11 @@
     padding: 0.75rem 1rem;
   }
 
-  .game-details :global(.col-12) {
+  .game-details > div {
     text-align: center;
   }
 
-  .md3-btn-group > :global(.btn) {
+  .md3-btn-group > .ds-button {
     white-space: nowrap;
   }
 }

@@ -1,4 +1,3 @@
-import { Row, Col, ButtonGroup, Button } from 'react-bootstrap';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { useTheme } from '@/lib/ThemeContext';
 import { formatLocalTime } from '@/lib/dateFormat';
@@ -59,12 +58,12 @@ function ScheduleCard({
       )}
       onClick={() => isGameCompleted(game) && goToGameDetails(game)}
     >
-      <Row key={game.gameId} className={styles['game-row']}>
-        <Col className={styles['team-info']}>
+      <div key={game.gameId} className={styles['game-row']}>
+        <div className={styles['team-info']}>
           <img src={homeLogo} alt="home_logo" />
           <h3>{game.homeTeam}</h3>
-        </Col>
-        <Col className={styles['vs']}>
+        </div>
+        <div className={styles['vs']}>
           {game.isPreseason && (
             <div className={styles['game-preseason-badge']}>Preseason</div>
           )}
@@ -118,31 +117,31 @@ function ScheduleCard({
               </p>
             </>
           )}
-        </Col>
-        <Col className={styles['team-info']}>
+        </div>
+        <div className={styles['team-info']}>
           <h3>{game.awayTeam}</h3>
           <img src={awayLogo} alt="away_logo" />
-        </Col>
-      </Row>
-      <Row className={styles['game-details']}>
-        <Col xs={12} sm={4}>
+        </div>
+      </div>
+      <div className={styles['game-details']}>
+        <div>
           <p>Venue: {game.venue}</p>
-        </Col>
-        <Col xs={12} sm={4} className="text-center">
-          <ButtonGroup className={styles['md3-btn-group']}>
+        </div>
+        <div className="text-center">
+          <div className={`${styles['md3-btn-group']} ds-button-group`}>
             {game.ticketLink !== '' ? (
-              <Button
-                className="btn btn-primary"
+              <button
+                className="ds-button"
                 onClick={() => handleTicketClick(game.ticketLink)}
               >
                 Tickets
-              </Button>
+              </button>
             ) : (
               <></>
             )}
-          </ButtonGroup>
-        </Col>
-        <Col xs={12} sm={4}>
+          </div>
+        </div>
+        <div>
           <p>
             Broadcasts:{' '}
             {game.broadcasts
@@ -152,8 +151,8 @@ function ScheduleCard({
               )
               .join(',')}
           </p>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </div>
   );
 }

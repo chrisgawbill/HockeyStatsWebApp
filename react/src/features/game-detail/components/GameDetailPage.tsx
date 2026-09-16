@@ -17,7 +17,6 @@ import {
   mapGameStateToStatus,
 } from '@/features/game-detail/utils/gameDetailHelper';
 import { getGameStoryFacts } from '@/features/game-detail/utils/gameStoryHelper';
-import { useTheme } from '@table-library/react-table-library/theme';
 import { useParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import HeroScoreboard from '@/features/game-detail/components/HeroScoreboard';
@@ -26,7 +25,6 @@ import ScoringSummary from '@/features/game-detail/components/ScoringSummary';
 import TeamComparison from '@/features/game-detail/components/TeamComparison';
 import ThreeStars from '@/features/game-detail/components/ThreeStars';
 import PlayerStatsSelection from '@/features/game-detail/components/PlayerStatsSelection';
-import { getTheme } from '@/lib/themeHandler';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import LoadingState from '@/components/LoadingState';
@@ -35,7 +33,6 @@ import GameStory from '@/features/game-detail/components/GameStory';
 
 const GameDetailPage = () => {
   const { gameId } = useParams<{ gameId: string }>();
-  const theme = useTheme(getTheme());
   const [boxscore, setBoxscore] = useState<GameDetailBoxscore | null>(null);
   const [landing, setLanding] = useState<GameLanding | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,7 +140,7 @@ const GameDetailPage = () => {
   return (
     <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
       <PageHeader />
-      <HeroScoreboard boxscore={boxscore} status={status} theme={theme} />
+      <HeroScoreboard boxscore={boxscore} status={status} />
       {!isPreview && (
         <div
           className={`${styles['game-detail-page__content']} ${shared.pageContent}`}

@@ -1,4 +1,3 @@
-import { Col, Container, Row } from 'react-bootstrap';
 import LandingPageStandings from '@/features/standings/components/LandingPageStandings';
 import PlayerStatLeaderRow from '@/features/stat-leaders/components/PlayerStatLeaderRow';
 import PageHeader from '@/components/PageHeader';
@@ -59,7 +58,7 @@ export default function LandingPage() {
   };
 
   return (
-    <Container fluid className="ds-page-shell">
+    <main className="ds-page-shell ds-container">
       <PageHeader />
       <header className={styles['landingPage-intro']}>
         <div className={styles['landingPage-intro-copy']}>
@@ -78,8 +77,8 @@ export default function LandingPage() {
           onRetry={retryStatLeaders}
         />
       ) : (
-        <Row className={styles['landingPage-content']}>
-          <Col lg={7}>
+        <div className={`${styles['landingPage-content']} ds-grid`}>
+          <section>
             <PlayerStatLeaderRow
               title="Skater Stat Leaders"
               topStatLeaders={[
@@ -102,12 +101,12 @@ export default function LandingPage() {
               title="Draft Lottery Odds"
               data={draftLotteryOddsData}
             />
-          </Col>
-          <Col lg={5}>
+          </section>
+          <section>
             <LandingPageStandings />
-          </Col>
-        </Row>
+          </section>
+        </div>
       )}
-    </Container>
+    </main>
   );
 }

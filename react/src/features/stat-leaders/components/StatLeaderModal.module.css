@@ -4,8 +4,6 @@
 }
 
 .stat-leader-modal__content {
-  /* Background/border/shadow come from the global .modal-content Aero
-     treatment (styles/components.css) - this just handles layout. */
   max-height: min(82vh, 46rem);
   display: flex;
   flex-direction: column;
@@ -14,11 +12,18 @@
 
 .stat-leader-modal__header,
 .stat-leader-modal__footer {
+  padding: var(--space-md);
   flex-shrink: 0;
   border-color: var(--color-divider);
 }
 
-.stat-leader-modal__header :global(.modal-title) {
+.stat-leader-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-divider);
+}
+
+.stat-leader-modal__header h2 {
   font-size: var(--text-lg);
   font-weight: 600;
 }
@@ -60,10 +65,6 @@
   min-width: 5rem;
 }
 
-:global([data-theme='dark'] .modal-backdrop) {
-  background-color: #020617;
-}
-
 :global([data-theme='dark']) .stat-leader-modal__table {
   background: var(--color-surface);
 }
@@ -86,8 +87,8 @@
     max-height: calc(82vh - 9.5rem);
   }
 
-  .stat-leader-modal__table :global(.th),
-  .stat-leader-modal__table :global(.td) {
+  .stat-leader-modal__table th,
+  .stat-leader-modal__table td {
     font-size: var(--text-sm);
   }
 

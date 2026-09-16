@@ -1,4 +1,3 @@
-import { Row, ButtonGroup, Button } from 'react-bootstrap';
 import styles from '@/features/schedule/components/SchedulePage.module.css';
 
 type ScheduleView = 'day' | 'week' | 'month';
@@ -146,10 +145,9 @@ const DatePicker = ({
   };
 
   return (
-    <Row className={styles['date-row']}>
-      <ButtonGroup>
-        <Button
-          className={`btn btn-primary ${styles['schedule-nav-btn']}`}
+    <div className={`${styles['date-row']} ds-button-group`}>
+        <button
+          className={`ds-button ${styles['schedule-nav-btn']}`}
           onClick={() => goTo(-1)}
           disabled={isPrevButtonDisabled}
           aria-label={`Previous ${view}`}
@@ -167,12 +165,12 @@ const DatePicker = ({
           >
             <polyline points="15 18 9 12 15 6" />
           </svg>
-        </Button>
+        </button>
         <p className={styles['schedule-date-label']}>
           {formatPeriodLabel(selectedDate, view)}
         </p>
-        <Button
-          className={`btn btn-primary ${styles['schedule-nav-btn']}`}
+        <button
+          className={`ds-button ${styles['schedule-nav-btn']}`}
           onClick={() => goTo(1)}
           disabled={isNextButtonDisabled}
           aria-label={`Next ${view}`}
@@ -190,9 +188,8 @@ const DatePicker = ({
           >
             <polyline points="9 18 15 12 9 6" />
           </svg>
-        </Button>
-      </ButtonGroup>
-    </Row>
+        </button>
+    </div>
   );
 };
 export default DatePicker;

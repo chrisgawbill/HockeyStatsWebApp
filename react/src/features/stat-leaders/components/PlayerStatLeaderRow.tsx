@@ -1,4 +1,3 @@
-import { Col, Row } from 'react-bootstrap';
 import styles from '@/styles/LandingPageRow.module.css';
 import { TopStatLeader } from '@/features/stat-leaders/types/topStatLeader';
 import StatLeaderCard from '@/features/stat-leaders/components/StatLeaderCard';
@@ -27,30 +26,25 @@ export default function PlayerStatLeaderRow({
 
   return (
     <div className={styles['stat-leader-row']}>
-      <Row>
-        <Col className={styles['landing-header']}>
+      <div className={styles['landing-header']}>
           <h2>{title}</h2>
-        </Col>
-      </Row>
+      </div>
       {availableLeaders.length < 1 ? (
         <EmptyState
           message={`No ${title.toLowerCase()} available for ${formatSeasonLabel(season)}.`}
         />
       ) : (
         <div className={styles['row-scroller-wrapper']}>
-          <Row className={styles['row-scroller']}>
+          <div className={`${styles['row-scroller']} ds-grid`}>
             {availableLeaders.map((topStatLeader: TopStatLeader) => (
-              <Col
-                sm
-                md={5}
-                lg={4}
+              <div
                 className={styles['row-scroller-column']}
                 key={topStatLeader.statIndicator}
               >
                 <StatLeaderCard topStatLeader={topStatLeader} />
-              </Col>
+              </div>
             ))}
-          </Row>
+          </div>
         </div>
       )}
     </div>

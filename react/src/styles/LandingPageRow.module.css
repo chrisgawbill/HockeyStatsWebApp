@@ -14,6 +14,11 @@
   margin: 0 0 var(--space-sm);
 }
 
+.section-container > .odds-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .row-scroller-wrapper {
   position: relative;
 }
@@ -119,10 +124,11 @@
     padding-right: 0;
   }
 
-  .section-container > :global(.row) {
+  .section-container > .ds-grid {
     --bs-gutter-x: var(--space-md);
     max-width: 26rem;
     margin-left: auto;
     margin-right: auto;
   }
+
 }

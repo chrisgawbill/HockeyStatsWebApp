@@ -1,4 +1,3 @@
-import { Col, Row } from 'react-bootstrap';
 import styles from '@/styles/LandingPageRow.module.css';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import DraftLotteryOddsCard from '@/features/draft-lottery/components/DraftLotteryOddsCard';
@@ -13,33 +12,19 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
     const maxOdds = Math.max(...data.map((t) => t.draftLotteryOdds));
     return (
       <div className={styles['section-container']}>
-        <Row>
-          <Col className={styles['landing-header']}>
+        <div className={styles['landing-header']}>
             <h2>{title}</h2>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={6}>
-            {data.slice(0, 8).map((team, index) => (
-              <DraftLotteryOddsCard
-                key={team.id}
-                team={team}
-                index={index}
-                maxOdds={maxOdds}
-              />
-            ))}
-          </Col>
-          <Col xs={6}>
-            {data.slice(8).map((team, index) => (
-              <DraftLotteryOddsCard
-                key={team.id}
-                team={team}
-                index={index + 8}
-                maxOdds={maxOdds}
-              />
-            ))}
-          </Col>
-        </Row>
+        </div>
+        <div className={`${styles['odds-grid']} ds-grid`}>
+          {data.slice(0, 16).map((team, index) => (
+            <DraftLotteryOddsCard
+              key={team.id}
+              team={team}
+              index={index}
+              maxOdds={maxOdds}
+            />
+          ))}
+        </div>
       </div>
     );
   }

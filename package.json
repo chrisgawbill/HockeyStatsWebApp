@@ -12,9 +12,5 @@
   "bugs": {
     "url": "https://github.com/chrisgawbill/HockeyStatsWebApp/issues"
   },
-  "homepage": "https://github.com/chrisgawbill/HockeyStatsWebApp#readme",
-  "dependencies": {
-    "20": "^1.0.0",
-    "node": "^26.8.2"
-  }
+  "homepage": "https://github.com/chrisgawbill/HockeyStatsWebApp#readme"
 }
