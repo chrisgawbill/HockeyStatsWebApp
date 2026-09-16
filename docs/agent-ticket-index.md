@@ -334,7 +334,7 @@ Phase A verifies pure playoff-race derivation before any substantial UI work. Ph
 - Add a deep-linkable matchup view with two team selectors and selected season.
 - Show series results, aggregate goals, upcoming meetings, and team form when already available.
 - Add a minimal pre-filled entry point from Game Detail; other entry points are follow-ups unless trivial.
-z
+
 **Constraints**
 - No new endpoint; team-selector changes are client-side projections.
 - Preserve existing URL/search-param and route-state conventions.
@@ -386,7 +386,7 @@ z
 
 ---
 
-### IDEA D3 — Product-level polish and motion
+### READY D3 — Product-level polish and motion
 **Source:** agent ticket index  
 **Depends on:** D1, D2; ideally after core signature features stabilize  
 **Route:** GPT-5.4 Mini. Use phased, page-cluster execution rather than a single repo-wide edit. Luna QA may verify performance/accessibility criteria; GPT-5.6 Sol only for evidence-backed rendering/performance problems.  
@@ -464,11 +464,11 @@ Generic motion tokens, state behavior, and reusable surface/interaction primitiv
 
 ## Ready
 
-None.
+- D3 — Product-level polish and motion
 
 ## Active
 
-- F1 — Game Story (Phase B implemented; manual UI verification pending)
+None.
 
 ## Completed
 
