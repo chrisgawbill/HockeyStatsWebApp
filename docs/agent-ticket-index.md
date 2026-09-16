@@ -247,15 +247,150 @@ GPT-5.6 Luna verifies the derivation acceptance criteria before Phase B starts. 
 **Verify:** targeted helper tests/checks → frontend typecheck/build → one-team source-data comparison → brief mobile/light/dark check.  
 **Out of scope:** player form, xG/shot data, backend work, standings-row integration unless trivial, reusable chart framework, generalized multi-sport analytics engine.
 
+### IDEA F2 — Team DNA
+**Source:** `docs/design-feature-backlog.md`  
+**Depends on:** D1, D2; reuse E2 helpers/data if available  
+**Route:** GPT-5.4 Mini; default single-agent. Add Luna QA only for normalized/derived metric correctness that targeted tests do not cover.  
+**Goal:** Give each team a compact, understandable visual fingerprint from measurable season tendencies.
+
+**Scope**
+- Inspect E2 outputs plus existing standings/team/season data; reuse rather than recalculate.
+- Select 4–6 metrics that are both available and meaningfully different (for example goal differential, scoring environment, home/road performance, recent form).
+- Keep calculations in pure helpers; keep raw values visible.
+- Normalize only when comparison requires it, with a documented scale/baseline.
+- Build one clear Team DNA presentation on the Team page using D1 primitives.
+
+**Constraints**
+- Zero new API/backend work by default.
+- No ML, clustering, speculative labels, or invented “team personality.”
+- Prefer understandable bars/scales/profile rows over a radar chart.
+- Do not duplicate E2 calculations or build a generalized analytics engine.
+- Unsupported metrics are omitted, not approximated.
+
+**Acceptance**
+- A fan can identify 4–6 measurable team tendencies and see the underlying values.
+- Any normalization is deterministic, documented, and testable.
+- Strong/average/struggling sample teams produce plausibly different profiles from source data.
+- Season context is visible; empty/partial seasons degrade gracefully.
+- Mobile/light/dark/accessibility and build/typecheck pass.
+
+**Verify:** targeted helper tests → compare 3 representative teams to source standings/form data → frontend checks.  
+**Out of scope:** historical comparisons, ML/clustering, new data acquisition, generic chart framework.
+
+---
+
+### IDEA E1 — Playoff race command center
+**Source:** `docs/exciting-features-backlog.md`  
+**Route:** GPT-5.4 Mini in two bounded phases; Luna QA gate for playoff math; GPT-5.6 Sol only for unresolved rule/data ambiguity.  
+**Goal:** Show a transparent, simplified playoff-race view from standings and schedule data already loaded by the app.
+
+**Execution shape**
+Phase A verifies pure playoff-race derivation before any substantial UI work. Phase B renders only verified outputs.
+
+**Phase A — derivation**
+- Inspect current standings/schedule models and reuse existing wildcard/playoff helpers if present.
+- Pure helper(s) for remaining games, max possible points, projected cutline/required pace, and simplified magic/tragic values only where formulas are defensible from available data.
+- Explicitly document assumptions and NHL tiebreaker limitations.
+- Handle zero remaining games, early season, and past seasons deterministically.
+
+**Phase A QA gate**
+- Targeted tests cover representative in-position/chasing/eliminated/season-over cases.
+- Luna independently checks formulas/assumptions when deterministic tests alone cannot establish hockey-rule correctness.
+- Do not begin Phase B if the math is unresolved.
+
+**Phase B — presentation**
+- Add a compact per-conference playoff-race view to the existing standings experience when practical; avoid a new route unless current structure makes it cleaner.
+- Show only useful verified values: points, remaining, max points, cutline/pace, and simplified clinch/elimination indicators.
+- Clearly label simplified calculations and ignored tiebreakers.
+- Use D1 tokens and preserve existing season/query-param behavior.
+
+**Constraints**
+- Zero new fetches/endpoints.
+- Pure math outside React.
+- No Monte Carlo odds or exact NHL clinch/tiebreaker engine.
+- Never present simplified math as official NHL clinch status.
+- Stop for human decision before adding data/contracts or complex heuristics.
+
+**Acceptance**
+- Spot-checked team calculations reconcile with helper inputs/formulas.
+- Current, early, and completed seasons render without divide-by-zero or misleading states.
+- Changing/opening the view introduces no new data fetch beyond existing season behavior.
+- Mobile/light/dark/accessibility and build/typecheck/tests pass.
+
+**Verify:** helper tests + manual formula spot-check for representative teams + frontend checks.  
+**Out of scope:** official tiebreaker-exact clinch logic, Monte Carlo playoff odds, backend/API changes.
+
+---
+
+### IDEA E3 — Head-to-head matchup explorer
+**Source:** `docs/exciting-features-backlog.md`  
+**Depends on:** E2 preferred for reusable form display  
+**Route:** GPT-5.4 Mini; default single-agent with deterministic helper verification.  
+**Goal:** Let a fan compare any two teams' season series using the already-loaded season schedule.
+
+**Scope**
+- Reuse existing schedule data and E2 form component/helper if available.
+- Add a pure season-series helper returning played/upcoming meetings and a compact summary.
+- Add a deep-linkable matchup view with two team selectors and selected season.
+- Show series results, aggregate goals, upcoming meetings, and team form when already available.
+- Add a minimal pre-filled entry point from Game Detail; other entry points are follow-ups unless trivial.
+
+**Constraints**
+- No new endpoint; team-selector changes are client-side projections.
+- Preserve existing URL/search-param and route-state conventions.
+- Do not duplicate schedule/game-card components when an existing compact presentation fits.
+- Same-team/no-meeting/loading states must be explicit.
+- No multi-season/all-time aggregation.
+
+**Acceptance**
+- One known divisional series matches source schedule results.
+- A fresh deep link restores both teams and season.
+- Changing either team with the season loaded causes no network request.
+- Game Detail entry opens the matchup pre-filled.
+- Empty/same-team states, mobile/themes/accessibility, build/typecheck pass.
+
+**Verify:** targeted helper tests → one season-series source comparison → deep-link/no-refetch/manual UI checks.  
+**Out of scope:** all-time history, player-vs-team splits, backend changes, extra entry-point proliferation.
+
+---
+
+### IDEA F4 — Signature interaction polish
+**Source:** `docs/design-feature-backlog.md`  
+**Depends on:** D1 + at least one completed signature feature (F1/F2/F3)  
+**Route:** GPT-5.6 Luna for clearly mechanical CSS-only polish; GPT-5.4 Mini when state/React behavior is involved. Default single-agent.  
+**Goal:** Add a tiny, reusable-feeling motion polish pass to one completed signature feature without turning the app into an animation project.
+
+**Scope**
+- Select exactly one completed signature feature.
+- Identify at most three meaningful moments: feature entry, state/value change, secondary reveal.
+- Prefer CSS transitions and D1 motion/design primitives where they already exist.
+- Respect `prefers-reduced-motion` and preserve keyboard/mobile behavior.
+- If a motion value is genuinely generic, add it to the portable D1 layer only when that is a tiny domain-free change; otherwise flag a follow-up.
+
+**Constraints**
+- No animation library, parallax, animated backgrounds, or page-wide motion.
+- No decorative motion without interaction/information value.
+- Do not redesign the underlying feature.
+- Remove motion rather than engineering around layout instability.
+- Keep generic motion primitives domain-free.
+
+**Acceptance**
+- No more than three purposeful interactions are polished.
+- Reduced-motion users receive an equivalent, stable experience.
+- No distracting layout shifts or impaired keyboard/mobile behavior.
+- Both themes remain coherent and build/typecheck pass.
+- Any reusable primitive added to D1 is documented briefly.
+
+**Verify:** targeted interaction checks with normal + reduced motion → keyboard/mobile/theme sanity → frontend checks.  
+**Out of scope:** animation framework, global motion redesign, unrelated feature changes.
+
+---
+
 ## Later candidates
 
 | Status | Ticket | Source | Note |
 |---|---|---|---|
-| IDEA | F2 — Team DNA | `docs/design-feature-backlog.md` | Better after D1/D2; can reuse E2. |
 | IDEA | F3 — Playoff What-If | `docs/design-feature-backlog.md` | Logic-heavy; preferably after playoff helper work. |
-| IDEA | E1 — Playoff race command center | `docs/exciting-features-backlog.md` | Pure derivation; larger rules surface. |
-| IDEA | E3 — Head-to-head matchup explorer | `docs/exciting-features-backlog.md` | Reuses loaded schedule data. |
-| IDEA | F4 — Signature interaction polish | `docs/design-feature-backlog.md` | Only after a signature feature exists. |
 
 ## Ready
 
