@@ -922,6 +922,94 @@ Use a fresh verifier/browser-capable QA path where applicable:
 
 ---
 
+### IDEA ARCH1B — Clean REST contract & typed frontend client
+**Source:** post-ARCH1 stabilization step before considering GraphQL  
+**Depends on:** ARCH1 complete and independently deployed/verified  
+**Route:** GPT-5.4 Mini; default single-agent for bounded API/client cleanup, with fresh QA only for contract changes spanning multiple feature flows. GPT-5.6 Sol only for evidence-backed contract/runtime ambiguity.  
+**Goal:** Make the extracted REST boundary simple, consistent, typed, and fast to consume before introducing another API paradigm.
+
+**Principle**
+Improve the REST API from observed usage. Do not redesign endpoints merely to make them look “RESTful,” and do not introduce GraphQL in this ticket. Preserve useful stable contracts while eliminating genuine inconsistency, duplicate request logic, and transport-shape leakage.
+
+### Phase A — request/contract audit
+- Inventory actual frontend API calls after ARCH1: endpoint, method, params/query, response shape, caller(s), and whether requests overlap.
+- Identify duplicate fetching, repeated URL/request construction, inconsistent error handling, inconsistent naming/status semantics, oversized payloads, or one-off endpoint shapes.
+- Identify places where raw transport DTOs leak deep into React/features.
+- Record a small baseline for representative flows: request count and obvious duplicate/overlapping requests; payload/timing only where cheap and useful.
+- Classify findings: `KEEP`, `CLIENT CLEANUP`, `API CONTRACT CLEANUP`, `PERFORMANCE EVIDENCE`, or `NOT WORTH CHANGING`.
+
+### Phase B — explicit typed client boundary
+- Create/standardize one obvious frontend API-client boundary.
+- Centralize base URL/environment configuration, request construction, shared transport error handling, and narrowly useful request helpers.
+- Define TypeScript DTOs at the transport boundary where they add real safety.
+- Map DTOs into existing frontend/domain models before feature/UI logic where shapes differ.
+- Keep feature-specific derivation out of the API client.
+- Prefer simple functions over a generated SDK/framework unless generation is separately justified and approved.
+
+### Phase C — REST contract cleanup
+Only change server contracts when Phase A found real friction:
+- normalize clearly inconsistent route/parameter/response conventions
+- keep resource-oriented endpoints understandable and predictable
+- avoid endpoint proliferation for calculations the client already derives cheaply
+- preserve backwards compatibility during migration when practical
+- return only data the consumer actually needs when over-fetching is measured and meaningful
+- use appropriate HTTP status/error semantics consistently
+- document the small stable contract surface used by HockeyStats
+
+Do not create an endpoint merely because an example architecture says `/teams/:id/games`; actual app needs are authoritative.
+
+### Phase D — request-path cleanup
+- Remove duplicate frontend request implementations and obsolete proxy/same-repo assumptions.
+- Prevent accidental duplicate requests when the same loaded data can be reused safely.
+- Preserve existing cache/revalidation behavior unless evidence shows it is wrong.
+- Do not add a data-fetching library, client cache, batching layer, request deduper, or server cache without demonstrated need and human approval.
+- Keep derived features such as Team DNA/form/playoff calculations client-side when existing loaded data already supports them efficiently.
+
+### Phase E — verification & GraphQL evidence report
+- Build/typecheck/test API and frontend.
+- Browser-check representative Team, Game, Standings, Schedule, matchup/signature-feature flows.
+- Compare representative request counts/duplication against Phase A baseline.
+- Confirm features consume domain models/client functions rather than scattered raw transport shapes where migration was in scope.
+- Produce a short **GraphQL signal report** only; do not implement GraphQL.
+
+**GraphQL signal report**
+Return factual observations:
+- number of representative screens requiring multiple independent API resources
+- meaningful over-fetching observed
+- repeated overlapping payloads/requests
+- endpoint proliferation or client composition pain
+- whether multiple distinct consumers currently exist
+- concrete REST limitation, if any, that GraphQL would plausibly address
+
+Conclusion must be one of: `NO CURRENT SIGNAL`, `REVISIT LATER`, or `EVALUATION TICKET WARRANTED`, with evidence. This is not permission to migrate.
+
+**Constraints**
+- No GraphQL implementation/dependency/schema.
+- No API framework rewrite.
+- No generated SDK unless separately approved.
+- No generic repository/service layer just to add architecture.
+- No new caching/data-fetching library without measured need and approval.
+- No speculative endpoint changes.
+- No moving cheap feature derivation server-side solely to centralize logic.
+- Preserve independent frontend/API deployments.
+- Aero/MD3 library remains entirely outside the API/data boundary.
+
+**Acceptance**
+- Frontend has one clear, documented API-client/configuration boundary.
+- API DTOs/transport concerns are contained rather than unnecessarily spread through UI code.
+- Genuine duplicate request/client logic found in scope is removed.
+- Any REST contract changes have a documented consumer reason and migration path.
+- Representative request behavior is no worse than baseline; claimed improvements have evidence.
+- Existing major data-driven flows still work.
+- API/frontend remain independently buildable/deployable.
+- A concise GraphQL signal report provides evidence for whether a future evaluation ticket is warranted.
+- Relevant builds/typechecks/tests/browser checks pass.
+
+**Verify:** API-call inventory/baseline → client-boundary checks → targeted contract/request cleanup → API/frontend checks → representative browser network verification → GraphQL signal report.  
+**Out of scope:** GraphQL, backend rewrite, generic SDK/framework, speculative caching, new data platform, moving all derivation server-side.
+
+---
+
 ## Later candidates
 
 | Status | Ticket | Source | Note |
