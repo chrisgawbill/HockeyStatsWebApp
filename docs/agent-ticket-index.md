@@ -208,30 +208,44 @@ GPT-5.6 Luna verifies the derivation acceptance criteria before Phase B starts. 
 
 ### IDEA E2 — Team form and momentum
 **Source:** `docs/exciting-features-backlog.md`  
-**Route:** GPT-5.4 Mini  
+**Route:** GPT-5.4 Mini. Default execution is single-agent; add GPT-5.6 Luna QA only if helper/domain logic cannot be covered adequately by deterministic checks.  
 **Goal:** Derive useful recent-form visuals from schedule data already loaded by the app.
 
 **Scope**
-- Pure team-form helper.
+- Inspect the existing schedule model/context and completed-game/status helpers first.
+- Add one pure team-form helper for only the calculations the UI needs.
 - Last-N form strip.
 - Rolling points-percentage sparkline.
 - Home/road and goal-differential summaries.
-- Mount on Team page; standings integration only if it fits cleanly.
+- Mount on Team page.
+- Treat standings-row integration as a follow-up unless it is trivial and clearly within the existing layout.
 
 **Constraints**
-- Zero new fetches/dependencies.
-- Pure calculations outside React.
-- Inline SVG; no chart library.
-- Existing design tokens only.
+- Zero new fetches, backend work, or dependencies.
+- Pure calculations outside React; components render derived values.
+- Inline SVG; no chart library or generic visualization framework.
+- Reuse D1 portable design tokens/primitives; keep hockey semantics in HockeyStats.
+- Do not duplicate an existing helper merely to match the legacy ticket wording.
+- Do not over-generalize the helper for hypothetical future sports/features.
+- If OT/SO loss detection or another hockey rule is not represented reliably by existing data, omit/flag that submetric instead of guessing.
+
+**Efficiency / verification**
+- Prefer one GPT-5.4 Mini worker session for implementation + targeted deterministic checks.
+- Add focused helper tests for non-obvious calculations/edge cases where the repo's current test structure makes that cheap.
+- Do not spawn a separate QA agent just to rerun typecheck/build.
+- Use Luna QA only when an independent check adds information: e.g. hockey-result interpretation, derived-value correctness not covered by tests, or a meaningful acceptance criterion the worker cannot deterministically prove.
+- Keep manual verification to one representative team plus mobile/theme sanity checks.
 
 **Acceptance**
-- Derived values match source schedule data for a checked team.
-- Past/current seasons do not crash.
+- Derived values match source schedule data for one checked team.
+- Calculations handle empty/short result sets and current/past seasons without crashing.
+- No network request is introduced by the feature.
 - Mobile and both themes remain legible.
-- Typecheck/build pass.
+- Relevant tests (if added), typecheck, and build pass.
+- Any unsupported metric/data assumption is explicitly omitted or documented rather than inferred.
 
-**Verify:** frontend checks + manual comparison for one team.  
-**Out of scope:** player form, xG/shot data, backend work.
+**Verify:** targeted helper tests/checks → frontend typecheck/build → one-team source-data comparison → brief mobile/light/dark check.  
+**Out of scope:** player form, xG/shot data, backend work, standings-row integration unless trivial, reusable chart framework, generalized multi-sport analytics engine.
 
 ## Later candidates
 
