@@ -60,3 +60,19 @@
 .sliding-toggle__btn:not(.sliding-toggle__btn--active):hover {
   color: var(--color-primary-dark);
 }
+
+.sliding-toggle__btn:active {
+  transform: translateY(1px);
+}
+
+.sliding-toggle__btn:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sliding-toggle__indicator,
+  .sliding-toggle__btn {
+    transition: none;
+  }
+}

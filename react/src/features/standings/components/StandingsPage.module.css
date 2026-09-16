@@ -2,11 +2,16 @@
   height: 100%;
   overflow: hidden;
   white-space: nowrap;
+  animation: standings-content-enter var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;
 }
 
 .standings-page-toggle-row {
   padding-left: var(--space-xl);
   padding-right: var(--space-xl);
+}
+
+.standings-page-toggle-row + .standings-page-toggle-row {
+  margin-top: var(--space-sm);
 }
 
 .standings-page-legend-row {
@@ -31,6 +36,17 @@
   margin: var(--space-lg) auto;
   color: var(--color-text-secondary);
   text-align: center;
+  animation: standings-loading-enter var(--ds-motion-duration-short) var(--ds-motion-easing-standard) both;
+}
+
+@keyframes standings-content-enter {
+  from { opacity: 0; transform: translateY(0.25rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes standings-loading-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (max-width: 767px) {
@@ -44,4 +60,11 @@
   }
 
   .playoff-race-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .standings-page-table-container,
+  .playoff-race-loading {
+    animation: none;
+  }
 }

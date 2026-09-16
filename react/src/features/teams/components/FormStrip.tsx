@@ -3,9 +3,10 @@ import styles from '@/features/teams/components/TeamPage.module.css';
 
 interface FormStripProps {
   results: TeamResult[];
+  className?: string;
 }
 
-export default function FormStrip({ results }: FormStripProps) {
+export default function FormStrip({ results, className }: FormStripProps) {
   const record = results.reduce(
     (counts, result) => {
       counts[result.outcome] += 1;
@@ -16,7 +17,7 @@ export default function FormStrip({ results }: FormStripProps) {
 
   return (
     <div
-      className={styles['form-strip']}
+      className={[styles['form-strip'], className].filter(Boolean).join(' ')}
       role="img"
       aria-label={`Last ${results.length}: ${record.W}-${record.L}-${record.OTL}`}
     >

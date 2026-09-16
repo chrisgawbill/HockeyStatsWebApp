@@ -21,7 +21,7 @@
 }
 
 .game-detail-hero {
-  animation: game-hero-enter 300ms cubic-bezier(0.2, 0, 0, 1) both;
+  animation: game-hero-enter var(--ds-motion-duration-long) var(--ds-motion-easing-standard) both;
 }
 
 /* ── Game Story ─────────────────────────────────────────────────────────── */
@@ -83,7 +83,7 @@
   display: flex;
   gap: var(--space-md);
   min-height: 4.5rem;
-  animation: game-story-event-reveal 260ms ease-out both;
+  animation: game-story-event-reveal var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;
 }
 
 .game-story-event:nth-child(2) { animation-delay: 45ms; }
@@ -180,7 +180,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .game-detail-hero,
-  .game-story-event { animation: none; }
+  .game-story-event,
+  .game-detail-state-chip--live { animation: none; }
 }
 
 /* ── Hero scoreboard ────────────────────────────────────────────────────── */

@@ -30,6 +30,7 @@ import { getTheme } from '@/lib/themeHandler';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import LoadingState from '@/components/LoadingState';
+import ErrorState from '@/components/ErrorState';
 import GameStory from '@/features/game-detail/components/GameStory';
 
 const GameDetailPage = () => {
@@ -122,14 +123,18 @@ const GameDetailPage = () => {
     return (
       <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
         <PageHeader />
-        <LoadingState label="Loading game" />
+        <LoadingState label="Loading game" fullPage />
       </div>
     );
   if (error || !boxscore)
     return (
       <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
         <PageHeader />
-        <div className={shared.errorState}>Game data unavailable.</div>
+        <ErrorState
+          fullPage
+          title="Game unavailable"
+          message="Game data unavailable."
+        />
       </div>
     );
 

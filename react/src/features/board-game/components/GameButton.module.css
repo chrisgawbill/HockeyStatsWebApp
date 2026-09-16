@@ -5,6 +5,10 @@
   border-radius: var(--border-radius-pill);
   border: 1px solid var(--color-text);
   cursor: pointer;
+  transition:
+    transform var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    box-shadow var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
+    filter var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
 }
 
 .button::before {
@@ -20,6 +24,25 @@
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.button:hover:not(:disabled) {
+  filter: brightness(1.04);
+  box-shadow: var(--elevation-2);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: var(--elevation-1);
+}
+
+.button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
 }
 
 .secondary {

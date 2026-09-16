@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import SeasonSelector from '@/components/SeasonSelector';
 import LoadingState from '@/components/LoadingState';
@@ -17,10 +17,22 @@ const label = (code: string) =>
   teams.find((team) => team.triCode === code)?.fullName ?? code;
 
 export default function MatchupPage() {
+  const location = useLocation();
   const [params, setParams] = useSearchParams();
   const { listOfGamesData, loadingListOfGamesData } = useListOfGames();
   const teamA = params.get('teamA')?.toUpperCase() || teams[0].triCode;
   const teamB = params.get('teamB')?.toUpperCase() || teams[1].triCode;
+  const routeState = location.state as { sourcePath?: string } | null;
+  const sourcePath = routeState?.sourcePath ?? '/schedule';
+  const sourceLabel = sourcePath.startsWith('/game/')
+    ? 'Game'
+    : sourcePath.startsWith('/team/')
+      ? 'Team'
+      : sourcePath.startsWith('/standings')
+        ? 'Standings'
+        : sourcePath === '/'
+          ? 'Home'
+          : 'Schedule';
   const series = useMemo(
     () => getSeasonSeries(listOfGamesData, teamA, teamB),
     [listOfGamesData, teamA, teamB],
@@ -51,43 +63,69 @@ export default function MatchupPage() {
     );
   };
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${shared.pageShell} ds-page-shell`}>
       <PageHeader />
       <main className={styles.content}>
-        <h1>Head-to-Head Matchup</h1>
-        <div className={`${shared.surface} ${styles.controls}`}>
-          <label className={styles.control}>
-            Team A
-            <select
-              aria-label="Team A"
-              value={teamA}
-              onChange={(event) => setTeam('teamA', event.target.value)}
-            >
-              {teams.map((team) => (
-                <option key={team.triCode} value={team.triCode}>
-                  {team.fullName}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={styles.control}>
-            Team B
-            <select
-              aria-label="Team B"
-              value={teamB}
-              onChange={(event) => setTeam('teamB', event.target.value)}
-            >
-              {teams.map((team) => (
-                <option key={team.triCode} value={team.triCode}>
-                  {team.fullName}
-                </option>
-              ))}
-            </select>
-          </label>
-          <SeasonSelector className={styles.control} />
-        </div>
+        <section className={`${shared.surfaceElevated} ${styles.hero}`}>
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <Link to={sourcePath} className={styles.breadcrumbBack}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              {sourceLabel}
+            </Link>
+            <span className={styles.breadcrumbSep}>/</span>
+            <span className={styles.breadcrumbCurrent}>Matchup</span>
+          </nav>
+          <header className={styles.intro}>
+            <p className={styles.kicker}>Season series</p>
+            <h1>Head-to-Head Matchup</h1>
+            <p>Compare meetings, results, goals, and recent form.</p>
+          </header>
+          <div className={`${shared.surface} ${styles.controls}`}>
+            <label className={styles.control}>
+              Team A
+              <select
+                aria-label="Team A"
+                value={teamA}
+                onChange={(event) => setTeam('teamA', event.target.value)}
+              >
+                {teams.map((team) => (
+                  <option key={team.triCode} value={team.triCode}>
+                    {team.fullName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={styles.control}>
+              Team B
+              <select
+                aria-label="Team B"
+                value={teamB}
+                onChange={(event) => setTeam('teamB', event.target.value)}
+              >
+                {teams.map((team) => (
+                  <option key={team.triCode} value={team.triCode}>
+                    {team.fullName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <SeasonSelector className={styles.seasonControl} />
+          </div>
+        </section>
         {loadingListOfGamesData ? (
-          <LoadingState label="Loading season series" />
+          <LoadingState label="Loading season series" fullPage />
         ) : teamA === teamB ? (
           <EmptyState
             title="Choose two different teams"
@@ -144,12 +182,14 @@ export default function MatchupPage() {
                 <h2 className={styles.formTitle}>{teamA} Form</h2>
                 <FormStrip
                   results={lastN(getTeamResults(listOfGamesData, teamA), 10)}
+                  className={styles.formStrip}
                 />
               </section>
               <section className={`${shared.surface} ${styles.formCard}`}>
                 <h2 className={styles.formTitle}>{teamB} Form</h2>
                 <FormStrip
                   results={lastN(getTeamResults(listOfGamesData, teamB), 10)}
+                  className={styles.formStrip}
                 />
               </section>
             </div>
