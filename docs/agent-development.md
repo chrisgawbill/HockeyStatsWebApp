@@ -12,39 +12,47 @@ Read only: `docs/architecture.md`, the selected ticket, directly relevant source
 
 ## Model routing
 
-Optimize for successful work per token, not model prestige or release date. Prefer the cheapest/oldest still-supported model that reliably completes the role.
+Optimize for successful work per token, not model prestige or release date. Prefer the lowest-cost model with a high probability of completing the task correctly on the first attempt.
 
 ### Default stack
 
-**PM / orchestrator — cheap reasoning tier**
-- Claude Code: `haiku`.
-- GLM alternative: GLM-4.5-Air.
+**PM / orchestrator — GPT-5.6 Luna**
+- Default reasoning: low; raise to medium only for ambiguous ticket decomposition.
 - No application code. Convert one approved ticket into a compact worker contract and route failures.
 
-**Coder — cost-efficient coding tier**
-- Claude Code: pin `claude-sonnet-4-5-20250929` while supported instead of automatically following newest Sonnet.
-- GLM alternative: GLM-4.7 for routine development.
-- Handles most bounded HockeyStats tickets; smallest targeted change; max 3-bullet report.
+**Mechanical / tiny code — GPT-5.6 Luna**
+- Documentation, ticket maintenance, straightforward CSS/token edits, narrow repetitive changes, and other highly constrained work.
+- Promote to GPT-5.4 Mini if implementation requires non-trivial code reasoning.
 
-**QA — cheapest reliable verifier**
-- Claude Code: `haiku`.
-- GLM alternative: GLM-4.5-Air.
+**Normal coder — GPT-5.4 Mini**
+- Default implementation model for bounded React/TypeScript/Node tickets.
+- Designed for coding and subagent workloads while remaining substantially cheaper than flagship models.
+- Smallest targeted change; max 3-bullet report.
+
+**QA — GPT-5.6 Luna**
+- Default reasoning: low.
 - Never modifies app code. Checks acceptance criteria and deterministic commands only.
 
-**Escalation coder/debugger — strong reasoning tier**
-- Claude Code: `opus` only when needed.
-- GLM: GLM-5.1 for complex/cross-cutting engineering.
-- Use for architecture-sensitive work, difficult debugging, or reasoning failures from the normal coder.
+**Escalation coder/debugger — GPT-5.6 Sol**
+- Use for architecture-sensitive work, difficult cross-stack debugging, ambiguous multi-file behavior, or when GPT-5.4 Mini fails for reasoning-related causes.
+- Start at medium reasoning; increase only when evidence warrants it.
+
+**Exceptional escalation — GPT-6 Astra**
+- Not part of the normal loop.
+- Use only for unusually difficult end-to-end work when GPT-5.6 Sol is insufficient and the human approves the extra cost.
+
+GLM models remain optional fallbacks when useful, but they are not part of the default route.
 
 ### Escalation ladder
 
-1. Cheap PM scopes the ticket.
-2. Normal coder implements.
-3. Cheap QA verifies.
+1. GPT-5.6 Luna PM scopes the ticket.
+2. Route mechanical work to Luna; normal code to GPT-5.4 Mini.
+3. GPT-5.6 Luna QA verifies.
 4. FAIL: send only failed assertion + relevant trace to the same coder.
-5. Escalate coder only when deeper reasoning is actually needed.
+5. Escalate to GPT-5.6 Sol only when deeper reasoning is actually needed.
 6. Maximum 3 repair cycles total.
 7. Before cycle 4, stop and return control to the human.
+8. GPT-6 Astra requires explicit human approval.
 
 A model upgrade never authorizes a scope upgrade.
 
@@ -57,6 +65,14 @@ AUTHORITY: The human developer is Product Owner and final decision-maker. Never 
 MISSION: Turn one human-approved ticket into the smallest reliable implementation/verification loop. Optimize for low token use and low-cost models while preserving correctness.
 
 READ: docs/architecture.md, selected ticket, then only directly relevant files/docs. Do not preload unrelated backlog/history.
+
+MODEL ROUTING:
+- MECHANICAL/TINY: GPT-5.6 Luna.
+- NORMAL CODE: GPT-5.4 Mini.
+- COMPLEX/FAILED REASONING: GPT-5.6 Sol.
+- EXCEPTIONAL: GPT-6 Astra only after human approval.
+- QA: GPT-5.6 Luna.
+Choose the cheapest tier likely to succeed on the first attempt. A stronger model does not receive broader scope.
 
 CODER DISPATCH FORMAT:
 TICKET: <id/title>
@@ -75,7 +91,7 @@ RUN: <smallest deterministic checks>
 DO NOT MODIFY APPLICATION CODE.
 RETURN: PASS|FAIL; verified assertions; on FAIL failing assertion + <=10 relevant trace/log lines.
 
-FAILURE LOOP: Forward only actionable failure evidence. Reuse the normal coder for local/mechanical fixes. Escalate to strong reasoning only for genuine reasoning/architecture complexity. Maximum 3 repair cycles. Before cycle 4 stop and report failing criterion, attempts, likely cause, and smallest human decision needed.
+FAILURE LOOP: Forward only actionable failure evidence. Reuse the current coder for local/mechanical fixes. Escalate to GPT-5.6 Sol only for genuine reasoning/architecture complexity. Maximum 3 repair cycles. Before cycle 4 stop and report failing criterion, attempts, likely cause, and smallest human decision needed.
 
 PASS: Return exactly 3 concise sentences: what changed; what QA verified; important caveat or 'No known caveats.'
 
