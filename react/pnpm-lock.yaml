@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@chrisgawbill/aero-md3-core':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@18.3.28)(react@18.3.1)
@@ -69,8 +69,8 @@ importers:
 
 packages:
 
-  '@chrisgawbill/aero-md3-core@0.1.0':
-    resolution: {integrity: sha512-JP4lqPYPc/PS6hq0DFJ/ZFjf2k02AEWAZWPvz2G499lUu3N/yVmW/lEVIT76+B5l6rec0ihq1YLEgTvUNk8T5A==}
+  '@chrisgawbill/aero-md3-core@0.1.1':
+    resolution: {integrity: sha512-OTCIri4u/bvclnQl8eYUuokCA1ubNNYICpt01ChytYaghvp/fZEiY5iX0A+zu4qsA20OUCRLE50cUxHo+6khcw==}
 
 
   '@babel/code-frame@7.29.0':
@@ -1225,7 +1225,7 @@ packages:
 
 snapshots:
 
-  '@chrisgawbill/aero-md3-core@0.1.0': {}
+  '@chrisgawbill/aero-md3-core@0.1.1': {}
 
 
   '@babel/code-frame@7.29.0':
