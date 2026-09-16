@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import ReactDOM from 'react-dom/client';
-import '@/design-system/core.css';
+import '@chrisgawbill/aero-md3-core/core.css';
 import '@/styles/index.css';
 import '@/styles/theme.css';
 import '@/styles/components.css';
