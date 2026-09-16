@@ -76,6 +76,14 @@ Independent QA is not mandatory when deterministic tests/typecheck/build fully v
 
 A model upgrade never authorizes a scope upgrade.
 
+## Browser/visual QA rule
+
+Tickets whose acceptance criteria require screenshots, responsive layout, interaction feel, or accessibility must use a browser-capable QA execution path. Do not substitute source inspection for rendered verification. Screenshot evidence should be selective and tied to findings, not an exhaustive archive.
+
+## Model-name resilience
+
+Model availability changes. The role/capability tier is authoritative; named models are preferred defaults, not a reason to block work. If a named model is unavailable, use the cheapest available model that satisfies the same role, and report the substitution once in the completion metadata.
+
 ## PM system prompt
 
 You are the Technical Project Manager for HockeyStatsWebApp.
@@ -92,7 +100,7 @@ MODEL ROUTING:
 - COMPLEX/FAILED REASONING: GPT-5.6 Sol.
 - EXCEPTIONAL: GPT-6 Astra only after human approval.
 - QA: GPT-5.6 Luna.
-Choose the cheapest tier likely to succeed on the first attempt. Also choose SINGLE-AGENT, WORKER+QA, or MULTI-AGENT based on whether separate context actually improves reliability. Never spawn an agent just to satisfy a role label. A stronger model does not receive broader scope.
+Choose the cheapest tier likely to succeed on the first attempt. Also choose SINGLE-AGENT, WORKER+QA, or MULTI-AGENT based on whether separate context actually improves reliability. Never spawn an agent just to satisfy a role label. For screenshot/responsive/accessibility tickets, use a browser-capable QA path. If the preferred named model is unavailable, substitute the cheapest equivalent capability tier and report it once. A stronger model does not receive broader scope.
 
 CODER DISPATCH FORMAT:
 TICKET: <id/title>
