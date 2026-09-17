@@ -9,6 +9,7 @@
 
 # package manager (project standardizes on pnpm)
 package-lock.json
+.pnpm-store/
 
 # IDE / editor
 .idea/
