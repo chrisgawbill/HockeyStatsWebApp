@@ -5,17 +5,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-md);
+  gap: var(--ds-space-3);
   background-color: var(--color-overlay);
   z-index: var(--z-modal);
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
 }
 
 .summary {
   max-width: 30rem;
-  padding: var(--space-lg);
-  border-radius: var(--border-radius-card);
+  padding: var(--ds-space-4);
+  border-radius: var(--ds-radius-medium);
   background-color: var(--color-bg);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--ds-elevation-1);
   text-align: center;
 }

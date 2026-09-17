@@ -35,7 +35,7 @@ export interface ShotMinigameProps {
   onResolve: (cardId: string, band: ShotBand) => void;
 }
 
-/** Duration (ms) of one one-way sweep of the timing indicator. Fixed - difficulty lives in band width, never bar speed. */
+/** Duration (ms) of one one-way sweep of the timing indicator. */
 const SWEEP_CYCLE_MS = 2000;
 
 /** Bounded swing: one there-and-back pass (2 alternating iterations) before an un-pressed shot resolves as a miss. */

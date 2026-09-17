@@ -18,12 +18,10 @@ export function getCarrier(state: GameState): Skater | undefined {
   return state.skaters.find((s) => s.id === puck.skaterId);
 }
 
-/** True if `ROLL_DICE` is legal right now. */
 export function canRoll(state: GameState): boolean {
   return state.phase === 'roll';
 }
 
-/** True if `END_TURN` is legal right now. */
 export function canEndTurn(state: GameState): boolean {
   return state.phase === 'move';
 }

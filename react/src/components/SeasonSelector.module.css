@@ -1,21 +1,19 @@
-/* Centered filter row, placed directly under the page nav. */
 .season-bar {
   display: flex;
   justify-content: center;
-  margin: var(--space-md) auto var(--space-lg);
-  padding: 0 var(--space-md);
+  margin: var(--ds-space-3) auto var(--ds-space-4);
+  padding: 0 var(--ds-space-3);
 }
 
-/* MD3 outlined select, adapted to the project's tokens. */
 .season-field {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
   position: relative;
   height: 40px;
-  padding: 0 var(--space-md);
+  padding: 0 var(--ds-space-3);
   border: 1px solid var(--season-border, var(--color-divider));
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
   background: var(--season-bg, var(--color-surface));
   cursor: pointer;
   transition:
@@ -24,7 +22,6 @@
     background-color 0.18s ease;
 }
 
-/* MD3 state layer on hover. */
 .season-field::before {
   content: '';
   position: absolute;
@@ -40,7 +37,6 @@
   opacity: 0.08;
 }
 
-/* MD3 focus indicator: 2px primary outline + tinted border. */
 .season-field:focus-within {
   border-color: var(--season-accent, var(--color-primary));
   box-shadow: 0 0 0 1px var(--season-accent, var(--color-primary));
@@ -71,8 +67,7 @@
   font-size: var(--text-base);
   font-weight: 700;
   font-family: inherit;
-  /* room for the chevron */
-  padding: 0 calc(var(--space-md) + 4px) 0 0;
+  padding: 0 calc(var(--ds-space-3) + 4px) 0 0;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -89,6 +84,7 @@
   top: calc(100% + 6px);
   left: 0;
   min-width: 100%;
+  max-width: calc(100vw - (2 * var(--page-gutter)));
   max-height: 18rem;
   overflow-y: auto;
   margin: 0;
@@ -107,8 +103,8 @@
 }
 
 .season-field__option {
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--border-radius-card);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border-radius: var(--ds-radius-medium);
   font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-text);
@@ -142,6 +138,14 @@
   color: var(--season-accent, var(--color-primary));
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .season-field,
+  .season-field::before,
+  .season-field__chevron {
+    transition: none;
+  }
+}
+
 /* The global header passes this host hook because CSS module class names are
    private to their owning file. */
 :global(.page-header-season-selector) {
@@ -151,7 +155,7 @@
 
 :global(.page-header-season-selector) .season-field {
   height: 36px;
-  padding: 0 var(--space-sm);
+  padding: 0 var(--ds-space-2);
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.45);
 }
@@ -185,10 +189,25 @@
   .season-field__listbox {
     top: auto;
     bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
     max-height: min(
       18rem,
-      calc(100dvh - var(--mobile-chrome-height) - var(--space-md))
+      calc(100dvh - var(--mobile-chrome-height) - var(--ds-space-3))
     );
     z-index: 200;
   }
+}
+
+/* Standard site focus ring for keyboard focus on the trigger. */
+.season-field:has(.season-field__button:focus-visible) {
+  outline: 3px solid var(--color-blue-accent);
+  outline-offset: 3px;
+}
+
+/* On the translucent-primary nav bar the blue ring alone blends in (light
+   theme), so a light halo fills the offset gap to separate it from the bar. */
+:global(.page-header-season-selector)
+  .season-field:has(.season-field__button:focus-visible) {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95);
 }

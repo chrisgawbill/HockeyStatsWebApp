@@ -10,6 +10,7 @@ import { localTeamList } from '@/lib/teamListData';
 import { GetTeamStatsById } from '@/features/teams/api/teamsApi';
 import { ConvertToListOfTeams } from '@/features/teams/utils/teamHelpers';
 import { Team } from '@/features/teams/types/team';
+import { useSeason } from '@/features/season/hooks/SeasonContext';
 
 interface ListOfTeamsData {
   listOfTeamsData: Team[];
@@ -28,19 +29,16 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   const [errorListOfTeamsData, setErrorListOfTeamsData] = useState<
     string | null
   >(null);
+  const { season } = useSeason();
 
-  /**
-   * Fetches season stats for every team and merges them onto the local team
-   * list. Stores a human-readable message for the UI instead of the raw
-   * API error on failure.
-   */
+  /** Fetches season stats and merges them onto the local team list. */
   const GetTeams = useCallback(async () => {
     setErrorListOfTeamsData(null);
     let rawLocalList: any[] = [...localTeamList];
     rawLocalList.sort((a, b) => b.fullName.localeCompare(a.fullName));
     teamListData.current = rawLocalList;
     try {
-      const teamStatsData = await GetTeamStatsById('');
+      const teamStatsData = await GetTeamStatsById('', season);
       const finalTeamData = ConvertToListOfTeams(
         teamListData.current,
         teamStatsData.data,
@@ -52,13 +50,9 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoadingListOfTeamsData(false);
     }
-  }, []);
+  }, [season]);
 
-  /**
-   * Re-runs the team list fetch. Shared by the mount effect and the manual
-   * "Try again" retry action so there is one fetch code path instead of two
-   * copies of the same reset-then-fetch sequence.
-   */
+  /** Re-runs the team list fetch for the current season. */
   const refetchListOfTeams = useCallback(() => {
     setLoadingListOfTeamsData(true);
     GetTeams();

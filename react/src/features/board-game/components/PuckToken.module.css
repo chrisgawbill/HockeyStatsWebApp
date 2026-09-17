@@ -3,7 +3,7 @@
   border-radius: 50%;
   background-color: var(--color-puck);
   border: 2px solid var(--color-puck-ring);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--ds-elevation-1);
 }
 
 .loose {

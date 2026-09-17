@@ -75,7 +75,6 @@ export function drawFilteredCards(
   return [{ ...deck, drawPile, discardPile, hand }, currentSeed];
 }
 
-/** Moves every card in hand to the discard pile. */
 export function discardHand(deck: Deck): Deck {
   return {
     ...deck,
@@ -95,7 +94,6 @@ export function returnCardsToDeck(
   return [{ ...deck, hand, drawPile }, nextSeed];
 }
 
-/** Removes the card at `index` from hand, sending it to the exhaust or discard pile. */
 export function removeFromHand(
   deck: Deck,
   index: number,

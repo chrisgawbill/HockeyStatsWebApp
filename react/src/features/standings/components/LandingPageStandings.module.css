@@ -15,17 +15,18 @@
 }
 
 .standings-header {
-  margin: var(--space-md) var(--space-xl) 0 5rem;
+  margin: var(--ds-space-3) 0 0;
   text-align: center;
 }
 
 .standings-table {
   width: 100%;
-  table-layout: fixed;
-  box-shadow: var(--shadow-card);
-  border-radius: var(--border-radius-card);
-  margin: 0 var(--space-xl) var(--space-md) 5rem;
-  min-width: 42rem;
+  /* Auto layout so the numeric columns shrink to fit and the team column
+     takes the remaining width instead of an equal 1/5 share. */
+  table-layout: auto;
+  border-radius: var(--ds-radius-medium);
+  margin: 0 0 var(--ds-space-3);
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -46,9 +47,26 @@
   text-align: left;
 }
 
+/* Numeric/short columns stay as narrow as their content. */
+.standings-table th:not(:nth-child(2)),
+.standings-table td:not(:nth-child(2)) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.standings-table th:nth-child(2),
+.standings-table td:nth-child(2) {
+  min-width: 7rem;
+}
+
+/* Sort button fills the header cell with no extra inset so the label sits
+   directly above the column's values; alignment follows the cell. */
 .standings-table th button {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   width: 100%;
+  min-height: 2rem;
   padding: 0;
   border: 0;
   background: transparent;
@@ -72,8 +90,18 @@
   text-align: right;
 }
 
+.standings-table th:first-child button,
+.standings-table th:nth-child(4) button,
+.standings-table th:nth-child(5) button {
+  justify-content: flex-end;
+}
+
 .standings-table tbody tr {
   cursor: pointer;
+}
+
+.standings-table tbody td {
+  font-variant-numeric: tabular-nums;
 }
 
 .standings-table tbody tr:focus-visible td {
@@ -101,13 +129,22 @@
 .standings-table-teamName-col {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--ds-space-1);
   width: 100%;
   overflow: hidden;
 }
 
 .standings-table-teamName-col > p {
   display: none;
+}
+
+.standings-team-abbrev {
+  display: none;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  font-weight: inherit;
+  margin: 0;
 }
 
 .standings-table-team-logo {
@@ -144,12 +181,12 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  margin: var(--space-sm) 0 var(--space-md);
-  padding: var(--space-sm) var(--space-md);
+  margin: var(--ds-space-2) 0 var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-3);
   background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
-  border-radius: var(--border-radius-card);
-  box-shadow: var(--elevation-1);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-1);
 }
 
 .standings-clinch-legend__item {
@@ -205,6 +242,12 @@
     text-align: left;
   }
 
+  /* Lets the team name column take the remaining width and truncate
+     instead of widening the auto-layout table past its shell. */
+  .standings-table td:nth-child(2) {
+    max-width: 0;
+  }
+
   .standings-table-teamName-col > p {
     display: block;
     flex: 1;
@@ -216,36 +259,63 @@
   }
 }
 
+@media only screen and (min-width: 768px) and (max-width: 1023px) {
+  .landing-standings .standings-table-teamName-col > p {
+    display: none;
+  }
+
+  .landing-standings .standings-team-abbrev {
+    display: block;
+    flex: 0 0 auto;
+  }
+
+  .landing-standings .standings-table-team-logo {
+    flex-basis: 2rem;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .landing-standings .standings-table th:nth-child(2),
+  .landing-standings .standings-table td:nth-child(2) {
+    min-width: 0;
+  }
+
+  .landing-standings .standings-table th,
+  .landing-standings .standings-table td {
+    padding-inline: var(--ds-space-1);
+  }
+}
+
 @media only screen and (max-width: 1399px) {
   .standings-header {
-    margin: var(--space-md) var(--space-sm) 0;
+    margin: var(--ds-space-3) 0 0;
   }
 
   .standings-table {
-    margin: 0 0 var(--space-md);
+    margin: 0 0 var(--ds-space-3);
   }
 
   .standings-clinch-legend {
-    margin: var(--space-sm) 0 var(--space-md);
+    margin: var(--ds-space-2) 0 var(--ds-space-3);
   }
 }
 
 @media only screen and (max-width: 767px) {
   .landing-standings-mobile-title {
     display: flex;
-    margin-top: var(--space-lg);
+    margin-top: var(--ds-space-4);
   }
 
   .standings-table-shell {
     height: 34.5rem !important;
-    margin-top: var(--space-sm) !important;
+    margin-top: var(--ds-space-2) !important;
     width: 100%;
     padding: 0;
   }
 
   .standings-table {
     width: 100%;
-    margin: var(--space-md) 0;
+    margin: var(--ds-space-3) 0;
     min-width: 42rem;
   }
 
@@ -271,9 +341,19 @@
     text-align: center;
   }
 
+  .standings-table th:nth-child(1) button,
+  .standings-table th:nth-child(2) button,
+  .standings-table th:nth-child(4) button {
+    justify-content: center;
+  }
+
   .standings-table th:nth-child(3),
   .standings-table td:nth-child(3) {
     text-align: right;
+  }
+
+  .standings-table th:nth-child(3) button {
+    justify-content: flex-end;
   }
 
   .standings-table-teamName-col {
@@ -303,7 +383,7 @@
   .standings-clinch-legend {
     width: 100%;
     max-width: 100%;
-    border-radius: var(--border-radius-card);
+    border-radius: var(--ds-radius-medium);
     justify-content: flex-start;
     padding: 0.375rem 0.5rem;
     overflow-x: auto;
@@ -412,4 +492,32 @@
   --standings-status-accent: #ffb59c;
   --standings-status-on-accent: #331000;
   --standings-status-on-container: #ffdbd0;
+}
+
+.standings-table-shell--fill {
+  margin-block: var(--ds-space-2) 0;
+}
+
+@media (min-width: 768px) {
+  .landing-standings {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .landing-standings__entry,
+  .standings-container--fill,
+  .standings-container__table--fill {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .standings-table-shell--fill {
+    flex: 1 1 0;
+    min-height: 10rem;
+    height: auto;
+  }
 }

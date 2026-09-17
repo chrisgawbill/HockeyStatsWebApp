@@ -70,7 +70,7 @@ function distancesTo(
 /**
  * The legal step for `skaterId` that shortens the path to `target` the most,
  * breaking ties by fewest threats then array order. Returns null ("no
- * useful step", design doc §7 step 5) when no legal step gets any closer.
+ * useful step") when no legal step gets any closer.
  */
 function pickStepToward(
   state: GameState,
@@ -100,7 +100,6 @@ function pickStepToward(
   return best.step;
 }
 
-/** The active team's carrier's forward pass target, if any teammate gains >= 3 columns toward the opponent's net. */
 function pickForwardPass(
   state: GameState,
   team: TeamId,
@@ -115,7 +114,6 @@ function pickForwardPass(
   return null;
 }
 
-/** The non-stunned, non-goalie skater with an available legal step who is closest to `target`. */
 function pickChaser(state: GameState, target: Coord): Skater | undefined {
   const candidates = state.skaters
     .map((s, index) => ({ s, index }))
@@ -130,7 +128,7 @@ function pickChaser(state: GameState, target: Coord): Skater | undefined {
 }
 
 /**
- * The heuristic board AI from design doc §7, parametrized by team so the same
+ * The heuristic board AI, parametrized by team so the same
  * policy can drive either side (used to mirror the user in headless sims).
  */
 export function chooseActionFor(state: GameState, team: TeamId): Action {
@@ -182,6 +180,6 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
   return { type: 'END_TURN' };
 }
 
-/** The CPU's own decision, per design doc §7: pure, deterministic, no RNG. */
+/** The CPU's pure, deterministic board decision; it uses no RNG. */
 export const chooseCpuAction = (state: GameState): Action =>
   chooseActionFor(state, 'cpu');

@@ -11,7 +11,6 @@ import type {
   TeamId,
 } from '@/features/board-game/types/game';
 
-/** True if the coord is within the rink bounds. */
 export function inBounds(coord: Coord): boolean {
   return (
     coord.col >= 0 &&
@@ -30,7 +29,6 @@ export function isPlayable(coord: Coord): boolean {
   return true;
 }
 
-/** The up-to-4 orthogonal neighbors that are in bounds. */
 export function orthNeighbors(coord: Coord): Coord[] {
   const candidates: Coord[] = [
     { col: coord.col + 1, row: coord.row },
@@ -41,7 +39,6 @@ export function orthNeighbors(coord: Coord): Coord[] {
   return candidates.filter(inBounds);
 }
 
-/** True if `a` and `b` are one orthogonal step apart. */
 export function isAdjacent(a: Coord, b: Coord): boolean {
   return manhattan(a, b) === 1;
 }
@@ -54,7 +51,6 @@ export function sameCoord(a: Coord, b: Coord): boolean {
   return a.col === b.col && a.row === b.row;
 }
 
-/** The skater occupying `coord`, if any. */
 export function skaterAt(state: GameState, coord: Coord): Skater | undefined {
   return state.skaters.find((s) => sameCoord(s.pos, coord));
 }

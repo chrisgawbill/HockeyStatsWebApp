@@ -5,7 +5,7 @@ import { localTeamList } from '@/lib/teamListData';
 import styles from '@/features/teams/components/TeamList.module.css';
 import PageHeader from '@/components/PageHeader';
 import { useListOfTeamsData } from '@/features/teams/hooks/ListOfTeamsContext';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useStandingsData } from '@/features/standings/hooks/StandingsContext';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import LoadingState from '@/components/LoadingState';
@@ -74,7 +74,6 @@ export default function TeamList() {
     errorStandingsData,
     refetchStandings,
   } = useStandingsData();
-  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [conference, setConference] = useState('All');
   const [division, setDivision] = useState('All');
@@ -193,171 +192,169 @@ export default function TeamList() {
   }
 
   return (
-    <main className={`${styles['team-list-page']} ds-page-shell ds-container`}>
+    <>
       <PageHeader />
-      <section className={styles['team-list-toolbar']}>
-        <div className={styles['team-list-toolbar__header']}>
-          <h1>Team List</h1>
-          <p>{teams.length} teams</p>
-        </div>
-        <div className={styles['team-list-controls']}>
-          <label className={styles['team-list-search']}>
-            <span>Search</span>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Team or abbreviation"
-            />
-          </label>
-          <label>
-            <span>Conference</span>
-            <select
-              value={conference}
-              onChange={(event) => setConference(event.target.value)}
-            >
-              <option>All</option>
-              <option>Eastern</option>
-              <option>Western</option>
-            </select>
-          </label>
-          <label>
-            <span>Division</span>
-            <select
-              value={division}
-              onChange={(event) => setDivision(event.target.value)}
-            >
-              <option>All</option>
-              <option>Atlantic</option>
-              <option>Metropolitan</option>
-              <option>Central</option>
-              <option>Pacific</option>
-            </select>
-          </label>
-          <label>
-            <span>Sort</span>
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as TeamSort)}
-            >
-              <option value="name">Name</option>
-              <option value="points">Points</option>
-              <option value="winPct">Win %</option>
-              <option value="goals">Goals / GP</option>
-              <option value="draftOdds">Draft Odds</option>
-            </select>
-          </label>
-        </div>
-        <div
-          className={styles['team-list-filter-chips']}
-          aria-label="Team filters"
-        >
-          {[
-            ['all', 'All Teams'],
-            ['playoff', 'Playoff'],
-            ['lottery', 'Lottery'],
-          ].map(([value, label]) => (
-            <button
-              key={value}
-              className={filter === value ? styles['active'] : ''}
-              onClick={() => setFilter(value as TeamFilter)}
-            >
-              {label}
-            </button>
-          ))}
-          <button
-            className={styles['team-list-reset-btn']}
-            onClick={resetFilters}
+      <main
+        className={`${styles['team-list-page']} ds-page-shell ds-container`}
+      >
+        <section className={styles['team-list-toolbar']}>
+          <div className={styles['team-list-toolbar__header']}>
+            <h1>Team List</h1>
+            <p>{teams.length} teams</p>
+          </div>
+          <div className={styles['team-list-controls']}>
+            <label className={styles['team-list-search']}>
+              <span>Search</span>
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Team or abbreviation"
+              />
+            </label>
+            <label>
+              <span>Conference</span>
+              <select
+                value={conference}
+                onChange={(event) => setConference(event.target.value)}
+              >
+                <option>All</option>
+                <option>Eastern</option>
+                <option>Western</option>
+              </select>
+            </label>
+            <label>
+              <span>Division</span>
+              <select
+                value={division}
+                onChange={(event) => setDivision(event.target.value)}
+              >
+                <option>All</option>
+                <option>Atlantic</option>
+                <option>Metropolitan</option>
+                <option>Central</option>
+                <option>Pacific</option>
+              </select>
+            </label>
+            <label>
+              <span>Sort</span>
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as TeamSort)}
+              >
+                <option value="name">Name</option>
+                <option value="points">Points</option>
+                <option value="winPct">Win %</option>
+                <option value="goals">Goals / GP</option>
+                <option value="draftOdds">Draft Odds</option>
+              </select>
+            </label>
+          </div>
+          <div
+            className={styles['team-list-filter-chips']}
+            aria-label="Team filters"
           >
-            Reset
-          </button>
-        </div>
-      </section>
-      <div className={styles['team-card-grid']}>
-        {teams.map(({ team, stats, standings, triCode }) => {
-          const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${triCode}_light.svg`;
-          const winPct = getWinPct(stats);
-          const statusLabel = getStatusLabel(
-            {
-              team,
-              stats,
-              standings,
-              triCode,
-            },
-            filter,
-          );
-          return (
-            <div
-              key={team.teamName}
-              className={styles['team-card']}
-              onClick={() => {
-                navigate(`/team/${triCode}`, {
-                  state: {
-                    sourcePath: '/teamList',
-                    fallbackPath: '/teamList',
-                  },
-                });
-              }}
+            {[
+              ['all', 'All Teams'],
+              ['playoff', 'Playoff'],
+              ['lottery', 'Lottery'],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                className={filter === value ? styles['active'] : ''}
+                onClick={() => setFilter(value as TeamFilter)}
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              className={styles['team-list-reset-btn']}
+              onClick={resetFilters}
             >
-              <div className={styles['team-card__top']}>
-                <img
-                  className={styles['team-card__logo']}
-                  src={logoUrl}
-                  alt={team.teamName}
-                />
-                {statusLabel && (
-                  <span className={styles['team-card__status']}>
-                    {statusLabel}
-                  </span>
+              Reset
+            </button>
+          </div>
+        </section>
+        <div className={styles['team-card-grid']}>
+          {teams.map(({ team, stats, standings, triCode }) => {
+            const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${triCode}_light.svg`;
+            const winPct = getWinPct(stats);
+            const statusLabel = getStatusLabel(
+              {
+                team,
+                stats,
+                standings,
+                triCode,
+              },
+              filter,
+            );
+            return (
+              <Link
+                key={team.teamName}
+                to={`/team/${triCode}`}
+                state={{ sourcePath: '/teamList', fallbackPath: '/teamList' }}
+                className={styles['team-card']}
+              >
+                <div className={styles['team-card__top']}>
+                  <img
+                    className={styles['team-card__logo']}
+                    src={logoUrl}
+                    alt={team.teamName}
+                  />
+                  {statusLabel && (
+                    <span className={styles['team-card__status']}>
+                      {statusLabel}
+                    </span>
+                  )}
+                </div>
+                <p className={styles['team-card__name']}>{team.teamName}</p>
+                <p className={styles['team-card__meta']}>
+                  {standings?.divisionName ?? 'NHL'} · {triCode}
+                </p>
+                {stats ? (
+                  <>
+                    <p className={styles['team-card__record']}>
+                      {stats.wins}-{stats.losses}-{stats.otLosses}
+                    </p>
+                    <div className={styles['team-card__metrics']}>
+                      <span>
+                        <strong className={styles['team-card__metrics-value']}>
+                          {stats.points}
+                        </strong>
+                        <span className={styles['team-card__metrics-label']}>
+                          PTS
+                        </span>
+                      </span>
+                      <span>
+                        <strong className={styles['team-card__metrics-value']}>
+                          {(winPct * 100).toFixed(1)}
+                        </strong>
+                        <span className={styles['team-card__metrics-label']}>
+                          WIN%
+                        </span>
+                      </span>
+                      <span>
+                        <strong className={styles['team-card__metrics-value']}>
+                          {formatNumber(stats.goalsPerGame, 2)}
+                        </strong>
+                        <span className={styles['team-card__metrics-label']}>
+                          GF/GP
+                        </span>
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <p className={styles['team-card__record']}>—</p>
                 )}
-              </div>
-              <p className={styles['team-card__name']}>{team.teamName}</p>
-              <p className={styles['team-card__meta']}>
-                {standings?.divisionName ?? 'NHL'} · {triCode}
-              </p>
-              {stats ? (
-                <>
-                  <p className={styles['team-card__record']}>
-                    {stats.wins}-{stats.losses}-{stats.otLosses}
-                  </p>
-                  <div className={styles['team-card__metrics']}>
-                    <span>
-                      <strong className={styles['team-card__metrics-value']}>
-                        {stats.points}
-                      </strong>
-                      <span className={styles['team-card__metrics-label']}>
-                        PTS
-                      </span>
-                    </span>
-                    <span>
-                      <strong className={styles['team-card__metrics-value']}>
-                        {(winPct * 100).toFixed(1)}
-                      </strong>
-                      <span className={styles['team-card__metrics-label']}>
-                        WIN%
-                      </span>
-                    </span>
-                    <span>
-                      <strong className={styles['team-card__metrics-value']}>
-                        {formatNumber(stats.goalsPerGame, 2)}
-                      </strong>
-                      <span className={styles['team-card__metrics-label']}>
-                        GF/GP
-                      </span>
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <p className={styles['team-card__record']}>—</p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      {teams.length === 0 && (
-        <p className={styles['team-list-empty']}>
-          No teams match the current filters.
-        </p>
-      )}
-    </main>
+              </Link>
+            );
+          })}
+        </div>
+        {teams.length === 0 && (
+          <p className={styles['team-list-empty']}>
+            No teams match the current filters.
+          </p>
+        )}
+      </main>
+    </>
   );
 }

@@ -1,4 +1,3 @@
-//LandingPage->Standings colors
 export const defaultColor: string = '#ffffff';
 export const leagueLeaderColor: string = '#ffcc00';
 export const conferenceLeaderColor: string = '#ccffff';

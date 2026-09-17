@@ -1,16 +1,16 @@
 .page {
-  padding: var(--space-lg) var(--space-md);
+  padding: var(--ds-space-4) var(--ds-space-3);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--ds-space-3);
   font-family: var(--font-pixel);
 }
 
 @media (max-width: 576px) {
   .page {
-    padding: var(--space-sm);
-    gap: var(--space-sm);
+    padding: var(--ds-space-2);
+    gap: var(--ds-space-2);
     height: calc(100svh - var(--mobile-chrome-height));
     overflow: hidden;
     box-sizing: border-box;
@@ -37,13 +37,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--ds-space-1);
 }
 
 .whistle {
   margin: 0;
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--border-radius-pill);
+  padding: var(--ds-space-1) var(--ds-space-3);
+  border-radius: var(--ds-radius-full);
   background-color: var(--color-chip-bg);
   color: var(--color-text);
   font-weight: bold;

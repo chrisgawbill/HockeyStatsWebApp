@@ -60,7 +60,7 @@ function buildCells(year: number, month: number): DayCell[] {
   return cells;
 }
 
-/** Read-only pixel-art monthly calendar showing the daily win streak (§9.3). Dumb: props in, callback out. */
+/** Read-only pixel-art monthly calendar showing the daily win streak. */
 export default function StreakCalendar({
   streakData,
   streak,

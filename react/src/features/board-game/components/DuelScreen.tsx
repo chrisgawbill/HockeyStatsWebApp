@@ -30,7 +30,7 @@ export interface DuelScreenProps {
   blockReason: (handIndex: number) => CardBlockReason | null;
   /** Whether the queued card at this index can still be pulled back to hand (false once a card it drew has itself been queued). */
   canUnqueue: (queueIndex: number) => boolean;
-  /** Daily-streak bonus energy for the user (0 or 1, BG-A18/B27). Adds a 4th energy orb. */
+  /** Daily-streak bonus energy for the user (0 or 1). Adds a 4th energy orb. */
   bonusEnergy: number;
 }
 

@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
   overflow-y: auto;
   background: var(--color-overlay);
 }
@@ -16,9 +16,9 @@
   width: min(42rem, calc(100vw - 2rem));
   background: var(--color-surface);
   color: var(--color-text);
-  border: 1px solid var(--aero-border-highlight);
-  border-radius: var(--border-radius-card);
-  box-shadow: var(--elevation-2);
+  border: 1px solid var(--ds-aero-border);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-2);
 }
 
 .dialog::before {
@@ -27,6 +27,6 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: var(--aero-sheen);
+  background: var(--ds-aero-sheen);
   pointer-events: none;
 }

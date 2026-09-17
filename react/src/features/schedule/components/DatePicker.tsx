@@ -65,10 +65,8 @@ function stepAnchor(date: Date, view: ScheduleView, direction: 1 | -1): Date {
 
 /**
  * Computes prev/next disabled state and the clamped stepped date for a pager
- * bounded by `seasonRange`. Extracted as a pure function (independent of
- * React) so the season-boundary navigation rules — e.g. "September 2026,
- * being the season's first month, cannot page further back" — can be unit
- * tested directly.
+ * bounded by `seasonRange`. The season boundaries prevent navigation beyond
+ * the selected season's calendar range.
  */
 function getNavState(
   selectedDate: Date,

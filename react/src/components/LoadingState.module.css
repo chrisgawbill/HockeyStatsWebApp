@@ -4,7 +4,7 @@
   min-height: 8rem;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
   color: var(--color-muted-text);
   font-size: var(--text-base);
   font-weight: 600;

@@ -7,11 +7,11 @@
 }
 
 .stat-leader-row + .stat-leader-row {
-  margin-top: var(--space-xl);
+  margin-top: var(--ds-space-5);
 }
 
 .landing-header h2 {
-  margin: 0 0 var(--space-sm);
+  margin: 0 0 var(--ds-space-2);
 }
 
 .section-container > .odds-grid {
@@ -95,7 +95,7 @@
   .stat-leader-row .row-scroller {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-sm);
+    gap: var(--ds-space-2);
     overflow: visible;
     white-space: normal;
   }
@@ -131,7 +131,7 @@
   }
 
   .section-container > .odds-grid {
-    --bs-gutter-x: var(--space-md);
+    --bs-gutter-x: var(--ds-space-3);
     grid-template-columns: 1fr;
     max-width: 26rem;
     margin-left: auto;

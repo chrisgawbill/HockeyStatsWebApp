@@ -59,7 +59,7 @@ function duelistRole(
 export interface BoardGameProps {
   length: GameLength;
   onChangeLength: () => void;
-  /** Google sign-in session token (BG-B31), or `null` when signed out. */
+  /** Google sign-in session token, or `null` when signed out. */
   authToken: string | null;
 }
 

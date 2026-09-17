@@ -18,7 +18,7 @@ import styles from '@/components/PageHeader.module.css';
  * One entry in the global search index: either a team (routes to
  * `/team/:triCode`) or a completed game (routes to `/game/:gameId`). Upcoming/
  * live games are left out of the index entirely since only completed games have
- * a detail page worth searching for (ticket 2.5 scope).
+ * a detail page worth searching for.
  */
 type SearchResult =
   | { type: 'team'; id: string; label: string; triCode: string }
@@ -410,25 +410,6 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
         ref={navRef}
         style={isSubPage ? { marginBottom: 0 } : undefined}
       >
-        <div className={styles['nav-secondary-row']}>
-          <div className={styles['nav-mobile-back']}>
-            {isSubPage && (
-              <button
-                className={styles['nav-back-btn']}
-                onClick={handleBack}
-                aria-label="Go back"
-              >
-                <BackIcon />
-              </button>
-            )}
-          </div>
-          <div className={styles['nav-season-selector']}>
-            <SeasonSelector className="page-header-season-selector" />
-          </div>
-          <div className={styles['nav-secondary-utility']}>
-            {corner && <div className={styles['nav-corner']}>{corner}</div>}
-          </div>
-        </div>
         <div className={styles['nav-inner']}>
           <div className={styles['nav-left']}>
             <span className={styles['nav-brand']}>HockeyStats</span>
@@ -487,6 +468,25 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
                   ))}
                 </ul>
               )}
+            </div>
+          </div>
+          <div className={styles['nav-secondary-row']}>
+            <div className={styles['nav-mobile-back']}>
+              {isSubPage && (
+                <button
+                  className={styles['nav-back-btn']}
+                  onClick={handleBack}
+                  aria-label="Go back"
+                >
+                  <BackIcon />
+                </button>
+              )}
+            </div>
+            <div className={styles['nav-season-selector']}>
+              <SeasonSelector className="page-header-season-selector" />
+            </div>
+            <div className={styles['nav-secondary-utility']}>
+              {corner && <div className={styles['nav-corner']}>{corner}</div>}
             </div>
           </div>
           <div className={styles['nav-right']}>

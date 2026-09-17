@@ -33,11 +33,7 @@ export const TEAM_SECTIONS: { key: TeamSection; label: string }[] = [
 ];
 
 export type Position =
-  | 'Center'
-  | 'Left Wing'
-  | 'Right Wing'
-  | 'Defenseman'
-  | 'Goalie';
+  'Center' | 'Left Wing' | 'Right Wing' | 'Defenseman' | 'Goalie';
 
 export interface RosterPlayer {
   id: number;
@@ -77,7 +73,7 @@ export const POSITION_GROUPS: PositionGroup[] = [
   'Goalies',
 ];
 
-/** Normalized roster player contract (ticket 2.2), as returned by `/team/roster/:triCode`. */
+/** Normalized roster player contract returned by `/team/roster/:triCode`. */
 export interface RosterPlayerContract {
   id: number;
   name: string;
@@ -86,7 +82,7 @@ export interface RosterPlayerContract {
   headshot: string;
 }
 
-/** Normalized skater summary contract (ticket 2.2), as returned by `/player/skater/summary`. */
+/** Normalized skater summary contract returned by `/player/skater/summary`. */
 export interface SkaterSummaryContract {
   playerId: number;
   name: string;
@@ -101,7 +97,7 @@ export interface SkaterSummaryContract {
   toiPerGame: number | null;
 }
 
-/** Normalized goalie summary contract (ticket 2.2), as returned by `/player/goalie/summary`. */
+/** Normalized goalie summary contract returned by `/player/goalie/summary`. */
 export interface GoalieSummaryContract {
   goalieId: number;
   name: string;
@@ -122,7 +118,7 @@ export interface SkaterCorsiEntry {
 
 /** Fields TeamPage reads off the team summary response (`/team/:teamId`). */
 export interface TeamStatsContract {
-  name: string;
+  teamFullName: string;
   points?: number;
   wins?: number;
   losses?: number;

@@ -16,10 +16,8 @@ function cx(...classes: (string | false | null | undefined)[]) {
 const FALLBACK_HEADSHOT = 'https://assets.nhle.com/mugs/nhl/skater/default.png';
 
 /**
- * Common leaderboard row shape that both skaters and goalies map into, so the
- * rendering below stays single-purpose instead of branching on source all
- * through the JSX. Goalies have no `position` field, so their rows use a
- * fixed 'G' position label.
+ * Common leaderboard row shape for skaters and goalies. Goalies have no
+ * `position` field, so their rows use a fixed 'G' position label.
  */
 interface LeaderRow {
   id: number;
@@ -79,10 +77,8 @@ function sortAndSlice(rows: LeaderRow[], higherIsBetter: boolean): LeaderRow[] {
 
 /**
  * Builds the top-10 leaderboard for the selected category. Skater and goalie
- * categories are backed by two separate arrays with different shapes (and
- * different max-games-played, which `requiresMinGames` depends on), so this
- * branches once on `category.source` and maps whichever array is relevant
- * into the common `LeaderRow` shape before sorting/slicing.
+ * categories are backed by separate arrays with different shapes and
+ * max-games-played values, which `requiresMinGames` depends on.
  */
 function getTopTen(
   players: PlayerStatLine[],
@@ -163,8 +159,11 @@ export default function PlayerStatsSection({
             key={cat.key}
             className={cx(
               styles['player-stat-tab'],
+              'ds-button',
               selectedKey === cat.key && styles.active,
             )}
+            type="button"
+            aria-pressed={selectedKey === cat.key}
             onClick={() => setSelectedKey(cat.key)}
           >
             {cat.shortLabel}

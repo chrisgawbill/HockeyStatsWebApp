@@ -2,10 +2,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
   width: min(100%, 400px);
   margin: 0 auto;
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
   background-color: var(--color-bg);
   image-rendering: pixelated;
   /* Stepped pixel corners instead of a smooth border-radius. */
@@ -33,7 +33,7 @@
 @media (max-width: 576px) {
   .panel {
     width: 100%;
-    padding: var(--space-sm);
+    padding: var(--ds-space-2);
   }
 }
 
@@ -55,14 +55,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
   width: 100%;
 }
 
 .navButton {
   font-family: var(--font-pixel);
   font-size: var(--text-sm);
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--ds-space-1) var(--ds-space-2);
   border: 2px solid var(--color-primary);
   background-color: var(--color-surface);
   color: var(--color-text);
@@ -93,7 +93,7 @@
   font-size: 0.55rem;
   text-align: center;
   color: var(--color-text-secondary);
-  padding-block: var(--space-xs);
+  padding-block: var(--ds-space-1);
 }
 
 .cell {
@@ -131,5 +131,5 @@
 }
 
 .actions {
-  margin-top: var(--space-sm);
+  margin-top: var(--ds-space-2);
 }

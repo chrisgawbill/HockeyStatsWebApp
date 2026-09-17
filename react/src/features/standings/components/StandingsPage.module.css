@@ -4,18 +4,20 @@
 
 .standings-page-table-container {
   height: 100%;
-  overflow: hidden;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
   white-space: nowrap;
   animation: standings-content-enter var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;
 }
 
 .standings-page-toggle-row {
-  padding-left: var(--space-xl);
-  padding-right: var(--space-xl);
+  padding-left: var(--ds-space-5);
+  padding-right: var(--ds-space-5);
 }
 
 .standings-page-toggle-row + .standings-page-toggle-row {
-  margin-top: var(--space-sm);
+  margin-top: var(--ds-space-2);
 }
 
 .standings-page-legend-row {
@@ -32,12 +34,12 @@
 .playoff-race-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-md);
+  gap: var(--ds-space-3);
   width: 100%;
 }
 
 .playoff-race-loading {
-  margin: var(--space-lg) auto;
+  margin: var(--ds-space-4) auto;
   color: var(--color-text-secondary);
   text-align: center;
   animation: standings-loading-enter var(--ds-motion-duration-short) var(--ds-motion-easing-standard) both;
@@ -59,8 +61,8 @@
   }
 
   .standings-page-toggle-row {
-    padding-left: var(--space-md);
-    padding-right: var(--space-md);
+    padding-left: var(--ds-space-3);
+    padding-right: var(--ds-space-3);
   }
 
   .playoff-race-grid { grid-template-columns: 1fr; }

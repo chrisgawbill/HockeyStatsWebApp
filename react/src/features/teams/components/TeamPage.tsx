@@ -178,7 +178,7 @@ export default function TeamPage() {
         GetGoalieSummary(String(numericId), season).catch(() => null),
       ]);
 
-      const raw: TeamStatsContract = statsRes.data[0] ?? { name: '' };
+      const raw: TeamStatsContract = statsRes.data[0] ?? { teamFullName: '' };
       setTeamRawResponse(raw);
 
       const toiMap = new Map<number, number>();
@@ -208,12 +208,7 @@ export default function TeamPage() {
     }
   }, [numericId, triCode, season]);
 
-  /**
-   * Re-runs the season fetch for the current team/season. Shared by the
-   * mount/season-change effect and the manual "Try again" retry action so
-   * there is one fetch code path instead of two copies of the same
-   * reset-then-fetch sequence.
-   */
+  /** Re-runs the season fetch for the current team and season. */
   const refetchTeam = useCallback(() => {
     setLoading(true);
     fetchMain();
@@ -250,7 +245,11 @@ export default function TeamPage() {
   }, [listOfGamesData, triCode, season]);
 
   const teamDna = useMemo(
-    () => buildTeamDna({ stats: teamRawResponse ?? { name: '' }, ...teamForm }),
+    () =>
+      buildTeamDna({
+        stats: teamRawResponse ?? { teamFullName: '' },
+        ...teamForm,
+      }),
     [teamForm, teamRawResponse],
   );
 
@@ -347,17 +346,20 @@ export default function TeamPage() {
         ref={pageRef}
       >
         <PageHeader />
-        <div
-          className={`${styles['team-page__content']} ${shared.pageContent}`}
-          style={{ paddingTop: 'var(--page-block-start)' }}
-        >
-          <ErrorState
-            fullPage
-            title="Couldn't load team"
-            message={error}
-            onRetry={refetchTeam}
-          />
-        </div>
+        <main>
+          <h1 className="visually-hidden">Team</h1>
+          <div
+            className={`${styles['team-page__content']} ${shared.pageContent}`}
+            style={{ paddingTop: 'var(--page-block-start)' }}
+          >
+            <ErrorState
+              fullPage
+              title="Couldn't load team"
+              message={error}
+              onRetry={refetchTeam}
+            />
+          </div>
+        </main>
       </div>
     );
   }
@@ -370,12 +372,15 @@ export default function TeamPage() {
         ref={pageRef}
       >
         <PageHeader />
-        <div
-          className={`${styles['team-page__content']} ${shared.pageContent}`}
-          style={{ paddingTop: 'var(--page-block-start)' }}
-        >
-          <LoadingState label="Loading team" fullPage />
-        </div>
+        <main>
+          <h1 className="visually-hidden">Team</h1>
+          <div
+            className={`${styles['team-page__content']} ${shared.pageContent}`}
+            style={{ paddingTop: 'var(--page-block-start)' }}
+          >
+            <LoadingState label="Loading team" fullPage />
+          </div>
+        </main>
       </div>
     );
   }
@@ -387,88 +392,92 @@ export default function TeamPage() {
       ref={pageRef}
     >
       <PageHeader />
-      <TeamHero team={team} />
-      <div className={`${styles['team-page__content']} ${shared.pageContent}`}>
-        <nav
-          ref={navRef}
-          className={styles['team-tabs']}
-          aria-label="Team sections"
+      <main>
+        <TeamHero team={team} />
+        <div
+          className={`${styles['team-page__content']} ${shared.pageContent}`}
         >
-          {TEAM_SECTIONS.map((s) => (
-            <a
-              key={s.key}
-              href={`#${s.key}`}
-              className={cx(
-                styles['team-tab'],
-                activeSection === s.key && styles.active,
-              )}
-              aria-current={activeSection === s.key ? 'true' : undefined}
-              onClick={(event) => handleNavClick(event, s.key)}
-            >
-              {s.label}
-            </a>
-          ))}
-        </nav>
-
-        <section id="stats" className={styles['team-section']}>
-          <TeamStatsRow stats={stats} />
-          <section
-            className={`${styles['form-panel']} ${shared.surface}`}
-            aria-labelledby="team-form-heading"
+          <nav
+            ref={navRef}
+            className={styles['team-tabs']}
+            aria-label="Team sections"
           >
-            <div className={styles['form-panel__header']}>
-              <div>
-                <h2 id="team-form-heading" className={shared.sectionTitle}>
-                  Team Form
-                </h2>
-                <p className={styles['form-panel__caption']}>
-                  {teamForm.results.length} completed games · goal differential{' '}
-                  {teamForm.goalDiff > 0 ? '+' : ''}
-                  {teamForm.goalDiff}
-                </p>
+            {TEAM_SECTIONS.map((s) => (
+              <a
+                key={s.key}
+                href={`#${s.key}`}
+                className={cx(
+                  styles['team-tab'],
+                  activeSection === s.key && styles.active,
+                )}
+                aria-current={activeSection === s.key ? 'true' : undefined}
+                onClick={(event) => handleNavClick(event, s.key)}
+              >
+                {s.label}
+              </a>
+            ))}
+          </nav>
+
+          <section id="stats" className={styles['team-section']}>
+            <TeamStatsRow stats={stats} />
+            <section
+              className={`${styles['form-panel']} ${shared.surface}`}
+              aria-labelledby="team-form-heading"
+            >
+              <div className={styles['form-panel__header']}>
+                <div>
+                  <h2 id="team-form-heading" className={shared.sectionTitle}>
+                    Team Form
+                  </h2>
+                  <p className={styles['form-panel__caption']}>
+                    {teamForm.results.length} completed games · goal
+                    differential {teamForm.goalDiff > 0 ? '+' : ''}
+                    {teamForm.goalDiff}
+                  </p>
+                </div>
+                <div className={styles['form-panel__recent']}>
+                  <span className={styles['form-panel__label']}>Last 10</span>
+                  <FormStrip results={teamForm.recent} />
+                </div>
               </div>
-              <div className={styles['form-panel__recent']}>
-                <span className={styles['form-panel__label']}>Last 10</span>
-                <FormStrip results={teamForm.recent} />
+              <div className={styles['form-panel__grid']}>
+                <div>
+                  <h3 className={styles['form-panel__subheading']}>
+                    Rolling points percentage
+                  </h3>
+                  <PointsPaceSparkline values={teamForm.pace} />
+                </div>
+                <div>
+                  <h3 className={styles['form-panel__subheading']}>
+                    Home / Road
+                  </h3>
+                  <SplitBars {...teamForm.splits} />
+                </div>
               </div>
-            </div>
-            <div className={styles['form-panel__grid']}>
-              <div>
-                <h3 className={styles['form-panel__subheading']}>
-                  Rolling points percentage
-                </h3>
-                <PointsPaceSparkline values={teamForm.pace} />
-              </div>
-              <div>
-                <h3 className={styles['form-panel__subheading']}>
-                  Home / Road
-                </h3>
-                <SplitBars {...teamForm.splits} />
-              </div>
-            </div>
+            </section>
+            <TeamDna metrics={teamDna} season={season} />
           </section>
-          <TeamDna metrics={teamDna} season={season} />
-        </section>
-        <section id="leaders" className={styles['team-section']}>
-          <PlayerStatsSection
-            players={playerStats}
-            goalies={goalieStats}
-            headshotMap={headshotMap}
-          />
-        </section>
-        <section id="roster" className={styles['team-section']}>
-          <RosterTab roster={roster} />
-        </section>
-        <section id="schedule" className={styles['team-section']}>
-          <ScheduleTab
-            games={schedule}
-            teamAbbrev={triCode}
-            sourceLabel={team.name}
-            sourcePath={teamSourcePath}
-            activeNavPath={teamActiveNavPath}
-          />
-        </section>
-      </div>
+          <section id="leaders" className={styles['team-section']}>
+            <PlayerStatsSection
+              players={playerStats}
+              goalies={goalieStats}
+              headshotMap={headshotMap}
+            />
+          </section>
+          <section id="roster" className={styles['team-section']}>
+            <RosterTab roster={roster} />
+          </section>
+          <section id="schedule" className={styles['team-section']}>
+            <ScheduleTab
+              games={schedule}
+              teamAbbrev={triCode}
+              sourceLabel={team.name}
+              sourcePath={teamSourcePath}
+              activeNavPath={teamActiveNavPath}
+            />
+          </section>
+        </div>
+      </main>
     </div>
   );
 }

@@ -41,10 +41,8 @@ export type CardEffect =
   | { type: 'draw'; amount: number };
 
 /**
- * Faceoff-ante outcome effect (BG-A15a): fires at contest-resolution time,
- * not during a reveal, so it is deliberately kept off `CardEffect`. One
- * optional enum field, exactly as additive as `accuracy`/`power` were -
- * BG-A15b is what actually applies these.
+ * Faceoff-ante outcome effect: fires at contest-resolution time, not during a
+ * reveal, so it is deliberately kept off `CardEffect`.
  */
 export type FaceoffCardEffect =
   'backDraw' | 'stunLoser' | 'bonusMp' | 'scrumOnLoss' | 'freeJump';
@@ -59,20 +57,20 @@ export interface CardDef {
   allowedIn: DuelKind[] | 'any';
   exhaust: boolean;
   effects: CardEffect[];
-  /** Shot-ante stat (BG-A14a): widens the perfect/yellow timing band. Only shot-pool cards set this. */
+  /** Widens the perfect/yellow timing band. Only shot-pool cards set this. */
   accuracy?: number;
-  /** Shot-ante stat (BG-A14a): subtracted from the goalie's save chance and drained from its poise on a save. */
+  /** Subtracted from the goalie's save chance and drained from its poise on a save. */
   power?: number;
-  /** Faceoff-ante stat (BG-A15a): widens the clean reaction window. Only faceoff-pool cards set this. */
+  /** Widens the clean reaction window. Only faceoff-pool cards set this. */
   anticipation?: number;
-  /** Faceoff-ante stat (BG-A15a): flat bonus to the contest roll, and (at BG-A15b) the size of the buff a clean win carries out. */
+  /** Flat bonus to the contest roll and the size of the buff a clean win carries out. */
   grip?: number;
-  /** Faceoff-ante effect (BG-A15a), fired at outcome time by BG-A15b. Only faceoff-pool cards set this. */
+  /** Fired at outcome time. Only faceoff-pool cards set this. */
   faceoffEffect?: FaceoffCardEffect;
 }
 
 /**
- * A shot's timing-bar outcome (BG-A14a): a narrow `perfect` (yellow) zone at
+ * A shot's timing-bar outcome: a narrow `perfect` (yellow) zone at
  * the centre, a wider `good` (light blue) zone around it, `weak` for the rest
  * of the track, and `miss` if nothing was pressed before the cycle ended.
  */
@@ -83,7 +81,7 @@ export type ShotBand = 'perfect' | 'good' | 'weak' | 'miss';
  * `[0, 1]` track, both centred on `0.5`. `yellowWidth` is the full width of
  * the perfect zone; `blueWidth` is the full width of the good zone, which
  * strictly contains the yellow zone (e.g. `blueWidth: 0.3` covers
- * `[0.35, 0.65]`, with the yellow zone sitting inside it). The UI (BG-B22)
+ * `[0.35, 0.65]`, with the yellow zone sitting inside it). The UI
  * renders these as nested bands and must not hardcode the numbers.
  */
 export interface ShotBandWidths {
@@ -92,7 +90,7 @@ export interface ShotBandWidths {
 }
 
 /**
- * A faceoff draw's reaction outcome (BG-A15a): `clean` (within the narrow
+ * A faceoff draw's reaction outcome: `clean` (within the narrow
  * on-time window), `scrum` (within the wider-but-still-timely window),
  * `late` (anything slower), and `jump` (pressed before the drop - a false
  * start, never produced by a random band roll, exactly as `miss` is
@@ -106,15 +104,14 @@ export type FaceoffBand = 'clean' | 'scrum' | 'late' | 'jump';
  * `scrumWindowMs` the outer edge of the `scrum` band (which strictly
  * contains `cleanWindowMs`, e.g. `scrumWindowMs: 260` covers a `cleanWindowMs`
  * of up to that). Anything slower than `scrumWindowMs` is `late`. The UI
- * (BG-B25) renders these as the drop's timing feedback and must not
- * hardcode the numbers.
+ * renders these as the drop's timing feedback and must not hardcode the numbers.
  */
 export interface FaceoffBandWindows {
   cleanWindowMs: number;
   scrumWindowMs: number;
 }
 
-/** Result of rolling a goalie's save for a shot band (BG-A14a's `rollShotSave`). */
+/** Result of rolling a goalie's save for a shot band. */
 export interface ShotSaveResult {
   band: ShotBand;
   saved: boolean;
@@ -128,7 +125,7 @@ export interface ShotSaveResult {
   rebound: boolean;
   /**
    * True on a `good`/`perfect` save the goalie smothers instead of
-   * rebounding (BG-A16), rolled against `SHOT_COVER_CHANCE`. Mutually
+   * rebounding, rolled against `SHOT_COVER_CHANCE`. Mutually
    * exclusive with `rebound` - a covered save always has `rebound: false`.
    * Whistles play dead and routes to the faceoff phase.
    */
@@ -136,12 +133,10 @@ export interface ShotSaveResult {
 }
 
 /**
- * Result of the symmetric head-to-head faceoff contest (BG-A15b cycle 2's
- * `rollFaceoffHeadToHead`): pure model output for one resolved pair of
- * bands, from the user's point of view. `engine/faceoffDuel.ts` turns this
- * into the richer, duel-flow-aware `FaceoffDuelResult` (jump/re-drop and
- * `scrumOnLoss` live there, not here - this function only decides a winner
- * given two already-real bands).
+ * Result of the symmetric head-to-head faceoff contest. The bands are already
+ * rolled before this function returns; it produces pure model output for one
+ * resolved pair of bands, from the user's point of view. `faceoffDuel.ts`
+ * turns this into the richer duel-flow-aware result.
  */
 export interface FaceoffHeadToHeadResult {
   /**
@@ -158,8 +153,8 @@ export interface FaceoffHeadToHeadResult {
 
 /**
  * The user centre's-eye-view result of a fully resolved faceoff draw
- * (BG-A15b cycle 2), surfaced on `GameState.lastFaceoffResult` for the UI
- * (BG-B25) and read by `engine/duelOutcome.ts`'s `applyOutcome` off
+ * surfaced on `GameState.lastFaceoffResult` for the UI and read by
+ * `engine/duelOutcome.ts`'s `applyOutcome` off
  * `DuelState.faceoffResult`. Wraps `rollFaceoffHeadToHead`'s bare
  * win/scrum roll with the duel-flow context the UI needs to narrate the
  * draw: both sides' actual bands, and whether a repeat jump ended it
@@ -220,25 +215,25 @@ export interface DuelState {
   queueDraws: string[][];
   receiverId: string | null;
   /**
-   * Shot duel only (BG-A14b): the shooter's picked ante card id, once chosen
+   * Shot duel only: the shooter's picked ante card id, once chosen
    * from the 3-card offer sitting in the shooter's hand. Null before the
    * pick and for every other duel kind.
    */
   shotPickedCardId: string | null;
   /**
-   * Faceoff duel only (BG-A15b): the user centre's picked ante card id, once
+   * Faceoff duel only: the user centre's picked ante card id, once
    * chosen from the offer sitting in `deck.hand`. Null before the pick and
    * for every other duel kind.
    */
   faceoffPickedCardId: string | null;
   /**
-   * Faceoff duel only (BG-A15b): the CPU centre's picked ante card id,
+   * Faceoff duel only: the CPU centre's picked ante card id,
    * chosen immediately when the duel is created (the CPU has no UI to wait
    * on). Null when the faceoff pool was exhausted and the CPU drew no card.
    */
   faceoffCpuCardId: string | null;
   /**
-   * Faceoff duel only (BG-A15b): true once the user's draw has already had
+   * Faceoff duel only: true once the user's draw has already had
    * one false start this duel, so a second `jump` is a repeat (outright
    * loss, not a re-drop) and `faceoffBandWindowsFor` narrows the clean
    * window on the retry - unless the picked card's `freeJump` effect says
@@ -246,7 +241,7 @@ export interface DuelState {
    */
   faceoffJumped: boolean;
   /**
-   * Faceoff duel only (BG-A15b cycle 2): the fully resolved head-to-head
+   * Faceoff duel only: the fully resolved head-to-head
    * result once both centres' bands are in - `applyOutcome` reads this to
    * place the puck and fire effects. Null until resolved (including while
    * a re-drop is pending).
@@ -302,7 +297,7 @@ export interface GameState {
   /** True right after a whistle reset (boxed-in carrier), until START_FACEOFF is dispatched. */
   whistle: boolean;
   /**
-   * Each team's goalie poise (BG-A14b), persisted across the whole match -
+   * Each team's goalie poise, persisted across the whole match -
    * this, not a per-duel `Duelist`, is what keeps `length` meaningful
    * (`GOALIE_POISE_BY_LENGTH` seeds it on `NEW_GAME`). Drains by a shot's
    * `power` on every save.
@@ -310,7 +305,7 @@ export interface GameState {
   goaliePoise: Record<TeamId, number>;
   /**
    * The real `rollShotSave` result for the shot `RESOLVE_SHOT_BAND` most
-   * recently resolved (BG-B24), so the UI can display the engine's own
+   * recently resolved, so the UI can display the engine's own
    * outcome rather than re-deriving or re-rolling it. Follows `lastOutcome`'s
    * lifecycle: null on `NEW_GAME` and `DISMISS_DUEL_RESULT`, set whenever a
    * shot resolves, otherwise stale-but-unread between shots.
@@ -318,16 +313,16 @@ export interface GameState {
   lastShotSaveResult: ShotSaveResult | null;
   /**
    * The `FaceoffDuelResult` for the faceoff `RESOLVE_FACEOFF_BAND`/
-   * `AUTO_RESOLVE_FACEOFF` most recently resolved (BG-A15b), mirroring
+   * `AUTO_RESOLVE_FACEOFF` most recently resolved, mirroring
    * `lastShotSaveResult`'s lifecycle: null on `NEW_GAME` and
    * `DISMISS_DUEL_RESULT`, set whenever a faceoff resolves, otherwise
    * stale-but-unread between faceoffs. Carries both centres' bands, so the
-   * UI (BG-B25) can narrate the draw ("you were clean, they were late")
+   * UI can narrate the draw ("you were clean, they were late")
    * without reaching into the (by-then-cleared) `DuelState`.
    */
   lastFaceoffResult: FaceoffDuelResult | null;
   /**
-   * The faceoff dot the current/most recent draw happened at (BG-A15b):
+   * The faceoff dot the current/most recent draw happened at:
    * `FACEOFF_SPOTS.centreIce` for a new game or a boxed-in whistle, or one
    * of `FACEOFF_SPOTS.defendingDots[team]` for a covered-puck whistle. Set
    * whenever a whistle moves `phase` to `'faceoff'`, read by
@@ -336,7 +331,7 @@ export interface GameState {
    */
   faceoffSpot: Coord;
   /**
-   * MP to add on top of the next `ROLL_DICE` roll (BG-A15b's `bonusMp`
+   * MP to add on top of the next `ROLL_DICE` roll (`bonusMp`
    * faceoff effect). Zero except right after a clean faceoff win with that
    * effect; `ROLL_DICE` consumes and clears it.
    */
@@ -354,17 +349,17 @@ export type Action =
   | { type: 'PLAY_CARD'; handIndex: number }
   | { type: 'UNQUEUE_CARD'; queueIndex: number }
   | { type: 'END_DUEL_ROUND' }
-  /** Shot duel only (BG-A14b): the user shooter picks their ante card, offered at `deck.hand[handIndex]`. */
+  /** Shot duel only: the user shooter picks their ante card at `deck.hand[handIndex]`. */
   | { type: 'PICK_SHOT_CARD'; handIndex: number }
-  /** Shot duel only (BG-A14b): the UI reports the timing bar's band, so the engine can roll the save. */
+  /** Shot duel only: the UI reports the timing bar's band so the engine can roll the save. */
   | { type: 'RESOLVE_SHOT_BAND'; band: ShotBand }
-  /** Shot duel only (BG-A14b): resolves without a timing-bar press, rolling a band from the picked card's accuracy - `prefers-reduced-motion` and headless play. */
+  /** Shot duel only: resolves without a timing-bar press, rolling a band from the picked card's accuracy. */
   | { type: 'AUTO_RESOLVE_SHOT' }
-  /** Faceoff duel only (BG-A15b): the user centre picks their ante card, offered at `deck.hand[handIndex]`. */
+  /** Faceoff duel only: the user centre picks their ante card at `deck.hand[handIndex]`. */
   | { type: 'PICK_FACEOFF_CARD'; handIndex: number }
-  /** Faceoff duel only (BG-A15b): the UI reports the drop's reaction band, so the engine can roll the contest. */
+  /** Faceoff duel only: the UI reports the drop's reaction band so the engine can roll the contest. */
   | { type: 'RESOLVE_FACEOFF_BAND'; band: FaceoffBand }
-  /** Faceoff duel only (BG-A15b): resolves without a real reaction press, rolling a band from the picked card's anticipation - `prefers-reduced-motion` and headless play. */
+  /** Faceoff duel only: resolves without a real reaction press, rolling a band from the picked card's anticipation. */
   | { type: 'AUTO_RESOLVE_FACEOFF' }
   | { type: 'DISMISS_DUEL_RESULT' }
   | {

@@ -1,12 +1,10 @@
 .nav-bar {
   /* App chrome declares its own font rather than inheriting the page's: the
-     board game sets a pixel font on its page root (BG-B23), and these nav
-     labels must not widen or the fixed mobile bar breaks (see BG-B20). */
+     board game sets a pixel font on its page root, and these nav labels must
+     not widen or the fixed mobile bar breaks. */
   font-family: 'Roboto', sans-serif;
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  max-width: none;
   box-sizing: border-box;
   /* Aero-glass bar: a translucent, blurred tint of the brand color rather
      than a flat fill, so whatever scrolls underneath shows through softly. */
@@ -15,10 +13,9 @@
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
-  padding: var(--space-sm) var(--space-md);
-  margin-bottom: var(--space-md);
+  padding: 0;
+  margin-bottom: var(--ds-space-3);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   flex-wrap: nowrap;
   position: sticky;
@@ -28,16 +25,20 @@
 }
 
 .nav-inner {
-  display: contents;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  width: min(100% - (2 * var(--page-gutter)), var(--page-content-width));
+  margin-inline: auto;
+  padding: var(--ds-space-2) 0;
 }
 
 .nav-secondary-row {
-  grid-column: 2;
-  grid-row: 1;
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  flex: 0 0 auto;
 }
 
 .nav-mobile-back,
@@ -50,17 +51,15 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  gap: var(--space-xs);
+  gap: var(--ds-space-1);
 }
 
 .nav-left {
-  grid-column: 1;
-  grid-row: 1;
+  flex: 1 1 auto;
 }
 
 .nav-right {
-  grid-column: 3;
-  grid-row: 1;
+  flex: 0 1 auto;
   justify-content: flex-end;
 }
 
@@ -71,8 +70,8 @@
 
 .nav-brand {
   flex: 0 0 auto;
-  margin-right: var(--space-xs);
-  padding: 0 var(--space-sm) 0 var(--space-xs);
+  margin-right: var(--ds-space-1);
+  padding: 0 var(--ds-space-2) 0 var(--ds-space-1);
   color: rgba(255, 255, 255, 0.95);
   font-size: 1rem;
   font-weight: 800;
@@ -115,7 +114,7 @@
 .nav-search-input {
   width: 100%;
   height: 32px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.15);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
@@ -146,8 +145,8 @@
   overflow-y: auto;
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-card);
-  box-shadow: var(--shadow-card);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-1);
   list-style: none;
   margin: 0;
   padding: 4px;
@@ -163,7 +162,7 @@
   padding: 8px 10px;
   font-size: 0.85rem;
   color: var(--color-text);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--ds-radius-medium);
   cursor: pointer;
 }
 
@@ -187,7 +186,7 @@
   display: flex;
   justify-content: center;
   padding: 2px 4px;
-  flex: 1;
+  flex: 0 1 auto;
 }
 
 .nav-right .nav-bar-item {
@@ -207,13 +206,13 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     0 1px 2px rgba(0, 0, 0, 0.1) !important;
   color: rgba(255, 255, 255, 0.85) !important;
-  border-radius: var(--border-radius-pill) !important;
+  border-radius: var(--ds-radius-full) !important;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px 16px;
   font-weight: 500;
-  width: 100%;
+  width: auto;
   white-space: nowrap;
   transition:
     background-color var(--ds-motion-duration-short)
@@ -265,10 +264,6 @@
 }
 
 @media (min-width: 1001px) and (max-width: 1300px) {
-  .nav-bar {
-    grid-template-columns: auto auto minmax(0, 1fr);
-  }
-
   .nav-search-col {
     display: none;
   }
@@ -281,7 +276,7 @@
 
   .nav-btn {
     min-height: 36px;
-    padding: var(--space-xs) !important;
+    padding: var(--ds-space-1) !important;
   }
 
   .nav-btn__label {
@@ -310,7 +305,7 @@
   min-height: 32px;
   padding: 4px 10px;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
   background: rgba(255, 255, 255, 0.14);
   color: rgba(255, 255, 255, 0.95);
   font: inherit;
@@ -338,12 +333,11 @@
     bottom: 0;
     left: 0;
     right: 0;
-    width: auto;
-    max-width: none;
+    width: 100%;
     margin: 0;
     margin-bottom: 0;
-    padding: var(--space-xs) var(--space-sm)
-      calc(var(--space-xs) + env(safe-area-inset-bottom, 0px));
+    padding: var(--ds-space-1) var(--ds-space-2)
+      calc(var(--ds-space-1) + env(safe-area-inset-bottom, 0px));
     gap: 0;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.25);
@@ -353,6 +347,8 @@
   .nav-inner {
     display: block;
     width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   .nav-secondary-row {
@@ -360,6 +356,8 @@
     grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
     width: 100%;
+    padding: 0;
+    margin: 0;
     min-height: 48px;
   }
 
@@ -383,7 +381,16 @@
   }
 
   body {
-    padding-bottom: var(--mobile-chrome-height);
+    /* The search FAB's real size and offset, shared with .mobile-search-fab
+       below so the reserved space always matches the button. */
+    --mobile-search-fab-size: 54px;
+    --mobile-search-fab-offset: var(--ds-space-3);
+    /* Reserve the fixed bottom nav plus the floating search FAB above it so
+       the last row of page content can scroll clear of both. */
+    padding-bottom: calc(
+      var(--mobile-chrome-height) + var(--mobile-search-fab-size) +
+        var(--mobile-search-fab-offset)
+    );
   }
 
   .nav-back-col {
@@ -451,8 +458,12 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
+    /* Fill the equal-width grid slot so every tap target is >=44x44. */
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 44px;
     min-height: 44px;
-    padding: var(--space-xs) !important;
+    padding: var(--ds-space-1) !important;
     font-size: 0.78rem;
     white-space: nowrap;
   }
@@ -476,8 +487,8 @@
    wrapping or clipping. */
 @media (max-width: 340px) {
   .nav-bar {
-    padding-left: var(--space-xs);
-    padding-right: var(--space-xs);
+    padding-left: var(--ds-space-1);
+    padding-right: var(--ds-space-1);
     gap: 2px;
   }
 
@@ -504,15 +515,15 @@
     justify-content: center;
     position: fixed;
     isolation: isolate;
-    right: var(--space-md);
-    bottom: calc(var(--mobile-chrome-height) + var(--space-md));
-    width: 54px;
-    height: 54px;
+    right: var(--mobile-search-fab-offset);
+    bottom: calc(var(--mobile-chrome-height) + var(--mobile-search-fab-offset));
+    width: var(--mobile-search-fab-size);
+    height: var(--mobile-search-fab-size);
     border-radius: 50%;
-    border: 1px solid var(--aero-border-highlight);
+    border: 1px solid var(--ds-aero-border);
     background-color: var(--color-selection);
     color: var(--color-selection-text);
-    box-shadow: var(--elevation-2);
+    box-shadow: var(--ds-elevation-2);
     /* The nav owns its open season listbox; this button only needs to float
        above page content and must remain below that chrome. */
     z-index: 90;
@@ -526,7 +537,7 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: var(--aero-sheen);
+    background: var(--ds-aero-sheen);
     pointer-events: none;
     z-index: -1;
   }
@@ -552,8 +563,8 @@
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.5);
-  padding: var(--space-md);
-  padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+  padding: var(--ds-space-3);
+  padding-top: calc(var(--ds-space-3) + env(safe-area-inset-top, 0px));
   box-sizing: border-box;
   animation: mobile-search-fade-in 0.15s ease;
 }
@@ -579,8 +590,8 @@
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
-  border-radius: var(--border-radius-card);
-  box-shadow: var(--shadow-card);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-1);
   overflow: hidden;
 }
 
@@ -588,22 +599,22 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm);
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2);
   border-bottom: 1px solid var(--color-divider);
 }
 
 .mobile-search-theme {
   display: flex;
   justify-content: flex-end;
-  padding: var(--space-sm) 0;
+  padding: var(--ds-space-2) 0;
 }
 
 .mobile-search-input {
   flex: 1;
   min-width: 0;
   height: 44px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
   border: 1px solid var(--color-divider);
   background: transparent;
   color: var(--color-text);
@@ -642,7 +653,7 @@
   overflow-y: auto;
   list-style: none;
   margin: 0;
-  padding: var(--space-xs);
+  padding: var(--ds-space-1);
 }
 
 .mobile-search-result {
@@ -665,7 +676,7 @@
 }
 
 .mobile-search-empty {
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
   text-align: center;
   color: var(--color-text-secondary);
   font-size: 0.9rem;

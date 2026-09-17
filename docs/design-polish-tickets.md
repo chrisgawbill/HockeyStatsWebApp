@@ -27,7 +27,7 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 
 ---
 
-## [ ] UI-01 — Global navigation, mobile nav, and season selector
+## [x] UI-01 — Global navigation, mobile nav, and season selector
 
 **Goal:** Full-width intentional desktop chrome and uncluttered, safe-area-aware mobile navigation.
 
@@ -47,7 +47,7 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 
 ---
 
-## [ ] UI-02 — One page-shell and spacing system
+## [x] UI-02 — One page-shell and spacing system
 
 **Goal:** Consistent content width, gutters, and vertical rhythm without accidental empty zones.
 
@@ -66,7 +66,7 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 
 ---
 
-## [ ] UI-03 — Landing hierarchy and game-card readability
+## [X] UI-03 — Landing hierarchy and game-card readability
 
 **Goal:** Make page title → section → matchup → status/meta obvious at a glance, especially on mobile.
 
@@ -84,7 +84,7 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 
 ---
 
-## [ ] UI-04 — Consolidate duplicated Aero design recipes
+## [X] UI-04 — Consolidate duplicated Aero design recipes
 
 **Goal:** Remove HockeyStats' duplicate mini design system while preserving domain styling.
 
@@ -101,7 +101,7 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 
 ---
 
-## [ ] UI-05 — Data surfaces, chips, and controls
+## [x] UI-05 — Data surfaces, chips, and controls
 
 **Goal:** Make dense hockey data easier to scan while keeping the UI light.
 
@@ -118,7 +118,7 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 
 ---
 
-## [ ] UI-06 — Accessibility and motion polish
+## [x] UI-06 — Accessibility and motion polish
 
 **Goal:** Fix concrete accessibility gaps using platform semantics/CSS without overengineering.
 
@@ -138,7 +138,7 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 
 ---
 
-## [ ] UI-07 — Cross-page visual QA and final cleanup
+## [x] UI-07 — Cross-page visual QA and final cleanup
 
 **Depends on:** UI-01 through UI-06.
 
@@ -155,3 +155,66 @@ Global constraints: preserve routes, data behavior, keyboard behavior, dark mode
 **Do not:** add features or redesign approved components.
 
 **PASS:** No high-confidence visual/accessibility defects remain in scope. Subjective future ideas are not implemented here. PM records PASS and stops.
+
+---
+
+## [ ] UI-08 — Residual QA defects: mini-standings tablet widths and team data display
+
+**Depends on:** UI-07 (escalated after 3 defect cycles; data defects found during UI-07 QA but out of its visual scope).
+
+**Goal:** Team identity stays readable in the landing mini-standings between 768px and ~1023px without breaking wider or phone layouts, and team detail / team list show the team name and record data they already fetch.
+
+### Part A — Landing mini-standings team names at tablet widths
+
+**Defect evidence (browser QA):**
+- Landing mini-standings at 768px: table is 374px wide inside a 368px `.standings-table-shell`, and every team-name span has width 0 (only logos/badges show).
+- 800–900px: names truncate to fragments ("Hurrica…", "Canadie…").
+- Cause: `.standings-table td:nth-child(2) { max-width: 0 }` inside the `min-width: 768px` query in `react/src/features/standings/components/LandingPageStandings.module.css`, combined with the fixed width taken by the #/record/PTS/P% columns (~49+87+57+67px) in the narrow landing column.
+- Unaffected and must stay passing: `/standings` at 768/1024/1440 (table width == shell width, all headers visible, names ≥123px); landing at 1024/1440 (640/640, 496/496); phones 390/320 (table 42rem, scrolls inside shell, no page overflow); header/value right edges aligned within 4px; `aria-sort` on sorted `<th>`.
+
+**PM inspect:** `LandingPageStandings.module.css`, `LandingPageStandingsTable.tsx`, the landing layout that sets the mini-standings column width at 768–1023px, and whether `StandingsTeam` (or the source standings data) exposes a short name/abbreviation. Decide one approach before dispatch:
+- (a) Scope the `max-width: 0` truncation rule to landing ≥1024px and let 768–1023px use the existing phone treatment (42rem min-width, scroll inside shell), or
+- (b) Show a short team name/abbreviation in the team column at 768–1023px when the data provides one (no new API calls), or
+- (c) Give the landing mini-standings a wider column at 768–1023px if the landing grid is the real constraint.
+
+**Coder execution requirements:**
+- Landing mini-standings at 768, 820, 900, and 1000px: table width ≤ shell clientWidth OR scrolls intentionally inside the shell (never page overflow); every row shows a readable team identifier (full name, short name, or abbreviation — not an empty or 1–3 letter fragment).
+- No changes to `/standings` page layout at ≥768px, landing at ≥1024px, or phone behavior.
+- Keep numeric alignment, sort buttons, `aria-sort`, row keyboard navigation, and focus styles unchanged.
+- No new dependencies, API calls, or z-index/magic-number hacks.
+
+**Do not:** redesign the standings table, change sort logic, or touch unrelated standings/landing CSS.
+
+### Part B — Team detail page shows empty team name
+
+**Defect evidence (browser QA, `?season=20252026`):** On `/team/:triCode` at all widths, the TeamHero `<h1>`, breadcrumb label, and team logo `alt` are empty. The team page code reads `raw.name`, but the teams API response uses `teamFullName` (see the `teamFullName: string` field in `react/src/features/teams/api/teamsApi.ts`; `teamHelpers.ts` already matches on `teamFullName`).
+
+**PM inspect:** `TeamPage.tsx`, `TeamHero.tsx`, `teamPageHelper.ts`/`teamPageTypes.ts` (wherever `raw.name` is mapped), and the teams API types. Confirm the actual API field name from the typed contract before dispatch.
+
+**Coder execution requirements:**
+- Map the team display name from the correct API field (`teamFullName`) wherever the team page builds its name; don't add any fallback aliases unless the contract really has both fields.
+- H1, breadcrumb, document/aria labels, and logo `alt` show the full team name.
+- Add or update a unit test for the mapping helper if one exists for that function.
+
+### Part C — Team list cards show "—" for every record
+
+**Defect evidence (browser QA):** On `/teamList` every card shows "—" for its record. `ListOfTeamsContext.tsx` calls `GetTeamStatsById('')` with no season, so the API returns `{"data":[]}` and no stats merge onto the team list.
+
+**PM inspect:** `react/src/features/teams/hooks/ListOfTeamsContext.tsx`, `GetTeamStatsById` overloads in `teamsApi.ts`, how `TeamPage.tsx` passes `season` (`GetTeamStatsById(String(numericId), season)`), and the app's current season source (season selector / `?season=` param).
+
+**Coder execution requirements:**
+- Pass the currently selected season to the team stats request, and refetch when the season changes.
+- Cards show real record/points for a season with data (e.g. 20252026); a season with no data keeps the existing "—" / empty state, with no errors.
+- Keep the existing loading, error, and "Try again" behaviour.
+
+### Part D — Out of scope (do not dispatch)
+
+These were found during UI-07 verification, so they're listed here for tracking only:
+- `src/lib/apiClient.test.ts` fails locally only because the git-ignored `react/.env` sets `VITE_API_URL` to the onrender API instead of the `.env.example` value (`localhost:9000`). It's an environment issue, not a code defect.
+- Prettier `format:check` reports 27 files that were already unformatted before the design-polish work. Handle that in a separate formatting-only commit if wanted.
+
+**PASS:**
+- Part A: browser QA of landing at 768/820/900/1000/1024/1440 and `/standings` at 768/1024/1440, light and dark. No clipped or empty team names, no page overflow, headers aligned with values, and sorting plus `aria-sort` still work. Phone widths 390/320 unchanged.
+- Part B: `/team/:triCode` for several teams shows the full team name in the h1, breadcrumb and logo alt, at 1440 and 390.
+- Part C: `/teamList?season=20252026` shows real records on the cards; switching season refetches; an empty season shows "—" without errors.
+- `tsc --noEmit`, `vitest run` (apart from the known env-only apiClient failure) and `vite build` pass.

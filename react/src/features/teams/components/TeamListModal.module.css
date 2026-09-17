@@ -1,6 +1,6 @@
 .header,
 .footer {
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
   border-color: var(--color-divider);
 }
 
@@ -15,7 +15,7 @@
 
 .body {
   min-height: 2rem;
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
 }
 
 .footer {
