@@ -1,8 +1,5 @@
+import type { CSSProperties } from 'react';
 import styles from '@/components/SlidingToggle.module.css';
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
 
 interface Option<T extends string> {
   label: string;
@@ -19,6 +16,7 @@ interface Props<T extends string> {
  * Generic segmented control: a row of options with a sliding indicator behind the
  * active one. Generic over the value type so callers get type-safe `value`/
  * `onChange`. Shared by the schedule view toggle and the standings view toggles.
+ * Layout, indicator motion, and states come from aero-md3-core's `.ds-segmented`.
  */
 export default function SlidingToggle<T extends string>({
   options,
@@ -29,31 +27,20 @@ export default function SlidingToggle<T extends string>({
     0,
     options.findIndex((o) => o.value === value),
   );
-  const count = options.length;
-  /**
-   * One indicator segment is exactly one button wide; translating by whole
-   * button widths keeps it aligned for any option count.
-   */
-  const indicatorStyle = {
-    width: `calc((100% - 8px) / ${count})`,
-    transform: `translateX(${activeIndex * 100}%)`,
-  };
+  const segmentStyle = {
+    '--ds-segment-count': options.length,
+    '--ds-segment-index': activeIndex,
+  } as CSSProperties;
 
   return (
-    <div className={styles['sliding-toggle']} role="group">
-      <div
-        className={styles['sliding-toggle__indicator']}
-        style={indicatorStyle}
-      />
+    <div className={styles['sliding-toggle']} role="group" style={segmentStyle}>
+      <div className="ds-segmented-indicator" />
       {options.map((opt) => (
         <button
           key={opt.value}
           type="button"
           aria-pressed={value === opt.value}
-          className={cx(
-            styles['sliding-toggle__btn'],
-            value === opt.value && styles['sliding-toggle__btn--active'],
-          )}
+          className={styles['sliding-toggle__btn']}
           onClick={() => onChange(opt.value)}
         >
           {opt.label}

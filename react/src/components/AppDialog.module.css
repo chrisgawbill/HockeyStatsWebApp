@@ -1,32 +1,15 @@
 .backdrop {
-  position: fixed;
-  inset: 0;
+  composes: ds-modal-layer from global;
   z-index: var(--z-modal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--ds-space-3);
-  overflow-y: auto;
   background: var(--color-overlay);
 }
 
 .dialog {
-  position: relative;
-  isolation: isolate;
-  width: min(42rem, calc(100vw - 2rem));
+  composes: ds-modal ds-aero-surface from global;
+  --ds-modal-max-width: 42rem;
+  width: min(var(--ds-modal-max-width), calc(100vw - 2rem));
+  padding: 0;
   background: var(--color-surface);
   color: var(--color-text);
-  border: 1px solid var(--ds-aero-border);
-  border-radius: var(--ds-radius-medium);
   box-shadow: var(--ds-elevation-2);
-}
-
-.dialog::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background: var(--ds-aero-sheen);
-  pointer-events: none;
 }

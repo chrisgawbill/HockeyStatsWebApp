@@ -347,7 +347,7 @@ export default function TeamPage() {
       >
         <PageHeader />
         <main>
-          <h1 className="visually-hidden">Team</h1>
+          <h1 className="ds-visually-hidden">Team</h1>
           <div
             className={`${styles['team-page__content']} ${shared.pageContent}`}
             style={{ paddingTop: 'var(--page-block-start)' }}
@@ -373,7 +373,7 @@ export default function TeamPage() {
       >
         <PageHeader />
         <main>
-          <h1 className="visually-hidden">Team</h1>
+          <h1 className="ds-visually-hidden">Team</h1>
           <div
             className={`${styles['team-page__content']} ${shared.pageContent}`}
             style={{ paddingTop: 'var(--page-block-start)' }}

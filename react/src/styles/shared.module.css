@@ -5,10 +5,7 @@
 }
 
 .pageContent {
-  width: min(
-    100% - (2 * var(--page-gutter)),
-    var(--page-content-width)
-  );
+  width: min(100% - (2 * var(--page-gutter)), var(--page-content-width));
   margin: 0 auto;
   box-sizing: border-box;
 }
@@ -18,8 +15,8 @@
 }
 
 .sectionTitle {
-  font-size: 1.375rem;
-  font-weight: 600;
+  font-size: var(--ds-font-size-title);
+  font-weight: var(--ds-font-weight-semibold);
   letter-spacing: 0;
   color: var(--color-text);
   margin: 0 0 var(--ds-space-3);
@@ -86,25 +83,19 @@
 }
 
 .surfaceInteractive {
-  transition:
-    box-shadow var(--ds-motion-duration-medium) var(--ds-motion-easing-standard),
-    transform var(--ds-motion-duration-short) var(--ds-motion-easing-standard),
-    background-color var(--ds-motion-duration-medium) var(--ds-motion-easing-standard);
+  composes: ds-aero-surface-interactive ds-focus-outline from global;
+  --ds-focus-outline-color: var(--color-blue-accent);
+  --ds-focus-outline-offset: 3px;
 }
 
+/* App surfaces tint from --color-surface and lift with the lighter shadow. */
 .surfaceInteractive:hover {
   background-color: color-mix(
     in srgb,
-    var(--color-primary) 8%,
+    var(--color-primary) var(--ds-state-hover-opacity),
     var(--color-surface)
   );
   box-shadow: var(--ds-elevation-1);
-  transform: translateY(-2px);
-}
-
-.surfaceInteractive:focus-visible {
-  outline: 3px solid var(--color-blue-accent);
-  outline-offset: 3px;
 }
 
 /* Opaque "Aero atmosphere" tier: the nav bar's sheen + top highlight +
@@ -118,14 +109,6 @@
 
 .surfaceElevated.surfaceInteractive:hover {
   box-shadow: var(--ds-elevation-2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .surfaceInteractive,
-  .surfaceInteractive:hover {
-    transition: none;
-    transform: none;
-  }
 }
 
 .chip {
