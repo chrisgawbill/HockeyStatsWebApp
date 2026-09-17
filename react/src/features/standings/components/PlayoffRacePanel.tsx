@@ -42,7 +42,7 @@ export default function PlayoffRacePanel({
       {race.seasonOver && <p className={styles.seasonNote}>Regular Season Complete.</p>}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
-          <caption className="visually-hidden">{conference} Simplified Playoff Race</caption>
+          <caption className="ds-visually-hidden">{conference} Simplified Playoff Race</caption>
           <thead>
             <tr>
               <th scope="col">Team</th>

@@ -79,7 +79,7 @@ export default function StandingsPage() {
       <main
         className={`${styles['standings-page']} ds-page-shell ds-container`}
       >
-        <h1 className="visually-hidden">Standings</h1>
+        <h1 className="ds-visually-hidden">Standings</h1>
         {loadingStandingsData ? (
           <LoadingState label="Loading standings" fullPage />
         ) : errorStandingsData ? (

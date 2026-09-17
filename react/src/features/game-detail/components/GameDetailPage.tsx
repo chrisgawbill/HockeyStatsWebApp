@@ -121,7 +121,7 @@ const GameDetailPage = () => {
       <>
         <PageHeader />
         <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
-          <h1 className="visually-hidden">Game Detail</h1>
+          <h1 className="ds-visually-hidden">Game Detail</h1>
           <LoadingState label="Loading game" fullPage />
         </main>
       </>
@@ -131,7 +131,7 @@ const GameDetailPage = () => {
       <>
         <PageHeader />
         <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
-          <h1 className="visually-hidden">Game Detail</h1>
+          <h1 className="ds-visually-hidden">Game Detail</h1>
           <ErrorState
             fullPage
             title="Game unavailable"
@@ -147,7 +147,7 @@ const GameDetailPage = () => {
     <>
       <PageHeader />
       <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
-        <h1 className="visually-hidden">
+        <h1 className="ds-visually-hidden">
           {`${boxscore.awayTeam.abbrev} at ${boxscore.homeTeam.abbrev}`}
         </h1>
         <HeroScoreboard boxscore={boxscore} status={status} />

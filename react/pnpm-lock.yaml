@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@chrisgawbill/aero-md3-core':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: ^0.2.0
+        version: 0.2.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -134,8 +134,8 @@ packages:
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
 
-  '@chrisgawbill/aero-md3-core@0.1.3':
-    resolution: {integrity: sha512-P68ZFiPpqqOF898NrvuEJyT+4rmuUbsd3JpgAPe/SCUVU+mAbdJcoW8kaMubKyhniAT4X+tqH+HzwfEcQdODdg==}
+  '@chrisgawbill/aero-md3-core@0.2.0':
+    resolution: {integrity: sha512-33l/QeDYVfI1sDf2s4J68vf1E8J5xdeYNgCX2HMbDg2H8HDPiUyyDe6b2H8SCM9JzkGtnh9NsD7AU6D9B/Kfqw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -820,7 +820,7 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@chrisgawbill/aero-md3-core@0.1.3': {}
+  '@chrisgawbill/aero-md3-core@0.2.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
