@@ -4,7 +4,6 @@ import '@/styles/index.css';
 import '@/styles/theme.css';
 import '@/styles/components.css';
 import App from '@/app/App';
-import { ListOfTeamsDataProvider } from '@/features/teams/hooks/ListOfTeamsContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
 
 const root = ReactDOM.createRoot(
@@ -17,8 +16,6 @@ const root = ReactDOM.createRoot(
  */
 root.render(
   <ThemeProvider>
-    <ListOfTeamsDataProvider>
-      <App />
-    </ListOfTeamsDataProvider>
+    <App />
   </ThemeProvider>,
 );

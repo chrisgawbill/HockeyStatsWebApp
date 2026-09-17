@@ -4,6 +4,7 @@ import { ListOfGamesProvider } from '@/features/schedule/hooks/ScheduleContext';
 import { SeasonProvider } from '@/features/season/hooks/SeasonContext';
 import { StandingsDataProvider } from '@/features/standings/hooks/StandingsContext';
 import { StatLeadersProvider } from '@/features/stat-leaders/hooks/StatLeadersContext';
+import { ListOfTeamsDataProvider } from '@/features/teams/hooks/ListOfTeamsContext';
 import { ErrorBoundary, getErrorMessage } from 'react-error-boundary';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
@@ -42,8 +43,8 @@ const BoardGamePage = lazy(
  * Route table plus the providers that depend on routing or the selected season.
  * The nesting is deliberate: SeasonProvider reads `?season=` so it must sit inside
  * HashRouter, and the season-dependent data providers (standings, schedule,
- * skater/goalie leaders) nest inside it so they re-fetch when the season changes.
- * Routing-agnostic providers live higher up in index.tsx.
+ * skater/goalie leaders, team list) nest inside it so they re-fetch when the
+ * season changes. Routing-agnostic providers live higher up in index.tsx.
  */
 export default function App() {
   return (
@@ -52,32 +53,34 @@ export default function App() {
         <StandingsDataProvider>
           <ListOfGamesProvider>
             <StatLeadersProvider>
-              <Suspense fallback={<RouteLoadingFallback />}>
-                <ErrorBoundary
-                  fallbackRender={({ error, resetErrorBoundary }) => (
-                    <div className="ds-page-shell">
-                      <ErrorState
-                        fullPage
-                        title="Something went wrong"
-                        message={getErrorMessage(error)}
-                        onRetry={resetErrorBoundary}
-                      />
-                    </div>
-                  )}
-                >
-                  <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="standings" element={<StandingsPage />} />
-                    <Route path="schedule" element={<SchedulePage />} />
-                    <Route path="teamList" element={<TeamList />} />
-                    <Route path="team/:teamId" element={<TeamPage />} />
-                    <Route path="game/:gameId" element={<GameDetailPage />} />
-                    <Route path="matchup" element={<MatchupPage />} />
-                    <Route path="diagnostics" element={<DiagnosticsPage />} />
-                    <Route path="board-game" element={<BoardGamePage />} />
-                  </Routes>
-                </ErrorBoundary>
-              </Suspense>
+              <ListOfTeamsDataProvider>
+                <Suspense fallback={<RouteLoadingFallback />}>
+                  <ErrorBoundary
+                    fallbackRender={({ error, resetErrorBoundary }) => (
+                      <div className="ds-page-shell">
+                        <ErrorState
+                          fullPage
+                          title="Something went wrong"
+                          message={getErrorMessage(error)}
+                          onRetry={resetErrorBoundary}
+                        />
+                      </div>
+                    )}
+                  >
+                    <Routes>
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="standings" element={<StandingsPage />} />
+                      <Route path="schedule" element={<SchedulePage />} />
+                      <Route path="teamList" element={<TeamList />} />
+                      <Route path="team/:teamId" element={<TeamPage />} />
+                      <Route path="game/:gameId" element={<GameDetailPage />} />
+                      <Route path="matchup" element={<MatchupPage />} />
+                      <Route path="diagnostics" element={<DiagnosticsPage />} />
+                      <Route path="board-game" element={<BoardGamePage />} />
+                    </Routes>
+                  </ErrorBoundary>
+                </Suspense>
+              </ListOfTeamsDataProvider>
             </StatLeadersProvider>
           </ListOfGamesProvider>
         </StandingsDataProvider>

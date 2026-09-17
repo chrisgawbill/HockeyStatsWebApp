@@ -4,7 +4,6 @@ export interface GameBroadcast {
   market: string;
   broadcastCountry: string;
 }
-// No additional code needed as the property has been removed from the interface
 export class GameBroadcast {
   id: string;
   broadcasterName: string;

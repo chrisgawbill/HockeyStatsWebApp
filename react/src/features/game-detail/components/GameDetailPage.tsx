@@ -118,71 +118,82 @@ const GameDetailPage = () => {
 
   if (loading)
     return (
-      <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
+      <>
         <PageHeader />
-        <LoadingState label="Loading game" fullPage />
-      </div>
+        <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
+          <h1 className="visually-hidden">Game Detail</h1>
+          <LoadingState label="Loading game" fullPage />
+        </main>
+      </>
     );
   if (error || !boxscore)
     return (
-      <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
+      <>
         <PageHeader />
-        <ErrorState
-          fullPage
-          title="Game unavailable"
-          message="Game data unavailable."
-        />
-      </div>
+        <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
+          <h1 className="visually-hidden">Game Detail</h1>
+          <ErrorState
+            fullPage
+            title="Game unavailable"
+            message="Game data unavailable."
+          />
+        </main>
+      </>
     );
 
   const isPreview = status === 'preview';
 
   return (
-    <div className={`${styles['game-detail-page']} ${shared.pageShell}`}>
+    <>
       <PageHeader />
-      <HeroScoreboard boxscore={boxscore} status={status} />
-      {!isPreview && (
-        <div
-          className={`${styles['game-detail-page__content']} ${shared.pageContent}`}
-        >
-          <GameStory
-            facts={gameStoryFacts}
-            boxscore={boxscore}
-            homeTotals={homeTotals}
-            awayTotals={awayTotals}
-          />
-          {periodGoalsBreakdown.length > 0 && (
-            <PeriodGoalsBreakdownTable
-              periodGoalsBreakdown={periodGoalsBreakdown}
-              homeAbbrev={boxscore.homeTeam.abbrev}
-              awayAbbrev={boxscore.awayTeam.abbrev}
-            />
-          )}
-          {hasScoringSummary(landing) && (
-            <ScoringSummary scoring={landing!.summary.scoring} />
-          )}
-          {hasThreeStars(landing) && (
-            <ThreeStars stars={landing!.summary.threeStars} />
-          )}
-          {homeTotals && awayTotals && (
-            <TeamComparison
+      <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
+        <h1 className="visually-hidden">
+          {`${boxscore.awayTeam.abbrev} at ${boxscore.homeTeam.abbrev}`}
+        </h1>
+        <HeroScoreboard boxscore={boxscore} status={status} />
+        {!isPreview && (
+          <div
+            className={`${styles['game-detail-page__content']} ${shared.pageContent}`}
+          >
+            <GameStory
+              facts={gameStoryFacts}
+              boxscore={boxscore}
               homeTotals={homeTotals}
               awayTotals={awayTotals}
-              homeAbbrev={boxscore.homeTeam.abbrev}
-              awayAbbrev={boxscore.awayTeam.abbrev}
             />
-          )}
-          {hasBoxscoreStats(boxscore) && (
-            <PlayerStatsSelection
-              homeTeam={boxscore.playerByGameStats!.homeTeam}
-              awayTeam={boxscore.playerByGameStats!.awayTeam}
-              homeAbbrev={boxscore.homeTeam.abbrev}
-              awayAbbrev={boxscore.awayTeam.abbrev}
-            />
-          )}
-        </div>
-      )}
-    </div>
+            {periodGoalsBreakdown.length > 0 && (
+              <PeriodGoalsBreakdownTable
+                periodGoalsBreakdown={periodGoalsBreakdown}
+                homeAbbrev={boxscore.homeTeam.abbrev}
+                awayAbbrev={boxscore.awayTeam.abbrev}
+              />
+            )}
+            {hasScoringSummary(landing) && (
+              <ScoringSummary scoring={landing!.summary.scoring} />
+            )}
+            {hasThreeStars(landing) && (
+              <ThreeStars stars={landing!.summary.threeStars} />
+            )}
+            {homeTotals && awayTotals && (
+              <TeamComparison
+                homeTotals={homeTotals}
+                awayTotals={awayTotals}
+                homeAbbrev={boxscore.homeTeam.abbrev}
+                awayAbbrev={boxscore.awayTeam.abbrev}
+              />
+            )}
+            {hasBoxscoreStats(boxscore) && (
+              <PlayerStatsSelection
+                homeTeam={boxscore.playerByGameStats!.homeTeam}
+                awayTeam={boxscore.playerByGameStats!.awayTeam}
+                homeAbbrev={boxscore.homeTeam.abbrev}
+                awayAbbrev={boxscore.awayTeam.abbrev}
+              />
+            )}
+          </div>
+        )}
+      </main>
+    </>
   );
 };
 export default GameDetailPage;

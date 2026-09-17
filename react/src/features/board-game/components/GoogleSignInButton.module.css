@@ -37,5 +37,5 @@
   font-family: var(--font-pixel);
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--ds-space-1) var(--ds-space-2);
 }

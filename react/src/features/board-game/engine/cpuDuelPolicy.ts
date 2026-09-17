@@ -83,6 +83,6 @@ export function planCards(state: GameState, side: 'user' | 'cpu'): string[] {
   return plan;
 }
 
-/** The CPU's own plan, per design doc §4: pure, deterministic, no RNG. */
+/** Pure, deterministic CPU plan with no RNG. */
 export const planCpuCards = (state: GameState): string[] =>
   planCards(state, 'cpu');

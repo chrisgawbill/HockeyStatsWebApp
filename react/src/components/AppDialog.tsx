@@ -1,4 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import styles from '@/components/AppDialog.module.css';
 
 interface AppDialogProps {
@@ -75,8 +76,11 @@ export default function AppDialog({
     }
   }
 
-  return (
-    <div className={styles.backdrop} onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+  return createPortal(
+    <div
+      className={styles.backdrop}
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
       <div
         ref={dialogRef}
         className={`${styles.dialog}${className ? ` ${className}` : ''}`}
@@ -88,6 +92,7 @@ export default function AppDialog({
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

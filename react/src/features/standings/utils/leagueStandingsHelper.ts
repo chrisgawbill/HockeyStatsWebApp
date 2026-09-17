@@ -9,12 +9,7 @@ const fallbackLogosByTeamName = Object.fromEntries(
   ]),
 );
 
-/**
- * The backend (api/services/mappers/standingsMapper.js) now returns each team in
- * the StandingsTeamContract shape (id resolved, clinch indicator normalized, raw
- * pointPctg). This helper only layers on app/display logic: pointsPctg rounding
- * and the locally-computed draft-lottery odds + trend.
- */
+/** Adds display rounding and draft-lottery odds/trend to normalized standings. */
 export function CreateLeagueStandingsArray(
   initialStandings: StandingsTeamDto[],
 ) {

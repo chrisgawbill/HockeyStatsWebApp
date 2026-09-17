@@ -5,8 +5,8 @@
   min-height: 8rem;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-md);
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3);
   color: var(--color-muted-text);
   text-align: center;
   animation: state-enter var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;

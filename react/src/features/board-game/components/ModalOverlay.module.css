@@ -6,7 +6,7 @@
   justify-content: center;
   background-color: var(--color-overlay);
   z-index: var(--z-modal);
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
   animation: modal-overlay-enter var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;
 }
 

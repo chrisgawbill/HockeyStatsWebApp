@@ -1,44 +1,125 @@
 .panel {
-  margin: var(--space-lg) 0 var(--space-xl);
-  padding: var(--space-md);
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  margin: var(--ds-space-4) 0 var(--ds-space-5);
+  padding: var(--ds-space-3);
   color: var(--color-text);
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-card);
-  box-shadow: var(--elevation-1);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-1);
   animation: playoff-panel-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
-.headingRow { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-md); }
-.headingRow h3 { margin: 0; font-size: var(--text-lg); }
-.note, .seasonNote { margin: var(--space-xs) 0 0; color: var(--color-text-secondary); font-size: var(--text-xs); }
-.seasonNote { color: var(--color-success); }
-.cutline { color: var(--color-text-secondary); font-size: var(--text-sm); font-weight: 700; white-space: nowrap; }
-.tableWrap { overflow-x: auto; }
-.table { width: 100%; margin-top: var(--space-sm); border-collapse: collapse; font-size: var(--text-sm); }
-.table th, .table td { padding: var(--space-sm); text-align: left; border-bottom: 1px solid var(--color-divider); }
-.table thead th { color: var(--color-text-secondary); font-size: var(--text-xs); }
-.team { display: flex; align-items: center; gap: var(--space-sm); min-width: 9rem; }
-.team img { width: 1.5rem; height: 1.5rem; object-fit: contain; }
-.status { display: block; font-weight: 700; }
-.raceValue { display: block; margin-top: 2px; color: var(--color-text-secondary); font-size: var(--text-xs); }
-.clinched { color: var(--color-success); }
-.playoff-position { color: var(--color-primary); }
-.chasing { color: var(--color-text-secondary); }
-.eliminated { color: var(--color-danger); }
+.headingRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+}
+.headingRow h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+.note,
+.seasonNote {
+  margin: var(--ds-space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+.seasonNote {
+  color: var(--color-success);
+}
+.cutline {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  margin-top: var(--ds-space-2);
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.table th,
+.table td {
+  padding: var(--ds-space-2);
+  text-align: left;
+  border-bottom: 1px solid var(--color-divider);
+}
+.table thead th {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+.team {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  min-width: 9rem;
+}
+.team img {
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: contain;
+}
+.status {
+  display: block;
+  font-weight: 700;
+}
+.raceValue {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+.clinched {
+  color: var(--color-success);
+}
+.playoff-position {
+  color: var(--color-primary);
+}
+.chasing {
+  color: var(--color-text-secondary);
+}
+.eliminated {
+  color: var(--color-danger);
+}
 
 @keyframes playoff-panel-enter {
-  from { opacity: 0; transform: translateY(0.35rem); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .panel { animation: none; }
+  .panel {
+    animation: none;
+  }
 }
 
 @media (max-width: 767px) {
-  .panel { margin-left: calc(-1 * var(--space-sm)); margin-right: calc(-1 * var(--space-sm)); padding: var(--space-sm); }
-  .headingRow { align-items: flex-start; }
-  .table th, .table td { padding: var(--space-xs); }
-  .table th:nth-child(3), .table td:nth-child(3) { display: none; }
+  .panel {
+    padding: var(--ds-space-2);
+  }
+  .headingRow {
+    align-items: flex-start;
+  }
+  .table th,
+  .table td {
+    padding: var(--ds-space-1);
+  }
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    display: none;
+  }
 }

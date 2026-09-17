@@ -4,16 +4,9 @@ import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { parseLocalDate } from '@/lib/dateFormat';
 
 /**
- * The backend (api/services/mappers/scheduleMapper.js) now returns games already
- * normalized into the ScheduleGameContract shape, so the frontend only wraps each
- * contract in the ScheduledGame / GameBroadcast model classes the UI expects.
- * All NHL-field extraction + playoff logic now lives in the backend mapper.
- */
-
-/**
- * Wraps one normalized ScheduleGameContract from the backend into the
- * ScheduledGame model the UI renders, building its GameBroadcast list along the
- * way. The contract's `date` string is parsed as a local date to avoid UTC shift.
+ * Wraps one normalized schedule contract in the UI model and builds its
+ * broadcast list. The contract's `date` string is parsed as a local date to
+ * avoid UTC shift.
  */
 function ConvertContractToGame(g: ScheduleGameDto): ScheduledGame {
   const broadcasts: GameBroadcast[] = (g.broadcasts ?? []).map(

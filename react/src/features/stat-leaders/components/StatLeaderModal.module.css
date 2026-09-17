@@ -12,7 +12,7 @@
 
 .stat-leader-modal__header,
 .stat-leader-modal__footer {
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
   flex-shrink: 0;
   border-color: var(--color-divider);
 }
@@ -30,7 +30,7 @@
 
 .stat-leader-modal__body {
   min-height: 0;
-  padding: var(--space-md);
+  padding: var(--ds-space-3);
   overflow: hidden;
 }
 
@@ -40,10 +40,21 @@
   background: var(--color-surface);
 }
 
+.stat-leader-modal__table th,
+.stat-leader-modal__table td {
+  white-space: nowrap;
+}
+
+.stat-leader-modal__table th:last-child,
+.stat-leader-modal__table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .stat-leader-modal__team-cell {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
   min-width: 0;
 }
 
@@ -72,7 +83,7 @@
 @media (max-width: 576px) {
   .stat-leader-modal {
     width: calc(100vw - 1.5rem);
-    margin: var(--space-md) auto;
+    margin: var(--ds-space-3) auto;
   }
 
   .stat-leader-modal__content {
@@ -80,16 +91,48 @@
   }
 
   .stat-leader-modal__body {
-    padding: var(--space-sm);
+    padding: var(--ds-space-2);
   }
 
   .stat-leader-modal__table {
     max-height: calc(82vh - 9.5rem);
   }
 
-  .stat-leader-modal__table th,
-  .stat-leader-modal__table td {
+  .stat-leader-modal__table table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .stat-leader-modal__table table th,
+  .stat-leader-modal__table table td {
+    padding-inline: var(--ds-space-2);
     font-size: var(--text-sm);
+  }
+
+  /* Name takes the remaining width and truncates; team logo, position and
+     stat value get fixed narrow columns so the value is never clipped. */
+  .stat-leader-modal__table table th:first-child,
+  .stat-leader-modal__table table td:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .stat-leader-modal__table table th:nth-child(2),
+  .stat-leader-modal__table table td:nth-child(2) {
+    width: 3rem;
+  }
+
+  .stat-leader-modal__table table th:nth-child(3),
+  .stat-leader-modal__table table td:nth-child(3) {
+    width: 2.75rem;
+  }
+
+  .stat-leader-modal__table table th:last-child,
+  .stat-leader-modal__table table td:last-child {
+    width: 4.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .stat-leader-modal__team-cell {
@@ -106,7 +149,7 @@
   }
 
   .stat-leader-modal__footer {
-    padding: var(--space-sm);
+    padding: var(--ds-space-2);
   }
 
   .stat-leader-modal__close {

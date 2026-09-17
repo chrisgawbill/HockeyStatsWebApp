@@ -32,7 +32,11 @@ describe('buildTeamDna', () => {
       result('2025-10-03', 2, 3, false, true),
     ];
     const metrics = buildTeamDna({
-      stats: { name: 'Example', goalsForPerGame: 3, goalsAgainstPerGame: 2.5 },
+      stats: {
+        teamFullName: 'Example',
+        goalsForPerGame: 3,
+        goalsAgainstPerGame: 2.5,
+      },
       results,
       recent: results,
       splits: {
@@ -58,7 +62,7 @@ describe('buildTeamDna', () => {
   it('omits metrics that lack completed or supported data', () => {
     expect(
       buildTeamDna({
-        stats: { name: 'Example' },
+        stats: { teamFullName: 'Example' },
         results: [],
         recent: [],
         splits: emptySplits,

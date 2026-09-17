@@ -12,7 +12,8 @@ export default function StatLeaderCard({ topStatLeader }: StatLeaderCardProps) {
 
   return (
     <>
-      <div
+      <button
+        type="button"
         className={styles['stat-leader-block']}
         onClick={() => setShowModal(true)}
       >
@@ -20,9 +21,9 @@ export default function StatLeaderCard({ topStatLeader }: StatLeaderCardProps) {
           <img src={topStatLeader.player.playerImage} alt="" />
         </div>
         <div className={styles['stat-leader-block-info']}>
-          <h4 className={styles['block-info-indicator']}>
+          <span className={styles['block-info-indicator']}>
             {topStatLeader.statIndicator}
-          </h4>
+          </span>
           <span className={styles['block-info-name']}>
             {topStatLeader.player.firstName +
               ' ' +
@@ -30,9 +31,9 @@ export default function StatLeaderCard({ topStatLeader }: StatLeaderCardProps) {
           </span>
         </div>
         <div className={styles['stat-leader-value-block']}>
-          <p>{topStatLeader.player.statLeaderValue}</p>
+          <span>{topStatLeader.player.statLeaderValue}</span>
         </div>
-      </div>
+      </button>
       <StatsLeaderModal
         showModal={showModal}
         setShowStatsModal={setShowModal}

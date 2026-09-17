@@ -1,6 +1,6 @@
 import type { CardDef } from '@/features/board-game/types/game';
 
-/** All card definitions, keyed by id. See design doc §5. */
+/** All card definitions, keyed by id. */
 export const CARDS: Record<string, CardDef> = {
   deke: {
     id: 'deke',
@@ -193,7 +193,7 @@ export const CARDS: Record<string, CardDef> = {
 };
 
 /**
- * User's 19-card starter deck (ids, duplicates repeated; see design doc §5).
+ * User's 19-card starter deck, with duplicate ids repeated.
  * One of each shot-/faceoff-pool card so those antes offer real variety.
  */
 export const STARTER_DECK: string[] = [

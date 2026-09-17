@@ -75,11 +75,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
     }
   }
 
-  /**
-   * Runs the fetch sequence for every category. Shared by the mount/season
-   * effect and the manual retry action so there is one fetch code path instead
-   * of two copies of the same reset-then-fetch sequence.
-   */
+  /** Runs the fetch sequence for every category. */
   const runFetch = useCallback(() => {
     setLeaders({});
     setError(null);

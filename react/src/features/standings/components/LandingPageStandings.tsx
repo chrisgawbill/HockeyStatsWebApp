@@ -117,11 +117,12 @@ export default function LandingPageStandings() {
       </div>
       <StandingsClinchLegend />
       {standingsLookup[view][conference].map((entry) => (
-        <div key={entry.name}>
+        <div key={entry.name} className={styles['landing-standings__entry']}>
           <StandingsContainer
             standingsName={entry.name}
             standingsData={entry.data}
             standingFormat={entry.format}
+            fill
           />
         </div>
       ))}

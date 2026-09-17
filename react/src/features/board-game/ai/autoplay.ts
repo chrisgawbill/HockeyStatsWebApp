@@ -25,7 +25,6 @@ export interface AutoplayResult {
   duelOutcomes: DuelOutcome[];
 }
 
-/** One step of a duel: plan the user's round with `planCards`, queue each card, then reveal. */
 function stepDuel(state: GameState): GameState {
   const plan = planCards(state, 'user');
   let next = state;
@@ -70,7 +69,6 @@ function stepFaceoffDuel(state: GameState): GameState {
   return gameReducer(state, { type: 'AUTO_RESOLVE_FACEOFF' });
 }
 
-/** One step of a headless game: both sides driven by the same board-AI policy, mirrored by team. */
 function step(state: GameState): GameState {
   switch (state.phase) {
     case 'faceoff':

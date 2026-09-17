@@ -185,39 +185,35 @@ export function transformPlayerStats(
     if (p.playerId != null && p.satPercentage != null)
       corsiMap.set(p.playerId, p.satPercentage);
   }
-  return (summary ?? []).map(
-    (p): PlayerStatLine => ({
-      playerId: p.playerId,
-      name: p.name ?? '',
-      position: p.position ?? '',
-      gamesPlayed: p.gamesPlayed ?? 0,
-      goals: p.goals ?? 0,
-      assists: p.assists ?? 0,
-      points: p.points ?? 0,
-      plusMinus: p.plusMinus ?? 0,
-      penaltyMinutes: p.penaltyMinutes ?? 0,
-      faceoffWinPct: p.faceoffWinPct ?? null,
-      corsiPct: corsiMap.get(p.playerId) ?? null,
-    }),
-  );
+  return (summary ?? []).map((p): PlayerStatLine => ({
+    playerId: p.playerId,
+    name: p.name ?? '',
+    position: p.position ?? '',
+    gamesPlayed: p.gamesPlayed ?? 0,
+    goals: p.goals ?? 0,
+    assists: p.assists ?? 0,
+    points: p.points ?? 0,
+    plusMinus: p.plusMinus ?? 0,
+    penaltyMinutes: p.penaltyMinutes ?? 0,
+    faceoffWinPct: p.faceoffWinPct ?? null,
+    corsiPct: corsiMap.get(p.playerId) ?? null,
+  }));
 }
 
 /** Shapes the normalized goalie summary contract into the Goalies tab's view model. */
 export function transformGoalieStats(
   summary: GoalieSummaryContract[] | null,
 ): GoalieStatLine[] {
-  return (summary ?? []).map(
-    (g): GoalieStatLine => ({
-      goalieId: g.goalieId,
-      name: g.name ?? '',
-      gamesPlayed: g.gamesPlayed ?? 0,
-      wins: g.wins ?? 0,
-      losses: g.losses ?? 0,
-      savePctg: g.savePctg ?? null,
-      goalsAgainstAverage: g.goalsAgainstAverage ?? null,
-      shutouts: g.shutouts ?? 0,
-    }),
-  );
+  return (summary ?? []).map((g): GoalieStatLine => ({
+    goalieId: g.goalieId,
+    name: g.name ?? '',
+    gamesPlayed: g.gamesPlayed ?? 0,
+    wins: g.wins ?? 0,
+    losses: g.losses ?? 0,
+    savePctg: g.savePctg ?? null,
+    goalsAgainstAverage: g.goalsAgainstAverage ?? null,
+    shutouts: g.shutouts ?? 0,
+  }));
 }
 
 /**
@@ -275,7 +271,7 @@ export function buildTeamOverview(
     ? teamPoints - playoffCutoff.points
     : 0;
   return {
-    name: raw?.name,
+    name: raw?.teamFullName ?? '',
     triCode,
     wins: s?.wins ?? raw?.wins ?? 0,
     losses: s?.losses ?? raw?.losses ?? 0,
@@ -311,10 +307,8 @@ export function resolveLegacyTeamTab(value: string | null): TeamSection | null {
 }
 
 /**
- * Generic, stable sort over a flat list of rows by one of their keys. Shared
- * by the Skaters and Goalies tabs so there's a single sort implementation
- * rather than two near-identical copies. Nulls always sort last regardless
- * of direction.
+ * Generic, stable sort over a flat list of rows by one of their keys. Nulls
+ * always sort last regardless of direction.
  */
 export function sortByKey<T>(
   rows: T[],

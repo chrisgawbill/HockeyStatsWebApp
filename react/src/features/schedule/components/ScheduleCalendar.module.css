@@ -5,14 +5,16 @@
 /* --- Grid --- */
 .calendar {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--space-xs);
-  /* Wider than the single-column day cards (64rem) so 7 columns can breathe;
-     caps relative to the viewport so it never runs to the screen edges. */
+  /* minmax(0, 1fr) lets columns shrink below their chips' min-content so the
+     grid always fits the content width instead of pushing the page sideways. */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--ds-space-1);
+  /* Wider than the single-column day cards (64rem) so 7 columns can breathe. */
+  box-sizing: border-box;
   width: 100%;
-  max-width: min(96vw, 90rem);
-  margin: 0 auto var(--space-md);
-  padding: 0 var(--space-md);
+  max-width: 90rem;
+  margin: 0 auto var(--ds-space-3);
+  padding: 0 var(--ds-space-3);
 }
 
 .calendar__weekday {
@@ -22,23 +24,24 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--color-muted-text);
-  padding: var(--space-xs) 0;
+  padding: var(--ds-space-1) 0;
 }
 
 /* Leading-offset placeholders before the first day of a month. */
 .calendar__blank {
-  border-radius: var(--border-radius-card);
+  border-radius: var(--ds-radius-medium);
 }
 
 .calendar__cell {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
   min-height: 6rem;
   padding: 6px;
   background: color-mix(in srgb, var(--color-primary) 3%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--ds-radius-medium);
 }
 
 /* Week shows a single row of 7 columns, so cells can be a touch shorter; the
@@ -53,7 +56,7 @@
   border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--color-primary) 45%, transparent),
-    var(--elevation-1);
+    var(--ds-elevation-1);
 }
 
 .calendar__cell--today::before {
@@ -61,7 +64,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--aero-sheen);
+  background: var(--ds-aero-sheen);
   pointer-events: none;
   z-index: -1;
 }
@@ -77,7 +80,7 @@
   padding: 0 6px;
   background: transparent;
   border: none;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
   color: var(--color-text);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -112,7 +115,7 @@
   font-weight: 600;
   color: var(--color-primary);
   cursor: pointer;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
 }
 
 .calendar__more:hover,
@@ -126,7 +129,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   padding: 5px 8px;
   background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
@@ -152,7 +157,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--aero-sheen);
+  background: var(--ds-aero-sheen);
   pointer-events: none;
   z-index: -1;
 }
@@ -163,7 +168,7 @@
     var(--color-primary) 12%,
     var(--color-surface)
   );
-  box-shadow: var(--elevation-1);
+  box-shadow: var(--ds-elevation-1);
   transform: translateY(-1px);
 }
 
@@ -271,13 +276,13 @@
 /* --- Small screens --- */
 @media (max-width: 767.98px) {
   .calendar {
-    padding: 0 var(--space-xs);
+    padding: 0 var(--ds-space-1);
     gap: 3px;
   }
 
   /* Week stacks into a single readable column; month stays a 7-col grid. */
   .calendar--week {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .calendar--week .calendar__weekday {
@@ -313,7 +318,7 @@
     justify-content: center;
     padding: 2px 3px;
     border-left-width: 2px;
-    gap: var(--space-xs);
+    gap: var(--ds-space-1);
   }
 
   .calendar--month .game-chip__abbrev,
@@ -341,6 +346,35 @@
 
   .calendar--month .game-chip__score {
     font-size: 0.7rem;
+  }
+}
+
+/* --- Phones: month columns are ~32-42px wide, too narrow for logo + score.
+   Collapse each chip to its two logos stacked vertically as a compact
+   "game exists" marker; the chip's aria-label still names the matchup/score
+   and tapping it behaves as before. --- */
+@media (max-width: 576px) {
+  .calendar--month .game-chip {
+    flex-direction: column;
+    gap: 1px;
+    padding: 2px 0;
+  }
+
+  .calendar--month .game-chip__score {
+    display: none;
+  }
+
+  .calendar--month .game-chip__team {
+    justify-content: center;
+  }
+
+  .calendar--month .game-chip__team + .game-chip__team::before {
+    content: none;
+  }
+
+  .calendar--month .game-chip__team img {
+    height: 0.875rem;
+    width: 0.875rem;
   }
 }
 

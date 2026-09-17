@@ -64,7 +64,7 @@
   background-color: var(--color-surface);
   padding: 0 1px;
   border-radius: 2px;
-  /* Carve-out (BG-B23): Press Start 2P is illegible this small and would overflow the tile. */
+  /* Press Start 2P is illegible at this size and would overflow the tile. */
   font-family: 'Roboto', sans-serif;
 }
 
@@ -94,6 +94,6 @@
   top: -6px;
   left: -4px;
   font-size: 0.6rem;
-  /* Carve-out (BG-B23): Press Start 2P is illegible this small. */
+  /* Press Start 2P is illegible at this size. */
   font-family: 'Roboto', sans-serif;
 }

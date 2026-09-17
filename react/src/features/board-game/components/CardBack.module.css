@@ -1,7 +1,7 @@
 .back {
   width: 1.5rem;
   height: 1.2rem;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--ds-radius-medium);
   border: 1px solid var(--color-text);
   background-color: var(--color-team-cpu);
   background-image:

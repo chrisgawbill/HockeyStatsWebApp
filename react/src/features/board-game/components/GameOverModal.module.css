@@ -4,13 +4,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--ds-space-3);
   max-width: 26rem;
-  padding: var(--space-lg);
-  border-radius: var(--border-radius-card);
+  padding: var(--ds-space-4);
+  border-radius: var(--ds-radius-medium);
   background-color: var(--color-bg);
-  border: 1px solid var(--aero-border-highlight);
-  box-shadow: var(--elevation-2);
+  border: 1px solid var(--ds-aero-border);
+  box-shadow: var(--ds-elevation-2);
   text-align: center;
   animation: game-over-enter var(--ds-motion-duration-medium) var(--ds-motion-easing-standard) both;
 }
@@ -29,7 +29,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--aero-sheen);
+  background: var(--ds-aero-sheen);
   pointer-events: none;
   z-index: -1;
 }
@@ -42,5 +42,5 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
 }

@@ -58,55 +58,57 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="ds-page-shell">
+    <div className="ds-page-shell">
       <PageHeader />
-      <header className={styles['landingPage-intro']}>
-        <div className={styles['landingPage-intro-copy']}>
-          <p className={styles['landingPage-kicker']}>Season overview</p>
-          <h1>{formatSeasonLabel(season)} at a glance</h1>
-          <p>Track the teams, leaders, and stories shaping the season.</p>
-        </div>
-      </header>
-      {loading ? (
-        <LoadingState label="Loading data" fullPage />
-      ) : statLeadersError ? (
-        <ErrorState
-          fullPage
-          title="Couldn't load stat leaders"
-          message={statLeadersError}
-          onRetry={retryStatLeaders}
-        />
-      ) : (
-        <div className={`${styles['landingPage-content']} ds-grid`}>
-          <section>
-            <PlayerStatLeaderRow
-              title="Skater Stat Leaders"
-              topStatLeaders={[
-                goalLeaderData,
-                assistLeaderData,
-                pointsLeaderData,
-                faceoffLeadersData,
-              ]}
-            />
-            <PlayerStatLeaderRow
-              title="Goalie Stat Leaders"
-              topStatLeaders={[
-                winsLeaderData,
-                savePercentageLeaderData,
-                gaaLeaderData,
-                shutoutLeaderData,
-              ]}
-            />
-            <DraftLotteryOddsRow
-              title="Draft Lottery Odds"
-              data={draftLotteryOddsData}
-            />
-          </section>
-          <section>
-            <LandingPageStandings />
-          </section>
-        </div>
-      )}
-    </main>
+      <main>
+        <header className={styles['landingPage-intro']}>
+          <div className={styles['landingPage-intro-copy']}>
+            <p className={styles['landingPage-kicker']}>Season overview</p>
+            <h1>{formatSeasonLabel(season)} at a glance</h1>
+            <p>Track the teams, leaders, and stories shaping the season.</p>
+          </div>
+        </header>
+        {loading ? (
+          <LoadingState label="Loading data" fullPage />
+        ) : statLeadersError ? (
+          <ErrorState
+            fullPage
+            title="Couldn't load stat leaders"
+            message={statLeadersError}
+            onRetry={retryStatLeaders}
+          />
+        ) : (
+          <div className={`${styles['landingPage-content']} ds-grid`}>
+            <section>
+              <PlayerStatLeaderRow
+                title="Skater Stat Leaders"
+                topStatLeaders={[
+                  goalLeaderData,
+                  assistLeaderData,
+                  pointsLeaderData,
+                  faceoffLeadersData,
+                ]}
+              />
+              <PlayerStatLeaderRow
+                title="Goalie Stat Leaders"
+                topStatLeaders={[
+                  winsLeaderData,
+                  savePercentageLeaderData,
+                  gaaLeaderData,
+                  shutoutLeaderData,
+                ]}
+              />
+              <DraftLotteryOddsRow
+                title="Draft Lottery Odds"
+                data={draftLotteryOddsData}
+              />
+            </section>
+            <section className={styles['landingPage-standings-col']}>
+              <LandingPageStandings />
+            </section>
+          </div>
+        )}
+      </main>
+    </div>
   );
 }

@@ -3,8 +3,8 @@
 }
 
 .team-list-toolbar {
-  max-width: var(--page-content-width);
-  margin: 0 auto var(--space-lg);
+  width: 100%;
+  margin: 0 auto var(--ds-space-4);
   padding: var(--page-block-start) 0 0;
 }
 
@@ -12,8 +12,8 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-3);
 }
 
 .team-list-toolbar__header h1 {
@@ -33,7 +33,7 @@
 .team-list-controls {
   display: grid;
   grid-template-columns: minmax(16rem, 2fr) repeat(3, minmax(9rem, 1fr));
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
 }
 
 .team-list-controls label {
@@ -53,7 +53,7 @@
   min-height: 44px;
   width: 100%;
   border: 1px solid color-mix(in srgb, var(--color-primary) 26%, transparent);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--ds-radius-medium);
   background: var(--color-surface);
   color: var(--color-text);
   font-size: var(--text-sm);
@@ -72,14 +72,14 @@
 .team-list-filter-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-3);
 }
 
 .team-list-filter-chips button {
   min-height: 36px;
   border: 1px solid color-mix(in srgb, var(--color-primary) 38%, transparent);
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
   background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
   color: var(--color-primary);
   font-size: var(--text-sm);
@@ -111,26 +111,33 @@
 .team-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-md);
-  padding: var(--space-sm) 0 var(--space-md);
-  max-width: var(--page-content-width);
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-2) 0 var(--ds-space-3);
+  width: 100%;
   margin: 0 auto;
 }
 
 .team-card {
   background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--ds-radius-medium);
   padding: 0.875rem;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   cursor: pointer;
+  color: inherit;
+  text-decoration: none;
   transition:
     box-shadow 0.2s ease,
     transform 0.2s ease,
     background-color 0.2s ease;
   text-align: left;
+}
+
+.team-card:focus-visible {
+  outline: 3px solid var(--color-blue-accent);
+  outline-offset: 3px;
 }
 
 .team-card:hover {
@@ -139,7 +146,7 @@
     var(--color-primary) 8%,
     var(--color-surface)
   );
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--ds-elevation-1);
   transform: translateY(-3px);
 }
 
@@ -147,7 +154,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
+  gap: var(--ds-space-2);
   margin-bottom: 0.625rem;
 }
 
@@ -158,7 +165,7 @@
 }
 
 .team-card__status {
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--ds-radius-full);
   background: color-mix(
     in srgb,
     var(--color-primary) 10%,
@@ -195,7 +202,7 @@
 .team-card__metrics {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-xs);
+  gap: var(--ds-space-1);
   margin-top: 0.625rem;
 }
 
@@ -224,7 +231,7 @@
 }
 
 .team-list-empty {
-  margin: var(--space-xl) 0;
+  margin: var(--ds-space-5) 0;
   color: var(--color-text-secondary);
   text-align: center;
 }
@@ -260,12 +267,12 @@
 
   .team-card-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-sm);
-    padding: var(--space-sm) 0;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-2) 0;
   }
 
   .team-card {
-    padding: var(--space-sm);
+    padding: var(--ds-space-2);
   }
 
   .team-card__logo {

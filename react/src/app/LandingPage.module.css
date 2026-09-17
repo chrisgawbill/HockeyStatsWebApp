@@ -1,15 +1,14 @@
 .landingPage-content {
-  margin: var(--page-section-gap) auto 0;
-  max-width: var(--page-content-width);
-  gap: var(--page-section-gap) 0;
-  animation: landing-content-reveal 360ms ease-out 80ms both;
+  width: min(100% - (2 * var(--page-gutter)), var(--page-content-width));
+  margin: var(--ds-space-3) auto var(--page-block-end);
+  gap: var(--page-section-gap);
+  animation: landing-content-reveal 360ms ease-out 80ms backwards;
 }
 
 .landingPage-intro {
-  max-width: var(--page-content-width);
-  margin: var(--page-block-start) auto 0;
-  padding: 0 var(--page-gutter);
-  animation: landing-intro-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
+  width: min(100% - (2 * var(--page-gutter)), var(--page-content-width));
+  margin: calc(var(--page-block-start) * 0.75) auto 0;
+  animation: landing-intro-enter 280ms cubic-bezier(0.2, 0, 0, 1) backwards;
 }
 
 .landingPage-intro-copy {
@@ -46,7 +45,7 @@
 }
 
 .landingPage-kicker {
-  margin: 0 0 var(--space-xs);
+  margin: 0 0 var(--ds-space-1);
   color: var(--color-primary);
   font-size: var(--text-xs);
   font-weight: 700;
@@ -58,16 +57,26 @@
   margin: 0;
   color: var(--color-text);
   font-size: clamp(1.5rem, 2.5vw, 2rem);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .landingPage-intro p:last-child {
-  margin: var(--space-xs) 0 0;
+  margin: var(--ds-space-1) 0 0;
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
 }
 
 .landingPage-content > section {
-  padding-left: var(--page-gutter);
-  padding-right: var(--page-gutter);
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .landingPage-standings-col {
+    position: relative;
+  }
+
+  .landingPage-standings-col > * {
+    position: absolute;
+    inset: 0;
+  }
 }

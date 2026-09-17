@@ -16,7 +16,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
             <h2>{title}</h2>
         </div>
         <div className={`${styles['odds-grid']} ds-grid`}>
-          {data.slice(0, 16).map((team, index) => (
+          {data.slice(0, 15).map((team, index) => (
             <DraftLotteryOddsCard
               key={team.id}
               team={team}

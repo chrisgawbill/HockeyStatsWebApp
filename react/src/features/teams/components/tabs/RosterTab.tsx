@@ -31,8 +31,6 @@ function splitLabeled(lines: RosterLine[]) {
  * players at each spot), each line rendered as one lifted `RosterLineRow`.
  * Any players beyond the numbered lines/pairs fall back to the flat
  * `PlayerCard` grid, as do Goalies (never enough of them to need pairing).
- * `RosterSection` (the old 5-column layout) is intentionally not used here —
- * it stays available for wherever it's already wired up, unmodified.
  */
 export default function RosterTab({ roster }: Props) {
   const forwardLines = splitLabeled(buildForwardLines(roster));
