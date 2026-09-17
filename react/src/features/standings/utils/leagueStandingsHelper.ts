@@ -1,5 +1,13 @@
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { StandingsTeamDto } from '@/features/standings/api/standingsApi';
+import { localTeamList } from '@/lib/teamListData';
+
+const fallbackLogosByTeamName = Object.fromEntries(
+  localTeamList.map(({ fullName, triCode }) => [
+    fullName,
+    `https://assets.nhle.com/logos/nhl/svg/${triCode}_light.svg`,
+  ]),
+);
 
 /**
  * The backend (api/services/mappers/standingsMapper.js) now returns each team in
@@ -14,8 +22,9 @@ export function CreateLeagueStandingsArray(
   for (let i = 0; i < initialStandings.length; i++) {
     const responseTeam = initialStandings[i];
     const teamId = responseTeam.teamId;
-    const teamLogo = responseTeam.teamLogo;
     const name = responseTeam.name;
+    const teamLogo =
+      responseTeam.teamLogo || fallbackLogosByTeamName[name] || '';
     const conferenceName = responseTeam.conferenceName;
     const divisionName = responseTeam.divisionName;
     const wins = responseTeam.wins;

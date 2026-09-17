@@ -1,6 +1,6 @@
 /* Schedule page layout */
 .schedule-page {
-  padding-bottom: 2rem;
+  padding: var(--page-block-start) 0 var(--page-block-end);
 }
 
 .schedule-page :global(.sliding-toggle),
@@ -343,7 +343,7 @@
 /* Mobile: stack details vertically */
 @media (max-width: 575.98px) {
   .schedule-page {
-    padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+    padding-top: calc(var(--page-block-start) + env(safe-area-inset-top, 0px));
   }
 
   .date-row {

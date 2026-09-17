@@ -3,7 +3,7 @@
 .game-detail-page {
   min-height: 100vh;
   background: var(--color-bg-subtle);
-  padding-bottom: var(--space-xl);
+  padding-bottom: var(--page-block-end);
 }
 
 .game-detail-page #nav-bar {
@@ -11,13 +11,13 @@
 }
 
 .game-detail-page__content {
-  max-width: 112.5rem;
+  max-width: var(--page-content-width);
   margin: 0 auto;
-  padding: var(--space-xl) var(--space-lg) 0;
+  padding: var(--page-block-start) 0 0;
 }
 
 .game-detail-section {
-  margin-bottom: calc(var(--space-xl) + var(--space-sm));
+  margin-bottom: var(--page-section-gap);
 }
 
 .game-detail-hero {
@@ -980,10 +980,6 @@
 
   .game-detail-team__score {
     font-size: 2rem;
-  }
-
-  .game-detail-page__content {
-    padding: var(--space-lg) var(--space-md) 0;
   }
 
   .three-stars-row {

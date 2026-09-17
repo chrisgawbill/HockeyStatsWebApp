@@ -205,6 +205,7 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   /**
    * Mobile-only full-screen search overlay, opened from the floating action
@@ -304,6 +305,29 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
     };
   }, [isMobileSearchOpen]);
 
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    const media = window.matchMedia('(max-width: 576px)');
+    const updateChromeHeight = () => {
+      document.documentElement.style.setProperty(
+        '--mobile-chrome-height',
+        media.matches ? `${nav.offsetHeight}px` : '0px',
+      );
+    };
+    const observer = new ResizeObserver(updateChromeHeight);
+
+    observer.observe(nav);
+    media.addEventListener('change', updateChromeHeight);
+    updateChromeHeight();
+    return () => {
+      observer.disconnect();
+      media.removeEventListener('change', updateChromeHeight);
+      document.documentElement.style.removeProperty('--mobile-chrome-height');
+    };
+  }, []);
+
   /**
    * Moves focus into the overlay's search input as soon as it opens, and
    * back onto the FAB that triggered it once it closes (cleanup runs on
@@ -383,8 +407,28 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
       <nav
         aria-label="Primary"
         className={styles['nav-bar']}
+        ref={navRef}
         style={isSubPage ? { marginBottom: 0 } : undefined}
       >
+        <div className={styles['nav-secondary-row']}>
+          <div className={styles['nav-mobile-back']}>
+            {isSubPage && (
+              <button
+                className={styles['nav-back-btn']}
+                onClick={handleBack}
+                aria-label="Go back"
+              >
+                <BackIcon />
+              </button>
+            )}
+          </div>
+          <div className={styles['nav-season-selector']}>
+            <SeasonSelector className="page-header-season-selector" />
+          </div>
+          <div className={styles['nav-secondary-utility']}>
+            {corner && <div className={styles['nav-corner']}>{corner}</div>}
+          </div>
+        </div>
         <div className={styles['nav-inner']}>
           <div className={styles['nav-left']}>
             <span className={styles['nav-brand']}>HockeyStats</span>
@@ -444,9 +488,6 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
                 </ul>
               )}
             </div>
-          </div>
-          <div className={styles['nav-season-selector']}>
-            <SeasonSelector />
           </div>
           <div className={styles['nav-right']}>
             {navItems.map(({ label, path, icon }) => (

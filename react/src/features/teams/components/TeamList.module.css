@@ -1,11 +1,11 @@
 .team-list-page {
-  padding-bottom: var(--space-xl);
+  padding-bottom: var(--page-block-end);
 }
 
 .team-list-toolbar {
-  max-width: 1500px;
+  max-width: var(--page-content-width);
   margin: 0 auto var(--space-lg);
-  padding: var(--space-md) var(--space-lg) 0;
+  padding: var(--page-block-start) 0 0;
 }
 
 .team-list-toolbar__header {
@@ -49,6 +49,7 @@
 
 .team-list-controls input,
 .team-list-controls select {
+  box-sizing: border-box;
   min-height: 44px;
   width: 100%;
   border: 1px solid color-mix(in srgb, var(--color-primary) 26%, transparent);
@@ -111,8 +112,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--space-md);
-  padding: var(--space-sm) var(--space-lg) var(--space-md);
-  max-width: 1500px;
+  padding: var(--space-sm) 0 var(--space-md);
+  max-width: var(--page-content-width);
   margin: 0 auto;
 }
 
@@ -229,12 +230,8 @@
 }
 
 @media (max-width: 576px) {
-  .team-list-page {
-    padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
-  }
-
   .team-list-toolbar {
-    padding: 0 var(--space-sm);
+    padding-top: calc(var(--page-block-start) + env(safe-area-inset-top, 0px));
   }
 
   .team-list-toolbar__header {
@@ -254,9 +251,7 @@
   }
 
   .team-list-filter-chips {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    flex-wrap: wrap;
   }
 
   .team-list-reset-btn {
@@ -266,7 +261,7 @@
   .team-card-grid {
     grid-template-columns: 1fr;
     gap: var(--space-sm);
-    padding: var(--space-sm);
+    padding: var(--space-sm) 0;
   }
 
   .team-card {

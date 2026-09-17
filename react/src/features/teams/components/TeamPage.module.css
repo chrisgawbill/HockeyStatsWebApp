@@ -1,5 +1,5 @@
 .team-page {
-  padding-bottom: var(--space-xl);
+  padding-bottom: var(--page-block-end);
   background: var(--color-bg-subtle);
   min-height: 100vh;
 }
@@ -9,9 +9,9 @@
 }
 
 .team-page__content {
-  max-width: 112.5rem;
+  max-width: var(--page-content-width);
   margin: 0 auto;
-  padding: 0 var(--space-lg);
+  padding: 0;
 }
 
 /* ── Anchor nav (sticky, scroll-spied) ────────────────────────────────────
@@ -1298,10 +1298,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-md);
-  }
-
-  .team-page__content {
-    padding: 0 var(--space-md);
   }
 
   .info-strip {

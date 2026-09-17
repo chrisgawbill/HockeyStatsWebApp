@@ -1,14 +1,14 @@
 .landingPage-content {
-  margin: var(--space-xl) auto 0;
-  max-width: 112.5rem;
-  gap: var(--space-lg) 0;
+  margin: var(--page-section-gap) auto 0;
+  max-width: var(--page-content-width);
+  gap: var(--page-section-gap) 0;
   animation: landing-content-reveal 360ms ease-out 80ms both;
 }
 
 .landingPage-intro {
-  max-width: 112.5rem;
-  margin: var(--space-lg) auto 0;
-  padding: 0 var(--space-lg);
+  max-width: var(--page-content-width);
+  margin: var(--page-block-start) auto 0;
+  padding: 0 var(--page-gutter);
   animation: landing-intro-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
@@ -68,29 +68,6 @@
 }
 
 .landingPage-content > section {
-  padding-left: var(--space-lg);
-  padding-right: var(--space-lg);
-}
-
-@media (min-width: 1920px) {
-  .landingPage-content {
-    max-width: 90vw;
-  }
-}
-
-@media (max-width: 576px) {
-  .landingPage-intro {
-    margin-top: var(--space-lg);
-    padding-left: var(--space-md);
-    padding-right: var(--space-md);
-  }
-
-  .landingPage-content {
-    margin-top: var(--space-lg);
-  }
-
-  .landingPage-content > section {
-    padding-left: var(--space-md);
-    padding-right: var(--space-md);
-  }
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
 }

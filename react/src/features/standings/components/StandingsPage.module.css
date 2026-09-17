@@ -1,3 +1,7 @@
+.standings-page {
+  padding: var(--page-block-start) 0 var(--page-block-end);
+}
+
 .standings-page-table-container {
   height: 100%;
   overflow: hidden;
@@ -51,7 +55,7 @@
 
 @media (max-width: 767px) {
   .standings-page {
-    padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0px));
+    padding-top: calc(var(--page-block-start) + env(safe-area-inset-top, 0px));
   }
 
   .standings-page-toggle-row {

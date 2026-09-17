@@ -37,7 +37,6 @@ export default function DraftLotteryOddsCard({
           alt={team.teamName}
           className={styles['lottery-card__logo']}
         />
-        <span className={styles['lottery-card__name']}>{team.teamName}</span>
         <div className={styles['lottery-card__right']}>
           {trendIcon && (
             <span

@@ -58,7 +58,7 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="ds-page-shell ds-container">
+    <main className="ds-page-shell">
       <PageHeader />
       <header className={styles['landingPage-intro']}>
         <div className={styles['landingPage-intro-copy']}>

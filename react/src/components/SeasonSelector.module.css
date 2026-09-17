@@ -141,3 +141,54 @@
 .season-field:focus-within .season-field__chevron {
   color: var(--season-accent, var(--color-primary));
 }
+
+/* The global header passes this host hook because CSS module class names are
+   private to their owning file. */
+:global(.page-header-season-selector) {
+  margin: 0;
+  padding: 0;
+}
+
+:global(.page-header-season-selector) .season-field {
+  height: 36px;
+  padding: 0 var(--space-sm);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+:global(.page-header-season-selector) .season-field__label,
+:global(.page-header-season-selector) .season-field__chevron {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+:global(.page-header-season-selector) .season-field__button {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 576px) {
+  :global(.page-header-season-selector) .season-field {
+    height: 44px;
+    max-width: calc(100vw - 7rem);
+  }
+
+  :global(.page-header-season-selector) .season-field__button {
+    max-width: min(14rem, calc(100vw - 12rem));
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .season-field__control {
+    min-width: 0;
+  }
+
+  .season-field__listbox {
+    top: auto;
+    bottom: calc(100% + 6px);
+    max-height: min(
+      18rem,
+      calc(100dvh - var(--mobile-chrome-height) - var(--space-md))
+    );
+    z-index: 200;
+  }
+}

@@ -70,7 +70,7 @@ export default function LandingPageStandingsTable({ standingsData, standingForma
           const statusClass = status ? CLINCH_STATUS_META[status].className : '';
           return <tr key={team.id} tabIndex={0} role="button" aria-label={`View ${team.teamName}`} onClick={() => goToTeam(team)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); goToTeam(team); } }}>
             <td className={`${styles['standings-status-cell']} ${styles['standings-status-cell--first']} ${statusClass}`}>{isDivision ? team.divisionStandingsPlace : team.conferenceStandingsPlace}</td>
-            <td className={`${styles['standings-status-cell']} ${statusClass}`}><span className={styles['standings-table-teamName-col']}><img className={styles['standings-table-team-logo']} src={team.teamLogo} alt="team logo" /><p>{team.teamName}</p>{renderClinchBadge(status)}</span></td>
+            <td className={`${styles['standings-status-cell']} ${statusClass}`}><span className={styles['standings-table-teamName-col']}><img className={styles['standings-table-team-logo']} src={team.teamLogo} alt={`${team.teamName} logo`} /><p>{team.teamName}</p>{renderClinchBadge(status)}</span></td>
             <td className={`${styles['standings-status-cell']} ${statusClass}`}>{`${team.wins}-${team.losses}-${team.otLosses}`}</td>
             <td className={`${styles['standings-status-cell']} ${statusClass}`}>{team.points}</td>
             {!isMobile && <td className={`${styles['standings-status-cell']} ${statusClass}`}>{team.pointsPercentage}</td>}

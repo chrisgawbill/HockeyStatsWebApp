@@ -348,8 +348,8 @@ export default function TeamPage() {
       >
         <PageHeader />
         <div
-          className={styles['team-page__content']}
-          style={{ paddingTop: '2rem' }}
+          className={`${styles['team-page__content']} ${shared.pageContent}`}
+          style={{ paddingTop: 'var(--page-block-start)' }}
         >
           <ErrorState
             fullPage
@@ -371,8 +371,8 @@ export default function TeamPage() {
       >
         <PageHeader />
         <div
-          className={styles['team-page__content']}
-          style={{ paddingTop: '2rem' }}
+          className={`${styles['team-page__content']} ${shared.pageContent}`}
+          style={{ paddingTop: 'var(--page-block-start)' }}
         >
           <LoadingState label="Loading team" fullPage />
         </div>
