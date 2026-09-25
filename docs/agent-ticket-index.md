@@ -34,9 +34,10 @@ acceptance are both necessary for DONE.
 | ON2-07 | Daily weights, repeat window, fallback behavior, and Rivalry Night frequency. |
 | ON2-08 | Pilot teams and each team's/player's content before enablement. |
 | ON2-09 | Setup flow and star-choice presentation before visual implementation. |
-| ON2-10 | Portrait/landscape layout and broadcast treatment, then rendered review. |
+| ON2-09A | Review arena prototype, tactical/close views, phone evidence, device target, and rendering-failure behavior; decide whether to migrate. |
+| ON2-10 | Apply the ON2-09A decision; portrait/landscape layout and broadcast treatment, then rendered review. |
 | ON2-11 | Readable hand/battle mockup, then touch and keyboard interaction review. |
-| ON2-12 | Ordinary/rivalry reveal examples and reduced-motion treatment. |
+| ON2-12 | Ordinary/rivalry reveals, pregame/faceoff/shot/goal camera examples and durations, and reduced-motion treatment. |
 | ON2-13 | Simulation protocol and material-advantage threshold before evaluation; final playtest and release acceptance. |
 
 ## Dependency outline
@@ -49,11 +50,16 @@ ON2-04 + API-ON2-02 -> ON2-06
 API-ON2-01 + API-ON2-02 -> ON2-07
 API-ON2-01 + API-ON2-02 + ON2-04 + ON2-06 + ON2-07 -> ON2-08
 ON2-06 + ON2-07 + ON2-08 -> ON2-09
-ON2-01 + ON2-02 + ON2-05 + ON2-09 -> ON2-10
+existing rules -> ON2-09A prototype (may run before ON2-01)
+ON2-01 + ON2-02 + ON2-05 + ON2-09 + ON2-09A decision -> ON2-10
 ON2-03 + ON2-04 + ON2-10 -> ON2-11
 ON2-07 + ON2-10 + ON2-11 -> ON2-12
 approved implementation/content release set -> ON2-13
 ```
+
+ON2-09A may run early using the existing game; it gates production presentation
+work, not 2.0 rules or team-content delivery. Existing ticket IDs are preserved.
+Recording this direction does not start implementation tickets.
 
 `API-*` tickets are backend-owned dependencies for the independent
 HockeyStatsAPI repository. Copy/adapt them to that repository's workflow before
@@ -490,7 +496,54 @@ themes at phone/desktop sizes.
 
 ---
 
-## ON2-10 — Fullscreen broadcast match shell
+## ON2-09A — Dimensional arena and camera prototype
+
+**Status:** IDEA
+
+**Goal:** Evaluate React + Three.js for a tactical rink inside a stylized arena
+before committing to production migration.
+
+**Read:** design “Dimensional arena and camera direction” and “Accessibility and
+performance”; architecture board-game invariant; RinkBoard, RinkOverlay,
+useBoardGame, coordinate mapping, and current shot presentation.
+
+**Dependencies:** existing playable game; no ON2 implementation prerequisite.
+
+**Scope:**
+
+- Build one playable rink/simple arena with tactical and close shot cameras;
+  use simple tokens or illustrated cutouts.
+- Reuse the reducer, legal actions, seeded rules, and CPU policy. Keep cards,
+  scoreboard, and timing controls in React/HTML; do not add another game engine.
+- Demonstrate selection, legal movement, and a shot-view transition; settle the
+  camera before timing and restore the tactical view before the next board action.
+- Demonstrate touch, keyboard/focus, accessible labels, responsive sizing, and
+  static reduced-motion views.
+- Measure load cost and rendering/input responsiveness on an identified phone
+  or device profile; record limitations and distinguish emulation from hardware.
+
+**Acceptance:**
+
+- Tiles, occupancy, selection, and legal destinations remain clear at 390×844,
+  landscape, and desktop sizes.
+- Camera transitions do not interfere with selection or consume timing windows.
+- Identical actions/seed produce identical rule outcomes across camera views.
+- Product Owner reviews the playable prototype and evidence, then records a
+  migration decision, visual treatment, device target, and rendering-failure
+  behavior before production integration.
+- Rejection records an approved current-renderer fallback direction for ON2-10;
+  completing the prototype alone does not authorize production migration.
+
+**Exclusions:** full migration, complete broadcast sequences, new gameplay,
+realistic player models, bespoke team arenas, sound, and haptics.
+
+**Verify:** focused rule/presentation checks, typecheck, build, browser QA for
+phone portrait/landscape and desktop, keyboard, reduced motion, and measured
+performance; Product Owner visual review and recorded decision.
+
+---
+
+## ON2-10 — Fullscreen broadcast match shell and arena integration
 
 **Status:** IDEA
 
@@ -500,10 +553,15 @@ scoreboard and contextual coaching controls.
 **Read:** design “Presentation” and “Responsive layouts”; BoardGame/Page,
 RinkBoard, HUD, navigation/chrome, and theme tokens.
 
-**Dependencies:** ON2-01, ON2-02, ON2-05, ON2-09.
+**Dependencies:** ON2-01, ON2-02, ON2-05, ON2-09, recorded ON2-09A decision.
 
 **Scope:**
 
+- Apply ON2-09A: integrate the accepted Three.js rink/arena with React/HTML
+  controls, or the explicitly approved current-renderer fallback.
+- Preserve the rules/CPU boundary; implement responsive coordinate picking,
+  accessible selection/focus, renderer cleanup, and approved rendering-failure
+  behavior. Keep the tactical camera stable during board input.
 - Hide site chrome during a match and provide accessible pause/exit.
 - Add team-logo/abbreviation/score scoreboard with possession, shift, initiative,
   and remaining activations; no fake clock.
@@ -520,8 +578,13 @@ RinkBoard, HUD, navigation/chrome, and theme tokens.
 - Scoreboard remains visible in board, battle, faceoff, and shot states.
 - Player, movement, actions, possession, and activation state are clear.
 - Site chrome returns on exit and focus is preserved.
+- Arena detail preserves readability and the ON2-09A device target; repeated
+  entry/exit releases renderer resources.
+- Canvas and accessible controls select the same engine coordinates in both
+  orientations; rendering failures follow the approved behavior.
 
-**Exclusions:** card-hand redesign, rivalry collision animation, clock mechanics.
+**Exclusions:** card-hand redesign, rivalry collision animation, broadcast camera
+sequences (ON2-12), clock mechanics.
 
 **Verify:** component tests, typecheck, build, browser interaction/screenshot QA at
 phone, landscape, and desktop sizes in both themes.
@@ -547,6 +610,8 @@ CardView, DuelScreen, reveal/queue components and styles.
 - Present three cards as a fanned hand with selected-card lift/expansion and an
   explicit commit control.
 - Present participants, poise, calls, energy, hand, and Reveal in one stage.
+- Keep cards/controls in React/HTML over the arena with readable contrast and
+  correct focus/pointer handling across the rendering boundary.
 - Move committed cards into call slots instead of duplicate card rows.
 - Support multiple commitments and four-card faceoff offers without tiny text or
   required drag gestures.
@@ -575,21 +640,28 @@ four-card, disabled, multi-commit, reveal, and narrow-height states.
 **Goal:** Give ordinary and rivalry matches concise presentation without delaying
 play or changing outcomes.
 
-**Read:** design “Rivalry animation” and reduced motion; match shell,
+**Read:** design “Rivalry animation,” “Dimensional arena and camera direction,”
+and reduced motion; accepted ON2-09A decision, match shell,
 battle/reveal stage, matchup, and final presentation.
 
 **Dependencies:** ON2-07, ON2-10, ON2-11.
 
 **Scope:**
 
+- Implement approved brief pregame sweep, faceoff/shot close views, and goal
+  celebration view using ON2-10; review examples and durations with the Product
+  Owner before implementing affected sequences.
+- Settle the camera before timing, hold it during challenges, and restore the
+  tactical view before board actions. Provide skippable intros/celebrations and
+  immediate static reduced-motion equivalents.
 - Add ordinary glide/settle/flip reveal.
 - Add rivalry team-color slide, restrained clash/ice impact, rebound, and reveal
   within the approved duration.
 - Make animation skippable; game resolution never waits on it.
 - Add compact rivalry scoreboard/matchup/final treatments.
 - Implement static reduced-motion equivalents.
-- Use transform/opacity and existing assets/tokens; add no dependency without a
-  measured CSS gap.
+- Use transform/opacity for HTML cards and the accepted renderer for arena
+  effects; reuse assets/tokens and add no second rendering engine.
 
 **Acceptance:**
 
@@ -599,8 +671,12 @@ battle/reveal stage, matchup, and final presentation.
 - Browser QA finds no rapid flash, layout shift, blocked input, or phone
   performance regression.
 - Rivalry treatment appears only from canonical enabled data.
+- Normal, skipped, and reduced-motion sequences preserve outcomes and complete
+  timing windows; cameras stay still during decisions and timing input.
+- Arena sequences meet the ON2-09A device target and Product Owner visual review.
 
-**Exclusions:** sound, haptics, rivalry bonuses, cinematics.
+**Exclusions:** sound, haptics, rivalry bonuses, long cinematics, replay viewer,
+realistic player animation, and bespoke team arenas.
 
 **Verify:** deterministic state tests, typecheck, build, phone/desktop performance
 and visual QA with normal/reduced motion.
@@ -640,6 +716,8 @@ Owner's approved release set.
 - Matches meaningfully use multiple skaters rather than one carrier/chaser.
 - Portrait, landscape, desktop, keyboard, screen reader, reduced motion, and both
   themes pass the browser matrix.
+- Arena/camera behavior passes the accepted device target, rendering-failure
+  behavior, repeated entry/exit, skip, and timing-window checks.
 - Product Owner accepts supported content, match feel, and known limitations.
 
 **Exclusions:** unreviewed teams, multiplayer, progression economy, clock

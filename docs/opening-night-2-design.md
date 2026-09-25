@@ -288,6 +288,45 @@ choices, receive Rivalry Night presentation.
 
 ## Presentation
 
+### Dimensional arena and camera direction
+
+Product Owner-approved direction: combine a readable tactical board with a
+stylized dimensional arena and selective perspective shots. React + Three.js is
+the preferred approach to prototype before committing to production migration.
+The existing TypeScript rules, seeded randomness, and CPU policy remain the
+source of truth; cameras and animations belong to presentation only.
+
+Three.js would render the rink, skaters/tokens, puck, arena, and lighting. React
+and HTML retain the scoreboard, cards, menus, timing controls, and report.
+Do not add PixiJS or Phaser alongside Three.js for this direction.
+
+Start with simple stands/crowd sections, team colors, an arena scoreboard, and
+restrained lighting. Illustrated cutouts or simple 3D tokens are sufficient;
+realistic player models, full skeletal animation, and bespoke arenas for every
+team are outside the initial scope.
+
+| Moment | Intended view |
+| --- | --- |
+| Tactical decisions | Stable overhead or gently angled rink with clear tiles, occupancy, selection, and passing lanes. |
+| Pregame | Brief arena sweep establishing the rink, stands, and team identity. |
+| Faceoff or shot | Closer perspective framing participants; camera settles before timing begins. |
+| Goal | Brief celebration angle with restrained lighting and crowd movement. |
+| Card battle | Readable HTML cards in the foreground with the arena behind them. |
+
+The camera stays still during tactical decisions and timing challenges. Restore
+the tactical view before the next board action. Intros and celebrations are
+skippable; reduced motion uses immediate static views without sweeps, shake, or
+flashing. Sequences never change outcomes, consume timing windows, or become
+mandatory waits. The 500–700 ms card-reveal target remains specific to reveals;
+other camera durations require Product Owner review.
+
+First deliver one playable rink with a simple arena, tactical view, and close
+shot view using existing rules. Review portrait/landscape readability, touch,
+keyboard, reduced motion, and measured phone performance before approving
+production integration. Record the supported-device target and rendering-failure
+behavior at that checkpoint. If rejected, retain the current renderer and agree
+on revised presentation scope before dependent work.
+
 ### Match shell and scoreboard
 
 Entering a match uses a fullscreen game shell that hides normal HockeyStats
@@ -375,7 +414,10 @@ human timing, touch, comprehension, and fun playtests.
 - Provide complete accessible card names/effects; never encode state by color.
 - Keep touch targets at least 44 CSS pixels where controls permit.
 - Support reduced motion, zoom/text scaling, safe areas, and portrait play.
-- Keep animations transform/opacity based and verify phone performance.
+- Keep HTML animations transform/opacity based. Measure arena rendering and
+  camera transitions on phones; reduce detail before sacrificing readability.
+- Preserve accessible board names, keyboard navigation, and visible focus across
+  the canvas/HTML boundary; canvas graphics alone do not provide these controls.
 - Headshots are progressive enhancement; fall back to initials or sprites.
 
 ## Product Owner content gates
