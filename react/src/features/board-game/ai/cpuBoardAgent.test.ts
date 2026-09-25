@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { CPU_TURN_ACTION_CAP } from '@/features/board-game/data/balance';
 import { playHeadlessGame } from '@/features/board-game/ai/autoplay';
 import { chooseCpuAction } from '@/features/board-game/ai/cpuBoardAgent';
 import {
   createInitialState,
   gameReducer,
 } from '@/features/board-game/engine/gameReducer';
-import type { DuelKind, GameLength } from '@/features/board-game/types/game';
+import type {
+  DuelKind,
+  GameLength,
+  GameState,
+} from '@/features/board-game/types/game';
 
 const GAME_COUNT = 200;
 const MAX_TURNS = 400;
@@ -20,25 +23,92 @@ const DUEL_KINDS: DuelKind[] = [
 const LENGTHS: GameLength[] = ['short', 'long'];
 
 describe('chooseCpuAction', () => {
-  it('returns END_TURN outside the roll/move phases or when it is not the CPU turn', () => {
+  it('does not act outside the activation phase or when it is not the CPU turn', () => {
     const state = createInitialState(1, 'long'); // phase faceoff, activeTeam user
-    expect(chooseCpuAction(state)).toEqual({ type: 'END_TURN' });
+    expect(chooseCpuAction(state)).toEqual({ type: 'END_ACTIVATION' });
   });
 
-  it('returns a legal action once it is the CPU turn (verified by the reducer actually changing state, or END_TURN)', () => {
+  it('selects a skater when it is the CPU activation', () => {
     let state = createInitialState(2, 'long');
     state = gameReducer(state, { type: 'START_FACEOFF' });
-    // Force a state where it's the CPU's turn to roll, regardless of who won the faceoff duel.
-    state = { ...state, duel: null, phase: 'roll', activeTeam: 'cpu' };
+    state = {
+      ...state,
+      duel: null,
+      phase: 'move',
+      activeTeam: 'cpu',
+      initiativeTeam: 'cpu',
+    };
     const action = chooseCpuAction(state);
     const next = gameReducer(state, action);
-    expect(action.type === 'END_TURN' || next !== state).toBe(true);
+    expect(action.type).toBe('ACTIVATE_SKATER');
+    expect(next.activationSkaterId).not.toBeNull();
+  });
+
+  it('advances the carrier when a pass receiver cannot activate later this shift', () => {
+    const initial = createInitialState(3, 'long');
+    const state = {
+      ...initial,
+      phase: 'move' as const,
+      activeTeam: 'cpu' as const,
+      activationSkaterId: 'cpu-C',
+      activationsRemaining: { user: 3, cpu: 2 },
+      activatedSkaters: ['cpu-LW'],
+      movementRemaining: 2,
+      puck: { kind: 'carried' as const, skaterId: 'cpu-C' },
+      skaters: initial.skaters.map((s) => {
+        if (s.id === 'cpu-LW') return { ...s, pos: { col: 5, row: 3 } };
+        if (s.id === 'user-C') return { ...s, pos: { col: 6, row: 2 } };
+        return s;
+      }),
+    };
+
+    expect(chooseCpuAction(state)).toEqual({
+      type: 'MOVE',
+      skaterId: 'cpu-C',
+      to: { col: 7, row: 3 },
+    });
+    expect(
+      chooseCpuAction({
+        ...state,
+        activationsRemaining: { user: 3, cpu: 1 },
+        activatedSkaters: [],
+      }),
+    ).toEqual({
+      type: 'MOVE',
+      skaterId: 'cpu-C',
+      to: { col: 7, row: 3 },
+    });
+  });
+
+  it('moves a support skater toward the attacking end when the carrier already activated', () => {
+    const initial = createInitialState(4, 'long');
+    let state: GameState = {
+      ...initial,
+      phase: 'move' as const,
+      activeTeam: 'cpu' as const,
+      initiativeTeam: 'cpu' as const,
+      activationsRemaining: { user: 3, cpu: 2 },
+      activatedSkaters: ['cpu-LW'],
+      puck: { kind: 'carried' as const, skaterId: 'cpu-LW' },
+      skaters: initial.skaters.map((s) =>
+        s.id === 'cpu-LW' ? { ...s, pos: { col: 11, row: 5 } } : s,
+      ),
+    };
+    state = gameReducer(state, chooseCpuAction(state));
+
+    expect(state.activationSkaterId).not.toBe('cpu-LW');
+    const support = state.skaters.find(
+      (skater) => skater.id === state.activationSkaterId,
+    )!;
+    const action = chooseCpuAction(state);
+    expect(action.type).toBe('MOVE');
+    if (action.type === 'MOVE') expect(action.skaterId).toBe(support.id);
   });
 });
 
 describe('200 seeded headless games per length', () => {
   it.each(LENGTHS)(
-    'all 200 %s games end in gameOver within 400 turns, and no turn exceeds the action cap',
+    'all 200 %s games end in gameOver within 400 turns',
     (length) => {
       let userWins = 0;
       let cpuWins = 0;
@@ -56,9 +126,6 @@ describe('200 seeded headless games per length', () => {
         const result = playHeadlessGame(seed, length, MAX_TURNS);
         expect(result.finalState.phase).toBe('gameOver');
         expect(result.turns).toBeLessThanOrEqual(MAX_TURNS);
-        expect(result.maxActionsInATurn).toBeLessThanOrEqual(
-          CPU_TURN_ACTION_CAP,
-        );
 
         if (result.finalState.winner === 'user') userWins++;
         if (result.finalState.winner === 'cpu') cpuWins++;

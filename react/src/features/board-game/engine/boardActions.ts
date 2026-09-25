@@ -1,8 +1,8 @@
-import { COST } from '@/features/board-game/data/balance';
 import { createDuel } from '@/features/board-game/engine/duel';
 import { createShotDuel } from '@/features/board-game/engine/shotDuel';
 import {
   isAdjacent,
+  isDefensiveZone,
   isStunned,
   laneBetween,
   legalSteps,
@@ -42,7 +42,7 @@ function findDekeDefender(
   )[0];
 }
 
-/** `MOVE`: spends 1 MP, picks up a loose puck on arrival, then checks the automatic deke trigger. */
+/** Move one step during the selected skater's activation, picking up the puck and checking the deke trigger. */
 export function handleMove(
   state: GameState,
   skaterId: string,
@@ -60,12 +60,16 @@ export function handleMove(
     ? { kind: 'carried' as const, skaterId }
     : state.puck;
 
+  const nextMovement = state.movementRemaining - 1;
   const nextState: GameState = {
     ...state,
     skaters,
     puck,
-    mp: state.mp - COST.move,
-    actionsThisTurn: state.actionsThisTurn + 1,
+    movementRemaining:
+      state.defensemanZoneMovement &&
+      !isDefensiveZone(state.skaters.find((s) => s.id === skaterId)!.team, to)
+        ? Math.min(nextMovement, 1)
+        : nextMovement,
   };
 
   const isNowCarrier =
@@ -76,10 +80,15 @@ export function handleMove(
   const defender = findDekeDefender(nextState, carrier);
   if (!defender) return nextState;
 
-  return createDuel(nextState, 'deke', skaterId, defender.id);
+  return createDuel(
+    { ...nextState, actionTaken: true },
+    'deke',
+    skaterId,
+    defender.id,
+  );
 }
 
-/** `PASS`: spends 2 MP, then either an intercept duel or a completed pass to the receiver. */
+/** `PASS`: either starts an intercept duel or completes the pass to the receiver. */
 export function handlePass(state: GameState, toSkaterId: string): GameState {
   if (!passTargets(state).includes(toSkaterId)) return state;
   const carrier = getCarrier(state)!;
@@ -88,11 +97,7 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
     (a, b) => manhattan(carrier.pos, a) - manhattan(carrier.pos, b),
   );
 
-  const spentState: GameState = {
-    ...state,
-    mp: state.mp - COST.pass,
-    actionsThisTurn: state.actionsThisTurn + 1,
-  };
+  const actionState: GameState = { ...state, actionTaken: true };
 
   for (const tile of lane) {
     const occupant = skaterAt(state, tile);
@@ -103,7 +108,7 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
       !isStunned(occupant, state.turn)
     ) {
       return createDuel(
-        spentState,
+        actionState,
         'intercept',
         carrier.id,
         occupant.id,
@@ -112,32 +117,27 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
     }
   }
 
-  return { ...spentState, puck: { kind: 'carried', skaterId: toSkaterId } };
+  return { ...actionState, puck: { kind: 'carried', skaterId: toSkaterId } };
 }
 
-/** `SHOOT`: spends 3 MP and starts a shot duel against the opposing goalie. */
+/** `SHOOT`: starts a shot duel against the opposing goalie. */
 export function handleShoot(state: GameState): GameState {
   if (!canShoot(state)) return state;
   const carrier = getCarrier(state)!;
   const goalie = state.skaters.find(
     (s) => s.team !== carrier.team && s.role === 'G',
   )!;
-  const spentState: GameState = {
-    ...state,
-    mp: state.mp - COST.shoot,
-    actionsThisTurn: state.actionsThisTurn + 1,
-  };
-  return createShotDuel(spentState, carrier.id, goalie.id);
+  return createShotDuel({ ...state, actionTaken: true }, carrier.id, goalie.id);
 }
 
-/** `CHECK`: spends 1 MP and starts a check duel against the enemy carrier. */
+/** `CHECK`: starts a check duel against the enemy carrier. */
 export function handleCheck(state: GameState, skaterId: string): GameState {
   if (!checkTargets(state, skaterId)) return state;
   const carrier = getCarrier(state)!;
-  const spentState: GameState = {
-    ...state,
-    mp: state.mp - COST.check,
-    actionsThisTurn: state.actionsThisTurn + 1,
-  };
-  return createDuel(spentState, 'check', skaterId, carrier.id);
+  return createDuel(
+    { ...state, actionTaken: true },
+    'check',
+    skaterId,
+    carrier.id,
+  );
 }

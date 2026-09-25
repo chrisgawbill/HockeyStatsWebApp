@@ -61,6 +61,11 @@ export function isOffensiveZone(team: TeamId, coord: Coord): boolean {
   return coord.col >= bounds.min && coord.col <= bounds.max;
 }
 
+/** The defensive zone is the opponent's offensive end of the rink. */
+export function isDefensiveZone(team: TeamId, coord: Coord): boolean {
+  return isOffensiveZone(team === 'user' ? 'cpu' : 'user', coord);
+}
+
 /**
  * Tiles strictly between `a` and `b` when they share a row or column.
  * Returns null when they don't (including when `a` equals `b`).
@@ -87,17 +92,17 @@ export function isStunned(skater: Skater, turn: number): boolean {
 }
 
 /**
- * Tiles a skater may step onto this turn: empty if it's the goalie, stunned,
- * not the move phase, not their team's turn, or they have no MP.
+ * Legal destinations for the currently activating skater.
  */
 export function legalSteps(state: GameState, skaterId: string): Coord[] {
   const skater = state.skaters.find((s) => s.id === skaterId);
   if (!skater) return [];
   if (skater.role === 'G') return [];
   if (isStunned(skater, state.turn)) return [];
-  if (state.phase !== 'move') return [];
+  if (state.phase !== 'move' || state.activationSkaterId !== skaterId)
+    return [];
   if (state.activeTeam !== skater.team) return [];
-  if (state.mp < 1) return [];
+  if (state.movementRemaining < 1 || state.actionTaken) return [];
   return orthNeighbors(skater.pos)
     .filter(isPlayable)
     .filter((c) => !skaterAt(state, c));

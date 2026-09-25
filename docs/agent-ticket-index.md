@@ -69,7 +69,20 @@ implementation; starting them here does not authorize backend edits.
 
 ## ON2-01 — Alternating shift activation engine
 
-**Status:** IDEA
+**Status:** ACTIVE
+
+**Human acceptance:** Pending Product Owner recheck of CPU puck advancement
+after the fix.
+
+**Decision checkpoint (approved):** The opening faceoff winner activates
+first; completed shifts alternate their first team. A stoppage resets both
+teams' activations and skater eligibility, with the next faceoff winner
+activating first. A stunned skater cannot activate through its next team
+activation opportunity, while another eligible skater may be chosen; if no
+eligible skater remains, that team forfeits its remaining activations.
+The legacy faceoff `bonusMp` effect becomes one extra movement step on the
+faceoff winner's next usable activation after its opening activation; skipped
+opportunities do not consume the bonus.
 
 **Goal:** Replace dice/shared movement points with symmetric alternating
 three-activation shifts and move-plus-action turns.

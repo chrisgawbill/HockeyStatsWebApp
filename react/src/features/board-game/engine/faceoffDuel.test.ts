@@ -293,8 +293,8 @@ describe('faceoffEffect: stunLoser', () => {
   });
 });
 
-describe('faceoffEffect: bonusMp', () => {
-  it("a clean win with that card adds 1 MP to the winning side's next roll", () => {
+describe('faceoffEffect: bonusMovement', () => {
+  it('banks one move for the winner’s activation after its opening activation', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'forehand_pull', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -310,16 +310,29 @@ describe('faceoffEffect: bonusMp', () => {
       'clean',
     );
     expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
-    expect(result.pendingBonusMp).toBe(1);
+    expect(result.pendingBonusMovement.user).toBe(true);
 
-    const dismissed = gameReducer(result, { type: 'DISMISS_DUEL_RESULT' });
-    const rolled = gameReducer(dismissed, { type: 'ROLL_DICE' });
-    const [d1, d2] = rolled.dice!;
-    expect(rolled.mp).toBe(d1 + d2 + 1);
-    expect(rolled.pendingBonusMp).toBe(0);
+    let resultState = gameReducer(result, { type: 'DISMISS_DUEL_RESULT' });
+    resultState = gameReducer(resultState, {
+      type: 'ACTIVATE_SKATER',
+      skaterId: 'user-C',
+    });
+    expect(resultState.movementRemaining).toBe(2);
+    resultState = gameReducer(resultState, { type: 'END_ACTIVATION' });
+    resultState = gameReducer(resultState, {
+      type: 'ACTIVATE_SKATER',
+      skaterId: 'cpu-C',
+    });
+    resultState = gameReducer(resultState, { type: 'END_ACTIVATION' });
+    resultState = gameReducer(resultState, {
+      type: 'ACTIVATE_SKATER',
+      skaterId: 'user-LW',
+    });
+    expect(resultState.movementRemaining).toBe(3);
+    expect(resultState.pendingBonusMovement.user).toBe(false);
   });
 
-  it('a plain (non-bonus) clean win does not add MP', () => {
+  it('a plain clean win does not add movement', () => {
     // Neither card here carries scrumOnLoss, so a user win stays a plain win.
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
@@ -335,7 +348,7 @@ describe('faceoffEffect: bonusMp', () => {
       'quick_hands',
       'clean',
     );
-    expect(result.pendingBonusMp).toBe(0);
+    expect(result.pendingBonusMovement.user).toBe(false);
   });
 });
 

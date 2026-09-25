@@ -318,7 +318,7 @@ export function resolveDuel(
   byKo: boolean,
 ): GameState {
   const duel = state.duel!;
-  const { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusMp } =
+  const { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusMovement } =
     applyOutcome(state, duel, winner);
 
   let skaters = state.skaters;
@@ -333,6 +333,16 @@ export function resolveDuel(
   const winnerTeam = goal
     ? state.skaters.find((s) => s.id === duel.attacker.skaterId)!.team
     : null;
+  const faceoffWinnerTeam =
+    duel.kind === 'faceoff'
+      ? state.skaters.find(
+          (s) =>
+            s.id ===
+            (winner === 'attacker'
+              ? duel.attacker.skaterId
+              : duel.defender.skaterId),
+        )!.team
+      : null;
   const outcome: DuelOutcome = {
     kind: duel.kind,
     winner,
@@ -350,7 +360,10 @@ export function resolveDuel(
     skaters,
     puck,
     rngSeed,
-    pendingBonusMp: bonusMp,
+    pendingBonusMovement:
+      bonusMovement && faceoffWinnerTeam
+        ? { ...state.pendingBonusMovement, [faceoffWinnerTeam]: true }
+        : state.pendingBonusMovement,
     deck: discardHand(state.deck),
     cpuDeck: discardHand(state.cpuDeck),
     duel: null,

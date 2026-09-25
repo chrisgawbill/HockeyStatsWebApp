@@ -21,18 +21,18 @@ import {
   pickFaceoffCard,
   resolveFaceoffBand,
 } from '@/features/board-game/engine/faceoffDuel';
-import { rollDie } from '@/features/board-game/engine/rng';
 import {
   autoResolveShot,
   pickShotCard,
   resolveShotBand,
 } from '@/features/board-game/engine/shotDuel';
 import {
-  canEndTurn,
-  canRoll,
+  canActivate,
+  canEndActivation,
   getCarrier,
   isBoxedIn,
 } from '@/features/board-game/engine/selectors';
+import { isDefensiveZone, isStunned } from '@/features/board-game/engine/rink';
 import type {
   Action,
   GameLength,
@@ -70,9 +70,16 @@ export function createInitialState(
     length,
     bonusEnergy: bonusEnergy > 0 ? 1 : 0,
     activeTeam: 'user',
+    initiativeTeam: 'user',
+    activationsRemaining: { user: 3, cpu: 3 },
+    activatedSkaters: [],
+    activationSkaterId: null,
+    movementRemaining: 0,
+    defensemanZoneMovement: false,
+    actionTaken: false,
+    pendingBonusMovement: { user: false, cpu: false },
+    openingActivationComplete: false,
     turn: 1,
-    mp: 0,
-    dice: null,
     skaters: formationSkaters(),
     puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
     deck,
@@ -82,7 +89,6 @@ export function createInitialState(
     lastReveal: null,
     winner: null,
     rngSeed,
-    actionsThisTurn: 0,
     whistle: false,
     goaliePoise: {
       user: GOALIE_POISE_BY_LENGTH[length],
@@ -91,7 +97,125 @@ export function createInitialState(
     lastShotSaveResult: null,
     lastFaceoffResult: null,
     faceoffSpot: FACEOFF_SPOTS.centreIce,
-    pendingBonusMp: 0,
+  };
+}
+
+function beginActivation(state: GameState, skaterId: string): GameState {
+  if (state.activationSkaterId === skaterId) return state;
+  if (state.activationSkaterId || !canActivate(state, skaterId)) return state;
+  const skater = state.skaters.find((s) => s.id === skaterId)!;
+  const bonus =
+    state.openingActivationComplete && state.pendingBonusMovement[skater.team];
+  const defensemanZoneMovement =
+    (skater.role === 'LD' || skater.role === 'RD') &&
+    isDefensiveZone(skater.team, skater.pos);
+  return {
+    ...state,
+    activationSkaterId: skaterId,
+    movementRemaining: (defensemanZoneMovement ? 3 : 2) + Number(bonus),
+    defensemanZoneMovement,
+    pendingBonusMovement: bonus
+      ? { ...state.pendingBonusMovement, [skater.team]: false }
+      : state.pendingBonusMovement,
+  };
+}
+
+function finishActivation(state: GameState): GameState {
+  const team = state.activeTeam;
+  const remaining = {
+    ...state.activationsRemaining,
+    [team]: state.activationsRemaining[team] - 1,
+  };
+  const turn = state.turn + 1;
+  const openingActivationComplete =
+    state.openingActivationComplete || team === state.initiativeTeam;
+  const skaters = state.skaters.map((s) =>
+    s.stunnedUntilTurn !== null && turn > s.stunnedUntilTurn
+      ? { ...s, stunnedUntilTurn: null }
+      : s,
+  );
+  let initiativeTeam = state.initiativeTeam;
+  let activeTeam = otherTeam(team);
+  let activatedSkaters = state.activationSkaterId
+    ? [...state.activatedSkaters, state.activationSkaterId]
+    : state.activatedSkaters;
+  if (remaining.user === 0 && remaining.cpu === 0) {
+    initiativeTeam = otherTeam(state.initiativeTeam);
+    activeTeam = initiativeTeam;
+    remaining.user = 3;
+    remaining.cpu = 3;
+    activatedSkaters = [];
+  }
+  let next: GameState = {
+    ...state,
+    phase: 'move',
+    turn,
+    activeTeam,
+    initiativeTeam,
+    activationsRemaining: remaining,
+    activatedSkaters,
+    activationSkaterId: null,
+    movementRemaining: 0,
+    defensemanZoneMovement: false,
+    actionTaken: false,
+    openingActivationComplete,
+    skaters,
+  };
+  // A stunned-only team forfeits its remaining opportunities so the game cannot stall.
+  while (
+    next.activationsRemaining[next.activeTeam] > 0 &&
+    !next.skaters.some(
+      (s) =>
+        s.team === next.activeTeam &&
+        s.role !== 'G' &&
+        !isStunned(s, next.turn) &&
+        !next.activatedSkaters.includes(s.id),
+    )
+  ) {
+    next = {
+      ...next,
+      activationsRemaining: {
+        ...next.activationsRemaining,
+        [next.activeTeam]: 0,
+      },
+      turn: next.turn + 1,
+      activeTeam: otherTeam(next.activeTeam),
+    };
+    if (
+      next.activationsRemaining.user === 0 &&
+      next.activationsRemaining.cpu === 0
+    ) {
+      next = {
+        ...next,
+        initiativeTeam: otherTeam(next.initiativeTeam),
+        activeTeam: otherTeam(next.initiativeTeam),
+        activationsRemaining: { user: 3, cpu: 3 },
+        activatedSkaters: [],
+      };
+    }
+  }
+  return next;
+}
+
+function completeActivation(state: GameState): GameState {
+  const next = finishActivation(state);
+  const carrier = getCarrier(next);
+  if (!carrier || !isBoxedIn(next, carrier.id)) return next;
+  return {
+    ...next,
+    skaters: formationSkaters(),
+    puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
+    phase: 'faceoff',
+    activationsRemaining: { user: 3, cpu: 3 },
+    activatedSkaters: [],
+    activationSkaterId: null,
+    movementRemaining: 0,
+    defensemanZoneMovement: false,
+    actionTaken: false,
+    pendingBonusMovement: { user: false, cpu: false },
+    openingActivationComplete: false,
+    whistle: true,
+    faceoffSpot: FACEOFF_SPOTS.centreIce,
   };
 }
 
@@ -115,67 +239,42 @@ export function gameReducer(state: GameState, action: Action): GameState {
       };
     }
 
-    case 'ROLL_DICE': {
-      if (!canRoll(state)) return state;
-      const [d1, seed1] = rollDie(state.rngSeed);
-      const [d2, seed2] = rollDie(seed1);
-      return {
-        ...state,
-        dice: [d1, d2],
-        mp: d1 + d2 + state.pendingBonusMp,
-        pendingBonusMp: 0,
-        phase: 'move',
-        rngSeed: seed2,
-      };
+    case 'ACTIVATE_SKATER':
+      return beginActivation(state, action.skaterId);
+
+    case 'MOVE': {
+      const active = beginActivation(state, action.skaterId);
+      const next = handleMove(active, action.skaterId, action.to);
+      return next.actionTaken && next.phase === 'move'
+        ? completeActivation(next)
+        : next;
     }
 
-    case 'MOVE':
-      return handleMove(state, action.skaterId, action.to);
+    case 'PASS': {
+      const carrier = getCarrier(state);
+      if (!carrier) return state;
+      const active = beginActivation(state, carrier.id);
+      const next = handlePass(active, action.toSkaterId);
+      return next.actionTaken && next.phase === 'move'
+        ? completeActivation(next)
+        : next;
+    }
 
-    case 'PASS':
-      return handlePass(state, action.toSkaterId);
-
-    case 'SHOOT':
-      return handleShoot(state);
+    case 'SHOOT': {
+      const carrier = getCarrier(state);
+      if (!carrier) return state;
+      return handleShoot(beginActivation(state, carrier.id));
+    }
 
     case 'CHECK':
-      return handleCheck(state, action.skaterId);
-
-    case 'END_TURN': {
-      if (!canEndTurn(state)) return state;
-      const turn = state.turn + 1;
-      const skaters = state.skaters.map((s) =>
-        s.stunnedUntilTurn !== null && turn > s.stunnedUntilTurn
-          ? { ...s, stunnedUntilTurn: null }
-          : s,
+      return handleCheck(
+        beginActivation(state, action.skaterId),
+        action.skaterId,
       );
-      const switched: GameState = {
-        ...state,
-        turn,
-        activeTeam: otherTeam(state.activeTeam),
-        phase: 'roll',
-        mp: 0,
-        dice: null,
-        actionsThisTurn: 0,
-        skaters,
-      };
 
-      const carrier = getCarrier(switched);
-      if (carrier && isBoxedIn(switched, carrier.id)) {
-        return {
-          ...switched,
-          skaters: formationSkaters(),
-          puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
-          phase: 'faceoff',
-          activeTeam: 'user',
-          mp: 0,
-          dice: null,
-          whistle: true,
-          faceoffSpot: FACEOFF_SPOTS.centreIce,
-        };
-      }
-
-      return switched;
+    case 'END_ACTIVATION': {
+      if (!canEndActivation(state)) return state;
+      return completeActivation(state);
     }
 
     case 'PLAY_CARD':
@@ -252,10 +351,16 @@ export function gameReducer(state: GameState, action: Action): GameState {
         const winnerTeam = state.skaters.find((s) => s.id === winnerId)!.team;
         return {
           ...state,
-          phase: 'roll',
+          phase: 'move',
           activeTeam: winnerTeam,
-          mp: 0,
-          dice: null,
+          initiativeTeam: winnerTeam,
+          activationsRemaining: { user: 3, cpu: 3 },
+          activatedSkaters: [],
+          activationSkaterId: null,
+          movementRemaining: 0,
+          defensemanZoneMovement: false,
+          actionTaken: false,
+          openingActivationComplete: false,
           lastOutcome: null,
           lastShotSaveResult: null,
           lastFaceoffResult: null,
@@ -284,9 +389,14 @@ export function gameReducer(state: GameState, action: Action): GameState {
           ),
           puck: { kind: 'loose', pos: dot },
           phase: 'faceoff',
-          activeTeam: 'user',
-          mp: 0,
-          dice: null,
+          activationsRemaining: { user: 3, cpu: 3 },
+          activatedSkaters: [],
+          activationSkaterId: null,
+          movementRemaining: 0,
+          defensemanZoneMovement: false,
+          actionTaken: false,
+          pendingBonusMovement: { user: false, cpu: false },
+          openingActivationComplete: false,
           whistle: true,
           faceoffSpot: dot,
           rngSeed: seed,
@@ -297,7 +407,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       }
       return {
         ...state,
-        phase: 'move',
+        ...completeActivation({ ...state, lastOutcome: null }),
         lastOutcome: null,
         lastShotSaveResult: null,
         lastFaceoffResult: null,

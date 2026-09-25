@@ -74,6 +74,22 @@ that owns initiative, teams alternate one activation at a time. A non-goalie
 skater may normally activate only once in the shift. After both teams use three
 activations, eligibility resets and the next shift begins.
 
+The opening faceoff winner takes the first activation. After each completed
+shift, the first team alternates. A stoppage resets both teams' activation
+counts and skater eligibility; the faceoff winner takes the first activation
+after the restart, and initiative alternates from that team after the next
+completed shift. The faceoff itself does not consume an activation.
+
+A stunned skater cannot activate through its next team activation opportunity,
+but its team may choose another eligible skater. If no eligible skater remains,
+the team forfeits its remaining activations so play can continue. A possession
+change or battle does not alter activation order; the current activation ends
+when its action resolves.
+
+The faceoff `bonusMp` effect grants the faceoff winner one extra movement step
+on its next usable activation after its opening activation. A skipped activation
+does not consume the bonus.
+
 An activation permits optional movement up to the skater's allowance and then at
 most one legal hockey action. Actions include passing, shooting, checking,
 setting a screen, clearing the crease, collecting a loose puck, or holding
@@ -83,11 +99,8 @@ that receiver later.
 
 There is no movement die and no shared movement-point pool.
 
-Before ON2-01 implementation, the PM brings the human a concrete proposal for
-opening and subsequent-shift initiative, stoppage resets, and skipped activations
-when a team has no eligible skater. The proposal must explain how faceoffs,
-stuns, and possession changes interact with alternation. These are open rules,
-not permission for the coder to invent extra turns.
+The Product Owner approved these rules at the ON2-01 checkpoint. Implementation
+must preserve them without granting extra activations.
 
 ### Movement
 

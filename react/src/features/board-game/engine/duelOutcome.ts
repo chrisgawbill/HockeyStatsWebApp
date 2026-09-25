@@ -27,8 +27,8 @@ export interface DuelOutcomeResult {
   cleanSave: boolean;
   /** `rngSeed` after any rolls this outcome needed (currently only the faceoff scrum tile pick); unchanged if nothing was rolled. */
   rngSeed: number;
-  /** MP to add on the winning side's next `ROLL_DICE` (the faceoff `bonusMp` effect). Zero otherwise. */
-  bonusMp: number;
+  /** One bonus movement step awarded to the faceoff winner. */
+  bonusMovement: number;
 }
 
 /** Non-goalie skater on `team` nearest `tile`; prefers non-stunned, falling back to stunned. Ties keep array order. Never moves anyone. */
@@ -90,7 +90,7 @@ export function applyOutcome(
   let goal = false;
   let cleanSave = false;
   let rngSeed = state.rngSeed;
-  let bonusMp = 0;
+  let bonusMovement = 0;
 
   switch (duel.kind) {
     case 'faceoff': {
@@ -150,8 +150,8 @@ export function applyOutcome(
               ? duel.defender.skaterId
               : duel.attacker.skaterId;
             break;
-          case 'bonusMp':
-            bonusMp = 1;
+          case 'bonusMovement':
+            bonusMovement = 1;
             break;
           // `scrumOnLoss` and `freeJump` have no clean-win-time bonus -
           // they're handled above (scrum downgrade) and in
@@ -217,5 +217,5 @@ export function applyOutcome(
     }
   }
 
-  return { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusMp };
+  return { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusMovement };
 }

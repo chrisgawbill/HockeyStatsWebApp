@@ -60,7 +60,7 @@ function bandLabel(band: FaceoffBand): string {
 const FACEOFF_EFFECT_LABEL: Record<FaceoffCardEffect, string> = {
   backDraw: 'puck drops back to the point instead of the dot',
   stunLoser: 'the beaten centre is stunned for a turn',
-  bonusMp: '+1 MP banked for this turn',
+  bonusMovement: '+1 move on a later activation',
   scrumOnLoss: 'a loss ties up into a scrum instead',
   freeJump: 'no window penalty on the re-drop',
 };

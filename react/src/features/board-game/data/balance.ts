@@ -23,14 +23,6 @@ export const HAND_SIZE = 5;
 /** Duel rounds before the defender wins on timeout. */
 export const MAX_ROUNDS = 3;
 
-/** MP cost per board action. */
-export const COST = {
-  move: 1,
-  pass: 2,
-  shoot: 3,
-  check: 1,
-};
-
 /** LW/RW shot accuracy bonus, on the same 0-100 scale as card accuracy. */
 export const PERK_WING_SHOT_ACCURACY = 15;
 /** LD/RD bonus to damage or block on check/block-tagged cards. */
@@ -86,7 +78,5 @@ export const FACEOFF_REACTION_SAMPLE_CEILING_MS = 500;
 /** Clean-window penalty after a false start. */
 export const FACEOFF_JUMP_WINDOW_PENALTY_MS = 30;
 
-/** Hard cap on actions in a CPU turn. */
-export const CPU_TURN_ACTION_CAP = 20;
 /** Delay between CPU actions in milliseconds. */
 export const CPU_STEP_MS = 450;

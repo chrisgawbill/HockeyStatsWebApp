@@ -20,18 +20,6 @@
   color: var(--color-text-secondary);
 }
 
-.pips {
-  display: flex;
-  gap: 2px;
-}
-
-.pip {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background-color: var(--color-success);
-}
-
 .actions {
   display: flex;
   gap: var(--ds-space-2);

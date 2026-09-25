@@ -1,4 +1,3 @@
-import { CPU_TURN_ACTION_CAP } from '@/features/board-game/data/balance';
 import { chooseActionFor } from '@/features/board-game/ai/cpuBoardAgent';
 import { planCards } from '@/features/board-game/engine/cpuDuelPolicy';
 import { pickBestFaceoffCard } from '@/features/board-game/engine/faceoffDuel';
@@ -17,8 +16,6 @@ export interface AutoplayResult {
   finalState: GameState;
   /** The state.turn value at the end of the game (or when the turn cap was hit). */
   turns: number;
-  /** The largest actionsThisTurn seen over the whole game, for cap-safety assertions. */
-  maxActionsInATurn: number;
   /** How many times the §3 whistle (boxed-in carrier) reset the board this game. */
   whistles: number;
   /** Every duel outcome resolved this game, in order, for balance breakdowns. */
@@ -79,7 +76,6 @@ function step(state: GameState): GameState {
       return stepDuel(state);
     case 'duelResult':
       return gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
-    case 'roll':
     case 'move':
       return gameReducer(state, chooseActionFor(state, state.activeTeam));
     default:
@@ -98,10 +94,9 @@ export function playHeadlessGame(
   maxTurns = 400,
 ): AutoplayResult {
   let state = createInitialState(seed, length);
-  let maxActionsInATurn = 0;
   let whistles = 0;
   const duelOutcomes: DuelOutcome[] = [];
-  const maxSteps = maxTurns * (CPU_TURN_ACTION_CAP + 10);
+  const maxSteps = maxTurns * 32;
 
   for (
     let i = 0;
@@ -115,14 +110,11 @@ export function playHeadlessGame(
     if (state.lastOutcome && state.lastOutcome !== previousOutcome) {
       duelOutcomes.push(state.lastOutcome);
     }
-    if (state.actionsThisTurn > maxActionsInATurn)
-      maxActionsInATurn = state.actionsThisTurn;
   }
 
   return {
     finalState: state,
     turns: state.turn,
-    maxActionsInATurn,
     whistles,
     duelOutcomes,
   };

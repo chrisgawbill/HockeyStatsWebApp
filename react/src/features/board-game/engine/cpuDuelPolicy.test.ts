@@ -54,9 +54,16 @@ function makeState(
     length: 'long',
     bonusEnergy: 0,
     activeTeam: 'user',
+    initiativeTeam: 'user',
+    activationsRemaining: { user: 3, cpu: 3 },
+    activatedSkaters: [],
+    activationSkaterId: null,
+    movementRemaining: 0,
+    defensemanZoneMovement: false,
+    actionTaken: false,
+    pendingBonusMovement: { user: false, cpu: false },
+    openingActivationComplete: false,
     turn: 1,
-    mp: 0,
-    dice: null,
     skaters: [
       makeSkater('user-LD', 'LD', 'user'),
       makeSkater('cpu-C', cpuRole, 'cpu'),
@@ -71,11 +78,9 @@ function makeState(
     lastFaceoffResult: null,
     winner: null,
     rngSeed: 1,
-    actionsThisTurn: 0,
     whistle: false,
     goaliePoise: { user: 43, cpu: 43 },
     faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
   };
 }
 

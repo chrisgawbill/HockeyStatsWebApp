@@ -24,8 +24,7 @@ export interface Skater {
 export type Puck =
   { kind: 'carried'; skaterId: string } | { kind: 'loose'; pos: Coord };
 
-export type Phase =
-  'faceoff' | 'roll' | 'move' | 'duel' | 'duelResult' | 'gameOver';
+export type Phase = 'faceoff' | 'move' | 'duel' | 'duelResult' | 'gameOver';
 
 export type DuelKind = 'faceoff' | 'deke' | 'check' | 'intercept' | 'shot';
 
@@ -45,7 +44,7 @@ export type CardEffect =
  * reveal, so it is deliberately kept off `CardEffect`.
  */
 export type FaceoffCardEffect =
-  'backDraw' | 'stunLoser' | 'bonusMp' | 'scrumOnLoss' | 'freeJump';
+  'backDraw' | 'stunLoser' | 'bonusMovement' | 'scrumOnLoss' | 'freeJump';
 
 /** A card definition shared across the match deck. */
 export interface CardDef {
@@ -280,9 +279,16 @@ export interface GameState {
   /** Daily-streak energy bonus for the user only. Set at game creation; engine code reads it but does not mutate it. */
   bonusEnergy: number;
   activeTeam: TeamId;
+  initiativeTeam: TeamId;
+  activationsRemaining: Record<TeamId, number>;
+  activatedSkaters: string[];
+  activationSkaterId: string | null;
+  movementRemaining: number;
+  defensemanZoneMovement: boolean;
+  actionTaken: boolean;
+  pendingBonusMovement: Record<TeamId, boolean>;
+  openingActivationComplete: boolean;
   turn: number;
-  mp: number;
-  dice: [number, number] | null;
   skaters: Skater[];
   puck: Puck;
   deck: Deck;
@@ -293,7 +299,6 @@ export interface GameState {
   lastReveal: RevealResult | null;
   winner: TeamId | null;
   rngSeed: number;
-  actionsThisTurn: number;
   /** True right after a whistle reset (boxed-in carrier), until START_FACEOFF is dispatched. */
   whistle: boolean;
   /**
@@ -330,22 +335,16 @@ export interface GameState {
    * `applyOutcome`'s scrum branch (which tile the loose puck lands on).
    */
   faceoffSpot: Coord;
-  /**
-   * MP to add on top of the next `ROLL_DICE` roll (`bonusMp`
-   * faceoff effect). Zero except right after a clean faceoff win with that
-   * effect; `ROLL_DICE` consumes and clears it.
-   */
-  pendingBonusMp: number;
 }
 
 export type Action =
   | { type: 'START_FACEOFF' }
-  | { type: 'ROLL_DICE' }
+  | { type: 'ACTIVATE_SKATER'; skaterId: string }
   | { type: 'MOVE'; skaterId: string; to: Coord }
   | { type: 'PASS'; toSkaterId: string }
   | { type: 'SHOOT' }
   | { type: 'CHECK'; skaterId: string }
-  | { type: 'END_TURN' }
+  | { type: 'END_ACTIVATION' }
   | { type: 'PLAY_CARD'; handIndex: number }
   | { type: 'UNQUEUE_CARD'; queueIndex: number }
   | { type: 'END_DUEL_ROUND' }

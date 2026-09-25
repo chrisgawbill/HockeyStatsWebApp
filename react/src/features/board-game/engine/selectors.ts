@@ -1,4 +1,3 @@
-import { COST } from '@/features/board-game/data/balance';
 import {
   isAdjacent,
   isOffensiveZone,
@@ -18,19 +17,33 @@ export function getCarrier(state: GameState): Skater | undefined {
   return state.skaters.find((s) => s.id === puck.skaterId);
 }
 
-export function canRoll(state: GameState): boolean {
-  return state.phase === 'roll';
+export function canActivate(state: GameState, skaterId: string): boolean {
+  const skater = state.skaters.find((s) => s.id === skaterId);
+  return (
+    !!skater &&
+    state.phase === 'move' &&
+    state.activeTeam === skater.team &&
+    skater.role !== 'G' &&
+    !isStunned(skater, state.turn) &&
+    !state.activatedSkaters.includes(skaterId) &&
+    state.activationsRemaining[skater.team] > 0
+  );
 }
 
-export function canEndTurn(state: GameState): boolean {
-  return state.phase === 'move';
+export function canEndActivation(state: GameState): boolean {
+  return state.phase === 'move' && state.activationSkaterId !== null;
 }
 
 /** True if the active team's carrier may `SHOOT` right now. */
 export function canShoot(state: GameState): boolean {
-  if (state.phase !== 'move' || state.mp < COST.shoot) return false;
+  if (state.phase !== 'move' || state.actionTaken) return false;
   const carrier = getCarrier(state);
-  if (!carrier || carrier.team !== state.activeTeam) return false;
+  if (
+    !carrier ||
+    carrier.team !== state.activeTeam ||
+    carrier.id !== state.activationSkaterId
+  )
+    return false;
   return isOffensiveZone(carrier.team, carrier.pos);
 }
 
@@ -50,15 +63,25 @@ export function eligibleReceivers(state: GameState, carrier: Skater): Skater[] {
 
 /** Legal receiver ids for the active team's carrier's `PASS`. Empty whenever a pass isn't currently legal. */
 export function passTargets(state: GameState): string[] {
-  if (state.phase !== 'move' || state.mp < COST.pass) return [];
+  if (state.phase !== 'move' || state.actionTaken) return [];
   const carrier = getCarrier(state);
-  if (!carrier || carrier.team !== state.activeTeam) return [];
+  if (
+    !carrier ||
+    carrier.team !== state.activeTeam ||
+    carrier.id !== state.activationSkaterId
+  )
+    return [];
   return eligibleReceivers(state, carrier).map((s) => s.id);
 }
 
 /** True if `skaterId` may `CHECK` right now: own-team, eligible, and adjacent to the enemy carrier. */
 export function checkTargets(state: GameState, skaterId: string): boolean {
-  if (state.phase !== 'move' || state.mp < COST.check) return false;
+  if (
+    state.phase !== 'move' ||
+    state.actionTaken ||
+    state.activationSkaterId !== skaterId
+  )
+    return false;
   const checker = state.skaters.find((s) => s.id === skaterId);
   if (!checker || checker.team !== state.activeTeam) return false;
   if (checker.role === 'G' || isStunned(checker, state.turn)) return false;

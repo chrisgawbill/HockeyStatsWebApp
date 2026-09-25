@@ -155,7 +155,7 @@ export const CARDS: Record<string, CardDef> = {
     effects: [],
     anticipation: 65,
     grip: 4,
-    faceoffEffect: 'bonusMp',
+    faceoffEffect: 'bonusMovement',
   },
   cheat_the_draw: {
     id: 'cheat_the_draw',

@@ -31,9 +31,16 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     length: 'long',
     bonusEnergy: 0,
     activeTeam: 'user',
+    initiativeTeam: 'user',
+    activationsRemaining: { user: 3, cpu: 3 },
+    activatedSkaters: [],
+    activationSkaterId: 'user-C',
+    movementRemaining: 3,
+    defensemanZoneMovement: false,
+    actionTaken: false,
+    pendingBonusMovement: { user: false, cpu: false },
+    openingActivationComplete: false,
     turn: 1,
-    mp: 3,
-    dice: null,
     skaters: [],
     puck: { kind: 'loose', pos: { col: 7, row: 3 } },
     deck: { drawPile: [], hand: [], discardPile: [], exhaustPile: [] },
@@ -45,11 +52,9 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     lastFaceoffResult: null,
     winner: null,
     rngSeed: 1,
-    actionsThisTurn: 0,
     whistle: false,
     goaliePoise: { user: 43, cpu: 43 },
     faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
     ...overrides,
   };
 }
@@ -152,16 +157,30 @@ describe('legalSteps', () => {
     expect(isStunned(stunned, 2)).toBe(true);
     expect(isStunned(stunned, 3)).toBe(false);
     expect(
-      legalSteps(makeState({ skaters: [stunned], turn: 2 }), 'user-LD'),
+      legalSteps(
+        makeState({
+          skaters: [stunned],
+          turn: 2,
+          activationSkaterId: 'user-LD',
+        }),
+        'user-LD',
+      ),
     ).toEqual([]);
     expect(
-      legalSteps(makeState({ skaters: [stunned], turn: 3 }), 'user-LD').length,
+      legalSteps(
+        makeState({
+          skaters: [stunned],
+          turn: 3,
+          activationSkaterId: 'user-LD',
+        }),
+        'user-LD',
+      ).length,
     ).toBeGreaterThan(0);
   });
 
-  it('is empty when the skater has zero MP', () => {
+  it('is empty when the skater has no movement remaining', () => {
     const carrier = makeSkater();
-    const state = makeState({ skaters: [carrier], mp: 0 });
+    const state = makeState({ skaters: [carrier], movementRemaining: 0 });
     expect(legalSteps(state, 'user-C')).toEqual([]);
   });
 
@@ -180,7 +199,10 @@ describe('legalSteps', () => {
     expect(legalSteps(state, 'user-G')).toEqual([]);
     expect(legalSteps(state, 'user-LD')).toEqual([]);
     expect(
-      legalSteps(makeState({ skaters: [stunned], phase: 'roll' }), 'user-LD'),
+      legalSteps(
+        makeState({ skaters: [stunned], phase: 'faceoff' }),
+        'user-LD',
+      ),
     ).toEqual([]);
     expect(
       legalSteps(

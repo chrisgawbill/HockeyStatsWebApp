@@ -18,7 +18,6 @@ function shotState(seed: number): GameState {
   return {
     ...initial,
     phase: 'move',
-    mp: 3,
     skaters: initial.skaters.map((skater) =>
       skater.id === 'user-C' ? { ...skater, pos: { col: 11, row: 3 } } : skater,
     ),

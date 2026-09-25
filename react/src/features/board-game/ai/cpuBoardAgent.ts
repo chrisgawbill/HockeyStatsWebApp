@@ -1,4 +1,3 @@
-import { CPU_TURN_ACTION_CAP } from '@/features/board-game/data/balance';
 import { CREASE_FRONT } from '@/features/board-game/data/rink';
 import { otherTeam } from '@/features/board-game/engine/gameReducer';
 import {
@@ -12,7 +11,7 @@ import {
   skaterAt,
 } from '@/features/board-game/engine/rink';
 import {
-  canRoll,
+  canActivate,
   canShoot,
   checkTargets,
   getCarrier,
@@ -105,8 +104,10 @@ function pickForwardPass(
   team: TeamId,
   carrier: Skater,
 ): string | null {
+  if (state.activationsRemaining[team] <= 1) return null;
   const direction = team === 'cpu' ? -1 : 1;
   for (const id of passTargets(state)) {
+    if (!canActivate(state, id)) continue;
     const receiver = state.skaters.find((s) => s.id === id)!;
     const gain = (receiver.pos.col - carrier.pos.col) * direction;
     if (gain >= 3) return id;
@@ -132,14 +133,46 @@ function pickChaser(state: GameState, target: Coord): Skater | undefined {
  * policy can drive either side (used to mirror the user in headless sims).
  */
 export function chooseActionFor(state: GameState, team: TeamId): Action {
-  if (state.activeTeam !== team) return { type: 'END_TURN' };
-  if (state.phase !== 'roll' && state.phase !== 'move')
-    return { type: 'END_TURN' };
-  if (state.actionsThisTurn >= CPU_TURN_ACTION_CAP) return { type: 'END_TURN' };
-  if (canRoll(state)) return { type: 'ROLL_DICE' };
+  if (state.activeTeam !== team || state.phase !== 'move')
+    return { type: 'END_ACTIVATION' };
 
   const carrier = getCarrier(state);
+  if (!state.activationSkaterId) {
+    const preferred =
+      carrier?.team === team
+        ? carrier
+        : pickChaser(
+            state,
+            carrier?.pos ??
+              (state.puck.kind === 'loose'
+                ? state.puck.pos
+                : CREASE_FRONT[otherTeam(team)]),
+          );
+    const skater =
+      preferred && canActivate(state, preferred.id)
+        ? preferred
+        : state.skaters.find(
+            (s) => s.team === team && canActivate(state, s.id),
+          );
+    return skater
+      ? { type: 'ACTIVATE_SKATER', skaterId: skater.id }
+      : { type: 'END_ACTIVATION' };
+  }
+  const activeSkater = state.skaters.find(
+    (s) => s.id === state.activationSkaterId,
+  )!;
+
   if (carrier && carrier.team === team) {
+    if (carrier.id !== activeSkater.id) {
+      const step = pickStepToward(
+        state,
+        activeSkater.id,
+        CREASE_FRONT[otherTeam(team)],
+      );
+      return step
+        ? { type: 'MOVE', skaterId: activeSkater.id, to: step }
+        : { type: 'END_ACTIVATION' };
+    }
     if (canShoot(state)) return { type: 'SHOOT' };
 
     const passTarget = pickForwardPass(state, team, carrier);
@@ -150,17 +183,20 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
     if (step) return { type: 'MOVE', skaterId: carrier.id, to: step };
 
     // Last resort: any legal pass beats stalling forever on a surrounded carrier.
-    const anyPassTarget = passTargets(state)[0];
+    const anyPassTarget =
+      state.activationsRemaining[team] > 1
+        ? passTargets(state).find((id) => canActivate(state, id))
+        : undefined;
     if (anyPassTarget) return { type: 'PASS', toSkaterId: anyPassTarget };
 
     // Truly last resort: a carrier can have one free neighbor that doesn't
     // shorten the path to net (so pickStepToward finds "no useful step")
     // without being isBoxedIn (zero free neighbors) - e.g. boxed in by its
-    // own teammates. Take the step anyway rather than looping END_TURN with
+    // own teammates. Take the step anyway rather than ending the activation with
     // the puck frozen in place.
     const anyStep = legalSteps(state, carrier.id)[0];
     if (anyStep) return { type: 'MOVE', skaterId: carrier.id, to: anyStep };
-    return { type: 'END_TURN' };
+    return { type: 'END_ACTIVATION' };
   }
 
   const puckTarget = carrier
@@ -168,16 +204,14 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
     : state.puck.kind === 'loose'
       ? state.puck.pos
       : null;
-  if (!puckTarget) return { type: 'END_TURN' };
+  if (!puckTarget) return { type: 'END_ACTIVATION' };
 
-  const chaser = pickChaser(state, puckTarget);
-  if (!chaser) return { type: 'END_TURN' };
-  if (checkTargets(state, chaser.id))
-    return { type: 'CHECK', skaterId: chaser.id };
+  if (checkTargets(state, activeSkater.id))
+    return { type: 'CHECK', skaterId: activeSkater.id };
 
-  const step = pickStepToward(state, chaser.id, puckTarget);
-  if (step) return { type: 'MOVE', skaterId: chaser.id, to: step };
-  return { type: 'END_TURN' };
+  const step = pickStepToward(state, activeSkater.id, puckTarget);
+  if (step) return { type: 'MOVE', skaterId: activeSkater.id, to: step };
+  return { type: 'END_ACTIVATION' };
 }
 
 /** The CPU's pure, deterministic board decision; it uses no RNG. */

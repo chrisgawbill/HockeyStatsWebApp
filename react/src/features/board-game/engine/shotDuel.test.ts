@@ -23,7 +23,6 @@ function makeShootState(seed = 1): GameState {
   return {
     ...state,
     phase: 'move',
-    mp: 3,
     skaters,
     puck: { kind: 'carried', skaterId: 'user-C' },
   };
@@ -195,7 +194,6 @@ describe('createShotDuel (CPU shooter)', () => {
       ...state,
       phase: 'move',
       activeTeam: 'cpu',
-      mp: 3,
       skaters,
       puck: { kind: 'carried', skaterId: 'cpu-C' },
     };

@@ -19,10 +19,7 @@ import {
 } from '@/features/board-game/engine/gameReducer';
 import { legalSteps as engineLegalSteps } from '@/features/board-game/engine/rink';
 import { chooseCpuAction } from '@/features/board-game/ai/cpuBoardAgent';
-import {
-  CPU_STEP_MS,
-  CPU_TURN_ACTION_CAP,
-} from '@/features/board-game/data/balance';
+import { CPU_STEP_MS } from '@/features/board-game/data/balance';
 import {
   currentStreak,
   hasStreakBonus,
@@ -77,19 +74,13 @@ export function useBoardGame(
     baseDispatch(action);
   }, []);
 
-  const cpuThinking =
-    state.activeTeam === 'cpu' &&
-    (state.phase === 'roll' || state.phase === 'move');
+  const cpuThinking = state.activeTeam === 'cpu' && state.phase === 'move';
 
   useEffect(() => {
     if (!cpuThinking) return;
     const delay = reducedMotion ? 0 : CPU_STEP_MS;
     const timer = setTimeout(() => {
-      if (state.actionsThisTurn >= CPU_TURN_ACTION_CAP) {
-        dispatch({ type: 'END_TURN' });
-      } else {
-        dispatch(chooseCpuAction(state));
-      }
+      dispatch(chooseCpuAction(state));
     }, delay);
     return () => clearTimeout(timer);
   }, [state, cpuThinking, reducedMotion]);

@@ -11,7 +11,7 @@ export interface GameButtonProps {
   subLabel?: string;
 }
 
-/** Shared pill button for board-game controls (dice roll, HUD actions, duel actions). */
+/** Shared pill button for board-game controls. */
 const GameButton = forwardRef<HTMLButtonElement, GameButtonProps>(
   function GameButton(
     {

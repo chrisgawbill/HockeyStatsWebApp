@@ -5,15 +5,17 @@ import styles from '@/features/board-game/components/TurnHud.module.css';
 
 export interface TurnHudProps {
   activeTeam: TeamId;
+  initiativeTeam: TeamId;
   length: GameLength;
   possession: string;
-  mp: number;
+  activationsRemaining: number;
+  movementRemaining: number | null;
   canPass: boolean;
   canShoot: boolean;
   canEnd: boolean;
   onPass: () => void;
   onShoot: () => void;
-  onEndTurn: () => void;
+  onEndActivation: () => void;
 }
 
 const LENGTH_LABEL: Record<GameLength, string> = {
@@ -21,35 +23,35 @@ const LENGTH_LABEL: Record<GameLength, string> = {
   long: 'Long game',
 };
 
-/** Whose turn it is, the game length, MP pips, and the Pass / Shoot / End Turn actions. */
+/** Active team, shift progress, movement allowance, and legal actions. */
 export default function TurnHud({
   activeTeam,
+  initiativeTeam,
   length,
   possession,
-  mp,
+  activationsRemaining,
+  movementRemaining,
   canPass,
   canShoot,
   canEnd,
   onPass,
   onShoot,
-  onEndTurn,
+  onEndActivation,
 }: TurnHudProps) {
   return (
     <div className={styles.hud}>
       <span className={styles.turnLabel}>
-        {TEAM_NAME[activeTeam]}&apos;s turn
+        {TEAM_NAME[activeTeam]}&apos;s activation · {TEAM_NAME[initiativeTeam]}{' '}
+        has initiative
       </span>
       <span className={styles.lengthLabel}>{LENGTH_LABEL[length]}</span>
       <span className={styles.possession}>{possession}</span>
-      <div
-        className={styles.pips}
-        role="img"
-        aria-label={`${mp} movement points left`}
-      >
-        {Array.from({ length: Math.max(mp, 0) }, (_, i) => (
-          <span key={i} className={styles.pip} />
-        ))}
-      </div>
+      <span>
+        {activationsRemaining} activations left ·{' '}
+        {movementRemaining === null
+          ? 'Select a skater'
+          : `${movementRemaining} moves left`}
+      </span>
       <div className={styles.actions}>
         <GameButton onClick={onPass} disabled={!canPass}>
           Pass
@@ -57,8 +59,12 @@ export default function TurnHud({
         <GameButton onClick={onShoot} disabled={!canShoot}>
           Shoot
         </GameButton>
-        <GameButton onClick={onEndTurn} disabled={!canEnd} variant="primary">
-          End Turn
+        <GameButton
+          onClick={onEndActivation}
+          disabled={!canEnd}
+          variant="primary"
+        >
+          End Activation
         </GameButton>
       </div>
     </div>
