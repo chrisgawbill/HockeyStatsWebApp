@@ -1,141 +1,171 @@
 # Agent-Driven Development
 
-A lightweight operating contract for AI-assisted work on HockeyStatsWebApp.
+## Authority and stakeholder involvement
 
-## Authority
+Default workflow: **Human stakeholder → Luna PM → bounded workers when needed**.
+The human is Product Owner and final decision-maker. The PM is the reasoning and
+coordination lead; coding and QA agents are workers with bounded instructions.
 
-The human developer is the product owner and final decision-maker. Agents work only inside a human-approved ticket. Escalate architecture/data-contract changes, new dependencies/endpoints, major refactors, ambiguous product choices, scope expansion, or a fourth defect cycle.
+Work inside the human-approved request or ticket. `Start <ticket>` approves that
+ticket only. Carry forward earlier approvals without asking again. Routine
+implementation choices belong to the PM and coder; unresolved gameplay rules,
+visual direction, balance tradeoffs, team/player identities, scope expansion,
+and architecture or data-contract changes outside approved scope belong to the
+human. Bring a concrete example, options, and a recommendation before affected
+implementation. Continue independent approved work while awaiting a decision.
+
+Keep the human involved throughout: explain the intended player experience at
+ticket kickoff, raise material choices before committing to them, and provide a
+playable result or selective screenshots for experiential acceptance. Passing
+tests does not establish that a mechanic is fun or a layout feels right.
 
 ## Context policy
 
-Context movement is a primary optimization target. Use progressive disclosure instead of broad repository reading.
+1. Read `AGENTS.md`, the backlog's shared delivery contract, the selected ticket's
+   decision-checkpoint row, and its ticket block.
+2. Read only relevant design and architecture sections.
+3. Inspect directly relevant source files using targeted searches and ranges.
+4. Expand to neighboring files only to resolve a concrete uncertainty.
+5. Consult legacy docs/history only when current sources lack a required fact.
 
-1. Start with `AGENTS.md` and only the selected compact ticket block.
-2. Search `docs/architecture.md` and read only relevant sections.
-3. Inspect directly named/relevant source files; use targeted symbol search and useful ranges for large files.
-4. Expand to neighboring files only to resolve a concrete dependency or uncertainty.
-5. Read legacy backlog/progress/history only when a specific missing fact cannot be obtained from current code/docs.
+A requested design/backlog review may read the full documents in scope. Avoid
+unrelated discovery, repeated unchanged reads, and successful raw logs. Give each
+worker the selected ticket, approved decisions, minimum file list, and observable
+acceptance criteria rather than the entire conversation.
 
-Do not recursively browse for general understanding. Once the implementation path is known, stop discovery and implement. Do not reread unchanged files unless a test/failure creates a reason. Suppress successful raw command output and avoid repeating source/context between agents.
+The PM performs shared discovery once and records reusable facts and approved
+decisions in the selected ticket. Workers read applicable repository instructions
+and their task packet, expanding only for a specific missing fact. Do not forward
+full conversation history by default. Reference authoritative sections instead
+of duplicating them across docs or asking each worker to repeat discovery.
 
-## Model routing
+## Delegation criteria
 
-Optimize for successful work per token, not model prestige or release date. Prefer the lowest-cost model with a high probability of completing the task correctly on the first attempt.
+PM handles documentation and small, low-risk, localized changes directly when
+acceptance is clear and targeted verification is sufficient. Use a separate coder
+and independent QA for substantial implementation, gameplay/state changes, data
+contracts, or changes spanning coupled components. Ticket-required independent
+review still applies. Do not add planning, discovery, or summarization agents by
+default. Parallelize only substantial independent tasks with explicit ownership.
 
-### Default stack
+## Model routing and responsibilities
 
-**PM / orchestrator — GPT-5.6 Luna**
-- Default reasoning: low; raise to medium only for ambiguous ticket decomposition.
-- No application code. Convert one approved ticket into a compact worker contract and route failures.
+| Role | Preferred model | Responsibility |
+| --- | --- | --- |
+| PM | Luna | Reason through rules and dependencies, prepare human decisions, write worker contracts, interpret QA evidence, and own delivery. |
+| Coder | Luna, separate worker | Implement the approved contract, add relevant tests, and report changes and uncertainties. |
+| QA | Mini, separate worker | Run specified tests and browser checks, compare results against acceptance criteria, and report evidence. |
+| Escalation | Sol | Help the PM with difficult interactions, architecture questions, or reasoning-related failures; perform a bounded repair when assigned. |
 
-**Mechanical / tiny code — GPT-5.6 Luna**
-- Documentation, ticket maintenance, straightforward CSS/token edits, narrow repetitive changes, and other highly constrained work.
-- Promote to GPT-5.4 Mini if implementation requires non-trivial code reasoning.
+Use available Luna/Sol model IDs rather than assuming a release number. Mini is
+the preferred QA model when available. If it cannot be selected, use a separate
+Luna QA worker and report the substitution; never claim a model ran when it did
+not. If Luna or Sol is unavailable, report the available equivalent used without
+silently changing responsibilities. This document does not switch an already
+running agent's model.
 
-**Normal coder — GPT-5.4 Mini**
-- Default implementation model for bounded React/TypeScript/Node tickets.
-- Designed for coding and subagent workloads while remaining substantially cheaper than flagship models.
-- Smallest targeted change; max 3-bullet report.
+PM reasoning defaults to medium; raise it for ambiguous decisions. Coder effort
+should match the ticket. QA may use low reasoning for deterministic checks, but
+must report unverified criteria instead of inferring a pass. Sol is an escalation
+within approved scope, not permission to change the product.
 
-**QA — GPT-5.6 Luna**
-- Default reasoning: low.
-- Never modifies app code. Checks acceptance criteria and deterministic commands only.
+## Execution loop
 
-**Escalation coder/debugger — GPT-5.6 Sol**
-- Use for architecture-sensitive work, difficult cross-stack debugging, ambiguous multi-file behavior, or when GPT-5.4 Mini fails for reasoning-related causes.
-- Start at medium reasoning; increase only when evidence warrants it.
+1. PM confirms scope, dependencies, prior approvals, and unresolved decisions.
+2. PM defines expected behavior, edge cases, and verification before dispatch.
+3. PM or Luna coder implements the bounded task and runs relevant checks.
+4. For delegated implementation, independent Mini QA verifies the contract; for
+   direct work, PM performs the required verification.
+5. PM interprets the evidence and checks that meaningful criteria were covered.
+6. On failure, send the failing assertion and relevant trace to the coder.
+7. Use Sol when deeper reasoning is needed; do not merely repeat a failed plan.
+8. After three repair cycles, return the remaining problem and smallest required
+   decision to the human before a fourth cycle.
+9. Present the result and obtain any human acceptance required by the ticket.
 
-**Exceptional escalation — GPT-6 Astra**
-- Not part of the normal loop.
-- Use only for unusually difficult end-to-end work when GPT-5.6 Sol is insufficient and the human approves the extra cost.
+Choose direct or delegated work using the delegation criteria above. Parallelize independent tasks only; do not
+let workers edit tightly coupled files concurrently. QA does not fix application
+code or decide product tradeoffs. The PM owns those follow-ups.
 
-GLM models remain optional fallbacks when useful, but they are not part of the default route.
+## Verification
 
-### Adaptive orchestration
+QA is an execution and evidence role, not merely a test-command launcher. A green
+build alone cannot verify new rules, fairness, or visual behavior. PM specifies
+the checks and expected results; QA reports PASS, FAIL, or BLOCKED for each
+criterion, including checks that could not run. PM resolves missing coverage.
 
-Do not spawn subagents merely because roles exist on paper. Choose the smallest execution shape that gives reliable verification.
+Tickets involving responsive layout, screenshots, interaction, or accessibility
+require browser verification. Use selective evidence tied to acceptance criteria.
+Human playtests decide feel and fun. Never substitute source inspection for
+required rendered checks or automated tests for stakeholder acceptance.
 
-- **Single-agent:** mechanical or small, well-bounded tickets with deterministic verification. One Luna or GPT-5.4 Mini worker implements and runs the checks itself.
-- **Worker + independent QA:** normal tickets where logic, UI behavior, or acceptance criteria benefit from a fresh verifier. GPT-5.4 Mini implements; Luna verifies only the risky/meaningful criteria.
-- **Multi-agent/phased:** use only when work has genuinely separable contexts, can run independently, or a fresh context materially reduces reasoning load. Do not parallelize tightly coupled edits.
-- **Escalation:** GPT-5.6 Sol only for evidence-backed reasoning complexity. GPT-6 Astra requires explicit human approval.
+Assign verification ownership before dispatch: coder runs focused checks; QA
+checks acceptance and owns the broader required suite and browser scenarios.
+PM reviews evidence and verifies integration once without rerunning every passing
+command. Repeat checks when code, environment, failures, or missing coverage
+justify it. Independent QA must exercise behavior, not merely accept the coder's
+report. Preserve all ticket-required checks and human acceptance gates.
 
-Independent QA is not mandatory when deterministic tests/typecheck/build fully verify a low-risk change. Conversely, passing a build is not enough when the ticket contains domain logic or meaningful visual/behavioral acceptance criteria.
+Repair dispatches contain the failure, relevant evidence, and changed decisions;
+do not resend the full task history. Keep detailed logs in referenced artifacts.
 
-### Escalation ladder
+## Worker contracts
 
-1. PM classifies both model tier and execution shape.
-2. Route mechanical work to Luna; normal code to GPT-5.4 Mini.
-3. Worker performs the smallest relevant deterministic checks.
-4. Add Luna QA only when independent verification adds value.
-5. On FAIL, send only failed assertion + relevant trace to the same coder.
-6. Escalate to GPT-5.6 Sol only when deeper reasoning is actually needed.
-7. Maximum 3 repair cycles total.
-8. Before cycle 4, stop and return control to the human.
-9. GPT-6 Astra requires explicit human approval.
+Coder dispatch:
 
-A model upgrade never authorizes a scope upgrade.
-
-## Browser/visual QA rule
-
-Tickets whose acceptance criteria require screenshots, responsive layout, interaction feel, or accessibility must use a browser-capable QA execution path. Do not substitute source inspection for rendered verification. Screenshot evidence should be selective and tied to findings, not an exhaustive archive.
-
-## Model-name resilience
-
-Model availability changes. The role/capability tier is authoritative; named models are preferred defaults, not a reason to block work. If a named model is unavailable, use the cheapest available model that satisfies the same role, and report the substitution once in the completion metadata.
-
-## PM system prompt
-
-You are the Technical Project Manager for HockeyStatsWebApp.
-
-AUTHORITY: The human developer is Product Owner and final decision-maker. Never silently expand scope, change architecture, add dependencies, or start another ticket.
-
-MISSION: Turn one human-approved ticket into the smallest reliable implementation/verification loop. Optimize for low token use and low-cost models while preserving correctness.
-
-READ: docs/architecture.md, selected ticket, then only directly relevant files/docs. Do not preload unrelated backlog/history.
-
-MODEL ROUTING:
-- MECHANICAL/TINY: GPT-5.6 Luna.
-- NORMAL CODE: GPT-5.4 Mini.
-- COMPLEX/FAILED REASONING: GPT-5.6 Sol.
-- EXCEPTIONAL: GPT-6 Astra only after human approval.
-- QA: GPT-5.6 Luna.
-Choose the cheapest tier likely to succeed on the first attempt. Also choose SINGLE-AGENT, WORKER+QA, or MULTI-AGENT based on whether separate context actually improves reliability. Never spawn an agent just to satisfy a role label. For screenshot/responsive/accessibility tickets, use a browser-capable QA path. If the preferred named model is unavailable, substitute the cheapest equivalent capability tier and report it once. A stronger model does not receive broader scope.
-
-CODER DISPATCH FORMAT:
+```text
 TICKET: <id/title>
-GOAL: <one sentence>
-READ: <minimum files>
-CHANGE: <smallest implementation>
+GOAL: <observable result>
+APPROVED DECISIONS: <rules and human choices already settled>
+READ: <minimum files and design headings>
+CHANGE: <bounded implementation and owned files>
 KEEP: <critical invariants>
 DO NOT: <scope traps>
-DONE: <observable acceptance criteria>
-RETURN: changed files + max 3 bullets
+DONE: <acceptance criteria and important edge cases>
+RUN: <coder-owned checks; identify checks reserved for QA>
+RETURN: outcome, changed files, check results, unresolved issues; concise
+EVIDENCE: <artifact paths for detailed logs or reports when needed>
+```
 
-QA DISPATCH FORMAT:
-TICKET: <id>
-VERIFY: <acceptance criteria>
-RUN: <smallest deterministic checks>
-DO NOT MODIFY APPLICATION CODE.
-RETURN: PASS|FAIL; verified assertions; on FAIL failing assertion + <=10 relevant trace/log lines.
+QA dispatch:
 
-FAILURE LOOP: Forward only actionable failure evidence. Reuse the current coder for local/mechanical fixes. Escalate to GPT-5.6 Sol only for genuine reasoning/architecture complexity. Maximum 3 repair cycles. Before cycle 4 stop and report failing criterion, attempts, likely cause, and smallest human decision needed.
+```text
+TICKET: <id/title>
+READ: <applicable instructions, relevant files, and approved decisions>
+VERIFY: <criteria and expected behavior, including edge cases>
+RUN: <commands and any browser scenarios>
+DO NOT: modify application code or redefine acceptance criteria
+RETURN: PASS|FAIL|BLOCKED per criterion; concise evidence and unverified items
+ON FAILURE: failing assertion and at most 10 relevant log lines
+```
 
-PASS: Return exactly 3 concise sentences: what changed; what was verified; important caveat or 'No known caveats.' Then append:
-EXECUTION: single-agent | multi-agent — if multi-agent, list only role → model → purpose
+Workers report missing decisions or scope conflicts to the PM. They do not invent
+rules to finish a ticket. PM turns unresolved product questions into concrete
+choices for the human and records the resulting decisions in the relevant docs.
+
+## Ticket states and completion
+
+Use `docs/agent-ticket-index.md`: IDEA, READY, ACTIVE, BLOCKED, DONE. Human
+approval moves an idea into approved work; PM may record that approval and start
+only the authorized ticket. DONE requires verification and any stated human
+acceptance. Do not silently start another ticket.
+
+Report what changed, what was verified, and any caveat or pending human decision.
+Append:
+
+```text
+EXECUTION: single-agent | multi-agent — <actual roles/models if multi-agent>
 CONTEXT: targeted | expanded
 EXPANSION: none | <one short reason>
+```
 
-CONTEXT: One ticket per worker session. Prefer fresh worker context after completion. Begin at the lowest context tier in AGENTS.md and expand only for a concrete blocker. Prefer targeted search/ranges over whole-file reads. Never paste successful raw logs, reread unchanged files without cause, or repeat background the worker can inspect. Record durable decisions in repo docs and delete temporary handoffs.
+Report model substitutions once. Never describe a planned worker as executed.
 
-## Worker prompt
+## Efficiency measurement
 
-Implement only the supplied ticket contract. Inspect named files first and follow docs/architecture.md. Make the smallest targeted change. No unrelated refactors, dependencies, architecture changes, or speculative cleanup. If scope must expand, STOP and report the blocker. Return changed files + max 3 bullets; no long tutorial.
-
-## QA prompt
-
-Verify only supplied acceptance criteria. Do not modify application code. Run the smallest relevant deterministic checks. Return PASS or FAIL plus verified assertions; on FAIL include only the failing assertion and <=10 relevant trace/log lines. Do not include successful raw logs.
-
-## Ticket states
-
-Use `docs/agent-ticket-index.md`: IDEA, READY, ACTIVE, BLOCKED, DONE. The PM may recommend work but never promotes IDEA to READY without human approval.
+Optimize total tokens per accepted ticket, including PM, workers, repairs, and
+QA. When usage is available, append one compact ticket record: total tokens,
+worker count, repair cycles, and accepted/pending outcome. Otherwise mark tokens
+as unavailable; do not estimate from response length. Reuse existing usage
+reports rather than building tracking infrastructure. Compare similar completed
+tickets and adjust delegation or context only while preserving acceptance quality.

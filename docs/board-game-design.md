@@ -1,5 +1,11 @@
 # Rink Quest — Board Game Design (MVP)
 
+> This document describes the currently implemented game. The approved future
+> direction and replacement tickets for **Opening Night 2.0** live in
+> [`opening-night-2-design.md`](./opening-night-2-design.md) and
+> [`agent-ticket-index.md`](./agent-ticket-index.md). Until a 2.0 ticket lands,
+> the rules below remain authoritative for runtime behavior.
+
 Single-player hockey board game at `/#/board-game`. You (Blue) play the CPU (Red). Movement uses dice, and contact is settled by a Slay-the-Spire-style card duel. **The first goal wins.** Every tunable number lives in `react/src/features/board-game/data/balance.ts`. Chris owns the balance numbers.
 
 Status key: **[C]** = decided by Chris, **[PM]** = PM default that Chris may override.
