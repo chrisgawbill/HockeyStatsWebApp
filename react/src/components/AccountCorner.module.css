@@ -3,3 +3,10 @@
   align-items: center;
   gap: var(--ds-space-2);
 }
+
+/* In the phone top bar the bell and avatar are spaced as separate items. */
+@media (max-width: 576px) {
+  .corner {
+    display: contents;
+  }
+}

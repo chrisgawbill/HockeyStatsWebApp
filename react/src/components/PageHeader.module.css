@@ -361,9 +361,12 @@
     display: none;
   }
 
+  /* Back button, season selector, bell, and avatar share the row with even
+     space between and around them. */
   .nav-secondary-row {
     display: flex;
     align-items: center;
+    justify-content: space-evenly;
     gap: var(--ds-space-1);
     width: 100%;
     min-height: 64px;
@@ -372,11 +375,12 @@
   .nav-mobile-back {
     display: flex;
     align-items: center;
-    /* Spacer: pushes the season selector and account controls right, even
-       on top-level pages where it holds no back button. */
-    flex: 1 1 auto;
-    min-width: 0;
+    flex: 0 0 auto;
     gap: var(--ds-space-1);
+  }
+
+  .nav-mobile-back:empty {
+    display: none;
   }
 
   .nav-season-selector {
@@ -384,14 +388,10 @@
     min-width: 0;
   }
 
-  .nav-secondary-utility {
-    display: flex;
-    align-items: center;
-    flex: 0 0 auto;
-  }
-
-  .nav-secondary-utility:empty {
-    display: none;
+  /* Flattened so each account control is its own evenly spaced item. */
+  .nav-secondary-utility,
+  .nav-secondary-row .nav-corner {
+    display: contents;
   }
 
   /* MD3 icon button: 40px visual, 48px touch target. */
