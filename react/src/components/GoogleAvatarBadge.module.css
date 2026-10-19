@@ -97,13 +97,3 @@
 .dropdownItem:focus-visible {
   background: color-mix(in srgb, var(--color-primary) 12%, transparent);
 }
-
-/* The nav bar docks to the bottom of the viewport on mobile, so the menu
-   has to open upward from the badge instead of downward off-screen. */
-@media (max-width: 576px) {
-  .dropdown {
-    top: auto;
-    bottom: 100%;
-    padding: var(--ds-space-1) var(--ds-space-1) 6px;
-  }
-}

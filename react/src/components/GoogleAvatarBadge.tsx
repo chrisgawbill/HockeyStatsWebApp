@@ -1,4 +1,10 @@
-import { useState, type KeyboardEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from 'react';
 import styles from '@/components/GoogleAvatarBadge.module.css';
 
 export interface GoogleAvatarBadgeProps {
@@ -20,7 +26,25 @@ export default function GoogleAvatarBadge({
   onSignOut,
 }: GoogleAvatarBadgeProps) {
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const initial = email.charAt(0).toUpperCase();
+
+  // Touch has no hover to leave, so a tap outside closes the menu.
+  useEffect(() => {
+    if (!open) return;
+    function closeOnOutsidePointer(e: globalThis.PointerEvent) {
+      if (!wrapperRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    return () =>
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+  }, [open]);
+
+  // Hover opens the menu for a mouse only: a tap fires enter and then click,
+  // and the click's toggle would immediately close what the enter opened.
+  function handlePointerHover(e: PointerEvent<HTMLDivElement>, next: boolean) {
+    if (e.pointerType === 'mouse') setOpen(next);
+  }
 
   function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'Escape') setOpen(false);
@@ -28,9 +52,10 @@ export default function GoogleAvatarBadge({
 
   return (
     <div
+      ref={wrapperRef}
       className={styles.wrapper}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onPointerEnter={(e) => handlePointerHover(e, true)}
+      onPointerLeave={(e) => handlePointerHover(e, false)}
       onKeyDown={handleKeyDown}
     >
       <button
