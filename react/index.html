@@ -2,7 +2,10 @@
 <html lang="en" class="ds-scrollbar">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#3f5f90" />
     <meta name="description" content="Hockey Stats Web App" />
     <link rel="manifest" href="%BASE_URL%manifest.json" />
@@ -17,7 +20,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Hockey Stats" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <!-- Installed iOS app: draw under the status bar so the (team-tinted) top
+         nav fills it; the bars pad themselves with safe-area insets. -->
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <title>Hockey Stats</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
