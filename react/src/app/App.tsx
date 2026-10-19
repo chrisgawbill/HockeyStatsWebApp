@@ -6,6 +6,7 @@ import { StandingsDataProvider } from '@/features/standings/hooks/StandingsConte
 import { StatLeadersProvider } from '@/features/stat-leaders/hooks/StatLeadersContext';
 import { ListOfTeamsDataProvider } from '@/features/teams/hooks/ListOfTeamsContext';
 import { ErrorBoundary, getErrorMessage } from 'react-error-boundary';
+import InstallBanner from '@/features/install-prompt/components/InstallBanner';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 
@@ -49,6 +50,7 @@ const BoardGamePage = lazy(
 export default function App() {
   return (
     <HashRouter>
+      <InstallBanner />
       <SeasonProvider>
         <StandingsDataProvider>
           <ListOfGamesProvider>

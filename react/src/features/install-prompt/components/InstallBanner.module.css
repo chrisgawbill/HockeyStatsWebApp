@@ -1,0 +1,134 @@
+/* Mobile-only: the component never renders above 576px, this is a backstop. */
+.banner,
+.card {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--mobile-chrome-height, 0px) + 10px);
+  z-index: 95;
+  box-sizing: border-box;
+  border-radius: 16px;
+  border: 1px solid var(--color-divider);
+  background: var(--ds-color-surface-container-high);
+  color: var(--color-text);
+  box-shadow: var(--ds-elevation-2);
+  animation: install-enter 220ms ease-out;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 8px 10px 12px;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 8px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.title,
+.subtitle {
+  margin: 0;
+}
+
+.title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.subtitle {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.25;
+}
+
+.action,
+.gotIt {
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--ds-color-on-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.action {
+  flex: none;
+  min-height: 36px;
+  padding: 0 16px;
+}
+
+.dismiss {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.action:focus-visible,
+.gotIt:focus-visible,
+.dismiss:focus-visible,
+.stepsHeading:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.card {
+  padding: 16px;
+}
+
+.stepsHeading {
+  margin: 0 0 8px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.steps {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  line-height: 1.7;
+}
+
+.shareIcon {
+  display: inline-block;
+  vertical-align: -3px;
+}
+
+.gotIt {
+  width: 100%;
+  min-height: 44px;
+}
+
+@keyframes install-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner,
+  .card {
+    animation: none;
+  }
+}

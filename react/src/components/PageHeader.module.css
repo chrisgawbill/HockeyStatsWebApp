@@ -456,8 +456,19 @@
        the last row of page content can scroll clear of both. */
     padding-bottom: calc(
       var(--mobile-chrome-height) + var(--mobile-search-fab-size) +
-        var(--mobile-search-fab-offset)
+        var(--mobile-search-fab-offset) + var(--install-banner-space, 0px)
     );
+  }
+
+  /* Install banner (features/install-prompt) sets data-install-banner on body:
+     'banner' reserves its height (64px card + 10px gap) and lifts the FAB
+     above it; 'steps' (iOS instruction card) hides the FAB. */
+  body[data-install-banner='banner'] {
+    --install-banner-space: 74px;
+  }
+
+  body[data-install-banner='steps'] .mobile-search-fab {
+    display: none;
   }
 
   /*
@@ -623,7 +634,10 @@
     position: fixed;
     isolation: isolate;
     right: var(--mobile-search-fab-offset);
-    bottom: calc(var(--mobile-chrome-height) + var(--mobile-search-fab-offset));
+    bottom: calc(
+      var(--mobile-chrome-height) + var(--mobile-search-fab-offset) +
+        var(--install-banner-space, 0px)
+    );
     width: var(--mobile-search-fab-size);
     height: var(--mobile-search-fab-size);
     border-radius: var(--ds-radius-large);
