@@ -132,6 +132,8 @@ html {
 
 body {
   margin: 0;
+  /* viewport-fit=cover: keep content clear of a landscape notch. */
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
   overflow-x: clip;
   background-color: var(--color-bg);
   color: var(--color-text);
