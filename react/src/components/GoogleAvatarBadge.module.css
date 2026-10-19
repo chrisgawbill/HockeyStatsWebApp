@@ -5,8 +5,8 @@
 /* Matches PageHeader's Aero-glass nav-back-btn chrome (same size, glossy
    gradient ring): this renders inside the shared global nav bar. */
 .badge {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: linear-gradient(
@@ -43,7 +43,7 @@
 
 .initial {
   font-family: 'Roboto', sans-serif;
-  font-size: 0.8rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: white;
 }
@@ -96,14 +96,4 @@
 .dropdownItem:hover,
 .dropdownItem:focus-visible {
   background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-}
-
-/* The nav bar docks to the bottom of the viewport on mobile, so the menu
-   has to open upward from the badge instead of downward off-screen. */
-@media (max-width: 576px) {
-  .dropdown {
-    top: auto;
-    bottom: 100%;
-    padding: var(--ds-space-1) var(--ds-space-1) 6px;
-  }
 }
