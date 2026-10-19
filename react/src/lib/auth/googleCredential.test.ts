@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeGoogleProfile } from '@/features/board-game/data/googleCredential';
+import { decodeGoogleProfile } from '@/lib/auth/googleCredential';
 
 function makeCredential(payload: Record<string, unknown>): string {
   const base64url = (obj: unknown) =>

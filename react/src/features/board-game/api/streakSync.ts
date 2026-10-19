@@ -1,39 +1,6 @@
-import { ApiError, get, post, put } from '@/lib/apiClient';
+import { get, put } from '@/lib/apiClient';
+import { authHeader } from '@/lib/auth/authApi';
 import type { StreakData } from '@/features/board-game/data/dailyStreak';
-
-function authHeader(token: string) {
-  return { headers: { Authorization: `Bearer ${token}` } };
-}
-
-/** Exchanges a Google Identity Services credential for an app session token. */
-export async function googleSignIn(
-  credential: string,
-): Promise<{ token: string; email: string }> {
-  return post<{ token: string; email: string }>('/api/auth/google', {
-    credential,
-  });
-}
-
-/**
- * Resolves a stored session token to the signed-in user's email, or `null`
- * for an expired/invalid session.
- */
-export async function fetchSession(
-  token: string,
-): Promise<{ email: string } | null> {
-  try {
-    return await get<{ email: string }>(
-      '/api/auth/me',
-      undefined,
-      authHeader(token),
-    );
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      return null;
-    }
-    throw error;
-  }
-}
 
 /** Fetches the signed-in user's server-side streak backup. */
 export async function fetchRemoteStreak(token: string): Promise<StreakData> {

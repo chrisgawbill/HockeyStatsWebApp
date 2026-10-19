@@ -12,6 +12,7 @@ import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { localTeamList } from '@/lib/teamListData';
 import { useTheme } from '@/lib/ThemeContext';
 import SeasonSelector from '@/components/SeasonSelector';
+import AccountCorner from '@/components/AccountCorner';
 import styles from '@/components/PageHeader.module.css';
 
 /**
@@ -189,14 +190,16 @@ function normalizeNavPath(path: string): string {
 
 export interface PageHeaderProps {
   /**
-   * Optional content rendered in a small fixed-size slot after the nav
-   * items (e.g. the board game's Google sign-in avatar badge). PageHeader
-   * itself has no idea what this is — it just reserves the corner.
+   * Content for the small slot after the nav items. Defaults to the
+   * site-wide account controls (Google sign-in, After Action Report bell,
+   * avatar menu); pass `null` to leave the corner empty.
    */
   corner?: ReactNode;
 }
 
-export default function PageHeader({ corner }: PageHeaderProps = {}) {
+export default function PageHeader({
+  corner = <AccountCorner />,
+}: PageHeaderProps = {}) {
   const location = useLocation();
   const { pathname } = location;
   const navigate = useNavigate();

@@ -39,6 +39,8 @@ acceptance are both necessary for DONE.
 | ON2-11 | Readable hand/battle mockup, then touch and keyboard interaction review. |
 | ON2-12 | Ordinary/rivalry reveals, pregame/faceoff/shot/goal camera examples and durations, and reduced-motion treatment. |
 | ON2-13 | Simulation protocol and material-advantage threshold before evaluation; final playtest and release acceptance. |
+| AAR-01 | Product Owner review of favorite star, header bell/inbox, report wording, and browser-alert opt-in on a real deploy. |
+| AAR-02 | PWA vs. React Native, alert timing after the final horn, and the external scheduler before any push work. |
 
 ## Dependency outline
 
@@ -725,3 +727,77 @@ redesign, speculative analytics infrastructure.
 
 **Verify:** full tests/typecheck/build/format; documented simulation report;
 selective browser evidence; Product Owner playtest acceptance.
+
+---
+
+## AAR-01 — Favorite teams and After Action Report inbox
+
+**Status:** ACTIVE — implemented; awaiting Product Owner acceptance
+
+**Goal:** A signed-in user favorites a team and gets an "After Action Report"
+after each of its games; choosing one opens that game's detail page.
+
+**Approved decisions:**
+
+- Google account sign-in is site-wide (Product Owner, architecture approval).
+- Delivery is an in-app inbox plus browser alerts while a tab is open
+  (Product Owner). Mobile push is AAR-02.
+- Multiple favorites are allowed. A favorite reports games that started no
+  more than 12 hours before it was favorited (tonight's game counts even when
+  favorited after the final horn; no season back catalogue). A game between two favorites
+  yields one report written from the first favorite's side. Inbox keeps the 25
+  newest reports.
+- Browser alerts need an explicit "Turn on browser alerts" click; each game
+  alerts once per browser; several new games roll into one alert. Clicking an
+  alert opens the game and marks it read.
+
+**Backend (HockeyStatsAPI):** migration `003_create_favorite_teams_and_report_reads.sql`;
+`slices/afterActionReports`; routes `/api/favorites` and
+`/api/after-action-reports` (see that repo's README). Reports overlay the
+12-hour season club schedule with a 10-minute current-week club schedule so a
+final shows up within about 10 minutes plus the client's 5-minute refresh.
+
+**Frontend:** `lib/auth` (site-wide session, moved from Rink Quest),
+`components/AccountCorner`, `features/after-action-reports`, star in `TeamHero`.
+
+**Verification so far:** API unit/route tests and a real-Postgres run of the
+repository SQL; frontend unit tests; Playwright run against a mocked API
+covering signed-out hint, header sign-in, favorite/unfavorite, unread badge,
+inbox to game navigation and read receipts, mark-all-read, browser-alert
+opt-in/new-game alert/click-through, Rink Quest streak sync on the shared
+session, phone layout without horizontal scroll, dark theme.
+
+**Deploy steps:** run `pnpm run db:migrate` on the API before releasing the
+frontend. `GOOGLE_OAUTH_CLIENT_ID` / `SESSION_JWT_SECRET` / `VITE_GOOGLE_CLIENT_ID`
+are already required by Rink Quest sign-in.
+
+**Acceptance:** Product Owner signs in on the deployed site, favorites a team,
+and confirms a real game's report appears, reads well, and opens the game.
+
+---
+
+## AAR-02 — Mobile push for After Action Reports
+
+**Status:** IDEA — needs Product Owner decision
+
+**Goal:** Ping a user's phone when a favorite's After Action Report is ready,
+even with the site closed.
+
+**Recommendation:** Installable PWA with Web Push rather than React Native.
+It reuses this codebase, the GitHub Pages deploy, the Google session, and the
+AAR-01 inbox/read receipts; Android and iOS 16.4+ (home-screen installed)
+deliver Web Push. React Native means a second app, store review, and native
+push credentials for the same notification.
+
+**Likely scope:** web manifest + icons and a service worker (`base:
+/HockeyStatsWebApp/`); VAPID keys; a `push_subscriptions` table and
+subscribe/unsubscribe routes; a "sent" ledger so each report pushes once; an
+external scheduler (e.g. GitHub Actions cron every 10 minutes during game
+windows) calling a secured API endpoint, because the hosted API sleeps when
+idle; notification click opens `#/game/:gameId`.
+
+**Decisions needed:** PWA vs. React Native; acceptable delay after the final
+horn (drives cron cadence/cost); per-team mute or quiet hours.
+
+**Dependencies:** AAR-01 accepted.
+

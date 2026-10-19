@@ -1,5 +1,5 @@
 import { useState, type KeyboardEvent } from 'react';
-import styles from '@/features/board-game/components/GoogleAvatarBadge.module.css';
+import styles from '@/components/GoogleAvatarBadge.module.css';
 
 export interface GoogleAvatarBadgeProps {
   email: string;
@@ -9,8 +9,8 @@ export interface GoogleAvatarBadgeProps {
 }
 
 /**
- * Small circular sign-in status badge for the global nav bar (rendered via
- * `PageHeader`'s `corner` slot from `BoardGamePage`). Stays visible while
+ * Small circular sign-in status badge for the global nav bar (rendered by
+ * `PageHeader`'s account corner on every page). Stays visible while
  * signed in; hovering (or clicking, for touch/keyboard) opens a small menu
  * with the "Sign out" action, rather than signing out on a plain click.
  */

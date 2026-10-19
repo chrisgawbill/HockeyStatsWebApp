@@ -1,0 +1,56 @@
+.wrapper {
+  position: relative;
+  margin-left: auto;
+}
+
+/* Sits on the team hero's colored gradient, so it uses white glass chrome
+   rather than surface colors. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.button[aria-pressed='true'] {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1a1a1a;
+}
+
+.button[aria-pressed='true'] svg {
+  color: #f5b301;
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.hint {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: min(260px, calc(100vw - 32px));
+  margin: 0;
+  padding: var(--ds-space-2);
+  border-radius: var(--ds-radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--ds-elevation-1);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  z-index: 20;
+}

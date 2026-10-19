@@ -8,7 +8,7 @@ export interface GoogleProfile {
  * Decodes the payload of a Google Identity Services ID token (a JWT) to read
  * display-only profile fields (avatar picture, name) for the sign-in badge.
  * Purely local/cosmetic: identity itself is established by the backend's
- * `verifyIdToken` check (`api/src/platform/googleAuthClient.js`), not by
+ * `verifyIdToken` check (HockeyStatsAPI `src/platform/googleAuthClient.js`), not by
  * anything read here — a forged/tampered credential would just show a wrong
  * or missing picture, never grant access.
  */

@@ -66,7 +66,7 @@ function urlFor(path: string, params?: QueryParams): string {
 }
 
 async function request<T>(
-  method: 'GET' | 'POST' | 'PUT',
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   path: string,
   data?: unknown,
   params?: QueryParams,
@@ -177,4 +177,12 @@ export function put<T>(
   options?: RequestOptions,
 ): Promise<T> {
   return send(() => request<T>('PUT', path, data, undefined, options));
+}
+
+/**
+ * Shared DELETE wrapper: returns `response.data`, and logs then re-throws so
+ * callers keep their own error UI.
+ */
+export function del<T>(path: string, options?: RequestOptions): Promise<T> {
+  return send(() => request<T>('DELETE', path, undefined, undefined, options));
 }

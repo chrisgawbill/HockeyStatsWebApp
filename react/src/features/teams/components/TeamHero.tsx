@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { TeamOverview } from '@/features/teams/types/teamPageTypes';
 import { localTeamList } from '@/lib/teamListData';
+import FavoriteTeamButton from '@/features/after-action-reports/components/FavoriteTeamButton';
 import styles from '@/features/teams/components/TeamPage.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
@@ -70,6 +71,7 @@ export default function TeamHero({ team }: TeamHeroProps) {
             {team.name}
           </span>
         </nav>
+        <FavoriteTeamButton triCode={team.triCode} teamName={team.name} />
       </div>
       <div className={styles['team-hero__body']}>
         <img

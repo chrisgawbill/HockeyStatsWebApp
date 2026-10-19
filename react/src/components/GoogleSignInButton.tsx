@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import styles from '@/features/board-game/components/GoogleSignInButton.module.css';
+import styles from '@/components/GoogleSignInButton.module.css';
+
+type GoogleButtonSize = 'large' | 'medium' | 'small';
 
 interface GoogleIdConfiguration {
   client_id: string;
@@ -8,8 +10,8 @@ interface GoogleIdConfiguration {
 interface GoogleButtonConfiguration {
   type: 'standard';
   theme: 'outline' | 'filled_black';
-  size: 'large';
-  text: 'signin_with';
+  size: GoogleButtonSize;
+  text: 'signin_with' | 'signin';
   shape: 'pill';
   logo_alignment: 'left';
 }
@@ -31,6 +33,15 @@ declare global {
 
 export interface GoogleSignInButtonProps {
   onCredential: (credential: string) => void;
+  /** Google's button size; `small` also shortens the label to "Sign in". */
+  size?: GoogleButtonSize;
+  /** Extra frame styling, e.g. Rink Quest's pixel border. */
+  className?: string;
+  unavailableClassName?: string;
+}
+
+function cx(...classes: (string | false | null | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
 }
 
 function isGoogleIdentityReady(): boolean {
@@ -48,16 +59,20 @@ function resolveGoogleButtonTheme(): 'outline' | 'filled_black' {
   return prefersDark ? 'filled_black' : 'outline';
 }
 
-/** Renders Google's branded sign-in button inside the game's frame. */
+/**
+ * Renders Google's branded sign-in button (Google Identity Services). Used in
+ * the global header and on Rink Quest; the credential goes to `useAuth().signIn`.
+ */
 export default function GoogleSignInButton({
   onCredential,
+  size = 'large',
+  className,
+  unavailableClassName,
 }: GoogleSignInButtonProps) {
   const slotRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(isGoogleIdentityReady());
 
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as
-    | string
-    | undefined;
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 
   useEffect(() => {
     if (ready || !clientId) return;
@@ -80,26 +95,28 @@ export default function GoogleSignInButton({
       window.google!.accounts.id.renderButton(slotRef.current, {
         type: 'standard',
         theme: resolveGoogleButtonTheme(),
-        size: 'large',
-        text: 'signin_with',
+        size,
+        text: size === 'small' ? 'signin' : 'signin_with',
         shape: 'pill',
         logo_alignment: 'left',
       });
     } catch (error) {
       console.error('Failed to render Google Sign-In button:', error);
     }
-  }, [ready, clientId, onCredential]);
+  }, [ready, clientId, onCredential, size]);
 
   if (!clientId) {
     return (
-      <div className={styles.frame}>
-        <span className={styles.unavailable}>Sign-in unavailable</span>
+      <div className={cx(styles.frame, className)}>
+        <span className={cx(styles.unavailable, unavailableClassName)}>
+          Sign-in unavailable
+        </span>
       </div>
     );
   }
 
   return (
-    <div className={styles.frame}>
+    <div className={cx(styles.frame, className)}>
       <div ref={slotRef} className={styles.slot} />
     </div>
   );
