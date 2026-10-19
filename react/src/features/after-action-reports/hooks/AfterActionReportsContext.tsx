@@ -42,6 +42,7 @@ export interface AfterActionReportsState {
   unreadCount: number;
   alertPermission: AlertPermission;
   isFavorite: (triCode: string) => boolean;
+  /** Rejects after restoring the previous favorites when the save fails. */
   toggleFavorite: (triCode: string) => Promise<void>;
   /** Marks a report read; the caller navigates to the game. */
   markRead: (gameId: number) => void;
@@ -190,6 +191,7 @@ export function AfterActionReportsProvider({
       } catch (error) {
         console.error('Failed to update favorite team:', error);
         setFavorites(previous);
+        throw error;
       }
     },
     [token, favorites, refreshReports],
