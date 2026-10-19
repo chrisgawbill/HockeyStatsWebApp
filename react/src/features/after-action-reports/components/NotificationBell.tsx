@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAfterActionReports } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 import type { AfterActionReport } from '@/features/after-action-reports/types/afterActionReport';
@@ -99,6 +99,7 @@ export default function NotificationBell() {
   } = useAfterActionReports();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,8 +109,19 @@ export default function NotificationBell() {
     const onPointerDown = (event: PointerEvent) => {
       if (!wrapperRef.current?.contains(event.target as Node)) setOpen(false);
     };
+    // Listen on document: focus can drop to <body> (e.g. "Mark all read"
+    // unmounts), so a wrapper-level handler would miss Escape.
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setOpen(false);
+      bellRef.current?.focus();
+    };
     document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [open]);
 
   const openReport = (report: AfterActionReport) => {
@@ -125,8 +137,10 @@ export default function NotificationBell() {
     });
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') setOpen(false);
+  const handleMarkAllRead = () => {
+    markAllRead();
+    // The button unmounts once nothing is unread; keep focus on the bell.
+    bellRef.current?.focus();
   };
 
   const label =
@@ -135,9 +149,10 @@ export default function NotificationBell() {
       : 'After Action Reports';
 
   return (
-    <div className={styles.wrapper} ref={wrapperRef} onKeyDown={handleKeyDown}>
+    <div className={styles.wrapper} ref={wrapperRef}>
       <button
         type="button"
+        ref={bellRef}
         className={styles.bell}
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="menu"
@@ -161,7 +176,7 @@ export default function NotificationBell() {
               <button
                 type="button"
                 className={styles.textButton}
-                onClick={markAllRead}
+                onClick={handleMarkAllRead}
               >
                 Mark all read
               </button>
