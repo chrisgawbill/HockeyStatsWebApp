@@ -6,7 +6,7 @@ import {
   useSkaterLeaderData,
   useGoalieLeaderData,
 } from '@/features/stat-leaders/hooks/StatLeadersContext';
-import { useDraftLotteryOddsData } from '@/features/standings/hooks/StandingsContext';
+import { useStandingsData } from '@/features/standings/hooks/StandingsContext';
 import DraftLotteryOddsRow from '@/features/draft-lottery/components/DraftLotteryOddsRow';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
@@ -38,10 +38,15 @@ export default function LandingPage() {
     errorGoalieLeaderData,
     retryGoalieLeaderData,
   } = useGoalieLeaderData();
-  const draftLotteryOddsData = useDraftLotteryOddsData();
+  const {
+    draftLotteryOdds: draftLotteryOddsData,
+    loadingStandingsData,
+    errorStandingsData,
+    refetchStandings,
+  } = useStandingsData();
 
   const loading =
-    loadingSkaterLeaderData || loadingGoalieLeaderData || !draftLotteryOddsData;
+    loadingSkaterLeaderData || loadingGoalieLeaderData || loadingStandingsData;
   // Skater and goalie leaders are fetched independently; a single provider
   // only reports an error once every category within it has failed, so
   // either one being non-null already means the stat-leaders API is down
@@ -50,11 +55,14 @@ export default function LandingPage() {
 
   /**
    * Re-runs both stat-leader fetches together since this page renders a
-   * single combined error for either failing.
+   * single combined error for either failing. Standings usually fail in the
+   * same outage, and their section would otherwise stay on its own error after
+   * this retry succeeds, so a failed standings fetch is re-run too.
    */
   const retryStatLeaders = () => {
     retrySkaterLeaderData();
     retryGoalieLeaderData();
+    if (errorStandingsData) refetchStandings();
   };
 
   return (

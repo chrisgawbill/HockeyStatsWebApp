@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
@@ -40,6 +41,10 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
     [],
   );
   const { season } = useSeason();
+  const latestRequest = useRef(0);
+  // Games whose scores were already backfilled (or attempted) for the loaded
+  // season, so updatePastGames requests each game detail at most once.
+  const backfilledGameIds = useRef(new Set<number>());
 
   /**
    * Fetches the full schedule for one season, converts backend contracts into
@@ -49,16 +54,21 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
    * message for the UI instead of the raw API error.
    */
   const fetchGames = useCallback(async (seasonId: string) => {
+    const requestId = ++latestRequest.current;
+    const isStale = () => requestId !== latestRequest.current;
     setErrorListOfGamesData(null);
     try {
       const response = await GetScheduledGames(seasonId);
+      if (isStale()) return;
+      backfilledGameIds.current = new Set();
       setListOfGamesData(ConvertContractsToGames(response.games));
     } catch (error) {
+      if (isStale()) return;
       console.error('Error fetching games: ', error);
       setErrorListOfGamesData("Couldn't load the schedule.");
       setListOfGamesData([]);
     } finally {
-      setLoadingListOfGamesData(false);
+      if (!isStale()) setLoadingListOfGamesData(false);
     }
   }, []);
 
@@ -94,14 +104,22 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   /**
    * Finds completed games whose schedule entry lacks a score, fetches each game
    * detail payload, and swaps scored copies into `listOfGamesData`. This keeps
-   * stale schedule-cache rows useful without reloading the whole season.
+   * stale schedule-cache rows useful without reloading the whole season. Each
+   * game is attempted once per season load: the state update below re-runs
+   * this effect, and a game that still has no score (failed request, postponed
+   * game) would otherwise be re-requested in an endless loop.
    */
   const updatePastGames = useCallback(async () => {
     if (!loadingListOfGamesData) {
       const gamesThatNeedToUpdate: ScheduledGame[] = listOfGamesData.filter(
-        (game: ScheduledGame) => doesGameNeedToUpdate(game),
+        (game: ScheduledGame) =>
+          !backfilledGameIds.current.has(game.gameId) &&
+          doesGameNeedToUpdate(game),
       );
       if (gamesThatNeedToUpdate.length === 0) return;
+      for (const game of gamesThatNeedToUpdate) {
+        backfilledGameIds.current.add(game.gameId);
+      }
 
       const updatedGames = await Promise.all(
         gamesThatNeedToUpdate.map((game) => updateGame(game)),
@@ -111,6 +129,7 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
       for (const game of updatedGames) {
         if (game) updatedMap.set(game.gameId, game);
       }
+      if (updatedMap.size === 0) return;
 
       setListOfGamesData((prev) =>
         prev.map((g) => updatedMap.get(g.gameId) ?? g),

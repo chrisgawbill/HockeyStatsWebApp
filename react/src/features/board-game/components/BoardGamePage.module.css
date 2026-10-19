@@ -11,7 +11,9 @@
   .page {
     padding: var(--ds-space-2);
     gap: var(--ds-space-2);
-    height: calc(100svh - var(--mobile-chrome-height));
+    height: calc(
+      100svh - var(--mobile-top-chrome-height) - var(--mobile-chrome-height)
+    );
     overflow: hidden;
     box-sizing: border-box;
   }

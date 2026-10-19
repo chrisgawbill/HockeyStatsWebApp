@@ -327,66 +327,142 @@
   outline-offset: 2px;
 }
 
+/* Phone-only title for the top app bar; the desktop brand lives in .nav-left. */
+.nav-mobile-title {
+  display: none;
+}
+
+/* Phone-only MD3 navigation bar (see the media query below). */
+.mobile-nav-bar {
+  display: none;
+}
+
 @media (max-width: 576px) {
+  /*
+   * MD3 small top app bar: leading back action and title, trailing season
+   * selector and optional page action. Stays sticky at the top like the
+   * desktop header; destinations move to the bottom navigation bar.
+   */
   .nav-bar {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    margin: 0;
-    margin-bottom: 0;
-    padding: var(--ds-space-1) var(--ds-space-2)
-      calc(var(--ds-space-1) + env(safe-area-inset-bottom, 0px));
-    gap: 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
-    border-bottom: none;
+    margin-bottom: var(--ds-space-2);
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   .nav-inner {
     display: block;
     width: 100%;
     margin: 0;
-    padding: 0;
+    padding: 0 var(--ds-space-1);
+    box-sizing: border-box;
+  }
+
+  .nav-left,
+  .nav-right {
+    display: none;
   }
 
   .nav-secondary-row {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    display: flex;
     align-items: center;
+    gap: var(--ds-space-1);
     width: 100%;
-    padding: 0;
-    margin: 0;
-    min-height: 48px;
+    min-height: 64px;
   }
 
-  .nav-left {
-    display: none;
+  .nav-mobile-back {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: var(--ds-space-1);
   }
 
-  .nav-right {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    width: 100%;
+  .nav-mobile-title {
+    display: block;
+    min-width: 0;
+    padding-inline: var(--ds-space-2) 0;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.75rem;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .nav-season-selector {
-    grid-column: 2;
+    flex: 0 1 auto;
     min-width: 0;
   }
 
-  .nav-brand {
+  .nav-secondary-utility {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+
+  .nav-secondary-utility:empty {
     display: none;
+  }
+
+  /* MD3 icon button: 40px visual, 48px touch target. */
+  .nav-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    transition: transform var(--ds-motion-duration-short)
+      var(--ds-motion-easing-standard);
+  }
+
+  .nav-back-btn::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: inherit;
+    background: white;
+    opacity: 0;
+    transition: opacity var(--ds-motion-duration-short)
+      var(--ds-motion-easing-standard);
+  }
+
+  .nav-back-btn:hover::before {
+    opacity: var(--ds-state-hover-opacity);
+  }
+
+  .nav-back-btn:focus-visible::before,
+  .nav-back-btn:active::before {
+    opacity: 0.16;
+  }
+
+  .nav-back-btn:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.7);
+    outline-offset: -2px;
+  }
+
+  .nav-back-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .nav-corner {
+    padding: 0;
   }
 
   body {
     /* The search FAB's real size and offset, shared with .mobile-search-fab
        below so the reserved space always matches the button. */
-    --mobile-search-fab-size: 54px;
+    --mobile-search-fab-size: 56px;
     --mobile-search-fab-offset: var(--ds-space-3);
     /* Reserve the fixed bottom nav plus the floating search FAB above it so
        the last row of page content can scroll clear of both. */
@@ -396,108 +472,148 @@
     );
   }
 
-  .nav-back-col {
-    display: none;
-  }
-
-  .nav-mobile-back,
-  .nav-secondary-utility {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-  }
-
-  .nav-back-btn {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.3),
-      rgba(255, 255, 255, 0.08)
+  /*
+   * MD3 navigation bar on the Aero glass: 80px container (plus the device's
+   * bottom safe area), equal-width destinations with an always-visible
+   * label, and a 64x32 pill active indicator behind the 24px icon.
+   */
+  .mobile-nav-bar {
+    composes: ds-aero-glass from global;
+    --ds-aero-glass-tint: color-mix(
+      in srgb,
+      var(--color-primary) 62%,
+      transparent
     );
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    transition:
-      background var(--ds-motion-duration-short)
-        var(--ds-motion-easing-standard),
-      transform var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
-    padding: 0;
-    flex-shrink: 0;
-  }
-
-  .nav-back-btn:hover,
-  .nav-back-btn:focus-visible {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.42),
-      rgba(255, 255, 255, 0.14)
-    );
-  }
-
-  .nav-bar-item {
-    padding: 0;
-    min-width: 0;
-  }
-
-  .nav-btn__label {
-    display: none;
-  }
-
-  .nav-btn__icon {
-    display: flex;
-  }
-
-  .nav-btn {
-    /* min-height (not padding math) guarantees the >=44px touch target
-       regardless of the 20px icon's own size; flex centers the icon inside
-       it so the button doesn't need symmetric padding to look centered. */
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    /* Fill the equal-width grid slot so every tap target is >=44x44. */
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--ds-layer-sticky);
     box-sizing: border-box;
-    width: 100%;
-    min-width: 44px;
-    min-height: 44px;
-    padding: var(--ds-space-1) !important;
-    font-size: 0.78rem;
+    min-height: calc(80px + env(safe-area-inset-bottom, 0px));
+    padding: 0 var(--ds-space-1) env(safe-area-inset-bottom, 0px);
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    /* Same reason as .nav-bar: keep labels out of the board game's pixel font. */
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .mobile-nav-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.08) 45%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    min-width: 0;
+    min-height: 80px;
+    padding: 12px 0 16px;
+    box-sizing: border-box;
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-item__indicator {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    max-width: 100%;
+    height: 32px;
+    border-radius: var(--ds-radius-full);
+    transition:
+      background-color var(--ds-motion-duration-short)
+        var(--ds-motion-easing-standard),
+      box-shadow var(--ds-motion-duration-short)
+        var(--ds-motion-easing-standard);
+  }
+
+  .mobile-nav-item__indicator svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* State layer for hover/press/focus on inactive destinations. */
+  .mobile-nav-item:hover .mobile-nav-item__indicator {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .mobile-nav-item:active .mobile-nav-item__indicator {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .mobile-nav-item:focus-visible {
+    outline: none;
+  }
+
+  .mobile-nav-item:focus-visible .mobile-nav-item__indicator {
+    outline: 3px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 2px;
+  }
+
+  .mobile-nav-item__label {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1rem;
+    letter-spacing: 0.03em;
     white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
-  .nav-corner {
-    padding: 0;
+  /* Active destination: the same white glass pill as the desktop active tab. */
+  .mobile-nav-item--active {
+    color: white;
   }
 
-  .nav-right .nav-corner {
-    display: none;
+  .mobile-nav-item--active .mobile-nav-item__indicator,
+  .mobile-nav-item--active:hover .mobile-nav-item__indicator,
+  .mobile-nav-item--active:active .mobile-nav-item__indicator {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(255, 255, 255, 0.68)
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 3px rgba(0, 0, 0, 0.2);
+    color: var(--color-selection-text);
   }
 
-  .nav-theme-toggle {
-    display: none;
+  .mobile-nav-item--active .mobile-nav-item__label {
+    font-weight: 700;
   }
 }
 
-/* At the very narrowest phone widths, tighten the bar's own padding and the
-   gap between items (never the 44px touch target) so 5 icons plus an
-   optional back button and corner slot still fit on one row without
-   wrapping or clipping. */
-@media (max-width: 340px) {
-  .nav-bar {
-    padding-left: var(--ds-space-1);
-    padding-right: var(--ds-space-1);
-    gap: 2px;
+/* Narrowest phones: five 12px labels would touch, so drop the tracking and a
+   half step of size while keeping every label whole. */
+@media (max-width: 360px) {
+  .mobile-nav-item {
+    padding-inline: 2px;
   }
 
-  .nav-btn {
-    padding-left: 2px !important;
-    padding-right: 2px !important;
+  .mobile-nav-item__label {
+    font-size: 0.6875rem;
+    letter-spacing: 0;
   }
 }
 
@@ -522,7 +638,7 @@
     bottom: calc(var(--mobile-chrome-height) + var(--mobile-search-fab-offset));
     width: var(--mobile-search-fab-size);
     height: var(--mobile-search-fab-size);
-    border-radius: 50%;
+    border-radius: var(--ds-radius-large);
     border: 1px solid var(--ds-aero-border);
     background-color: var(--color-selection);
     color: var(--color-selection-text);
@@ -547,13 +663,17 @@
 
   .mobile-search-fab:hover,
   .mobile-search-fab:focus-visible {
-    transform: scale(1.06);
+    box-shadow:
+      var(--ds-elevation-2),
+      0 4px 12px rgba(0, 0, 0, 0.22);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nav-btn,
   .nav-back-btn,
+  .nav-back-btn::before,
+  .mobile-nav-item__indicator,
   .mobile-search-fab {
     transition: none;
   }

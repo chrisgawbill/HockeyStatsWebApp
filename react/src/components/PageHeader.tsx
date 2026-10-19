@@ -206,6 +206,7 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const mobileNavRef = useRef<HTMLElement>(null);
 
   /**
    * Mobile-only full-screen search overlay, opened from the floating action
@@ -305,26 +306,43 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
     };
   }, [isMobileSearchOpen]);
 
+  /**
+   * Publishes the mobile chrome sizes as CSS variables so page layouts can
+   * clear them: `--mobile-chrome-height` is the fixed bottom navigation bar
+   * (also offsets the search FAB) and `--mobile-top-chrome-height` the sticky
+   * top app bar including its bottom margin. Both read 0 above the phone
+   * breakpoint, where the header is the only chrome.
+   */
   useEffect(() => {
     const nav = navRef.current;
-    if (!nav) return;
+    const mobileNav = mobileNavRef.current;
+    if (!nav || !mobileNav) return;
 
     const media = window.matchMedia('(max-width: 576px)');
+    const root = document.documentElement.style;
     const updateChromeHeight = () => {
-      document.documentElement.style.setProperty(
+      const topHeight =
+        nav.offsetHeight + parseFloat(getComputedStyle(nav).marginBottom);
+      root.setProperty(
         '--mobile-chrome-height',
-        media.matches ? `${nav.offsetHeight}px` : '0px',
+        media.matches ? `${mobileNav.offsetHeight}px` : '0px',
+      );
+      root.setProperty(
+        '--mobile-top-chrome-height',
+        media.matches ? `${topHeight}px` : '0px',
       );
     };
     const observer = new ResizeObserver(updateChromeHeight);
 
     observer.observe(nav);
+    observer.observe(mobileNav);
     media.addEventListener('change', updateChromeHeight);
     updateChromeHeight();
     return () => {
       observer.disconnect();
       media.removeEventListener('change', updateChromeHeight);
-      document.documentElement.style.removeProperty('--mobile-chrome-height');
+      root.removeProperty('--mobile-chrome-height');
+      root.removeProperty('--mobile-top-chrome-height');
     };
   }, []);
 
@@ -481,6 +499,7 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
                   <BackIcon />
                 </button>
               )}
+              <span className={styles['nav-mobile-title']}>HockeyStats</span>
             </div>
             <div className={styles['nav-season-selector']}>
               <SeasonSelector className="page-header-season-selector" />
@@ -512,6 +531,30 @@ export default function PageHeader({ corner }: PageHeaderProps = {}) {
             </div>
           </div>
         </div>
+      </nav>
+      {/* Phone-only MD3 navigation bar. It is a separate element because the
+          header's glass backdrop-filter would anchor a fixed child to the
+          header instead of the viewport; below the breakpoint the header's
+          own destination links are hidden, so only one set is exposed. */}
+      <nav
+        aria-label="Primary"
+        className={styles['mobile-nav-bar']}
+        ref={mobileNavRef}
+      >
+        {navItems.map(({ label, path, icon }) => (
+          <Link
+            key={path}
+            to={path}
+            className={cx(
+              styles['mobile-nav-item'],
+              activePath === path && styles['mobile-nav-item--active'],
+            )}
+            aria-current={activePath === path ? 'page' : undefined}
+          >
+            <span className={styles['mobile-nav-item__indicator']}>{icon}</span>
+            <span className={styles['mobile-nav-item__label']}>{label}</span>
+          </Link>
+        ))}
       </nav>
       <button
         ref={mobileSearchFabRef}

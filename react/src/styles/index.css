@@ -49,6 +49,7 @@
   --page-block-end: var(--ds-space-5);
   /** Measured by PageHeader so fixed mobile chrome always reserves its real height. */
   --mobile-chrome-height: 0px;
+  --mobile-top-chrome-height: 0px;
   --text-xs: var(--ds-font-size-label);
   --text-sm: var(--ds-font-size-body-small);
   --text-base: var(--ds-font-size-body);

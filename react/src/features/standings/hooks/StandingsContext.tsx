@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
@@ -52,17 +53,23 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
     null,
   );
   const { season } = useSeason();
+  const latestRequest = useRef(0);
 
   /**
    * Fetches one season's standings and splits them into the slices above. On
    * failure it resets every slice (rather than leaving the previous season's
    * standings on screen after a failed season change) and stores a
-   * human-readable message for the UI instead of the raw API error.
+   * human-readable message for the UI instead of the raw API error. A response
+   * that arrives after a newer fetch started is dropped so it cannot overwrite
+   * the newer season's standings.
    */
   const fetchStandings = useCallback(async (seasonId: string) => {
+    const requestId = ++latestRequest.current;
+    const isStale = () => requestId !== latestRequest.current;
     setErrorStandingsData(null);
     try {
       const data = await GetCurrentStandings(seasonId);
+      if (isStale()) return;
       const all: StandingsTeam[] = CreateLeagueStandingsArray(data.standings);
 
       const byConference = (name: string) =>
@@ -94,6 +101,7 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
           .slice(0, 16),
       );
     } catch (error) {
+      if (isStale()) return;
       console.error('Error fetching standings: ', error);
       setErrorStandingsData("Couldn't load standings.");
       setEasternStandingsData([]);
@@ -104,7 +112,7 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
       setPacificStandings([]);
       setDraftLotteryOdds([]);
     } finally {
-      setLoadingStandingsData(false);
+      if (!isStale()) setLoadingStandingsData(false);
     }
   }, []);
 
@@ -150,10 +158,6 @@ export function useStandingsContext(): StandingsData {
       'useStandingsContext must be used within StandingsDataProvider',
     );
   return context;
-}
-
-export function useDraftLotteryOddsData() {
-  return useStandingsContext().draftLotteryOdds;
 }
 
 function useStandingsData(): StandingsData {

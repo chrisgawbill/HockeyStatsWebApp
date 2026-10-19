@@ -28,6 +28,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   const failedRefs = useRef<Record<string, boolean>>(
     Object.fromEntries(stats.map((s) => [s.displayKey, false])),
   );
+  const latestRun = useRef(0);
 
   /**
    * Collapses the per-category loading map into the hook's public loading flag.
@@ -52,11 +53,14 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
    * Fetches one stat category for the current season, converts the backend
    * contracts into PlayerStatLeader models, and stores the top leader keyed by
    * display label. It always clears that category's loading flag and records
-   * whether the category failed.
+   * whether the category failed, unless a newer run (retry or season change)
+   * has started, in which case the stale result is dropped.
    */
-  async function fetchStat({ displayKey, apiKey }: StatEntry) {
+  async function fetchStat({ displayKey, apiKey }: StatEntry, runId: number) {
+    const isStale = () => runId !== latestRun.current;
     try {
       const data = await fetcher(apiKey, season);
+      if (isStale()) return;
       const statLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(data);
       failedRefs.current[displayKey] = false;
       if (statLeaders.length === 0) return;
@@ -67,16 +71,20 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
       );
       setLeaders((prev) => ({ ...prev, [displayKey]: topLeader }));
     } catch (error) {
+      if (isStale()) return;
       console.error(`Error fetching ${displayKey}: `, error);
       failedRefs.current[displayKey] = true;
     } finally {
-      loadingRefs.current[displayKey] = false;
-      checkLoadingStatus();
+      if (!isStale()) {
+        loadingRefs.current[displayKey] = false;
+        checkLoadingStatus();
+      }
     }
   }
 
   /** Runs the fetch sequence for every category. */
   const runFetch = useCallback(() => {
+    const runId = ++latestRun.current;
     setLeaders({});
     setError(null);
     setLoading(true);
@@ -86,7 +94,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
     failedRefs.current = Object.fromEntries(
       stats.map((s) => [s.displayKey, false]),
     );
-    Promise.all(stats.map(fetchStat)).finally(checkLoadingStatus);
+    stats.forEach((stat) => fetchStat(stat, runId));
   }, [stats, season]);
 
   useEffect(() => {
