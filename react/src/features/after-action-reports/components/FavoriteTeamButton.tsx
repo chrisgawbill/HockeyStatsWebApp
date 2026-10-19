@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAfterActionReports } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 import styles from '@/features/after-action-reports/components/FavoriteTeamButton.module.css';
 
@@ -19,6 +19,9 @@ function StarIcon({ filled }: { filled: boolean }) {
   );
 }
 
+/** How long the save-failed message stays up. */
+const ERROR_VISIBLE_MS = 6000;
+
 export interface FavoriteTeamButtonProps {
   triCode: string;
   teamName: string;
@@ -26,7 +29,8 @@ export interface FavoriteTeamButtonProps {
 
 /**
  * Follows a team for After Action Reports. Signed-out users get a pointer to
- * the header's Google sign-in instead of a dead button.
+ * the header's Google sign-in instead of a dead button. A failed save reverts
+ * the star and says so briefly rather than failing silently.
  */
 export default function FavoriteTeamButton({
   triCode,
@@ -35,16 +39,30 @@ export default function FavoriteTeamButton({
   const { isSignedIn, isFavorite, toggleFavorite } = useAfterActionReports();
   const [showHint, setShowHint] = useState(false);
   const [pending, setPending] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
   const favorite = isSignedIn && isFavorite(triCode);
+
+  useEffect(() => {
+    if (!saveFailed) return;
+    const timer = window.setTimeout(
+      () => setSaveFailed(false),
+      ERROR_VISIBLE_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [saveFailed]);
 
   const handleClick = async () => {
     if (!isSignedIn) {
       setShowHint((value) => !value);
       return;
     }
+    setSaveFailed(false);
     setPending(true);
     try {
       await toggleFavorite(triCode);
+    } catch {
+      // The provider already restored the star and logged the cause.
+      setSaveFailed(true);
     } finally {
       setPending(false);
     }
@@ -71,6 +89,11 @@ export default function FavoriteTeamButton({
         <p className={styles.hint} role="status">
           Sign in with Google at the top of the page to favorite {teamName} and
           get an After Action Report after every game.
+        </p>
+      )}
+      {saveFailed && (
+        <p className={styles.hint} role="alert">
+          Couldn&apos;t save your favorite. Try again in a moment.
         </p>
       )}
     </div>

@@ -502,7 +502,6 @@ export default function PageHeader({
                   <BackIcon />
                 </button>
               )}
-              <span className={styles['nav-mobile-title']}>HockeyStats</span>
             </div>
             <div className={styles['nav-season-selector']}>
               <SeasonSelector className="page-header-season-selector" />
