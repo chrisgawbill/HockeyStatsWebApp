@@ -9,6 +9,11 @@ export const DIAGNOSTICS_HEADER = 'x-diagnostics-key';
 const apiBaseUrl =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.DEV ? 'http://localhost:9000' : undefined);
+/** Configured API origin ('' when requests use relative URLs). */
+export function getApiBaseUrl(): string {
+  return (apiBaseUrl ?? '').replace(/\/+$/, '');
+}
+
 const REQUEST_TIMEOUT_MS = 15_000;
 
 /**
@@ -181,8 +186,12 @@ export function put<T>(
 
 /**
  * Shared DELETE wrapper: returns `response.data`, and logs then re-throws so
- * callers keep their own error UI.
+ * callers keep their own error UI. `data` is an optional JSON body.
  */
-export function del<T>(path: string, options?: RequestOptions): Promise<T> {
-  return send(() => request<T>('DELETE', path, undefined, undefined, options));
+export function del<T>(
+  path: string,
+  options?: RequestOptions,
+  data?: unknown,
+): Promise<T> {
+  return send(() => request<T>('DELETE', path, data, undefined, options));
 }

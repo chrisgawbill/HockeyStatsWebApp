@@ -2,6 +2,8 @@
 export interface FavoriteTeam {
   triCode: string;
   since: string;
+  /** True when phone push is muted for this team (inbox still lists it). */
+  pushMuted: boolean;
 }
 
 /** One completed game involving at least one of the user's favorite teams. */

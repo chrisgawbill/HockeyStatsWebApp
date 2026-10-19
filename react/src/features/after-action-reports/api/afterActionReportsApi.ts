@@ -73,3 +73,17 @@ export function markAllAfterActionReportsRead(
     authHeader(token),
   );
 }
+
+/** Mutes or unmutes phone push for one favorite team. */
+export async function setFavoritePushMuted(
+  token: string,
+  triCode: string,
+  muted: boolean,
+): Promise<FavoriteTeam[]> {
+  const { favorites } = await put<FavoritesResponseDto>(
+    `/api/favorites/${encodeURIComponent(triCode)}/push-mute`,
+    { muted },
+    authHeader(token),
+  );
+  return favorites;
+}
