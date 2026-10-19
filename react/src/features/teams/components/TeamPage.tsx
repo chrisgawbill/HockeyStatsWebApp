@@ -41,6 +41,7 @@ import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import {
   GetTeamStatsById,
   GetTeamRoster,
+  GetTeamLines,
   GetTeamSchedule,
   GetSkaterSummary,
   GetSkaterCorsi,
@@ -49,6 +50,7 @@ import {
   TeamRosterResponseDto,
   TeamStatsResponseDto,
 } from '@/features/teams/api/teamsApi';
+import { TeamLinesDto } from '@/features/teams/types/teamLines';
 import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import { useStandingsContext } from '@/features/standings/hooks/StandingsContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
@@ -135,6 +137,7 @@ export default function TeamPage() {
   const [schedule, setSchedule] = useState<ScheduledGame[]>([]);
   const [roster, setRoster] =
     useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
+  const [teamLines, setTeamLines] = useState<TeamLinesDto | null>(null);
   const [playerStats, setPlayerStats] = useState<PlayerStatLine[]>([]);
   const [goalieStats, setGoalieStats] = useState<GoalieStatLine[]>([]);
   const [headshotMap, setHeadshotMap] = useState<Map<number, string>>(
@@ -215,6 +218,24 @@ export default function TeamPage() {
     if (!triCode) return;
     refetchTeam();
   }, [triCode, refetchTeam]);
+
+  // Real lines load independently so they never block the roster; until they
+  // arrive (or if the call fails) the Roster tab shows projected lines.
+  useEffect(() => {
+    if (!triCode) return;
+    let cancelled = false;
+    setTeamLines(null);
+    GetTeamLines(triCode, season)
+      .then((res) => {
+        if (!cancelled) setTeamLines(res);
+      })
+      .catch(() => {
+        if (!cancelled) setTeamLines(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [triCode, season]);
 
   const team: TeamOverview | null = useMemo(() => {
     if (teamRawResponse == null) {
@@ -463,7 +484,7 @@ export default function TeamPage() {
             />
           </section>
           <section id="roster" className={styles['team-section']}>
-            <RosterTab roster={roster} />
+            <RosterTab roster={roster} triCode={triCode} lines={teamLines} />
           </section>
           <section id="schedule" className={styles['team-section']}>
             <ScheduleTab

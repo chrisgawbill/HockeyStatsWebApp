@@ -1,85 +1,45 @@
-import PlayerCard from '@/features/teams/components/PlayerCard';
-import RosterLineRow from '@/features/teams/components/RosterLineRow';
+import { useMemo } from 'react';
+
+import RosterLinesTabs from '@/features/teams/components/RosterLinesTabs';
+import { TeamLinesDto } from '@/features/teams/types/teamLines';
+import { Position, RosterPlayer } from '@/features/teams/types/teamPageTypes';
+import { buildTeamLinesView } from '@/features/teams/utils/teamLinesHelper';
 import {
-  buildDefensePairs,
-  buildForwardLines,
-} from '@/features/teams/utils/teamPageHelper';
-import {
-  Position,
-  RosterLine,
-  RosterPlayer,
-} from '@/features/teams/types/teamPageTypes';
+  getContrastTextColor,
+  getTeamPrimaryColor,
+  toDarkModeAccentColor,
+} from '@/features/teams/utils/teamColor';
+import { useTheme } from '@/lib/ThemeContext';
 import shared from '@/styles/shared.module.css';
-import styles from '@/features/teams/components/TeamPage.module.css';
 
 interface Props {
   roster: Record<Position, RosterPlayer[]>;
-}
-
-/** Splits a group's lines into the labeled ones (rendered as line rows) and any unlabeled overflow (rendered as a flat card grid). */
-function splitLabeled(lines: RosterLine[]) {
-  return {
-    labeled: lines.filter((l) => l.label),
-    overflow: lines.filter((l) => !l.label).flatMap((l) => l.players),
-  };
+  triCode: string;
+  /** Real lines from `/team/lines`; null while loading or when the call failed (projected lines are used). */
+  lines: TeamLinesDto | null;
 }
 
 /**
- * Roster tab: Forwards render as ice-time-ranked "lines" and Defense as
- * "pairs" (see `buildForwardLines`/`buildDefensePairs` — zips each
- * TOI-sorted position array together, so line/pair 1 is the most-used
- * players at each spot), each line rendered as one lifted `RosterLineRow`.
- * Any players beyond the numbered lines/pairs fall back to the flat
- * `PlayerCard` grid, as do Goalies (never enough of them to need pairing).
+ * Roster tab: the "Line Change" rink view. Renders projected lines from ice
+ * time immediately and swaps to real shift-based lines when `lines` arrives.
  */
-export default function RosterTab({ roster }: Props) {
-  const forwardLines = splitLabeled(buildForwardLines(roster));
-  const defensePairs = splitLabeled(buildDefensePairs(roster));
+export default function RosterTab({ roster, triCode, lines }: Props) {
+  const { theme } = useTheme();
+  const view = useMemo(
+    () => buildTeamLinesView(roster, lines),
+    [roster, lines],
+  );
+  const base = getTeamPrimaryColor(triCode);
+  const teamColor = theme === 'dark' ? toDarkModeAccentColor(base, 45) : base;
 
   return (
     <section className={shared.section}>
       <h2 className={shared.sectionTitle}>Roster</h2>
-
-      <div className={styles['roster-group-section']}>
-        <h3 className={styles['roster-group-section__header']}>Forwards</h3>
-        <div className={styles['roster-line-list']}>
-          {forwardLines.labeled.map((line) => (
-            <RosterLineRow key={line.label} line={line} />
-          ))}
-        </div>
-        {forwardLines.overflow.length > 0 && (
-          <div className={styles['roster-group-cards']}>
-            {forwardLines.overflow.map((player) => (
-              <PlayerCard key={`${player.id}-${player.name}`} player={player} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className={styles['roster-group-section']}>
-        <h3 className={styles['roster-group-section__header']}>Defense</h3>
-        <div className={styles['roster-line-list']}>
-          {defensePairs.labeled.map((line) => (
-            <RosterLineRow key={line.label} line={line} />
-          ))}
-        </div>
-        {defensePairs.overflow.length > 0 && (
-          <div className={styles['roster-group-cards']}>
-            {defensePairs.overflow.map((player) => (
-              <PlayerCard key={`${player.id}-${player.name}`} player={player} />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className={styles['roster-group-section']}>
-        <h3 className={styles['roster-group-section__header']}>Goalies</h3>
-        <div className={styles['roster-group-cards']}>
-          {roster.Goalie.map((player) => (
-            <PlayerCard key={`${player.id}-${player.name}`} player={player} />
-          ))}
-        </div>
-      </div>
+      <RosterLinesTabs
+        view={view}
+        teamColor={teamColor}
+        teamInk={getContrastTextColor(teamColor)}
+      />
     </section>
   );
 }

@@ -7,6 +7,7 @@ import {
   SkaterSummaryContract,
   TeamStatsContract,
 } from '@/features/teams/types/teamPageTypes';
+import { TeamLinesDto } from '@/features/teams/types/teamLines';
 
 export interface TeamStatsResponseDto {
   data: TeamStatsContract[];
@@ -68,6 +69,13 @@ export function GetTeamRoster(
   season?: string,
 ): Promise<TeamRosterResponseDto> {
   return get<TeamRosterResponseDto>(`/team/roster/${triCode}`, { season });
+}
+/** Real forward lines / defense pairs derived from recent shift data. */
+export function GetTeamLines(
+  triCode: string,
+  season?: string,
+): Promise<TeamLinesDto> {
+  return get<TeamLinesDto>(`/team/lines/${triCode}`, { season });
 }
 export function GetTeamSchedule(
   triCode: string,

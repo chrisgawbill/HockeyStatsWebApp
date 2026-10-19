@@ -80,3 +80,22 @@ function hslToHex(h: number, s: number, l: number): string {
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+/** Picks black or white text for readable contrast on a hex background (WCAG relative luminance). */
+export function getContrastTextColor(hex: string): '#111111' | '#ffffff' {
+  const normalized = hex.replace('#', '');
+  const full =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : normalized;
+  const channel = (start: number) => {
+    const v = parseInt(full.slice(start, start + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  const luminance =
+    0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+  return luminance > 0.4 ? '#111111' : '#ffffff';
+}
