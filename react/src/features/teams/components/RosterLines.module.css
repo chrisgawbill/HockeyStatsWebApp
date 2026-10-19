@@ -365,7 +365,11 @@
 }
 
 .strip--goal .spot--G {
-  top: 46%;
+  /* Anchored to the goal line so the starter (disc, name, slot) sits
+     inside the crease instead of straddling its arc. */
+  top: auto;
+  bottom: calc(34px * var(--tk));
+  transform: translate(-50%, 0);
 }
 
 /* ── Bench / Extras ────────────────────────────────────────────────────── */
