@@ -1064,7 +1064,7 @@ a double run.
 
 ## WPR-01 — Favorite players and the weekly report (frontend)
 
-**Status:** ACTIVE (started by the Product Owner 2026-10-19, after API-WPR-01)
+**Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); awaiting Product Owner screenshot review and deploy acceptance
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1109,7 +1109,26 @@ until it deploys, as TEAM-LINES-01 did).
    `features/teams` may render the favorites feature's star, as `TeamHero`
    already does; record the new exception in architecture.md.
 
-**Verification:** unit tests for formatting and state; Playwright against a
+**Implemented:** `features/favorite-players` (API client, `FavoritePlayersProvider`,
+`PlayerHeadshot` + `FavoritePlayerStar`, `WeeklyReportPage` at
+`/weekly-report[/:weekStart]`); stars on the roster dialog, team Player Stats
+rows, Three Stars, and stat-leader cards (the stat-leader modal is a table with
+no headshots); bell inbox merges weekly items and hosts the weekly switch;
+`sw.js` routes `kind: "weekly-report"` pushes. Architecture exceptions recorded.
+
+**Verification so far:** unit tests (format helpers, service-worker weekly
+push/click), tsc, build. Independent QA ran Playwright against a mocked API on
+the dev server and production preview: star toggle/revert/409/signed-out hint
+on every surface (photo and card clicks unchanged, none on scoring summary),
+bell mix/badge/open/mark-all-read, report page (skater/goalie lines, best-game
+link, did-not-play, traded, other weeks, unstar, 404 and empty states), weekly
+switch with a stubbed PushManager, old-API 404 degradation, `wpr-navigate`
+messages, and 375/1280 light/dark without horizontal scroll — all PASS after
+fixing the dark-theme best-game link contrast and the stat-leader star
+position under `vite dev` (`2f53aee`, re-verified). Not verifiable here: real
+Google sign-in, a real OS notification tap, and real NHL data.
+
+**Planned verification:** unit tests for formatting and state; Playwright against a
 mocked API at 375px and 1280px, light and dark: star/unstar from the dialog
 (signed in and out), inbox item and unread badge, report page including "Did
 not play", the notification toggle, and the service-worker click route.
