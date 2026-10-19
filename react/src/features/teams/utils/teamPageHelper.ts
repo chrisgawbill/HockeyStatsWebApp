@@ -12,7 +12,6 @@ import {
   SkaterCorsiEntry,
   SkaterSummaryContract,
   SortDirection,
-  StatItem,
   TeamOverview,
   TeamStatsContract,
   TeamSection,
@@ -214,35 +213,6 @@ export function transformGoalieStats(
     goalsAgainstAverage: g.goalsAgainstAverage ?? null,
     shutouts: g.shutouts ?? 0,
   }));
-}
-
-/**
- * Shapes the raw NHL team summary into the labeled stat tiles the header strip
- * renders, formatting rates/percentages and falling back to "—" when absent.
- */
-export function transformTeamStats(raw: TeamStatsContract): StatItem[] {
-  return [
-    { label: 'Goals For / GP', value: raw.goalsForPerGame?.toFixed(2) ?? '—' },
-    {
-      label: 'Goals Against / GP',
-      value: raw.goalsAgainstPerGame?.toFixed(2) ?? '—',
-    },
-    {
-      label: 'Power Play %',
-      value:
-        raw.powerPlayPct != null
-          ? `${(raw.powerPlayPct * 100).toFixed(1)}%`
-          : '—',
-    },
-    {
-      label: 'Penalty Kill %',
-      value:
-        raw.penaltyKillPct != null
-          ? `${(raw.penaltyKillPct * 100).toFixed(1)}%`
-          : '—',
-    },
-    { label: 'Shots / GP', value: raw.shotsForPerGame?.toFixed(1) ?? '—' },
-  ];
 }
 
 /**

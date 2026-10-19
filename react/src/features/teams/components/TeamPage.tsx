@@ -13,7 +13,6 @@ import shared from '@/styles/shared.module.css';
 import TeamHero from '@/features/teams/components/TeamHero';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
-import TeamStatsRow from '@/features/teams/components/TeamStatsRow';
 import PlayerStatsSection from '@/features/teams/components/PlayerStatsSection';
 import RosterTab from '@/features/teams/components/tabs/RosterTab';
 import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
@@ -24,7 +23,6 @@ import {
   Position,
   RosterPlayer,
   SkaterSummaryContract,
-  StatItem,
   TeamOverview,
   TeamStatsContract,
   TeamSection,
@@ -38,7 +36,6 @@ import {
   transformGoalieStats,
   transformPlayerStats,
   transformRoster,
-  transformTeamStats,
 } from '@/features/teams/utils/teamPageHelper';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import {
@@ -135,7 +132,6 @@ export default function TeamPage() {
 
   const [teamRawResponse, setTeamRawResponse] =
     useState<TeamStatsContract | null>(null);
-  const [stats, setStats] = useState<StatItem[]>([]);
   const [schedule, setSchedule] = useState<ScheduledGame[]>([]);
   const [roster, setRoster] =
     useState<Record<Position, RosterPlayer[]>>(buildEmptyRoster());
@@ -197,7 +193,6 @@ export default function TeamPage() {
         if (p.id && p.headshot) newHeadshotMap.set(p.id, p.headshot);
       }
       setHeadshotMap(newHeadshotMap);
-      setStats(transformTeamStats(raw));
       setSchedule(ConvertContractsToGames(scheduleRes.games));
       setRoster(transformRoster(rosterRes.players, toiMap));
       setPlayerStats(transformPlayerStats(summaryRes, corsiRes));
@@ -423,7 +418,7 @@ export default function TeamPage() {
           </nav>
 
           <section id="stats" className={styles['team-section']}>
-            <TeamStatsRow stats={stats} />
+            <TeamDna profile={teamDna} season={season} />
             <section
               className={`${styles['form-panel']} ${shared.surface}`}
               aria-labelledby="team-form-heading"
@@ -459,7 +454,6 @@ export default function TeamPage() {
                 </div>
               </div>
             </section>
-            <TeamDna profile={teamDna} season={season} />
           </section>
           <section id="leaders" className={styles['team-section']}>
             <PlayerStatsSection

@@ -17,11 +17,6 @@ export interface TeamOverview {
   hallOfFamers: number;
 }
 
-export interface StatItem {
-  label: string;
-  value: string;
-}
-
 /** Anchor sections of the team detail page (`#stats`, `#roster`, etc). */
 export type TeamSection = 'stats' | 'leaders' | 'roster' | 'schedule';
 
