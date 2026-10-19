@@ -1,0 +1,14 @@
+.frame {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.corner {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  z-index: 1;
+}

@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/lib/ThemeContext';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { registerServiceWorker } from '@/features/after-action-reports/utils/pushNotifications';
 import { AfterActionReportsProvider } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
+import { FavoritePlayersProvider } from '@/features/favorite-players/hooks/FavoritePlayersContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
@@ -22,7 +23,9 @@ root.render(
   <ThemeProvider>
     <AuthProvider>
       <AfterActionReportsProvider>
-        <App />
+        <FavoritePlayersProvider>
+          <App />
+        </FavoritePlayersProvider>
       </AfterActionReportsProvider>
     </AuthProvider>
   </ThemeProvider>,

@@ -6,6 +6,7 @@ import {
   PlayerStatLine,
   GoalieStatLine,
 } from '@/features/teams/types/teamPageTypes';
+import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 
@@ -189,13 +190,20 @@ export default function PlayerStatsSection({
                 <span className={styles['player-stat-row__rank']}>
                   #{index + 1}
                 </span>
-                <img
-                  className={styles['player-stat-row__headshot']}
+                <PlayerHeadshot
+                  playerId={row.id}
+                  playerName={row.name}
                   src={headshotMap.get(row.id) || FALLBACK_HEADSHOT}
                   alt={row.name}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = FALLBACK_HEADSHOT;
-                  }}
+                  imgClassName={styles['player-stat-row__headshot']}
+                  starSize="sm"
+                  fallback={
+                    <img
+                      className={styles['player-stat-row__headshot']}
+                      src={FALLBACK_HEADSHOT}
+                      alt={row.name}
+                    />
+                  }
                 />
               </div>
               <div className={styles['player-stat-row__info']}>

@@ -278,3 +278,16 @@
     );
   }
 }
+
+.weeklyIcon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  /* Same width as the two overlapping team logos on game rows. */
+  width: 50px;
+  height: 28px;
+  border-radius: 14px;
+  background: color-mix(in srgb, #f5b301 18%, var(--color-surface));
+  color: #f5b301;
+  font-size: 1rem;
+}

@@ -13,6 +13,10 @@
   margin-bottom: var(--ds-space-3);
 }
 
+.avatarFrame {
+  flex: 0 0 72px;
+}
+
 .avatar {
   flex: 0 0 72px;
   width: 72px;

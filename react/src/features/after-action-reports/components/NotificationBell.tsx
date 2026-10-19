@@ -7,6 +7,9 @@ import {
   formatReportDate,
   reportOutcome,
 } from '@/features/after-action-reports/utils/afterActionReportFormat';
+import { useFavoritePlayers } from '@/features/favorite-players/hooks/FavoritePlayersContext';
+import type { WeeklyPlayerReport } from '@/features/favorite-players/types/favoritePlayers';
+import { weeklyReportTitle } from '@/features/favorite-players/utils/weeklyReportFormat';
 import styles from '@/features/after-action-reports/components/NotificationBell.module.css';
 
 function cx(...classes: (string | false | null | undefined)[]) {
@@ -80,6 +83,67 @@ function ReportRow({
         {!report.read && <span className={styles.dot} aria-label="Unread" />}
       </button>
     </li>
+  );
+}
+
+function WeeklyReportRow({
+  report,
+  onOpen,
+}: {
+  report: WeeklyPlayerReport;
+  onOpen: (report: WeeklyPlayerReport) => void;
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        role="menuitem"
+        className={cx(styles.row, !report.read && styles.unread)}
+        onClick={() => onOpen(report)}
+      >
+        <span className={styles.weeklyIcon} aria-hidden="true">
+          ★
+        </span>
+        <span className={styles.rowText}>
+          <span className={styles.rowTitle}>{weeklyReportTitle(report)}</span>
+          <span className={styles.rowBody}>{report.headline}</span>
+        </span>
+        {!report.read && <span className={styles.dot} aria-label="Unread" />}
+      </button>
+    </li>
+  );
+}
+
+/** The Monday Weekly Player Report push switch (one per account). */
+function WeeklyReportPushToggle() {
+  const { available, weeklyPush, setWeeklyPush } = useFavoritePlayers();
+  const [failed, setFailed] = useState(false);
+  if (!available || weeklyPush === null) return null;
+  return (
+    <>
+      <div className={styles.muteRow}>
+        <span className={styles.muteTeam}>
+          Weekly player report notifications
+        </span>
+        <button
+          type="button"
+          className={styles.textButton}
+          aria-pressed={weeklyPush}
+          aria-label="Weekly player report notifications"
+          onClick={() => {
+            setFailed(false);
+            setWeeklyPush(!weeklyPush).catch(() => setFailed(true));
+          }}
+        >
+          {weeklyPush ? 'On' : 'Off'}
+        </button>
+      </div>
+      {failed && (
+        <p className={styles.footnote} role="alert">
+          Couldn't update the weekly report setting. Try again.
+        </p>
+      )}
+    </>
   );
 }
 
@@ -165,15 +229,41 @@ function PushControls() {
               Couldn't update that team. Try again.
             </p>
           )}
+          <WeeklyReportPushToggle />
         </>
       )}
     </div>
   );
 }
 
+type InboxItem =
+  | { kind: 'game'; time: number; report: AfterActionReport }
+  | { kind: 'weekly'; time: number; report: WeeklyPlayerReport };
+
+/** Newest first: games by start time, weekly reports by generation time. */
+function inboxItems(
+  reports: AfterActionReport[],
+  weeklyReports: WeeklyPlayerReport[],
+): InboxItem[] {
+  const items: InboxItem[] = [
+    ...reports.map((report) => ({
+      kind: 'game' as const,
+      time: Date.parse(report.gameTime) || Date.parse(report.date) || 0,
+      report,
+    })),
+    ...weeklyReports.map((report) => ({
+      kind: 'weekly' as const,
+      time: Date.parse(report.createdAt) || 0,
+      report,
+    })),
+  ];
+  return items.sort((a, b) => b.time - a.time);
+}
+
 /**
- * Global-header inbox for After Action Reports. The badge counts unread
- * reports; choosing one marks it read and opens its game detail page.
+ * Global-header inbox for After Action Reports and Weekly Player Reports. The
+ * badge counts both kinds of unread report; choosing one marks it read and
+ * opens its game detail page or weekly report page.
  */
 export default function NotificationBell() {
   const {
@@ -186,6 +276,15 @@ export default function NotificationBell() {
     markAllRead,
     enableAlerts,
   } = useAfterActionReports();
+  const {
+    favorites: favoritePlayers,
+    reports: weeklyReports,
+    unreadCount: weeklyUnread,
+    markReportRead,
+    markAllReportsRead,
+  } = useFavoritePlayers();
+  const totalUnread = unreadCount + weeklyUnread;
+  const items = inboxItems(reports, weeklyReports);
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLButtonElement>(null);
@@ -226,16 +325,20 @@ export default function NotificationBell() {
     });
   };
 
+  const openWeeklyReport = (report: WeeklyPlayerReport) => {
+    markReportRead(report.weekStart);
+    setOpen(false);
+    navigate(`/weekly-report/${report.weekStart}`);
+  };
+
   const handleMarkAllRead = () => {
-    markAllRead();
+    if (unreadCount > 0) markAllRead();
+    markAllReportsRead();
     // The button unmounts once nothing is unread; keep focus on the bell.
     bellRef.current?.focus();
   };
 
-  const label =
-    unreadCount > 0
-      ? `After Action Reports, ${unreadCount} unread`
-      : 'After Action Reports';
+  const label = totalUnread > 0 ? `Reports, ${totalUnread} unread` : 'Reports';
 
   return (
     <div className={styles.wrapper} ref={wrapperRef}>
@@ -251,17 +354,17 @@ export default function NotificationBell() {
         title={label}
       >
         <BellIcon />
-        {unreadCount > 0 && (
+        {totalUnread > 0 && (
           <span className={styles.badge} aria-hidden="true">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {totalUnread > 9 ? '9+' : totalUnread}
           </span>
         )}
       </button>
       {open && (
         <div className={styles.panel} id={panelId} role="menu">
           <div className={styles.panelHeader}>
-            <span className={styles.panelTitle}>After Action Reports</span>
-            {unreadCount > 0 && (
+            <span className={styles.panelTitle}>Reports</span>
+            {totalUnread > 0 && (
               <button
                 type="button"
                 className={styles.textButton}
@@ -271,15 +374,23 @@ export default function NotificationBell() {
               </button>
             )}
           </div>
-          {reports.length > 0 ? (
+          {items.length > 0 ? (
             <ul className={styles.list}>
-              {reports.map((report) => (
-                <ReportRow
-                  key={report.gameId}
-                  report={report}
-                  onOpen={openReport}
-                />
-              ))}
+              {items.map((item) =>
+                item.kind === 'game' ? (
+                  <ReportRow
+                    key={`game-${item.report.gameId}`}
+                    report={item.report}
+                    onOpen={openReport}
+                  />
+                ) : (
+                  <WeeklyReportRow
+                    key={`week-${item.report.weekStart}`}
+                    report={item.report}
+                    onOpen={openWeeklyReport}
+                  />
+                ),
+              )}
             </ul>
           ) : (
             <p className={styles.empty}>
@@ -290,6 +401,8 @@ export default function NotificationBell() {
                     .join(
                       ', ',
                     )} play${favorites.length === 1 ? 's' : ''} next.`}
+              {favoritePlayers.length === 0 &&
+                ' Star a player on their headshot for a Weekly Player Report every Monday.'}
             </p>
           )}
           <PushControls />

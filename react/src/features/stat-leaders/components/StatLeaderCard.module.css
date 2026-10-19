@@ -1,3 +1,16 @@
+.stat-leader-shell {
+  position: relative;
+}
+
+/* Over the photo's lower-right corner: the card's left margin (3rem on
+   phones, 0 from 768px) plus most of the 4.5rem picture column. */
+.stat-leader-star {
+  position: absolute;
+  bottom: calc(var(--ds-space-3) + 2px);
+  left: calc(3rem + 3.25rem);
+  z-index: 2;
+}
+
 .stat-leader-block {
   position: relative;
   isolation: isolate;
@@ -154,5 +167,27 @@
     transition:
       box-shadow 0.2s ease,
       background-color 0.2s ease;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .stat-leader-star {
+    left: 3.25rem;
+  }
+}
+
+@media only screen and (max-width: 576px) {
+  .stat-leader-shell {
+    width: min(100%, 21rem);
+    margin: 0 auto;
+  }
+
+  .stat-leader-block {
+    width: 100%;
+    margin: var(--ds-space-3) 0;
+  }
+
+  .stat-leader-star {
+    left: 3.25rem;
   }
 }
