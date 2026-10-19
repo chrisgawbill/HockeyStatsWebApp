@@ -871,7 +871,7 @@ clears it from the bell, and Mute stops a team's pushes.
 
 ## API-LINES-01 — Real line combinations from shift charts
 
-**Status:** ACTIVE (HockeyStatsAPI)
+**Status:** DONE (Product Owner approved 2026-10-19) (HockeyStatsAPI)
 
 **Approved decisions (Product Owner):** Lines come from the team's most recent
 completed game's NHL shift chart (`api.nhle.com/stats/rest/en/shiftcharts`).
@@ -892,7 +892,7 @@ while `FINAL` or empty. Lines are computed on read, never cached.
 
 ## TEAM-LINES-01 — "Line Change" roster view
 
-**Status:** ACTIVE (frontend)
+**Status:** DONE (Product Owner approved 2026-10-19) (frontend)
 
 **Approved decisions (Product Owner):** Option 1. Roster tab gets a
 Forwards | Defense | Goalies tab row styled like the player stats header
