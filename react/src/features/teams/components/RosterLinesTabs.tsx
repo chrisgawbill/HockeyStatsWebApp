@@ -95,6 +95,7 @@ export default function RosterLinesTabs({
           lines={view.forwardLines}
           view={view}
           ariaLabel="Forward lines"
+          columns={2}
         />
         <BenchStrip title="Extras" players={view.extras.forwards} slot="F" />
       </div>
@@ -109,6 +110,7 @@ export default function RosterLinesTabs({
           lines={view.defensePairs}
           view={view}
           ariaLabel="Defense pairs"
+          columns={3}
         />
         <BenchStrip title="Extras" players={view.extras.defense} slot="D" />
       </div>

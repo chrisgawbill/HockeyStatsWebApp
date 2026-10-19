@@ -21,7 +21,6 @@ export default function RinkStrip({ line, caption, live }: RinkStripProps) {
       <div className={`${styles.strip} ${live ? styles['strip--live'] : ''}`}>
         <span className={styles.strip__blueLine} aria-hidden="true" />
         <span className={styles.strip__circle} aria-hidden="true" />
-        <span className={styles.strip__dot} aria-hidden="true" />
         <span
           className={`${styles.strip__dot} ${styles['strip__dot--l']}`}
           aria-hidden="true"

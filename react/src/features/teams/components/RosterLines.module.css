@@ -98,7 +98,7 @@
 .strip {
   position: relative;
   width: 100%;
-  height: 232px;
+  height: 248px;
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid var(--color-divider);
@@ -147,14 +147,14 @@
 
 .strip__dot--l {
   left: 8%;
-  top: 80%;
+  top: 91%;
   width: 10px;
   height: 10px;
 }
 
 .strip__dot--r {
   left: 92%;
-  top: 80%;
+  top: 91%;
   width: 10px;
   height: 10px;
 }
@@ -166,6 +166,7 @@
   transform: translate(-50%, -50%);
   translate: var(--from-x, 0) var(--from-y, 24px);
   opacity: 0;
+  visibility: hidden;
   transition:
     translate 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
     opacity 320ms ease-out;
@@ -175,6 +176,7 @@
 .strip--live .spot {
   translate: 0 0;
   opacity: 1;
+  visibility: visible;
 }
 
 .spot--LW {
@@ -216,6 +218,7 @@
   .spot {
     translate: 0 0;
     opacity: 1;
+    visibility: visible;
     transition: none;
   }
 }
@@ -227,7 +230,7 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  width: 78px;
+  width: 84px;
   border-radius: 10px;
   outline-offset: 2px;
 }
@@ -258,10 +261,11 @@
 
 .token__name {
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--text-xs);
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+  font-size: 11px;
   font-weight: 600;
   color: var(--rink-ink);
 }
@@ -274,7 +278,7 @@
 }
 
 .token--sm {
-  width: 64px;
+  width: 76px;
 }
 
 .token--sm .token__disc {
@@ -353,4 +357,103 @@
 
 .bench .token__name {
   color: var(--color-text);
+}
+
+/* ── Goalie layout ─────────────────────────────────────────────────────── */
+
+.goalie__rink {
+  max-width: 560px;
+}
+
+@media (min-width: 992px) {
+  .goalie {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-4, 24px);
+  }
+
+  .goalie__rink {
+    flex: 0 1 560px;
+  }
+
+  .goalie .bench {
+    flex: 1 1 0;
+    margin-top: 0;
+  }
+}
+
+/* ── Desktop: all lines at once in a grid, no pager ────────────────────── */
+
+@media (min-width: 992px) {
+  .pager {
+    display: none;
+  }
+
+  .scroller {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .scroller__item {
+    flex: none;
+  }
+}
+
+/* ── Headshot variant: photo in a team-color ring, number badge ───────── */
+
+.token__disc--photo {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0;
+  border: 3px solid var(--rink-team);
+  background: var(--rink-team);
+  overflow: visible;
+}
+
+.token__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  background: #e8eef4;
+}
+
+[data-theme='dark'] .token__photo {
+  background: #3a4656;
+}
+
+.token__badge {
+  position: absolute;
+  right: -7px;
+  bottom: -5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--rink-team);
+  color: var(--rink-team-ink);
+  border: 1.5px solid #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .token__badge {
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+.token--sm .token__badge {
+  min-width: 17px;
+  height: 17px;
+  font-size: 10px;
+  right: -6px;
 }

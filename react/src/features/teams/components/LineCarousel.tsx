@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import RinkStrip from '@/features/teams/components/RinkStrip';
 import {
@@ -12,6 +12,8 @@ interface LineCarouselProps {
   lines: DisplayLine[];
   view: Pick<TeamLinesView, 'source' | 'game'>;
   ariaLabel: string;
+  /** Columns when shown as a grid on desktop (>= 992px). */
+  columns: number;
 }
 
 function prefersReducedMotion(): boolean {
@@ -31,16 +33,21 @@ export default function LineCarousel({
   lines,
   view,
   ariaLabel,
+  columns,
 }: LineCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  // Strips that have entered view at least once: they play the slide-in once
+  // and then stay visible for good.
+  const [seen, setSeen] = useState<ReadonlySet<number>>(new Set());
 
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller || lines.length === 0) return;
     if (typeof IntersectionObserver === 'undefined') {
       setActiveIndex(0);
+      setSeen(new Set(lines.map((_, i) => i)));
       return;
     }
     const ratios = new Map<Element, number>();
@@ -50,15 +57,25 @@ export default function LineCarousel({
           ratios.set(entry.target, entry.intersectionRatio);
         }
         let best = -1;
-        let bestRatio = 0.5;
+        let bestRatio = 0;
+        const entered: number[] = [];
         itemRefs.current.forEach((el, i) => {
           const ratio = el ? (ratios.get(el) ?? 0) : 0;
-          if (ratio >= bestRatio) {
+          // Strict > keeps the lowest index on ties.
+          if (ratio > bestRatio) {
             best = i;
             bestRatio = ratio;
           }
+          if (ratio >= 0.2) entered.push(i);
         });
         if (best !== -1) setActiveIndex(best);
+        if (entered.length > 0) {
+          setSeen((prev) =>
+            entered.every((i) => prev.has(i))
+              ? prev
+              : new Set([...prev, ...entered]),
+          );
+        }
       },
       { root: scroller, threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
@@ -103,6 +120,7 @@ export default function LineCarousel({
       <div
         ref={scrollerRef}
         className={styles.scroller}
+        style={{ '--cols': columns } as React.CSSProperties}
         role="region"
         aria-label={ariaLabel}
       >
@@ -117,7 +135,7 @@ export default function LineCarousel({
             <RinkStrip
               line={line}
               caption={formatLineCaption(line, view)}
-              live={activeIndex === i}
+              live={seen.has(i)}
             />
           </div>
         ))}

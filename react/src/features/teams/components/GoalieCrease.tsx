@@ -14,8 +14,8 @@ export default function GoalieCrease({ starter, backups }: GoalieCreaseProps) {
     return <p className={styles.empty}>No goalies on the roster.</p>;
   }
   return (
-    <div>
-      <figure className={styles.stripFigure}>
+    <div className={styles.goalie}>
+      <figure className={`${styles.stripFigure} ${styles.goalie__rink}`}>
         <div
           className={`${styles.strip} ${styles['strip--goal']} ${styles['strip--live']}`}
         >
