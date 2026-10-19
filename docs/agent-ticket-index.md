@@ -920,7 +920,7 @@ already loads; no extra API calls.
 
 ## API-WPR-01 — Favorite players and the weekly player report (backend)
 
-**Status:** ACTIVE (HockeyStatsAPI; started by the Product Owner 2026-10-19)
+**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); awaiting deploy and Product Owner acceptance with WPR-01
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1032,6 +1032,26 @@ favorited a player mid-week (include the whole week).
 timezone (recommended Monday 8:00 ET); whether break means zero league games
 (recommended) or "no games for my favorites" only; the stat lines above;
 the 25-favorite cap; the single on/off toggle versus per-player mute.
+
+**Implemented (`f243cce`):** migration `005_create_favorite_players_and_weekly_reports.sql`;
+`slices/weeklyPlayerReports` (pure `weeklyReportBuilder`, repository, service);
+push slice gains the weekly ledger, switch, `weeklyDispatch`, and `wpr-read`
+read tokens accepted by `POST /api/push/read`; routes `/api/favorite-players`,
+`/api/weekly-player-reports`, `GET/PUT /api/push/weekly-report`,
+`POST /api/push/weekly-dispatch` (optional `{ weekStart }` for manual reruns);
+`bin/weekly-report-cron.js` + `.github/workflows/weekly-player-report.yml`.
+Contract details are in the API README. Push payload: `{ kind: "weekly-report",
+title, body, weekStart, tag: "wpr-<weekStart>", readToken }`.
+
+**Verification so far:** 161 API unit/route tests; a real Postgres 16 run of
+the new SQL (cap under 12 concurrent adds, break week, concurrent double
+dispatch sends once, read token, cascade). Independent QA ran the real app on
+real Postgres with stubbed NHL and a local HTTPS fake push service (payloads
+decrypted): favorites, cap, normal/break/DST weeks, cron script end to end,
+sequential and concurrent double runs, switch, read tokens both directions,
+NHL failure (502, nothing written, recovers), 410 cleanup, week validation,
+and an AAR dispatch smoke — all PASS. Not verifiable here: real NHL payload
+shapes, the real cache/rate limiter, and the GitHub workflow.
 
 **Deploy:** run migration 005; add the Monday schedule to the workflow (or a
 new `weekly-player-report.yml`) using the existing `CRON_SECRET` and
