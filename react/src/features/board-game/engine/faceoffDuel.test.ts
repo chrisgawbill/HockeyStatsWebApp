@@ -82,7 +82,7 @@ function findSeedWhereCpuBandIs(
 }
 
 describe('createFaceoffDuel (both centres ante)', () => {
-  it('draws a faceoff-pool ante for the user (draw 4 = 3 + the C perk, pick 1) and has the CPU centre pick+settle its own card immediately - both real duelists, no passive side', () => {
+  it('both centres ante deterministically: the user draws 4 and picks 1, the CPU picks and settles', () => {
     const state = makeFaceoffState();
     expect(state.phase).toBe('duel');
     expect(state.duel!.kind).toBe('faceoff');
@@ -97,9 +97,8 @@ describe('createFaceoffDuel (both centres ante)', () => {
     expect(CARDS[state.duel!.faceoffCpuCardId!].tags).toContain('faceoff');
     // The CPU's picked card is already out of its own deck's hand (settled).
     expect(state.cpuDeck.hand).not.toContain(state.duel!.faceoffCpuCardId);
-  });
 
-  it('is deterministic for a fixed seed', () => {
+    // Is deterministic for a fixed seed.
     const run = () =>
       createFaceoffDuel(createInitialState(11, 'long'), 'user-C', 'cpu-C');
     expect(run()).toEqual(run());
@@ -107,18 +106,19 @@ describe('createFaceoffDuel (both centres ante)', () => {
 });
 
 describe('pickFaceoffCard / canPickFaceoffCard', () => {
-  it('sets the pick and refuses a second pick', () => {
+  it('sets one pick, refusing a second pick or an out-of-range index', () => {
     let state = makeFaceoffState();
     const cardId = state.deck.hand[0];
     expect(canPickFaceoffCard(state, 0)).toBe(true);
     state = pickFaceoffCard(state, 0);
     expect(state.duel!.faceoffPickedCardId).toBe(cardId);
     expect(canPickFaceoffCard(state, 1)).toBe(false);
-  });
 
-  it('refuses an out-of-range hand index', () => {
-    const state = makeFaceoffState();
-    expect(canPickFaceoffCard(state, 99)).toBe(false);
+    // Refuses an out-of-range hand index.
+    {
+      const state = makeFaceoffState();
+      expect(canPickFaceoffCard(state, 99)).toBe(false);
+    }
   });
 });
 
@@ -131,7 +131,7 @@ describe('pickBestFaceoffCard', () => {
 });
 
 describe('resolveFaceoffBand: three outcomes, symmetric head-to-head (BG-A15b cycle 2)', () => {
-  it('WIN: the winner carries the puck when the user genuinely wins the head-to-head', () => {
+  it('WIN and LOSS: the head-to-head winner carries the puck', () => {
     // The CPU's card here must not carry `scrumOnLoss`, or its own
     // protection would legitimately downgrade this to a scrum - see the
     // dedicated scrumOnLoss tests below.
@@ -153,9 +153,29 @@ describe('resolveFaceoffBand: three outcomes, symmetric head-to-head (BG-A15b cy
     expect(result.lastOutcome!.kind).toBe('faceoff');
     expect(result.lastOutcome!.winner).toBe('attacker');
     expect(result.duel).toBeNull();
+
+    // LOSS: the opponent carries when the CPU wins the head-to-head.
+    {
+      let state = makeFaceoffState();
+      state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
+      state = pickFaceoffCard(state, 0);
+      const seed = findSeedWhere(
+        state,
+        'quick_hands',
+        'late',
+        (r) => r.puck.kind === 'carried' && r.puck.skaterId === 'cpu-C',
+      );
+      const result = resolveFaceoffBand(
+        { ...state, rngSeed: seed },
+        'quick_hands',
+        'late',
+      );
+      expect(result.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
+      expect(result.lastOutcome!.winner).toBe('defender');
+    }
   });
 
-  it('SCRUM: both sides reading the same non-clean band is an automatic scrum - the puck goes loose on a free tile adjacent to the dot', () => {
+  it('same non-clean band is a scrum, one-sided clean is a real roll, and a repeat jump forfeits', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -184,62 +204,45 @@ describe('resolveFaceoffBand: three outcomes, symmetric head-to-head (BG-A15b cy
     }
     expect(sawScrum).toBe(true);
     expect(sawCarried).toBe(true);
-  });
 
-  it('a one-sided clean vs. non-clean band is NOT a scrum - it is a real, band-edge-favoured win/loss roll', () => {
-    let state = makeFaceoffState();
-    state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
-    state = pickFaceoffCard(state, 0);
-    // The CPU's own band happens to be clean at this seed (see the seed
-    // search above's else-branch reasoning) - a clean-vs-scrum pairing, so
-    // it must resolve as a win/loss roll, never a scrum.
-    const seed = findSeedWhereCpuBandIs(
-      CARDS.quick_hands.anticipation!,
-      'clean',
-    );
-    const result = resolveFaceoffBand(
-      { ...state, rngSeed: seed },
-      'quick_hands',
-      'scrum',
-    );
-    expect(result.puck.kind).toBe('carried');
-  });
+    // A one-sided clean vs. non-clean band is NOT a scrum - it is a real, band-edge-favoured win/loss roll.
+    {
+      let state = makeFaceoffState();
+      state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
+      state = pickFaceoffCard(state, 0);
+      // The CPU's own band happens to be clean at this seed (see the seed
+      // search above's else-branch reasoning) - a clean-vs-scrum pairing, so
+      // it must resolve as a win/loss roll, never a scrum.
+      const seed = findSeedWhereCpuBandIs(
+        CARDS.quick_hands.anticipation!,
+        'clean',
+      );
+      const result = resolveFaceoffBand(
+        { ...state, rngSeed: seed },
+        'quick_hands',
+        'scrum',
+      );
+      expect(result.puck.kind).toBe('carried');
+    }
 
-  it('LOSS: the opponent carries when the CPU wins the head-to-head', () => {
-    let state = makeFaceoffState();
-    state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
-    state = pickFaceoffCard(state, 0);
-    const seed = findSeedWhere(
-      state,
-      'quick_hands',
-      'late',
-      (r) => r.puck.kind === 'carried' && r.puck.skaterId === 'cpu-C',
-    );
-    const result = resolveFaceoffBand(
-      { ...state, rngSeed: seed },
-      'quick_hands',
-      'late',
-    );
-    expect(result.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
-    expect(result.lastOutcome!.winner).toBe('defender');
-  });
-
-  it('a repeat jump forfeits the draw outright for the user (no second re-drop) - the CPU still gets its own real band', () => {
-    let state = makeFaceoffState();
-    state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
-    state = pickFaceoffCard(state, 0);
-    const firstJump = resolveFaceoffBand(
-      { ...state, rngSeed: 5 },
-      'quick_hands',
-      'jump',
-    );
-    expect(firstJump.duel).not.toBeNull();
-    expect(firstJump.duel!.faceoffJumped).toBe(true);
-    const secondJump = resolveFaceoffBand(firstJump, 'quick_hands', 'jump');
-    expect(secondJump.duel).toBeNull();
-    expect(secondJump.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
-    expect(secondJump.lastFaceoffResult!.forfeitedByJump).toBe(true);
-    expect(secondJump.lastFaceoffResult!.userBand).toBe('jump');
+    // A repeat jump forfeits the draw outright for the user (no second re-drop) - the CPU still gets its own real band.
+    {
+      let state = makeFaceoffState();
+      state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
+      state = pickFaceoffCard(state, 0);
+      const firstJump = resolveFaceoffBand(
+        { ...state, rngSeed: 5 },
+        'quick_hands',
+        'jump',
+      );
+      expect(firstJump.duel).not.toBeNull();
+      expect(firstJump.duel!.faceoffJumped).toBe(true);
+      const secondJump = resolveFaceoffBand(firstJump, 'quick_hands', 'jump');
+      expect(secondJump.duel).toBeNull();
+      expect(secondJump.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
+      expect(secondJump.lastFaceoffResult!.forfeitedByJump).toBe(true);
+      expect(secondJump.lastFaceoffResult!.userBand).toBe('jump');
+    }
   });
 });
 
@@ -294,7 +297,7 @@ describe('faceoffEffect: stunLoser', () => {
 });
 
 describe('faceoffEffect: bonusMp', () => {
-  it("a clean win with that card adds 1 MP to the winning side's next roll", () => {
+  it('a clean win with that card adds 1 MP; a plain clean win does not', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'forehand_pull', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -317,30 +320,32 @@ describe('faceoffEffect: bonusMp', () => {
     const [d1, d2] = rolled.dice!;
     expect(rolled.mp).toBe(d1 + d2 + 1);
     expect(rolled.pendingBonusMp).toBe(0);
-  });
 
-  it('a plain (non-bonus) clean win does not add MP', () => {
-    // Neither card here carries scrumOnLoss, so a user win stays a plain win.
-    let state = makeFaceoffState();
-    state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
-    state = pickFaceoffCard(state, 0);
-    const seed = findSeedWhere(
-      state,
-      'quick_hands',
-      'clean',
-      (r) => r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
-    );
-    const result = resolveFaceoffBand(
-      { ...state, rngSeed: seed },
-      'quick_hands',
-      'clean',
-    );
-    expect(result.pendingBonusMp).toBe(0);
+    // A plain (non-bonus) clean win does not add MP.
+    {
+      // Neither card here carries scrumOnLoss, so a user win stays a plain win.
+      let state = makeFaceoffState();
+      state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
+      state = pickFaceoffCard(state, 0);
+      const seed = findSeedWhere(
+        state,
+        'quick_hands',
+        'clean',
+        (r) =>
+          r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
+      );
+      const result = resolveFaceoffBand(
+        { ...state, rngSeed: seed },
+        'quick_hands',
+        'clean',
+      );
+      expect(result.pendingBonusMp).toBe(0);
+    }
   });
 });
 
 describe('faceoffEffect: scrumOnLoss', () => {
-  it("downgrades what would otherwise be a clean loss for the card's bearer into a scrum", () => {
+  it("downgrades the bearer's clean loss to a scrum but not its win", () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'tie_it_up', 'body_the_dot');
     state = pickFaceoffCard(state, 0);
@@ -377,29 +382,31 @@ describe('faceoffEffect: scrumOnLoss', () => {
     if (result.puck.kind === 'loose') {
       expect(manhattan(result.puck.pos, FACEOFF_SPOTS.centreIce)).toBe(1);
     }
-  });
 
-  it('does not downgrade a win for its own bearer', () => {
-    let state = makeFaceoffState();
-    state = withFaceoffCards(state, 'tie_it_up', 'quick_hands');
-    state = pickFaceoffCard(state, 0);
-    const seed = findSeedWhere(
-      state,
-      'tie_it_up',
-      'clean',
-      (r) => r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
-    );
-    const result = resolveFaceoffBand(
-      { ...state, rngSeed: seed },
-      'tie_it_up',
-      'clean',
-    );
-    expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
+    // Does not downgrade a win for its own bearer.
+    {
+      let state = makeFaceoffState();
+      state = withFaceoffCards(state, 'tie_it_up', 'quick_hands');
+      state = pickFaceoffCard(state, 0);
+      const seed = findSeedWhere(
+        state,
+        'tie_it_up',
+        'clean',
+        (r) =>
+          r.puck.kind === 'carried' && r.lastOutcome!.winner === 'attacker',
+      );
+      const result = resolveFaceoffBand(
+        { ...state, rngSeed: seed },
+        'tie_it_up',
+        'clean',
+      );
+      expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
+    }
   });
 });
 
 describe('faceoffEffect: freeJump', () => {
-  it('re-drops at the full window, not the narrowed one, after a jump', () => {
+  it('freeJump re-drops at the full window; without it the window narrows', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'cheat_the_draw', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -412,25 +419,26 @@ describe('faceoffEffect: freeJump', () => {
     expect(jumped.duel!.faceoffJumped).toBe(true);
     const after = faceoffBandWindowsFor(jumped)!;
     expect(after.cleanWindowMs).toBe(before.cleanWindowMs);
-  });
 
-  it('a card without freeJump narrows the clean window on the re-drop', () => {
-    let state = makeFaceoffState();
-    state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
-    state = pickFaceoffCard(state, 0);
-    const before = faceoffBandWindowsFor(state)!;
-    const jumped = resolveFaceoffBand(
-      { ...state, rngSeed: 5 },
-      'quick_hands',
-      'jump',
-    );
-    const after = faceoffBandWindowsFor(jumped)!;
-    expect(after.cleanWindowMs).toBeLessThan(before.cleanWindowMs);
+    // A card without freeJump narrows the clean window on the re-drop.
+    {
+      let state = makeFaceoffState();
+      state = withFaceoffCards(state, 'quick_hands', 'quick_hands');
+      state = pickFaceoffCard(state, 0);
+      const before = faceoffBandWindowsFor(state)!;
+      const jumped = resolveFaceoffBand(
+        { ...state, rngSeed: 5 },
+        'quick_hands',
+        'jump',
+      );
+      const after = faceoffBandWindowsFor(jumped)!;
+      expect(after.cleanWindowMs).toBeLessThan(before.cleanWindowMs);
+    }
   });
 });
 
 describe('the CPU centre goes through the identical head-to-head contest as the user (no privileged path)', () => {
-  it("the CPU's own card effect fires on some of its wins and not others - proof its band genuinely varies rather than being fixed", () => {
+  it("the CPU's band genuinely varies and the user wins off a clean band the same way", () => {
     const base = pickFaceoffCard(
       withFaceoffCards(makeFaceoffState(), 'quick_hands', 'body_the_dot'),
       0,
@@ -453,9 +461,8 @@ describe('the CPU centre goes through the identical head-to-head contest as the 
     }
     expect(sawFired).toBe(true);
     expect(sawNotFired).toBe(true);
-  });
 
-  it('the user can win outright off a clean band exactly like the CPU can - the identical formula runs from either side', () => {
+    // The user can win outright off a clean band exactly like the CPU can - the identical formula runs from either side.
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'body_the_dot', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -475,19 +482,20 @@ describe('the CPU centre goes through the identical head-to-head contest as the 
 });
 
 describe('pickDefendingDot', () => {
-  it('picks the dot nearest the shooter row', () => {
+  it('picks the dot nearest the shooter row, breaking ties with a seeded flip', () => {
     const dots = FACEOFF_SPOTS.defendingDots.cpu;
     const [nearRow1] = pickDefendingDot(dots, 1, 0);
     expect(nearRow1).toEqual(dots[0]);
     const [nearRow5] = pickDefendingDot(dots, 6, 0);
     expect(nearRow5).toEqual(dots[1]);
-  });
 
-  it('breaks an equidistant tie with a seeded flip, deterministic for a fixed seed', () => {
-    const dots = FACEOFF_SPOTS.defendingDots.cpu;
-    const a = pickDefendingDot(dots, 3, 7);
-    const b = pickDefendingDot(dots, 3, 7);
-    expect(a).toEqual(b);
+    // Breaks an equidistant tie with a seeded flip, deterministic for a fixed seed.
+    {
+      const dots = FACEOFF_SPOTS.defendingDots.cpu;
+      const a = pickDefendingDot(dots, 3, 7);
+      const b = pickDefendingDot(dots, 3, 7);
+      expect(a).toEqual(b);
+    }
   });
 });
 

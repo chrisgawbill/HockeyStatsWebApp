@@ -36,7 +36,7 @@ describe('teamFormHelper', () => {
     game('2025-10-11', 'COL', 'WPG', 3, 1, 'SO'),
   ];
 
-  it('derives chronological W/L/OTL results for the selected team', () => {
+  it('derives chronological results and the form stats built on them', () => {
     const results = getTeamResults(games, 'col');
 
     expect(results.map((result) => result.outcome)).toEqual([
@@ -48,10 +48,8 @@ describe('teamFormHelper', () => {
     ]);
     expect(results[1].home).toBe(false);
     expect(results[3].gf).toBe(5);
-  });
 
-  it('calculates recent form, rolling points percentage, goal differential, and splits', () => {
-    const results = getTeamResults(games, 'COL');
+    // Recent form, rolling points percentage, goal differential, splits.
     expect(lastN(results, 3).map((result) => result.outcome)).toEqual([
       'L',
       'W',
@@ -75,7 +73,9 @@ describe('teamFormHelper', () => {
       homeScore: null,
     } as unknown as ScheduledGame;
 
-    expect(getTeamResults([...games, incomplete, missingScore], 'COL')).toHaveLength(5);
+    expect(
+      getTeamResults([...games, incomplete, missingScore], 'COL'),
+    ).toHaveLength(5);
     expect(lastN(getTeamResults(games, 'COL'), 0)).toEqual([]);
   });
 });

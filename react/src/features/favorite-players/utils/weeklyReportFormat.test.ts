@@ -27,7 +27,7 @@ function player(overrides: Partial<WeeklyReportPlayer>): WeeklyReportPlayer {
 }
 
 describe('weeklyReportFormat', () => {
-  it('formats the approved skater line', () => {
+  it('formats the approved skater and goalie lines', () => {
     expect(
       skaterStatItems({
         gp: 3,
@@ -48,9 +48,8 @@ describe('weeklyReportFormat', () => {
       '11 SOG',
       '21:42 TOI/GP',
     ]);
-  });
 
-  it('formats the approved goalie line', () => {
+    // Formats the approved goalie line.
     expect(
       goalieStatItems({
         gp: 2,
@@ -67,7 +66,7 @@ describe('weeklyReportFormat', () => {
     expect(formatSavePct(null)).toBe('—');
   });
 
-  it('describes did-not-play and traded players', () => {
+  it('describes did-not-play and traded players, titles, and validates weeks', () => {
     expect(didNotPlayText(player({ teamGames: 3 }))).toBe(
       'Did not play (team played 3 games)',
     );
@@ -79,9 +78,8 @@ describe('weeklyReportFormat', () => {
     );
     expect(teamsLabel(player({ teams: ['CGY', 'EDM'] }))).toBe('CGY → EDM');
     expect(teamsLabel(player({ teams: [], team: 'VAN' }))).toBe('VAN');
-  });
 
-  it('titles and validates weeks', () => {
+    // Titles and validates weeks.
     expect(weeklyReportTitle({ label: 'Oct 13–19' })).toBe(
       'Weekly Player Report · Oct 13–19',
     );

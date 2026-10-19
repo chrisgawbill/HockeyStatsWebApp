@@ -89,7 +89,7 @@ describe('sw.js', () => {
     expect(w.handlers.fetch).toBeUndefined();
   });
 
-  it('shows the pushed report', async () => {
+  it('shows pushed reports and weekly reports, falling back for bad payloads', async () => {
     const w = loadWorker();
     const p = pushEvent({
       title: 'BOS 3, NYR 2',
@@ -108,15 +108,46 @@ describe('sw.js', () => {
       data: { gameId: 2025020001, readToken: 'tok' },
     });
     expect(options.icon).toBe(`${SCOPE}icons/icon-192.png`);
-  });
 
-  it('still shows something for a bad payload', async () => {
-    const w = loadWorker();
-    const p = pushEvent(null, true);
-    w.handlers.push(p.event);
-    await p.done();
-    expect(w.showNotification).toHaveBeenCalledTimes(1);
-    expect(w.showNotification.mock.calls[0][0]).toBe('After Action Report');
+    // Still shows something for a bad payload.
+    {
+      const w = loadWorker();
+      const p = pushEvent(null, true);
+      w.handlers.push(p.event);
+      await p.done();
+      expect(w.showNotification).toHaveBeenCalledTimes(1);
+      expect(w.showNotification.mock.calls[0][0]).toBe('After Action Report');
+    }
+
+    // Shows a weekly report push with its week.
+    {
+      const w = loadWorker();
+      const p = pushEvent({
+        kind: 'weekly-report',
+        title: 'Weekly Player Report · Oct 12–18',
+        body: 'Connor McDavid: 2G 4A in 2 GP',
+        weekStart: '2026-10-12',
+        tag: 'wpr-2026-10-12',
+        readToken: 'wtok',
+      });
+      w.handlers.push(p.event);
+      await p.done();
+      const [title, options] = w.showNotification.mock.calls[0];
+      expect(title).toBe('Weekly Player Report · Oct 12–18');
+      expect(options).toMatchObject({
+        tag: 'wpr-2026-10-12',
+        data: { gameId: null, weekStart: '2026-10-12', readToken: 'wtok' },
+      });
+    }
+
+    // Ignores a malformed weekStart.
+    {
+      const w = loadWorker();
+      const p = pushEvent({ kind: 'weekly-report', weekStart: '../../x' });
+      w.handlers.push(p.event);
+      await p.done();
+      expect(w.showNotification.mock.calls[0][1].data.weekStart).toBeNull();
+    }
   });
 
   it('click posts the read token and focuses an open tab on the game', async () => {
@@ -148,7 +179,7 @@ describe('sw.js', () => {
     expect(w.openWindow).not.toHaveBeenCalled();
   });
 
-  it('opens the game before the read finishes and announces read after', async () => {
+  it('opens the game before the read finishes, focusing a tab or opening a window', async () => {
     const open = client(`${SCOPE}#/standings`);
     const w = loadWorker([open]);
     let release: (value: unknown) => void = () => undefined;
@@ -175,58 +206,34 @@ describe('sw.js', () => {
       type: 'aar-report-read',
       gameId: 42,
     });
+
+    // Opens a window before the read finishes when no tab is open.
+    {
+      const w = loadWorker([]);
+      let release: (value: unknown) => void = () => undefined;
+      w.fetchMock.mockReturnValue(
+        new Promise((resolve) => (release = resolve)),
+      );
+      const c = clickEvent({ gameId: 9, readToken: 'tok' });
+      w.handlers.notificationclick(c.event);
+      for (let i = 0; i < 20; i++) await Promise.resolve();
+      expect(w.openWindow).toHaveBeenCalledWith(`${SCOPE}#/game/9`);
+      release({ ok: true });
+      await c.done();
+    }
+
+    // Click opens a window when none is in scope, even if the read fails.
+    {
+      const w = loadWorker([client('https://elsewhere.test/')]);
+      w.fetchMock.mockRejectedValue(new Error('offline'));
+      const c = clickEvent({ gameId: 7, readToken: 'tok' });
+      w.handlers.notificationclick(c.event);
+      await c.done();
+      expect(w.openWindow).toHaveBeenCalledWith(`${SCOPE}#/game/7`);
+    }
   });
 
-  it('opens a window before the read finishes when no tab is open', async () => {
-    const w = loadWorker([]);
-    let release: (value: unknown) => void = () => undefined;
-    w.fetchMock.mockReturnValue(new Promise((resolve) => (release = resolve)));
-    const c = clickEvent({ gameId: 9, readToken: 'tok' });
-    w.handlers.notificationclick(c.event);
-    for (let i = 0; i < 20; i++) await Promise.resolve();
-    expect(w.openWindow).toHaveBeenCalledWith(`${SCOPE}#/game/9`);
-    release({ ok: true });
-    await c.done();
-  });
-
-  it('click opens a window when none is in scope, even if the read fails', async () => {
-    const w = loadWorker([client('https://elsewhere.test/')]);
-    w.fetchMock.mockRejectedValue(new Error('offline'));
-    const c = clickEvent({ gameId: 7, readToken: 'tok' });
-    w.handlers.notificationclick(c.event);
-    await c.done();
-    expect(w.openWindow).toHaveBeenCalledWith(`${SCOPE}#/game/7`);
-  });
-
-  it('shows a weekly report push with its week', async () => {
-    const w = loadWorker();
-    const p = pushEvent({
-      kind: 'weekly-report',
-      title: 'Weekly Player Report · Oct 12–18',
-      body: 'Connor McDavid: 2G 4A in 2 GP',
-      weekStart: '2026-10-12',
-      tag: 'wpr-2026-10-12',
-      readToken: 'wtok',
-    });
-    w.handlers.push(p.event);
-    await p.done();
-    const [title, options] = w.showNotification.mock.calls[0];
-    expect(title).toBe('Weekly Player Report · Oct 12–18');
-    expect(options).toMatchObject({
-      tag: 'wpr-2026-10-12',
-      data: { gameId: null, weekStart: '2026-10-12', readToken: 'wtok' },
-    });
-  });
-
-  it('ignores a malformed weekStart', async () => {
-    const w = loadWorker();
-    const p = pushEvent({ kind: 'weekly-report', weekStart: '../../x' });
-    w.handlers.push(p.event);
-    await p.done();
-    expect(w.showNotification.mock.calls[0][1].data.weekStart).toBeNull();
-  });
-
-  it('weekly click posts the read token and routes an open tab to the report', async () => {
+  it('weekly clicks post the read token and route an open tab or a new window to the report', async () => {
     const open = client(`${SCOPE}#/standings`);
     const w = loadWorker([open]);
     const c = clickEvent({
@@ -254,15 +261,16 @@ describe('sw.js', () => {
     expect(open.postMessage).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'aar-navigate' }),
     );
-  });
 
-  it('weekly click opens a window when no tab is open', async () => {
-    const w = loadWorker([]);
-    const c = clickEvent({ weekStart: '2026-10-12', readToken: 'wtok' });
-    w.handlers.notificationclick(c.event);
-    await c.done();
-    expect(w.openWindow).toHaveBeenCalledWith(
-      `${SCOPE}#/weekly-report/2026-10-12`,
-    );
+    // Weekly click opens a window when no tab is open.
+    {
+      const w = loadWorker([]);
+      const c = clickEvent({ weekStart: '2026-10-12', readToken: 'wtok' });
+      w.handlers.notificationclick(c.event);
+      await c.done();
+      expect(w.openWindow).toHaveBeenCalledWith(
+        `${SCOPE}#/weekly-report/2026-10-12`,
+      );
+    }
   });
 });

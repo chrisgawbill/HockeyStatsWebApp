@@ -86,7 +86,7 @@ describe('getGameStoryFacts', () => {
     expect(facts.largestLead?.eventIndex).toBe(0);
   });
 
-  it('returns empty facts when the scoring block is absent', () => {
+  it('returns empty or partial facts for missing or incomplete scoring', () => {
     const facts = getGameStoryFacts(null, 'AWY', 'HOM');
     expect(facts).toEqual({
       scoringEvents: [],
@@ -96,16 +96,15 @@ describe('getGameStoryFacts', () => {
       largestLead: null,
       turningPoints: [],
     });
-  });
 
-  it('does not derive lead facts from an event with incomplete scores', () => {
+    // An event with incomplete scores yields no lead facts.
     const landing = landingWithGoals([
       { team: 'AWY', awayScore: Number.NaN, homeScore: 0 },
     ]);
-    const facts = getGameStoryFacts(landing, 'AWY', 'HOM');
+    const partial = getGameStoryFacts(landing, 'AWY', 'HOM');
 
-    expect(facts.scoringEvents[0]?.gameState).toBeNull();
-    expect(facts.firstLead).toBeNull();
-    expect(facts.largestLead).toBeNull();
+    expect(partial.scoringEvents[0]?.gameState).toBeNull();
+    expect(partial.firstLead).toBeNull();
+    expect(partial.largestLead).toBeNull();
   });
 });

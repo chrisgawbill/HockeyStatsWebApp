@@ -17,27 +17,18 @@ function makeCard(overrides: Partial<CardDef> = {}): CardDef {
 }
 
 describe('cardBlockReasonLabel', () => {
-  it('describes an energy shortfall using the card cost and current energy', () => {
+  it('describes each reason a card cannot be played', () => {
+    // Energy shortfalls use the card cost and current energy.
     expect(cardBlockReasonLabel('energy', makeCard({ cost: 2 }), 1)).toBe(
       'Costs 2⚡ · you have 1',
     );
-  });
-
-  it('describes a shot-only card', () => {
-    expect(cardBlockReasonLabel('shotOnly', makeCard(), 3)).toBe(
-      'Only when shooting',
-    );
-  });
-
-  it('describes a check-only card', () => {
-    expect(cardBlockReasonLabel('checkOnly', makeCard(), 3)).toBe(
-      'Only when checking',
-    );
-  });
-
-  it('describes a faceoff-only card', () => {
-    expect(cardBlockReasonLabel('faceoffOnly', makeCard(), 3)).toBe(
-      'Only at a faceoff',
-    );
+    const cases = [
+      ['shotOnly', 'Only when shooting'],
+      ['checkOnly', 'Only when checking'],
+      ['faceoffOnly', 'Only at a faceoff'],
+    ] as const;
+    for (const [reason, label] of cases) {
+      expect(cardBlockReasonLabel(reason, makeCard(), 3)).toBe(label);
+    }
   });
 });

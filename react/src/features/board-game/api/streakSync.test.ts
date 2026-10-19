@@ -28,7 +28,7 @@ describe('streakSync', () => {
     put.mockReset();
   });
 
-  it('fetchRemoteStreak GETs the streak with a bearer header', async () => {
+  it('GETs and PUTs the streak with a bearer header', async () => {
     const streak: StreakData = {
       wins: { '2026-03-10': true },
       lastWinDate: '2026-03-10',
@@ -41,9 +41,8 @@ describe('streakSync', () => {
       headers: { Authorization: 'Bearer token-1' },
     });
     expect(result).toEqual(streak);
-  });
 
-  it('pushRemoteStreak PUTs the streak and returns the server-merged result', async () => {
+    // pushRemoteStreak PUTs the streak and returns the server-merged result.
     const local: StreakData = {
       wins: { '2026-03-10': true },
       lastWinDate: '2026-03-10',
@@ -54,11 +53,11 @@ describe('streakSync', () => {
     };
     put.mockResolvedValue(merged);
 
-    const result = await pushRemoteStreak('token-1', local);
+    const pushed = await pushRemoteStreak('token-1', local);
 
     expect(put).toHaveBeenCalledWith('/api/board-game/streak', local, {
       headers: { Authorization: 'Bearer token-1' },
     });
-    expect(result).toEqual(merged);
+    expect(pushed).toEqual(merged);
   });
 });

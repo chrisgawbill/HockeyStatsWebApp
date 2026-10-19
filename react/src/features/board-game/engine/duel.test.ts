@@ -83,44 +83,46 @@ function driveToCompletion(state: GameState, maxRounds = 10): GameState {
 }
 
 describe('stunUntil', () => {
-  it("lasts through the team's next turn either way", () => {
+  it("lasts through the team's next turn, whichever turn the stun lands on", () => {
     const state = makeState({ turn: 3, activeTeam: 'user' });
     expect(stunUntil(state, 'user')).toBe(5);
     expect(stunUntil(state, 'cpu')).toBe(4);
-  });
 
-  it('a skater stunned on its own turn cannot move next turn but can the turn after', () => {
-    const state = makeState({ turn: 3, activeTeam: 'user' });
-    const until = stunUntil(state, 'user');
-    expect(
-      isStunned(
-        { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-        until,
-      ),
-    ).toBe(true);
-    expect(
-      isStunned(
-        { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-        until + 2,
-      ),
-    ).toBe(false);
-  });
+    // A skater stunned on its own turn cannot move next turn but can the turn after.
+    {
+      const state = makeState({ turn: 3, activeTeam: 'user' });
+      const until = stunUntil(state, 'user');
+      expect(
+        isStunned(
+          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
+          until,
+        ),
+      ).toBe(true);
+      expect(
+        isStunned(
+          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
+          until + 2,
+        ),
+      ).toBe(false);
+    }
 
-  it("a skater stunned on the opponent's turn cannot move its next turn but can the turn after", () => {
-    const state = makeState({ turn: 3, activeTeam: 'cpu' });
-    const until = stunUntil(state, 'user');
-    expect(
-      isStunned(
-        { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-        until,
-      ),
-    ).toBe(true);
-    expect(
-      isStunned(
-        { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-        until + 2,
-      ),
-    ).toBe(false);
+    // A skater stunned on the opponent's turn cannot move its next turn but can the turn after.
+    {
+      const state = makeState({ turn: 3, activeTeam: 'cpu' });
+      const until = stunUntil(state, 'user');
+      expect(
+        isStunned(
+          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
+          until,
+        ),
+      ).toBe(true);
+      expect(
+        isStunned(
+          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
+          until + 2,
+        ),
+      ).toBe(false);
+    }
   });
 });
 
@@ -129,41 +131,43 @@ describe('createDuel', () => {
   // hand-dealing machinery at all (it's an ante pick now - see
   // engine/faceoffDuel.test.ts), so `handSizeFor`'s old +1-for-faceoff perk
   // branch is gone; every remaining duel kind here draws a plain 5.
-  it('draws 5 cards for both sides', () => {
+  it('draws 5 cards each, plans CPU cards within budget, and adds streak energy to the user only', () => {
     const state = makeState();
     const check = createDuel(state, 'check', 'user-LD', 'cpu-C');
     expect(check.duel!.energy).toBe(3);
     expect(check.deck.hand).toHaveLength(5);
     expect(check.cpuDeck.hand).toHaveLength(5);
-  });
 
-  it("plans the CPU's round-1 cards within the energy budget", () => {
-    const state = makeState();
-    const duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
-    const plan = duel.duel!.cpuPlan;
-    const totalCost = plan.reduce((sum, id) => sum + CARDS[id].cost, 0);
-    expect(totalCost).toBeLessThanOrEqual(ENERGY);
-    expect(plan.every((id) => duel.cpuDeck.hand.includes(id))).toBe(true);
-  });
+    // Plans the CPU's round-1 cards within the energy budget.
+    {
+      const state = makeState();
+      const duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
+      const plan = duel.duel!.cpuPlan;
+      const totalCost = plan.reduce((sum, id) => sum + CARDS[id].cost, 0);
+      expect(totalCost).toBeLessThanOrEqual(ENERGY);
+      expect(plan.every((id) => duel.cpuDeck.hand.includes(id))).toBe(true);
+    }
 
-  it('adds daily-streak bonus energy to the user duel budget only', () => {
-    const state = makeState({
-      bonusEnergy: 1,
-      cpuDeck: {
-        drawPile: ['toe_drag', 'toe_drag'],
-        hand: [],
-        discardPile: [],
-        exhaustPile: [],
-      },
-    });
-    const duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
-    const cpuPlanCost = duel.duel!.cpuPlan.reduce(
-      (sum, id) => sum + CARDS[id].cost,
-      0,
-    );
+    // Adds daily-streak bonus energy to the user duel budget only.
+    {
+      const state = makeState({
+        bonusEnergy: 1,
+        cpuDeck: {
+          drawPile: ['toe_drag', 'toe_drag'],
+          hand: [],
+          discardPile: [],
+          exhaustPile: [],
+        },
+      });
+      const duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
+      const cpuPlanCost = duel.duel!.cpuPlan.reduce(
+        (sum, id) => sum + CARDS[id].cost,
+        0,
+      );
 
-    expect(duel.duel!.energy).toBe(ENERGY + 1);
-    expect(cpuPlanCost).toBe(ENERGY - 1);
+      expect(duel.duel!.energy).toBe(ENERGY + 1);
+      expect(cpuPlanCost).toBe(ENERGY - 1);
+    }
   });
 });
 
@@ -178,39 +182,45 @@ describe('filtered duel draw (BG-A13)', () => {
   // this also guards that a faceoff-only card never leaks into a deke hand -
   // it's the same filter path a shot- or check-only card was already
   // guarded against here.
-  it('never deals a shot-, check-, or faceoff-only card into a deke hand', () => {
+  it('deals only eligible cards, short hands safely, deterministically, keeping the rest in the deck', () => {
     const state = makeState();
     const duel = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
     for (const id of duel.deck.hand) expect(isAllowedIn(id, 'deke')).toBe(true);
     for (const id of duel.cpuDeck.hand)
       expect(isAllowedIn(id, 'deke')).toBe(true);
-  });
 
-  it('deals a short hand (not a throw or a hang) when the eligible pool cannot fill it', () => {
-    // A check duel only allows 'any' or check-tagged cards. Stock the CPU's
-    // deck entirely with shot-only cards so its eligible pool is empty.
-    const state = makeState();
-    const [cpuDeck] = createDeck(
-      ['wrist_shot', 'wrist_shot', 'wrist_shot', 'slapshot', 'wrist_shot'],
-      1,
-    );
-    const duel = createDuel({ ...state, cpuDeck }, 'check', 'user-LD', 'cpu-C');
-    expect(duel.cpuDeck.hand).toEqual([]);
-    expect(duel.phase).toBe('duel');
-  });
+    // Deals a short hand (not a throw or a hang) when the eligible pool cannot fill it.
+    {
+      // A check duel only allows 'any' or check-tagged cards. Stock the CPU's
+      // deck entirely with shot-only cards so its eligible pool is empty.
+      const state = makeState();
+      const [cpuDeck] = createDeck(
+        ['wrist_shot', 'wrist_shot', 'wrist_shot', 'slapshot', 'wrist_shot'],
+        1,
+      );
+      const duel = createDuel(
+        { ...state, cpuDeck },
+        'check',
+        'user-LD',
+        'cpu-C',
+      );
+      expect(duel.cpuDeck.hand).toEqual([]);
+      expect(duel.phase).toBe('duel');
+    }
 
-  it('leaves ineligible cards in the deck for a later duel of a different kind', () => {
-    const state = makeState();
-    const deke = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
-    const remaining = [
-      ...deke.deck.drawPile,
-      ...deke.deck.discardPile,
-      ...deke.deck.hand,
-    ];
-    expect([...remaining].sort()).toEqual([...STARTER_DECK].sort());
-  });
+    // Leaves ineligible cards in the deck for a later duel of a different kind.
+    {
+      const state = makeState();
+      const deke = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
+      const remaining = [
+        ...deke.deck.drawPile,
+        ...deke.deck.discardPile,
+        ...deke.deck.hand,
+      ];
+      expect([...remaining].sort()).toEqual([...STARTER_DECK].sort());
+    }
 
-  it('is deterministic for a fixed seed', () => {
+    // Is deterministic for a fixed seed.
     const s1 = createDuel(
       makeState({ rngSeed: 7 }),
       'deke',
@@ -228,7 +238,7 @@ describe('filtered duel draw (BG-A13)', () => {
     expect(s1.rngSeed).toEqual(s2.rngSeed);
   });
 
-  it('filters the per-round redraw the same way as the opening hand', () => {
+  it('redraws filter the same way and reset energy to base plus the streak bonus', () => {
     const state = makeState();
     let duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
     // Force the round to advance without a KO so a fresh hand is drawn.
@@ -238,101 +248,108 @@ describe('filtered duel draw (BG-A13)', () => {
       expect(isAllowedIn(id, 'check')).toBe(true);
     for (const id of duel.cpuDeck.hand)
       expect(isAllowedIn(id, 'check')).toBe(true);
-  });
 
-  it('resets the next user duel round to base energy plus the daily-streak bonus', () => {
-    let duel = createDuel(
-      makeState({ bonusEnergy: 1 }),
-      'check',
-      'user-LD',
-      'cpu-C',
-    );
-    duel = {
-      ...duel,
-      deck: { ...duel.deck, hand: [] },
-      cpuDeck: { ...duel.cpuDeck, hand: [] },
-      duel: { ...duel.duel!, cpuPlan: [] },
-    };
+    // Resets the next user duel round to base energy plus the daily-streak bonus.
+    {
+      let duel = createDuel(
+        makeState({ bonusEnergy: 1 }),
+        'check',
+        'user-LD',
+        'cpu-C',
+      );
+      duel = {
+        ...duel,
+        deck: { ...duel.deck, hand: [] },
+        cpuDeck: { ...duel.cpuDeck, hand: [] },
+        duel: { ...duel.duel!, cpuPlan: [] },
+      };
 
-    const next = endDuelRound(duel);
+      const next = endDuelRound(duel);
 
-    expect(next.duel!.round).toBe(2);
-    expect(next.duel!.energy).toBe(ENERGY + 1);
+      expect(next.duel!.round).toBe(2);
+      expect(next.duel!.energy).toBe(ENERGY + 1);
+    }
   });
 });
 
 describe('canPlayCard / playCard (queue)', () => {
-  it('rejects a card not allowed in this duel kind', () => {
+  it('queues allowed cards, spending energy, and resolves draw effects immediately', () => {
     let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     state = { ...state, deck: { ...state.deck, hand: ['wrist_shot'] } };
     expect(canPlayCard(state, 0)).toBe(false);
-  });
 
-  it('moves the card from hand to userQueue and spends its energy, with no combat effect yet', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = { ...state, deck: { ...state.deck, hand: ['protect_puck'] } };
-    const next = playCard(state, 0);
-    expect(next.deck.hand).toEqual([]);
-    expect(next.duel!.userQueue).toEqual(['protect_puck']);
-    expect(next.duel!.energy).toBe(2);
-    expect(next.duel!.attacker.block).toBe(0);
-  });
+    // Moves the card from hand to userQueue and spends its energy, with no combat effect yet.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = { ...state, deck: { ...state.deck, hand: ['protect_puck'] } };
+      const next = playCard(state, 0);
+      expect(next.deck.hand).toEqual([]);
+      expect(next.duel!.userQueue).toEqual(['protect_puck']);
+      expect(next.duel!.energy).toBe(2);
+      expect(next.duel!.attacker.block).toBe(0);
+    }
 
-  it('resolves a draw effect immediately on queue', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
-    const next = playCard(state, 0);
-    expect(next.deck.hand).toHaveLength(1);
+    // Resolves a draw effect immediately on queue.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
+      const next = playCard(state, 0);
+      expect(next.deck.hand).toHaveLength(1);
+    }
   });
 });
 
 describe('cardBlockReason', () => {
-  it('returns null for a playable card', () => {
+  it('reports null, rule reasons, then energy, agreeing with canPlayCard', () => {
     let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     state = { ...state, deck: { ...state.deck, hand: ['poke_check'] } };
     expect(cardBlockReason(state, 0)).toBeNull();
-  });
 
-  it("returns 'shotOnly' when the card's allowedIn excludes this duel kind and lists shot first", () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = { ...state, deck: { ...state.deck, hand: ['wrist_shot'] } };
-    expect(cardBlockReason(state, 0)).toBe('shotOnly');
-  });
+    // Returns 'shotOnly' when the card's allowedIn excludes this duel kind and lists shot first.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = { ...state, deck: { ...state.deck, hand: ['wrist_shot'] } };
+      expect(cardBlockReason(state, 0)).toBe('shotOnly');
+    }
 
-  it("returns 'checkOnly' when the card's allowedIn excludes this duel kind and lists check first", () => {
-    let state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
-    state = { ...state, deck: { ...state.deck, hand: ['body_check'] } };
-    expect(cardBlockReason(state, 0)).toBe('checkOnly');
-  });
+    // Returns 'checkOnly' when the card's allowedIn excludes this duel kind and lists check first.
+    {
+      let state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
+      state = { ...state, deck: { ...state.deck, hand: ['body_check'] } };
+      expect(cardBlockReason(state, 0)).toBe('checkOnly');
+    }
 
-  it("returns 'energy' when the card costs more than the current energy, and rule reasons take priority over it", () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = {
-      ...state,
-      duel: { ...state.duel!, energy: 0 },
-      deck: { ...state.deck, hand: ['poke_check'] },
-    };
-    expect(cardBlockReason(state, 0)).toBe('energy');
-  });
+    // Returns 'energy' when the card costs more than the current energy, and rule reasons take priority over it.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = {
+        ...state,
+        duel: { ...state.duel!, energy: 0 },
+        deck: { ...state.deck, hand: ['poke_check'] },
+      };
+      expect(cardBlockReason(state, 0)).toBe('energy');
+    }
 
-  it('agrees with canPlayCard for every hand index in a mixed fixture', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = {
-      ...state,
-      duel: { ...state.duel!, energy: 1 },
-      deck: {
-        ...state.deck,
-        hand: ['poke_check', 'wrist_shot', 'toe_drag', 'body_check'],
-      },
-    };
-    for (let i = 0; i < state.deck.hand.length; i++) {
-      expect(canPlayCard(state, i)).toBe(cardBlockReason(state, i) === null);
+    // Agrees with canPlayCard for every hand index in a mixed fixture.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = {
+        ...state,
+        duel: { ...state.duel!, energy: 1 },
+        deck: {
+          ...state.deck,
+          hand: ['poke_check', 'wrist_shot', 'toe_drag', 'body_check'],
+        },
+      };
+      for (let i = 0; i < state.deck.hand.length; i++) {
+        expect(canPlayCard(state, i)).toBe(cardBlockReason(state, i) === null);
+      }
     }
   });
 });
 
 describe('unqueueCard', () => {
-  it('returns the card to the end of hand and refunds its cost', () => {
+  it('returns the card to hand with a refund, ignoring invalid indexes, with no net change over repeats', () => {
     let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     state = {
       ...state,
@@ -343,37 +360,39 @@ describe('unqueueCard', () => {
     expect(unqueued.duel!.userQueue).toEqual([]);
     expect(unqueued.duel!.energy).toBe(3);
     expect(unqueued.deck.hand).toEqual(['deke', 'protect_puck']);
-  });
 
-  it('returns the same state for an invalid queue index', () => {
-    const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    expect(unqueueCard(state, 0)).toBe(state);
-  });
-
-  it('queue-unqueue Stickhandle 5x leaves hand size, total card count, and energy unchanged', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
-    const total = (d: Deck) =>
-      d.hand.length +
-      d.drawPile.length +
-      d.discardPile.length +
-      d.exhaustPile.length;
-    const totalBefore = total(state.deck);
-
-    for (let i = 0; i < 5; i++) {
-      state = playCard(state, 0);
-      expect(state.deck.hand).toHaveLength(1);
-      state = unqueueCard(state, 0);
-      expect(state.deck.hand).toEqual(['stickhandle']);
+    // Returns the same state for an invalid queue index.
+    {
+      const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      expect(unqueueCard(state, 0)).toBe(state);
     }
 
-    expect(total(state.deck)).toBe(totalBefore);
-    expect(state.duel!.energy).toBe(ENERGY);
-    expect(state.duel!.userQueue).toEqual([]);
-    expect(state.duel!.queueDraws).toEqual([]);
+    // Queue-unqueue Stickhandle 5x leaves hand size, total card count, and energy unchanged.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
+      const total = (d: Deck) =>
+        d.hand.length +
+        d.drawPile.length +
+        d.discardPile.length +
+        d.exhaustPile.length;
+      const totalBefore = total(state.deck);
+
+      for (let i = 0; i < 5; i++) {
+        state = playCard(state, 0);
+        expect(state.deck.hand).toHaveLength(1);
+        state = unqueueCard(state, 0);
+        expect(state.deck.hand).toEqual(['stickhandle']);
+      }
+
+      expect(total(state.deck)).toBe(totalBefore);
+      expect(state.duel!.energy).toBe(ENERGY);
+      expect(state.duel!.userQueue).toEqual([]);
+      expect(state.duel!.queueDraws).toEqual([]);
+    }
   });
 
-  it('shuffles the returned drawn card into the draw pile rather than leaving it on top', () => {
+  it('returned drawn cards are reshuffled, and a queued drawn card cannot be unqueued', () => {
     let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
     const queued = playCard(state, 0);
@@ -390,26 +409,27 @@ describe('unqueueCard', () => {
       ...queued.deck.drawPile,
       drawnCardId,
     ]);
-  });
 
-  it('canUnqueueCard is false once a drawn card has itself been queued, and unqueueCard refuses (state unchanged)', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
-    let queued = playCard(state, 0);
-    // Force a known drawn card id so the follow-up queue is deterministic.
-    queued = {
-      ...queued,
-      deck: { ...queued.deck, hand: ['deke'] },
-      duel: { ...queued.duel!, queueDraws: [['deke']] },
-    };
-    queued = playCard(queued, 0);
-    expect(canUnqueueCard(queued, 0)).toBe(false);
-    expect(unqueueCard(queued, 0)).toBe(queued);
+    // canUnqueueCard is false once a drawn card has itself been queued, and unqueueCard refuses (state unchanged).
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
+      let queued = playCard(state, 0);
+      // Force a known drawn card id so the follow-up queue is deterministic.
+      queued = {
+        ...queued,
+        deck: { ...queued.deck, hand: ['deke'] },
+        duel: { ...queued.duel!, queueDraws: [['deke']] },
+      };
+      queued = playCard(queued, 0);
+      expect(canUnqueueCard(queued, 0)).toBe(false);
+      expect(unqueueCard(queued, 0)).toBe(queued);
+    }
   });
 });
 
 describe('endDuelRound (simultaneous reveal)', () => {
-  it('block applies before damage, and LD perk boosts block', () => {
+  it('applies block before damage with the LD perk, order-independently, exhausting at reveal', () => {
     let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     state = {
       ...state,
@@ -422,9 +442,8 @@ describe('endDuelRound (simultaneous reveal)', () => {
     // base 5 block + LD/RD perk (+2) = 7, untouched since the CPU dealt no damage.
     expect(next.duel!.attacker.block).toBe(7);
     expect(next.lastReveal!.userBlock).toBe(7);
-  });
 
-  it('is order-independent: the same cards queued in either order deal the same damage to each side', () => {
+    // Is order-independent: the same cards queued in either order deal the same damage to each side.
     const base = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     const withHand = (order: string[]): GameState => ({
       ...base,
@@ -447,24 +466,25 @@ describe('endDuelRound (simultaneous reveal)', () => {
     expect(forward.lastReveal!.cpuDamageDealt).toBe(
       reversed.lastReveal!.cpuDamageDealt,
     );
+
+    // Exhaust sends the queued card to the exhaust pile at reveal, not discard.
+    {
+      let state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
+      state = {
+        ...state,
+        deck: { ...state.deck, hand: ['slapshot'] },
+        cpuDeck: { ...state.cpuDeck, hand: [] },
+        duel: { ...state.duel!, cpuPlan: [] },
+      };
+      const queued = playCard(state, 0);
+      expect(queued.deck.exhaustPile).not.toContain('slapshot'); // not yet - still face-down in the queue
+      const next = endDuelRound(queued);
+      expect(next.deck.exhaustPile).toContain('slapshot');
+      expect(next.deck.discardPile).not.toContain('slapshot');
+    }
   });
 
-  it('exhaust sends the queued card to the exhaust pile at reveal, not discard', () => {
-    let state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
-    state = {
-      ...state,
-      deck: { ...state.deck, hand: ['slapshot'] },
-      cpuDeck: { ...state.cpuDeck, hand: [] },
-      duel: { ...state.duel!, cpuPlan: [] },
-    };
-    const queued = playCard(state, 0);
-    expect(queued.deck.exhaustPile).not.toContain('slapshot'); // not yet - still face-down in the queue
-    const next = endDuelRound(queued);
-    expect(next.deck.exhaustPile).toContain('slapshot');
-    expect(next.deck.discardPile).not.toContain('slapshot');
-  });
-
-  it('a lethal queued card KOs the opponent at reveal', () => {
+  it('resolves KOs and double KOs at reveal, recording lastReveal', () => {
     let state = createDuel(makeState(), 'check', 'user-C', 'cpu-C');
     state = {
       ...state,
@@ -481,46 +501,48 @@ describe('endDuelRound (simultaneous reveal)', () => {
     expect(next.duel).toBeNull();
     expect(next.lastOutcome!.byKo).toBe(true);
     expect(next.lastOutcome!.winner).toBe('attacker');
-  });
 
-  it('a double KO goes to the higher remaining poise, tie to the defender, and counts as a KO', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = {
-      ...state,
-      deck: { ...state.deck, hand: [] },
-      cpuDeck: { ...state.cpuDeck, hand: [] },
-      duel: {
-        ...state.duel!,
-        cpuPlan: [],
-        attacker: { ...state.duel!.attacker, poise: 0 },
-        defender: { ...state.duel!.defender, poise: 0 },
-      },
-    };
-    const next = endDuelRound(state);
-    expect(next.duel).toBeNull();
-    expect(next.lastOutcome!.byKo).toBe(true);
-    expect(next.lastOutcome!.winner).toBe('defender'); // tied at 0 -> defender
-  });
+    // A double KO goes to the higher remaining poise, tie to the defender, and counts as a KO.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = {
+        ...state,
+        deck: { ...state.deck, hand: [] },
+        cpuDeck: { ...state.cpuDeck, hand: [] },
+        duel: {
+          ...state.duel!,
+          cpuPlan: [],
+          attacker: { ...state.duel!.attacker, poise: 0 },
+          defender: { ...state.duel!.defender, poise: 0 },
+        },
+      };
+      const next = endDuelRound(state);
+      expect(next.duel).toBeNull();
+      expect(next.lastOutcome!.byKo).toBe(true);
+      expect(next.lastOutcome!.winner).toBe('defender'); // tied at 0 -> defender
+    }
 
-  it("records lastReveal with both sides' cards and post-block damage", () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    state = {
-      ...state,
-      deck: { ...state.deck, hand: ['deke'] },
-      cpuDeck: { ...state.cpuDeck, hand: ['poke_check'] },
-      duel: { ...state.duel!, cpuPlan: ['poke_check'] },
-    };
-    const queued = playCard(state, 0);
-    const next = endDuelRound(queued);
-    expect(next.lastReveal).toEqual({
-      round: 1,
-      userCards: ['deke'],
-      cpuCards: ['poke_check'],
-      userDamageDealt: 6,
-      cpuDamageDealt: 5,
-      userBlock: 0,
-      cpuBlock: 0,
-    });
+    // Records lastReveal with both sides' cards and post-block damage.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = {
+        ...state,
+        deck: { ...state.deck, hand: ['deke'] },
+        cpuDeck: { ...state.cpuDeck, hand: ['poke_check'] },
+        duel: { ...state.duel!, cpuPlan: ['poke_check'] },
+      };
+      const queued = playCard(state, 0);
+      const next = endDuelRound(queued);
+      expect(next.lastReveal).toEqual({
+        round: 1,
+        userCards: ['deke'],
+        cpuCards: ['poke_check'],
+        userDamageDealt: 6,
+        cpuDamageDealt: 5,
+        userBlock: 0,
+        cpuBlock: 0,
+      });
+    }
   });
 
   it('a mid-round KO discards the leftover hand, keeping all 12 cards across piles', () => {
@@ -557,9 +579,40 @@ describe('endDuelRound (simultaneous reveal)', () => {
 });
 
 describe('endDuelRound (passive-human scenarios)', () => {
-  it('is a no-op when there is no active duel', () => {
+  it('is a no-op without a duel; a passive human loses, including to CPU KOs', () => {
     const state = makeState({ duel: null });
     expect(endDuelRound(state)).toBe(state);
+
+    // A passive human (empty hand) never damages the CPU, so the CPU side always wins.
+    {
+      // check duel: user-LD is attacker, cpu-C is defender. Since the user never plays a
+      // card, the CPU (defender) never takes damage - it wins by KO (if its own plan
+      // lands a KO first) or by the timeout-favors-defender rule either way.
+      const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      const result = driveToCompletion(state);
+      expect(result.duel).toBeNull();
+      expect(result.lastOutcome!.winner).toBe('defender');
+    }
+
+    // A KO from the CPU's own planned cards ends the duel with the CPU side winning.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      // attacker is the user (userSide), so a KO here should hand the win to the defender (cpu).
+      state = {
+        ...state,
+        deck: { ...state.deck, hand: [] },
+        cpuDeck: { ...state.cpuDeck, hand: ['toe_drag'] },
+        duel: {
+          ...state.duel!,
+          attacker: { ...state.duel!.attacker, poise: 1 },
+          cpuPlan: ['toe_drag'],
+        },
+      };
+      const next = endDuelRound(state);
+      expect(next.duel).toBeNull();
+      expect(next.lastOutcome!.byKo).toBe(true);
+      expect(next.lastOutcome!.winner).toBe('defender');
+    }
   });
 
   // BG-A15b removed the old faceoff-specific timeout tiebreak (poise
@@ -568,39 +621,10 @@ describe('endDuelRound (passive-human scenarios)', () => {
   // ante+reaction; see engine/faceoffDuel.test.ts for its own timeout-free
   // outcome coverage). Every remaining duel kind here already always
   // favored the defender on a timeout, covered by the next test.
-
-  it('a passive human (empty hand) never damages the CPU, so the CPU side always wins', () => {
-    // check duel: user-LD is attacker, cpu-C is defender. Since the user never plays a
-    // card, the CPU (defender) never takes damage - it wins by KO (if its own plan
-    // lands a KO first) or by the timeout-favors-defender rule either way.
-    const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    const result = driveToCompletion(state);
-    expect(result.duel).toBeNull();
-    expect(result.lastOutcome!.winner).toBe('defender');
-  });
-
-  it("a KO from the CPU's own planned cards ends the duel with the CPU side winning", () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    // attacker is the user (userSide), so a KO here should hand the win to the defender (cpu).
-    state = {
-      ...state,
-      deck: { ...state.deck, hand: [] },
-      cpuDeck: { ...state.cpuDeck, hand: ['toe_drag'] },
-      duel: {
-        ...state.duel!,
-        attacker: { ...state.duel!.attacker, poise: 1 },
-        cpuPlan: ['toe_drag'],
-      },
-    };
-    const next = endDuelRound(state);
-    expect(next.duel).toBeNull();
-    expect(next.lastOutcome!.byKo).toBe(true);
-    expect(next.lastOutcome!.winner).toBe('defender');
-  });
 });
 
 describe('resolveDuel outcome table', () => {
-  it('discards both hands', () => {
+  it('discards both hands; check and deke wins move the puck and stun the loser', () => {
     let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
     state = {
       ...state,
@@ -610,6 +634,45 @@ describe('resolveDuel outcome table', () => {
     const result = resolveDuel(state, 'attacker', true);
     expect(result.deck.hand).toEqual([]);
     expect(result.cpuDeck.hand).toEqual([]);
+
+    // Check: defender (carrier) win stuns the checker and the puck stays with the carrier.
+    {
+      const state = {
+        ...createDuel(makeState(), 'check', 'user-LD', 'cpu-C'),
+        puck: { kind: 'carried' as const, skaterId: 'cpu-C' },
+      };
+      const result = resolveDuel(state, 'defender', true);
+      expect(result.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
+      expect(
+        result.skaters.find((s) => s.id === 'user-LD')!.stunnedUntilTurn,
+      ).not.toBeNull();
+    }
+
+    // Deke: attacker win keeps the puck and stuns the defender; defender win flips both.
+    {
+      const state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
+      const attackerWin = resolveDuel(state, 'attacker', true);
+      expect(attackerWin.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
+      expect(
+        attackerWin.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
+      ).not.toBeNull();
+
+      const defenderWin = resolveDuel(state, 'defender', true);
+      expect(defenderWin.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
+      expect(
+        defenderWin.skaters.find((s) => s.id === 'user-LW')!.stunnedUntilTurn,
+      ).not.toBeNull();
+    }
+
+    // Check: attacker (checker) win takes the puck and stuns the carrier.
+    {
+      const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      const result = resolveDuel(state, 'attacker', true);
+      expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-LD' });
+      expect(
+        result.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
+      ).not.toBeNull();
+    }
   });
 
   // BG-A15b: `applyOutcome`'s `faceoff` case now reads `duel.faceoffUserResult`
@@ -618,43 +681,7 @@ describe('resolveDuel outcome table', () => {
   // `createDuel` (as the old version of this test did) no longer applies -
   // see engine/faceoffDuel.test.ts for the real outcome-table coverage.
 
-  it('check: defender (carrier) win stuns the checker and the puck stays with the carrier', () => {
-    const state = {
-      ...createDuel(makeState(), 'check', 'user-LD', 'cpu-C'),
-      puck: { kind: 'carried' as const, skaterId: 'cpu-C' },
-    };
-    const result = resolveDuel(state, 'defender', true);
-    expect(result.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
-    expect(
-      result.skaters.find((s) => s.id === 'user-LD')!.stunnedUntilTurn,
-    ).not.toBeNull();
-  });
-
-  it('deke: attacker win keeps the puck and stuns the defender; defender win flips both', () => {
-    const state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
-    const attackerWin = resolveDuel(state, 'attacker', true);
-    expect(attackerWin.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
-    expect(
-      attackerWin.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
-    ).not.toBeNull();
-
-    const defenderWin = resolveDuel(state, 'defender', true);
-    expect(defenderWin.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
-    expect(
-      defenderWin.skaters.find((s) => s.id === 'user-LW')!.stunnedUntilTurn,
-    ).not.toBeNull();
-  });
-
-  it('check: attacker (checker) win takes the puck and stuns the carrier', () => {
-    const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
-    const result = resolveDuel(state, 'attacker', true);
-    expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-LD' });
-    expect(
-      result.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
-    ).not.toBeNull();
-  });
-
-  it('intercept: attacker win completes the pass to the receiver', () => {
+  it('intercepts give the puck to the receiver or the lane opponent; a shot win scores', () => {
     const state = createDuel(
       makeState(),
       'intercept',
@@ -664,29 +691,31 @@ describe('resolveDuel outcome table', () => {
     );
     const result = resolveDuel(state, 'attacker', false);
     expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-RW' });
+
+    // Intercept: defender win gives the lane opponent the puck.
+    {
+      const state = createDuel(
+        makeState(),
+        'intercept',
+        'user-C',
+        'cpu-LD',
+        'user-RW',
+      );
+      const result = resolveDuel(state, 'defender', false);
+      expect(result.puck).toEqual({ kind: 'carried', skaterId: 'cpu-LD' });
+    }
+
+    // Shot: attacker win scores a goal and ends the game.
+    {
+      const state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
+      const result = resolveDuel(state, 'attacker', true);
+      expect(result.phase).toBe('gameOver');
+      expect(result.winner).toBe('user');
+      expect(result.lastOutcome!.goal).toBe(true);
+    }
   });
 
-  it('intercept: defender win gives the lane opponent the puck', () => {
-    const state = createDuel(
-      makeState(),
-      'intercept',
-      'user-C',
-      'cpu-LD',
-      'user-RW',
-    );
-    const result = resolveDuel(state, 'defender', false);
-    expect(result.puck).toEqual({ kind: 'carried', skaterId: 'cpu-LD' });
-  });
-
-  it('shot: attacker win scores a goal and ends the game', () => {
-    const state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
-    const result = resolveDuel(state, 'attacker', true);
-    expect(result.phase).toBe('gameOver');
-    expect(result.winner).toBe('user');
-    expect(result.lastOutcome!.goal).toBe(true);
-  });
-
-  it("shot: a clean save (goalie poise === maxPoise) freezes the puck to the nearest skater on the goalie's team, never the goalie itself", () => {
+  it('shot saves freeze to a teammate when clean, else rebound at the crease front', () => {
     // Timeout is the only reachable defender-win path now that goalies only block
     // (they can never KO the shooter), and this goalie took no damage all duel.
     const state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
@@ -699,19 +728,20 @@ describe('resolveDuel outcome table', () => {
       expect(carrier.team).toBe('cpu');
       expect(carrier.role).not.toBe('G');
     }
-  });
 
-  it('shot: a non-clean-save timeout (goalie took poise damage) rebounds loose at the crease front unless a skater stands there', () => {
-    let state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
-    state = {
-      ...state,
-      duel: {
-        ...state.duel!,
-        defender: { ...state.duel!.defender, poise: 25 },
-      },
-    };
-    const result = resolveDuel(state, 'defender', false);
-    expect(result.lastOutcome!.cleanSave).toBe(false);
-    expect(result.puck).toEqual({ kind: 'loose', pos: { col: 13, row: 3 } });
+    // Shot: a non-clean-save timeout (goalie took poise damage) rebounds loose at the crease front unless a skater stands there.
+    {
+      let state = createDuel(makeState(), 'shot', 'user-C', 'cpu-G');
+      state = {
+        ...state,
+        duel: {
+          ...state.duel!,
+          defender: { ...state.duel!.defender, poise: 25 },
+        },
+      };
+      const result = resolveDuel(state, 'defender', false);
+      expect(result.lastOutcome!.cleanSave).toBe(false);
+      expect(result.puck).toEqual({ kind: 'loose', pos: { col: 13, row: 3 } });
+    }
   });
 });

@@ -34,7 +34,7 @@ function resolveShot(seed: number, band: ShotBand): GameState {
 }
 
 describe('deterministic browser QA state harness', () => {
-  it('reaches both shot result variants from a fixed seed search', () => {
+  it('reaches both shot results from a fixed seed search, and NEW_GAME resets them', () => {
     let goal: GameState | undefined;
     let save: GameState | undefined;
 
@@ -48,6 +48,19 @@ describe('deterministic browser QA state harness', () => {
     expect(goal?.lastOutcome?.goal).toBe(true);
     expect(save?.lastOutcome?.goal).toBe(false);
     expect(save?.lastShotSaveResult).not.toBeNull();
+
+    // Returns the deterministic game-over fixture to the opening state.
+    const gameOver = resolveShot(1, 'perfect');
+    const reset = gameReducer(gameOver, {
+      type: 'NEW_GAME',
+      seed: 99,
+      length: 'short',
+    });
+
+    expect(reset.phase).toBe('faceoff');
+    expect(reset.winner).toBeNull();
+    expect(reset.lastOutcome).toBeNull();
+    expect(reset.deck.hand).toHaveLength(0);
   });
 
   it('exposes a deterministic disabled-card state with its reason', () => {
@@ -60,19 +73,5 @@ describe('deterministic browser QA state harness', () => {
 
     expect(CARDS[cardId].cost).toBeGreaterThan(0);
     expect(cardBlockReason(state, 0)).toBe('energy');
-  });
-
-  it('returns the deterministic game-over fixture to the opening state', () => {
-    const gameOver = resolveShot(1, 'perfect');
-    const reset = gameReducer(gameOver, {
-      type: 'NEW_GAME',
-      seed: 99,
-      length: 'short',
-    });
-
-    expect(reset.phase).toBe('faceoff');
-    expect(reset.winner).toBeNull();
-    expect(reset.lastOutcome).toBeNull();
-    expect(reset.deck.hand).toHaveLength(0);
   });
 });

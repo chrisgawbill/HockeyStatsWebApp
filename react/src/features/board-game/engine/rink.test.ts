@@ -55,21 +55,19 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
 }
 
 describe('isPlayable', () => {
-  it('rejects the unplayable corners', () => {
+  it('rejects corners, clipped tiles, and goalie tiles; accepts the rest', () => {
     expect(isPlayable({ col: 0, row: 0 })).toBe(false);
     expect(isPlayable({ col: 14, row: 6 })).toBe(false);
-  });
 
-  it('rejects the clipped tiles beside the corners', () => {
+    // Rejects the clipped tiles beside the corners.
     expect(isPlayable({ col: 1, row: 0 })).toBe(false);
     expect(isPlayable({ col: 13, row: 6 })).toBe(false);
     expect(isPlayable({ col: 0, row: 1 })).toBe(false);
     expect(isPlayable({ col: 0, row: 5 })).toBe(false);
     expect(isPlayable({ col: 14, row: 1 })).toBe(false);
     expect(isPlayable({ col: 14, row: 5 })).toBe(false);
-  });
 
-  it('marks exactly the tiles too clipped by the rounded boards', () => {
+    // Marks exactly the tiles too clipped by the rounded boards.
     const { x: rx, y: ry } = RINK_CORNER_RADIUS;
     const inside = (x: number, y: number) => {
       const cx = x < rx ? rx : x > BOARD_COLS - rx ? BOARD_COLS - rx : null;
@@ -94,39 +92,34 @@ describe('isPlayable', () => {
     }
     const actual = UNPLAYABLE_CORNERS.map((c) => `${c.col},${c.row}`);
     expect(actual.sort()).toEqual(expected.sort());
-  });
 
-  it('keeps the tiles beside the creases playable', () => {
+    // Keeps the tiles beside the creases playable.
     expect(isPlayable({ col: 0, row: 2 })).toBe(true);
     expect(isPlayable({ col: 14, row: 4 })).toBe(true);
-  });
 
-  it('rejects goalie tiles', () => {
+    // Rejects goalie tiles.
     expect(isPlayable({ col: 0, row: 3 })).toBe(false);
     expect(isPlayable({ col: 14, row: 3 })).toBe(false);
-  });
 
-  it('accepts an ordinary tile', () => {
+    // Accepts an ordinary tile.
     expect(isPlayable({ col: 7, row: 3 })).toBe(true);
   });
 });
 
 describe('laneBetween', () => {
-  it('returns tiles strictly between two coords in the same row', () => {
+  it('returns tiles strictly between straight-line coords, else empty or null', () => {
     expect(laneBetween({ col: 2, row: 3 }, { col: 5, row: 3 })).toEqual([
       { col: 3, row: 3 },
       { col: 4, row: 3 },
     ]);
-  });
 
-  it('returns tiles strictly between two coords in the same column', () => {
+    // Returns tiles strictly between two coords in the same column.
     expect(laneBetween({ col: 4, row: 1 }, { col: 4, row: 4 })).toEqual([
       { col: 4, row: 2 },
       { col: 4, row: 3 },
     ]);
-  });
 
-  it('is empty for adjacent tiles and null for a non-straight or equal pair', () => {
+    // Is empty for adjacent tiles and null for a non-straight or equal pair.
     expect(laneBetween({ col: 2, row: 3 }, { col: 3, row: 3 })).toEqual([]);
     expect(laneBetween({ col: 2, row: 3 }, { col: 5, row: 4 })).toBeNull();
     expect(laneBetween({ col: 2, row: 3 }, { col: 2, row: 3 })).toBeNull();
@@ -134,16 +127,15 @@ describe('laneBetween', () => {
 });
 
 describe('legalSteps', () => {
-  it('blocks tiles occupied by another skater', () => {
+  it('blocks occupied tiles, honors stun expiry, and is empty when the skater cannot move', () => {
     const carrier = makeSkater({ id: 'user-C', pos: { col: 5, row: 3 } });
     const blocker = makeSkater({ id: 'user-LW', pos: { col: 6, row: 3 } });
     const state = makeState({ skaters: [carrier, blocker] });
     const steps = legalSteps(state, 'user-C');
     expect(steps).not.toContainEqual({ col: 6, row: 3 });
     expect(steps).toContainEqual({ col: 4, row: 3 });
-  });
 
-  it('lets a stun expire once turn passes stunnedUntilTurn', () => {
+    // Lets a stun expire once turn passes stunnedUntilTurn.
     const stunned = makeSkater({
       id: 'user-LD',
       stunnedUntilTurn: 2,
@@ -157,37 +149,39 @@ describe('legalSteps', () => {
     expect(
       legalSteps(makeState({ skaters: [stunned], turn: 3 }), 'user-LD').length,
     ).toBeGreaterThan(0);
-  });
 
-  it('is empty when the skater has zero MP', () => {
-    const carrier = makeSkater();
-    const state = makeState({ skaters: [carrier], mp: 0 });
-    expect(legalSteps(state, 'user-C')).toEqual([]);
-  });
+    // Is empty when the skater has zero MP.
+    {
+      const carrier = makeSkater();
+      const state = makeState({ skaters: [carrier], mp: 0 });
+      expect(legalSteps(state, 'user-C')).toEqual([]);
+    }
 
-  it('is empty for the goalie, a stunned skater, or the wrong phase/team', () => {
-    const goalie = makeSkater({
-      id: 'user-G',
-      role: 'G',
-      pos: { col: 0, row: 3 },
-    });
-    const stunned = makeSkater({
-      id: 'user-LD',
-      stunnedUntilTurn: 5,
-      pos: { col: 3, row: 2 },
-    });
-    const state = makeState({ skaters: [goalie, stunned] });
-    expect(legalSteps(state, 'user-G')).toEqual([]);
-    expect(legalSteps(state, 'user-LD')).toEqual([]);
-    expect(
-      legalSteps(makeState({ skaters: [stunned], phase: 'roll' }), 'user-LD'),
-    ).toEqual([]);
-    expect(
-      legalSteps(
-        makeState({ skaters: [makeSkater()], activeTeam: 'cpu' }),
-        'user-C',
-      ),
-    ).toEqual([]);
+    // Is empty for the goalie, a stunned skater, or the wrong phase/team.
+    {
+      const goalie = makeSkater({
+        id: 'user-G',
+        role: 'G',
+        pos: { col: 0, row: 3 },
+      });
+      const stunned = makeSkater({
+        id: 'user-LD',
+        stunnedUntilTurn: 5,
+        pos: { col: 3, row: 2 },
+      });
+      const state = makeState({ skaters: [goalie, stunned] });
+      expect(legalSteps(state, 'user-G')).toEqual([]);
+      expect(legalSteps(state, 'user-LD')).toEqual([]);
+      expect(
+        legalSteps(makeState({ skaters: [stunned], phase: 'roll' }), 'user-LD'),
+      ).toEqual([]);
+      expect(
+        legalSteps(
+          makeState({ skaters: [makeSkater()], activeTeam: 'cpu' }),
+          'user-C',
+        ),
+      ).toEqual([]);
+    }
   });
 });
 

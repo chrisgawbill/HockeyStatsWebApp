@@ -47,13 +47,12 @@ describe('dailyStreak', () => {
     vi.unstubAllGlobals();
   });
 
-  it('formats today as a local YYYY-MM-DD key', () => {
+  it('formats the date key and loads stored, empty, malformed, or unavailable storage', () => {
     setDate(2026, 11, 4);
 
     expect(todayKey()).toBe('2026-11-04');
-  });
 
-  it('loads a stored streak record', () => {
+    // Loads a stored streak record.
     const stored: StreakData = {
       wins: { '2026-03-09': true },
       lastWinDate: '2026-03-09',
@@ -64,9 +63,9 @@ describe('dailyStreak', () => {
     );
 
     expect(loadStreak()).toEqual(stored);
-  });
 
-  it('returns the default when storage is empty, malformed, or unavailable', () => {
+    // Returns the default when storage is empty, malformed, or unavailable.
+    vi.stubGlobal('localStorage', makeStorage());
     expect(loadStreak()).toEqual({ wins: {}, lastWinDate: null });
 
     vi.stubGlobal(
@@ -84,7 +83,7 @@ describe('dailyStreak', () => {
     expect(loadStreak()).toEqual({ wins: {}, lastWinDate: null });
   });
 
-  it('counts a 3-day streak ending today', () => {
+  it('counts consecutive wins ending today or yesterday, else zero', () => {
     const data: StreakData = {
       wins: {
         '2026-03-08': true,
@@ -96,36 +95,38 @@ describe('dailyStreak', () => {
 
     expect(currentStreak(data)).toBe(3);
     expect(hasStreakBonus(data)).toBe(true);
+
+    // Counts a streak ending yesterday before today has been won.
+    {
+      const data: StreakData = {
+        wins: {
+          '2026-03-07': true,
+          '2026-03-08': true,
+          '2026-03-09': true,
+        },
+        lastWinDate: '2026-03-09',
+      };
+
+      expect(currentStreak(data)).toBe(3);
+      expect(hasStreakBonus(data)).toBe(true);
+    }
+
+    // Resets to zero when today and yesterday are missing.
+    {
+      const data: StreakData = {
+        wins: {
+          '2026-03-06': true,
+          '2026-03-08': true,
+        },
+        lastWinDate: '2026-03-08',
+      };
+
+      expect(currentStreak(data)).toBe(0);
+      expect(hasStreakBonus(data)).toBe(false);
+    }
   });
 
-  it('counts a streak ending yesterday before today has been won', () => {
-    const data: StreakData = {
-      wins: {
-        '2026-03-07': true,
-        '2026-03-08': true,
-        '2026-03-09': true,
-      },
-      lastWinDate: '2026-03-09',
-    };
-
-    expect(currentStreak(data)).toBe(3);
-    expect(hasStreakBonus(data)).toBe(true);
-  });
-
-  it('resets to zero when today and yesterday are missing', () => {
-    const data: StreakData = {
-      wins: {
-        '2026-03-06': true,
-        '2026-03-08': true,
-      },
-      lastWinDate: '2026-03-08',
-    };
-
-    expect(currentStreak(data)).toBe(0);
-    expect(hasStreakBonus(data)).toBe(false);
-  });
-
-  it('records a win once per day and persists the updated data', () => {
+  it('records a win once per day, garbage-collects old wins, and survives write failures', () => {
     const storage = makeStorage();
     vi.stubGlobal('localStorage', storage);
 
@@ -139,9 +140,8 @@ describe('dailyStreak', () => {
     expect(second).toEqual(first);
     expect(storage.setItem).toHaveBeenCalledTimes(2);
     expect(JSON.parse(storage.setItem.mock.calls[1][1])).toEqual(first);
-  });
 
-  it('garbage-collects wins older than 60 days on write', () => {
+    // Garbage-collects wins older than 60 days on write.
     const updated = recordWin({
       wins: {
         '2026-01-08': true,
@@ -161,9 +161,8 @@ describe('dailyStreak', () => {
       },
       lastWinDate: '2026-03-10',
     });
-  });
 
-  it('returns the updated streak even if storage rejects the write', () => {
+    // Returns the updated streak even if storage rejects the write.
     vi.stubGlobal('localStorage', {
       ...makeStorage(),
       setItem: vi.fn(() => {
@@ -177,7 +176,7 @@ describe('dailyStreak', () => {
     });
   });
 
-  it('saveStreak round-trips through loadStreak without win-recording side effects', () => {
+  it('saveStreak round-trips without side effects and tolerates storage errors', () => {
     const storage = makeStorage();
     vi.stubGlobal('localStorage', storage);
 
@@ -191,9 +190,8 @@ describe('dailyStreak', () => {
     expect(loadStreak()).toEqual(data);
     // No garbage collection or "today" injection like recordWin performs.
     expect(storage.setItem).toHaveBeenCalledTimes(1);
-  });
 
-  it('saveStreak silently tolerates storage errors', () => {
+    // saveStreak silently tolerates storage errors.
     vi.stubGlobal('localStorage', {
       ...makeStorage(),
       setItem: vi.fn(() => {
@@ -205,43 +203,52 @@ describe('dailyStreak', () => {
   });
 
   describe('mergeStreakData', () => {
-    it('unions disjoint wins keys', () => {
-      const local: StreakData = { wins: { '2026-03-08': true }, lastWinDate: '2026-03-08' };
-      const remote: StreakData = { wins: { '2026-03-09': true }, lastWinDate: '2026-03-09' };
-
-      expect(mergeStreakData(local, remote)).toEqual({
-        wins: { '2026-03-08': true, '2026-03-09': true },
-        lastWinDate: '2026-03-09',
-      });
-    });
-
-    it('does not duplicate overlapping keys', () => {
+    it('unions wins without duplicates and keeps the later non-null lastWinDate', () => {
       const local: StreakData = {
-        wins: { '2026-03-08': true, '2026-03-09': true },
-        lastWinDate: '2026-03-09',
+        wins: { '2026-03-08': true },
+        lastWinDate: '2026-03-08',
       };
       const remote: StreakData = {
-        wins: { '2026-03-09': true, '2026-03-10': true },
-        lastWinDate: '2026-03-10',
+        wins: { '2026-03-09': true },
+        lastWinDate: '2026-03-09',
       };
 
       expect(mergeStreakData(local, remote)).toEqual({
-        wins: { '2026-03-08': true, '2026-03-09': true, '2026-03-10': true },
-        lastWinDate: '2026-03-10',
+        wins: { '2026-03-08': true, '2026-03-09': true },
+        lastWinDate: '2026-03-09',
       });
-    });
 
-    it('picks the lexicographically later lastWinDate regardless of side', () => {
+      // Does not duplicate overlapping keys.
+      {
+        const local: StreakData = {
+          wins: { '2026-03-08': true, '2026-03-09': true },
+          lastWinDate: '2026-03-09',
+        };
+        const remote: StreakData = {
+          wins: { '2026-03-09': true, '2026-03-10': true },
+          lastWinDate: '2026-03-10',
+        };
+
+        expect(mergeStreakData(local, remote)).toEqual({
+          wins: { '2026-03-08': true, '2026-03-09': true, '2026-03-10': true },
+          lastWinDate: '2026-03-10',
+        });
+      }
+
+      // Picks the lexicographically later lastWinDate regardless of side.
       const earlierLocal: StreakData = { wins: {}, lastWinDate: '2026-03-05' };
       const laterRemote: StreakData = { wins: {}, lastWinDate: '2026-03-09' };
-      expect(mergeStreakData(earlierLocal, laterRemote).lastWinDate).toBe('2026-03-09');
+      expect(mergeStreakData(earlierLocal, laterRemote).lastWinDate).toBe(
+        '2026-03-09',
+      );
 
       const laterLocal: StreakData = { wins: {}, lastWinDate: '2026-03-09' };
       const earlierRemote: StreakData = { wins: {}, lastWinDate: '2026-03-05' };
-      expect(mergeStreakData(laterLocal, earlierRemote).lastWinDate).toBe('2026-03-09');
-    });
+      expect(mergeStreakData(laterLocal, earlierRemote).lastWinDate).toBe(
+        '2026-03-09',
+      );
 
-    it('falls back to whichever side is non-null when one lastWinDate is null', () => {
+      // Falls back to whichever side is non-null when one lastWinDate is null.
       expect(
         mergeStreakData(
           { wins: {}, lastWinDate: null },
@@ -255,12 +262,13 @@ describe('dailyStreak', () => {
           { wins: {}, lastWinDate: null },
         ).lastWinDate,
       ).toBe('2026-03-09');
-    });
 
-    it('returns null when both sides are null', () => {
+      // Returns null when both sides are null.
       expect(
-        mergeStreakData({ wins: {}, lastWinDate: null }, { wins: {}, lastWinDate: null })
-          .lastWinDate,
+        mergeStreakData(
+          { wins: {}, lastWinDate: null },
+          { wins: {}, lastWinDate: null },
+        ).lastWinDate,
       ).toBeNull();
     });
   });

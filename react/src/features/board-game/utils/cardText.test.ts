@@ -17,33 +17,29 @@ function makeCard(overrides: Partial<CardDef> = {}): CardDef {
 }
 
 describe('cardText', () => {
-  it('falls back to card.text when no role is given', () => {
+  it('applies role perks only where they match, keeping draw and exhaust suffixes', () => {
     expect(cardText(makeCard())).toBe('5 block');
-  });
 
-  it('leaves text unchanged for a role with no matching perk', () => {
+    // Leaves text unchanged for a role with no matching perk.
     expect(cardText(makeCard(), 'C')).toBe('5 block');
-  });
 
-  it('adds the defense perk bonus to a block card for LD/RD', () => {
+    // Adds the defense perk bonus to a block card for LD/RD.
     expect(cardText(makeCard(), 'LD')).toBe('7 block');
     expect(cardText(makeCard(), 'RD')).toBe('7 block');
-  });
 
-  it('no longer applies a damage perk to a shot card for LW/RW (BG-A14b: the wing bonus moved to shot accuracy)', () => {
-    const card = makeCard({
+    // No longer applies a damage perk to a shot card for LW/RW (BG-A14b: the wing bonus moved to shot accuracy).
+    const shot = makeCard({
       id: 'wrist_shot',
       text: '7 damage',
       tags: ['shot'],
       allowedIn: ['shot'],
       effects: [{ type: 'damage', amount: 7 }],
     });
-    expect(cardText(card, 'LW')).toBe('7 damage');
-    expect(cardText(card, 'RW')).toBe('7 damage');
-  });
+    expect(cardText(shot, 'LW')).toBe('7 damage');
+    expect(cardText(shot, 'RW')).toBe('7 damage');
 
-  it('preserves draw and exhaust suffixes in order', () => {
-    const card = makeCard({
+    // Preserves draw and exhaust suffixes in order.
+    const stickhandle = makeCard({
       id: 'stickhandle',
       text: '3 damage, draw 1',
       tags: ['skill'],
@@ -52,7 +48,7 @@ describe('cardText', () => {
         { type: 'draw', amount: 1 },
       ],
     });
-    expect(cardText(card, 'C')).toBe('3 damage, draw 1');
+    expect(cardText(stickhandle, 'C')).toBe('3 damage, draw 1');
 
     const exhaustCard = makeCard({
       id: 'slapshot',
@@ -67,15 +63,13 @@ describe('cardText', () => {
 });
 
 describe('cardPerkBadge', () => {
-  it('returns null with no role', () => {
+  it('is a badge only when a role perk applies', () => {
     expect(cardPerkBadge(makeCard())).toBeNull();
-  });
 
-  it('returns null when no perk applies', () => {
+    // Returns null when no perk applies.
     expect(cardPerkBadge(makeCard(), 'C')).toBeNull();
-  });
 
-  it('returns a badge string when a perk applies', () => {
+    // Returns a badge string when a perk applies.
     expect(cardPerkBadge(makeCard(), 'LD')).toBe('LD +2');
   });
 });

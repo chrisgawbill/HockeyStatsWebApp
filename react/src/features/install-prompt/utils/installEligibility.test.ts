@@ -39,33 +39,32 @@ function memoryStorage(): KeyValueStorage & { data: Map<string, string> } {
 }
 
 describe('getInstallVariant', () => {
-  it('hides on the first visit', () => {
+  it('shows from the second visit or once engaged', () => {
     expect(getInstallVariant(fresh, android, NOW)).toBeNull();
-  });
-  it('shows from the second visit', () => {
+
+    // Shows from the second visit.
     expect(getInstallVariant({ ...fresh, visits: 2 }, android, NOW)).toBe(
       'android',
     );
-  });
-  it('shows on the first visit once engaged', () => {
+
+    // Shows on the first visit once engaged.
     expect(getInstallVariant({ ...fresh, engaged: true }, ios, NOW)).toBe(
       'ios',
     );
   });
-  it('never shows when standalone', () => {
+  it('never shows when standalone, installed, snoozed, or without a way to install', () => {
     const s = { ...fresh, visits: 5 };
     expect(
       getInstallVariant(s, { ...android, standalone: true }, NOW),
     ).toBeNull();
     expect(getInstallVariant(s, { ...ios, standalone: true }, NOW)).toBeNull();
-  });
-  it('never shows once installed', () => {
+
+    // Never shows once installed.
     expect(
       getInstallVariant({ ...fresh, visits: 5, installed: true }, android, NOW),
     ).toBeNull();
-  });
-  it('snoozes for 30 days after a dismissal', () => {
-    const s = { ...fresh, visits: 5 };
+
+    // Snoozes for 30 days after a dismissal.
     expect(
       getInstallVariant(
         { ...s, dismissedAt: NOW - SNOOZE_MS + 1000 },
@@ -76,8 +75,8 @@ describe('getInstallVariant', () => {
     expect(
       getInstallVariant({ ...s, dismissedAt: NOW - SNOOZE_MS }, ios, NOW),
     ).toBe('ios');
-  });
-  it('shows nothing without iOS or an install event', () => {
+
+    // Shows nothing without iOS or an install event.
     expect(
       getInstallVariant(
         { ...fresh, visits: 5 },
@@ -99,20 +98,20 @@ describe('isEngagedPath', () => {
 });
 
 describe('recordVisit / readInstallState', () => {
-  it('counts once per session', () => {
+  it('counts visits once per session and reads flags and the dismissal time', () => {
     const local = memoryStorage();
     const session = memoryStorage();
     expect(recordVisit(local, session)).toBe(1);
     expect(recordVisit(local, session)).toBe(1);
     expect(recordVisit(local, memoryStorage())).toBe(2);
     expect(readInstallState(local).visits).toBe(2);
-  });
-  it('reads flags and the dismissal timestamp', () => {
-    const local = memoryStorage();
-    local.setItem(INSTALL_KEYS.installed, '1');
-    local.setItem(INSTALL_KEYS.engaged, '1');
-    local.setItem(INSTALL_KEYS.dismissedAt, String(NOW));
-    expect(readInstallState(local)).toEqual({
+
+    // Reads flags and the dismissal timestamp.
+    const flags = memoryStorage();
+    flags.setItem(INSTALL_KEYS.installed, '1');
+    flags.setItem(INSTALL_KEYS.engaged, '1');
+    flags.setItem(INSTALL_KEYS.dismissedAt, String(NOW));
+    expect(readInstallState(flags)).toEqual({
       visits: 0,
       engaged: true,
       installed: true,
