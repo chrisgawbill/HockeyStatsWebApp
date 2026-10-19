@@ -3,8 +3,7 @@
 }
 
 /* Matches PageHeader's Aero-glass nav-back-btn chrome (same size, glossy
-   gradient ring) rather than the board game's pixel-art skin: this renders
-   inside the shared global nav bar, not the game's own panels. */
+   gradient ring): this renders inside the shared global nav bar. */
 .badge {
   width: 28px;
   height: 28px;

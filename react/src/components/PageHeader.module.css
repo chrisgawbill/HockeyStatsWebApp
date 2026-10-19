@@ -351,6 +351,10 @@
   .nav-inner {
     display: block;
     width: 100%;
+    /* Grid item of .nav-bar: without this it grows to its min-content, so a
+       crowded app bar (back button + account controls) widens the page
+       instead of truncating the title. */
+    min-width: 0;
     margin: 0;
     padding: 0 var(--ds-space-1);
     box-sizing: border-box;

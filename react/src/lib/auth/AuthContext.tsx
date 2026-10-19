@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
 import {
-  fetchRemoteStreak,
-  fetchSession,
-  googleSignIn,
-  pushRemoteStreak,
-} from '@/features/board-game/api/streakSync';
-import {
-  loadStreak,
-  mergeStreakData,
-  saveStreak,
-} from '@/features/board-game/data/dailyStreak';
-import { decodeGoogleProfile } from '@/features/board-game/data/googleCredential';
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { fetchSession, googleSignIn } from '@/lib/auth/authApi';
+import { decodeGoogleProfile } from '@/lib/auth/googleCredential';
 
+// Keys predate site-wide sign-in (they came from Rink Quest); keeping them
+// means people already signed in there stay signed in everywhere.
 const AUTH_TOKEN_KEY = 'rinkquest-auth-token';
 
 const AUTH_PROFILE_KEY = 'rinkquest-auth-profile';
@@ -20,7 +20,7 @@ interface CachedProfile {
   picture?: string;
 }
 
-export interface GoogleAuthSession {
+export interface AuthSession {
   token: string | null;
   email: string | null;
   picture: string | null;
@@ -62,7 +62,10 @@ function readCachedProfile(): CachedProfile | null {
 function storeCachedProfile(profile: CachedProfile | null): void {
   try {
     if (profile) {
-      globalThis.localStorage?.setItem(AUTH_PROFILE_KEY, JSON.stringify(profile));
+      globalThis.localStorage?.setItem(
+        AUTH_PROFILE_KEY,
+        JSON.stringify(profile),
+      );
     } else {
       globalThis.localStorage?.removeItem(AUTH_PROFILE_KEY);
     }
@@ -71,7 +74,14 @@ function storeCachedProfile(profile: CachedProfile | null): void {
   }
 }
 
-export function useGoogleAuthSession(): GoogleAuthSession {
+const AuthContext = createContext<AuthSession | null>(null);
+
+/**
+ * Site-wide Google sign-in session. Restores a stored app session token on
+ * load and exchanges fresh Google credentials for one. Feature-specific sync
+ * (Rink Quest streaks, favorite teams) reacts to `token` in its own slice.
+ */
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [picture, setPicture] = useState<string | null>(
@@ -111,7 +121,7 @@ export function useGoogleAuthSession(): GoogleAuthSession {
     const profile = decodeGoogleProfile(credential);
 
     googleSignIn(credential)
-      .then(async ({ token: newToken, email: newEmail }) => {
+      .then(({ token: newToken, email: newEmail }) => {
         storeToken(newToken);
         setToken(newToken);
         setEmail(newEmail);
@@ -119,15 +129,6 @@ export function useGoogleAuthSession(): GoogleAuthSession {
         if (profile?.picture) {
           storeCachedProfile({ picture: profile.picture });
           setPicture(profile.picture);
-        }
-
-        try {
-          const remote = await fetchRemoteStreak(newToken);
-          const merged = mergeStreakData(loadStreak(), remote);
-          saveStreak(merged);
-          await pushRemoteStreak(newToken, merged);
-        } catch (error) {
-          console.error('Google sign-in streak sync failed:', error);
         }
       })
       .catch((error) => {
@@ -143,5 +144,18 @@ export function useGoogleAuthSession(): GoogleAuthSession {
     setPicture(null);
   }, []);
 
-  return { token, email, picture, signIn, signOut };
+  const value = useMemo(
+    () => ({ token, email, picture, signIn, signOut }),
+    [token, email, picture, signIn, signOut],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthSession {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }

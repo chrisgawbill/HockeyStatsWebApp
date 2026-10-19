@@ -1,0 +1,18 @@
+.frame {
+  display: inline-flex;
+}
+
+.slot {
+  min-width: 40px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unavailable {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  padding: var(--ds-space-1) var(--ds-space-2);
+  white-space: nowrap;
+}

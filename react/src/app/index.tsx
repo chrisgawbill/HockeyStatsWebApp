@@ -5,6 +5,8 @@ import '@/styles/theme.css';
 import '@/styles/components.css';
 import App from '@/app/App';
 import { ThemeProvider } from '@/lib/ThemeContext';
+import { AuthProvider } from '@/lib/auth/AuthContext';
+import { AfterActionReportsProvider } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
@@ -16,6 +18,10 @@ const root = ReactDOM.createRoot(
  */
 root.render(
   <ThemeProvider>
-    <App />
+    <AuthProvider>
+      <AfterActionReportsProvider>
+        <App />
+      </AfterActionReportsProvider>
+    </AuthProvider>
   </ThemeProvider>,
 );
