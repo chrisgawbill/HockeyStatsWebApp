@@ -56,7 +56,6 @@ import { useStandingsContext } from '@/features/standings/hooks/StandingsContext
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { toDarkModeAccentColor } from '@/features/teams/utils/teamColor';
-import { useThemeColor } from '@/lib/useThemeColor';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 import { useListOfTeamsData } from '@/features/teams/hooks/ListOfTeamsContext';
@@ -118,9 +117,6 @@ export default function TeamPage() {
   // use the raw brand hex when --color-primary substitutes for it here.
   const primaryColorForTheme =
     theme === 'dark' ? toDarkModeAccentColor(primaryColor) : primaryColor;
-  // The nav bars take the team color via --color-primary; tint the system
-  // status bar (Android, Safari) the same way.
-  useThemeColor(primaryColorForTheme);
 
   const pageRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
