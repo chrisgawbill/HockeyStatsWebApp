@@ -59,6 +59,7 @@ import { useTheme } from '@/lib/ThemeContext';
 import { toDarkModeAccentColor } from '@/features/teams/utils/teamColor';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
+import { useListOfTeamsData } from '@/features/teams/hooks/ListOfTeamsContext';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import FormStrip from '@/features/teams/components/FormStrip';
 import PointsPaceSparkline from '@/features/teams/components/PointsPaceSparkline';
@@ -105,6 +106,7 @@ export default function TeamPage() {
   const { easternStandingsData, westernStandingsData } = useStandingsContext();
   const { season } = useSeason();
   const { listOfGamesData } = useListOfGames();
+  const { listOfTeamsData } = useListOfTeamsData();
   const { theme } = useTheme();
   const teamActiveNavPath =
     routeState?.activeNavPath ?? routeState?.sourcePath ?? '/teamList';
@@ -248,9 +250,11 @@ export default function TeamPage() {
     () =>
       buildTeamDna({
         stats: teamRawResponse ?? { teamFullName: '' },
-        ...teamForm,
+        league: listOfTeamsData,
+        season,
+        teamId: numericId,
       }),
-    [teamForm, teamRawResponse],
+    [teamRawResponse, listOfTeamsData, season, numericId],
   );
 
   // Measures the sticky header (PageHeader, rendered as this page's first
@@ -455,7 +459,7 @@ export default function TeamPage() {
                 </div>
               </div>
             </section>
-            <TeamDna metrics={teamDna} season={season} />
+            <TeamDna profile={teamDna} season={season} />
           </section>
           <section id="leaders" className={styles['team-section']}>
             <PlayerStatsSection
