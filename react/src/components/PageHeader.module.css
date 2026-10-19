@@ -327,11 +327,6 @@
   outline-offset: 2px;
 }
 
-/* Phone-only title for the top app bar; the desktop brand lives in .nav-left. */
-.nav-mobile-title {
-  display: none;
-}
-
 /* Phone-only MD3 navigation bar (see the media query below). */
 .mobile-nav-bar {
   display: none;
@@ -339,9 +334,10 @@
 
 @media (max-width: 576px) {
   /*
-   * MD3 small top app bar: leading back action and title, trailing season
-   * selector and optional page action. Stays sticky at the top like the
-   * desktop header; destinations move to the bottom navigation bar.
+   * MD3 small top app bar: leading back action, trailing season
+   * selector and account controls (no title; pages carry their own
+   * headings). Stays sticky at the top like the desktop header; destinations
+   * move to the bottom navigation bar.
    */
   .nav-bar {
     margin-bottom: var(--ds-space-2);
@@ -353,7 +349,7 @@
     width: 100%;
     /* Grid item of .nav-bar: without this it grows to its min-content, so a
        crowded app bar (back button + account controls) widens the page
-       instead of truncating the title. */
+       instead of shrinking the season selector. */
     min-width: 0;
     margin: 0;
     padding: 0 var(--ds-space-1);
@@ -376,23 +372,11 @@
   .nav-mobile-back {
     display: flex;
     align-items: center;
+    /* Spacer: pushes the season selector and account controls right, even
+       on top-level pages where it holds no back button. */
     flex: 1 1 auto;
     min-width: 0;
     gap: var(--ds-space-1);
-  }
-
-  .nav-mobile-title {
-    display: block;
-    min-width: 0;
-    padding-inline: var(--ds-space-2) 0;
-    overflow: hidden;
-    color: rgba(255, 255, 255, 0.95);
-    font-size: 1.25rem;
-    font-weight: 700;
-    line-height: 1.75rem;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-    text-overflow: ellipsis;
   }
 
   .nav-season-selector {
