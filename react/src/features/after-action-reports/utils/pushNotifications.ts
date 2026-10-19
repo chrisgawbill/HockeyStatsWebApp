@@ -39,22 +39,6 @@ export function urlBase64ToUint8Array(
   return output;
 }
 
-export function isIosDevice(): boolean {
-  const ua = navigator.userAgent;
-  // iPadOS 13+ reports as a Mac with touch.
-  return (
-    /iPad|iPhone|iPod/.test(ua) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  );
-}
-
-export function isStandaloneDisplay(): boolean {
-  return (
-    (navigator as Navigator & { standalone?: boolean }).standalone === true ||
-    window.matchMedia?.('(display-mode: standalone)').matches === true
-  );
-}
-
 export function pushSupported(): boolean {
   return (
     typeof navigator !== 'undefined' &&

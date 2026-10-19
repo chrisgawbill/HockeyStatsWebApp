@@ -4,6 +4,7 @@ import '@/styles/index.css';
 import '@/styles/theme.css';
 import '@/styles/components.css';
 import App from '@/app/App';
+import '@/lib/installPrompt';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { registerServiceWorker } from '@/features/after-action-reports/utils/pushNotifications';

@@ -8,13 +8,12 @@ import {
 import {
   derivePushStatus,
   getDeviceSubscription,
-  isIosDevice,
-  isStandaloneDisplay,
   pushSupported,
   readPermission,
   subscribeDevice,
   type PushStatus,
 } from '@/features/after-action-reports/utils/pushNotifications';
+import { isIosDevice, isStandaloneDisplay } from '@/lib/displayMode';
 
 export interface PushNotificationsState {
   status: PushStatus;
