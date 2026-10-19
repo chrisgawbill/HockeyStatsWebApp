@@ -11,6 +11,16 @@ const apiBaseUrl =
   (import.meta.env.DEV ? 'http://localhost:9000' : undefined);
 const REQUEST_TIMEOUT_MS = 15_000;
 
+/**
+ * The deployed API sleeps when idle and takes up to about a minute to wake, so
+ * the first requests after a quiet period time out or come back as gateway
+ * errors. GETs are idempotent, so they retry those transient failures with
+ * backoff instead of surfacing an error the user has to retry by hand. The
+ * per-attempt timeout plus these delays gives the API roughly 70s to wake.
+ */
+const GET_RETRY_DELAYS_MS = [1_000, 2_000, 4_000];
+const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+
 if (!apiBaseUrl && import.meta.env.PROD) {
   console.error(
     'VITE_API_URL is not configured. API requests will use relative URLs.',
@@ -91,23 +101,58 @@ async function request<T>(
     } catch {
       return text as T;
     }
-  } catch (error) {
-    console.error('API request failed:', error);
-    throw error;
   } finally {
     clearTimeout(timeout);
   }
 }
 
 /**
- * Shared GET wrapper. Feature callers retain ownership of user-facing error UI.
+ * Network failures and timeouts have no status and are worth retrying; HTTP
+ * errors are retried only for statuses that signal a waking or overloaded API.
+ */
+function isTransient(error: unknown): boolean {
+  return !(error instanceof ApiError) || RETRYABLE_STATUSES.has(error.status);
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Runs one request, retrying transient failures after each delay in
+ * `retryDelays`. Logs only the final failure, then re-throws so callers keep
+ * their own error UI.
+ */
+async function send<T>(
+  attempt: () => Promise<T>,
+  retryDelays: readonly number[] = [],
+): Promise<T> {
+  for (let i = 0; ; i++) {
+    try {
+      return await attempt();
+    } catch (error) {
+      if (i >= retryDelays.length || !isTransient(error)) {
+        console.error('API request failed:', error);
+        throw error;
+      }
+      await delay(retryDelays[i]);
+    }
+  }
+}
+
+/**
+ * Shared GET wrapper. Retries transient failures (see GET_RETRY_DELAYS_MS);
+ * feature callers retain ownership of user-facing error UI.
  */
 export function get<T>(
   path: string,
   params?: QueryParams,
   options?: RequestOptions,
 ): Promise<T> {
-  return request<T>('GET', path, undefined, params, options);
+  return send(
+    () => request<T>('GET', path, undefined, params, options),
+    GET_RETRY_DELAYS_MS,
+  );
 }
 
 /**
@@ -119,7 +164,7 @@ export function post<T>(
   data?: unknown,
   options?: RequestOptions,
 ): Promise<T> {
-  return request<T>('POST', path, data, undefined, options);
+  return send(() => request<T>('POST', path, data, undefined, options));
 }
 
 /**
@@ -131,5 +176,5 @@ export function put<T>(
   data?: unknown,
   options?: RequestOptions,
 ): Promise<T> {
-  return request<T>('PUT', path, data, undefined, options);
+  return send(() => request<T>('PUT', path, data, undefined, options));
 }

@@ -70,34 +70,79 @@ describe('apiClient', () => {
     );
   });
 
-  it('throws a status-bearing error for non-success responses', async () => {
+  it('throws a status-bearing error for non-retryable responses', async () => {
     fetchMock.mockResolvedValue(
-      new Response('nope', { status: 500, statusText: 'Server Error' }),
+      new Response('nope', { status: 404, statusText: 'Not Found' }),
     );
 
     await expect(get('/api/example')).rejects.toMatchObject({
       name: 'ApiError',
-      status: 500,
+      status: 404,
     });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(console.error).toHaveBeenCalled();
   });
 
-  it('aborts requests after 15 seconds', async () => {
+  it('retries GETs through gateway errors and network failures', async () => {
     vi.useFakeTimers();
-    let signal: AbortSignal | undefined;
+    fetchMock
+      .mockResolvedValueOnce(new Response('', { status: 502 }))
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(jsonResponse({ standings: [] }));
+
+    const request = get('/standings');
+    await vi.advanceTimersByTimeAsync(3_000);
+
+    await expect(request).resolves.toEqual({ standings: [] });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
+  it('gives up on GETs after the last retry', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(
+      async () => new Response('', { status: 503, statusText: 'Unavailable' }),
+    );
+
+    const request = get('/standings');
+    const rejection = expect(request).rejects.toMatchObject({ status: 503 });
+    await vi.advanceTimersByTimeAsync(7_000);
+
+    await rejection;
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(console.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry writes', async () => {
+    fetchMock.mockResolvedValue(new Response('', { status: 503 }));
+
+    await expect(post('/api/example', {})).rejects.toMatchObject({
+      status: 503,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('aborts each attempt after 15 seconds and retries timed-out GETs', async () => {
+    vi.useFakeTimers();
+    const signals: AbortSignal[] = [];
     fetchMock.mockImplementation(
       (_url: string, init?: RequestInit) =>
         new Promise((_resolve, reject) => {
-          signal = init?.signal ?? undefined;
-          signal?.addEventListener('abort', () => reject(new Error('aborted')));
+          const signal = init?.signal as AbortSignal;
+          signals.push(signal);
+          signal.addEventListener('abort', () => reject(new Error('aborted')));
         }),
     );
 
     const request = get('/api/slow');
     const rejection = expect(request).rejects.toThrow('aborted');
     await vi.advanceTimersByTimeAsync(15_000);
+    expect(signals).toHaveLength(1);
+    expect(signals[0].aborted).toBe(true);
 
+    await vi.advanceTimersByTimeAsync(3 * 15_000 + 7_000);
     await rejection;
-    expect(signal?.aborted).toBe(true);
+    expect(signals).toHaveLength(4);
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
   });
 });
