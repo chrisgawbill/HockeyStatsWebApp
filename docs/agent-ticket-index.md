@@ -903,3 +903,13 @@ together and the source game; falls back to the ice-time ranking labeled
 "Projected" when the API returns `source: 'none'` or the call fails.
 
 **Dependencies:** API-LINES-01 contract (frontend must work before it deploys).
+
+**Product Owner review (screenshots):** Approved with polish: larger tokens on
+desktop, content-sized goalie bench, Defense 2 columns below 1200px, grid edge
+fix. Tokens show NHL headshots (number-disc fallback). Desktop (>= 992px) shows
+all lines in a grid; the carousel is phone/tablet only. Tapping a player opens a
+stats dialog (`AppDialog`) built from the skater/goalie stats the team page
+already loads; no extra API calls.
+
+**Follow-up (not in scope):** the global header nav overflows the viewport by
+~35px at 1024px (pre-existing, outside this change).
