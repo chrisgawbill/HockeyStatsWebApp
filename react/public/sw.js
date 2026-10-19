@@ -91,11 +91,16 @@ async function openGame(gameId) {
   } else if (self.clients.openWindow) {
     await self.clients.openWindow(new URL(`./${hash}`, scope).href);
   }
+}
 
-  if (hasGame) {
-    for (const client of windows) {
-      client.postMessage({ type: 'aar-report-read', gameId });
-    }
+async function announceRead(gameId) {
+  if (gameId === null || gameId === undefined || gameId === '') return;
+  const windows = await self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true,
+  });
+  for (const client of windows) {
+    client.postMessage({ type: 'aar-report-read', gameId });
   }
 }
 
@@ -104,8 +109,14 @@ self.addEventListener('notificationclick', (event) => {
   const { gameId, readToken } = event.notification.data || {};
   event.waitUntil(
     (async () => {
-      await markRead(readToken);
-      await openGame(gameId);
+      // The API may take a minute to wake; open the game without waiting on it.
+      const read = markRead(readToken);
+      try {
+        await openGame(gameId);
+      } finally {
+        await read;
+        await announceRead(gameId);
+      }
     })(),
   );
 });

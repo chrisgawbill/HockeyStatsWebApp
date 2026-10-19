@@ -148,6 +148,47 @@ describe('sw.js', () => {
     expect(w.openWindow).not.toHaveBeenCalled();
   });
 
+  it('opens the game before the read finishes and announces read after', async () => {
+    const open = client(`${SCOPE}#/standings`);
+    const w = loadWorker([open]);
+    let release: (value: unknown) => void = () => undefined;
+    w.fetchMock.mockReturnValue(new Promise((resolve) => (release = resolve)));
+    const c = clickEvent({ gameId: 42, readToken: 'tok' });
+    w.handlers.notificationclick(c.event);
+    for (let i = 0; i < 20; i++) await Promise.resolve();
+
+    expect(w.fetchMock).toHaveBeenCalled();
+    expect(open.focus).toHaveBeenCalled();
+    expect(open.navigate).toHaveBeenCalled();
+    expect(open.postMessage).toHaveBeenCalledWith({
+      type: 'aar-navigate',
+      gameId: 42,
+    });
+    expect(open.postMessage).not.toHaveBeenCalledWith({
+      type: 'aar-report-read',
+      gameId: 42,
+    });
+
+    release({ ok: true });
+    await c.done();
+    expect(open.postMessage).toHaveBeenCalledWith({
+      type: 'aar-report-read',
+      gameId: 42,
+    });
+  });
+
+  it('opens a window before the read finishes when no tab is open', async () => {
+    const w = loadWorker([]);
+    let release: (value: unknown) => void = () => undefined;
+    w.fetchMock.mockReturnValue(new Promise((resolve) => (release = resolve)));
+    const c = clickEvent({ gameId: 9, readToken: 'tok' });
+    w.handlers.notificationclick(c.event);
+    for (let i = 0; i < 20; i++) await Promise.resolve();
+    expect(w.openWindow).toHaveBeenCalledWith(`${SCOPE}#/game/9`);
+    release({ ok: true });
+    await c.done();
+  });
+
   it('click opens a window when none is in scope, even if the read fails', async () => {
     const w = loadWorker([client('https://elsewhere.test/')]);
     w.fetchMock.mockRejectedValue(new Error('offline'));
