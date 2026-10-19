@@ -16,11 +16,16 @@ import {
   markAfterActionReportRead,
   markAllAfterActionReportsRead,
   removeFavorite,
+  setFavoritePushMuted,
 } from '@/features/after-action-reports/api/afterActionReportsApi';
 import type {
   AfterActionReport,
   FavoriteTeam,
 } from '@/features/after-action-reports/types/afterActionReport';
+import {
+  usePushNotifications,
+  type PushNotificationsState,
+} from '@/features/after-action-reports/hooks/usePushNotifications';
 import {
   alertContent,
   alertPermission,
@@ -48,6 +53,10 @@ export interface AfterActionReportsState {
   markRead: (gameId: number) => void;
   markAllRead: () => void;
   enableAlerts: () => Promise<void>;
+  /** Phone (Web Push) notifications for this device. */
+  push: PushNotificationsState;
+  /** Mutes/unmutes phone push for a favorite; inbox still lists the team. */
+  setTeamPushMuted: (triCode: string, muted: boolean) => Promise<void>;
 }
 
 const AfterActionReportsContext = createContext<AfterActionReportsState | null>(
@@ -84,12 +93,22 @@ export function AfterActionReportsProvider({
   // the current session rather than the one captured when they were shown.
   const tokenRef = useRef(token);
   tokenRef.current = token;
+  const push = usePushNotifications(token);
+  // With push on, tab-only browser alerts would duplicate it.
+  const pushOnRef = useRef(false);
+  pushOnRef.current = push.status === 'on';
 
   const applyReports = useCallback((next: AfterActionReport[]) => {
     setReports(next);
     const plan = planAlerts(next, readRememberedAlerts());
     storeRememberedAlerts(plan.remembered);
-    if (plan.fresh.length === 0 || alertPermission() !== 'granted') return;
+    if (
+      plan.fresh.length === 0 ||
+      pushOnRef.current ||
+      alertPermission() !== 'granted'
+    ) {
+      return;
+    }
 
     const { title, body, gameId } = alertContent(plan.fresh);
     try {
@@ -167,6 +186,22 @@ export function AfterActionReportsProvider({
     };
   }, [token, refreshReports]);
 
+  // The service worker tells open tabs when a notification was tapped.
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    const onMessage = (event: MessageEvent) => {
+      const data = event.data as { type?: string; gameId?: unknown } | null;
+      if (data?.type === 'aar-navigate' && data.gameId != null) {
+        window.location.hash = `#/game/${data.gameId}`;
+      } else if (data?.type === 'aar-report-read' && tokenRef.current) {
+        refreshReports(tokenRef.current);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', onMessage);
+    return () =>
+      navigator.serviceWorker.removeEventListener('message', onMessage);
+  }, [refreshReports]);
+
   const isFavorite = useCallback(
     (triCode: string) => favorites.some((f) => f.triCode === triCode),
     [favorites],
@@ -180,7 +215,10 @@ export function AfterActionReportsProvider({
       setFavorites(
         wasFavorite
           ? favorites.filter((f) => f.triCode !== triCode)
-          : [...favorites, { triCode, since: new Date().toISOString() }],
+          : [
+              ...favorites,
+              { triCode, since: new Date().toISOString(), pushMuted: false },
+            ],
       );
       try {
         const next = wasFavorite
@@ -195,6 +233,26 @@ export function AfterActionReportsProvider({
       }
     },
     [token, favorites, refreshReports],
+  );
+
+  const setTeamPushMuted = useCallback(
+    async (triCode: string, muted: boolean) => {
+      if (!token) return;
+      const previous = favorites;
+      setFavorites(
+        favorites.map((f) =>
+          f.triCode === triCode ? { ...f, pushMuted: muted } : f,
+        ),
+      );
+      try {
+        setFavorites(await setFavoritePushMuted(token, triCode, muted));
+      } catch (error) {
+        console.error('Failed to update push mute:', error);
+        setFavorites(previous);
+        throw error;
+      }
+    },
+    [token, favorites],
   );
 
   const markRead = useCallback(
@@ -246,6 +304,8 @@ export function AfterActionReportsProvider({
       markRead,
       markAllRead,
       enableAlerts,
+      push,
+      setTeamPushMuted,
     }),
     [
       token,
@@ -257,6 +317,8 @@ export function AfterActionReportsProvider({
       markRead,
       markAllRead,
       enableAlerts,
+      push,
+      setTeamPushMuted,
     ],
   );
 

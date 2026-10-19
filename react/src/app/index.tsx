@@ -6,6 +6,7 @@ import '@/styles/components.css';
 import App from '@/app/App';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { AuthProvider } from '@/lib/auth/AuthContext';
+import { registerServiceWorker } from '@/features/after-action-reports/utils/pushNotifications';
 import { AfterActionReportsProvider } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 
 const root = ReactDOM.createRoot(
@@ -25,3 +26,8 @@ root.render(
     </AuthProvider>
   </ThemeProvider>,
 );
+
+// Installability and Web Push; failure only logs and the site works without it.
+window.addEventListener('load', () => {
+  registerServiceWorker();
+});

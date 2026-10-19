@@ -83,6 +83,94 @@ function ReportRow({
   );
 }
 
+/** Phone notification opt-in and per-team mutes, shown above browser alerts. */
+function PushControls() {
+  const { favorites, push, setTeamPushMuted } = useAfterActionReports();
+  const [muteError, setMuteError] = useState(false);
+
+  if (push.status === 'hidden') return null;
+  if (push.status === 'ios-install') {
+    return (
+      <p className={styles.footnote}>
+        Add to Home Screen to get phone notifications: tap Share, then Add to
+        Home Screen, and open the app from there.
+      </p>
+    );
+  }
+  if (push.status === 'denied') {
+    return (
+      <p className={styles.footnote}>
+        Phone notifications are blocked for this site. Re-enable them in your
+        browser or phone settings.
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        className={styles.alertsButton}
+        disabled={push.busy}
+        onClick={() => {
+          (push.status === 'on' ? push.disable() : push.enable()).catch(
+            () => undefined,
+          );
+        }}
+      >
+        {push.busy
+          ? 'Working…'
+          : push.status === 'on'
+            ? 'Turn off phone notifications'
+            : 'Turn on phone notifications'}
+      </button>
+      {push.error && (
+        <p className={styles.footnote} role="alert">
+          {push.error}
+        </p>
+      )}
+      {push.status === 'on' && (
+        <>
+          <p className={styles.footnote}>
+            Phone notifications are on. Browser alerts are off on this device.
+          </p>
+          {favorites.length > 0 && (
+            <ul
+              className={styles.muteList}
+              aria-label="Phone notifications by team"
+            >
+              {favorites.map((favorite) => (
+                <li key={favorite.triCode} className={styles.muteRow}>
+                  <span className={styles.muteTeam}>{favorite.triCode}</span>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    aria-pressed={favorite.pushMuted}
+                    onClick={() => {
+                      setMuteError(false);
+                      setTeamPushMuted(
+                        favorite.triCode,
+                        !favorite.pushMuted,
+                      ).catch(() => setMuteError(true));
+                    }}
+                  >
+                    {favorite.pushMuted ? 'Muted' : 'Mute'}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {muteError && (
+            <p className={styles.footnote} role="alert">
+              Couldn't update that team. Try again.
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 /**
  * Global-header inbox for After Action Reports. The badge counts unread
  * reports; choosing one marks it read and opens its game detail page.
@@ -93,6 +181,7 @@ export default function NotificationBell() {
     reports,
     unreadCount,
     alertPermission,
+    push,
     markRead,
     markAllRead,
     enableAlerts,
@@ -203,7 +292,8 @@ export default function NotificationBell() {
                     )} play${favorites.length === 1 ? 's' : ''} next.`}
             </p>
           )}
-          {alertPermission === 'default' && (
+          <PushControls />
+          {push.status !== 'on' && alertPermission === 'default' && (
             <button
               type="button"
               className={styles.alertsButton}
@@ -214,7 +304,7 @@ export default function NotificationBell() {
               Turn on browser alerts
             </button>
           )}
-          {alertPermission === 'denied' && (
+          {push.status !== 'on' && alertPermission === 'denied' && (
             <p className={styles.footnote}>
               Browser alerts are blocked for this site in your browser settings.
             </p>
