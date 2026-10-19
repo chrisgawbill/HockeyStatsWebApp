@@ -484,7 +484,13 @@ export default function TeamPage() {
             />
           </section>
           <section id="roster" className={styles['team-section']}>
-            <RosterTab roster={roster} triCode={triCode} lines={teamLines} />
+            <RosterTab
+              roster={roster}
+              triCode={triCode}
+              lines={teamLines}
+              playerStats={playerStats}
+              goalieStats={goalieStats}
+            />
           </section>
           <section id="schedule" className={styles['team-section']}>
             <ScheduleTab

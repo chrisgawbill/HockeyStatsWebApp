@@ -7,7 +7,16 @@
   --rink-red: #c8443f;
   --rink-ink: #1d2b3a;
   --rink-line-opacity: 0.55;
+  --tk: 1; /* token scale; larger on desktop */
+  --strip-h: 248px;
   min-width: 0;
+}
+
+@media (min-width: 992px) {
+  .lines {
+    --tk: 1.4;
+    --strip-h: 340px;
+  }
 }
 
 [data-theme='dark'] .lines {
@@ -97,8 +106,9 @@
 
 .strip {
   position: relative;
+  box-sizing: border-box;
   width: 100%;
-  height: 248px;
+  height: var(--strip-h);
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid var(--color-divider);
@@ -124,9 +134,9 @@
 .strip__circle {
   position: absolute;
   left: 50%;
-  top: 56%;
-  width: 150px;
-  height: 150px;
+  top: 80%;
+  width: calc(96px * var(--tk));
+  height: calc(96px * var(--tk));
   transform: translate(-50%, -50%);
   border: 2px solid var(--rink-red);
   border-radius: 50%;
@@ -143,6 +153,12 @@
   border-radius: 50%;
   background: var(--rink-red);
   opacity: var(--rink-line-opacity);
+}
+
+.strip--pair .strip__circle {
+  top: 112%;
+  width: calc(110px * var(--tk));
+  height: calc(110px * var(--tk));
 }
 
 .strip__dot--l {
@@ -187,7 +203,7 @@
 
 .spot--C {
   left: 50%;
-  top: 44%;
+  top: 38%;
   --from-y: 50px;
 }
 
@@ -207,6 +223,11 @@
   left: 72%;
   top: 60%;
   --from-x: 60px;
+}
+
+.strip--pair .spot--LD,
+.strip--pair .spot--RD {
+  top: 54%;
 }
 
 .spot--G {
@@ -230,9 +251,25 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  width: 84px;
+  width: calc(84px * var(--tk));
   border-radius: 10px;
   outline-offset: 2px;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+}
+
+.token:hover {
+  background: none;
+  box-shadow: none;
+  transform: none;
 }
 
 .token:focus-visible {
@@ -243,14 +280,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: calc(50px * var(--tk));
+  height: calc(50px * var(--tk));
   border-radius: 50%;
   background: var(--rink-team);
   color: var(--rink-team-ink);
   border: 2px solid #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  font-size: var(--text-base);
+  font-size: calc(var(--text-base) * var(--tk));
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -265,19 +302,20 @@
   white-space: normal;
   overflow-wrap: anywhere;
   line-height: 1.15;
-  font-size: 11px;
+  font-size: calc(11px * var(--tk));
   font-weight: 600;
   color: var(--rink-ink);
 }
 
 .token__slot {
-  font-size: 10px;
+  font-size: calc(10px * var(--tk));
   font-weight: 600;
   letter-spacing: 0.5px;
   color: var(--color-muted-text);
 }
 
 .token--sm {
+  --tk: 1;
   width: 76px;
 }
 
@@ -303,8 +341,8 @@
   position: absolute;
   left: 50%;
   bottom: 28px;
-  width: 190px;
-  height: 100px;
+  width: calc(190px * var(--tk));
+  height: calc(100px * var(--tk));
   transform: translateX(-50%);
   border: 2px solid var(--rink-red);
   border-bottom: none;
@@ -377,7 +415,9 @@
   }
 
   .goalie .bench {
-    flex: 1 1 0;
+    flex: 0 0 auto;
+    width: fit-content;
+    max-width: 100%;
     margin-top: 0;
   }
 }
@@ -391,7 +431,7 @@
 
   .scroller {
     display: grid;
-    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    grid-template-columns: repeat(var(--cols-lg, 2), minmax(0, 1fr));
     overflow: visible;
     scroll-snap-type: none;
   }
@@ -428,10 +468,10 @@
 
 .token__badge {
   position: absolute;
-  right: -7px;
-  bottom: -5px;
-  min-width: 20px;
-  height: 20px;
+  right: calc(-7px * var(--tk));
+  bottom: calc(-5px * var(--tk));
+  min-width: calc(20px * var(--tk));
+  height: calc(20px * var(--tk));
   padding: 0 4px;
   box-sizing: border-box;
   display: flex;
@@ -441,7 +481,7 @@
   background: var(--rink-team);
   color: var(--rink-team-ink);
   border: 1.5px solid #fff;
-  font-size: 11px;
+  font-size: calc(11px * var(--tk));
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -456,4 +496,10 @@
   height: 17px;
   font-size: 10px;
   right: -6px;
+}
+
+@media (min-width: 1200px) {
+  .scroller {
+    grid-template-columns: repeat(var(--cols-xl, 2), minmax(0, 1fr));
+  }
 }

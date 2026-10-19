@@ -1,6 +1,8 @@
 import { RosterPlayer } from '@/features/teams/types/teamPageTypes';
 import { useState } from 'react';
 
+import { useOpenPlayerDialog } from '@/features/teams/hooks/PlayerDialogContext';
+
 import {
   buildTokenAriaLabel,
   getLastName,
@@ -18,9 +20,9 @@ interface JerseyTokenProps {
 
 /**
  * Round jersey token: team-color disc with the jersey number, the last name
- * below and an optional slot label. Tapping a player does nothing today (the
- * old PlayerCard was not interactive either); the token is focusable so it is
- * reachable by keyboard and announced with name, number and position.
+ * below and an optional slot label. It is a real button that opens the
+ * player stats dialog (via PlayerDialogContext) and is announced with name,
+ * number and position.
  */
 export default function JerseyToken({
   player,
@@ -31,14 +33,17 @@ export default function JerseyToken({
   // Remember which URL failed so a changed headshot gets a fresh attempt.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const showPhoto = Boolean(player.headshot) && failedUrl !== player.headshot;
+  const openPlayer = useOpenPlayerDialog();
   const imgSize = size === 'sm' ? 34 : 44;
+  // Rendered larger on desktop via CSS; request a sharper pixel size there.
 
   return (
-    <div
+    <button
+      type="button"
       className={`${styles.token} ${size === 'sm' ? styles['token--sm'] : ''}`}
-      role="group"
-      tabIndex={0}
       aria-label={buildTokenAriaLabel(player, slot)}
+      aria-haspopup="dialog"
+      onClick={(e) => openPlayer(player, slot, e.currentTarget)}
     >
       {showPhoto ? (
         <span
@@ -70,6 +75,6 @@ export default function JerseyToken({
           {slot}
         </span>
       )}
-    </div>
+    </button>
   );
 }

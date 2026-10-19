@@ -12,8 +12,8 @@ interface LineCarouselProps {
   lines: DisplayLine[];
   view: Pick<TeamLinesView, 'source' | 'game'>;
   ariaLabel: string;
-  /** Columns when shown as a grid on desktop (>= 992px). */
-  columns: number;
+  /** Grid columns on desktop: from 992px and from 1200px. */
+  columns: { lg: number; xl: number };
 }
 
 function prefersReducedMotion(): boolean {
@@ -120,7 +120,12 @@ export default function LineCarousel({
       <div
         ref={scrollerRef}
         className={styles.scroller}
-        style={{ '--cols': columns } as React.CSSProperties}
+        style={
+          {
+            '--cols-lg': columns.lg,
+            '--cols-xl': columns.xl,
+          } as React.CSSProperties
+        }
         role="region"
         aria-label={ariaLabel}
       >
