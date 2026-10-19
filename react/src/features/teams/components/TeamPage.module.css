@@ -84,7 +84,7 @@
 
 .team-section {
   scroll-margin-top: calc(
-    var(--sticky-header-h, 0px) + var(--sticky-nav-h, 0px)
+    var(--sticky-header-h, 0px) + var(--sticky-nav-h, 0px) + var(--ds-space-4)
   );
 }
 
