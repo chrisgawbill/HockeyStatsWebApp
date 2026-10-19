@@ -43,8 +43,8 @@ acceptance are both necessary for DONE.
 | AAR-02 | PWA vs. React Native, alert timing after the final horn, and the external scheduler before any push work. |
 | API-LINES-01 | Approved: real lines from NHL shift charts, NHL calls batched/cached (see block). |
 | TEAM-LINES-01 | Approved: "Line Change" rink strips + Forwards/Defense/Goalies tab row; Product Owner reviews screenshots. |
-| API-WPR-01 | Report week and send time/timezone, break rule, per-player stat lines, favorite limit, and NHL batching strategy (see block) before any backend work. |
-| WPR-01 | Where the player star lives, the report page and inbox item design, and notification wording; screenshots for Product Owner acceptance. |
+| API-WPR-01 | Approved 2026-10-19: Monday 9:00 ET, zero-league-games break, proposed stat lines, 10-player cap, one on/off switch (see block). |
+| WPR-01 | Approved 2026-10-19: reusable star headshot, proposed inbox/report design, best-performer wording; screenshots for Product Owner acceptance. |
 
 ## Dependency outline
 
@@ -920,7 +920,24 @@ already loads; no extra API calls.
 
 ## API-WPR-01 — Favorite players and the weekly player report (backend)
 
-**Status:** IDEA (HockeyStatsAPI; copy/adapt to that repository's workflow)
+**Status:** ACTIVE (HockeyStatsAPI; started by the Product Owner 2026-10-19)
+
+**Approved decisions (Product Owner, 2026-10-19):**
+
+- Report week is Monday 00:00 – Sunday 23:59 America/New_York; generated and
+  pushed Monday about **9:00 ET** (cron 13:05 and 14:05 UTC; the script skips
+  the run that lands before 9:00 ET and the ledger keeps it to one send).
+- Break = **zero completed regular-season/playoff games league-wide** that
+  week: no reports, no pushes. Users whose favorites' teams did not play are
+  also skipped individually (design item 5).
+- Stat lines as proposed in design item 6.
+- **At most 10 favorite players** per user (409 on the 11th).
+- **One on/off switch** (`users.weekly_report_push`, default on); no
+  per-player mute. The report is still created for the inbox when it is off.
+- Push wording: title `Weekly Player Report · Oct 13–19`; body is the best
+  performer (skaters by points, else goalies by wins), e.g.
+  `Connor McDavid: 2G 4A in 3 GP`, plus ` and N more` for the other players
+  who played.
 
 **Goal:** A signed-in user favorites players the same way they favorite teams.
 Every Monday morning the API builds one Weekly Player Report per user covering
@@ -1027,7 +1044,18 @@ a double run.
 
 ## WPR-01 — Favorite players and the weekly report (frontend)
 
-**Status:** IDEA
+**Status:** ACTIVE (started by the Product Owner 2026-10-19, after API-WPR-01)
+
+**Approved decisions (Product Owner, 2026-10-19):**
+
+- Replaces design item 1: a reusable **player headshot with a corner star
+  button**. Tapping the star toggles the favorite; tapping the photo keeps
+  today's behaviour. Filled gold = favorited, outline = not; signed out it
+  shows the same sign-in hint as the team star. Used on the larger headshots:
+  roster stats dialog, team Player Stats rows, Three Stars, stat-leader
+  rows/modal, and the weekly report cards (not the scoring-summary goals).
+- Inbox item, report page, and toggle placement as proposed (items 2–3).
+- Notification wording as in API-WPR-01's approved decisions.
 
 **Goal:** A signed-in user can star a player, see their favorite players,
 and open each Monday's Weekly Player Report from the bell inbox or from the
