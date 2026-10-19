@@ -1,123 +1,358 @@
+import { Team } from '@/features/teams/types/team';
+import { TeamStats } from '@/features/teams/types/teamStats';
 import { TeamStatsContract } from '@/features/teams/types/teamPageTypes';
-import { TeamResult, TeamSplit } from '@/features/teams/utils/teamFormHelper';
 
-export interface TeamDnaMetric {
+export type TeamDnaTier = 'elite' | 'above' | 'average' | 'below' | 'weak';
+
+export interface TeamDnaRow {
   key: string;
   label: string;
+  /** Short clarifier shown only where the label alone is ambiguous. */
+  note?: string;
   value: string;
-  normalized: number;
-  description: string;
+  /** Competition rank (1,2,2,4) among teams with data; null without league data. */
+  rank: number | null;
+  /** Number of teams ranked on this metric. */
+  of: number | null;
+  /** Bar fill, 4–100 (see `scalePosition`); null without league data. */
+  fill: number | null;
+  /** League-average tick position on the same 4–100 scale. */
+  average: number | null;
+  tier: TeamDnaTier | null;
+}
+
+export interface TeamDnaChip {
+  label: string;
+  kind: 'strength' | 'weakness' | 'neutral';
+}
+
+export interface TeamDnaProfile {
+  rows: TeamDnaRow[];
+  /** True when rows carry league ranks; false for the own-stats fallback. */
+  ranked: boolean;
+  /** Teams with season data in the league set (0 when unranked). */
+  teamCount: number;
+  gamesPlayed: number | null;
+  chips: TeamDnaChip[];
+  earlySample: boolean;
 }
 
 export interface TeamDnaInput {
   stats: TeamStatsContract;
-  results: TeamResult[];
-  recent: TeamResult[];
-  splits: { home: TeamSplit; road: TeamSplit };
+  league: Team[];
+  /** Season as used by the page, e.g. "20262027". */
+  season: string;
+  /** Page team id, used when the full-name match fails. */
+  teamId?: number;
 }
 
-function pointsPercentage(results: TeamResult[]): number | null {
-  if (results.length === 0) return null;
-  const points = results.reduce(
-    (total, result) => total + (result.won ? 2 : result.otl ? 1 : 0),
-    0,
-  );
-  return points / (results.length * 2);
+interface MetricDef {
+  key: string;
+  label: string;
+  note?: string;
+  higherIsBetter: boolean;
+  read: (stats: TeamStats) => number | null | undefined;
+  readOwn: (stats: TeamStatsContract) => number | null | undefined;
+  format: (value: number) => string;
+  strength: [elite: string, strong: string];
+  weakness: string;
 }
 
-function signed(value: number): string {
-  return `${value > 0 ? '+' : ''}${value.toFixed(2)}`;
+const pct = (value: number) => `${(value * 100).toFixed(1)}%`;
+
+const METRICS: MetricDef[] = [
+  {
+    key: 'offense',
+    label: 'Offense',
+    higherIsBetter: true,
+    read: (s) => s.goalsPerGame,
+    readOwn: (s) => s.goalsForPerGame,
+    format: (v) => `${v.toFixed(2)} GF/GP`,
+    strength: ['Elite offense', 'Strong offense'],
+    weakness: 'Low scoring',
+  },
+  {
+    key: 'defense',
+    label: 'Defense',
+    higherIsBetter: false,
+    read: (s) => s.goalsAgainstPerGame,
+    readOwn: (s) => s.goalsAgainstPerGame,
+    format: (v) => `${v.toFixed(2)} GA/GP`,
+    strength: ['Elite defense', 'Strong defense'],
+    weakness: 'Leaky defense',
+  },
+  {
+    key: 'power-play',
+    label: 'Power Play',
+    higherIsBetter: true,
+    read: (s) => s.powerPlayPct,
+    readOwn: (s) => s.powerPlayPct,
+    format: pct,
+    strength: ['Elite power play', 'Strong power play'],
+    weakness: 'Struggling power play',
+  },
+  {
+    key: 'penalty-kill',
+    label: 'Penalty Kill',
+    higherIsBetter: true,
+    read: (s) => s.penaltyKillPct,
+    readOwn: (s) => s.penaltyKillPct,
+    format: pct,
+    strength: ['Elite penalty kill', 'Strong penalty kill'],
+    weakness: 'Weak penalty kill',
+  },
+  {
+    key: 'shot-volume',
+    label: 'Shot Volume',
+    higherIsBetter: true,
+    read: (s) => s.shotsForPerGame,
+    readOwn: (s) => s.shotsForPerGame,
+    format: (v) => `${v.toFixed(1)} shots/GP`,
+    strength: ['Elite shot volume', 'High shot volume'],
+    weakness: 'Low shot volume',
+  },
+  {
+    key: 'shot-suppression',
+    label: 'Shot Suppression',
+    note: 'Shots allowed per game',
+    higherIsBetter: false,
+    read: (s) => s.shotsAgainstPerGame,
+    readOwn: (s) => s.shotsAgainstPerGame,
+    format: (v) => `${v.toFixed(1)} against/GP`,
+    strength: ['Elite shot suppression', 'Limits shots'],
+    weakness: 'Allows lots of shots',
+  },
+  {
+    key: 'faceoffs',
+    label: 'Faceoffs',
+    higherIsBetter: true,
+    read: (s) => s.faceoffWinPct,
+    readOwn: (s) => s.faceoffWinPct,
+    format: pct,
+    strength: ['Elite faceoffs', 'Wins faceoffs'],
+    weakness: 'Loses faceoffs',
+  },
+];
+
+const MAX_CHIPS_PER_SIDE = 2;
+const STRENGTH_MAX_RANK = 8;
+const WEAKNESS_FROM_BOTTOM = 7;
+const EARLY_SAMPLE_GAMES = 5;
+const FILL_MIN = 4;
+
+const TIER_TEXT: Record<TeamDnaTier, string> = {
+  elite: 'elite',
+  above: 'above league average',
+  average: 'around league average',
+  below: 'below league average',
+  weak: 'well below league average',
+};
+
+function finite(value: number | null | undefined): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
 }
 
-function percent(value: number): string {
-  return `${(value * 100).toFixed(1)}%`;
+/** "1st", "2nd", "3rd", "4th", "11th", "22nd"… */
+export function ordinal(n: number): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
+  }
 }
 
-function boundedScale(value: number, min: number, max: number): number {
-  return Math.round(
-    ((Math.max(min, Math.min(max, value)) - min) / (max - min)) * 100,
+/**
+ * Competition rank (1,2,2,4): one plus the number of values strictly better
+ * than `value`. "Better" is lower when `higherIsBetter` is false.
+ */
+export function competitionRank(
+  value: number,
+  values: number[],
+  higherIsBetter: boolean,
+): number {
+  return (
+    1 +
+    values.filter((other) => (higherIsBetter ? other > value : other < value))
+      .length
   );
 }
 
 /**
- * Builds the Team DNA profile from the already-loaded Team page data.
- * Percentages use their natural 0–100 scale; goal differential uses -3 to +3
- * goals/game and scoring environment uses 3 to 9 goals/game. Those bounded
- * ranges make the bars comparable while the displayed value remains raw.
+ * Bar scale shared by the fill and the league-average tick. A value maps
+ * linearly from the league's worst team (4%) to its best team (100%), where
+ * "best" is the highest value for higher-is-better metrics and the lowest for
+ * the rest. The floor keeps the worst team's bar visible. When every team is
+ * identical the scale is degenerate and everything sits at 100%.
+ */
+export function scalePosition(
+  value: number,
+  values: number[],
+  higherIsBetter: boolean,
+): number {
+  const best = higherIsBetter ? Math.max(...values) : Math.min(...values);
+  const worst = higherIsBetter ? Math.min(...values) : Math.max(...values);
+  if (best === worst) return 100;
+  const ratio = (value - worst) / (best - worst);
+  const clamped = Math.max(0, Math.min(1, ratio));
+  return FILL_MIN + clamped * (100 - FILL_MIN);
+}
+
+/** Top 5 elite, top third above, bottom 5 weak, bottom third below. */
+export function tierForRank(rank: number, of: number): TeamDnaTier {
+  if (rank <= 5) return 'elite';
+  if (rank > of - 5) return 'weak';
+  if (rank <= of / 3) return 'above';
+  if (rank > (of * 2) / 3) return 'below';
+  return 'average';
+}
+
+/** Screen-reader sentence, e.g. "Power Play: 24.1%, 8th of 32, above league average". */
+export function describeRow(row: TeamDnaRow): string {
+  if (row.rank == null || row.of == null || row.tier == null) {
+    return `${row.label}: ${row.value}`;
+  }
+  return `${row.label}: ${row.value}, ${ordinal(row.rank)} of ${row.of}, ${TIER_TEXT[row.tier]}`;
+}
+
+function buildChips(rows: TeamDnaRow[]): TeamDnaChip[] {
+  const defs = new Map(METRICS.map((m) => [m.key, m]));
+  const ranked = rows.filter(
+    (row): row is TeamDnaRow & { rank: number; of: number } =>
+      row.rank != null && row.of != null,
+  );
+
+  const strengths = ranked
+    .filter((row) => row.rank <= STRENGTH_MAX_RANK)
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, MAX_CHIPS_PER_SIDE);
+  const weaknesses = ranked
+    .filter(
+      (row) =>
+        row.rank >= row.of - WEAKNESS_FROM_BOTTOM &&
+        !strengths.some((s) => s.key === row.key),
+    )
+    .sort((a, b) => b.rank - a.rank)
+    .slice(0, MAX_CHIPS_PER_SIDE);
+
+  const chips: TeamDnaChip[] = [
+    ...strengths.map((row): TeamDnaChip => {
+      const [elite, strong] = defs.get(row.key)!.strength;
+      return { label: row.rank <= 5 ? elite : strong, kind: 'strength' };
+    }),
+    ...weaknesses.map((row): TeamDnaChip => ({
+      label: defs.get(row.key)!.weakness,
+      kind: 'weakness',
+    })),
+  ];
+  return chips.length > 0
+    ? chips
+    : [{ label: 'Middle of the pack', kind: 'neutral' }];
+}
+
+function gamesPlayedOf(stats: {
+  wins?: number | null;
+  losses?: number | null;
+  otLosses?: number | null;
+}): number | null {
+  if (!finite(stats.wins) || !finite(stats.losses)) return null;
+  return stats.wins + stats.losses + (stats.otLosses ?? 0);
+}
+
+/**
+ * Builds the Team DNA profile: seven tendencies ranked against every team with
+ * data for the selected season. Teams are matched by full name (as in
+ * ConvertToListOfTeams), falling back to team id, and season stats by numeric
+ * seasonId. If the league set is empty or lacks this team, rows fall back to
+ * the team's own summary values without ranks, bars, or chips.
  */
 export function buildTeamDna({
   stats,
-  results,
-  recent,
-  splits,
-}: TeamDnaInput): TeamDnaMetric[] {
-  const metrics: TeamDnaMetric[] = [];
-  const seasonPct = pointsPercentage(results);
-  const recentPct = pointsPercentage(recent);
-
-  if (seasonPct != null) {
-    metrics.push({
-      key: 'season-points',
-      label: 'Season Performance',
-      value: percent(seasonPct),
-      normalized: Math.round(seasonPct * 100),
-      description: 'Share of available standings points earned this season.',
-    });
-  }
-
-  if (results.length > 0) {
-    const goalDiff = results.reduce(
-      (total, result) => total + result.gf - result.ga,
-      0,
+  league,
+  season,
+  teamId,
+}: TeamDnaInput): TeamDnaProfile {
+  const seasonId = Number(season);
+  const leagueRows = league
+    .map((team) => ({
+      team,
+      stats: team.seasonStats.find((s) => s.seasonId === seasonId),
+    }))
+    .filter(
+      (entry): entry is { team: Team; stats: TeamStats } => !!entry.stats,
     );
-    const goalDiffPerGame = goalDiff / results.length;
-    metrics.push({
-      key: 'goal-differential',
-      label: 'Goal Margin Per Game',
-      value: signed(goalDiffPerGame),
-      normalized: boundedScale(goalDiffPerGame, -3, 3),
-      description: 'Average scoring margin per completed game.',
-    });
-  }
+  const own =
+    leagueRows.find(
+      (entry) =>
+        stats.teamFullName !== '' && entry.team.teamName === stats.teamFullName,
+    ) ??
+    (teamId != null
+      ? leagueRows.find((entry) => entry.team.id === teamId)
+      : undefined);
 
-  if (stats.goalsForPerGame != null && stats.goalsAgainstPerGame != null) {
-    const environment = stats.goalsForPerGame + stats.goalsAgainstPerGame;
-    metrics.push({
-      key: 'scoring-environment',
-      label: 'Game Scoring',
-      value: `${environment.toFixed(2)} goals/game`,
-      normalized: boundedScale(environment, 3, 9),
-      description: 'Average combined goals scored and allowed per game.',
-    });
-  }
-
-  for (const [key, label, split] of [
-    ['home-points', 'Home Performance', splits.home],
-    ['road-points', 'Road Performance', splits.road],
-  ] as const) {
-    const splitPct = pointsPercentage(
-      results.filter((result) => result.home === (split === splits.home)),
-    );
-    if (split.games > 0 && splitPct != null) {
-      metrics.push({
-        key,
-        label,
-        value: percent(splitPct),
-        normalized: Math.round(splitPct * 100),
-        description: `${split.games} games · points percentage in this split.`,
+  if (!own) {
+    const rows: TeamDnaRow[] = [];
+    for (const metric of METRICS) {
+      const value = metric.readOwn(stats);
+      if (!finite(value)) continue;
+      rows.push({
+        key: metric.key,
+        label: metric.label,
+        note: metric.note,
+        value: metric.format(value),
+        rank: null,
+        of: null,
+        fill: null,
+        average: null,
+        tier: null,
       });
     }
+    const gamesPlayed = gamesPlayedOf(stats);
+    return {
+      rows,
+      ranked: false,
+      teamCount: 0,
+      gamesPlayed,
+      chips: [],
+      earlySample: gamesPlayed != null && gamesPlayed < EARLY_SAMPLE_GAMES,
+    };
   }
 
-  if (recentPct != null) {
-    metrics.push({
-      key: 'recent-points',
-      label: `Recent Form · Last ${recent.length}`,
-      value: percent(recentPct),
-      normalized: Math.round(recentPct * 100),
-      description: 'Points percentage across the most recent completed games.',
+  const rows: TeamDnaRow[] = [];
+  for (const metric of METRICS) {
+    const value = metric.read(own.stats);
+    if (!finite(value)) continue;
+    const values = leagueRows
+      .map((entry) => metric.read(entry.stats))
+      .filter(finite);
+    const rank = competitionRank(value, values, metric.higherIsBetter);
+    const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+    rows.push({
+      key: metric.key,
+      label: metric.label,
+      note: metric.note,
+      value: metric.format(value),
+      rank,
+      of: values.length,
+      fill: scalePosition(value, values, metric.higherIsBetter),
+      average: scalePosition(mean, values, metric.higherIsBetter),
+      tier: tierForRank(rank, values.length),
     });
   }
 
-  return metrics;
+  const gamesPlayed = gamesPlayedOf(own.stats);
+  return {
+    rows,
+    ranked: true,
+    teamCount: leagueRows.length,
+    gamesPlayed,
+    chips: rows.length > 0 ? buildChips(rows) : [],
+    earlySample: gamesPlayed != null && gamesPlayed < EARLY_SAMPLE_GAMES,
+  };
 }

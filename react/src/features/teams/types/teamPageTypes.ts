@@ -128,6 +128,8 @@ export interface TeamStatsContract {
   powerPlayPct?: number;
   penaltyKillPct?: number;
   shotsForPerGame?: number;
+  shotsAgainstPerGame?: number;
+  faceoffWinPct?: number;
 }
 
 export interface PlayerStatLine {
