@@ -2,6 +2,7 @@ import {
   KeyboardEvent,
   ReactNode,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -11,6 +12,8 @@ import { isCompletedGameState } from '@/lib/gameStatus';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { localTeamList } from '@/lib/teamListData';
 import { useTheme } from '@/lib/ThemeContext';
+import { navTopEdgeColor } from '@/lib/systemBarColor';
+import { useThemeColor } from '@/lib/useThemeColor';
 import SeasonSelector from '@/components/SeasonSelector';
 import AccountCorner from '@/components/AccountCorner';
 import styles from '@/components/PageHeader.module.css';
@@ -210,6 +213,25 @@ export default function PageHeader({
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
+  const { theme } = useTheme();
+  const [systemBarColor, setSystemBarColor] = useState<string | null>(null);
+
+  // Tint the system status bar (`theme-color`: Android installed app,
+  // Safari) to the nav bar's top edge, so a team page's tinted bar and the
+  // status bar above it read as one surface. Re-read on route and theme
+  // changes, since both change --color-primary / --color-bg.
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const style = getComputedStyle(nav);
+    setSystemBarColor(
+      navTopEdgeColor(
+        style.getPropertyValue('--color-primary'),
+        style.getPropertyValue('--color-bg'),
+      ),
+    );
+  }, [pathname, theme]);
+  useThemeColor(systemBarColor);
 
   /**
    * Mobile-only full-screen search overlay, opened from the floating action
