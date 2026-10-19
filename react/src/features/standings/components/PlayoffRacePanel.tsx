@@ -27,7 +27,10 @@ export default function PlayoffRacePanel({
   const race = derivePlayoffRace(standings, games);
 
   return (
-    <section className={styles.panel} aria-labelledby={`${conference}-race-heading`}>
+    <section
+      className={styles.panel}
+      aria-labelledby={`${conference}-race-heading`}
+    >
       <div className={styles.headingRow}>
         <div>
           <h3 id={`${conference}-race-heading`}>{conference} Playoff Race</h3>
@@ -36,13 +39,18 @@ export default function PlayoffRacePanel({
           </p>
         </div>
         <span className={styles.cutline}>
-          Cutline: {race.cutlinePoints === null ? '—' : `${race.cutlinePoints} Points`}
+          Cutline:{' '}
+          {race.cutlinePoints === null ? '—' : `${race.cutlinePoints} Points`}
         </span>
       </div>
-      {race.seasonOver && <p className={styles.seasonNote}>Regular Season Complete.</p>}
+      {race.seasonOver && (
+        <p className={styles.seasonNote}>Regular Season Complete.</p>
+      )}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
-          <caption className="ds-visually-hidden">{conference} Simplified Playoff Race</caption>
+          <caption className="ds-visually-hidden">
+            {conference} Simplified Playoff Race
+          </caption>
           <thead>
             <tr>
               <th scope="col">Team</th>
@@ -54,11 +62,15 @@ export default function PlayoffRacePanel({
           </thead>
           <tbody>
             {race.teams.map((entry) => {
-              const pace = entry.requiredPace === null ? '—' : `${entry.requiredPace.toFixed(1)}/Game`;
+              const pace =
+                entry.requiredPace === null
+                  ? '—'
+                  : `${entry.requiredPace.toFixed(1)}/Game`;
               const raceValue =
                 entry.status === 'chasing'
-                    ? `Tragic Number ${entry.tragicNumber ?? '—'}`
-                    : entry.status === 'playoff-position' || entry.status === 'clinched'
+                  ? `Tragic Number ${entry.tragicNumber ?? '—'}`
+                  : entry.status === 'playoff-position' ||
+                      entry.status === 'clinched'
                     ? `Magic Number ${entry.magicNumber ?? '—'}`
                     : '—';
               return (
@@ -73,11 +85,17 @@ export default function PlayoffRacePanel({
                   <td>{entry.remainingGames}</td>
                   <td>{entry.maxPossiblePoints}</td>
                   <td>
-                    <span className={`${styles.status} ${styles[entry.status]}`}>
+                    <span
+                      className={`${styles.status} ${styles[entry.status]}`}
+                    >
                       {STATUS_LABELS[entry.status]}
                     </span>
                     <span className={styles.raceValue}>
-                      {raceValue}{entry.status === 'chasing' && entry.requiredPoints !== null ? ` · ${entry.requiredPoints} Needed (${pace})` : ''}
+                      {raceValue}
+                      {entry.status === 'chasing' &&
+                      entry.requiredPoints !== null
+                        ? ` · ${entry.requiredPoints} Needed (${pace})`
+                        : ''}
                     </span>
                   </td>
                 </tr>

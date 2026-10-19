@@ -30,7 +30,9 @@ export default function ErrorState({
       role="alert"
     >
       <span className={styles['error-state__icon']} aria-hidden="true" />
-      {title && <TitleTag className={styles['error-state__title']}>{title}</TitleTag>}
+      {title && (
+        <TitleTag className={styles['error-state__title']}>{title}</TitleTag>
+      )}
       <span className={styles['error-state__message']}>{message}</span>
       {onRetry && (
         <button

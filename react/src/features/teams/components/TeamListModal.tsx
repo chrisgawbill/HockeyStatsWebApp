@@ -20,7 +20,11 @@ export default function TeamListModal({
       </header>
       <div className={styles.body} />
       <footer className={styles.footer}>
-        <button type="button" className={`ds-button ${styles.close}`} onClick={handleModalClose}>
+        <button
+          type="button"
+          className={`ds-button ${styles.close}`}
+          onClick={handleModalClose}
+        >
           Close
         </button>
       </footer>

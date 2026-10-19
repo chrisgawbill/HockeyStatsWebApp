@@ -15,7 +15,8 @@ export default function PointsPaceSparkline({
       values.length <= 1
         ? width / 2
         : padding + (index / (values.length - 1)) * (width - padding * 2);
-    const y = padding + (1 - Math.max(0, Math.min(1, value))) * (height - padding * 2);
+    const y =
+      padding + (1 - Math.max(0, Math.min(1, value))) * (height - padding * 2);
     return `${x},${y}`;
   });
   const referenceY = height / 2;

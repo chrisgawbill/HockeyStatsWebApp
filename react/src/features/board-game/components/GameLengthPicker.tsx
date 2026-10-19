@@ -36,8 +36,8 @@ export default function GameLengthPicker({ onPick }: GameLengthPickerProps) {
         </GameButton>
       </div>
       <p className={styles.help}>
-        Quick start: choose a skater, move the puck, and use cards to win
-        duels. Score more goals before the final whistle.
+        Quick start: choose a skater, move the puck, and use cards to win duels.
+        Score more goals before the final whistle.
       </p>
     </div>
   );

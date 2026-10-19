@@ -9,10 +9,7 @@ export interface PlayoffRaceGame {
 }
 
 export type PlayoffRaceStatus =
-  | 'playoff-position'
-  | 'chasing'
-  | 'eliminated'
-  | 'clinched';
+  'playoff-position' | 'chasing' | 'eliminated' | 'clinched';
 
 export interface PlayoffRaceTeam {
   team: StandingsTeam;
@@ -70,8 +67,7 @@ export function derivePlayoffRace(
   const maxChaserPoints = outsideTeams.length
     ? Math.max(
         ...outsideTeams.map(
-          (team) =>
-            team.points + remainingGamesForTeam(team.id, games) * 2,
+          (team) => team.points + remainingGamesForTeam(team.id, games) * 2,
         ),
       )
     : null;
