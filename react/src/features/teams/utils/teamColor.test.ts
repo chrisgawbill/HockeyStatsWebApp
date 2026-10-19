@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { toDarkModeAccentColor } from '@/features/teams/utils/teamColor';
+import {
+  getContrastTextColor,
+  toDarkModeAccentColor,
+} from '@/features/teams/utils/teamColor';
 
 describe('toDarkModeAccentColor', () => {
   it('lightens a dark, saturated color up to the floor', () => {
@@ -15,5 +18,12 @@ describe('toDarkModeAccentColor', () => {
     // as its own hand-picked dark-mode primary (#5b9bd5).
     const result = toDarkModeAccentColor('#1b4f8a', 60);
     expect(result.toLowerCase()).toBe('#5495de');
+  });
+});
+
+describe('getContrastTextColor', () => {
+  it('uses white on dark colors and near-black on light colors', () => {
+    expect(getContrastTextColor('#0b2545')).toBe('#ffffff');
+    expect(getContrastTextColor('#ffb81c')).toBe('#111111');
   });
 });

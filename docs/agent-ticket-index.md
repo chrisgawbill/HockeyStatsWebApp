@@ -41,6 +41,8 @@ acceptance are both necessary for DONE.
 | ON2-13 | Simulation protocol and material-advantage threshold before evaluation; final playtest and release acceptance. |
 | AAR-01 | Product Owner review of favorite star, header bell/inbox, report wording, and browser-alert opt-in on a real deploy. |
 | AAR-02 | PWA vs. React Native, alert timing after the final horn, and the external scheduler before any push work. |
+| API-LINES-01 | Approved: real lines from NHL shift charts, NHL calls batched/cached (see block). |
+| TEAM-LINES-01 | Approved: "Line Change" rink strips + Forwards/Defense/Goalies tab row; Product Owner reviews screenshots. |
 
 ## Dependency outline
 
@@ -864,3 +866,50 @@ re-enable it each October.
 via Add to Home Screen), signs in there, turns on phone notifications, and
 confirms a real final arrives within ~25 minutes, tapping it opens the game and
 clears it from the bell, and Mute stops a team's pushes.
+
+---
+
+## API-LINES-01 — Real line combinations from shift charts
+
+**Status:** DONE (Product Owner approved 2026-10-19) (HockeyStatsAPI)
+
+**Approved decisions (Product Owner):** Lines come from the team's most recent
+completed game's NHL shift chart (`api.nhle.com/stats/rest/en/shiftcharts`).
+Batch NHL calls: as fresh as possible, but never re-fetch immutable data, and
+every response is pinned to one game so it is internally consistent.
+
+**Contract:** `GET /team/lines/:triCode?season=` → `{ source: 'shifts'|'none',
+game: { gameId, gameDate, opponent, homeAway } | null, forwardLines: [{ players:
+[{ id, slot: 'LW'|'C'|'RW' }], togetherSeconds }] (≤4), defensePairs: [{
+players: [{ id, slot: 'LD'|'RD' }], togetherSeconds }] (≤3), goalies: {
+starterId: number|null } }`.
+
+**NHL call budget:** latest completed game from the 10-minute `week/now` club
+schedule (shared with After Action Reports), else the 12-hour season schedule;
+positions from the 24-hour roster cache; shift chart cached forever once the
+game is `OFF` (shared by both teams, single-flight via `GetOrFetch`), 5 minutes
+while `FINAL` or empty. Lines are computed on read, never cached.
+
+## TEAM-LINES-01 — "Line Change" roster view
+
+**Status:** DONE (Product Owner approved 2026-10-19) (frontend)
+
+**Approved decisions (Product Owner):** Option 1. Roster tab gets a
+Forwards | Defense | Goalies tab row styled like the player stats header
+(`.player-stat-tab`). Each line/pair is a rink strip with jersey tokens in
+formation (LW-C-RW; LD-RD), swiped horizontally with L1–L4 / P1–P3 pager.
+Goalies: starter in the crease, backup on a bench strip. Strip shows time
+together and the source game; falls back to the ice-time ranking labeled
+"Projected" when the API returns `source: 'none'` or the call fails.
+
+**Dependencies:** API-LINES-01 contract (frontend must work before it deploys).
+
+**Product Owner review (screenshots):** Approved with polish: larger tokens on
+desktop, content-sized goalie bench, Defense 2 columns below 1200px, grid edge
+fix. Tokens show NHL headshots (number-disc fallback). Desktop (>= 992px) shows
+all lines in a grid; the carousel is phone/tablet only. Tapping a player opens a
+stats dialog (`AppDialog`) built from the skater/goalie stats the team page
+already loads; no extra API calls.
+
+**Follow-up (not in scope):** the global header nav overflows the viewport by
+~35px at 1024px (pre-existing, outside this change).

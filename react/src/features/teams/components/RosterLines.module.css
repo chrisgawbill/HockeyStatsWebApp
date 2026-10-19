@@ -1,0 +1,509 @@
+/* "Line Change" roster view: rink strips, jersey tokens, pager, bench. */
+
+.lines {
+  --rink-ice: #eef6fb;
+  --rink-ice-edge: #dcebf5;
+  --rink-blue: #3b6fb6;
+  --rink-red: #c8443f;
+  --rink-ink: #1d2b3a;
+  --rink-line-opacity: 0.55;
+  --tk: 1; /* token scale; larger on desktop */
+  --strip-h: 248px;
+  min-width: 0;
+}
+
+@media (min-width: 992px) {
+  .lines {
+    --tk: 1.4;
+    --strip-h: 340px;
+  }
+}
+
+[data-theme='dark'] .lines {
+  --rink-ice: #1b2736;
+  --rink-ice-edge: #223247;
+  --rink-blue: #6f9ee0;
+  --rink-red: #e0736d;
+  --rink-ink: #e6edf5;
+  --rink-line-opacity: 0.7;
+}
+
+.empty {
+  margin: var(--ds-space-3) 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+/* ── Pager ─────────────────────────────────────────────────────────────── */
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-2);
+}
+
+.pager__btn {
+  appearance: none;
+  min-width: 44px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pager__btn--active {
+  background: var(--rink-team);
+  border-color: var(--rink-team);
+  color: var(--rink-team-ink);
+}
+
+/* ── Carousel ──────────────────────────────────────────────────────────── */
+
+.scroller {
+  position: relative;
+  display: flex;
+  gap: var(--ds-space-3);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.scroller__item {
+  flex: 0 0 90%;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 720px) {
+  .scroller__item {
+    flex-basis: 440px;
+  }
+}
+
+/* ── Strip ─────────────────────────────────────────────────────────────── */
+
+.stripFigure {
+  margin: 0;
+}
+
+.stripCaption {
+  margin-top: var(--ds-space-2);
+  font-size: var(--text-xs);
+  color: var(--color-muted-text);
+}
+
+.strip {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--strip-h);
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--color-divider);
+  background: linear-gradient(
+    180deg,
+    var(--rink-ice) 0%,
+    var(--rink-ice-edge) 100%
+  );
+  box-shadow: inset 0 3px 0 0 var(--rink-team);
+  color: var(--rink-ink);
+}
+
+.strip__blueLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
+  height: 14px;
+  background: var(--rink-blue);
+  opacity: var(--rink-line-opacity);
+}
+
+.strip__circle {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  width: calc(96px * var(--tk));
+  height: calc(96px * var(--tk));
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--rink-red);
+  border-radius: 50%;
+  opacity: var(--rink-line-opacity);
+}
+
+.strip__dot {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--rink-red);
+  opacity: var(--rink-line-opacity);
+}
+
+.strip--pair .strip__circle {
+  top: 112%;
+  width: calc(110px * var(--tk));
+  height: calc(110px * var(--tk));
+}
+
+.strip__dot--l {
+  left: 8%;
+  top: 91%;
+  width: 10px;
+  height: 10px;
+}
+
+.strip__dot--r {
+  left: 92%;
+  top: 91%;
+  width: 10px;
+  height: 10px;
+}
+
+/* ── Token spots (positioned, animated) ────────────────────────────────── */
+
+.spot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  translate: var(--from-x, 0) var(--from-y, 24px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    translate 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 320ms ease-out;
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.strip--live .spot {
+  translate: 0 0;
+  opacity: 1;
+  visibility: visible;
+}
+
+.spot--LW {
+  left: 20%;
+  top: 62%;
+  --from-x: -60px;
+}
+
+.spot--C {
+  left: 50%;
+  top: 38%;
+  --from-y: 50px;
+}
+
+.spot--RW {
+  left: 80%;
+  top: 62%;
+  --from-x: 60px;
+}
+
+.spot--LD {
+  left: 28%;
+  top: 60%;
+  --from-x: -60px;
+}
+
+.spot--RD {
+  left: 72%;
+  top: 60%;
+  --from-x: 60px;
+}
+
+.strip--pair .spot--LD,
+.strip--pair .spot--RD {
+  top: 54%;
+}
+
+.spot--G {
+  left: 50%;
+  top: 52%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spot {
+    translate: 0 0;
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+  }
+}
+
+/* ── Jersey token ──────────────────────────────────────────────────────── */
+
+.token {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: calc(84px * var(--tk));
+  border-radius: 10px;
+  outline-offset: 2px;
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+}
+
+.token:hover {
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.token:focus-visible {
+  outline: 2px solid var(--rink-team);
+}
+
+.token__disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(50px * var(--tk));
+  height: calc(50px * var(--tk));
+  border-radius: 50%;
+  background: var(--rink-team);
+  color: var(--rink-team-ink);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-size: calc(var(--text-base) * var(--tk));
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .token__disc {
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+.token__name {
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+  font-size: calc(11px * var(--tk));
+  font-weight: 600;
+  color: var(--rink-ink);
+}
+
+.token__slot {
+  font-size: calc(10px * var(--tk));
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--color-muted-text);
+}
+
+.token--sm {
+  --tk: 1;
+  width: 76px;
+}
+
+.token--sm .token__disc {
+  width: 40px;
+  height: 40px;
+  font-size: var(--text-sm);
+}
+
+/* ── Goalie crease ─────────────────────────────────────────────────────── */
+
+.goal__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 28px;
+  height: 3px;
+  background: var(--rink-red);
+  opacity: var(--rink-line-opacity);
+}
+
+.goal__crease {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  width: calc(190px * var(--tk));
+  height: calc(100px * var(--tk));
+  transform: translateX(-50%);
+  border: 2px solid var(--rink-red);
+  border-bottom: none;
+  border-radius: 100px 100px 0 0;
+  background: color-mix(in srgb, var(--rink-blue) 28%, transparent);
+  opacity: 0.9;
+}
+
+.goal__net {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 64px;
+  height: 14px;
+  transform: translateX(-50%);
+  border: 2px solid var(--rink-ink);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  opacity: 0.5;
+}
+
+.strip--goal .spot--G {
+  /* Anchored to the goal line so the starter (disc, name, slot) sits
+     inside the crease instead of straddling its arc. */
+  top: auto;
+  bottom: calc(34px * var(--tk));
+  transform: translate(-50%, 0);
+}
+
+/* ── Bench / Extras ────────────────────────────────────────────────────── */
+
+.bench {
+  margin-top: var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border: 1px dashed var(--color-divider);
+  border-radius: 12px;
+  background: var(--color-bg-subtle);
+}
+
+.bench__title {
+  margin: 0 0 var(--ds-space-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+}
+
+.bench__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2) var(--ds-space-1);
+}
+
+.bench .token__name {
+  color: var(--color-text);
+}
+
+/* ── Goalie layout ─────────────────────────────────────────────────────── */
+
+.goalie__rink {
+  max-width: 560px;
+}
+
+@media (min-width: 992px) {
+  .goalie {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-4, 24px);
+  }
+
+  .goalie__rink {
+    flex: 0 1 560px;
+  }
+
+  .goalie .bench {
+    flex: 0 0 auto;
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 0;
+  }
+}
+
+/* ── Desktop: all lines at once in a grid, no pager ────────────────────── */
+
+@media (min-width: 992px) {
+  .pager {
+    display: none;
+  }
+
+  .scroller {
+    display: grid;
+    grid-template-columns: repeat(var(--cols-lg, 2), minmax(0, 1fr));
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .scroller__item {
+    flex: none;
+  }
+}
+
+/* ── Headshot variant: photo in a team-color ring, number badge ───────── */
+
+.token__disc--photo {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0;
+  border: 3px solid var(--rink-team);
+  background: var(--rink-team);
+  overflow: visible;
+}
+
+.token__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  background: #e8eef4;
+}
+
+[data-theme='dark'] .token__photo {
+  background: #3a4656;
+}
+
+.token__badge {
+  position: absolute;
+  right: calc(-7px * var(--tk));
+  bottom: calc(-5px * var(--tk));
+  min-width: calc(20px * var(--tk));
+  height: calc(20px * var(--tk));
+  padding: 0 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--rink-team);
+  color: var(--rink-team-ink);
+  border: 1.5px solid #fff;
+  font-size: calc(11px * var(--tk));
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .token__badge {
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+.token--sm .token__badge {
+  min-width: 17px;
+  height: 17px;
+  font-size: 10px;
+  right: -6px;
+}
+
+@media (min-width: 1200px) {
+  .scroller {
+    grid-template-columns: repeat(var(--cols-xl, 2), minmax(0, 1fr));
+  }
+}
