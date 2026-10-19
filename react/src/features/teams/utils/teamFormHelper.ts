@@ -33,7 +33,8 @@ export function getTeamResults(
     .filter(
       (game) =>
         isCompletedGameState(game.gameState) &&
-        (game.homeTeam === normalizedCode || game.awayTeam === normalizedCode) &&
+        (game.homeTeam === normalizedCode ||
+          game.awayTeam === normalizedCode) &&
         game.homeScore != null &&
         game.awayScore != null,
     )
@@ -42,7 +43,8 @@ export function getTeamResults(
       const gf = home ? game.homeScore : game.awayScore;
       const ga = home ? game.awayScore : game.homeScore;
       const won = gf > ga;
-      const otl = !won && (game.periodType === 'OT' || game.periodType === 'SO');
+      const otl =
+        !won && (game.periodType === 'OT' || game.periodType === 'SO');
 
       return {
         date: game.date,

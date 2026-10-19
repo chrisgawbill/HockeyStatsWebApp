@@ -76,15 +76,14 @@ function build(teams: Team[], name: string, extra = {}) {
 }
 
 describe('ranking helpers', () => {
-  it('ranks higher-better and lower-better with competition ties', () => {
+  it('ranks with competition ties, formats ordinals, maps scores, and assigns tiers', () => {
     expect(competitionRank(5, [5, 4, 3], true)).toBe(1);
     expect(competitionRank(3, [5, 4, 3], true)).toBe(3);
     expect(competitionRank(3, [5, 4, 3], false)).toBe(1);
     expect(competitionRank(4, [5, 4, 4, 3], true)).toBe(2);
     expect(competitionRank(3, [5, 4, 4, 3], true)).toBe(4);
-  });
 
-  it('formats ordinals', () => {
+    // Formats ordinals.
     expect([1, 2, 3, 4, 11, 12, 13, 21, 22, 32].map(ordinal)).toEqual([
       '1st',
       '2nd',
@@ -97,18 +96,16 @@ describe('ranking helpers', () => {
       '22nd',
       '32nd',
     ]);
-  });
 
-  it('maps best to 100, worst to 4, and honors direction', () => {
+    // Maps best to 100, worst to 4, and honors direction.
     const values = [1, 2, 3];
     expect(scalePosition(3, values, true)).toBe(100);
     expect(scalePosition(1, values, true)).toBe(4);
     expect(scalePosition(1, values, false)).toBe(100);
     expect(scalePosition(3, values, false)).toBe(4);
     expect(scalePosition(2, values, true)).toBeCloseTo(52);
-  });
 
-  it('assigns tiers by rank among N', () => {
+    // Assigns tiers by rank among N.
     const tiers = Array.from({ length: 32 }, (_, k) => tierForRank(k + 1, 32));
     expect(tiers.slice(0, 5)).toEqual(Array(5).fill('elite'));
     expect(tiers[5]).toBe('above');
@@ -122,7 +119,7 @@ describe('ranking helpers', () => {
 });
 
 describe('buildTeamDna', () => {
-  it('produces the seven rows in order with formatted values', () => {
+  it('produces seven ranked rows with formatted values, directions, and competition ties', () => {
     const p = build(league(32), 'Team 32');
     expect(p.rows.map((r) => r.key)).toEqual([
       'offense',
@@ -142,59 +139,63 @@ describe('buildTeamDna', () => {
     expect(p.ranked).toBe(true);
     expect(p.teamCount).toBe(32);
     expect(p.gamesPlayed).toBe(40);
+
+    // Ranks higher-better and lower-better metrics in opposite directions.
+    {
+      const p = build(league(32), 'Team 32');
+      expect(row(p, 'offense').rank).toBe(1);
+      expect(row(p, 'defense').rank).toBe(32);
+      expect(row(p, 'defense').fill).toBe(4);
+      expect(row(p, 'offense').fill).toBe(100);
+      expect(row(p, 'shot-suppression').rank).toBe(32);
+    }
+
+    // Uses standard competition ranking for ties.
+    {
+      const teams = league(6, (i) => ({ gf: i <= 2 ? 4 : 2 + i / 10 }));
+      const p = build(teams, 'Team 1');
+      // Teams 1 and 2 tie at 4.0 and trail only Team 6 (2.6)? no: 4.0 is best.
+      expect(row(p, 'offense').rank).toBe(1);
+      expect(row(build(teams, 'Team 2'), 'offense').rank).toBe(1);
+      expect(row(build(teams, 'Team 6'), 'offense').rank).toBe(3);
+    }
   });
 
-  it('ranks higher-better and lower-better metrics in opposite directions', () => {
-    const p = build(league(32), 'Team 32');
-    expect(row(p, 'offense').rank).toBe(1);
-    expect(row(p, 'defense').rank).toBe(32);
-    expect(row(p, 'defense').fill).toBe(4);
-    expect(row(p, 'offense').fill).toBe(100);
-    expect(row(p, 'shot-suppression').rank).toBe(32);
-  });
-
-  it('uses standard competition ranking for ties', () => {
-    const teams = league(6, (i) => ({ gf: i <= 2 ? 4 : 2 + i / 10 }));
-    const p = build(teams, 'Team 1');
-    // Teams 1 and 2 tie at 4.0 and trail only Team 6 (2.6)? no: 4.0 is best.
-    expect(row(p, 'offense').rank).toBe(1);
-    expect(row(build(teams, 'Team 2'), 'offense').rank).toBe(1);
-    expect(row(build(teams, 'Team 6'), 'offense').rank).toBe(3);
-  });
-
-  it('handles fewer than 32 teams', () => {
+  it('handles partial leagues, the average tick, and id matching', () => {
     const p = build(league(30), 'Team 1');
     expect(p.teamCount).toBe(30);
     expect(row(p, 'offense').of).toBe(30);
     expect(row(p, 'offense').rank).toBe(30);
     expect(row(p, 'offense').tier).toBe('weak');
+
+    // Places the league average tick on the same scale.
+    {
+      // Offense values 2.1..5.2 are evenly spaced, so the mean is the midpoint.
+      const p = build(league(32), 'Team 1');
+      expect(row(p, 'offense').average).toBeCloseTo(52, 5);
+      // Lower-better: mean is mirrored but still the midpoint here.
+      expect(row(p, 'defense').average).toBeCloseTo(52, 5);
+      const skewed = league(4, (i) => ({ gf: i === 4 ? 10 : 2 }));
+      const q = build(skewed, 'Team 1');
+      // mean = 4, worst = 2, best = 10 -> 4 + (2/8) * 96 = 28
+      expect(row(q, 'offense').average).toBeCloseTo(28, 5);
+      expect(row(q, 'offense').fill).toBe(4);
+    }
+
+    // Matches teams by id when the name does not match.
+    {
+      const p = buildTeamDna({
+        stats: { teamFullName: 'Renamed' },
+        league: league(32),
+        season: SEASON,
+        teamId: 32,
+      });
+      expect(p.ranked).toBe(true);
+      expect(row(p, 'offense').rank).toBe(1);
+    }
   });
 
-  it('places the league average tick on the same scale', () => {
-    // Offense values 2.1..5.2 are evenly spaced, so the mean is the midpoint.
-    const p = build(league(32), 'Team 1');
-    expect(row(p, 'offense').average).toBeCloseTo(52, 5);
-    // Lower-better: mean is mirrored but still the midpoint here.
-    expect(row(p, 'defense').average).toBeCloseTo(52, 5);
-    const skewed = league(4, (i) => ({ gf: i === 4 ? 10 : 2 }));
-    const q = build(skewed, 'Team 1');
-    // mean = 4, worst = 2, best = 10 -> 4 + (2/8) * 96 = 28
-    expect(row(q, 'offense').average).toBeCloseTo(28, 5);
-    expect(row(q, 'offense').fill).toBe(4);
-  });
-
-  it('matches teams by id when the name does not match', () => {
-    const p = buildTeamDna({
-      stats: { teamFullName: 'Renamed' },
-      league: league(32),
-      season: SEASON,
-      teamId: 32,
-    });
-    expect(p.ranked).toBe(true);
-    expect(row(p, 'offense').rank).toBe(1);
-  });
-
-  it('builds up to two strengths and two weaknesses', () => {
+  it('builds strength/weakness chips, neutral and early-season states', () => {
     // Team 32: best offense/PP/PK/volume/faceoffs, worst defense/suppression.
     const p = build(league(32), 'Team 32');
     expect(p.chips.map((c) => [c.kind, c.label])).toEqual([
@@ -203,9 +204,8 @@ describe('buildTeamDna', () => {
       ['weakness', 'Leaky defense'],
       ['weakness', 'Allows lots of shots'],
     ]);
-  });
 
-  it('uses the non-elite strength wording for ranks 6 to 8', () => {
+    // Uses the non-elite strength wording for ranks 6 to 8.
     const seventh = build(
       league(32).map((t) =>
         t.id === 26 ? team(26, 'Team 26', { gf: 4.6 }) : t,
@@ -217,23 +217,25 @@ describe('buildTeamDna', () => {
       kind: 'strength',
       label: 'Strong offense',
     });
-  });
 
-  it('shows a neutral chip when nothing stands out', () => {
-    const p = build(league(32), 'Team 16');
-    expect(row(p, 'offense').rank).toBe(17);
-    expect(row(p, 'defense').rank).toBe(16);
-    expect(p.chips).toEqual([{ kind: 'neutral', label: 'Middle of the pack' }]);
-  });
+    // Shows a neutral chip when nothing stands out.
+    {
+      const p = build(league(32), 'Team 16');
+      expect(row(p, 'offense').rank).toBe(17);
+      expect(row(p, 'defense').rank).toBe(16);
+      expect(p.chips).toEqual([
+        { kind: 'neutral', label: 'Middle of the pack' },
+      ]);
+    }
 
-  it('flags early-season samples', () => {
+    // Flags early-season samples.
     const teams = league(32).map((t) => t);
     teams[0] = team(1, 'Team 1', { gp: 4 });
     expect(build(teams, 'Team 1').earlySample).toBe(true);
     expect(build(teams, 'Team 2').earlySample).toBe(false);
   });
 
-  it('falls back to own stats without ranks when league data is empty', () => {
+  it('falls back to own stats without ranks when league data is unusable, else no rows', () => {
     const p = buildTeamDna({
       stats: {
         teamFullName: 'Team 1',
@@ -258,33 +260,36 @@ describe('buildTeamDna', () => {
     expect(row(p, 'power-play').value).toBe('24.1%');
     expect(row(p, 'faceoffs').value).toBe('51.2%');
     expect(p.earlySample).toBe(true);
-  });
 
-  it('falls back when the team is missing from the league data', () => {
-    const p = buildTeamDna({
-      stats: { teamFullName: 'Ghost FC', goalsForPerGame: 3 },
-      league: league(32),
-      season: SEASON,
-    });
-    expect(p.ranked).toBe(false);
-    expect(p.rows.map((r) => r.key)).toEqual(['offense']);
-  });
+    // Falls back when the team is missing from the league data.
+    {
+      const p = buildTeamDna({
+        stats: { teamFullName: 'Ghost FC', goalsForPerGame: 3 },
+        league: league(32),
+        season: SEASON,
+      });
+      expect(p.ranked).toBe(false);
+      expect(p.rows.map((r) => r.key)).toEqual(['offense']);
+    }
 
-  it('falls back when the league has no rows for the season', () => {
-    const p = buildTeamDna({
-      stats: { teamFullName: 'Team 1', goalsForPerGame: 3 },
-      league: league(32),
-      season: '20252026',
-    });
-    expect(p.ranked).toBe(false);
-  });
+    // Falls back when the league has no rows for the season.
+    {
+      const p = buildTeamDna({
+        stats: { teamFullName: 'Team 1', goalsForPerGame: 3 },
+        league: league(32),
+        season: '20252026',
+      });
+      expect(p.ranked).toBe(false);
+    }
 
-  it('returns no rows when neither source has data', () => {
-    const p = buildTeamDna({
-      stats: { teamFullName: '' },
-      league: [],
-      season: SEASON,
-    });
-    expect(p.rows).toEqual([]);
+    // Returns no rows when neither source has data.
+    {
+      const p = buildTeamDna({
+        stats: { teamFullName: '' },
+        league: [],
+        season: SEASON,
+      });
+      expect(p.rows).toEqual([]);
+    }
   });
 });

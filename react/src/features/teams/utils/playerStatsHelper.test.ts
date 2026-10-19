@@ -38,9 +38,9 @@ const lookup = buildStatsLookup(
 );
 
 describe('playerStatsHelper', () => {
-  it('builds skater cells with TOI when available', () => {
-    const cells = buildPlayerStatCells(1, 'LW', lookup, '18:22 TOI');
-    expect(cells?.map((c) => c.value)).toEqual([
+  it('builds skater and goalie cells, or null without a stat line', () => {
+    const skater = buildPlayerStatCells(1, 'LW', lookup, '18:22 TOI');
+    expect(skater?.map((c) => c.value)).toEqual([
       '10',
       '4',
       '6',
@@ -49,11 +49,10 @@ describe('playerStatsHelper', () => {
       '18:22',
     ]);
     expect(buildPlayerStatCells(1, 'LW', lookup, '')?.length).toBe(5);
-  });
 
-  it('builds goalie cells', () => {
-    const cells = buildPlayerStatCells(2, 'G', lookup);
-    expect(cells).toEqual([
+    // Builds goalie cells.
+    const goalie = buildPlayerStatCells(2, 'G', lookup);
+    expect(goalie).toEqual([
       { label: 'GP', value: '5' },
       { label: 'W', value: '3' },
       { label: 'L', value: '2' },
@@ -61,20 +60,18 @@ describe('playerStatsHelper', () => {
       { label: 'GAA', value: '2.50' },
       { label: 'SO', value: '1' },
     ]);
-  });
 
-  it('returns null without a stat line', () => {
+    // Returns null without a stat line.
     expect(buildPlayerStatCells(99, 'C', lookup)).toBeNull();
     expect(buildPlayerStatCells(1, 'G', lookup)).toBeNull();
   });
 
-  it('formats helpers', () => {
+  it('formats helpers and resolves position labels', () => {
     expect(formatSavePct(null)).toBe('—');
     expect(parseToiLabel('9:05 TOI')).toBe('9:05');
     expect(parseToiLabel('')).toBeNull();
-  });
 
-  it('resolves position labels', () => {
+    // Resolves position labels.
     expect(getPositionLabel('C', lookup, 1)).toBe('Center');
     expect(getPositionLabel('F', lookup, 1)).toBe('Left Wing');
     expect(getPositionLabel('D', lookup, 99)).toBe('Defense');

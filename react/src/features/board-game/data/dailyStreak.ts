@@ -76,7 +76,10 @@ export function saveStreak(data: StreakData): void {
  * conflict), and `lastWinDate` is the lexicographically later of the two ISO
  * date strings, falling back to whichever side is non-null when one is null.
  */
-export function mergeStreakData(local: StreakData, remote: StreakData): StreakData {
+export function mergeStreakData(
+  local: StreakData,
+  remote: StreakData,
+): StreakData {
   const wins = { ...local.wins, ...remote.wins };
   const lastWinDate = laterDateKey(local.lastWinDate, remote.lastWinDate);
   return { wins, lastWinDate };

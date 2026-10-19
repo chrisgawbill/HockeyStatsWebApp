@@ -1,6 +1,7 @@
 import React from 'react';
 import { LandingThreeStar } from '@/features/game-detail/types/gameDetail';
 import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
+import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 
@@ -39,13 +40,12 @@ function ThreeStars({ stars }: ThreeStarsProps) {
             }
           >
             <div className={styles['three-star-card__badge']}>{star.star}</div>
-            <img
-              className={styles['three-star-card__headshot']}
+            <PlayerHeadshot
+              playerId={star.playerId}
+              playerName={star.name.default}
               src={star.headshot}
               alt={star.name.default}
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
+              imgClassName={styles['three-star-card__headshot']}
             />
             <div className={styles['three-star-card__info']}>
               <span className={styles['three-star-card__name']}>

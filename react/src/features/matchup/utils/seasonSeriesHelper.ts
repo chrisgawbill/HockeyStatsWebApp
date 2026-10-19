@@ -25,8 +25,8 @@ export function getSeasonSeries(
   const meetings = games
     .filter(
       (game) =>
-        ((game.homeTeam === a && game.awayTeam === b) ||
-          (game.homeTeam === b && game.awayTeam === a)),
+        (game.homeTeam === a && game.awayTeam === b) ||
+        (game.homeTeam === b && game.awayTeam === a),
     )
     .sort((left, right) => left.date.getTime() - right.date.getTime());
   const played = meetings.filter(

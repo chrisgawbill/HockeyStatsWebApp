@@ -20,9 +20,9 @@ export default function StandingsContainer({
       <div className={fill ? styles['standings-container--fill'] : undefined}>
         {standingsName && (
           <div className={styles['standings-header']}>
-              <div>
-                <h3>{standingsName}</h3>
-              </div>
+            <div>
+              <h3>{standingsName}</h3>
+            </div>
           </div>
         )}
         <div

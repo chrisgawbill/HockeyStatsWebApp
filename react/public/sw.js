@@ -1,5 +1,6 @@
 /*
- * Web Push service worker for After Action Reports. Handles push and
+ * Web Push service worker for After Action Reports and the Monday Weekly
+ * Player Report (payload `kind: "weekly-report"`). Handles push and
  * notification clicks only: no fetch handler and no offline caching.
  * Registered as `sw.js?api=<API origin>` so it knows where to post read tokens.
  */
@@ -42,6 +43,11 @@ self.addEventListener('push', (event) => {
     badge: ICON,
     data: {
       gameId: payload.gameId ?? null,
+      weekStart:
+        payload.kind === 'weekly-report' &&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(payload.weekStart))
+          ? payload.weekStart
+          : null,
       readToken: payload.readToken ?? null,
     },
   };
@@ -62,14 +68,16 @@ async function markRead(readToken) {
   }
 }
 
-async function openGame(gameId) {
+/**
+ * Focuses (or opens) the app at `hash`; `message` tells an already open tab
+ * to route there itself when the client cannot be navigated.
+ */
+async function openApp(hash, message) {
   const scope = self.registration.scope;
   const windows = await self.clients.matchAll({
     type: 'window',
     includeUncontrolled: true,
   });
-  const hasGame = gameId !== null && gameId !== undefined && gameId !== '';
-  const hash = hasGame ? `#/game/${gameId}` : '';
   const existing = windows.find((client) => client.url.startsWith(scope));
 
   if (existing) {
@@ -78,8 +86,8 @@ async function openGame(gameId) {
     } catch {
       // Focus can be refused; navigation below is still worth trying.
     }
-    if (hasGame) {
-      existing.postMessage({ type: 'aar-navigate', gameId });
+    if (hash) {
+      existing.postMessage(message);
       try {
         if (typeof existing.navigate === 'function') {
           await existing.navigate(new URL(`./${hash}`, scope).href);
@@ -93,29 +101,48 @@ async function openGame(gameId) {
   }
 }
 
-async function announceRead(gameId) {
-  if (gameId === null || gameId === undefined || gameId === '') return;
+function openGame(gameId) {
+  const hasGame = gameId !== null && gameId !== undefined && gameId !== '';
+  return openApp(hasGame ? `#/game/${gameId}` : '', {
+    type: 'aar-navigate',
+    gameId,
+  });
+}
+
+function openWeeklyReport(weekStart) {
+  return openApp(`#/weekly-report/${weekStart}`, {
+    type: 'wpr-navigate',
+    weekStart,
+  });
+}
+
+async function announce(message) {
   const windows = await self.clients.matchAll({
     type: 'window',
     includeUncontrolled: true,
   });
-  for (const client of windows) {
-    client.postMessage({ type: 'aar-report-read', gameId });
-  }
+  for (const client of windows) client.postMessage(message);
+}
+
+function announceRead(gameId) {
+  if (gameId === null || gameId === undefined || gameId === '') return;
+  return announce({ type: 'aar-report-read', gameId });
 }
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const { gameId, readToken } = event.notification.data || {};
+  const { gameId, weekStart, readToken } = event.notification.data || {};
   event.waitUntil(
     (async () => {
-      // The API may take a minute to wake; open the game without waiting on it.
+      // The API may take a minute to wake; open the page without waiting on it.
       const read = markRead(readToken);
       try {
-        await openGame(gameId);
+        if (weekStart) await openWeeklyReport(weekStart);
+        else await openGame(gameId);
       } finally {
         await read;
-        await announceRead(gameId);
+        if (weekStart) await announce({ type: 'wpr-report-read', weekStart });
+        else await announceRead(gameId);
       }
     })(),
   );

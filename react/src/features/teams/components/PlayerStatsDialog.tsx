@@ -1,6 +1,7 @@
-import { useId, useState } from 'react';
+import { useId } from 'react';
 
 import AppDialog from '@/components/AppDialog';
+import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import { RosterPlayer } from '@/features/teams/types/teamPageTypes';
 import {
   buildPlayerStatCells,
@@ -28,9 +29,7 @@ export default function PlayerStatsDialog({
   onClose,
 }: PlayerStatsDialogProps) {
   const titleId = useId();
-  const [photoFailed, setPhotoFailed] = useState(false);
   const cells = buildPlayerStatCells(player.id, slot, lookup, player.stat);
-  const showPhoto = Boolean(player.headshot) && !photoFailed;
 
   return (
     <AppDialog
@@ -49,20 +48,19 @@ export default function PlayerStatsDialog({
         }
       >
         <header className={styles.header}>
-          <span className={styles.avatar} aria-hidden="true">
-            {showPhoto ? (
-              <img
-                className={styles.avatar__img}
-                src={player.headshot}
-                alt=""
-                width={72}
-                height={72}
-                onError={() => setPhotoFailed(true)}
-              />
-            ) : (
-              <span className={styles.avatar__number}>{player.number}</span>
-            )}
-          </span>
+          <PlayerHeadshot
+            playerId={player.id}
+            playerName={player.name}
+            src={player.headshot}
+            className={styles.avatarFrame}
+            innerClassName={styles.avatar}
+            imgClassName={styles.avatar__img}
+            fallback={
+              <span className={styles.avatar__number} aria-hidden="true">
+                {player.number}
+              </span>
+            }
+          />
           <div className={styles.heading}>
             <h2 id={titleId} className={styles.name}>
               {player.name}

@@ -27,14 +27,13 @@ function report(overrides: Partial<AfterActionReport> = {}): AfterActionReport {
 }
 
 describe('afterActionReportFormat', () => {
-  it('labels finals by last period', () => {
+  it('labels finals and scores outcomes from the favorite side', () => {
     expect(finalLabel('REG')).toBe('Final');
     expect(finalLabel(null)).toBe('Final');
     expect(finalLabel('OT')).toBe('Final/OT');
     expect(finalLabel('SO')).toBe('Final/SO');
-  });
 
-  it('scores the outcome from the favorite team side, home or away', () => {
+    // Scores the outcome from the favorite team side, home or away.
     expect(reportOutcome(report())).toBe('W');
     expect(reportOutcome(report({ favoriteTeams: ['MTL'] }))).toBe('L');
     expect(
@@ -43,14 +42,13 @@ describe('afterActionReportFormat', () => {
     expect(reportOutcome(report({ homeScore: null }))).toBeNull();
   });
 
-  it('puts the favorite team first in the score line', () => {
+  it('puts the favorite first in score lines and inbox descriptions', () => {
     expect(reportScoreLine(report())).toBe('TOR 4, MTL 2');
     expect(reportScoreLine(report({ favoriteTeams: ['MTL'] }))).toBe(
       'MTL 2, TOR 4',
     );
-  });
 
-  it('describes a report for the inbox and alerts', () => {
+    // Describes a report for the inbox and alerts.
     expect(describeReport(report({ periodType: 'OT' }))).toEqual({
       title: 'After Action Report: TOR Win',
       body: 'TOR 4, MTL 2 · Final/OT',

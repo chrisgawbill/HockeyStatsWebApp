@@ -40,7 +40,7 @@ function makeOutcome(overrides: Partial<DuelOutcome> = {}): DuelOutcome {
 }
 
 describe('describeOutcome', () => {
-  it('describes a faceoff win', () => {
+  it('describes faceoff and deke outcomes', () => {
     const outcome = makeOutcome({
       kind: 'faceoff',
       winner: 'attacker',
@@ -48,29 +48,33 @@ describe('describeOutcome', () => {
       defenderId: 'cpu-C',
     });
     expect(describeOutcome(outcome, skaters)).toBe('Blue C wins the faceoff');
+
+    // Describes a deke attacker win.
+    {
+      const outcome = makeOutcome({
+        kind: 'deke',
+        winner: 'attacker',
+        attackerId: 'user-LW',
+        defenderId: 'cpu-LD',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        'Blue LW dekes past Red LD',
+      );
+    }
+
+    // Describes a deke defender win.
+    {
+      const outcome = makeOutcome({
+        kind: 'deke',
+        winner: 'defender',
+        attackerId: 'user-LW',
+        defenderId: 'cpu-LD',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe('Red LD strips Blue LW');
+    }
   });
 
-  it('describes a deke attacker win', () => {
-    const outcome = makeOutcome({
-      kind: 'deke',
-      winner: 'attacker',
-      attackerId: 'user-LW',
-      defenderId: 'cpu-LD',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe('Blue LW dekes past Red LD');
-  });
-
-  it('describes a deke defender win', () => {
-    const outcome = makeOutcome({
-      kind: 'deke',
-      winner: 'defender',
-      attackerId: 'user-LW',
-      defenderId: 'cpu-LD',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe('Red LD strips Blue LW');
-  });
-
-  it('describes a check attacker win', () => {
+  it('describes check and intercept outcomes, naming the receiver when known', () => {
     const outcome = makeOutcome({
       kind: 'check',
       winner: 'attacker',
@@ -80,55 +84,63 @@ describe('describeOutcome', () => {
     expect(describeOutcome(outcome, skaters)).toBe(
       'Red C checks Blue RW and takes the puck',
     );
+
+    // Describes a check defender win.
+    {
+      const outcome = makeOutcome({
+        kind: 'check',
+        winner: 'defender',
+        attackerId: 'cpu-C-checker',
+        defenderId: 'user-RW',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        "Blue RW shrugs off Red C's check",
+      );
+    }
+
+    // Describes an intercept attacker win using the receiver.
+    {
+      const outcome = makeOutcome({
+        kind: 'intercept',
+        winner: 'attacker',
+        attackerId: 'user-C',
+        defenderId: 'cpu-RD',
+        receiverId: 'user-RW',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        'Pass completed to Blue RW',
+      );
+    }
+
+    // Describes an intercept attacker win falling back to the attacker when receiverId is null.
+    {
+      const outcome = makeOutcome({
+        kind: 'intercept',
+        winner: 'attacker',
+        attackerId: 'user-C',
+        defenderId: 'cpu-RD',
+        receiverId: null,
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        'Pass completed to Blue C',
+      );
+    }
+
+    // Describes an intercept defender win.
+    {
+      const outcome = makeOutcome({
+        kind: 'intercept',
+        winner: 'defender',
+        attackerId: 'user-C',
+        defenderId: 'cpu-RD',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        'Red RD intercepts the pass',
+      );
+    }
   });
 
-  it('describes a check defender win', () => {
-    const outcome = makeOutcome({
-      kind: 'check',
-      winner: 'defender',
-      attackerId: 'cpu-C-checker',
-      defenderId: 'user-RW',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe(
-      "Blue RW shrugs off Red C's check",
-    );
-  });
-
-  it('describes an intercept attacker win using the receiver', () => {
-    const outcome = makeOutcome({
-      kind: 'intercept',
-      winner: 'attacker',
-      attackerId: 'user-C',
-      defenderId: 'cpu-RD',
-      receiverId: 'user-RW',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe('Pass completed to Blue RW');
-  });
-
-  it('describes an intercept attacker win falling back to the attacker when receiverId is null', () => {
-    const outcome = makeOutcome({
-      kind: 'intercept',
-      winner: 'attacker',
-      attackerId: 'user-C',
-      defenderId: 'cpu-RD',
-      receiverId: null,
-    });
-    expect(describeOutcome(outcome, skaters)).toBe('Pass completed to Blue C');
-  });
-
-  it('describes an intercept defender win', () => {
-    const outcome = makeOutcome({
-      kind: 'intercept',
-      winner: 'defender',
-      attackerId: 'user-C',
-      defenderId: 'cpu-RD',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe(
-      'Red RD intercepts the pass',
-    );
-  });
-
-  it('describes a shot goal', () => {
+  it('describes shot goals, freezes, and rebounds', () => {
     const outcome = makeOutcome({
       kind: 'shot',
       winner: 'attacker',
@@ -137,37 +149,39 @@ describe('describeOutcome', () => {
       goal: true,
     });
     expect(describeOutcome(outcome, skaters)).toBe('GOAL! Blue RW scores');
+
+    // Describes a shot freeze (clean save).
+    {
+      const outcome = makeOutcome({
+        kind: 'shot',
+        winner: 'defender',
+        byKo: false,
+        cleanSave: true,
+        attackerId: 'user-RW',
+        defenderId: 'cpu-G',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        'Red G freezes the puck — clean save',
+      );
+    }
+
+    // Describes a shot rebound (not a clean save).
+    {
+      const outcome = makeOutcome({
+        kind: 'shot',
+        winner: 'defender',
+        byKo: false,
+        cleanSave: false,
+        attackerId: 'user-RW',
+        defenderId: 'cpu-G',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        'Red G makes the save — rebound!',
+      );
+    }
   });
 
-  it('describes a shot freeze (clean save)', () => {
-    const outcome = makeOutcome({
-      kind: 'shot',
-      winner: 'defender',
-      byKo: false,
-      cleanSave: true,
-      attackerId: 'user-RW',
-      defenderId: 'cpu-G',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe(
-      'Red G freezes the puck — clean save',
-    );
-  });
-
-  it('describes a shot rebound (not a clean save)', () => {
-    const outcome = makeOutcome({
-      kind: 'shot',
-      winner: 'defender',
-      byKo: false,
-      cleanSave: false,
-      attackerId: 'user-RW',
-      defenderId: 'cpu-G',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe(
-      'Red G makes the save — rebound!',
-    );
-  });
-
-  it('appends ", by knockout" for a non-shot KO win', () => {
+  it('appends ", by knockout" for non-shot KOs and passes unknown ids through', () => {
     const outcome = makeOutcome({
       kind: 'deke',
       winner: 'attacker',
@@ -178,17 +192,18 @@ describe('describeOutcome', () => {
     expect(describeOutcome(outcome, skaters)).toBe(
       'Blue LW dekes past Red LD, by knockout',
     );
-  });
 
-  it('falls back to an unknown skater id verbatim', () => {
-    const outcome = makeOutcome({
-      kind: 'faceoff',
-      winner: 'attacker',
-      attackerId: 'ghost-skater',
-      defenderId: 'cpu-C',
-    });
-    expect(describeOutcome(outcome, skaters)).toBe(
-      'ghost-skater wins the faceoff',
-    );
+    // Falls back to an unknown skater id verbatim.
+    {
+      const outcome = makeOutcome({
+        kind: 'faceoff',
+        winner: 'attacker',
+        attackerId: 'ghost-skater',
+        defenderId: 'cpu-C',
+      });
+      expect(describeOutcome(outcome, skaters)).toBe(
+        'ghost-skater wins the faceoff',
+      );
+    }
   });
 });

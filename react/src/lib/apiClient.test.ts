@@ -20,7 +20,7 @@ function jsonResponse(data: unknown) {
 }
 
 describe('apiClient', () => {
-  it('builds the API URL and omits empty query values', async () => {
+  it('builds URLs, serializes bodies, and keeps caller headers and content types', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ games: [] }));
 
     await expect(
@@ -37,9 +37,8 @@ describe('apiClient', () => {
       'http://localhost:9000/schedule/?season=20252026&live=true',
       expect.objectContaining({ method: 'GET' }),
     );
-  });
 
-  it('sends caller headers and JSON-serializes object bodies', async () => {
+    // Sends caller headers and JSON-serializes object bodies.
     fetchMock.mockResolvedValue(jsonResponse({ saved: true }));
 
     await post(
@@ -48,14 +47,13 @@ describe('apiClient', () => {
       { headers: { Authorization: 'Bearer token' } },
     );
 
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const [, init] = fetchMock.mock.lastCall as [string, RequestInit];
     const headers = init.headers as Headers;
     expect(init).toMatchObject({ method: 'POST', body: '{"value":1}' });
     expect(headers.get('Authorization')).toBe('Bearer token');
     expect(headers.get('Content-Type')).toBe('application/json');
-  });
 
-  it('preserves pre-serialized JSON bodies and caller content types', async () => {
+    // Preserves pre-serialized JSON bodies and caller content types.
     fetchMock.mockResolvedValue(jsonResponse({ saved: true }));
     const payload = '{"value":1}';
 
@@ -63,14 +61,14 @@ describe('apiClient', () => {
       headers: { 'Content-Type': 'application/custom+json' },
     });
 
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(init.body).toBe(payload);
-    expect((init.headers as Headers).get('Content-Type')).toBe(
+    const [, putInit] = fetchMock.mock.lastCall as [string, RequestInit];
+    expect(putInit.body).toBe(payload);
+    expect((putInit.headers as Headers).get('Content-Type')).toBe(
       'application/custom+json',
     );
   });
 
-  it('throws a status-bearing error for non-retryable responses', async () => {
+  it('throws a status-bearing error without retrying 4xx responses or writes', async () => {
     fetchMock.mockResolvedValue(
       new Response('nope', { status: 404, statusText: 'Not Found' }),
     );
@@ -81,9 +79,18 @@ describe('apiClient', () => {
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(console.error).toHaveBeenCalled();
+
+    // Does not retry writes.
+    fetchMock.mockClear();
+    fetchMock.mockResolvedValue(new Response('', { status: 503 }));
+
+    await expect(post('/api/example', {})).rejects.toMatchObject({
+      status: 503,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('retries GETs through gateway errors and network failures', async () => {
+  it('retries GETs through gateway errors and network failures, then gives up', async () => {
     vi.useFakeTimers();
     fetchMock
       .mockResolvedValueOnce(new Response('', { status: 502 }))
@@ -96,30 +103,20 @@ describe('apiClient', () => {
     await expect(request).resolves.toEqual({ standings: [] });
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(console.error).not.toHaveBeenCalled();
-  });
 
-  it('gives up on GETs after the last retry', async () => {
+    // Gives up on GETs after the last retry.
     vi.useFakeTimers();
     fetchMock.mockImplementation(
       async () => new Response('', { status: 503, statusText: 'Unavailable' }),
     );
 
-    const request = get('/standings');
-    const rejection = expect(request).rejects.toMatchObject({ status: 503 });
+    const exhausted = get('/standings');
+    const rejection = expect(exhausted).rejects.toMatchObject({ status: 503 });
     await vi.advanceTimersByTimeAsync(7_000);
 
     await rejection;
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(3 + 4);
     expect(console.error).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not retry writes', async () => {
-    fetchMock.mockResolvedValue(new Response('', { status: 503 }));
-
-    await expect(post('/api/example', {})).rejects.toMatchObject({
-      status: 503,
-    });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('aborts each attempt after 15 seconds and retries timed-out GETs', async () => {

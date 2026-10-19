@@ -11,7 +11,7 @@ function makeCredential(payload: Record<string, unknown>): string {
 }
 
 describe('decodeGoogleProfile', () => {
-  it('reads email, picture, and name from a well-formed credential', () => {
+  it('reads email, picture, and name, omitting missing or mistyped fields', () => {
     const credential = makeCredential({
       email: 'player@example.com',
       picture: 'https://example.com/avatar.png',
@@ -22,18 +22,18 @@ describe('decodeGoogleProfile', () => {
       picture: 'https://example.com/avatar.png',
       name: 'Player One',
     });
-  });
 
-  it('handles a payload whose base64url length needs padding', () => {
-    // Deliberately pick a payload whose base64 length isn't a multiple of 4.
-    const credential = makeCredential({ picture: 'https://example.com/p.png' });
-    const profile = decodeGoogleProfile(credential);
-    expect(profile?.picture).toBe('https://example.com/p.png');
-  });
+    // A payload whose base64 length isn't a multiple of 4 needs padding.
+    expect(
+      decodeGoogleProfile(
+        makeCredential({ picture: 'https://example.com/p.png' }),
+      )?.picture,
+    ).toBe('https://example.com/p.png');
 
-  it('omits fields that are missing or the wrong type', () => {
-    const credential = makeCredential({ picture: 123, sub: 'abc' });
-    expect(decodeGoogleProfile(credential)).toEqual({
+    // Missing or wrongly typed fields are omitted.
+    expect(
+      decodeGoogleProfile(makeCredential({ picture: 123, sub: 'abc' })),
+    ).toEqual({
       email: undefined,
       picture: undefined,
       name: undefined,
@@ -44,9 +44,7 @@ describe('decodeGoogleProfile', () => {
     expect(decodeGoogleProfile('not-a-jwt')).toBeNull();
     expect(decodeGoogleProfile('')).toBeNull();
     expect(decodeGoogleProfile('a.b')).toBeNull();
-  });
-
-  it('returns null when the payload segment is not valid base64/JSON', () => {
+    // Payload segment that is not valid base64/JSON.
     expect(decodeGoogleProfile('a.not-valid-base64!!.c')).toBeNull();
   });
 });

@@ -27,7 +27,7 @@ export default function PlayerStatLeaderRow({
   return (
     <div className={styles['stat-leader-row']}>
       <div className={styles['landing-header']}>
-          <h2>{title}</h2>
+        <h2>{title}</h2>
       </div>
       {availableLeaders.length < 1 ? (
         <EmptyState

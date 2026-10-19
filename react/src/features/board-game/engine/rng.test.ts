@@ -2,11 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { nextFloat, rollDie, shuffle } from '@/features/board-game/engine/rng';
 
 describe('rng', () => {
-  it('nextFloat is deterministic for a given seed', () => {
+  it('nextFloat, rollDie, and shuffle are deterministic per seed', () => {
     expect(nextFloat(42)).toEqual(nextFloat(42));
-  });
 
-  it('rollDie is deterministic and stays in 1..6', () => {
+    // rollDie stays in 1..6.
     let seed = 1;
     for (let i = 0; i < 200; i++) {
       const [a, nextA] = rollDie(seed);
@@ -17,9 +16,8 @@ describe('rng', () => {
       expect(a).toBeLessThanOrEqual(6);
       seed = nextA;
     }
-  });
 
-  it('shuffle is deterministic and keeps every element', () => {
+    // shuffle keeps every element and does not mutate its input.
     const arr = [1, 2, 3, 4, 5, 6, 7, 8];
     const [shuffledA] = shuffle(arr, 7);
     const [shuffledB] = shuffle(arr, 7);

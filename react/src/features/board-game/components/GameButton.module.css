@@ -42,7 +42,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .button { transition: none; }
+  .button {
+    transition: none;
+  }
 }
 
 .secondary {

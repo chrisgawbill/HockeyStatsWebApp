@@ -5,7 +5,7 @@ export default function QuickLinks() {
   return (
     <div id="quick-links-container">
       <div className={styles['landing-header']}>
-          <h2>Quick Links</h2>
+        <h2>Quick Links</h2>
       </div>
       <div className="ds-grid">
         <div>

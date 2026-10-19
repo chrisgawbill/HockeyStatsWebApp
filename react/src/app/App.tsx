@@ -36,6 +36,9 @@ const MatchupPage = lazy(
 const DiagnosticsPage = lazy(
   () => import('@/features/diagnostics/components/DiagnosticsPage'),
 );
+const WeeklyReportPage = lazy(
+  () => import('@/features/favorite-players/components/WeeklyReportPage'),
+);
 const BoardGamePage = lazy(
   () => import('@/features/board-game/components/BoardGamePage'),
 );
@@ -79,6 +82,14 @@ export default function App() {
                       <Route path="matchup" element={<MatchupPage />} />
                       <Route path="diagnostics" element={<DiagnosticsPage />} />
                       <Route path="board-game" element={<BoardGamePage />} />
+                      <Route
+                        path="weekly-report"
+                        element={<WeeklyReportPage />}
+                      />
+                      <Route
+                        path="weekly-report/:weekStart"
+                        element={<WeeklyReportPage />}
+                      />
                     </Routes>
                   </ErrorBoundary>
                 </Suspense>

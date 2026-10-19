@@ -4,25 +4,17 @@ import {
   toDarkModeAccentColor,
 } from '@/features/teams/utils/teamColor';
 
-describe('toDarkModeAccentColor', () => {
-  it('lightens a dark, saturated color up to the floor', () => {
+describe('teamColor', () => {
+  it('toDarkModeAccentColor raises lightness to the floor, keeping hue', () => {
     expect(toDarkModeAccentColor('#8b0000', 60)).toBe('#ff3333');
-  });
-
-  it('leaves an already-light color unchanged', () => {
+    // Already light: unchanged.
     expect(toDarkModeAccentColor('#ffffff', 60)).toBe('#ffffff');
+    // #1b4f8a (the app's light-mode primary) -> ~60% lightness, same hue as
+    // its hand-picked dark-mode primary (#5b9bd5).
+    expect(toDarkModeAccentColor('#1b4f8a', 60).toLowerCase()).toBe('#5495de');
   });
 
-  it('preserves hue while raising lightness', () => {
-    // #1b4f8a (the app's own light-mode primary) -> ~60% lightness, same hue
-    // as its own hand-picked dark-mode primary (#5b9bd5).
-    const result = toDarkModeAccentColor('#1b4f8a', 60);
-    expect(result.toLowerCase()).toBe('#5495de');
-  });
-});
-
-describe('getContrastTextColor', () => {
-  it('uses white on dark colors and near-black on light colors', () => {
+  it('getContrastTextColor uses white on dark colors and near-black on light', () => {
     expect(getContrastTextColor('#0b2545')).toBe('#ffffff');
     expect(getContrastTextColor('#ffb81c')).toBe('#111111');
   });

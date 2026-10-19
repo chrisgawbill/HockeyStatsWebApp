@@ -166,7 +166,9 @@ export default function SeasonSelector({
             aria-expanded={open}
             aria-controls={listboxId}
             aria-activedescendant={open ? optionId(activeIndex) : undefined}
-            onClick={() => (open ? setOpen(false) : openAt(seasons.indexOf(season)))}
+            onClick={() =>
+              open ? setOpen(false) : openAt(seasons.indexOf(season))
+            }
             onKeyDown={onButtonKeyDown}
           >
             {formatSeasonLabel(season)}
@@ -192,7 +194,9 @@ export default function SeasonSelector({
                   optionRefs.current[i] = el;
                 }}
                 className={`${styles['season-field__option']} ${
-                  i === activeIndex ? styles['season-field__option--active'] : ''
+                  i === activeIndex
+                    ? styles['season-field__option--active']
+                    : ''
                 } ${id === season ? styles['season-field__option--selected'] : ''}`}
                 onMouseEnter={() => setActiveIndex(i)}
                 onClick={() => selectSeason(id)}
