@@ -51,7 +51,6 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
 
   if (data.length <= 1) return <></>;
 
-  const maxOdds = Math.max(...data.map((t) => t.draftLotteryOdds));
   const animating =
     phase === 'rolling' || phase === 'reveal-2' || phase === 'reveal-1';
 
@@ -193,7 +192,6 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
                 key={team.id}
                 team={team}
                 rank={rank}
-                maxOdds={maxOdds}
                 result={entry}
               />
             ))}

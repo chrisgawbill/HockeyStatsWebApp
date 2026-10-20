@@ -1,161 +1,112 @@
+/* Compact stacked tile: dark surface, gold reserved for price tag/winners. */
 .slot {
   --board-gold: #ffc61a;
-  --board-yellow: #ffe45c;
-  --board-orange: #ff8f00;
-  --board-red: #e53935;
 
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
   box-sizing: border-box;
   min-width: 0;
-  padding: 8px 10px;
-  color: #2b1a00;
-  background: #fff8e1;
-  border: 2px solid var(--board-gold);
+  padding: 22px 4px 6px;
+  color: #eef0f8;
+  text-align: center;
+  background: #252b4a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--ds-radius-medium);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
 }
 
 .slot--winner {
-  background: linear-gradient(135deg, #fff4b8, #ffd54f);
-  border-color: var(--board-red);
+  border-color: var(--board-gold);
   box-shadow:
-    0 0 0 2px var(--board-yellow),
-    0 0 16px 2px rgba(255, 228, 92, 0.7);
-}
-
-.slot--first {
-  border-width: 3px;
-}
-
-.slot__main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+    0 0 0 1px var(--board-gold),
+    0 0 12px rgba(255, 198, 26, 0.45);
 }
 
 .slot__rank {
+  position: absolute;
+  top: 4px;
+  left: 4px;
   display: grid;
   place-items: center;
-  flex: 0 0 auto;
-  width: 1.75rem;
-  height: 1.75rem;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 800;
-  background: var(--board-red);
-  border-radius: 50%;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 4px;
+  box-sizing: border-box;
+  color: #cfd3e6;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
   font-variant-numeric: tabular-nums;
 }
 
+.slot__marker {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  color: var(--board-gold);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
 .slot__logo {
-  flex: 0 0 auto;
   width: 2.25rem;
   height: 2.25rem;
   object-fit: contain;
 }
 
 .slot__name {
-  flex: 1 1 0;
-  min-width: 0;
-  font-weight: 700;
-  line-height: 1.15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.2em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.1;
   overflow-wrap: break-word;
 }
 
-/* Price-tag chip holding the odds and the trend arrow. */
 .slot__tag {
-  flex: 0 0 auto;
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 6px;
+  align-items: baseline;
+  gap: 2px;
+  padding: 1px 8px;
   color: #2b1a00;
-  background: linear-gradient(180deg, var(--board-yellow), var(--board-gold));
-  border: 2px solid var(--board-red);
-  border-radius: 10px 4px 10px 4px;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
-  transform: rotate(-2deg);
+  background: var(--board-gold);
+  border-radius: 6px;
 }
 
 .slot__odds {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.3;
   font-variant-numeric: tabular-nums;
 }
 
 .slot__trend {
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.5rem;
+  opacity: 0.65;
 }
 
-/* Trend colors are tuned for contrast on the yellow tag. */
-.trend-up {
-  color: #1b5e20;
-}
-
+.trend-up,
 .trend-down {
-  color: #b71c1c;
+  color: #2b1a00;
 }
 
-.slot__foot {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 0.9rem;
-}
-
-.slot__bar-track {
-  flex: 1 1 auto;
-  height: 6px;
-  overflow: hidden;
-  background: rgba(43, 26, 0, 0.15);
-  border-radius: 3px;
-}
-
-.slot__bar-fill {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, var(--board-orange), var(--board-red));
-  border-radius: 3px;
-}
-
-.slot__badge,
 .slot__move {
-  flex: 0 0 auto;
-  padding: 0 6px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  line-height: 1.3rem;
-  border-radius: 999px;
-}
-
-.slot__badge {
-  color: #fff;
-  background: var(--board-red);
-  letter-spacing: 0.5px;
+  min-height: 1em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .slot__move--up {
-  color: #fff;
-  background: #2e7d32;
+  color: #6fcf8a;
 }
 
 .slot__move--down {
-  color: #fff;
-  background: #b71c1c;
-}
-
-@media (max-width: 576px) {
-  .slot {
-    padding: 8px;
-  }
-
-  .slot__logo {
-    width: 2rem;
-    height: 2rem;
-  }
+  color: #f08a8a;
 }

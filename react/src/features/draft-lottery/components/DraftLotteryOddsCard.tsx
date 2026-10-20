@@ -1,12 +1,12 @@
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { LotteryResultEntry } from '@/features/draft-lottery/utils/draftLotterySim';
+import { getTeamShortName } from '@/features/draft-lottery/utils/teamShortName';
 import styles from '@/features/draft-lottery/components/DraftLotteryOddsCard.module.css';
 
 interface DraftLotteryOddsCardProps {
   team: StandingsTeam;
   /** Board position (1-based): pre-lottery rank, or final pick after a draw. */
   rank: number;
-  maxOdds: number;
   /** Present once a simulation has finished. */
   result?: LotteryResultEntry;
 }
@@ -20,10 +20,8 @@ const TREND_LABEL: Record<string, string> = {
 export default function DraftLotteryOddsCard({
   team,
   rank,
-  maxOdds,
   result,
 }: DraftLotteryOddsCardProps) {
-  const progressPct = maxOdds > 0 ? (team.draftLotteryOdds / maxOdds) * 100 : 0;
   const trend = team.draftLotteryOddsTrend.toLowerCase();
   const trendIcon = TREND_ICON[trend] ?? null;
   const trendClass = trend === 'up' ? styles['trend-up'] : styles['trend-down'];
@@ -38,52 +36,62 @@ export default function DraftLotteryOddsCard({
     result && movement < 0 ? `, moved down ${-movement}` : '',
   ].join('');
 
+  const marker =
+    result && result.pick <= 2
+      ? `★ #${result.pick}`
+      : result && result.drawWon !== null
+        ? '★'
+        : null;
+
   return (
     <li
-      className={[
-        styles['slot'],
-        isWinner ? styles['slot--winner'] : '',
-        result?.pick === 1 ? styles['slot--first'] : '',
-      ]
+      className={[styles['slot'], isWinner ? styles['slot--winner'] : '']
         .filter(Boolean)
         .join(' ')}
       aria-label={ariaLabel}
+      title={team.teamName}
     >
-      <div className={styles['slot__main']} aria-hidden="true">
-        <span className={styles['slot__rank']}>{rank}</span>
-        <img src={team.teamLogo} alt="" className={styles['slot__logo']} />
-        <span className={styles['slot__name']}>{team.teamName}</span>
-        <span className={styles['slot__tag']}>
-          {trendIcon && (
-            <span className={`${styles['slot__trend']} ${trendClass}`}>
-              {trendIcon}
-            </span>
-          )}
-          <span className={styles['slot__odds']}>{team.draftLotteryOdds}%</span>
+      <span className={styles['slot__rank']} aria-hidden="true">
+        {rank}
+      </span>
+      {marker && (
+        <span className={styles['slot__marker']} aria-hidden="true">
+          {marker}
         </span>
-      </div>
-      <div className={styles['slot__foot']} aria-hidden="true">
-        <span className={styles['slot__bar-track']}>
-          <span
-            className={styles['slot__bar-fill']}
-            style={{ width: `${progressPct}%` }}
-          />
-        </span>
-        {result && result.drawWon !== null && (
-          <span className={styles['slot__badge']}>WINNER</span>
-        )}
-        {result && movement !== 0 && (
-          <span
-            className={`${styles['slot__move']} ${
-              movement > 0
-                ? styles['slot__move--up']
-                : styles['slot__move--down']
-            }`}
-          >
-            {movement > 0 ? `▲${movement}` : `▼${-movement}`}
+      )}
+      <img
+        src={team.teamLogo}
+        alt=""
+        className={styles['slot__logo']}
+        aria-hidden="true"
+      />
+      <span className={styles['slot__name']} aria-hidden="true">
+        {getTeamShortName(team.teamName)}
+      </span>
+      <span className={styles['slot__tag']} aria-hidden="true">
+        <span className={styles['slot__odds']}>{team.draftLotteryOdds}%</span>
+        {trendIcon && (
+          <span className={`${styles['slot__trend']} ${trendClass}`}>
+            {trendIcon}
           </span>
         )}
-      </div>
+      </span>
+      <span
+        className={[
+          styles['slot__move'],
+          movement > 0 ? styles['slot__move--up'] : '',
+          movement < 0 ? styles['slot__move--down'] : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-hidden="true"
+      >
+        {result && movement !== 0
+          ? movement > 0
+            ? `▲${movement}`
+            : `▼${-movement}`
+          : ''}
+      </span>
     </li>
   );
 }

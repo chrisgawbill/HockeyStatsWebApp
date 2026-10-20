@@ -1,72 +1,53 @@
 /* "Price is Right" board: marquee frame, chasing bulbs, game-show palette. */
 .frame {
   --board-gold: #ffc61a;
-  --board-yellow: #ffe45c;
-  --board-orange: #ff8f00;
-  --board-red: #e53935;
-  --board-night: #1b0f4d;
-  --board-night-2: #34147a;
-  --bulb-core: #fffbd0;
-  --bulb-size: 24px;
+  --board-night: #161a2e;
+  --bulb-size: 32px;
 
   position: relative;
   box-sizing: border-box;
   container-type: inline-size;
   width: 100%;
-  padding: 18px;
-  border: 3px solid var(--board-gold);
+  padding: 16px 12px;
+  border: 1px solid rgba(255, 198, 26, 0.5);
   border-radius: var(--ds-radius-large, 16px);
-  background:
-    radial-gradient(
-      ellipse at 50% 0%,
-      var(--board-night-2),
-      var(--board-night) 70%
-    ),
-    var(--board-night);
-  box-shadow:
-    0 0 0 2px var(--board-red),
-    0 6px 20px rgba(0, 0, 0, 0.35);
+  background: var(--board-night);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-/* Two interleaved sets of bulbs around the border; they alternate to give
-   the "chasing" effect. Offsets place set B halfway between set A bulbs. */
-.frame::before,
-.frame::after {
+/* Thin marquee: small, dim bulbs along the border, gently twinkling. */
+.frame::before {
   content: '';
   position: absolute;
-  inset: 3px;
+  inset: 2px;
   pointer-events: none;
-  border-radius: calc(var(--ds-radius-large, 16px) - 4px);
+  opacity: 0.7;
   background-image:
     radial-gradient(
-      circle at 12px 6px,
-      var(--bulb-core) 0 2px,
-      var(--board-yellow) 3px,
-      rgba(255, 143, 0, 0) 6px
+      circle at 16px 4px,
+      var(--board-gold) 0 1.5px,
+      transparent 2.5px
     ),
     radial-gradient(
-      circle at 12px 6px,
-      var(--bulb-core) 0 2px,
-      var(--board-yellow) 3px,
-      rgba(255, 143, 0, 0) 6px
+      circle at 16px 4px,
+      var(--board-gold) 0 1.5px,
+      transparent 2.5px
     ),
     radial-gradient(
-      circle at 6px 12px,
-      var(--bulb-core) 0 2px,
-      var(--board-yellow) 3px,
-      rgba(255, 143, 0, 0) 6px
+      circle at 4px 16px,
+      var(--board-gold) 0 1.5px,
+      transparent 2.5px
     ),
     radial-gradient(
-      circle at 6px 12px,
-      var(--bulb-core) 0 2px,
-      var(--board-yellow) 3px,
-      rgba(255, 143, 0, 0) 6px
+      circle at 4px 16px,
+      var(--board-gold) 0 1.5px,
+      transparent 2.5px
     );
   background-size:
-    var(--bulb-size) 12px,
-    var(--bulb-size) 12px,
-    12px var(--bulb-size),
-    12px var(--bulb-size);
+    var(--bulb-size) 8px,
+    var(--bulb-size) 8px,
+    8px var(--bulb-size),
+    8px var(--bulb-size);
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   background-position:
     0 0,
@@ -75,39 +56,18 @@
     100% 0;
 }
 
-.frame::after {
-  background-position:
-    12px 0,
-    12px 100%,
-    0 12px,
-    100% 12px;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .frame::before {
-    animation: bulbs-a 1s steps(1, end) infinite;
-  }
-
-  .frame::after {
-    animation: bulbs-b 1s steps(1, end) infinite;
+    animation: twinkle 3.2s ease-in-out infinite alternate;
   }
 }
 
-@keyframes bulbs-a {
-  0% {
-    opacity: 1;
+@keyframes twinkle {
+  from {
+    opacity: 0.35;
   }
-  50% {
-    opacity: 0.2;
-  }
-}
-
-@keyframes bulbs-b {
-  0% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 1;
+  to {
+    opacity: 0.8;
   }
 }
 
@@ -119,23 +79,17 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* Two columns only when the board is wide enough for full team names. */
-@container (min-width: 600px) {
+/* Wider boards fit four tiles per row. */
+@container (min-width: 640px) {
   .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media only screen and (max-width: 576px) {
-  .frame {
-    padding: 18px 14px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -166,18 +120,18 @@
   margin-bottom: 12px;
   padding: 12px;
   text-align: center;
-  background: linear-gradient(135deg, var(--board-red), var(--board-orange));
-  border: 2px solid var(--board-yellow);
+  background: #252b4a;
+  border: 1px solid var(--board-gold);
   border-radius: var(--ds-radius-medium);
 }
 
 .stage__title {
   margin: 0 0 8px;
-  color: #fff;
-  font-weight: 800;
+  color: var(--board-gold);
+  font-size: 0.8rem;
+  font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 
 .stage__slots {
@@ -192,11 +146,11 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 7.5rem;
+  min-height: 6rem;
   padding: 8px;
-  color: #2b1a00;
-  background: #fff8e1;
-  border: 3px solid var(--board-gold);
+  color: #eef0f8;
+  background: #1c2038;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--ds-radius-medium);
   box-sizing: border-box;
 }
@@ -206,14 +160,14 @@
   font-weight: 800;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--board-red);
+  color: #cfd3e6;
 }
 
 .stage__mystery {
-  font-size: 2.5rem;
-  font-weight: 900;
+  font-size: 2rem;
+  font-weight: 800;
   line-height: 1;
-  color: var(--board-orange);
+  color: var(--board-gold);
 }
 
 .stage__logo {
@@ -234,7 +188,8 @@
   }
 
   .stage__slot--revealed {
-    animation: reveal-pop 0.5s ease-out;
+    animation: reveal-pop 0.35s ease-out;
+    border-color: var(--board-gold);
   }
 }
 
@@ -250,15 +205,11 @@
 
 @keyframes reveal-pop {
   0% {
-    transform: scale(0.6);
-    box-shadow: 0 0 0 0 var(--board-yellow);
-    background: #fff;
-  }
-  60% {
-    transform: scale(1.08);
-    box-shadow: 0 0 24px 8px var(--board-yellow);
+    transform: scale(0.85);
+    opacity: 0.4;
   }
   100% {
     transform: scale(1);
+    opacity: 1;
   }
 }
