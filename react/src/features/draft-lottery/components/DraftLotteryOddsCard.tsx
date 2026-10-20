@@ -20,11 +20,12 @@ export default function DraftLotteryOddsCard({
   onSelect,
 }: DraftLotteryOddsCardProps) {
   const isWinner = !!result && (result.pick <= 2 || result.drawWon !== null);
+  const odds = team.draftLotteryOdds.toFixed(1);
   const movement = result?.movement ?? 0;
   const rankLabel = isWinner ? `★${rank}` : `#${rank}`;
 
   const ariaLabel = [
-    `#${rank} ${team.teamName}: ${team.draftLotteryOdds}% draft lottery odds`,
+    `#${rank} ${team.teamName}: ${odds}% draft lottery odds`,
     result && movement > 0 ? `, moved up ${movement}` : '',
     result && movement < 0 ? `, moved down ${-movement}` : '',
   ].join('');
@@ -64,7 +65,7 @@ export default function DraftLotteryOddsCard({
           <span className={styles['slot__abbr']}>{team.id}</span>
         </span>
         <span className={styles['slot__tag']} aria-hidden="true">
-          {team.draftLotteryOdds}%
+          {odds}%
         </span>
       </button>
     </li>

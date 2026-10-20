@@ -5,6 +5,7 @@ import {
   LotteryResultEntry,
   simulateDraftLottery,
 } from '@/features/draft-lottery/utils/draftLotterySim';
+import { buildLotteryAnnouncement } from '@/features/draft-lottery/utils/draftLotteryAnnouncement';
 import headerStyles from '@/styles/LandingPageRow.module.css';
 import styles from '@/features/draft-lottery/components/DraftLotteryOddsRow.module.css';
 
@@ -56,13 +57,13 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
   const animating =
     phase === 'rolling' || phase === 'reveal-2' || phase === 'reveal-1';
 
-  const nameOf = (entry?: LotteryResultEntry) =>
-    (entry && teamsById.get(entry.id)?.teamName) ?? 'Unknown team';
-
   const finish = (outcome: LotteryResultEntry[]) => {
     setPhase('done');
     setAnnouncement(
-      `${nameOf(outcome[0])} win the #1 pick. ${nameOf(outcome[1])} get the #2 pick.`,
+      buildLotteryAnnouncement(
+        outcome,
+        (id) => teamsById.get(id)?.teamName ?? 'Unknown team',
+      ),
     );
   };
 
@@ -234,7 +235,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
           </ol>
           <p className={styles['caption']}>
             {selectedTeam
-              ? `${selectedTeam.teamName} · #${selectedRank} · ${selectedTeam.draftLotteryOdds}%`
+              ? `${selectedTeam.teamName} · #${selectedRank} · ${selectedTeam.draftLotteryOdds.toFixed(1)}%`
               : 'Tap a tile for the full team name'}
           </p>
         </div>
