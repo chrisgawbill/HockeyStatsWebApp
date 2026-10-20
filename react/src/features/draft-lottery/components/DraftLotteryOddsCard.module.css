@@ -1,157 +1,109 @@
-.lottery-card {
+/* Compact tile: dark surface, gold only on the price tag and winners. */
+.item {
   display: block;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: inherit;
-  cursor: pointer;
-  perspective: 800px;
-  border-radius: var(--ds-radius-medium);
+  min-width: 0;
 }
 
-.lottery-card:focus-visible {
-  outline: 3px solid var(--color-blue-accent);
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 6px 6px 7px;
+  box-sizing: border-box;
+  color: #e4e3ec;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: var(--board-tile);
+  border: 1px solid var(--board-tile-border);
+  border-radius: 8px;
+}
+
+.slot:focus-visible {
+  outline: 2px solid var(--board-accent);
   outline-offset: 2px;
 }
 
-.lottery-card__inner {
-  display: grid;
-  transform-style: preserve-3d;
-  transition: transform var(--ds-motion-duration-medium, 300ms)
-    var(--ds-motion-easing-standard, ease);
+.slot--selected {
+  border-color: var(--board-accent);
 }
 
-.lottery-card__face {
-  grid-area: 1 / 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  box-sizing: border-box;
-  min-height: 100%;
-  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--ds-radius-medium);
-  padding: 12px 16px;
-  overflow: hidden;
+.slot--winner {
+  background: #2a2333;
+  border-color: var(--board-gold);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--board-gold) 35%, transparent);
 }
 
-.lottery-card__face--back {
-  transform: rotateY(180deg);
-}
-
-.lottery-card.is-flipped .lottery-card__inner,
-.lottery-card:focus-visible .lottery-card__inner {
-  transform: rotateY(180deg);
-}
-
-@media (hover: hover) {
-  .lottery-card:hover .lottery-card__inner {
-    transform: rotateY(180deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lottery-card__inner {
-    transition: none;
-  }
-}
-
-.lottery-card__header {
+.slot__top {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-bottom: 10px;
+  justify-content: space-between;
+  min-height: 12px;
+  line-height: 1;
 }
 
-.lottery-card__face--front .lottery-card__header {
-  padding-bottom: 0;
-}
-
-.lottery-card__rank {
-  min-width: 28px;
-  color: var(--color-muted-text);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.lottery-card__logo {
-  width: 38px;
-  height: 38px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.lottery-card__name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.lottery-card__right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-}
-
-.lottery-card__trend {
+.slot__rank {
+  color: var(--board-muted);
   font-size: 10px;
   font-weight: 700;
 }
 
-.trend-up {
-  color: var(--color-success);
+.slot--winner .slot__rank {
+  color: var(--board-gold);
 }
 
-.trend-down {
-  color: var(--color-danger);
-}
-
-.lottery-card__odds {
-  min-width: 50px;
-  color: var(--color-blue-accent);
-  font-size: var(--text-base);
+.slot__move--up,
+.slot__move--down {
+  font-size: 9.5px;
   font-weight: 700;
-  text-align: right;
 }
 
-.lottery-card__bar-track {
-  display: block;
-  height: 4px;
-  margin: 0 -16px;
-  overflow: hidden;
-  background: var(--color-info-bg);
-  border-radius: 2px;
+.slot__move--up {
+  color: #6fd39a;
 }
 
-.lottery-card__bar-fill {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-blue-accent), #42a5f5);
-  border-radius: 2px;
+.slot__move--down {
+  color: #e98a8a;
 }
 
-@media (max-width: 576px) {
-  .lottery-card__face {
-    padding: 10px 12px;
-  }
+.slot__id {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
 
-  .lottery-card__logo {
-    width: 28px;
-    height: 28px;
-  }
+.slot__logo {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
 
-  .lottery-card__bar-track {
-    margin: 0 -12px;
-  }
+.slot__abbr {
+  min-width: 0;
+  font-family: 'Roboto Condensed', Roboto, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.slot__tag {
+  padding: 2px 0;
+  color: var(--board-gold);
+  font-family: 'Roboto Condensed', Roboto, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  background: color-mix(in srgb, var(--board-gold) 14%, transparent);
+  border-radius: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot--winner .slot__tag {
+  color: #1b1405;
+  background: var(--board-gold);
 }

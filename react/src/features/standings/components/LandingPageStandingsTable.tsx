@@ -24,24 +24,11 @@ export default function LandingPageStandingsTable({
   const navigate = useNavigate();
   const location = useLocation();
   const isDivision = standingFormat === 'Division';
-  const [isMobile, setIsMobile] = React.useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia('(max-width: 767px)').matches,
-  );
   const [sort, setSort] = React.useState<{
     key: SortKey;
     direction: 'ascending' | 'descending';
   } | null>(null);
   const standingsSourcePath = location.pathname === '/' ? '/' : '/standings';
-
-  React.useEffect(() => {
-    const query = window.matchMedia('(max-width: 767px)');
-    const handleChange = () => setIsMobile(query.matches);
-    handleChange();
-    query.addEventListener('change', handleChange);
-    return () => query.removeEventListener('change', handleChange);
-  }, []);
 
   const goToTeam = (team: StandingsTeam) =>
     navigate(`/team/${team.id}`, {
@@ -119,8 +106,8 @@ export default function LandingPageStandingsTable({
     ['Team', 'TEAM'],
     ['Record', 'RECORD'],
     ['Pts', 'POINTS'],
+    ['P%', 'POINTSPERCENTAGE'],
   ];
-  if (!isMobile) headers.push(['P%', 'POINTSPERCENTAGE']);
 
   return (
     <div
@@ -216,13 +203,11 @@ export default function LandingPageStandingsTable({
                 >
                   {team.points}
                 </td>
-                {!isMobile && (
-                  <td
-                    className={`${styles['standings-status-cell']} ${statusClass}`}
-                  >
-                    {team.pointsPercentage}
-                  </td>
-                )}
+                <td
+                  className={`${styles['standings-status-cell']} ${statusClass}`}
+                >
+                  {team.pointsPercentage}
+                </td>
               </tr>
             );
           })}
