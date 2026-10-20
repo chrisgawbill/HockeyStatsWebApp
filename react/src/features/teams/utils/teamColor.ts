@@ -1,5 +1,6 @@
 import { localTeamList } from '@/lib/teamListData';
 
+/** A team's primary brand color by tri-code, with a neutral blue fallback. */
 export function getTeamPrimaryColor(abbrev?: string): string {
   const normalizedAbbrev = abbrev?.toUpperCase();
   return (
@@ -21,81 +22,85 @@ export function toDarkModeAccentColor(hex: string, minLightness = 60): string {
   return hslToHex(h, s, Math.max(l, minLightness));
 }
 
-function hexToHsl(hex: string): { h: number; s: number; l: number } {
-  const normalized = hex.replace('#', '');
-  const full =
-    normalized.length === 3
-      ? normalized
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : normalized;
-  const r = parseInt(full.slice(0, 2), 16) / 255;
-  const g = parseInt(full.slice(2, 4), 16) / 255;
-  const b = parseInt(full.slice(4, 6), 16) / 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-
-  if (max === min) return { h: 0, s: 0, l: l * 100 };
-
-  const d = max - min;
-  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-  let h: number;
-  switch (max) {
-    case r:
-      h = (g - b) / d + (g < b ? 6 : 0);
-      break;
-    case g:
-      h = (b - r) / d + 2;
-      break;
-    default:
-      h = (r - g) / d + 4;
-  }
-  h *= 60;
-
-  return { h, s: s * 100, l: l * 100 };
+/** Expands a "#rgb" or "#rrggbb" color to six hex digits with no "#". */
+function expandHexDigits(hex: string): string {
+  const digits = hex.replace('#', '');
+  return digits.length === 3
+    ? digits
+        .split('')
+        .map((digit) => digit + digit)
+        .join('')
+    : digits;
 }
 
-function hslToHex(h: number, s: number, l: number): string {
-  const sNorm = s / 100;
-  const lNorm = l / 100;
-  const c = (1 - Math.abs(2 * lNorm - 1)) * sNorm;
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const m = lNorm - c / 2;
+/** Converts a hex color to hue (degrees), saturation (percent), lightness (percent). */
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const digits = expandHexDigits(hex);
+  const red = parseInt(digits.slice(0, 2), 16) / 255;
+  const green = parseInt(digits.slice(2, 4), 16) / 255;
+  const blue = parseInt(digits.slice(4, 6), 16) / 255;
 
-  let [r, g, b] = [0, 0, 0];
-  if (h < 60) [r, g, b] = [c, x, 0];
-  else if (h < 120) [r, g, b] = [x, c, 0];
-  else if (h < 180) [r, g, b] = [0, c, x];
-  else if (h < 240) [r, g, b] = [0, x, c];
-  else if (h < 300) [r, g, b] = [x, 0, c];
-  else [r, g, b] = [c, 0, x];
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const lightness = (max + min) / 2;
 
-  const toHex = (v: number) =>
-    Math.round((v + m) * 255)
+  if (max === min) return { h: 0, s: 0, l: lightness * 100 };
+
+  const spread = max - min;
+  const saturation =
+    lightness > 0.5 ? spread / (2 - max - min) : spread / (max + min);
+  let hue: number;
+  switch (max) {
+    case red:
+      hue = (green - blue) / spread + (green < blue ? 6 : 0);
+      break;
+    case green:
+      hue = (blue - red) / spread + 2;
+      break;
+    default:
+      hue = (red - green) / spread + 4;
+  }
+  hue *= 60;
+
+  return { h: hue, s: saturation * 100, l: lightness * 100 };
+}
+
+/** Converts hue (degrees), saturation (percent), lightness (percent) to a "#rrggbb" hex color. */
+function hslToHex(hue: number, saturation: number, lightness: number): string {
+  const saturationFraction = saturation / 100;
+  const lightnessFraction = lightness / 100;
+  const chroma = (1 - Math.abs(2 * lightnessFraction - 1)) * saturationFraction;
+  const secondary = chroma * (1 - Math.abs(((hue / 60) % 2) - 1));
+  const lightnessOffset = lightnessFraction - chroma / 2;
+
+  let [red, green, blue] = [0, 0, 0];
+  if (hue < 60) [red, green, blue] = [chroma, secondary, 0];
+  else if (hue < 120) [red, green, blue] = [secondary, chroma, 0];
+  else if (hue < 180) [red, green, blue] = [0, chroma, secondary];
+  else if (hue < 240) [red, green, blue] = [0, secondary, chroma];
+  else if (hue < 300) [red, green, blue] = [secondary, 0, chroma];
+  else [red, green, blue] = [chroma, 0, secondary];
+
+  const toHex = (channel: number) =>
+    Math.round((channel + lightnessOffset) * 255)
       .toString(16)
       .padStart(2, '0');
 
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  return `#${toHex(red)}${toHex(green)}${toHex(blue)}`;
 }
 
 /** Picks black or white text for readable contrast on a hex background (WCAG relative luminance). */
 export function getContrastTextColor(hex: string): '#111111' | '#ffffff' {
-  const normalized = hex.replace('#', '');
-  const full =
-    normalized.length === 3
-      ? normalized
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : normalized;
-  const channel = (start: number) => {
-    const v = parseInt(full.slice(start, start + 2), 16) / 255;
-    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  const digits = expandHexDigits(hex);
+  const linearChannel = (start: number) => {
+    const channel = parseInt(digits.slice(start, start + 2), 16) / 255;
+    return channel <= 0.03928
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4;
   };
   const luminance =
-    0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+    0.2126 * linearChannel(0) +
+    0.7152 * linearChannel(2) +
+    0.0722 * linearChannel(4);
   return luminance > 0.4 ? '#111111' : '#ffffff';
 }

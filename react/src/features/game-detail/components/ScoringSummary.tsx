@@ -8,6 +8,7 @@ type ScoringSummaryProps = {
   scoring: LandingScoringPeriod[];
 };
 
+/** Heading for a period's goals (Period 1, Overtime, Shootout). */
 function getPeriodTitle(num: number, type: string): string {
   if (type === 'OT') return 'Overtime';
   if (type === 'SO') return 'Shootout';
@@ -15,6 +16,7 @@ function getPeriodTitle(num: number, type: string): string {
   return `${num}${suffix} Period`;
 }
 
+/** Badge text for special-teams or empty-net goals, or null for even strength. */
 function getStrengthBadge(strength: string, modifier: string): string | null {
   if (modifier === 'empty-net') return 'EN';
   if (strength === 'pp') return 'PP';
@@ -22,8 +24,9 @@ function getStrengthBadge(strength: string, modifier: string): string | null {
   return null;
 }
 
+/** Goal-by-goal summary grouped by period. */
 function ScoringSummary({ scoring }: ScoringSummaryProps) {
-  const periodsWithGoals = scoring.filter((p) => p.goals.length > 0);
+  const periodsWithGoals = scoring.filter((period) => period.goals.length > 0);
   if (periodsWithGoals.length === 0) return null;
 
   return (
@@ -65,8 +68,8 @@ function ScoringSummary({ scoring }: ScoringSummaryProps) {
                     className={styles['scoring-goal__headshot']}
                     src={goal.headshot}
                     alt={goal.name.default}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
+                    onError={(event) => {
+                      (event.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                   <div className={styles['scoring-goal__info']}>

@@ -1,6 +1,5 @@
 import styles from '@/features/schedule/components/SchedulePage.module.css';
-
-type ScheduleView = 'day' | 'week' | 'month';
+import { ScheduleView } from '@/features/schedule/utils/scheduleViewHelper';
 
 type DatePickerProps = {
   /** The selected season's calendar boundaries, from `getSeasonDateRange`. */
@@ -14,8 +13,10 @@ type DatePickerProps = {
  * Converts a Date to a YYYYMMDD number for local-day comparisons that ignore
  * time-of-day.
  */
-function toDateKey(d: Date): number {
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+function toDateKey(date: Date): number {
+  return (
+    date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
+  );
 }
 
 /**
@@ -192,4 +193,3 @@ const DatePicker = ({
 };
 export default DatePicker;
 export { getNavState };
-export type { ScheduleView };

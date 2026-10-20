@@ -2,12 +2,9 @@ import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { formatDateParam } from '@/features/schedule/utils/scheduleHelper';
 import GameChip from '@/features/schedule/components/GameChip';
 import styles from '@/features/schedule/components/ScheduleCalendar.module.css';
+import { joinClassNames } from '@/lib/joinClassNames';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
 
 type ScheduleCalendarProps = {
   view: 'week' | 'month';
@@ -45,7 +42,10 @@ export default function ScheduleCalendar({
 
   return (
     <div
-      className={cx(styles['calendar'], styles[`calendar--${view}`])}
+      className={joinClassNames(
+        styles['calendar'],
+        styles[`calendar--${view}`],
+      )}
       aria-label={`${view} schedule`}
     >
       {WEEKDAYS.map((label) => (
@@ -72,7 +72,7 @@ export default function ScheduleCalendar({
         return (
           <div
             key={key}
-            className={cx(
+            className={joinClassNames(
               styles['calendar__cell'],
               isToday && styles['calendar__cell--today'],
             )}

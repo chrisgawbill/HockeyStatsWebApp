@@ -1,5 +1,6 @@
 import { post } from '@/lib/apiClient';
 
+/** Posts a message to the AI service and returns its JSON reply, extracting the JSON object when the reply comes back wrapped in text. */
 export async function InterfaceWithChatBot(
   message: object,
   triCode?: string,

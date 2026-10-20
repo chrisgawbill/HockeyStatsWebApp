@@ -4,6 +4,7 @@ import styles from '@/features/install-prompt/components/InstallBanner.module.cs
 
 const ICON_SRC = `${import.meta.env.BASE_URL}icons/icon-192.png`;
 
+/** iOS share-sheet icon used in the install steps. */
 function ShareIcon() {
   return (
     <svg

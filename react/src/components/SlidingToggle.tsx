@@ -25,7 +25,7 @@ export default function SlidingToggle<T extends string>({
 }: Props<T>) {
   const activeIndex = Math.max(
     0,
-    options.findIndex((o) => o.value === value),
+    options.findIndex((option) => option.value === value),
   );
   const segmentStyle = {
     '--ds-segment-count': options.length,

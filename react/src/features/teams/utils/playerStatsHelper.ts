@@ -14,13 +14,14 @@ export interface PlayerStatsLookup {
   goalies: Map<number, GoalieStatLine>;
 }
 
+/** Indexes skater and goalie stat lines by player id. */
 export function buildStatsLookup(
   players: PlayerStatLine[],
   goalies: GoalieStatLine[],
 ): PlayerStatsLookup {
   return {
-    skaters: new Map(players.map((p) => [p.playerId, p])),
-    goalies: new Map(goalies.map((g) => [g.goalieId, g])),
+    skaters: new Map(players.map((player) => [player.playerId, player])),
+    goalies: new Map(goalies.map((goalie) => [goalie.goalieId, goalie])),
   };
 }
 
@@ -31,10 +32,12 @@ export function formatSavePct(value: number | null): string {
   return value == null ? DASH : value.toFixed(3).replace(/^0\./, '.');
 }
 
+/** Goals-against average to two decimals, or a dash when missing. */
 export function formatGaa(value: number | null): string {
   return value == null ? DASH : value.toFixed(2);
 }
 
+/** Plus/minus with an explicit + for positive values. */
 export function formatPlusMinus(value: number): string {
   return value > 0 ? `+${value}` : String(value);
 }
@@ -57,25 +60,25 @@ export function buildPlayerStatCells(
   toiStat?: string,
 ): StatCell[] | null {
   if (slot === 'G') {
-    const g = lookup.goalies.get(playerId);
-    if (!g) return null;
+    const goalie = lookup.goalies.get(playerId);
+    if (!goalie) return null;
     return [
-      { label: 'GP', value: String(g.gamesPlayed) },
-      { label: 'W', value: String(g.wins) },
-      { label: 'L', value: String(g.losses) },
-      { label: 'SV%', value: formatSavePct(g.savePctg) },
-      { label: 'GAA', value: formatGaa(g.goalsAgainstAverage) },
-      { label: 'SO', value: String(g.shutouts) },
+      { label: 'GP', value: String(goalie.gamesPlayed) },
+      { label: 'W', value: String(goalie.wins) },
+      { label: 'L', value: String(goalie.losses) },
+      { label: 'SV%', value: formatSavePct(goalie.savePctg) },
+      { label: 'GAA', value: formatGaa(goalie.goalsAgainstAverage) },
+      { label: 'SO', value: String(goalie.shutouts) },
     ];
   }
-  const s = lookup.skaters.get(playerId);
-  if (!s) return null;
+  const skater = lookup.skaters.get(playerId);
+  if (!skater) return null;
   const cells: StatCell[] = [
-    { label: 'GP', value: String(s.gamesPlayed) },
-    { label: 'G', value: String(s.goals) },
-    { label: 'A', value: String(s.assists) },
-    { label: 'PTS', value: String(s.points) },
-    { label: '+/-', value: formatPlusMinus(s.plusMinus) },
+    { label: 'GP', value: String(skater.gamesPlayed) },
+    { label: 'G', value: String(skater.goals) },
+    { label: 'A', value: String(skater.assists) },
+    { label: 'PTS', value: String(skater.points) },
+    { label: '+/-', value: formatPlusMinus(skater.plusMinus) },
   ];
   const toi = parseToiLabel(toiStat);
   if (toi) cells.push({ label: 'TOI/GP', value: toi });

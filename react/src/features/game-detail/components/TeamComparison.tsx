@@ -2,10 +2,7 @@ import React from 'react';
 import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
+import { joinClassNames } from '@/lib/joinClassNames';
 
 type TeamTotals = {
   sog: number;
@@ -34,6 +31,7 @@ const STAT_ROWS: { label: string; key: keyof TeamTotals }[] = [
   { label: 'Takeaways', key: 'takeaways' },
 ];
 
+/** Side-by-side bars comparing the teams' game totals. */
 function TeamComparison({
   homeTotals,
   awayTotals,
@@ -57,7 +55,7 @@ function TeamComparison({
       >
         <div className={styles['team-comparison-header']}>
           <span
-            className={cx(
+            className={joinClassNames(
               styles['team-comparison-abbrev'],
               styles['team-comparison-abbrev--away'],
             )}
@@ -66,7 +64,7 @@ function TeamComparison({
           </span>
           <span />
           <span
-            className={cx(
+            className={joinClassNames(
               styles['team-comparison-abbrev'],
               styles['team-comparison-abbrev--home'],
             )}
@@ -83,7 +81,7 @@ function TeamComparison({
           return (
             <div key={key} className={styles['team-stat-row']}>
               <span
-                className={cx(
+                className={joinClassNames(
                   styles['team-stat-row__value'],
                   styles['team-stat-row__away'],
                   awayLeads && styles['team-stat-row__value--leader'],
@@ -94,7 +92,7 @@ function TeamComparison({
               </span>
               <span className={styles['team-stat-row__label']}>{label}</span>
               <span
-                className={cx(
+                className={joinClassNames(
                   styles['team-stat-row__value'],
                   styles['team-stat-row__home'],
                   homeLeads && styles['team-stat-row__value--leader'],

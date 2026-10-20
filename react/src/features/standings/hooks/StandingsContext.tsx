@@ -12,7 +12,7 @@ import { GetCurrentStandings } from '@/features/standings/api/standingsApi';
 import { CreateLeagueStandingsArray } from '@/features/standings/utils/leagueStandingsHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 
-interface StandingsData {
+export interface StandingsData {
   easternStandingsData: StandingsTeam[];
   westernStandingsData: StandingsTeam[];
   metropolitanStandings: StandingsTeam[];
@@ -68,20 +68,22 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
     const isStale = () => requestId !== latestRequest.current;
     setErrorStandingsData(null);
     try {
-      const data = await GetCurrentStandings(seasonId);
+      const standingsResponse = await GetCurrentStandings(seasonId);
       if (isStale()) return;
-      const all: StandingsTeam[] = CreateLeagueStandingsArray(data.standings);
+      const allTeams: StandingsTeam[] = CreateLeagueStandingsArray(
+        standingsResponse.standings,
+      );
 
       const byConference = (name: string) =>
-        all
-          .filter((t) => t.conferenceName === name)
+        allTeams
+          .filter((team) => team.conferenceName === name)
           .sort(
             (a, b) => a.conferenceStandingsPlace - b.conferenceStandingsPlace,
           );
 
       const byDivision = (name: string) =>
-        all
-          .filter((t) => t.divisionName === name)
+        allTeams
+          .filter((team) => team.divisionName === name)
           .sort((a, b) => a.divisionStandingsPlace - b.divisionStandingsPlace);
 
       setEasternStandingsData(byConference('Eastern'));
@@ -90,13 +92,11 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
       setAtlanticStandings(byDivision('Atlantic'));
       setCentralStandings(byDivision('Central'));
       setPacificStandings(byDivision('Pacific'));
-      /**
-       * Keeps the lottery list to the 16 non-playoff teams that carry odds,
-       * ordered worst team first (highest odds; ties broken by league rank).
-       */
+      // The lottery list holds the 16 non-playoff teams that carry odds,
+      // ordered worst team first (highest odds; ties broken by league rank).
       setDraftLotteryOdds(
-        all
-          .filter((t) => t.draftLotteryOdds > 0)
+        allTeams
+          .filter((team) => team.draftLotteryOdds > 0)
           .sort(
             (a, b) =>
               b.draftLotteryOdds - a.draftLotteryOdds ||
@@ -155,6 +155,7 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Reads the standings slices; throws outside `StandingsDataProvider`. */
 export function useStandingsContext(): StandingsData {
   const context = useContext(StandingsContext);
   if (!context)
@@ -164,6 +165,7 @@ export function useStandingsContext(): StandingsData {
   return context;
 }
 
+/** Alias of `useStandingsContext` kept for existing callers. */
 function useStandingsData(): StandingsData {
   return useStandingsContext();
 }

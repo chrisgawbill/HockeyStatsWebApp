@@ -36,6 +36,7 @@ export function GetHealth(passphrase: string): Promise<HealthDataDto> {
     headers: { [DIAGNOSTICS_HEADER]: passphrase },
   });
 }
+/** Cache usage report, authorized by the passphrase. */
 export function GetCacheReport(passphrase: string): Promise<CacheReportDto> {
   return get<CacheReportDto>('/health/cache-usage', undefined, {
     headers: { [DIAGNOSTICS_HEADER]: passphrase },

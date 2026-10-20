@@ -9,10 +9,7 @@ import {
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
+import { joinClassNames } from '@/lib/joinClassNames';
 
 const FALLBACK_HEADSHOT = 'https://assets.nhle.com/mugs/nhl/skater/default.png';
 
@@ -28,6 +25,7 @@ interface LeaderRow {
   value: number | null;
 }
 
+/** A skater's value for the chosen leaderboard category. */
 function getSkaterValue(
   player: PlayerStatLine,
   key: StatCategoryKey,
@@ -52,6 +50,7 @@ function getSkaterValue(
   }
 }
 
+/** A goalie's value for the chosen leaderboard category. */
 function getGoalieValue(
   goalie: GoalieStatLine,
   key: StatCategoryKey,
@@ -66,6 +65,7 @@ function getGoalieValue(
   }
 }
 
+/** Orders rows best-first (nulls last) and keeps the top few. */
 function sortAndSlice(rows: LeaderRow[], higherIsBetter: boolean): LeaderRow[] {
   return [...rows]
     .sort((a, b) => {
@@ -88,21 +88,21 @@ function getTopTen(
 ): LeaderRow[] {
   if (category.source === 'goalie') {
     let eligible = goalies.filter(
-      (g) => getGoalieValue(g, category.key) !== null,
+      (goalie) => getGoalieValue(goalie, category.key) !== null,
     );
 
     if (category.requiresMinGames) {
-      const maxGP = Math.max(...goalies.map((g) => g.gamesPlayed), 0);
+      const maxGP = Math.max(...goalies.map((goalie) => goalie.gamesPlayed), 0);
       const minGP = Math.min(20, Math.round(maxGP * 0.25));
-      eligible = eligible.filter((g) => g.gamesPlayed >= minGP);
+      eligible = eligible.filter((goalie) => goalie.gamesPlayed >= minGP);
     }
 
-    const rows: LeaderRow[] = eligible.map((g) => ({
-      id: g.goalieId,
-      name: g.name,
+    const rows: LeaderRow[] = eligible.map((goalie) => ({
+      id: goalie.goalieId,
+      name: goalie.name,
       positionLabel: 'G',
-      gamesPlayed: g.gamesPlayed,
-      value: getGoalieValue(g, category.key),
+      gamesPlayed: goalie.gamesPlayed,
+      value: getGoalieValue(goalie, category.key),
     }));
     return sortAndSlice(rows, category.higherIsBetter);
   }
@@ -110,26 +110,28 @@ function getTopTen(
   let eligible =
     category.key === 'faceoffWinPct'
       ? players.filter(
-          (p) =>
-            p.faceoffWinPct !== null &&
-            (p.position === 'C' || p.position === 'LW' || p.position === 'RW'),
+          (player) =>
+            player.faceoffWinPct !== null &&
+            (player.position === 'C' ||
+              player.position === 'LW' ||
+              player.position === 'RW'),
         )
       : category.key === 'corsiPct'
-        ? players.filter((p) => p.corsiPct !== null)
+        ? players.filter((player) => player.corsiPct !== null)
         : players;
 
   if (category.requiresMinGames) {
-    const maxGP = Math.max(...players.map((p) => p.gamesPlayed), 0);
+    const maxGP = Math.max(...players.map((player) => player.gamesPlayed), 0);
     const minGP = Math.min(20, Math.round(maxGP * 0.25));
-    eligible = eligible.filter((p) => p.gamesPlayed >= minGP);
+    eligible = eligible.filter((player) => player.gamesPlayed >= minGP);
   }
 
-  const rows: LeaderRow[] = eligible.map((p) => ({
-    id: p.playerId,
-    name: p.name,
-    positionLabel: p.position,
-    gamesPlayed: p.gamesPlayed,
-    value: getSkaterValue(p, category.key),
+  const rows: LeaderRow[] = eligible.map((player) => ({
+    id: player.playerId,
+    name: player.name,
+    positionLabel: player.position,
+    gamesPlayed: player.gamesPlayed,
+    value: getSkaterValue(player, category.key),
   }));
   return sortAndSlice(rows, category.higherIsBetter);
 }
@@ -140,6 +142,7 @@ interface Props {
   headshotMap: Map<number, string>;
 }
 
+/** Team leaders: pick a stat category and see the top players with headshots. */
 export default function PlayerStatsSection({
   players,
   goalies,
@@ -147,7 +150,9 @@ export default function PlayerStatsSection({
 }: Props) {
   const [selectedKey, setSelectedKey] = useState<StatCategoryKey>('goals');
 
-  const selectedCategory = STAT_CATEGORIES.find((c) => c.key === selectedKey)!;
+  const selectedCategory = STAT_CATEGORIES.find(
+    (statCategory) => statCategory.key === selectedKey,
+  )!;
   const topTen = getTopTen(players, goalies, selectedCategory);
 
   return (
@@ -158,7 +163,7 @@ export default function PlayerStatsSection({
         {STAT_CATEGORIES.map((cat) => (
           <button
             key={cat.key}
-            className={cx(
+            className={joinClassNames(
               styles['player-stat-tab'],
               'ds-button',
               selectedKey === cat.key && styles.active,

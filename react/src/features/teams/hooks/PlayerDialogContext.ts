@@ -8,6 +8,7 @@ export const PlayerDialogContext = createContext<
   (player: RosterPlayer, slot: TokenSlot, trigger: HTMLElement) => void
 >(() => {});
 
+/** Returns a function that opens the stats dialog for a player. */
 export function useOpenPlayerDialog() {
   return useContext(PlayerDialogContext);
 }

@@ -6,6 +6,7 @@ import {
 } from '@/features/season/utils/seasonHelper';
 import styles from '@/components/SeasonSelector.module.css';
 
+/** Down chevron for the season dropdown button. */
 function ChevronIcon() {
   return (
     <svg
@@ -67,14 +68,15 @@ export default function SeasonSelector({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
   const listboxId = useId();
-  const optionId = (i: number) => `${listboxId}-option-${i}`;
+  const optionId = (optionIndex: number) =>
+    `${listboxId}-option-${optionIndex}`;
 
   useEffect(() => {
     if (!open) return;
-    function onPointerDown(e: PointerEvent) {
+    function onPointerDown(event: PointerEvent) {
       if (
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !containerRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
       }
@@ -100,44 +102,46 @@ export default function SeasonSelector({
     buttonRef.current?.focus();
   }
 
-  function onButtonKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
+  function onButtonKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (!open) {
       if (
-        e.key === 'ArrowDown' ||
-        e.key === 'ArrowUp' ||
-        e.key === 'Enter' ||
-        e.key === ' '
+        event.key === 'ArrowDown' ||
+        event.key === 'ArrowUp' ||
+        event.key === 'Enter' ||
+        event.key === ' '
       ) {
-        e.preventDefault();
+        event.preventDefault();
         openAt(Math.max(0, seasons.indexOf(season)));
       }
       return;
     }
 
-    switch (e.key) {
+    switch (event.key) {
       case 'ArrowDown':
-        e.preventDefault();
-        setActiveIndex((i) => Math.min(seasons.length - 1, i + 1));
+        event.preventDefault();
+        setActiveIndex((currentIndex) =>
+          Math.min(seasons.length - 1, currentIndex + 1),
+        );
         break;
       case 'ArrowUp':
-        e.preventDefault();
-        setActiveIndex((i) => Math.max(0, i - 1));
+        event.preventDefault();
+        setActiveIndex((currentIndex) => Math.max(0, currentIndex - 1));
         break;
       case 'Home':
-        e.preventDefault();
+        event.preventDefault();
         setActiveIndex(0);
         break;
       case 'End':
-        e.preventDefault();
+        event.preventDefault();
         setActiveIndex(seasons.length - 1);
         break;
       case 'Enter':
       case ' ':
-        e.preventDefault();
+        event.preventDefault();
         selectSeason(seasons[activeIndex]);
         break;
       case 'Escape':
-        e.preventDefault();
+        event.preventDefault();
         setOpen(false);
         break;
       case 'Tab':
@@ -184,24 +188,24 @@ export default function SeasonSelector({
             aria-label="Select season"
             className={`${styles['season-field__listbox']} ds-aero-surface`}
           >
-            {seasons.map((id, i) => (
+            {seasons.map((seasonId, optionIndex) => (
               <li
-                key={id}
-                id={optionId(i)}
+                key={seasonId}
+                id={optionId(optionIndex)}
                 role="option"
-                aria-selected={id === season}
-                ref={(el) => {
-                  optionRefs.current[i] = el;
+                aria-selected={seasonId === season}
+                ref={(optionElement) => {
+                  optionRefs.current[optionIndex] = optionElement;
                 }}
                 className={`${styles['season-field__option']} ${
-                  i === activeIndex
+                  optionIndex === activeIndex
                     ? styles['season-field__option--active']
                     : ''
-                } ${id === season ? styles['season-field__option--selected'] : ''}`}
-                onMouseEnter={() => setActiveIndex(i)}
-                onClick={() => selectSeason(id)}
+                } ${seasonId === season ? styles['season-field__option--selected'] : ''}`}
+                onMouseEnter={() => setActiveIndex(optionIndex)}
+                onClick={() => selectSeason(seasonId)}
               >
-                {formatSeasonLabel(id)}
+                {formatSeasonLabel(seasonId)}
               </li>
             ))}
           </ul>

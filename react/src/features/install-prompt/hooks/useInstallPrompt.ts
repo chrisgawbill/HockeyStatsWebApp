@@ -31,6 +31,7 @@ export interface InstallPromptState {
   dismiss: () => void;
 }
 
+/** Reads the persisted install state, or null when storage is unavailable. */
 function loadState(): InstallState | null {
   try {
     return readInstallState(window.localStorage);
@@ -39,6 +40,7 @@ function loadState(): InstallState | null {
   }
 }
 
+/** Writes one install flag to localStorage, ignoring storage failures. */
 function persist(key: string, value: string) {
   try {
     window.localStorage.setItem(key, value);
@@ -47,6 +49,13 @@ function persist(key: string, value: string) {
   }
 }
 
+/**
+ * Decides whether the mobile install banner should show, and which kind
+ * (Chromium native prompt or iOS instructions). Combines the persisted
+ * eligibility state (visits, engagement, dismissals, install), the captured
+ * `beforeinstallprompt` event, and whether the viewport is phone-sized, and
+ * exposes the install, open-steps, and dismiss actions.
+ */
 export function useInstallPrompt(): InstallPromptState {
   const { pathname } = useLocation();
   const [isMobile, setIsMobile] = useState(
@@ -69,27 +78,31 @@ export function useInstallPrompt(): InstallPromptState {
   useEffect(() => {
     const media = window.matchMedia?.(MOBILE_QUERY);
     if (!media) return;
-    const onChange = () => setIsMobile(media.matches);
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
+    const handleMediaChange = () => setIsMobile(media.matches);
+    media.addEventListener('change', handleMediaChange);
+    return () => media.removeEventListener('change', handleMediaChange);
   }, []);
 
   useEffect(() => {
-    const sync = () => {
+    const syncInstallState = () => {
       setHasPrompt(getDeferredInstallPrompt() !== null);
       if (hasAppInstalled()) {
         persist(INSTALL_KEYS.installed, '1');
-        setState((s) => (s ? { ...s, installed: true } : s));
+        setState((current) =>
+          current ? { ...current, installed: true } : current,
+        );
       }
     };
-    sync();
-    return subscribeInstallPrompt(sync);
+    syncInstallState();
+    return subscribeInstallPrompt(syncInstallState);
   }, []);
 
   useEffect(() => {
     if (!isEngagedPath(pathname)) return;
     persist(INSTALL_KEYS.engaged, '1');
-    setState((s) => (s && !s.engaged ? { ...s, engaged: true } : s));
+    setState((current) =>
+      current && !current.engaged ? { ...current, engaged: true } : current,
+    );
   }, [pathname]);
 
   const variant =
@@ -108,21 +121,26 @@ export function useInstallPrompt(): InstallPromptState {
   const dismiss = useCallback(() => {
     const now = Date.now();
     persist(INSTALL_KEYS.dismissedAt, String(now));
-    setState((s) => (s ? { ...s, dismissedAt: now } : s));
+    setState((current) =>
+      current ? { ...current, dismissedAt: now } : current,
+    );
     setStepsOpen(false);
   }, []);
 
   const install = useCallback(async () => {
-    const event = getDeferredInstallPrompt();
-    if (!event) return;
+    const installEvent = getDeferredInstallPrompt();
+    if (!installEvent) return;
     try {
-      await event.prompt();
-      const { outcome } = await event.userChoice;
+      await installEvent.prompt();
+      const { outcome } = await installEvent.userChoice;
       // The event is single-use either way.
       clearDeferredInstallPrompt();
       if (outcome === 'dismissed') dismiss();
       // 'accepted': `appinstalled` sets the permanent flag; hide right away.
-      else setState((s) => (s ? { ...s, installed: true } : s));
+      else
+        setState((current) =>
+          current ? { ...current, installed: true } : current,
+        );
     } catch {
       clearDeferredInstallPrompt();
     }

@@ -54,9 +54,9 @@ export function buildEmptyRoster(): Record<Position, RosterPlayer[]> {
 
 /** Formats a per-game time-on-ice value in seconds into the roster stat label. */
 function formatToi(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')} TOI`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')} TOI`;
 }
 
 /**
@@ -68,28 +68,28 @@ export function transformRoster(
   players: RosterPlayerContract[],
   toiMap: Map<number, number>,
 ): Record<Position, RosterPlayer[]> {
-  const result = buildEmptyRoster();
-  for (const p of players ?? []) {
-    const pos = POS_MAP[p.position] as Position;
-    if (!pos) continue;
-    const toi = toiMap.get(p.id);
+  const roster = buildEmptyRoster();
+  for (const player of players ?? []) {
+    const position = POS_MAP[player.position] as Position;
+    if (!position) continue;
+    const toi = toiMap.get(player.id);
     const stat = toi != null ? formatToi(toi) : '';
-    result[pos].push({
-      id: p.id,
-      name: p.name,
-      number: p.number ?? 0,
+    roster[position].push({
+      id: player.id,
+      name: player.name,
+      number: player.number ?? 0,
       stat,
-      headshot: p.headshot ?? '',
+      headshot: player.headshot ?? '',
     });
   }
-  for (const pos of Object.keys(result) as Position[]) {
-    result[pos].sort((a, b) => {
+  for (const position of Object.keys(roster) as Position[]) {
+    roster[position].sort((a, b) => {
       const aToi = toiMap.get(a.id) ?? 0;
       const bToi = toiMap.get(b.id) ?? 0;
       return bToi - aToi;
     });
   }
-  return result;
+  return roster;
 }
 
 /**
@@ -100,11 +100,13 @@ export function transformRoster(
 export function groupRosterByPositionGroup(
   roster: Record<Position, RosterPlayer[]>,
 ): Record<PositionGroup, RosterPlayer[]> {
-  const result = {} as Record<PositionGroup, RosterPlayer[]>;
+  const grouped = {} as Record<PositionGroup, RosterPlayer[]>;
   for (const group of POSITION_GROUPS) {
-    result[group] = POSITIONS_BY_GROUP[group].flatMap((pos) => roster[pos]);
+    grouped[group] = POSITIONS_BY_GROUP[group].flatMap(
+      (position) => roster[position],
+    );
   }
-  return result;
+  return grouped;
 }
 
 /**
@@ -124,7 +126,7 @@ function zipIntoLines(
   for (let i = 0; i < maxLen; i++) {
     const players = positionArrays
       .map((arr) => arr[i])
-      .filter((p): p is RosterPlayer => p != null);
+      .filter((player): player is RosterPlayer => player != null);
     if (players.length === 0) continue;
     lines.push({
       label: i < labeledCount ? `${labelPrefix} ${i + 1}` : '',
@@ -180,22 +182,22 @@ export function transformPlayerStats(
   corsiData: { data?: SkaterCorsiEntry[] } | null,
 ): PlayerStatLine[] {
   const corsiMap = new Map<number, number>();
-  for (const p of corsiData?.data ?? []) {
-    if (p.playerId != null && p.satPercentage != null)
-      corsiMap.set(p.playerId, p.satPercentage);
+  for (const entry of corsiData?.data ?? []) {
+    if (entry.playerId != null && entry.satPercentage != null)
+      corsiMap.set(entry.playerId, entry.satPercentage);
   }
-  return (summary ?? []).map((p): PlayerStatLine => ({
-    playerId: p.playerId,
-    name: p.name ?? '',
-    position: p.position ?? '',
-    gamesPlayed: p.gamesPlayed ?? 0,
-    goals: p.goals ?? 0,
-    assists: p.assists ?? 0,
-    points: p.points ?? 0,
-    plusMinus: p.plusMinus ?? 0,
-    penaltyMinutes: p.penaltyMinutes ?? 0,
-    faceoffWinPct: p.faceoffWinPct ?? null,
-    corsiPct: corsiMap.get(p.playerId) ?? null,
+  return (summary ?? []).map((skater): PlayerStatLine => ({
+    playerId: skater.playerId,
+    name: skater.name ?? '',
+    position: skater.position ?? '',
+    gamesPlayed: skater.gamesPlayed ?? 0,
+    goals: skater.goals ?? 0,
+    assists: skater.assists ?? 0,
+    points: skater.points ?? 0,
+    plusMinus: skater.plusMinus ?? 0,
+    penaltyMinutes: skater.penaltyMinutes ?? 0,
+    faceoffWinPct: skater.faceoffWinPct ?? null,
+    corsiPct: corsiMap.get(skater.playerId) ?? null,
   }));
 }
 
@@ -203,15 +205,15 @@ export function transformPlayerStats(
 export function transformGoalieStats(
   summary: GoalieSummaryContract[] | null,
 ): GoalieStatLine[] {
-  return (summary ?? []).map((g): GoalieStatLine => ({
-    goalieId: g.goalieId,
-    name: g.name ?? '',
-    gamesPlayed: g.gamesPlayed ?? 0,
-    wins: g.wins ?? 0,
-    losses: g.losses ?? 0,
-    savePctg: g.savePctg ?? null,
-    goalsAgainstAverage: g.goalsAgainstAverage ?? null,
-    shutouts: g.shutouts ?? 0,
+  return (summary ?? []).map((goalie): GoalieStatLine => ({
+    goalieId: goalie.goalieId,
+    name: goalie.name ?? '',
+    gamesPlayed: goalie.gamesPlayed ?? 0,
+    wins: goalie.wins ?? 0,
+    losses: goalie.losses ?? 0,
+    savePctg: goalie.savePctg ?? null,
+    goalsAgainstAverage: goalie.goalsAgainstAverage ?? null,
+    shutouts: goalie.shutouts ?? 0,
   }));
 }
 
@@ -228,29 +230,29 @@ export function buildTeamOverview(
   westernStandingsData: StandingsTeam[],
 ): TeamOverview {
   const allStandings = [...easternStandingsData, ...westernStandingsData];
-  const s = allStandings.find((t) => t.id === triCode);
+  const teamStandings = allStandings.find((team) => team.id === triCode);
   const conferenceStandings =
-    s?.conferenceName === 'Eastern'
+    teamStandings?.conferenceName === 'Eastern'
       ? easternStandingsData
       : westernStandingsData;
   const playoffCutoff = conferenceStandings.find(
-    (t) => t.conferenceStandingsPlace === 8,
+    (team) => team.conferenceStandingsPlace === 8,
   );
-  const teamPoints = s?.points ?? raw?.points ?? 0;
+  const teamPoints = teamStandings?.points ?? raw?.points ?? 0;
   const playoffLineDelta = playoffCutoff
     ? teamPoints - playoffCutoff.points
     : 0;
   return {
     name: raw?.teamFullName ?? '',
     triCode,
-    wins: s?.wins ?? raw?.wins ?? 0,
-    losses: s?.losses ?? raw?.losses ?? 0,
-    otLosses: s?.otLosses ?? raw?.otLosses ?? 0,
+    wins: teamStandings?.wins ?? raw?.wins ?? 0,
+    losses: teamStandings?.losses ?? raw?.losses ?? 0,
+    otLosses: teamStandings?.otLosses ?? raw?.otLosses ?? 0,
     points: teamPoints,
-    divisionRank: s?.divisionStandingsPlace ?? 0,
-    division: s?.divisionName ?? '',
-    conference: s?.conferenceName ?? '',
-    conferenceRank: s?.conferenceStandingsPlace ?? 0,
+    divisionRank: teamStandings?.divisionStandingsPlace ?? 0,
+    division: teamStandings?.divisionName ?? '',
+    conference: teamStandings?.conferenceName ?? '',
+    conferenceRank: teamStandings?.conferenceStandingsPlace ?? 0,
     playoffLineDelta,
     founded: 0,
     arena: '—',
@@ -260,7 +262,14 @@ export function buildTeamOverview(
   };
 }
 
-const VALID_TEAM_SECTIONS = new Set(TEAM_SECTIONS.map((s) => s.key));
+const VALID_TEAM_SECTIONS = new Set<string>(
+  TEAM_SECTIONS.map((section) => section.key),
+);
+
+/** True when `value` is the key of one of the team page's anchor sections. */
+export function isTeamSection(value: string): value is TeamSection {
+  return VALID_TEAM_SECTIONS.has(value);
+}
 
 /**
  * Maps a legacy `?tab=` value (from previously shared links) onto the
@@ -271,9 +280,7 @@ const VALID_TEAM_SECTIONS = new Set(TEAM_SECTIONS.map((s) => s.key));
 export function resolveLegacyTeamTab(value: string | null): TeamSection | null {
   if (value == null) return null;
   if (value === 'overview') return 'stats';
-  return VALID_TEAM_SECTIONS.has(value as TeamSection)
-    ? (value as TeamSection)
-    : null;
+  return isTeamSection(value) ? value : null;
 }
 
 /**

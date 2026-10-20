@@ -8,34 +8,40 @@ import { parseLocalDate } from '@/lib/dateFormat';
  * broadcast list. The contract's `date` string is parsed as a local date to
  * avoid UTC shift.
  */
-function ConvertContractToGame(g: ScheduleGameDto): ScheduledGame {
-  const broadcasts: GameBroadcast[] = (g.broadcasts ?? []).map(
-    (b) => new GameBroadcast(b.id, b.network, b.market, b.countryCode),
+function ConvertContractToGame(gameDto: ScheduleGameDto): ScheduledGame {
+  const broadcasts: GameBroadcast[] = (gameDto.broadcasts ?? []).map(
+    (broadcast) =>
+      new GameBroadcast(
+        broadcast.id,
+        broadcast.network,
+        broadcast.market,
+        broadcast.countryCode,
+      ),
   );
 
   return new ScheduledGame(
-    g.gameId,
-    parseLocalDate(g.date),
-    g.gameTime,
-    g.dayOfWeek,
-    g.venue,
-    g.homeTeam,
-    g.homeLogo,
-    g.homeScore,
-    g.awayTeam,
-    g.awayLogo,
-    g.awayScore,
+    gameDto.gameId,
+    parseLocalDate(gameDto.date),
+    gameDto.gameTime,
+    gameDto.dayOfWeek,
+    gameDto.venue,
+    gameDto.homeTeam,
+    gameDto.homeLogo,
+    gameDto.homeScore,
+    gameDto.awayTeam,
+    gameDto.awayLogo,
+    gameDto.awayScore,
     broadcasts,
-    g.ticketLink,
-    g.gameCenter,
-    g.isPlayoff,
-    g.isPreseason,
-    g.playoffRound,
-    g.periodType,
-    g.seriesWins,
-    g.topSeedTeamAbbrev ?? null,
-    g.bottomSeedTeamAbbrev ?? null,
-    g.gameState,
+    gameDto.ticketLink,
+    gameDto.gameCenter,
+    gameDto.isPlayoff,
+    gameDto.isPreseason,
+    gameDto.playoffRound,
+    gameDto.periodType,
+    gameDto.seriesWins,
+    gameDto.topSeedTeamAbbrev ?? null,
+    gameDto.bottomSeedTeamAbbrev ?? null,
+    gameDto.gameState,
   );
 }
 

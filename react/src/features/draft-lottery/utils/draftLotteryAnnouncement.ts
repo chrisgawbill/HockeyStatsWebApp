@@ -8,14 +8,14 @@ const DRAW_LABEL = { 1: 'first', 2: 'second' } as const;
  * @param nameOf resolves a team id to its display name
  */
 export function buildLotteryAnnouncement(
-  result: LotteryResultEntry[],
+  lotteryResult: LotteryResultEntry[],
   nameOf: (id: string) => string,
 ): string {
   const parts = [
-    `${nameOf(result[0].id)} win the #1 pick.`,
-    `${nameOf(result[1].id)} get the #2 pick.`,
+    `${nameOf(lotteryResult[0].id)} win the #1 pick.`,
+    `${nameOf(lotteryResult[1].id)} get the #2 pick.`,
   ];
-  for (const entry of result) {
+  for (const entry of lotteryResult) {
     if (entry.drawWon !== null && entry.pick > entry.drawWon) {
       parts.push(
         `${nameOf(entry.id)} win the ${DRAW_LABEL[entry.drawWon]} draw and jump ${entry.movement} spots to #${entry.pick}.`,

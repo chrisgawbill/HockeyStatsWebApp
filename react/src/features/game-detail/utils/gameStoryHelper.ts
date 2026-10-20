@@ -45,10 +45,12 @@ export interface GameStoryFacts {
   turningPoints: GameStoryTurningPoint[];
 }
 
+/** The score if it is a finite number, otherwise null. */
 function scoreOrNull(value: number | undefined): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
+/** Who is ahead after a goal, or null while either score is unknown. */
 function gameStateFor(
   awayScore: number | null,
   homeScore: number | null,
@@ -58,6 +60,7 @@ function gameStateFor(
   return awayScore > homeScore ? 'away-lead' : 'home-lead';
 }
 
+/** Abbreviation of the team leading after the event, or null when tied or unknown. */
 function leadTeam(
   event: GameStoryScoringEvent,
   awayAbbrev: string,
@@ -68,6 +71,7 @@ function leadTeam(
   return null;
 }
 
+/** Normalizes one landing-feed goal into a scoring event with defaults for missing fields. */
 function toScoringEvent(
   goal: LandingGoal,
   periodNumber: number,
@@ -97,16 +101,11 @@ function toScoringEvent(
   };
 }
 
-/**
- * Derives only facts explicitly represented by the landing scoring feed.
- * The feed's period/goal order is treated as authoritative; no event timing
- * or causal interpretation is invented here.
- */
-export function getGameStoryFacts(
+/** Flattens the landing feed's periods into goal events, keeping the feed's order. */
+function collectScoringEvents(
   landing: GameLanding | null | undefined,
-  awayAbbrev: string,
   homeAbbrev: string,
-): GameStoryFacts {
+): GameStoryScoringEvent[] {
   const scoringEvents: GameStoryScoringEvent[] = [];
   for (const period of landing?.summary?.scoring ?? []) {
     for (const goal of period.goals ?? []) {
@@ -121,11 +120,18 @@ export function getGameStoryFacts(
       );
     }
   }
+  return scoringEvents;
+}
 
-  const tiedEventIndexes = scoringEvents
-    .filter((event) => event.gameState === 'tied')
-    .map((event) => event.eventIndex);
-
+/**
+ * Walks the goals in order and finds the first lead, the largest lead (the
+ * earliest one wins ties), and every goal that moved the lead to the other team.
+ */
+function findLeads(
+  scoringEvents: GameStoryScoringEvent[],
+  awayAbbrev: string,
+  homeAbbrev: string,
+) {
   const leadChanges: GameStoryLeadChange[] = [];
   let previousLeader: string | null = null;
   let firstLead: GameStoryLeadChange | null = null;
@@ -165,6 +171,16 @@ export function getGameStoryFacts(
     previousLeader = leader;
   }
 
+  return { leadChanges, firstLead, largestLead };
+}
+
+/** Picks the notable goals to call out, listing each goal at most once. */
+function pickTurningPoints(
+  facts: Pick<
+    GameStoryFacts,
+    'tiedEventIndexes' | 'leadChanges' | 'firstLead' | 'largestLead'
+  >,
+): GameStoryTurningPoint[] {
   const turningPoints: GameStoryTurningPoint[] = [];
   const addTurningPoint = (
     kind: GameStoryTurningPoint['kind'],
@@ -178,12 +194,34 @@ export function getGameStoryFacts(
     }
   };
 
-  addTurningPoint('first-lead', firstLead?.eventIndex);
-  addTurningPoint('largest-lead', largestLead?.eventIndex);
-  addTurningPoint('lead-change', leadChanges[0]?.eventIndex);
+  addTurningPoint('first-lead', facts.firstLead?.eventIndex);
+  addTurningPoint('largest-lead', facts.largestLead?.eventIndex);
+  addTurningPoint('lead-change', facts.leadChanges[0]?.eventIndex);
   addTurningPoint(
     'tied-game',
-    tiedEventIndexes.find((index) => index > 0),
+    facts.tiedEventIndexes.find((index) => index > 0),
+  );
+  return turningPoints;
+}
+
+/**
+ * Derives only facts explicitly represented by the landing scoring feed.
+ * The feed's period/goal order is treated as authoritative; no event timing
+ * or causal interpretation is invented here.
+ */
+export function getGameStoryFacts(
+  landing: GameLanding | null | undefined,
+  awayAbbrev: string,
+  homeAbbrev: string,
+): GameStoryFacts {
+  const scoringEvents = collectScoringEvents(landing, homeAbbrev);
+  const tiedEventIndexes = scoringEvents
+    .filter((event) => event.gameState === 'tied')
+    .map((event) => event.eventIndex);
+  const { leadChanges, firstLead, largestLead } = findLeads(
+    scoringEvents,
+    awayAbbrev,
+    homeAbbrev,
   );
 
   return {
@@ -192,6 +230,11 @@ export function getGameStoryFacts(
     leadChanges,
     firstLead,
     largestLead,
-    turningPoints,
+    turningPoints: pickTurningPoints({
+      tiedEventIndexes,
+      leadChanges,
+      firstLead,
+      largestLead,
+    }),
   };
 }

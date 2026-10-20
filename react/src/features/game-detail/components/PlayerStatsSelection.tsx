@@ -15,16 +15,19 @@ interface Props {
   awayAbbrev: string;
 }
 
+/** Converts an 'mm:ss' time on ice to seconds. */
 function toSeconds(toi: string): number {
   const [m, s] = toi.split(':').map(Number);
   return m * 60 + (s || 0);
 }
 
+/** Save percentage with three decimals, or a dash when missing. */
 function formatSvPct(pct?: number): string {
   if (pct == null) return '—';
   return (pct * 100).toFixed(1) + '%';
 }
 
+/** Skater box score sorted by time on ice. */
 function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
   const sorted = [...skaters].sort(
     (a, b) => toSeconds(b.toi) - toSeconds(a.toi),
@@ -51,42 +54,46 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((p) => (
-            <tr key={p.playerId}>
+          {sorted.map((skater) => (
+            <tr key={skater.playerId}>
               <td className={styles['player-box-table__muted']}>
-                {p.sweaterNumber}
+                {skater.sweaterNumber}
               </td>
               <td className={styles['player-box-table__name-col']}>
-                {p.name.default}
+                {skater.name.default}
               </td>
               <td className={styles['player-box-table__muted']}>
-                {p.position}
+                {skater.position}
               </td>
-              <td>{p.goals}</td>
-              <td>{p.assists}</td>
+              <td>{skater.goals}</td>
+              <td>{skater.assists}</td>
               <td
                 className={
-                  p.points > 0 ? styles['player-box-table__highlight'] : ''
+                  skater.points > 0 ? styles['player-box-table__highlight'] : ''
                 }
               >
-                {p.points}
+                {skater.points}
               </td>
               <td
                 className={
-                  p.plusMinus > 0
+                  skater.plusMinus > 0
                     ? styles['player-box-table__positive']
-                    : p.plusMinus < 0
+                    : skater.plusMinus < 0
                       ? styles['player-box-table__negative']
                       : ''
                 }
               >
-                {p.plusMinus > 0 ? `+${p.plusMinus}` : p.plusMinus}
+                {skater.plusMinus > 0
+                  ? `+${skater.plusMinus}`
+                  : skater.plusMinus}
               </td>
-              <td>{p.pim}</td>
-              <td>{p.hits}</td>
-              <td>{p.blockedShots}</td>
-              <td>{p.sog}</td>
-              <td className={styles['player-box-table__muted']}>{p.toi}</td>
+              <td>{skater.pim}</td>
+              <td>{skater.hits}</td>
+              <td>{skater.blockedShots}</td>
+              <td>{skater.sog}</td>
+              <td className={styles['player-box-table__muted']}>
+                {skater.toi}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -95,8 +102,9 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
   );
 }
 
+/** Box score for goalies who played. */
 function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
-  const played = goalies.filter((g) => toSeconds(g.toi) > 0);
+  const played = goalies.filter((goalie) => toSeconds(goalie.toi) > 0);
   if (played.length === 0) return null;
   return (
     <div
@@ -115,29 +123,34 @@ function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
           </tr>
         </thead>
         <tbody>
-          {played.map((g) => (
-            <tr key={g.playerId}>
+          {played.map((goalie) => (
+            <tr key={goalie.playerId}>
               <td className={styles['player-box-table__muted']}>
-                {g.sweaterNumber}
+                {goalie.sweaterNumber}
               </td>
               <td className={styles['player-box-table__name-col']}>
-                {g.name.default}
+                {goalie.name.default}
               </td>
               <td
                 className={
-                  g.decision === 'W'
+                  goalie.decision === 'W'
                     ? styles['player-box-table__positive']
-                    : g.decision === 'L'
+                    : goalie.decision === 'L'
                       ? styles['player-box-table__negative']
                       : styles['player-box-table__muted']
                 }
               >
-                {g.decision ?? '—'}
+                {goalie.decision ?? '—'}
               </td>
-              <td>{g.saveShotsAgainst ?? `${g.saves}/${g.shotsAgainst}`}</td>
-              <td>{formatSvPct(g.savePctg)}</td>
-              <td>{g.goalsAgainst}</td>
-              <td className={styles['player-box-table__muted']}>{g.toi}</td>
+              <td>
+                {goalie.saveShotsAgainst ??
+                  `${goalie.saves}/${goalie.shotsAgainst}`}
+              </td>
+              <td>{formatSvPct(goalie.savePctg)}</td>
+              <td>{goalie.goalsAgainst}</td>
+              <td className={styles['player-box-table__muted']}>
+                {goalie.toi}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -146,6 +159,7 @@ function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
   );
 }
 
+/** One team's skater and goalie tables. */
 function TeamPlayerStats({
   team,
   abbrev,
@@ -170,6 +184,7 @@ function TeamPlayerStats({
   );
 }
 
+/** Player box scores with a toggle between the away and home team. */
 function PlayerStatsSelection({
   homeTeam,
   awayTeam,

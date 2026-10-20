@@ -2,13 +2,24 @@ import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import styles from '@/features/standings/components/LandingPageStandings.module.css';
+import { joinClassNames } from '@/lib/joinClassNames';
 import shared from '@/styles/shared.module.css';
 import {
   CLINCH_STATUS_META,
   ClinchStatus,
+  getClinchStatus,
 } from '@/features/standings/utils/clinchStatus';
 
 type SortKey = 'PLACE' | 'TEAM' | 'RECORD' | 'POINTS' | 'POINTSPERCENTAGE';
+type SortState = { key: SortKey; direction: 'ascending' | 'descending' };
+
+const HEADERS: [string, SortKey][] = [
+  ['#', 'PLACE'],
+  ['Team', 'TEAM'],
+  ['Record', 'RECORD'],
+  ['Pts', 'POINTS'],
+  ['P%', 'POINTSPERCENTAGE'],
+];
 
 interface Props {
   standingsData: StandingsTeam[];
@@ -16,6 +27,62 @@ interface Props {
   fill?: boolean;
 }
 
+/** Small letter badge marking a clinched playoff status next to a team name. */
+function ClinchBadge({ status }: { status: ClinchStatus | null }) {
+  if (!status) return null;
+  const meta = CLINCH_STATUS_META[status];
+  return (
+    <span
+      className={`${shared.chip} ${styles['standings-clinch-badge']} ${meta.className}`}
+      aria-label={meta.label}
+      title={meta.label}
+    >
+      {meta.badge}
+    </span>
+  );
+}
+
+/** Returns a copy of the standings ordered by the active column, or unchanged when no sort is set. */
+function sortStandings(
+  standings: StandingsTeam[],
+  sort: SortState | null,
+  isDivision: boolean,
+): StandingsTeam[] {
+  return [...standings].sort((first, second) => {
+    if (!sort) return 0;
+    let comparison = 0;
+    switch (sort.key) {
+      case 'PLACE':
+        comparison =
+          (isDivision
+            ? first.divisionStandingsPlace
+            : first.conferenceStandingsPlace) -
+          (isDivision
+            ? second.divisionStandingsPlace
+            : second.conferenceStandingsPlace);
+        break;
+      case 'TEAM':
+        comparison = first.teamName.localeCompare(second.teamName);
+        break;
+      case 'RECORD':
+        comparison = first.wins - second.wins;
+        break;
+      case 'POINTS':
+        comparison = first.points - second.points;
+        break;
+      case 'POINTSPERCENTAGE':
+        comparison = first.pointsPercentage - second.pointsPercentage;
+        break;
+    }
+    return sort.direction === 'ascending' ? comparison : -comparison;
+  });
+}
+
+/**
+ * Sortable standings table for one conference or division. Clicking a column
+ * header sorts by it (click again to reverse); clicking a row opens the team
+ * page, returning to the home page or standings page afterwards.
+ */
 export default function LandingPageStandingsTable({
   standingsData,
   standingFormat,
@@ -24,10 +91,7 @@ export default function LandingPageStandingsTable({
   const navigate = useNavigate();
   const location = useLocation();
   const isDivision = standingFormat === 'Division';
-  const [sort, setSort] = React.useState<{
-    key: SortKey;
-    direction: 'ascending' | 'descending';
-  } | null>(null);
+  const [sort, setSort] = React.useState<SortState | null>(null);
   const standingsSourcePath = location.pathname === '/' ? '/' : '/standings';
 
   const goToTeam = (team: StandingsTeam) =>
@@ -38,58 +102,7 @@ export default function LandingPageStandingsTable({
       },
     });
 
-  const getClinchStatus = (item: StandingsTeam): ClinchStatus | null => {
-    const indicator = item.clinchingIndicator?.toString().trim().toLowerCase();
-    if (indicator === 'p') return 'presidents';
-    if (indicator === 'z') return 'conference';
-    if (indicator === 'y') return 'division';
-    if (
-      indicator === 'w' ||
-      (indicator === 'x' && item.wildCardRank > 0 && item.wildCardRank <= 2)
-    )
-      return 'wildcard';
-    if (indicator === 'x') return 'playoffs';
-    return null;
-  };
-
-  const renderClinchBadge = (status: ClinchStatus | null) => {
-    if (!status) return null;
-    const meta = CLINCH_STATUS_META[status];
-    return (
-      <span
-        className={`${shared.chip} ${styles['standings-clinch-badge']} ${meta.className}`}
-        aria-label={meta.label}
-        title={meta.label}
-      >
-        {meta.badge}
-      </span>
-    );
-  };
-
-  const sortedStandings = [...standingsData].sort((a, b) => {
-    if (!sort) return 0;
-    let result = 0;
-    switch (sort.key) {
-      case 'PLACE':
-        result =
-          (isDivision ? a.divisionStandingsPlace : a.conferenceStandingsPlace) -
-          (isDivision ? b.divisionStandingsPlace : b.conferenceStandingsPlace);
-        break;
-      case 'TEAM':
-        result = a.teamName.localeCompare(b.teamName);
-        break;
-      case 'RECORD':
-        result = a.wins - b.wins;
-        break;
-      case 'POINTS':
-        result = a.points - b.points;
-        break;
-      case 'POINTSPERCENTAGE':
-        result = a.pointsPercentage - b.pointsPercentage;
-        break;
-    }
-    return sort.direction === 'ascending' ? result : -result;
-  });
+  const sortedStandings = sortStandings(standingsData, sort, isDivision);
 
   const toggleSort = (key: SortKey) =>
     setSort((current) =>
@@ -101,23 +114,14 @@ export default function LandingPageStandingsTable({
           }
         : { key, direction: 'ascending' },
     );
-  const headers: [string, SortKey][] = [
-    ['#', 'PLACE'],
-    ['Team', 'TEAM'],
-    ['Record', 'RECORD'],
-    ['Pts', 'POINTS'],
-    ['P%', 'POINTSPERCENTAGE'],
-  ];
 
   return (
     <div
-      className={[
+      className={joinClassNames(
         styles['standings-table-shell'],
         'ds-table-wrap',
-        fill ? styles['standings-table-shell--fill'] : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+        fill && styles['standings-table-shell--fill'],
+      )}
       style={
         fill
           ? undefined
@@ -131,7 +135,7 @@ export default function LandingPageStandingsTable({
       <table className={`${styles['standings-table']} ds-table`}>
         <thead>
           <tr>
-            {headers.map(([label, key]) => (
+            {HEADERS.map(([label, key]) => (
               <th
                 key={key}
                 scope="col"
@@ -192,7 +196,7 @@ export default function LandingPageStandingsTable({
                     >
                       {team.id}
                     </span>
-                    {renderClinchBadge(status)}
+                    <ClinchBadge status={status} />
                   </span>
                 </td>
                 <td

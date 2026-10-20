@@ -6,6 +6,7 @@ export const INSTALL_KEYS = {
   engaged: 'installPrompt.engaged',
 } as const;
 
+/** How long a dismissal hides the banner: 30 days. */
 export const SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
 
 export type InstallVariant = 'android' | 'ios';
@@ -28,6 +29,7 @@ export interface InstallEnvironment {
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
+/** True for team and game detail pages, which count as engagement with the app. */
 export function isEngagedPath(pathname: string): boolean {
   return /^\/(game|team)\/[^/]+/.test(pathname);
 }
@@ -42,6 +44,7 @@ export function getPlatformVariant(
   return null;
 }
 
+/** Whether a dismissal is still inside its 30-day snooze window. */
 export function isSnoozed(dismissedAt: number | null, now: number): boolean {
   return dismissedAt !== null && now - dismissedAt < SNOOZE_MS;
 }

@@ -8,6 +8,7 @@ interface StatLeaderCardProps {
   topStatLeader: TopStatLeader;
 }
 
+/** Card for one stat category's top player; opens a dialog with the full leaderboard. */
 export default function StatLeaderCard({ topStatLeader }: StatLeaderCardProps) {
   const [showModal, setShowModal] = useState(false);
 

@@ -11,6 +11,7 @@ type ThreeStarsProps = {
 
 const STAR_LABELS = ['1st Star', '2nd Star', '3rd Star'];
 
+/** One-line stat summary for a star. */
 function formatStatLine(star: LandingThreeStar): string {
   if (star.position === 'G') {
     const gaa = star.goalsAgainstAverage?.toFixed(2) ?? '—';
@@ -18,12 +19,13 @@ function formatStatLine(star: LandingThreeStar): string {
       star.savePctg != null ? (star.savePctg * 100).toFixed(1) + '%' : '—';
     return `${svPct} SV%  ·  ${gaa} GAA`;
   }
-  const g = star.goals ?? 0;
-  const a = star.assists ?? 0;
-  const p = star.points ?? 0;
-  return `${g}G  ${a}A  ${p}P`;
+  const goals = star.goals ?? 0;
+  const assists = star.assists ?? 0;
+  const points = star.points ?? 0;
+  return `${goals}G  ${assists}A  ${points}P`;
 }
 
+/** The game's three stars with headshots and stat lines. */
 function ThreeStars({ stars }: ThreeStarsProps) {
   return (
     <section className={`${styles['game-detail-section']} ${shared.section}`}>

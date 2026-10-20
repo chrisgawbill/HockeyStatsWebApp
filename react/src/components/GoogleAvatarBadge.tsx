@@ -1,11 +1,33 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
   type KeyboardEvent,
   type PointerEvent,
+  type RefObject,
 } from 'react';
 import styles from '@/components/GoogleAvatarBadge.module.css';
+
+/**
+ * Closes the menu when a pointer goes down outside `wrapperRef`. Touch has no
+ * hover to leave, so a tap outside is the only way a touch user dismisses it.
+ */
+function useCloseOnOutsidePointer(
+  wrapperRef: RefObject<HTMLElement>,
+  isOpen: boolean,
+  close: () => void,
+) {
+  useEffect(() => {
+    if (!isOpen) return;
+    function closeOnOutsidePointer(event: globalThis.PointerEvent) {
+      if (!wrapperRef.current?.contains(event.target as Node)) close();
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    return () =>
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+  }, [isOpen, wrapperRef, close]);
+}
 
 export interface GoogleAvatarBadgeProps {
   email: string;
@@ -29,39 +51,34 @@ export default function GoogleAvatarBadge({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const initial = email.charAt(0).toUpperCase();
 
-  // Touch has no hover to leave, so a tap outside closes the menu.
-  useEffect(() => {
-    if (!open) return;
-    function closeOnOutsidePointer(e: globalThis.PointerEvent) {
-      if (!wrapperRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('pointerdown', closeOnOutsidePointer);
-    return () =>
-      document.removeEventListener('pointerdown', closeOnOutsidePointer);
-  }, [open]);
+  const closeMenu = useCallback(() => setOpen(false), []);
+  useCloseOnOutsidePointer(wrapperRef, open, closeMenu);
 
   // Hover opens the menu for a mouse only: a tap fires enter and then click,
   // and the click's toggle would immediately close what the enter opened.
-  function handlePointerHover(e: PointerEvent<HTMLDivElement>, next: boolean) {
-    if (e.pointerType === 'mouse') setOpen(next);
+  function handlePointerHover(
+    event: PointerEvent<HTMLDivElement>,
+    nextOpen: boolean,
+  ) {
+    if (event.pointerType === 'mouse') setOpen(nextOpen);
   }
 
-  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
-    if (e.key === 'Escape') setOpen(false);
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Escape') setOpen(false);
   }
 
   return (
     <div
       ref={wrapperRef}
       className={styles.wrapper}
-      onPointerEnter={(e) => handlePointerHover(e, true)}
-      onPointerLeave={(e) => handlePointerHover(e, false)}
+      onPointerEnter={(event) => handlePointerHover(event, true)}
+      onPointerLeave={(event) => handlePointerHover(event, false)}
       onKeyDown={handleKeyDown}
     >
       <button
         type="button"
         className={styles.badge}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen((wasOpen) => !wasOpen)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Signed in as ${email}`}

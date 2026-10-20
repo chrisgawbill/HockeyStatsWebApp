@@ -7,10 +7,7 @@ import {
   getGameStatusLabel,
 } from '@/features/schedule/utils/gameStatusHelper';
 import styles from '@/features/schedule/components/ScheduleCalendar.module.css';
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
+import { joinClassNames } from '@/lib/joinClassNames';
 
 /**
  * Returns the logo URL variant for the active theme. NHL logo URLs are stored as
@@ -54,7 +51,7 @@ export default function GameChip({
   return (
     <button
       type="button"
-      className={cx(
+      className={joinClassNames(
         styles['game-chip'],
         completed && styles['game-chip--clickable'],
         game.isPreseason && styles['game-chip--preseason'],
@@ -82,7 +79,7 @@ export default function GameChip({
       </span>
 
       <span
-        className={cx(
+        className={joinClassNames(
           styles['game-chip__meta'],
           live && styles['game-chip__meta--live'],
         )}

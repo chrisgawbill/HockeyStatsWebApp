@@ -6,14 +6,17 @@ interface SplitBarsProps {
   road: TeamSplit;
 }
 
+/** Formats a split as wins-losses-OT losses. */
 function record(split: TeamSplit): string {
   return `${split.wins}-${split.losses}-${split.otl}`;
 }
 
+/** Bar width as a percentage of the larger side. */
 function barWidth(value: number, max: number): string {
   return `${max === 0 ? 0 : Math.round((value / max) * 100)}%`;
 }
 
+/** Paired bars comparing home and road records. */
 export default function SplitBars({ home, road }: SplitBarsProps) {
   const maxGoals = Math.max(home.gf, home.ga, road.gf, road.ga, 1);
 

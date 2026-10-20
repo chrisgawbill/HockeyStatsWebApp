@@ -12,12 +12,14 @@ interface TeamDnaProps {
   season: string;
 }
 
+/** Formats a season id like 20252026 as 2025-26. */
 function seasonLabel(season: string): string {
   return /^\d{8}$/.test(season)
     ? `${season.slice(0, 4)}–${season.slice(6)}`
     : season;
 }
 
+/** Caption naming the season, how many teams the ranks cover, and sample caveats. */
 function captionOf(profile: TeamDnaProfile, season: string): string {
   const parts = [seasonLabel(season)];
   if (profile.ranked) {
@@ -30,6 +32,7 @@ function captionOf(profile: TeamDnaProfile, season: string): string {
   return parts.join(' · ');
 }
 
+/** One metric row: the team's value, league rank, and rank bar. */
 function DnaRow({ row, index }: { row: TeamDnaRow; index: number }) {
   const tierClass = row.tier ? styles[`dna-metric--${row.tier}`] : '';
   return (
@@ -76,6 +79,7 @@ function DnaRow({ row, index }: { row: TeamDnaRow; index: number }) {
   );
 }
 
+/** Team DNA card: strengths and weaknesses chips plus per-metric league rankings. */
 export default function TeamDna({ profile, season }: TeamDnaProps) {
   const { rows, chips, ranked } = profile;
 

@@ -70,10 +70,11 @@ function urlFor(path: string, params?: QueryParams): string {
     : url;
 }
 
+/** Sends one JSON request with a timeout and returns the parsed body; throws ApiError on a non-OK status. */
 async function request<T>(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   path: string,
-  data?: unknown,
+  requestBody?: unknown,
   params?: QueryParams,
   options?: RequestOptions,
 ): Promise<T> {
@@ -81,11 +82,11 @@ async function request<T>(
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const headers = new Headers(options?.headers);
   const body =
-    data === undefined
+    requestBody === undefined
       ? undefined
-      : typeof data === 'string'
-        ? data
-        : JSON.stringify(data);
+      : typeof requestBody === 'string'
+        ? requestBody
+        : JSON.stringify(requestBody);
 
   if (body !== undefined && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
@@ -119,6 +120,7 @@ function isTransient(error: unknown): boolean {
   return !(error instanceof ApiError) || RETRYABLE_STATUSES.has(error.status);
 }
 
+/** Resolves after `ms` milliseconds; used to space out retries. */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -166,10 +168,10 @@ export function get<T>(
  */
 export function post<T>(
   path: string,
-  data?: unknown,
+  requestBody?: unknown,
   options?: RequestOptions,
 ): Promise<T> {
-  return send(() => request<T>('POST', path, data, undefined, options));
+  return send(() => request<T>('POST', path, requestBody, undefined, options));
 }
 
 /**
@@ -178,20 +180,22 @@ export function post<T>(
  */
 export function put<T>(
   path: string,
-  data?: unknown,
+  requestBody?: unknown,
   options?: RequestOptions,
 ): Promise<T> {
-  return send(() => request<T>('PUT', path, data, undefined, options));
+  return send(() => request<T>('PUT', path, requestBody, undefined, options));
 }
 
 /**
  * Shared DELETE wrapper: returns `response.data`, and logs then re-throws so
- * callers keep their own error UI. `data` is an optional JSON body.
+ * callers keep their own error UI. `requestBody` is an optional JSON body.
  */
 export function del<T>(
   path: string,
   options?: RequestOptions,
-  data?: unknown,
+  requestBody?: unknown,
 ): Promise<T> {
-  return send(() => request<T>('DELETE', path, data, undefined, options));
+  return send(() =>
+    request<T>('DELETE', path, requestBody, undefined, options),
+  );
 }

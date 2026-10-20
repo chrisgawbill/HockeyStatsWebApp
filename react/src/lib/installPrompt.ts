@@ -15,6 +15,7 @@ let deferredPrompt: BeforeInstallPromptEvent | null = null;
 let installed = false;
 const listeners = new Set<Listener>();
 
+/** Tells every subscriber that the captured install prompt changed. */
 function notify() {
   listeners.forEach((listener) => listener());
 }
@@ -32,10 +33,12 @@ if (typeof window !== 'undefined') {
   });
 }
 
+/** The captured `beforeinstallprompt` event, or null if none is available. */
 export function getDeferredInstallPrompt(): BeforeInstallPromptEvent | null {
   return deferredPrompt;
 }
 
+/** Forgets the captured event (it can only be used once) and notifies subscribers. */
 export function clearDeferredInstallPrompt(): void {
   deferredPrompt = null;
   notify();
@@ -46,6 +49,7 @@ export function hasAppInstalled(): boolean {
   return installed;
 }
 
+/** Calls `listener` whenever the install prompt appears, is used, or the app is installed; returns an unsubscribe function. */
 export function subscribeInstallPrompt(listener: Listener): () => void {
   listeners.add(listener);
   return () => {

@@ -72,10 +72,12 @@ export function getPeriodGoalsBreakdown(
   return scoring.map((period) => ({
     periodNum: period.periodDescriptor.number,
     periodType: period.periodDescriptor.periodType,
-    homeGoals: period.goals.filter((g) => g.teamAbbrev.default === homeAbbrev)
-      .length,
-    awayGoals: period.goals.filter((g) => g.teamAbbrev.default === awayAbbrev)
-      .length,
+    homeGoals: period.goals.filter(
+      (goal) => goal.teamAbbrev.default === homeAbbrev,
+    ).length,
+    awayGoals: period.goals.filter(
+      (goal) => goal.teamAbbrev.default === awayAbbrev,
+    ).length,
   }));
 }
 
@@ -87,12 +89,15 @@ export function computeTeamTotals(
   const skaters = [...teamStats.forwards, ...teamStats.defense];
   return {
     sog: teamSog,
-    hits: skaters.reduce((sum, p) => sum + p.hits, 0),
-    blockedShots: skaters.reduce((sum, p) => sum + p.blockedShots, 0),
-    pim: skaters.reduce((sum, p) => sum + p.pim, 0),
-    powerPlayGoals: skaters.reduce((sum, p) => sum + p.powerPlayGoals, 0),
-    giveaways: skaters.reduce((sum, p) => sum + p.giveaways, 0),
-    takeaways: skaters.reduce((sum, p) => sum + p.takeaways, 0),
+    hits: skaters.reduce((sum, skater) => sum + skater.hits, 0),
+    blockedShots: skaters.reduce((sum, skater) => sum + skater.blockedShots, 0),
+    pim: skaters.reduce((sum, skater) => sum + skater.pim, 0),
+    powerPlayGoals: skaters.reduce(
+      (sum, skater) => sum + skater.powerPlayGoals,
+      0,
+    ),
+    giveaways: skaters.reduce((sum, skater) => sum + skater.giveaways, 0),
+    takeaways: skaters.reduce((sum, skater) => sum + skater.takeaways, 0),
   };
 }
 
@@ -103,13 +108,18 @@ export function computeTeamTotals(
  * instead of rendering it empty or throwing on missing nested fields.
  */
 export function hasScoringSummary(landing: GameLanding | null): boolean {
-  return landing?.summary?.scoring?.some((p) => p.goals.length > 0) ?? false;
+  return (
+    landing?.summary?.scoring?.some((period) => period.goals.length > 0) ??
+    false
+  );
 }
 
+/** Whether the landing payload lists any three stars. */
 export function hasThreeStars(landing: GameLanding | null): boolean {
   return (landing?.summary?.threeStars?.length ?? 0) > 0;
 }
 
+/** Whether the boxscore includes player-by-game stats. */
 export function hasBoxscoreStats(boxscore: GameDetailBoxscore | null): boolean {
   return !!boxscore?.playerByGameStats;
 }

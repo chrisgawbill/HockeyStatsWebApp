@@ -11,6 +11,7 @@ import {
 export function GetGameLanding(gameID: number): Promise<GameLanding> {
   return get<GameLanding>(`/schedule/landing/${gameID}`);
 }
+/** A game's boxscore. */
 export function GetGameDetails(gameID: number): Promise<GameDetailBoxscore> {
   return get<GameDetailBoxscore>(`/schedule/${gameID}`);
 }

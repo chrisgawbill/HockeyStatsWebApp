@@ -81,10 +81,12 @@ export function rollingPointsPct(
   });
 }
 
+/** Total goals for minus goals against across the results. */
 export function cumulativeGoalDiff(results: TeamResult[]): number {
   return results.reduce((total, result) => total + result.gf - result.ga, 0);
 }
 
+/** Summarizes a set of results as a record with goals for and against. */
 function buildSplit(results: TeamResult[]): TeamSplit {
   return results.reduce(
     (split, result) => ({
@@ -99,6 +101,7 @@ function buildSplit(results: TeamResult[]): TeamSplit {
   );
 }
 
+/** Splits results into home and road records. */
 export function homeRoadSplits(results: TeamResult[]): {
   home: TeamSplit;
   road: TeamSplit;
@@ -106,5 +109,29 @@ export function homeRoadSplits(results: TeamResult[]): {
   return {
     home: buildSplit(results.filter((result) => result.home)),
     road: buildSplit(results.filter((result) => !result.home)),
+  };
+}
+
+/** Everything the Team Form panel displays for one team. */
+export interface TeamForm {
+  results: TeamResult[];
+  recent: TeamResult[];
+  pace: number[];
+  goalDiff: number;
+  splits: ReturnType<typeof homeRoadSplits>;
+}
+
+/** Derives the Team Form panel's figures from the league schedule. */
+export function buildTeamForm(
+  games: ScheduledGame[],
+  triCode: string,
+): TeamForm {
+  const results = getTeamResults(games, triCode);
+  return {
+    results,
+    recent: lastN(results, 10),
+    pace: rollingPointsPct(results, 10),
+    goalDiff: cumulativeGoalDiff(results),
+    splits: homeRoadSplits(results),
   };
 }

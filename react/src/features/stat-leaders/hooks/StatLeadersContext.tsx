@@ -76,6 +76,7 @@ function StatLeadersProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Reads the skater leaders; throws outside the provider. */
 function useSkaterLeaderData(): SkaterLeaderContextValue {
   const context = useContext(StatLeadersContext);
   if (!context)
@@ -85,6 +86,7 @@ function useSkaterLeaderData(): SkaterLeaderContextValue {
   return context.skater;
 }
 
+/** Reads the goalie leaders; throws outside the provider. */
 function useGoalieLeaderData(): GoalieLeaderContextValue {
   const context = useContext(StatLeadersContext);
   if (!context)

@@ -12,6 +12,7 @@ export interface FilterContext {
   statusFilter: StatusFilter;
 }
 
+/** Applies the team, status, and game-type filters to a game list. */
 export function filterGames(
   games: ScheduledGame[],
   filter: ScheduleFilter,

@@ -8,10 +8,7 @@ import {
 } from '@/features/schedule/utils/gameStatusHelper';
 import styles from '@/features/schedule/components/SchedulePage.module.css';
 import sharedStyles from '@/styles/shared.module.css';
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
+import { joinClassNames } from '@/lib/joinClassNames';
 
 /**
  * Returns the logo URL variant for the active theme. NHL logo URLs are stored as
@@ -53,7 +50,7 @@ function ScheduleCard({
   return (
     <div
       key={game.gameId}
-      className={cx(
+      className={joinClassNames(
         sharedStyles.surfaceElevated,
         styles['game-card'],
         isGameCompleted(game) && sharedStyles.surfaceInteractive,
@@ -127,7 +124,7 @@ function ScheduleCard({
             )}
             {statusLabel && (
               <span
-                className={cx(
+                className={joinClassNames(
                   styles['game-period-chip'],
                   (game.periodType === 'OT' || game.periodType === 'SO') &&
                     styles['overtime'],

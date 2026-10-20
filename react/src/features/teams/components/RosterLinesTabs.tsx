@@ -86,8 +86,8 @@ export default function RosterLinesTabs({
     select(TABS[next], true);
   }
 
-  const tabId = (g: string) => `${baseId}-tab-${g}`;
-  const panelId = (g: string) => `${baseId}-panel-${g}`;
+  const tabId = (group: string) => `${baseId}-tab-${group}`;
+  const panelId = (group: string) => `${baseId}-panel-${group}`;
 
   return (
     <PlayerDialogContext.Provider value={openPlayer}>
@@ -105,11 +105,11 @@ export default function RosterLinesTabs({
           role="tablist"
           aria-label="Roster groups"
         >
-          {TABS.map((group, i) => (
+          {TABS.map((group, tabIndex) => (
             <button
               key={group}
-              ref={(el) => {
-                tabRefs.current[group] = el;
+              ref={(tabElement) => {
+                tabRefs.current[group] = tabElement;
               }}
               id={tabId(group)}
               type="button"
@@ -119,7 +119,7 @@ export default function RosterLinesTabs({
               tabIndex={selected === group ? 0 : -1}
               className={`${teamStyles['player-stat-tab']} ds-button ${selected === group ? teamStyles.active : ''}`}
               onClick={() => select(group)}
-              onKeyDown={(e) => onKeyDown(e, i)}
+              onKeyDown={(event) => onKeyDown(event, tabIndex)}
             >
               {group}
             </button>

@@ -22,6 +22,7 @@ export function GetSkaterStatLeaders(
     season,
   });
 }
+/** Goalie leaders for one stat category. */
 export function GetGoalieStatLeaders(
   statIndicator: string,
   season?: string,

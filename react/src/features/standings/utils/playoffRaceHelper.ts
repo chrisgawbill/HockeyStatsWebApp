@@ -29,14 +29,17 @@ export interface PlayoffRaceSummary {
   seasonOver: boolean;
 }
 
+/** Whether a game state means the game is over. */
 function isCompleted(gameState: string): boolean {
   return gameState === 'OFF' || gameState === 'FINAL';
 }
 
+/** Whether a game counts toward the regular season. */
 function isRegularSeasonGame(game: PlayoffRaceGame): boolean {
   return !game.isPlayoff && !game.isPreseason;
 }
 
+/** Regular-season games a team still has to play. */
 function remainingGamesForTeam(
   teamId: string,
   games: PlayoffRaceGame[],

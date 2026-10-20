@@ -116,7 +116,7 @@ export interface LandingThreeStar {
 export interface GameLandingSummary {
   scoring: LandingScoringPeriod[];
   threeStars: LandingThreeStar[];
-  penalties?: any[];
+  penalties?: unknown[];
 }
 
 export interface GameLanding {

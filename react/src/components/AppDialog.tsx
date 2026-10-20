@@ -10,6 +10,7 @@ interface AppDialogProps {
   children: ReactNode;
 }
 
+/** Modal dialog: locks page scroll while open, closes on Escape, keeps Tab focus inside, and returns focus to the element that opened it. */
 export default function AppDialog({
   open,
   labelledBy,
