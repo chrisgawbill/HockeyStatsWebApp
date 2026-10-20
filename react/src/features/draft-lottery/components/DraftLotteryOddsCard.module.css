@@ -60,10 +60,6 @@
 .slot__name {
   flex: 1 1 0;
   min-width: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
   font-weight: 700;
   line-height: 1.15;
   overflow-wrap: break-word;
@@ -75,7 +71,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 1px 6px;
   color: #2b1a00;
   background: linear-gradient(180deg, var(--board-yellow), var(--board-gold));
   border: 2px solid var(--board-red);
@@ -85,7 +81,7 @@
 }
 
 .slot__odds {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 900;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
