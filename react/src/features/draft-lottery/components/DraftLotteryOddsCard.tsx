@@ -1,6 +1,5 @@
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { LotteryResultEntry } from '@/features/draft-lottery/utils/draftLotterySim';
-import { getTeamShortName } from '@/features/draft-lottery/utils/teamShortName';
 import styles from '@/features/draft-lottery/components/DraftLotteryOddsCard.module.css';
 
 interface DraftLotteryOddsCardProps {
@@ -9,89 +8,65 @@ interface DraftLotteryOddsCardProps {
   rank: number;
   /** Present once a simulation has finished. */
   result?: LotteryResultEntry;
+  selected: boolean;
+  onSelect: () => void;
 }
-
-const TREND_ICON: Record<string, string> = { up: '▲', down: '▼' };
-const TREND_LABEL: Record<string, string> = {
-  up: ', trending up',
-  down: ', trending down',
-};
 
 export default function DraftLotteryOddsCard({
   team,
   rank,
   result,
+  selected,
+  onSelect,
 }: DraftLotteryOddsCardProps) {
-  const trend = team.draftLotteryOddsTrend.toLowerCase();
-  const trendIcon = TREND_ICON[trend] ?? null;
-  const trendClass = trend === 'up' ? styles['trend-up'] : styles['trend-down'];
-
   const isWinner = !!result && (result.pick <= 2 || result.drawWon !== null);
   const movement = result?.movement ?? 0;
+  const rankLabel = isWinner ? `★${rank}` : `#${rank}`;
 
   const ariaLabel = [
     `#${rank} ${team.teamName}: ${team.draftLotteryOdds}% draft lottery odds`,
-    TREND_LABEL[trend] ?? '',
     result && movement > 0 ? `, moved up ${movement}` : '',
     result && movement < 0 ? `, moved down ${-movement}` : '',
   ].join('');
 
-  const marker =
-    result && result.pick <= 2
-      ? `★ #${result.pick}`
-      : result && result.drawWon !== null
-        ? '★'
-        : null;
-
   return (
-    <li
-      className={[styles['slot'], isWinner ? styles['slot--winner'] : '']
-        .filter(Boolean)
-        .join(' ')}
-      aria-label={ariaLabel}
-      title={team.teamName}
-    >
-      <span className={styles['slot__rank']} aria-hidden="true">
-        {rank}
-      </span>
-      {marker && (
-        <span className={styles['slot__marker']} aria-hidden="true">
-          {marker}
-        </span>
-      )}
-      <img
-        src={team.teamLogo}
-        alt=""
-        className={styles['slot__logo']}
-        aria-hidden="true"
-      />
-      <span className={styles['slot__name']} aria-hidden="true">
-        {getTeamShortName(team.teamName)}
-      </span>
-      <span className={styles['slot__tag']} aria-hidden="true">
-        <span className={styles['slot__odds']}>{team.draftLotteryOdds}%</span>
-        {trendIcon && (
-          <span className={`${styles['slot__trend']} ${trendClass}`}>
-            {trendIcon}
-          </span>
-        )}
-      </span>
-      <span
+    <li className={styles['item']}>
+      <button
+        type="button"
         className={[
-          styles['slot__move'],
-          movement > 0 ? styles['slot__move--up'] : '',
-          movement < 0 ? styles['slot__move--down'] : '',
+          styles['slot'],
+          isWinner ? styles['slot--winner'] : '',
+          selected ? styles['slot--selected'] : '',
         ]
           .filter(Boolean)
           .join(' ')}
-        aria-hidden="true"
+        aria-label={ariaLabel}
+        aria-pressed={selected}
+        title={team.teamName}
+        onClick={onSelect}
       >
-        {result && movement !== 0
-          ? movement > 0
-            ? `▲${movement}`
-            : `▼${-movement}`
-          : ''}
-      </span>
+        <span className={styles['slot__top']} aria-hidden="true">
+          <span className={styles['slot__rank']}>{rankLabel}</span>
+          {result && movement !== 0 && (
+            <span
+              className={
+                movement > 0
+                  ? styles['slot__move--up']
+                  : styles['slot__move--down']
+              }
+            >
+              {movement > 0 ? `▲${movement}` : `▼${-movement}`}
+            </span>
+          )}
+        </span>
+        <span className={styles['slot__id']} aria-hidden="true">
+          <img src={team.teamLogo} alt="" className={styles['slot__logo']} />
+          <span className={styles['slot__abbr']}>{team.id}</span>
+        </span>
+        <span className={styles['slot__tag']} aria-hidden="true">
+          {team.draftLotteryOdds}%
+        </span>
+      </button>
     </li>
   );
 }

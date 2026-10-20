@@ -1,112 +1,111 @@
-/* Compact stacked tile: dark surface, gold reserved for price tag/winners. */
-.slot {
-  --board-gold: #ffc61a;
+/* Compact tile: dark surface, gold only on the price tag and winners. */
+.item {
+  display: block;
+  min-width: 0;
+}
 
-  position: relative;
+.slot {
+  --board-gold: #f2c14e;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  box-sizing: border-box;
+  gap: 5px;
+  width: 100%;
   min-width: 0;
-  padding: 22px 4px 6px;
-  color: #eef0f8;
-  text-align: center;
-  background: #252b4a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--ds-radius-medium);
+  margin: 0;
+  padding: 6px 6px 7px;
+  box-sizing: border-box;
+  color: #e4e3ec;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: #211d2c;
+  border: 1px solid #2e2a3b;
+  border-radius: 8px;
+}
+
+.slot:focus-visible {
+  outline: 2px solid #a9c7ff;
+  outline-offset: 2px;
+}
+
+.slot--selected {
+  border-color: #a9c7ff;
 }
 
 .slot--winner {
+  background: #2a2333;
   border-color: var(--board-gold);
-  box-shadow:
-    0 0 0 1px var(--board-gold),
-    0 0 12px rgba(255, 198, 26, 0.45);
+  box-shadow: 0 0 12px rgba(242, 193, 78, 0.35);
 }
 
-.slot__rank {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  display: grid;
-  place-items: center;
-  min-width: 1.25rem;
-  height: 1.25rem;
-  padding: 0 4px;
-  box-sizing: border-box;
-  color: #cfd3e6;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  font-variant-numeric: tabular-nums;
-}
-
-.slot__marker {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  color: var(--board-gold);
-  font-size: 0.75rem;
-  font-weight: 800;
-}
-
-.slot__logo {
-  width: 2.25rem;
-  height: 2.25rem;
-  object-fit: contain;
-}
-
-.slot__name {
+.slot__top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 2.2em;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.1;
-  overflow-wrap: break-word;
-}
-
-.slot__tag {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
-  padding: 1px 8px;
-  color: #2b1a00;
-  background: var(--board-gold);
-  border-radius: 6px;
-}
-
-.slot__odds {
-  font-size: 1rem;
-  font-weight: 900;
-  line-height: 1.3;
-  font-variant-numeric: tabular-nums;
-}
-
-.slot__trend {
-  font-size: 0.5rem;
-  opacity: 0.65;
-}
-
-.trend-up,
-.trend-down {
-  color: #2b1a00;
-}
-
-.slot__move {
-  min-height: 1em;
-  font-size: 0.75rem;
-  font-weight: 700;
+  justify-content: space-between;
+  min-height: 12px;
   line-height: 1;
 }
 
+.slot__rank {
+  color: #8d8a9e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.slot--winner .slot__rank {
+  color: var(--board-gold);
+}
+
+.slot__move--up,
+.slot__move--down {
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
 .slot__move--up {
-  color: #6fcf8a;
+  color: #6fd39a;
 }
 
 .slot__move--down {
-  color: #f08a8a;
+  color: #e98a8a;
+}
+
+.slot__id {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.slot__logo {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.slot__abbr {
+  min-width: 0;
+  font-family: 'Roboto Condensed', Roboto, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.slot__tag {
+  padding: 2px 0;
+  color: var(--board-gold);
+  font-family: 'Roboto Condensed', Roboto, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  background: rgba(242, 193, 78, 0.14);
+  border-radius: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot--winner .slot__tag {
+  color: #1b1405;
+  background: var(--board-gold);
 }

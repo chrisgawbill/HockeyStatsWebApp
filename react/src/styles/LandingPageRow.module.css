@@ -17,15 +17,15 @@
 /* Header with title + action buttons (draft lottery). */
 .landing-header--actions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: var(--ds-space-2) var(--ds-space-3);
+  justify-content: space-between;
+  gap: var(--ds-space-2);
   margin-bottom: var(--ds-space-2);
 }
 
 .landing-header--actions h2 {
   margin: 0;
+  font-size: 1.25rem;
 }
 
 .landing-header-actions {
@@ -120,6 +120,11 @@
 
   .landing-header--actions {
     justify-content: flex-start;
+    gap: var(--ds-space-3);
+  }
+
+  .landing-header--actions h2 {
+    font-size: inherit;
   }
 }
 

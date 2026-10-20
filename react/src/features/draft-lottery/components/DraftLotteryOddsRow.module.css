@@ -1,106 +1,120 @@
 /* "Price is Right" board: marquee frame, chasing bulbs, game-show palette. */
 .frame {
-  --board-gold: #ffc61a;
-  --board-night: #161a2e;
-  --bulb-size: 32px;
+  --board-gold: #f2c14e;
 
-  position: relative;
-  box-sizing: border-box;
   container-type: inline-size;
   width: 100%;
-  padding: 16px 12px;
-  border: 1px solid rgba(255, 198, 26, 0.5);
-  border-radius: var(--ds-radius-large, 16px);
-  background: var(--board-night);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #17141f;
+  border: 1px solid rgba(242, 193, 78, 0.28);
+  border-radius: 14px;
 }
 
-/* Thin marquee: small, dim bulbs along the border, gently twinkling. */
-.frame::before {
+/* 6px dotted bulb strips along the top and bottom edges. */
+.frame::before,
+.frame::after {
   content: '';
-  position: absolute;
-  inset: 2px;
-  pointer-events: none;
-  opacity: 0.7;
-  background-image:
-    radial-gradient(
-      circle at 16px 4px,
-      var(--board-gold) 0 1.5px,
-      transparent 2.5px
-    ),
-    radial-gradient(
-      circle at 16px 4px,
-      var(--board-gold) 0 1.5px,
-      transparent 2.5px
-    ),
-    radial-gradient(
-      circle at 4px 16px,
-      var(--board-gold) 0 1.5px,
-      transparent 2.5px
-    ),
-    radial-gradient(
-      circle at 4px 16px,
-      var(--board-gold) 0 1.5px,
-      transparent 2.5px
-    );
-  background-size:
-    var(--bulb-size) 8px,
-    var(--bulb-size) 8px,
-    8px var(--bulb-size),
-    8px var(--bulb-size);
-  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-  background-position:
-    0 0,
-    0 100%,
-    0 0,
-    100% 0;
+  display: block;
+  height: 6px;
+  background-image: radial-gradient(
+    circle,
+    rgba(242, 193, 78, 0.6) 1.4px,
+    transparent 2px
+  );
+  background-size: 12px 6px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .frame::before {
+  .frame::before,
+  .frame::after {
     animation: twinkle 3.2s ease-in-out infinite alternate;
   }
 }
 
 @keyframes twinkle {
   from {
-    opacity: 0.35;
+    opacity: 0.45;
   }
   to {
-    opacity: 0.8;
+    opacity: 1;
   }
 }
 
 .frame__inner {
-  position: relative;
-  z-index: 1;
   min-width: 0;
+  padding: 8px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* Wider boards fit four tiles per row. */
-@container (min-width: 640px) {
+@container (min-width: 560px) {
   .grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
+}
+
+@container (min-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+.caption {
+  margin: 8px 0 0;
+  color: #8d8a9e;
+  font-size: 12px;
+  text-align: center;
 }
 
 /* Header buttons */
 .action {
-  min-width: 5.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  color: #0d1b33;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #a9c7ff;
+  border: 0;
+  border-radius: 20px;
 }
 
-.action:disabled {
+.action-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--color-text, #c9cad6);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--color-muted-text, #3a3d4d);
+  border-radius: 20px;
+}
+
+.action:disabled,
+.action-reset:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
+}
+
+.action:focus-visible,
+.action-reset:focus-visible {
+  outline: 2px solid #a9c7ff;
+  outline-offset: 2px;
 }
 
 .sr-only {
@@ -117,8 +131,8 @@
 
 /* Reveal stage */
 .stage {
-  margin-bottom: 12px;
-  padding: 12px;
+  margin-bottom: 8px;
+  padding: 8px;
   text-align: center;
   background: #252b4a;
   border: 1px solid var(--board-gold);
@@ -126,7 +140,7 @@
 }
 
 .stage__title {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--board-gold);
   font-size: 0.8rem;
   font-weight: 700;
@@ -146,7 +160,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 6rem;
+  min-height: 4.5rem;
   padding: 8px;
   color: #eef0f8;
   background: #1c2038;
@@ -164,15 +178,15 @@
 }
 
 .stage__mystery {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   line-height: 1;
   color: var(--board-gold);
 }
 
 .stage__logo {
-  width: 3rem;
-  height: 3rem;
+  width: 2rem;
+  height: 2rem;
   object-fit: contain;
 }
 

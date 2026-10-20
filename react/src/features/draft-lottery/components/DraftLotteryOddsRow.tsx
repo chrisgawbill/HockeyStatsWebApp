@@ -28,6 +28,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [result, setResult] = useState<LotteryResultEntry[] | null>(null);
   const [announcement, setAnnouncement] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
 
   const clearTimers = useCallback(() => {
@@ -47,6 +48,7 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
     setPhase('idle');
     setResult(null);
     setAnnouncement('');
+    setSelectedId(null);
   }, [data, clearTimers]);
 
   if (data.length <= 1) return <></>;
@@ -134,6 +136,11 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
     );
   };
 
+  const selectedTeam = selectedId ? teamsById.get(selectedId) : undefined;
+  const selectedRank = selectedTeam
+    ? board.findIndex((b) => b.team.id === selectedTeam.id) + 1
+    : 0;
+
   return (
     <div className={headerStyles['section-container']}>
       <div
@@ -143,21 +150,44 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
         <div className={headerStyles['landing-header-actions']}>
           <button
             type="button"
-            className={`ds-button ${styles['action']}`}
+            className={styles['action']}
             onClick={simulate}
             disabled={animating}
             aria-label="Simulate the draft lottery"
           >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <polygon points="6 4 20 12 6 20 6 4" />
+            </svg>
             Simulate
           </button>
           <button
             type="button"
-            className={`ds-button ${styles['action']}`}
+            className={styles['action-reset']}
             onClick={reset}
             disabled={phase === 'idle' || animating}
-            aria-label="Reset the draft lottery to the current odds"
+            aria-label="Reset draft lottery"
+            title="Reset draft lottery"
           >
-            Reset
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 12a9 9 0 1 0 3-6.7" />
+              <polyline points="3 3 3 9 9 9" />
+            </svg>
           </button>
         </div>
       </div>
@@ -193,9 +223,20 @@ export default function LandingPageRow({ title, data }: LandingPageRowProps) {
                 team={team}
                 rank={rank}
                 result={entry}
+                selected={selectedId === team.id}
+                onSelect={() =>
+                  setSelectedId((current) =>
+                    current === team.id ? null : team.id,
+                  )
+                }
               />
             ))}
           </ol>
+          <p className={styles['caption']}>
+            {selectedTeam
+              ? `${selectedTeam.teamName} · #${selectedRank} · ${selectedTeam.draftLotteryOdds}%`
+              : 'Tap a tile for the full team name'}
+          </p>
         </div>
       </div>
     </div>
