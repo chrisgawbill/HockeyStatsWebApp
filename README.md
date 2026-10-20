@@ -37,7 +37,7 @@ pnpm install
 pnpm start
 ```
 
-The deployed frontend uses `https://hockeystatsapi.onrender.com` through the GitHub Actions `VITE_API_URL` variable. Local development defaults to `http://localhost:9000`; set `VITE_API_URL` if the API runs elsewhere.
+The deployed frontend contacts the hockeystatsAPI that is hosted on my own dev server. 
 
 ### Environment variables
 
