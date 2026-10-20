@@ -17,11 +17,16 @@ import {
   markAllAfterActionReportsRead,
   removeFavorite,
   setFavoritePushMuted,
+  updateFavoriteTeamCategory,
 } from '@/features/after-action-reports/api/afterActionReportsApi';
 import type {
   AfterActionReport,
   FavoriteTeam,
 } from '@/features/after-action-reports/types/afterActionReport';
+import {
+  DEFAULT_FAN_TIER,
+  type FavoriteCategory,
+} from '@/lib/favoriteCategory';
 import {
   usePushNotifications,
   type PushNotificationsState,
@@ -49,6 +54,11 @@ export interface AfterActionReportsState {
   isFavorite: (triCode: string) => boolean;
   /** Rejects after restoring the previous favorites when the save fails. */
   toggleFavorite: (triCode: string) => Promise<void>;
+  /** Rejects after restoring the previous favorites when the save fails. */
+  updateTeamCategory: (
+    triCode: string,
+    category: FavoriteCategory,
+  ) => Promise<void>;
   /** Marks a report read; the caller navigates to the game. */
   markRead: (gameId: number) => void;
   markAllRead: () => void;
@@ -217,7 +227,13 @@ export function AfterActionReportsProvider({
           ? favorites.filter((f) => f.triCode !== triCode)
           : [
               ...favorites,
-              { triCode, since: new Date().toISOString(), pushMuted: false },
+              {
+                triCode,
+                since: new Date().toISOString(),
+                pushMuted: false,
+                tier: DEFAULT_FAN_TIER,
+                label: null,
+              },
             ],
       );
       try {
@@ -248,6 +264,28 @@ export function AfterActionReportsProvider({
         setFavorites(await setFavoritePushMuted(token, triCode, muted));
       } catch (error) {
         console.error('Failed to update push mute:', error);
+        setFavorites(previous);
+        throw error;
+      }
+    },
+    [token, favorites],
+  );
+
+  const updateTeamCategory = useCallback(
+    async (triCode: string, category: FavoriteCategory) => {
+      if (!token) return;
+      const previous = favorites;
+      setFavorites(
+        favorites.map((f) =>
+          f.triCode === triCode ? { ...f, ...category } : f,
+        ),
+      );
+      try {
+        setFavorites(
+          await updateFavoriteTeamCategory(token, triCode, category),
+        );
+      } catch (error) {
+        console.error('Failed to update favorite team category:', error);
         setFavorites(previous);
         throw error;
       }
@@ -301,6 +339,7 @@ export function AfterActionReportsProvider({
       alertPermission: permission,
       isFavorite,
       toggleFavorite,
+      updateTeamCategory,
       markRead,
       markAllRead,
       enableAlerts,
@@ -314,6 +353,7 @@ export function AfterActionReportsProvider({
       permission,
       isFavorite,
       toggleFavorite,
+      updateTeamCategory,
       markRead,
       markAllRead,
       enableAlerts,

@@ -8,6 +8,8 @@ import {
 } from '@/features/stat-leaders/hooks/StatLeadersContext';
 import { useStandingsData } from '@/features/standings/hooks/StandingsContext';
 import DraftLotteryOddsRow from '@/features/draft-lottery/components/DraftLotteryOddsRow';
+import FavoriteTeamsRow from '@/features/after-action-reports/components/FavoriteTeamsRow';
+import FavoritePlayersRow from '@/features/favorite-players/components/FavoritePlayersRow';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
@@ -76,6 +78,8 @@ export default function LandingPage() {
             <p>Track the teams, leaders, and stories shaping the season.</p>
           </div>
         </header>
+        <FavoriteTeamsRow />
+        <FavoritePlayersRow />
         {loading ? (
           <LoadingState label="Loading data" fullPage />
         ) : statLeadersError ? (

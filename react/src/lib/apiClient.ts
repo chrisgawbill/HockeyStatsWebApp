@@ -72,7 +72,7 @@ function urlFor(path: string, params?: QueryParams): string {
 
 /** Sends one JSON request with a timeout and returns the parsed body; throws ApiError on a non-OK status. */
 async function request<T>(
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   path: string,
   requestBody?: unknown,
   params?: QueryParams,
@@ -184,6 +184,18 @@ export function put<T>(
   options?: RequestOptions,
 ): Promise<T> {
   return send(() => request<T>('PUT', path, requestBody, undefined, options));
+}
+
+/**
+ * Shared PATCH wrapper: returns `response.data`, and logs then re-throws so
+ * callers keep their own error UI.
+ */
+export function patch<T>(
+  path: string,
+  data?: unknown,
+  options?: RequestOptions,
+): Promise<T> {
+  return send(() => request<T>('PATCH', path, data, undefined, options));
 }
 
 /**

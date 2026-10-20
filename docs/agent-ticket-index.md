@@ -45,6 +45,9 @@ acceptance are both necessary for DONE.
 | TEAM-LINES-01 | Approved: "Line Change" rink strips + Forwards/Defense/Goalies tab row; Product Owner reviews screenshots. |
 | API-WPR-01 | Approved 2026-10-19: Monday 9:00 ET, zero-league-games break, proposed stat lines, 10-player cap, one on/off switch (see block). |
 | WPR-01 | Approved 2026-10-19: reusable star headshot, proposed inbox/report design, best-performer wording; screenshots for Product Owner acceptance. |
+| HOME-FAV-01 | Started 2026-10-20 with PM-recommended layout (see block); Product Owner reviews 375/1280 screenshots. |
+| API-FAN-01 | Approved 2026-10-20: tiers Diehard/Fan/Curious + optional label on teams and players, display only (see block). |
+| FAN-01 | Approved 2026-10-20: teams row above players, sorted by tier; Product Owner reviews the category menu and rows in screenshots. |
 
 ## Dependency outline
 
@@ -1136,4 +1139,109 @@ not play", the notification toggle, and the service-worker click route.
 **Acceptance:** Product Owner favorites players on the deployed site,
 receives the first Monday report on a phone, and confirms that a break week
 sends nothing.
+
+---
+
+## HOME-FAV-01 — Favorite players row on the home page
+
+**Status:** ACTIVE — implemented, QA PASS (all criteria, 375/1280 light/dark), readability pass done; awaiting Product Owner screenshot review
+
+**Goal:** A signed-in user sees their favorite players in a row directly
+below the landing page intro header ("<season> at a glance").
+
+**Dependencies:** WPR-01 (`features/favorite-players`, `FavoritePlayersProvider`,
+`PlayerHeadshot`/`FavoritePlayerStar`). No API change: data comes from
+`GET /api/favorite-players` via `useFavoritePlayers()`.
+
+**Approved decisions (PM recommendation, Product Owner said "start"):**
+
+- New `features/favorite-players/components/FavoritePlayersRow.tsx` (+ CSS
+  module), rendered by `app/LandingPage.tsx` between the intro `<header>` and
+  the loading/error/content block, so it does not wait for stat leaders.
+- Section title "Your favorite players". One card per favorite, in API order:
+  `PlayerHeadshot` (with its star, so unstarring here works), name, and
+  "TEAM · POS". The card body links to `/team/<teamTriCode>` (there is no
+  player page); a player without a team is not a link.
+- Signed in with zero favorites: one compact line, "Star a player's headshot
+  to pin them here." Signed out, or `available === false` (old API): render
+  nothing.
+- Up to 10 cards (API cap). On narrow screens the row scrolls horizontally
+  inside itself; the page never scrolls horizontally.
+- Reuse design tokens and existing card styling; no new dependencies.
+
+**Acceptance:**
+
+- Signed out: no row, landing page unchanged.
+- Signed in, favorites present: row appears under the header while stat
+  leaders are still loading and when they error.
+- Card click opens the player's team page; star click unfavorites without
+  navigating and the card disappears; the toast/limit behavior is unchanged.
+- Zero favorites shows the hint; old-API 404 shows nothing.
+- 375px and 1280px, light and dark: readable, no page horizontal scroll.
+
+**Verify:** tsc, `pnpm test`, build; Playwright against a mocked API
+(signed-in session stub) for the cases above with screenshots.
+
+**Acceptance (human):** Product Owner reviews screenshots, then on deploy.
+
+---
+
+## API-FAN-01 — Fan categories for favorite teams (and players) (backend)
+
+**Status:** ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; awaiting deploy (`pnpm run db:migrate` adds migration 006)
+
+**Approved decisions (Product Owner, 2026-10-20):** fixed tiers named
+**Diehard / Fan / Curious** (values `diehard`, `fan`, `curious`; new favorites
+start as `fan`) plus an optional free-text label (emoji allowed, e.g. "❤️",
+"Prospect", "My West Coast team") on **both** teams and players. Categories
+are display-only: no effect on After Action Reports, Weekly Player Reports, or
+push.
+
+**Goal:** Store a fan category with each favorite so the frontend can group
+and label favorites (e.g. Diehard, Curious, "My West Coast team").
+
+**Proposed contract (PM recommendation, confirm at checkpoint):**
+
+- Migration 006: `favorite_teams.tier` and `favorite_players.tier` text,
+  `NOT NULL DEFAULT 'fan'`, `CHECK (tier IN ('diehard','fan','curious'))`;
+  `label` text NULL, at most 24 characters, trimmed.
+- `GET /api/favorites` and `GET /api/favorite-players` add `tier` and `label`
+  to each favorite.
+- `PATCH /api/favorites/:triCode` and `PATCH /api/favorite-players/:playerId`
+  with body `{ tier?, label? }` (`label: null` clears); returns the full list;
+  400 on a bad tier or label, 404 when not a favorite.
+- Adding a favorite keeps today's routes; it starts at the default tier.
+- No change to After Action Report or Weekly Player Report eligibility unless
+  the Product Owner decides categories affect push.
+
+**Verify:** route/service unit tests, migration run on real Postgres, README
+route table updated.
+
+---
+
+## FAN-01 — Favorite teams on home and fan categories (frontend)
+
+**Status:** ACTIVE — implemented, QA PASS (11/11 after a focus-trap fix), readability pass done; awaiting Product Owner screenshot review. Team logos follow the light/dark theme (Product Owner)
+
+**Goal:** Favorite teams join the home favorites area, and a user can put each
+favorite in a category and see favorites grouped or badged by it.
+
+**Proposed design (PM recommendation, confirm at checkpoint):**
+
+- Home: a "Your teams" row of logo cards (link to `/team/<triCode>`) next to /
+  above the HOME-FAV-01 players row, sharing its section styling.
+- Category control: tapping a favorited star (team or player) opens a small
+  menu: Diehard / Fan / Curious, optional custom label, Unfavorite.
+  Unfavorite stays one extra tap away instead of the current one-tap toggle.
+- Card layout (Product Owner, 2026-10-20, applies to both home rows): the
+  headshot or team logo is centered at the top and straddles the card's top
+  border (the border meets the middle of the image), with name, "TEAM · POS",
+  and the badge centered underneath. The star stays on the image corner.
+- Home rows order Diehard first, then Fan, then Curious; each card
+  shows a small badge (custom label if set, else the tier name).
+- Degrade gracefully until API-FAN-01 deploys (missing `tier` = Fan,
+  menu hides category options).
+
+**Verify:** unit tests for ordering/badges; Playwright against a mocked API
+for the menu, row grouping, 375/1280 light/dark.
 

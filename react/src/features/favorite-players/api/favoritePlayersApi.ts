@@ -1,25 +1,46 @@
-import { del, get, post, put } from '@/lib/apiClient';
+import { del, get, patch, post, put } from '@/lib/apiClient';
 import { authHeader } from '@/lib/auth/authApi';
+import {
+  readCategoryLabel,
+  readFanTier,
+  type FavoriteCategory,
+} from '@/lib/favoriteCategory';
 import type {
   FavoritePlayer,
   WeeklyPlayerReport,
   WeeklyPlayerReportInbox,
 } from '@/features/favorite-players/types/favoritePlayers';
 
+type FavoritePlayerDto = Omit<FavoritePlayer, 'tier' | 'label'> & {
+  tier?: unknown;
+  label?: unknown;
+};
+
 interface FavoritePlayersResponseDto {
-  favorites: FavoritePlayer[];
+  favorites: FavoritePlayerDto[];
+}
+
+/** Fills in the tier and label an API that predates fan categories leaves out. */
+function readFavoritePlayers(
+  response: FavoritePlayersResponseDto,
+): FavoritePlayer[] {
+  return response.favorites.map((favorite) => ({
+    ...favorite,
+    tier: readFanTier(favorite.tier),
+    label: readCategoryLabel(favorite.label),
+  }));
 }
 
 /** The signed-in user's favorite players. */
 export async function fetchFavoritePlayers(
   token: string,
 ): Promise<FavoritePlayer[]> {
-  const { favorites } = await get<FavoritePlayersResponseDto>(
+  const response = await get<FavoritePlayersResponseDto>(
     '/api/favorite-players',
     undefined,
     authHeader(token),
   );
-  return favorites;
+  return readFavoritePlayers(response);
 }
 
 /** Rejects with ApiError 409 once the user already has the maximum. */
@@ -27,23 +48,37 @@ export async function addFavoritePlayer(
   token: string,
   playerId: number,
 ): Promise<FavoritePlayer[]> {
-  const { favorites } = await put<FavoritePlayersResponseDto>(
+  const response = await put<FavoritePlayersResponseDto>(
     `/api/favorite-players/${playerId}`,
     undefined,
     authHeader(token),
   );
-  return favorites;
+  return readFavoritePlayers(response);
 }
 
 export async function removeFavoritePlayer(
   token: string,
   playerId: number,
 ): Promise<FavoritePlayer[]> {
-  const { favorites } = await del<FavoritePlayersResponseDto>(
+  const response = await del<FavoritePlayersResponseDto>(
     `/api/favorite-players/${playerId}`,
     authHeader(token),
   );
-  return favorites;
+  return readFavoritePlayers(response);
+}
+
+/** Sets a favorite player's fan tier and label; a null label clears it. */
+export async function updateFavoritePlayerCategory(
+  token: string,
+  playerId: number,
+  category: FavoriteCategory,
+): Promise<FavoritePlayer[]> {
+  const response = await patch<FavoritePlayersResponseDto>(
+    `/api/favorite-players/${playerId}`,
+    category,
+    authHeader(token),
+  );
+  return readFavoritePlayers(response);
 }
 
 /** Weekly Player Reports, newest first (at most 12). */
