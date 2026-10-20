@@ -1,0 +1,11 @@
+.logo {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--ds-aero-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: var(--ds-elevation-1);
+  object-fit: contain;
+}

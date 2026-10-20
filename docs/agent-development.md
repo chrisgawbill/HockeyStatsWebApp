@@ -81,7 +81,9 @@ within approved scope, not permission to change the product.
 7. Use Sol when deeper reasoning is needed; do not merely repeat a failed plan.
 8. After three repair cycles, return the remaining problem and smallest required
    decision to the human before a fourth cycle.
-9. Present the result and obtain any human acceptance required by the ticket.
+9. After QA passes, the PM does a readability pass on the ticket's diff (see
+   "Readability pass") and re-runs the coder-owned checks if anything changed.
+10. Present the result and obtain any human acceptance required by the ticket.
 
 Choose direct or delegated work using the delegation criteria above. Parallelize independent tasks only; do not
 let workers edit tightly coupled files concurrently. QA does not fix application
@@ -142,6 +144,35 @@ ON FAILURE: failing assertion and at most 10 relevant log lines
 Workers report missing decisions or scope conflicts to the PM. They do not invent
 rules to finish a ticket. PM turns unresolved product questions into concrete
 choices for the human and records the resulting decisions in the relevant docs.
+
+## Readability pass (Product Owner rule)
+
+Code ships readable by a person new to the file. On the passed diff, the PM:
+
+- splits long or deeply nested functions into small, well-named ones;
+- removes duplication, dead code, and speculative options;
+- names things for what they mean in the domain, not how they are computed;
+- gives every variable, parameter, and function a name that says what it
+  holds or does (`favoriteTeams`, `updatedRowCount`, `isLabelTooLong`), not
+  `data`, `res`, `e`, `tmp`, `x`, or a bare `updated`/`normalized`;
+- keeps data flow one-directional and obvious (no hidden mutation, no flags
+  that change a function's meaning, no reaching across layers);
+- names functions for what they do, as a verb phrase (`listFavoriteTeams`,
+  `parseCategoryUpdate`), not `handle`, `process`, `doStuff`, or `helper`;
+- writes idiomatic code for the language and the file's existing style
+  (e.g. CommonJS and `async`/`await` in the API, typed React function
+  components and hooks in the frontend); no patterns borrowed from another
+  language;
+- puts comments on functions to say what they do; inline comments inside a
+  function body are rare and only explain a non-obvious why.
+
+Behavior must not change: the same checks must still pass afterwards.
+
+## Commits and branches (Product Owner rule)
+
+Branch names describe the work (`feature/<short-topic>`). Do not mention
+Claude or any AI tool in code, comments, commit messages, or pull requests,
+and commit as the repository owner.
 
 ## Ticket states and completion
 

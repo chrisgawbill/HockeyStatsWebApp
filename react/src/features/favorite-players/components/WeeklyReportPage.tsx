@@ -20,17 +20,9 @@ import {
   playerStatItems,
   teamsLabel,
 } from '@/features/favorite-players/utils/weeklyReportFormat';
+import { getInitials } from '@/features/favorite-players/utils/playerCardFormat';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/favorite-players/components/WeeklyReportPage.module.css';
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 function PlayerCard({ player }: { player: WeeklyReportPlayer }) {
   const items = playerStatItems(player);
@@ -46,7 +38,7 @@ function PlayerCard({ player }: { player: WeeklyReportPlayer }) {
         imgClassName={styles.avatarImg}
         fallback={
           <span className={styles.avatarInitials} aria-hidden="true">
-            {initials(player.name)}
+            {getInitials(player.name)}
           </span>
         }
       />

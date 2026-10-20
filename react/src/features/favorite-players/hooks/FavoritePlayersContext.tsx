@@ -18,7 +18,12 @@ import {
   markWeeklyReportRead,
   removeFavoritePlayer,
   setWeeklyReportPush,
+  updateFavoritePlayerCategory,
 } from '@/features/favorite-players/api/favoritePlayersApi';
+import {
+  DEFAULT_FAN_TIER,
+  type FavoriteCategory,
+} from '@/lib/favoriteCategory';
 import type {
   FavoritePlayer,
   WeeklyPlayerReport,
@@ -49,6 +54,11 @@ export interface FavoritePlayersState {
   isFavorite: (playerId: number) => boolean;
   /** Rejects (FavoriteLimitError on the cap) after restoring the old list. */
   toggleFavorite: (playerId: number, name: string) => Promise<void>;
+  /** Rejects after restoring the previous favorites when the save fails. */
+  updatePlayerCategory: (
+    playerId: number,
+    category: FavoriteCategory,
+  ) => Promise<void>;
   markReportRead: (weekStart: string) => void;
   markAllReportsRead: () => void;
   /** The Monday push switch; null until loaded. */
@@ -178,6 +188,8 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
                 position: null,
                 headshot: null,
                 since: new Date().toISOString(),
+                tier: DEFAULT_FAN_TIER,
+                label: null,
               },
             ],
       );
@@ -193,6 +205,28 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
         if (error instanceof ApiError && error.status === 409) {
           throw new FavoriteLimitError();
         }
+        throw error;
+      }
+    },
+    [token, favorites],
+  );
+
+  const updatePlayerCategory = useCallback(
+    async (playerId: number, category: FavoriteCategory) => {
+      if (!token) return;
+      const previous = favorites;
+      setFavorites(
+        favorites.map((f) =>
+          f.playerId === playerId ? { ...f, ...category } : f,
+        ),
+      );
+      try {
+        setFavorites(
+          await updateFavoritePlayerCategory(token, playerId, category),
+        );
+      } catch (error) {
+        console.error('Failed to update favorite player category:', error);
+        setFavorites(previous);
         throw error;
       }
     },
@@ -246,6 +280,7 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
       unreadCount: reports.filter((report) => !report.read).length,
       isFavorite,
       toggleFavorite,
+      updatePlayerCategory,
       markReportRead,
       markAllReportsRead,
       weeklyPush,
@@ -258,6 +293,7 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
       reports,
       isFavorite,
       toggleFavorite,
+      updatePlayerCategory,
       markReportRead,
       markAllReportsRead,
       weeklyPush,

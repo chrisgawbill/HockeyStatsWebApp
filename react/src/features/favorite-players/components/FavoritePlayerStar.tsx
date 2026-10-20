@@ -1,4 +1,6 @@
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import FavoriteCategoryMenu from '@/components/FavoriteCategoryMenu';
+import { DEFAULT_FAN_TIER } from '@/lib/favoriteCategory';
 import {
   FavoriteLimitError,
   useFavoritePlayers,
@@ -33,7 +35,8 @@ export interface FavoritePlayerStarProps {
 
 /**
  * Round star button that favorites a player for the Weekly Player Report.
- * It never triggers the surrounding row or card. Signed-out users get a
+ * Once the player is a favorite, it opens the fan category menu (tier, label,
+ * Unfavorite) instead. It never triggers the surrounding row or card. Signed-out users get a
  * pointer to the header's Google sign-in; hints and failures show as a toast
  * so they are not clipped by scrolling rows. Hidden when the API predates
  * favorite players.
@@ -44,24 +47,38 @@ export default function FavoritePlayerStar({
   size = 'md',
   className,
 }: FavoritePlayerStarProps) {
-  const { isSignedIn, available, isFavorite, toggleFavorite } =
-    useFavoritePlayers();
+  const {
+    isSignedIn,
+    available,
+    favorites,
+    isFavorite,
+    toggleFavorite,
+    updatePlayerCategory,
+  } = useFavoritePlayers();
+  const starRef = useRef<HTMLButtonElement>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [message, setMessage] = useState<{
     text: string;
     isError: boolean;
   } | null>(null);
   const [pending, setPending] = useState(false);
   const favorite = isSignedIn && isFavorite(playerId);
+  const favoritePlayer = favorites.find(
+    (player) => player.playerId === playerId,
+  );
 
   useEffect(() => {
     if (!message) return;
-    const timer = window.setTimeout(() => setMessage(null), MESSAGE_VISIBLE_MS);
-    return () => window.clearTimeout(timer);
+    const hideMessageTimer = window.setTimeout(
+      () => setMessage(null),
+      MESSAGE_VISIBLE_MS,
+    );
+    return () => window.clearTimeout(hideMessageTimer);
   }, [message]);
 
   if (isSignedIn && !available) return null;
 
-  const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
+  const respondToStarPress = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     if (!isSignedIn) {
@@ -69,6 +86,10 @@ export default function FavoritePlayerStar({
         text: `Sign in with Google at the top of the page to favorite ${playerName} and get a Weekly Player Report every Monday.`,
         isError: false,
       });
+      return;
+    }
+    if (favorite) {
+      setIsMenuOpen((isOpen) => !isOpen);
       return;
     }
     setMessage(null);
@@ -91,22 +112,40 @@ export default function FavoritePlayerStar({
   return (
     <>
       <button
+        ref={starRef}
         type="button"
         className={[styles.star, styles[size], className]
           .filter(Boolean)
           .join(' ')}
-        onClick={handleClick}
+        onClick={respondToStarPress}
         disabled={pending}
         aria-pressed={isSignedIn ? favorite : undefined}
+        aria-haspopup={favorite ? 'dialog' : undefined}
+        aria-expanded={favorite ? isMenuOpen : undefined}
         aria-label={
           favorite
-            ? `Unfavorite ${playerName}`
+            ? `Fan category and options for ${playerName}`
             : `Favorite ${playerName} for the Weekly Player Report`
         }
-        title={favorite ? `Unfavorite ${playerName}` : `Favorite ${playerName}`}
+        title={
+          favorite ? `Fan category for ${playerName}` : `Favorite ${playerName}`
+        }
       >
         <StarIcon filled={favorite} />
       </button>
+      {isMenuOpen && favorite && (
+        <FavoriteCategoryMenu
+          itemName={playerName}
+          category={{
+            tier: favoritePlayer?.tier ?? DEFAULT_FAN_TIER,
+            label: favoritePlayer?.label ?? null,
+          }}
+          anchorRef={starRef}
+          onSave={(category) => updatePlayerCategory(playerId, category)}
+          onUnfavorite={() => toggleFavorite(playerId, playerName)}
+          onClose={() => setIsMenuOpen(false)}
+        />
+      )}
       {message && (
         <p className={styles.toast} role={message.isError ? 'alert' : 'status'}>
           {message.text}

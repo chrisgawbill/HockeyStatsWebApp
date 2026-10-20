@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import FavoriteCategoryMenu from '@/components/FavoriteCategoryMenu';
+import { DEFAULT_FAN_TIER } from '@/lib/favoriteCategory';
 import { useAfterActionReports } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 import styles from '@/features/after-action-reports/components/FavoriteTeamButton.module.css';
 
@@ -29,31 +31,45 @@ export interface FavoriteTeamButtonProps {
 
 /**
  * Follows a team for After Action Reports. Signed-out users get a pointer to
- * the header's Google sign-in instead of a dead button. A failed save reverts
- * the star and says so briefly rather than failing silently.
+ * the header's Google sign-in instead of a dead button. Once the team is a
+ * favorite, the star opens the fan category menu (tier, label, Unfavorite). A
+ * failed save reverts the star and says so briefly rather than failing silently.
  */
 export default function FavoriteTeamButton({
   triCode,
   teamName,
 }: FavoriteTeamButtonProps) {
-  const { isSignedIn, isFavorite, toggleFavorite } = useAfterActionReports();
+  const {
+    isSignedIn,
+    favorites,
+    isFavorite,
+    toggleFavorite,
+    updateTeamCategory,
+  } = useAfterActionReports();
+  const starRef = useRef<HTMLButtonElement>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [pending, setPending] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const favorite = isSignedIn && isFavorite(triCode);
+  const favoriteTeam = favorites.find((team) => team.triCode === triCode);
 
   useEffect(() => {
     if (!saveFailed) return;
-    const timer = window.setTimeout(
+    const hideErrorTimer = window.setTimeout(
       () => setSaveFailed(false),
       ERROR_VISIBLE_MS,
     );
-    return () => window.clearTimeout(timer);
+    return () => window.clearTimeout(hideErrorTimer);
   }, [saveFailed]);
 
-  const handleClick = async () => {
+  const respondToStarPress = async () => {
     if (!isSignedIn) {
-      setShowHint((value) => !value);
+      setShowHint((isHintShown) => !isHintShown);
+      return;
+    }
+    if (favorite) {
+      setIsMenuOpen((isOpen) => !isOpen);
       return;
     }
     setSaveFailed(false);
@@ -71,20 +87,36 @@ export default function FavoriteTeamButton({
   return (
     <div className={styles.wrapper}>
       <button
+        ref={starRef}
         type="button"
         className={styles.button}
-        onClick={handleClick}
+        onClick={respondToStarPress}
         disabled={pending}
         aria-pressed={isSignedIn ? favorite : undefined}
+        aria-haspopup={favorite ? 'dialog' : undefined}
+        aria-expanded={favorite ? isMenuOpen : undefined}
         aria-label={
           favorite
-            ? `Unfavorite ${teamName}`
+            ? `Fan category and options for ${teamName}`
             : `Favorite ${teamName} for After Action Reports`
         }
       >
         <StarIcon filled={favorite} />
         <span>{favorite ? 'Favorited' : 'Favorite'}</span>
       </button>
+      {isMenuOpen && favorite && (
+        <FavoriteCategoryMenu
+          itemName={teamName}
+          category={{
+            tier: favoriteTeam?.tier ?? DEFAULT_FAN_TIER,
+            label: favoriteTeam?.label ?? null,
+          }}
+          anchorRef={starRef}
+          onSave={(category) => updateTeamCategory(triCode, category)}
+          onUnfavorite={() => toggleFavorite(triCode)}
+          onClose={() => setIsMenuOpen(false)}
+        />
+      )}
       {showHint && !isSignedIn && (
         <p className={styles.hint} role="status">
           Sign in with Google at the top of the page to favorite {teamName} and

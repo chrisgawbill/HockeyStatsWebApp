@@ -1,3 +1,5 @@
+import type { FanTier } from '@/lib/favoriteCategory';
+
 /** A favorited player as stored by the API (display fields from the NHL). */
 export interface FavoritePlayer {
   playerId: number;
@@ -7,6 +9,8 @@ export interface FavoritePlayer {
   headshot: string | null;
   /** ISO timestamp when it was favorited. */
   since: string;
+  tier: FanTier;
+  label: string | null;
 }
 
 export interface SkaterWeekStats {

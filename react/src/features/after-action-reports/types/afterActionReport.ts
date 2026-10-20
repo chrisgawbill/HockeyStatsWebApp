@@ -1,9 +1,13 @@
+import type { FanTier } from '@/lib/favoriteCategory';
+
 /** A favorite team and when it was favorited (ISO timestamp). */
 export interface FavoriteTeam {
   triCode: string;
   since: string;
   /** True when phone push is muted for this team (inbox still lists it). */
   pushMuted: boolean;
+  tier: FanTier;
+  label: string | null;
 }
 
 /** One completed game involving at least one of the user's favorite teams. */
