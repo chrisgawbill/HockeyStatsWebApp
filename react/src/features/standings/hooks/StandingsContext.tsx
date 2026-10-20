@@ -92,12 +92,16 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
       setPacificStandings(byDivision('Pacific'));
       /**
        * Keeps the lottery list to the 16 non-playoff teams that carry odds,
-       * sorted best-odds first for the landing-page display.
+       * ordered worst team first (highest odds; ties broken by league rank).
        */
       setDraftLotteryOdds(
         all
           .filter((t) => t.draftLotteryOdds > 0)
-          .sort((a, b) => b.draftLotteryOdds - a.draftLotteryOdds)
+          .sort(
+            (a, b) =>
+              b.draftLotteryOdds - a.draftLotteryOdds ||
+              b.leagueStanding - a.leagueStanding,
+          )
           .slice(0, 16),
       );
     } catch (error) {

@@ -344,6 +344,29 @@
     min-width: 0;
   }
 
+  /* The team column hugs its content (logo + abbreviation + clinch badge)
+     like the other columns instead of claiming the remaining width, so all
+     five columns fit a phone without horizontal scroll. */
+  .standings-table th:nth-child(2),
+  .standings-table td:nth-child(2) {
+    width: 1%;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .standings-table-teamName-col {
+    width: auto;
+  }
+
+  .standings-team-abbrev {
+    flex: 0 0 auto;
+  }
+
+  .standings-table th:nth-child(5),
+  .standings-table td:nth-child(5) {
+    text-align: right;
+  }
+
   .standings-table th:nth-child(4),
   .standings-table td:nth-child(4) {
     text-align: center;
