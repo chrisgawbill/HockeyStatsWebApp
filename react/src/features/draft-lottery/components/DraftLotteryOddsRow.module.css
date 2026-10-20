@@ -1,13 +1,18 @@
-/* "Price is Right" board: marquee frame, chasing bulbs, game-show palette. */
+/* Compact lottery board: dark frame with dotted bulb strips on the top and
+   bottom edges only. Board colour vars are shared with the tile styles. */
 .frame {
   --board-gold: #f2c14e;
+  --board-muted: #8d8a9e;
+  --board-accent: #a9c7ff;
+  --board-tile: #211d2c;
+  --board-tile-border: #2e2a3b;
 
   container-type: inline-size;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
   background: #17141f;
-  border: 1px solid rgba(242, 193, 78, 0.28);
+  border: 1px solid color-mix(in srgb, var(--board-gold) 28%, transparent);
   border-radius: 14px;
 }
 
@@ -19,7 +24,7 @@
   height: 6px;
   background-image: radial-gradient(
     circle,
-    rgba(242, 193, 78, 0.6) 1.4px,
+    color-mix(in srgb, var(--board-gold) 60%, transparent) 1.4px,
     transparent 2px
   );
   background-size: 12px 6px;
@@ -69,7 +74,7 @@
 
 .caption {
   margin: 8px 0 0;
-  color: #8d8a9e;
+  color: var(--board-muted);
   font-size: 12px;
   text-align: center;
 }

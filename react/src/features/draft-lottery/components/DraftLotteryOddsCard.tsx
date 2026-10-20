@@ -19,16 +19,18 @@ export default function DraftLotteryOddsCard({
   selected,
   onSelect,
 }: DraftLotteryOddsCardProps) {
-  const isWinner = !!result && (result.pick <= 2 || result.drawWon !== null);
+  const isWinner = result?.drawWon != null;
   const odds = team.draftLotteryOdds.toFixed(1);
   const movement = result?.movement ?? 0;
   const rankLabel = isWinner ? `★${rank}` : `#${rank}`;
 
-  const ariaLabel = [
-    `#${rank} ${team.teamName}: ${odds}% draft lottery odds`,
-    result && movement > 0 ? `, moved up ${movement}` : '',
-    result && movement < 0 ? `, moved down ${-movement}` : '',
-  ].join('');
+  const moveText =
+    movement > 0
+      ? `, moved up ${movement}`
+      : movement < 0
+        ? `, moved down ${-movement}`
+        : '';
+  const ariaLabel = `#${rank} ${team.teamName}: ${odds}% draft lottery odds${moveText}`;
 
   return (
     <li className={styles['item']}>

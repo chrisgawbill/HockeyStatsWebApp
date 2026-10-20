@@ -104,10 +104,8 @@ export function simulateDraftLottery(
   const all = teams.map((_, index) => index);
   runDraw(1, all);
   // A team cannot win both draws, nor win a pick it already holds.
-  runDraw(
-    2,
-    all.filter((index) => !pickByIndex.has(index)),
-  );
+  const draw2Candidates = all.filter((index) => !pickByIndex.has(index));
+  runDraw(2, draw2Candidates);
 
   // Everyone else fills the remaining picks in original order.
   let nextPick = 1;

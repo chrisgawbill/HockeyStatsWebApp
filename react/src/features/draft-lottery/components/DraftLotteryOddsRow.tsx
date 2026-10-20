@@ -9,7 +9,7 @@ import { buildLotteryAnnouncement } from '@/features/draft-lottery/utils/draftLo
 import headerStyles from '@/styles/LandingPageRow.module.css';
 import styles from '@/features/draft-lottery/components/DraftLotteryOddsRow.module.css';
 
-interface LandingPageRowProps {
+interface DraftLotteryOddsRowProps {
   title: string;
   /** Lottery teams ordered worst team first. */
   data: StandingsTeam[];
@@ -25,7 +25,10 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export default function LandingPageRow({ title, data }: LandingPageRowProps) {
+export default function DraftLotteryOddsRow({
+  title,
+  data,
+}: DraftLotteryOddsRowProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [result, setResult] = useState<LotteryResultEntry[] | null>(null);
   const [announcement, setAnnouncement] = useState('');
