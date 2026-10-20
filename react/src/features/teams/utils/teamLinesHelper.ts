@@ -45,29 +45,37 @@ const POSITION_SLOT: Partial<Record<Position, LineSlot>> = {
   'Right Wing': 'RW',
 };
 
+/** Sort position of a slot within a line's usual left-to-right order. */
 function slotRank(order: LineSlot[], slot: LineSlot): number {
-  const i = order.indexOf(slot);
-  return i === -1 ? order.length : i;
+  const rank = order.indexOf(slot);
+  return rank === -1 ? order.length : rank;
 }
 
+/**
+ * Maps a line's player ids onto roster players, in slot order. Ids missing
+ * from the roster, or already placed in an earlier line (tracked in
+ * `usedPlayerIds`), are dropped.
+ */
 function resolveTokens(
   entries: { id: number; slot: LineSlot }[] | undefined,
   order: LineSlot[],
-  byId: Map<number, RosterPlayer>,
-  used: Set<number>,
+  playersById: Map<number, RosterPlayer>,
+  usedPlayerIds: Set<number>,
 ): LineToken[] {
   const tokens: LineToken[] = [];
   for (const entry of entries ?? []) {
-    const player = byId.get(entry.id);
-    if (!player || used.has(entry.id)) continue;
-    used.add(entry.id);
+    const player = playersById.get(entry.id);
+    if (!player || usedPlayerIds.has(entry.id)) continue;
+    usedPlayerIds.add(entry.id);
     tokens.push({ slot: entry.slot, player });
   }
   return tokens.sort(
-    (a, b) => slotRank(order, a.slot) - slotRank(order, b.slot),
+    (first, second) =>
+      slotRank(order, first.slot) - slotRank(order, second.slot),
   );
 }
 
+/** Labels a group of tokens as "Line N" or "Pair N" for display. */
 function toDisplayLine(
   index: number,
   prefix: 'Line' | 'Pair',
@@ -81,6 +89,76 @@ function toDisplayLine(
     tokens,
     togetherSeconds,
   };
+}
+
+/** Builds lines from the API's shift-based groups, skipping groups that map to no roster player. */
+function buildShiftBasedGroups(
+  groups: {
+    players: { id: number; slot: LineSlot }[];
+    togetherSeconds: number;
+  }[],
+  prefix: 'Line' | 'Pair',
+  slotOrder: LineSlot[],
+  playersById: Map<number, RosterPlayer>,
+  usedPlayerIds: Set<number>,
+): DisplayLine[] {
+  return groups
+    .map((group) => ({
+      tokens: resolveTokens(
+        group.players,
+        slotOrder,
+        playersById,
+        usedPlayerIds,
+      ),
+      seconds: group.togetherSeconds,
+    }))
+    .filter((group) => group.tokens.length > 0)
+    .map((group, index) =>
+      toDisplayLine(index, prefix, group.tokens, group.seconds),
+    );
+}
+
+/**
+ * Builds lines projected from ice time (no shift data), recording every
+ * placed player in `usedPlayerIds`. Forward slots follow each player's
+ * position; defensemen are left then right in listed order.
+ */
+function buildProjectedLines(
+  roster: Record<Position, RosterPlayer[]>,
+  usedPlayerIds: Set<number>,
+) {
+  const slotByPlayerId = new Map<number, LineSlot>();
+  for (const [position, slot] of Object.entries(POSITION_SLOT)) {
+    for (const player of roster[position as Position])
+      slotByPlayerId.set(player.id, slot);
+  }
+  const forwardLines = buildForwardLines(roster)
+    .filter((line) => line.label)
+    .map((line, index) =>
+      toDisplayLine(
+        index,
+        'Line',
+        line.players.map((player) => {
+          usedPlayerIds.add(player.id);
+          return { slot: slotByPlayerId.get(player.id) ?? 'C', player };
+        }),
+        null,
+      ),
+    );
+  const defensePairs = buildDefensePairs(roster)
+    .filter((pair) => pair.label)
+    .map((pair, index) =>
+      toDisplayLine(
+        index,
+        'Pair',
+        pair.players.map((player, playerIndex) => {
+          usedPlayerIds.add(player.id);
+          return { slot: playerIndex === 0 ? 'LD' : 'RD', player };
+        }),
+        null,
+      ),
+    );
+  return { forwardLines, defensePairs };
 }
 
 /**
@@ -100,71 +178,46 @@ export function buildTeamLinesView(
     ...roster['Right Wing'],
   ];
   const skaterById = new Map(
-    [...forwards, ...roster.Defenseman].map((p) => [p.id, p]),
+    [...forwards, ...roster.Defenseman].map((player) => [player.id, player]),
   );
 
   let source: TeamLinesView['source'] = 'projected';
   let forwardLines: DisplayLine[] = [];
   let defensePairs: DisplayLine[] = [];
-  const used = new Set<number>();
+  const usedPlayerIds = new Set<number>();
 
   if (dto?.source === 'shifts') {
-    forwardLines = (dto.forwardLines ?? [])
-      .map((l) => ({
-        tokens: resolveTokens(l.players, FORWARD_ORDER, skaterById, used),
-        seconds: l.togetherSeconds,
-      }))
-      .filter((l) => l.tokens.length > 0)
-      .map((l, i) => toDisplayLine(i, 'Line', l.tokens, l.seconds));
-    defensePairs = (dto.defensePairs ?? [])
-      .map((p) => ({
-        tokens: resolveTokens(p.players, DEFENSE_ORDER, skaterById, used),
-        seconds: p.togetherSeconds,
-      }))
-      .filter((p) => p.tokens.length > 0)
-      .map((p, i) => toDisplayLine(i, 'Pair', p.tokens, p.seconds));
+    forwardLines = buildShiftBasedGroups(
+      dto.forwardLines ?? [],
+      'Line',
+      FORWARD_ORDER,
+      skaterById,
+      usedPlayerIds,
+    );
+    defensePairs = buildShiftBasedGroups(
+      dto.defensePairs ?? [],
+      'Pair',
+      DEFENSE_ORDER,
+      skaterById,
+      usedPlayerIds,
+    );
     if (forwardLines.length > 0 || defensePairs.length > 0) {
       source = 'shifts';
     }
   }
 
   if (source === 'projected') {
-    used.clear();
-    const slotById = new Map<number, LineSlot>();
-    for (const [pos, slot] of Object.entries(POSITION_SLOT)) {
-      for (const p of roster[pos as Position]) slotById.set(p.id, slot);
-    }
-    forwardLines = buildForwardLines(roster)
-      .filter((l) => l.label)
-      .map((l, i) =>
-        toDisplayLine(
-          i,
-          'Line',
-          l.players.map((player) => {
-            used.add(player.id);
-            return { slot: slotById.get(player.id) ?? 'C', player };
-          }),
-          null,
-        ),
-      );
-    defensePairs = buildDefensePairs(roster)
-      .filter((l) => l.label)
-      .map((l, i) =>
-        toDisplayLine(
-          i,
-          'Pair',
-          l.players.map((player, j) => {
-            used.add(player.id);
-            return { slot: j === 0 ? 'LD' : 'RD', player };
-          }),
-          null,
-        ),
-      );
+    usedPlayerIds.clear();
+    ({ forwardLines, defensePairs } = buildProjectedLines(
+      roster,
+      usedPlayerIds,
+    ));
   }
 
   const goalies = roster.Goalie;
   const starterId = source === 'shifts' ? dto?.goalies?.starterId : null;
-  const starter = goalies.find((g) => g.id === starterId) ?? goalies[0] ?? null;
+  const starter =
+    goalies.find((goalie) => goalie.id === starterId) ?? goalies[0] ?? null;
 
   return {
     source,
@@ -172,11 +225,13 @@ export function buildTeamLinesView(
     forwardLines,
     defensePairs,
     extras: {
-      forwards: forwards.filter((p) => !used.has(p.id)),
-      defense: roster.Defenseman.filter((p) => !used.has(p.id)),
+      forwards: forwards.filter((player) => !usedPlayerIds.has(player.id)),
+      defense: roster.Defenseman.filter(
+        (player) => !usedPlayerIds.has(player.id),
+      ),
     },
     starter,
-    backups: goalies.filter((g) => g !== starter),
+    backups: goalies.filter((goalie) => goalie !== starter),
   };
 }
 

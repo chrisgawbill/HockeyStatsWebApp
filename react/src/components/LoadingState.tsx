@@ -5,6 +5,7 @@ interface LoadingStateProps {
   fullPage?: boolean;
 }
 
+/** Spinner with an accessible status label, inline or filling the page. */
 export default function LoadingState({
   label = 'Loading',
   fullPage = false,

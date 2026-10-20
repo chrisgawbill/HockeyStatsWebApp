@@ -23,10 +23,10 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   const [error, setError] = useState<string | null>(null);
 
   const loadingRefs = useRef<Record<string, boolean>>(
-    Object.fromEntries(stats.map((s) => [s.displayKey, true])),
+    Object.fromEntries(stats.map((stat) => [stat.displayKey, true])),
   );
   const failedRefs = useRef<Record<string, boolean>>(
-    Object.fromEntries(stats.map((s) => [s.displayKey, false])),
+    Object.fromEntries(stats.map((stat) => [stat.displayKey, false])),
   );
   const latestRun = useRef(0);
 
@@ -43,7 +43,9 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   function checkLoadingStatus() {
     if (Object.values(loadingRefs.current).includes(true)) return;
     setLoading(false);
-    const allFailed = stats.every((s) => failedRefs.current[s.displayKey]);
+    const allFailed = stats.every(
+      (stat) => failedRefs.current[stat.displayKey],
+    );
     if (allFailed) {
       setError("Couldn't load stat leaders.");
     }
@@ -59,9 +61,10 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   async function fetchStat({ displayKey, apiKey }: StatEntry, runId: number) {
     const isStale = () => runId !== latestRun.current;
     try {
-      const data = await fetcher(apiKey, season);
+      const leaderContracts = await fetcher(apiKey, season);
       if (isStale()) return;
-      const statLeaders: PlayerStatLeader[] = PlayerStatLeaderConverter(data);
+      const statLeaders: PlayerStatLeader[] =
+        PlayerStatLeaderConverter(leaderContracts);
       failedRefs.current[displayKey] = false;
       if (statLeaders.length === 0) return;
       const topLeader = new TopStatLeader(
@@ -69,10 +72,13 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
         statLeaders[0],
         statLeaders,
       );
-      setLeaders((prev) => ({ ...prev, [displayKey]: topLeader }));
-    } catch (error) {
+      setLeaders((currentLeaders) => ({
+        ...currentLeaders,
+        [displayKey]: topLeader,
+      }));
+    } catch (fetchError) {
       if (isStale()) return;
-      console.error(`Error fetching ${displayKey}: `, error);
+      console.error(`Error fetching ${displayKey}: `, fetchError);
       failedRefs.current[displayKey] = true;
     } finally {
       if (!isStale()) {
@@ -89,10 +95,10 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
     setError(null);
     setLoading(true);
     loadingRefs.current = Object.fromEntries(
-      stats.map((s) => [s.displayKey, true]),
+      stats.map((stat) => [stat.displayKey, true]),
     );
     failedRefs.current = Object.fromEntries(
-      stats.map((s) => [s.displayKey, false]),
+      stats.map((stat) => [stat.displayKey, false]),
     );
     stats.forEach((stat) => fetchStat(stat, runId));
   }, [stats, season]);

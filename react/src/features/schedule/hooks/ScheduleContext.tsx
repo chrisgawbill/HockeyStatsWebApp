@@ -125,14 +125,14 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
         gamesThatNeedToUpdate.map((game) => updateGame(game)),
       );
 
-      const updatedMap = new Map<number, ScheduledGame>();
+      const refreshedGamesById = new Map<number, ScheduledGame>();
       for (const game of updatedGames) {
-        if (game) updatedMap.set(game.gameId, game);
+        if (game) refreshedGamesById.set(game.gameId, game);
       }
-      if (updatedMap.size === 0) return;
+      if (refreshedGamesById.size === 0) return;
 
-      setListOfGamesData((prev) =>
-        prev.map((g) => updatedMap.get(g.gameId) ?? g),
+      setListOfGamesData((currentGames) =>
+        currentGames.map((game) => refreshedGamesById.get(game.gameId) ?? game),
       );
     }
   }, [listOfGamesData, loadingListOfGamesData]);
@@ -231,6 +231,7 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Reads the season schedule; throws outside the schedule provider. */
 function useListOfGames(): ListOfGamesData {
   const context = useContext(ListOfGamesContext);
   if (!context)

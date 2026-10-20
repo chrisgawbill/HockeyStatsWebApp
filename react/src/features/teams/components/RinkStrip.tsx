@@ -16,7 +16,9 @@ interface RinkStripProps {
  * dots, with jersey tokens in formation (LW-C-RW, or LD-RD near the blue line).
  */
 export default function RinkStrip({ line, caption, live }: RinkStripProps) {
-  const isPair = line.tokens.some((t) => t.slot === 'LD' || t.slot === 'RD');
+  const isPair = line.tokens.some(
+    (token) => token.slot === 'LD' || token.slot === 'RD',
+  );
 
   return (
     <figure className={styles.stripFigure}>

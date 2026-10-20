@@ -1,6 +1,7 @@
 import styles from '@/components/QuickLinks.module.css';
 import { Link } from 'react-router-dom';
 
+/** Home-page shortcut buttons to the main sections. */
 export default function QuickLinks() {
   return (
     <div id="quick-links-container">

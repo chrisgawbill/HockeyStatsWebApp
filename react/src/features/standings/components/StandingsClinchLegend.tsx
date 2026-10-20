@@ -2,18 +2,18 @@ import {
   CLINCH_STATUS_META,
   ClinchStatus,
 } from '@/features/standings/utils/clinchStatus';
+import { joinClassNames } from '@/lib/joinClassNames';
 import styles from '@/features/standings/components/LandingPageStandings.module.css';
 
 interface Props {
   className?: string;
 }
 
+/** Key explaining each clinch badge letter (P, C, D, X, W) used in the standings tables. */
 export default function StandingsClinchLegend({ className }: Props) {
   return (
     <div
-      className={[styles['standings-clinch-legend'], className]
-        .filter(Boolean)
-        .join(' ')}
+      className={joinClassNames(styles['standings-clinch-legend'], className)}
       aria-label="Standings clinch legend"
     >
       {(Object.keys(CLINCH_STATUS_META) as ClinchStatus[]).map((status) => {

@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   ReactNode,
   useCallback,
@@ -21,8 +21,8 @@ interface ListOfTeamsData {
 
 const ListOfTeamsContext = createContext<ListOfTeamsData | null>(null);
 
+/** Loads every club with its per-season stats for the selected season and shares it with the team pages. */
 function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
-  const teamListData = React.useRef<any[]>([]);
   const [listOfTeamsData, setListOfTeamsData] = useState<Team[]>([]);
   const [loadingListOfTeamsData, setLoadingListOfTeamsData] =
     useState<boolean>(true);
@@ -32,15 +32,15 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   const { season } = useSeason();
 
   /** Fetches season stats and merges them onto the local team list. */
-  const GetTeams = useCallback(async () => {
+  const loadTeams = useCallback(async () => {
     setErrorListOfTeamsData(null);
-    let rawLocalList: any[] = [...localTeamList];
-    rawLocalList.sort((a, b) => b.fullName.localeCompare(a.fullName));
-    teamListData.current = rawLocalList;
+    const sortedLocalTeams = [...localTeamList].sort((first, second) =>
+      second.fullName.localeCompare(first.fullName),
+    );
     try {
       const teamStatsData = await GetTeamStatsById('', season);
       const finalTeamData = ConvertToListOfTeams(
-        teamListData.current,
+        sortedLocalTeams,
         teamStatsData.data,
       );
       setListOfTeamsData(finalTeamData);
@@ -55,8 +55,8 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   /** Re-runs the team list fetch for the current season. */
   const refetchListOfTeams = useCallback(() => {
     setLoadingListOfTeamsData(true);
-    GetTeams();
-  }, [GetTeams]);
+    loadTeams();
+  }, [loadTeams]);
 
   useEffect(() => {
     refetchListOfTeams();
@@ -74,6 +74,7 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     </ListOfTeamsContext.Provider>
   );
 }
+/** Reads the team list; throws outside `ListOfTeamsDataProvider`. */
 function useListOfTeamsData(): ListOfTeamsData {
   const context = useContext(ListOfTeamsContext);
   if (!context)

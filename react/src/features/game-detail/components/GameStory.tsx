@@ -18,12 +18,14 @@ type GameStoryProps = {
   awayTotals: TeamTotalsViewModel | null;
 };
 
+/** Short period label: P1, P2, P3, OT, or SO. */
 function periodLabel(periodNumber: number, periodType: string): string {
   if (periodType === 'OT') return 'OT';
   if (periodType === 'SO') return 'SO';
   return `P${periodNumber}`;
 }
 
+/** Away-home score such as 2–1, or a placeholder when either score is missing. */
 function scoreLabel(
   awayScore: number | null,
   homeScore: number | null,
@@ -32,6 +34,7 @@ function scoreLabel(
   return `${awayScore}–${homeScore}`;
 }
 
+/** Sentence describing a turning-point goal. */
 function turningPointText(
   point: GameStoryTurningPoint,
   facts: GameStoryFacts,
@@ -57,6 +60,7 @@ function turningPointText(
   return `${awayAbbrev} and ${homeAbbrev} were level at ${score}.`;
 }
 
+/** Plain-language recap of the game built from the scoring facts. */
 function GameStory({
   facts,
   boxscore,

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from '@/components/GoogleSignInButton.module.css';
+import { joinClassNames } from '@/lib/joinClassNames';
 
 type GoogleButtonSize = 'large' | 'medium' | 'small';
 
@@ -40,14 +41,12 @@ export interface GoogleSignInButtonProps {
   unavailableClassName?: string;
 }
 
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
-
+/** Whether Google's Identity Services script has loaded and exposes the sign-in API. */
 function isGoogleIdentityReady(): boolean {
   return typeof window !== 'undefined' && window.google?.accounts?.id != null;
 }
 
+/** Picks the Google button theme that matches the site's current light or dark theme. */
 function resolveGoogleButtonTheme(): 'outline' | 'filled_black' {
   if (typeof document === 'undefined') return 'outline';
   const explicit = document.documentElement.getAttribute('data-theme');
@@ -107,8 +106,10 @@ export default function GoogleSignInButton({
 
   if (!clientId) {
     return (
-      <div className={cx(styles.frame, className)}>
-        <span className={cx(styles.unavailable, unavailableClassName)}>
+      <div className={joinClassNames(styles.frame, className)}>
+        <span
+          className={joinClassNames(styles.unavailable, unavailableClassName)}
+        >
           Sign-in unavailable
         </span>
       </div>
@@ -116,7 +117,7 @@ export default function GoogleSignInButton({
   }
 
   return (
-    <div className={cx(styles.frame, className)}>
+    <div className={joinClassNames(styles.frame, className)}>
       <div ref={slotRef} className={styles.slot} />
     </div>
   );

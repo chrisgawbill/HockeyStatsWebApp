@@ -14,8 +14,50 @@ import {
 
 const SeasonContext = createContext<{
   season: string;
-  setSeason: (s: string) => void;
+  setSeason: (seasonId: string) => void;
 } | null>(null);
+
+/**
+ * Deep links, back/forward, and manual URL edits update the season the app
+ * remembers.
+ */
+function useSyncRememberedSeasonWithUrl(
+  validParam: string | null,
+  rememberedSeason: string,
+  setRememberedSeason: (seasonId: string) => void,
+) {
+  useEffect(() => {
+    if (validParam && validParam !== rememberedSeason) {
+      setRememberedSeason(validParam);
+    }
+  }, [validParam, rememberedSeason, setRememberedSeason]);
+}
+
+/**
+ * Bare navigations drop the `?season=` param; rewrites the URL to carry the
+ * remembered season without adding a history entry or dropping router state.
+ */
+function useCarrySeasonInUrl(
+  validParam: string | null,
+  rememberedSeason: string,
+) {
+  const [, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!validParam) {
+      setSearchParams(
+        (currentParams) => {
+          const nextParams = new URLSearchParams(currentParams);
+          nextParams.set('season', rememberedSeason);
+          return nextParams;
+        },
+        { replace: true, state: location.state },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validParam, rememberedSeason, location.key]);
+}
 
 /**
  * Holds the app-wide selected season. The `?season=` URL param wins when present
@@ -28,7 +70,6 @@ const SeasonContext = createContext<{
  */
 function SeasonProvider({ children }: { children: ReactNode }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
   const param = searchParams.get('season');
   const validParam = param && isValidSeasonId(param) ? param : null;
 
@@ -38,40 +79,24 @@ function SeasonProvider({ children }: { children: ReactNode }) {
 
   const season = validParam ?? rememberedSeason;
 
-  // Deep links / back-forward / manual URL edits update what we remember.
-  useEffect(() => {
-    if (validParam && validParam !== rememberedSeason) {
-      setRememberedSeason(validParam);
-    }
-  }, [validParam, rememberedSeason]);
-
-  // Bare navigations drop the param; rewrite the URL to carry the remembered
-  // season without adding a history entry or dropping router state.
-  useEffect(() => {
-    if (!validParam) {
-      setSearchParams(
-        (prev) => {
-          const p = new URLSearchParams(prev);
-          p.set('season', rememberedSeason);
-          return p;
-        },
-        { replace: true, state: location.state },
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validParam, rememberedSeason, location.key]);
+  useSyncRememberedSeasonWithUrl(
+    validParam,
+    rememberedSeason,
+    setRememberedSeason,
+  );
+  useCarrySeasonInUrl(validParam, rememberedSeason);
 
   /**
    * Writes the selected season back to the URL while preserving unrelated query
    * params such as schedule `date` and `view`.
    */
   const setSeason = useCallback(
-    (next: string) => {
-      setRememberedSeason(next);
-      setSearchParams((prev) => {
-        const p = new URLSearchParams(prev);
-        p.set('season', next);
-        return p;
+    (nextSeason: string) => {
+      setRememberedSeason(nextSeason);
+      setSearchParams((currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
+        nextParams.set('season', nextSeason);
+        return nextParams;
       });
     },
     [setSearchParams],
@@ -88,9 +113,9 @@ function SeasonProvider({ children }: { children: ReactNode }) {
  * outside SeasonProvider so provider-order mistakes fail during development.
  */
 function useSeason() {
-  const ctx = useContext(SeasonContext);
-  if (!ctx) throw new Error('useSeason must be used within SeasonProvider');
-  return ctx;
+  const context = useContext(SeasonContext);
+  if (!context) throw new Error('useSeason must be used within SeasonProvider');
+  return context;
 }
 
 export { SeasonProvider, useSeason };

@@ -9,6 +9,7 @@ interface StandingsContainerProps {
   fill?: boolean;
 }
 
+/** A titled standings table for one conference or division; renders nothing when there are too few teams. */
 export default function StandingsContainer({
   standingsName,
   standingsData,
@@ -38,7 +39,6 @@ export default function StandingsContainer({
         </div>
       </div>
     );
-  } else {
-    return <></>;
   }
+  return null;
 }

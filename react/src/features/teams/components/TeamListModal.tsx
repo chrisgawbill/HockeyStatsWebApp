@@ -7,6 +7,7 @@ interface TeamListModalProps {
   setShowModal: Function;
   team: Team;
 }
+/** Dialog for a team on the team list. */
 export default function TeamListModal({
   showModal,
   setShowModal,

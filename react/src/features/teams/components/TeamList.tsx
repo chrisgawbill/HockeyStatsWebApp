@@ -1,65 +1,23 @@
 import { useMemo, useState } from 'react';
-import { Team } from '@/features/teams/types/team';
-import { TeamStats } from '@/features/teams/types/teamStats';
-import { localTeamList } from '@/lib/teamListData';
 import styles from '@/features/teams/components/TeamList.module.css';
 import PageHeader from '@/components/PageHeader';
+import TeamListCard from '@/features/teams/components/TeamListCard';
 import { useListOfTeamsData } from '@/features/teams/hooks/ListOfTeamsContext';
-import { Link } from 'react-router-dom';
 import { useStandingsData } from '@/features/standings/hooks/StandingsContext';
-import { StandingsTeam } from '@/features/standings/types/standingsTeam';
+import {
+  TeamFilter,
+  TeamSort,
+  buildStandingsLookup,
+  buildTeamCards,
+} from '@/features/teams/utils/teamListHelper';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 
-const triCodeLookup: Record<string, string> = Object.fromEntries(
-  (localTeamList as any[]).map((t) => [t.fullName, t.triCode]),
-);
-
-function normalizeKey(value: string) {
-  return value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-}
-
-function getCurrentStats(team: Team): TeamStats | null {
-  if (!team.seasonStats || team.seasonStats.length === 0) return null;
-  return team.seasonStats.reduce((latest, stat) =>
-    !latest || stat.seasonId > latest.seasonId ? stat : latest,
-  );
-}
-
-type TeamFilter = 'all' | 'playoff' | 'lottery';
-type TeamSort = 'name' | 'points' | 'winPct' | 'goals' | 'draftOdds';
-
-interface TeamCardData {
-  team: Team;
-  stats: TeamStats | null;
-  standings?: StandingsTeam;
-  triCode: string;
-}
-
-function getWinPct(stats: TeamStats | null) {
-  if (!stats) return 0;
-  const gamesPlayed = stats.wins + stats.losses + stats.otLosses;
-  return gamesPlayed > 0 ? stats.wins / gamesPlayed : 0;
-}
-
-function formatNumber(value: number | undefined, digits: number) {
-  return typeof value === 'number' && Number.isFinite(value)
-    ? value.toFixed(digits)
-    : '—';
-}
-
-function getStatusLabel(team: TeamCardData, filter: TeamFilter) {
-  if (filter === 'playoff' && team.standings?.conferenceStandingsPlace) {
-    return `#${team.standings.conferenceStandingsPlace} ${team.standings.conferenceName}`;
-  }
-
-  if (filter === 'lottery' && (team.standings?.draftLotteryOdds ?? 0) > 0) {
-    return `${team.standings?.draftLotteryOdds}% Lottery`;
-  }
-
-  return null;
-}
-
+/**
+ * Team list route (`/teamList`): every club as a card with its record and key
+ * stats, searchable and filterable by conference, division, and playoff or
+ * lottery position, with sorting. Waits for both the team list and standings.
+ */
 export default function TeamList() {
   const {
     listOfTeamsData,
@@ -88,82 +46,31 @@ export default function TeamList() {
     setSortBy('name');
   };
 
-  const standingsByTeam = useMemo(() => {
-    const allStandings = [...easternStandingsData, ...westernStandingsData];
-    const standingsMap = new Map<string, StandingsTeam>();
+  const standingsByKey = useMemo(
+    () =>
+      buildStandingsLookup([...easternStandingsData, ...westernStandingsData]),
+    [easternStandingsData, westernStandingsData],
+  );
 
-    for (const team of allStandings) {
-      standingsMap.set(team.id, team);
-      standingsMap.set(team.teamName, team);
-      standingsMap.set(normalizeKey(team.teamName), team);
-    }
-
-    return standingsMap;
-  }, [easternStandingsData, westernStandingsData]);
-
-  const teams = useMemo<TeamCardData[]>(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    return listOfTeamsData
-      .map((team: Team) => {
-        const triCode = triCodeLookup[team.teamName] ?? '';
-        const standings =
-          standingsByTeam.get(triCode) ??
-          standingsByTeam.get(team.teamName) ??
-          standingsByTeam.get(normalizeKey(team.teamName));
-        return {
-          team,
-          standings,
-          stats: getCurrentStats(team),
-          triCode,
-        };
-      })
-      .filter(({ team, standings, triCode }: TeamCardData) => {
-        const matchesSearch =
-          normalizedSearch.length === 0 ||
-          team.teamName.toLowerCase().includes(normalizedSearch) ||
-          triCode.toLowerCase().includes(normalizedSearch);
-        const matchesConference =
-          conference === 'All' || standings?.conferenceName === conference;
-        const matchesDivision =
-          division === 'All' || standings?.divisionName === division;
-        const isLottery = (standings?.draftLotteryOdds ?? 0) > 0;
-        const isPlayoff =
-          standings?.conferenceStandingsPlace != null &&
-          standings.conferenceStandingsPlace <= 8;
-        const matchesFilter =
-          filter === 'all' ||
-          (filter === 'playoff' && isPlayoff) ||
-          (filter === 'lottery' && isLottery);
-
-        return (
-          matchesSearch && matchesConference && matchesDivision && matchesFilter
-        );
-      })
-      .sort((a: TeamCardData, b: TeamCardData) => {
-        if (sortBy === 'points')
-          return (b.stats?.points ?? 0) - (a.stats?.points ?? 0);
-        if (sortBy === 'winPct') return getWinPct(b.stats) - getWinPct(a.stats);
-        if (sortBy === 'goals') {
-          return (b.stats?.goalsPerGame ?? 0) - (a.stats?.goalsPerGame ?? 0);
-        }
-        if (sortBy === 'draftOdds') {
-          return (
-            (b.standings?.draftLotteryOdds ?? 0) -
-            (a.standings?.draftLotteryOdds ?? 0)
-          );
-        }
-        return a.team.teamName.localeCompare(b.team.teamName);
-      });
-  }, [
-    conference,
-    division,
-    filter,
-    listOfTeamsData,
-    search,
-    sortBy,
-    standingsByTeam,
-  ]);
+  const teams = useMemo(
+    () =>
+      buildTeamCards(listOfTeamsData, standingsByKey, {
+        search,
+        conference,
+        division,
+        filter,
+        sortBy,
+      }),
+    [
+      conference,
+      division,
+      filter,
+      listOfTeamsData,
+      search,
+      sortBy,
+      standingsByKey,
+    ],
+  );
 
   if (errorListOfTeamsData) {
     return (
@@ -275,79 +182,13 @@ export default function TeamList() {
           </div>
         </section>
         <div className={styles['team-card-grid']}>
-          {teams.map(({ team, stats, standings, triCode }) => {
-            const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${triCode}_light.svg`;
-            const winPct = getWinPct(stats);
-            const statusLabel = getStatusLabel(
-              {
-                team,
-                stats,
-                standings,
-                triCode,
-              },
-              filter,
-            );
-            return (
-              <Link
-                key={team.teamName}
-                to={`/team/${triCode}`}
-                state={{ sourcePath: '/teamList', fallbackPath: '/teamList' }}
-                className={styles['team-card']}
-              >
-                <div className={styles['team-card__top']}>
-                  <img
-                    className={styles['team-card__logo']}
-                    src={logoUrl}
-                    alt={team.teamName}
-                  />
-                  {statusLabel && (
-                    <span className={styles['team-card__status']}>
-                      {statusLabel}
-                    </span>
-                  )}
-                </div>
-                <p className={styles['team-card__name']}>{team.teamName}</p>
-                <p className={styles['team-card__meta']}>
-                  {standings?.divisionName ?? 'NHL'} · {triCode}
-                </p>
-                {stats ? (
-                  <>
-                    <p className={styles['team-card__record']}>
-                      {stats.wins}-{stats.losses}-{stats.otLosses}
-                    </p>
-                    <div className={styles['team-card__metrics']}>
-                      <span>
-                        <strong className={styles['team-card__metrics-value']}>
-                          {stats.points}
-                        </strong>
-                        <span className={styles['team-card__metrics-label']}>
-                          PTS
-                        </span>
-                      </span>
-                      <span>
-                        <strong className={styles['team-card__metrics-value']}>
-                          {(winPct * 100).toFixed(1)}
-                        </strong>
-                        <span className={styles['team-card__metrics-label']}>
-                          WIN%
-                        </span>
-                      </span>
-                      <span>
-                        <strong className={styles['team-card__metrics-value']}>
-                          {formatNumber(stats.goalsPerGame, 2)}
-                        </strong>
-                        <span className={styles['team-card__metrics-label']}>
-                          GF/GP
-                        </span>
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <p className={styles['team-card__record']}>—</p>
-                )}
-              </Link>
-            );
-          })}
+          {teams.map((card) => (
+            <TeamListCard
+              key={card.team.teamName}
+              card={card}
+              filter={filter}
+            />
+          ))}
         </div>
         {teams.length === 0 && (
           <p className={styles['team-list-empty']}>

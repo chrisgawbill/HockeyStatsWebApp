@@ -13,7 +13,7 @@ const fallbackLogosByTeamName = Object.fromEntries(
 export function CreateLeagueStandingsArray(
   initialStandings: StandingsTeamDto[],
 ) {
-  let leageuStandingsArray: StandingsTeam[] = [];
+  let leagueStandings: StandingsTeam[] = [];
   for (let i = 0; i < initialStandings.length; i++) {
     const responseTeam = initialStandings[i];
     const teamId = responseTeam.teamId;
@@ -34,8 +34,8 @@ export function CreateLeagueStandingsArray(
     const clinchingIndicator = responseTeam.clinchingIndicator;
 
     const teamLastTenLeagueRank: number = responseTeam.leagueL10Sequence;
-    const teamDraftLotteryOdds: number = DraftLotteryOddsHelper(leagueStanding);
-    const draftLotteryOddsTrend: string = DraftLotteryOddsTrendHelper(
+    const teamDraftLotteryOdds: number = getDraftLotteryOdds(leagueStanding);
+    const draftLotteryOddsTrend: string = getDraftLotteryOddsTrend(
       leagueStanding,
       teamLastTenLeagueRank,
     );
@@ -59,13 +59,14 @@ export function CreateLeagueStandingsArray(
       teamDraftLotteryOdds,
       draftLotteryOddsTrend,
     );
-    leageuStandingsArray.push(standingsTeam);
+    leagueStandings.push(standingsTeam);
   }
-  return leageuStandingsArray;
+  return leagueStandings;
 }
-function DraftLotteryOddsTrendHelper(leagueRank: number, lastTenRank: number) {
-  const currentOdds = DraftLotteryOddsHelper(leagueRank);
-  const lastTenOdds = DraftLotteryOddsHelper(lastTenRank);
+/** Whether a team's lottery odds moved UP, DOWN, or stayed the SAME based on last-ten rank versus league rank. */
+function getDraftLotteryOddsTrend(leagueRank: number, lastTenRank: number) {
+  const currentOdds = getDraftLotteryOdds(leagueRank);
+  const lastTenOdds = getDraftLotteryOdds(lastTenRank);
   if (currentOdds > lastTenOdds) {
     return 'UP';
   } else if (currentOdds < lastTenOdds) {
@@ -73,7 +74,7 @@ function DraftLotteryOddsTrendHelper(leagueRank: number, lastTenRank: number) {
   }
   return 'SAME';
 }
-function DraftLotteryOddsHelper(leagueRank: number) {
+function getDraftLotteryOdds(leagueRank: number) {
   let draftLotteryOdds: number = 0.0;
   switch (leagueRank) {
     case 32:

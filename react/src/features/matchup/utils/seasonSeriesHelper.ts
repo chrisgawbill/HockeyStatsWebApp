@@ -15,18 +15,23 @@ export interface SeasonSeries {
   summary: SeasonSeriesSummary;
 }
 
+/**
+ * Collects the meetings between two teams in the loaded season, oldest first,
+ * split into played (completed with scores) and upcoming, with the series
+ * win/tie and goal totals from teamA's and teamB's points of view.
+ */
 export function getSeasonSeries(
   games: ScheduledGame[],
   teamA: string,
   teamB: string,
 ): SeasonSeries {
-  const a = teamA.toUpperCase();
-  const b = teamB.toUpperCase();
+  const teamACode = teamA.toUpperCase();
+  const teamBCode = teamB.toUpperCase();
   const meetings = games
     .filter(
       (game) =>
-        (game.homeTeam === a && game.awayTeam === b) ||
-        (game.homeTeam === b && game.awayTeam === a),
+        (game.homeTeam === teamACode && game.awayTeam === teamBCode) ||
+        (game.homeTeam === teamBCode && game.awayTeam === teamACode),
     )
     .sort((left, right) => left.date.getTime() - right.date.getTime());
   const played = meetings.filter(
@@ -37,15 +42,17 @@ export function getSeasonSeries(
   );
   const upcoming = meetings.filter((game) => !played.includes(game));
   const summary = played.reduce<SeasonSeriesSummary>(
-    (result, game) => {
-      const aGoals = game.homeTeam === a ? game.homeScore : game.awayScore;
-      const bGoals = game.homeTeam === b ? game.homeScore : game.awayScore;
-      result.teamAGoals += aGoals;
-      result.teamBGoals += bGoals;
-      if (aGoals > bGoals) result.teamAwins += 1;
-      else if (bGoals > aGoals) result.teamBwins += 1;
-      else result.ties += 1;
-      return result;
+    (summaryTotals, game) => {
+      const aGoals =
+        game.homeTeam === teamACode ? game.homeScore : game.awayScore;
+      const bGoals =
+        game.homeTeam === teamBCode ? game.homeScore : game.awayScore;
+      summaryTotals.teamAGoals += aGoals;
+      summaryTotals.teamBGoals += bGoals;
+      if (aGoals > bGoals) summaryTotals.teamAwins += 1;
+      else if (bGoals > aGoals) summaryTotals.teamBwins += 1;
+      else summaryTotals.ties += 1;
+      return summaryTotals;
     },
     { teamAwins: 0, teamBwins: 0, ties: 0, teamAGoals: 0, teamBGoals: 0 },
   );

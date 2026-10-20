@@ -16,23 +16,25 @@ type PeriodGoalsBreakdownTableProps = {
   awayAbbrev: string;
 };
 
-function getPeriodLabel(p: PeriodGoalBreakdown): string {
-  if (p.periodType === 'OT') return 'OT';
-  if (p.periodType === 'SO') return 'SO';
-  return `P${p.periodNum}`;
+/** Column header for a period: P1-P3, then OT or SO. */
+function getPeriodLabel(period: PeriodGoalBreakdown): string {
+  if (period.periodType === 'OT') return 'OT';
+  if (period.periodType === 'SO') return 'SO';
+  return `P${period.periodNum}`;
 }
 
+/** Goals by period for each team, with totals. */
 function PeriodGoalsBreakdownTable({
   periodGoalsBreakdown,
   homeAbbrev,
   awayAbbrev,
 }: PeriodGoalsBreakdownTableProps) {
   const awayTotal = periodGoalsBreakdown.reduce(
-    (sum, p) => sum + p.awayGoals,
+    (sum, period) => sum + period.awayGoals,
     0,
   );
   const homeTotal = periodGoalsBreakdown.reduce(
-    (sum, p) => sum + p.homeGoals,
+    (sum, period) => sum + period.homeGoals,
     0,
   );
   const awayColor = getTeamPrimaryColor(awayAbbrev);
@@ -50,8 +52,8 @@ function PeriodGoalsBreakdownTable({
               <th className={styles['period-goals-breakdown-table__team-col']}>
                 Team
               </th>
-              {periodGoalsBreakdown.map((p) => (
-                <th key={p.periodNum}>{getPeriodLabel(p)}</th>
+              {periodGoalsBreakdown.map((period) => (
+                <th key={period.periodNum}>{getPeriodLabel(period)}</th>
               ))}
               <th className={styles['total-col']}>T</th>
             </tr>
@@ -65,8 +67,8 @@ function PeriodGoalsBreakdownTable({
               <td className={styles['period-goals-breakdown-table__team-col']}>
                 {awayAbbrev}
               </td>
-              {periodGoalsBreakdown.map((p) => (
-                <td key={p.periodNum}>{p.awayGoals}</td>
+              {periodGoalsBreakdown.map((period) => (
+                <td key={period.periodNum}>{period.awayGoals}</td>
               ))}
               <td className={styles['total-col']}>{awayTotal}</td>
             </tr>
@@ -78,8 +80,8 @@ function PeriodGoalsBreakdownTable({
               <td className={styles['period-goals-breakdown-table__team-col']}>
                 {homeAbbrev}
               </td>
-              {periodGoalsBreakdown.map((p) => (
-                <td key={p.periodNum}>{p.homeGoals}</td>
+              {periodGoalsBreakdown.map((period) => (
+                <td key={period.periodNum}>{period.homeGoals}</td>
               ))}
               <td className={styles['total-col']}>{homeTotal}</td>
             </tr>

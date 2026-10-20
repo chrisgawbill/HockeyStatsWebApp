@@ -3,10 +3,7 @@ import { TeamOverview } from '@/features/teams/types/teamPageTypes';
 import { localTeamList } from '@/lib/teamListData';
 import FavoriteTeamButton from '@/features/after-action-reports/components/FavoriteTeamButton';
 import styles from '@/features/teams/components/TeamPage.module.css';
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
+import { joinClassNames } from '@/lib/joinClassNames';
 
 interface TeamHeroProps {
   team: TeamOverview;
@@ -34,8 +31,8 @@ export default function TeamHero({ team }: TeamHeroProps) {
           ? 'Standings'
           : 'Team List';
   const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${team.triCode}_dark.svg`;
-  var primaryColor = localTeamList.find(
-    (x) => x.triCode === team.triCode,
+  const primaryColor = localTeamList.find(
+    (entry) => entry.triCode === team.triCode,
   )?.primary;
 
   return (
@@ -93,7 +90,7 @@ export default function TeamHero({ team }: TeamHeroProps) {
               #{team.divisionRank} {team.division}
             </span>
             <span
-              className={cx(
+              className={joinClassNames(
                 styles['team-hero__badge'],
                 styles['team-hero__badge--playoff'],
                 team.playoffLineDelta >= 0 ? styles.above : styles.below,

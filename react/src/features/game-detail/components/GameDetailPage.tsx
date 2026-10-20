@@ -1,20 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ReactNode, useMemo } from 'react';
+import { useGameDetail } from '@/features/game-detail/hooks/useGameDetail';
 import {
-  GetGameDetails,
-  GetGameLanding,
-} from '@/features/game-detail/api/gameDetailApi';
-import {
-  GameDetailBoxscore,
-  GameLanding,
-} from '@/features/game-detail/types/gameDetail';
-import {
-  LIVE_POLL_INTERVAL_MS,
   computeTeamTotals,
   getPeriodGoalsBreakdown,
   hasBoxscoreStats,
   hasScoringSummary,
   hasThreeStars,
-  mapGameStateToStatus,
 } from '@/features/game-detail/utils/gameDetailHelper';
 import { getGameStoryFacts } from '@/features/game-detail/utils/gameStoryHelper';
 import { useParams } from 'react-router-dom';
@@ -31,55 +22,26 @@ import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 import GameStory from '@/features/game-detail/components/GameStory';
 
+/** Header plus page-width main wrapper shared by every state of the game page. */
+function GameDetailShell({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <PageHeader />
+      <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
+        {children}
+      </main>
+    </>
+  );
+}
+
+/**
+ * Game route (`/game/:gameId`): hero scoreboard plus, for games that have
+ * started, the story, period breakdown, scoring summary, three stars, team
+ * comparison, and player stats.
+ */
 const GameDetailPage = () => {
   const { gameId } = useParams<{ gameId: string }>();
-  const [boxscore, setBoxscore] = useState<GameDetailBoxscore | null>(null);
-  const [landing, setLanding] = useState<GameLanding | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    if (!gameId) return;
-    setLoading(true);
-    setError(false);
-    Promise.all([
-      GetGameDetails(Number(gameId)),
-      GetGameLanding(Number(gameId)),
-    ])
-      .then(([boxData, landData]) => {
-        setBoxscore(boxData);
-        setLanding(landData);
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, [gameId]);
-
-  const status = useMemo(
-    () => mapGameStateToStatus(boxscore?.gameState),
-    [boxscore?.gameState],
-  );
-
-  // Live games only: refresh scores/boxscore on a single interval so the page
-  // updates in place. Never scheduled for preview/final games, and always
-  // cleared on unmount or when the game leaves the live state.
-  useEffect(() => {
-    if (!gameId || status !== 'live') return;
-    const intervalId = window.setInterval(() => {
-      Promise.all([
-        GetGameDetails(Number(gameId)),
-        GetGameLanding(Number(gameId)),
-      ])
-        .then(([boxData, landData]) => {
-          setBoxscore(boxData);
-          setLanding(landData);
-        })
-        .catch(() => {
-          // Transient poll failure: keep showing the last good data and try
-          // again on the next tick rather than surfacing an error state.
-        });
-    }, LIVE_POLL_INTERVAL_MS);
-    return () => window.clearInterval(intervalId);
-  }, [gameId, status]);
+  const { boxscore, landing, loading, error, status } = useGameDetail(gameId);
 
   const periodGoalsBreakdown = useMemo(() => {
     if (!landing?.summary?.scoring || !boxscore) return [];
@@ -118,82 +80,73 @@ const GameDetailPage = () => {
 
   if (loading)
     return (
-      <>
-        <PageHeader />
-        <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
-          <h1 className="ds-visually-hidden">Game Detail</h1>
-          <LoadingState label="Loading game" fullPage />
-        </main>
-      </>
+      <GameDetailShell>
+        <h1 className="ds-visually-hidden">Game Detail</h1>
+        <LoadingState label="Loading game" fullPage />
+      </GameDetailShell>
     );
   if (error || !boxscore)
     return (
-      <>
-        <PageHeader />
-        <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
-          <h1 className="ds-visually-hidden">Game Detail</h1>
-          <ErrorState
-            fullPage
-            title="Game unavailable"
-            message="Game data unavailable."
-          />
-        </main>
-      </>
+      <GameDetailShell>
+        <h1 className="ds-visually-hidden">Game Detail</h1>
+        <ErrorState
+          fullPage
+          title="Game unavailable"
+          message="Game data unavailable."
+        />
+      </GameDetailShell>
     );
 
   const isPreview = status === 'preview';
 
   return (
-    <>
-      <PageHeader />
-      <main className={`${styles['game-detail-page']} ${shared.pageShell}`}>
-        <h1 className="ds-visually-hidden">
-          {`${boxscore.awayTeam.abbrev} at ${boxscore.homeTeam.abbrev}`}
-        </h1>
-        <HeroScoreboard boxscore={boxscore} status={status} />
-        {!isPreview && (
-          <div
-            className={`${styles['game-detail-page__content']} ${shared.pageContent}`}
-          >
-            <GameStory
-              facts={gameStoryFacts}
-              boxscore={boxscore}
+    <GameDetailShell>
+      <h1 className="ds-visually-hidden">
+        {`${boxscore.awayTeam.abbrev} at ${boxscore.homeTeam.abbrev}`}
+      </h1>
+      <HeroScoreboard boxscore={boxscore} status={status} />
+      {!isPreview && (
+        <div
+          className={`${styles['game-detail-page__content']} ${shared.pageContent}`}
+        >
+          <GameStory
+            facts={gameStoryFacts}
+            boxscore={boxscore}
+            homeTotals={homeTotals}
+            awayTotals={awayTotals}
+          />
+          {periodGoalsBreakdown.length > 0 && (
+            <PeriodGoalsBreakdownTable
+              periodGoalsBreakdown={periodGoalsBreakdown}
+              homeAbbrev={boxscore.homeTeam.abbrev}
+              awayAbbrev={boxscore.awayTeam.abbrev}
+            />
+          )}
+          {hasScoringSummary(landing) && (
+            <ScoringSummary scoring={landing!.summary.scoring} />
+          )}
+          {hasThreeStars(landing) && (
+            <ThreeStars stars={landing!.summary.threeStars} />
+          )}
+          {homeTotals && awayTotals && (
+            <TeamComparison
               homeTotals={homeTotals}
               awayTotals={awayTotals}
+              homeAbbrev={boxscore.homeTeam.abbrev}
+              awayAbbrev={boxscore.awayTeam.abbrev}
             />
-            {periodGoalsBreakdown.length > 0 && (
-              <PeriodGoalsBreakdownTable
-                periodGoalsBreakdown={periodGoalsBreakdown}
-                homeAbbrev={boxscore.homeTeam.abbrev}
-                awayAbbrev={boxscore.awayTeam.abbrev}
-              />
-            )}
-            {hasScoringSummary(landing) && (
-              <ScoringSummary scoring={landing!.summary.scoring} />
-            )}
-            {hasThreeStars(landing) && (
-              <ThreeStars stars={landing!.summary.threeStars} />
-            )}
-            {homeTotals && awayTotals && (
-              <TeamComparison
-                homeTotals={homeTotals}
-                awayTotals={awayTotals}
-                homeAbbrev={boxscore.homeTeam.abbrev}
-                awayAbbrev={boxscore.awayTeam.abbrev}
-              />
-            )}
-            {hasBoxscoreStats(boxscore) && (
-              <PlayerStatsSelection
-                homeTeam={boxscore.playerByGameStats!.homeTeam}
-                awayTeam={boxscore.playerByGameStats!.awayTeam}
-                homeAbbrev={boxscore.homeTeam.abbrev}
-                awayAbbrev={boxscore.awayTeam.abbrev}
-              />
-            )}
-          </div>
-        )}
-      </main>
-    </>
+          )}
+          {hasBoxscoreStats(boxscore) && (
+            <PlayerStatsSelection
+              homeTeam={boxscore.playerByGameStats!.homeTeam}
+              awayTeam={boxscore.playerByGameStats!.awayTeam}
+              homeAbbrev={boxscore.homeTeam.abbrev}
+              awayAbbrev={boxscore.awayTeam.abbrev}
+            />
+          )}
+        </div>
+      )}
+    </GameDetailShell>
   );
 };
 export default GameDetailPage;

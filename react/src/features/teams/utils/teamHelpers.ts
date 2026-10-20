@@ -2,6 +2,7 @@ import { Team } from '@/features/teams/types/team';
 import { TeamStats } from '@/features/teams/types/teamStats';
 import { TeamHistoryDto } from '@/features/teams/api/teamsApi';
 
+/** Builds Team models by matching each local team to its per-season stat rows. */
 export function ConvertToListOfTeams(
   teamListData: { id: number; fullName: string }[],
   teamResponseData: TeamHistoryDto[],
@@ -29,24 +30,26 @@ export function ConvertToListOfTeams(
   }
   return teamArray;
 }
+/** Converts API history rows into TeamStats models. */
 function CreateHistoricalTeamStatsList(teamResponseData: TeamHistoryDto[]) {
-  return teamResponseData.map((data) => {
-    const seasonId = data.seasonId;
-    const wins = data.wins;
-    const regulationWins = data.regulationWins;
-    const otWins = data.otWins;
-    const losses = data.losses;
-    const otLosses = data.otLosses;
-    const points = data.points;
-    const faceoffWinPct = data.faceoffWinPct;
-    const goalsAgainst = data.goalsAgainst;
-    const goalsAgainstPerGame = data.goalsAgainstPerGame;
-    const goalsFor = data.goalsFor;
-    const goalsForPerGame = data.goalsForPerGame ?? data.goalsPerGame ?? 0;
-    const penaltyKillPct = data.penaltyKillPct;
-    const powerPlayPct = data.powerPlayPct;
-    const shotsAgainstPerGame = data.shotsAgainstPerGame;
-    const shotsForPerGame = data.shotsForPerGame;
+  return teamResponseData.map((historyRow) => {
+    const seasonId = historyRow.seasonId;
+    const wins = historyRow.wins;
+    const regulationWins = historyRow.regulationWins;
+    const otWins = historyRow.otWins;
+    const losses = historyRow.losses;
+    const otLosses = historyRow.otLosses;
+    const points = historyRow.points;
+    const faceoffWinPct = historyRow.faceoffWinPct;
+    const goalsAgainst = historyRow.goalsAgainst;
+    const goalsAgainstPerGame = historyRow.goalsAgainstPerGame;
+    const goalsFor = historyRow.goalsFor;
+    const goalsForPerGame =
+      historyRow.goalsForPerGame ?? historyRow.goalsPerGame ?? 0;
+    const penaltyKillPct = historyRow.penaltyKillPct;
+    const powerPlayPct = historyRow.powerPlayPct;
+    const shotsAgainstPerGame = historyRow.shotsAgainstPerGame;
+    const shotsForPerGame = historyRow.shotsForPerGame;
 
     return new TeamStats(
       seasonId,

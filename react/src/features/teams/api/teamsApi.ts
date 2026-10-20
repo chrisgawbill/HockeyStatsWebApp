@@ -64,6 +64,7 @@ export function GetTeamStatsById(
     season,
   });
 }
+/** A team's roster for a season. */
 export function GetTeamRoster(
   triCode: string,
   season?: string,
@@ -77,12 +78,14 @@ export function GetTeamLines(
 ): Promise<TeamLinesDto> {
   return get<TeamLinesDto>(`/team/lines/${triCode}`, { season });
 }
+/** A team's schedule for a season. */
 export function GetTeamSchedule(
   triCode: string,
   season?: string,
 ): Promise<ScheduleResponseDto> {
   return get<ScheduleResponseDto>(`/team/schedule/${triCode}`, { season });
 }
+/** Skater season totals, optionally for one team. */
 export function GetSkaterSummary(
   teamId?: string,
   season?: string,
@@ -92,6 +95,7 @@ export function GetSkaterSummary(
     season,
   });
 }
+/** Skater Corsi percentages, optionally for one team. */
 export function GetSkaterCorsi(
   teamId?: string,
   season?: string,
@@ -101,6 +105,7 @@ export function GetSkaterCorsi(
     season,
   });
 }
+/** Goalie season totals, optionally for one team. */
 export function GetGoalieSummary(
   teamId?: string,
   season?: string,

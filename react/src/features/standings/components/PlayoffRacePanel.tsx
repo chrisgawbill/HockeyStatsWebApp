@@ -19,6 +19,50 @@ const STATUS_LABELS: Record<PlayoffRaceStatus, string> = {
   eliminated: 'Simplified Eliminated',
 };
 
+type PlayoffRaceEntry = ReturnType<typeof derivePlayoffRace>['teams'][number];
+
+/** "Magic Number n" / "Tragic Number n" for the race status, or a dash when neither applies. */
+function describeRaceNumber(entry: PlayoffRaceEntry): string {
+  if (entry.status === 'chasing') {
+    return `Tragic Number ${entry.tragicNumber ?? '—'}`;
+  }
+  if (entry.status === 'playoff-position' || entry.status === 'clinched') {
+    return `Magic Number ${entry.magicNumber ?? '—'}`;
+  }
+  return '—';
+}
+
+/** One team's row: points, games left, best possible total, status, and what it needs. */
+function PlayoffRaceRow({ entry }: { entry: PlayoffRaceEntry }) {
+  const pace =
+    entry.requiredPace === null ? '—' : `${entry.requiredPace.toFixed(1)}/Game`;
+  return (
+    <tr>
+      <th scope="row">
+        <span className={styles.team}>
+          <img src={entry.team.teamLogo} alt="" />
+          {entry.team.teamName}
+        </span>
+      </th>
+      <td>{entry.team.points}</td>
+      <td>{entry.remainingGames}</td>
+      <td>{entry.maxPossiblePoints}</td>
+      <td>
+        <span className={`${styles.status} ${styles[entry.status]}`}>
+          {STATUS_LABELS[entry.status]}
+        </span>
+        <span className={styles.raceValue}>
+          {describeRaceNumber(entry)}
+          {entry.status === 'chasing' && entry.requiredPoints !== null
+            ? ` · ${entry.requiredPoints} Needed (${pace})`
+            : ''}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+/** One conference's simplified playoff race table: cutline, magic/tragic numbers, and status. */
 export default function PlayoffRacePanel({
   conference,
   standings,
@@ -61,46 +105,9 @@ export default function PlayoffRacePanel({
             </tr>
           </thead>
           <tbody>
-            {race.teams.map((entry) => {
-              const pace =
-                entry.requiredPace === null
-                  ? '—'
-                  : `${entry.requiredPace.toFixed(1)}/Game`;
-              const raceValue =
-                entry.status === 'chasing'
-                  ? `Tragic Number ${entry.tragicNumber ?? '—'}`
-                  : entry.status === 'playoff-position' ||
-                      entry.status === 'clinched'
-                    ? `Magic Number ${entry.magicNumber ?? '—'}`
-                    : '—';
-              return (
-                <tr key={entry.team.id}>
-                  <th scope="row">
-                    <span className={styles.team}>
-                      <img src={entry.team.teamLogo} alt="" />
-                      {entry.team.teamName}
-                    </span>
-                  </th>
-                  <td>{entry.team.points}</td>
-                  <td>{entry.remainingGames}</td>
-                  <td>{entry.maxPossiblePoints}</td>
-                  <td>
-                    <span
-                      className={`${styles.status} ${styles[entry.status]}`}
-                    >
-                      {STATUS_LABELS[entry.status]}
-                    </span>
-                    <span className={styles.raceValue}>
-                      {raceValue}
-                      {entry.status === 'chasing' &&
-                      entry.requiredPoints !== null
-                        ? ` · ${entry.requiredPoints} Needed (${pace})`
-                        : ''}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
+            {race.teams.map((entry) => (
+              <PlayoffRaceRow key={entry.team.id} entry={entry} />
+            ))}
           </tbody>
         </table>
       </div>

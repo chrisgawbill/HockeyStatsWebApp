@@ -3,7 +3,7 @@ import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import PageHeader from '@/components/PageHeader';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import styles from '@/features/schedule/components/SchedulePage.module.css';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ScheduleCard from '@/features/schedule/components/ScheduleCard';
 import ScheduleCalendar from '@/features/schedule/components/ScheduleCalendar';
 import DatePicker from '@/features/schedule/components/DatePicker';
@@ -11,6 +11,14 @@ import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import SlidingToggle from '@/components/SlidingToggle';
+import ScheduleFilterBar from '@/features/schedule/components/ScheduleFilterBar';
+import { useScheduleUrlState } from '@/features/schedule/hooks/useScheduleUrlState';
+import {
+  getDaysForView,
+  isCalendarView,
+  MAX_CHIPS_BY_VIEW,
+  VIEW_OPTIONS,
+} from '@/features/schedule/utils/scheduleViewHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import {
   formatSeasonLabel,
@@ -21,90 +29,14 @@ import {
   groupGamesByDate,
   resolveEffectiveDate,
 } from '@/features/schedule/utils/scheduleHelper';
-import {
-  filterGames,
-  ScheduleFilter,
-} from '@/features/schedule/utils/scheduleFilterHelper';
+import { filterGames } from '@/features/schedule/utils/scheduleFilterHelper';
 import { parseLocalDate } from '@/lib/dateFormat';
 import { isCompletedGameState } from '@/lib/gameStatus';
 import { localTeamList } from '@/lib/teamListData';
 
-const STATUS_OPTIONS: { label: string; value: '' | 'upcoming' | 'final' }[] = [
-  { label: 'All', value: '' },
-  { label: 'Upcoming', value: 'upcoming' },
-  { label: 'Final', value: 'final' },
-];
-
-const TYPE_OPTIONS: { label: string; value: '' | 'regular' | 'playoff' }[] = [
-  { label: 'All', value: '' },
-  { label: 'Regular', value: 'regular' },
-  { label: 'Playoff', value: 'playoff' },
-];
-
-const ViewParamType = {
-  DAY: 'day',
-  WEEK: 'week',
-  MONTH: 'month',
-} as const;
-type ScheduleView = (typeof ViewParamType)[keyof typeof ViewParamType];
-type CalendarView = typeof ViewParamType.WEEK | typeof ViewParamType.MONTH;
-
-/**
- * Per-view day-cell limit before ScheduleCalendar collapses overflow games into
- * a "+N more" action.
- */
-const MAX_CHIPS_BY_VIEW: Record<CalendarView, number> = {
-  [ViewParamType.WEEK]: 3,
-  [ViewParamType.MONTH]: 2,
-};
-
-const VIEW_OPTIONS: { label: string; value: ScheduleView }[] = [
-  { label: 'Daily', value: ViewParamType.DAY },
-  { label: 'Weekly', value: ViewParamType.WEEK },
-  { label: 'Monthly', value: ViewParamType.MONTH },
-];
-
-/**
- * Narrows the schedule view union to views rendered by ScheduleCalendar.
- */
-function isCalendarView(view: ScheduleView): view is CalendarView {
-  return view === ViewParamType.WEEK || view === ViewParamType.MONTH;
-}
-
-/**
- * The set of days a view renders, anchored on `targetDate`:
- * - day   → just that day
- * - week  → the Sunday-start week containing it (always 7 days)
- * - month → every day of its month (the grid adds the leading weekday offset)
- * Dates are shifted with clone + setDate so month/year rollover is handled for us.
- */
-function getDaysForView(view: ScheduleView, targetDate: Date): Date[] {
-  switch (view) {
-    case ViewParamType.WEEK: {
-      const startOfWeek = new Date(targetDate);
-      startOfWeek.setDate(targetDate.getDate() - targetDate.getDay());
-      return Array.from({ length: 7 }, (_, i) => {
-        const day = new Date(startOfWeek);
-        day.setDate(startOfWeek.getDate() + i);
-        return day;
-      });
-    }
-    case ViewParamType.MONTH: {
-      const year = targetDate.getFullYear();
-      const month = targetDate.getMonth();
-      const days: Date[] = [];
-      for (let i = 1; i <= 31; i++) {
-        const day = new Date(year, month, i);
-        if (day.getMonth() !== month) break;
-        days.push(day);
-      }
-      return days;
-    }
-    case ViewParamType.DAY:
-    default:
-      return [targetDate];
-  }
-}
+/** Whether a game has reached a completed NHL state and can link to its detail page. */
+const isGameCompleted = (game: ScheduledGame): boolean =>
+  isCompletedGameState(game.gameState);
 
 /**
  * Schedule route. Reads the whole season from ScheduleContext and renders one of
@@ -123,34 +55,19 @@ function SchedulePage() {
     refetchGames,
   } = useListOfGames();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { season } = useSeason();
-  const selectedDateParam = searchParams.get('date');
-  const viewParam = (searchParams.get('view') ??
-    ViewParamType.DAY) as ScheduleView;
-  const teamParam = searchParams.get('team');
-  const statusParam = searchParams.get('status');
-  const typeParam = searchParams.get('type');
-
-  /**
-   * Derives the pure ScheduleFilter contract from the URL. Any value other than
-   * the recognized ones falls back to "no filter" so a malformed deep link never
-   * throws.
-   */
-  const filter: ScheduleFilter = useMemo(
-    () => ({
-      team: teamParam,
-      status:
-        statusParam === 'upcoming' || statusParam === 'final'
-          ? statusParam
-          : null,
-      gameType:
-        typeParam === 'regular' || typeParam === 'playoff' ? typeParam : null,
-    }),
-    [teamParam, statusParam, typeParam],
-  );
-  const isFilterActive =
-    filter.team != null || filter.status != null || filter.gameType != null;
+  const {
+    selectedDateParam,
+    viewParam,
+    filter,
+    isFilterActive,
+    setDate,
+    setView,
+    setTeamFilter,
+    setStatusFilter,
+    setTypeFilter,
+    openDay,
+  } = useScheduleUrlState();
 
   const selectedDate = useMemo(() => {
     if (!selectedDateParam) return null;
@@ -221,108 +138,10 @@ function SchedulePage() {
     effectiveDate,
   ]);
 
-  /**
-   * Stores the selected calendar anchor in the URL and updates the day-view
-   * slice in ScheduleContext.
-   */
+  /** Stores the chosen date in the URL and loads that day's games. */
   const handleDateChange = (date: Date) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('date', formatDateParam(date));
-      return next;
-    });
+    setDate(date);
     fetchGamesByDate(date);
-  };
-
-  /**
-   * Stores the selected schedule projection in the URL. This changes only the
-   * client-side view; the loaded season data is reused.
-   */
-  const handleViewChange = (view: ScheduleView) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.set('view', view);
-        return next;
-      },
-      { replace: true },
-    );
-  };
-
-  /**
-   * Stores or clears the team filter in the URL. An empty value ("All") removes
-   * the param entirely rather than persisting `team=`.
-   */
-  const handleTeamChange = (team: string) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (team) {
-          next.set('team', team);
-        } else {
-          next.delete('team');
-        }
-        return next;
-      },
-      { replace: true },
-    );
-  };
-
-  /**
-   * Stores or clears the status filter (upcoming/final) in the URL.
-   */
-  const handleStatusChange = (status: string) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (status) {
-          next.set('status', status);
-        } else {
-          next.delete('status');
-        }
-        return next;
-      },
-      { replace: true },
-    );
-  };
-
-  /**
-   * Stores or clears the game type filter (regular/playoff) in the URL.
-   */
-  const handleTypeChange = (type: string) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (type) {
-          next.set('type', type);
-        } else {
-          next.delete('type');
-        }
-        return next;
-      },
-      { replace: true },
-    );
-  };
-
-  /**
-   * Opens the richer day view for a calendar cell while preserving the selected
-   * season and other URL params.
-   */
-  const handleSelectDay = (date: Date) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('date', formatDateParam(date));
-      next.set('view', ViewParamType.DAY);
-      return next;
-    });
-  };
-
-  /**
-   * Returns whether a game has reached a completed NHL state and can link to
-   * the detail page.
-   */
-  const isGameCompleted = (game: ScheduledGame): boolean => {
-    return isCompletedGameState(game.gameState);
   };
 
   /**
@@ -331,11 +150,11 @@ function SchedulePage() {
    */
   const goToGameDetails = (game: ScheduledGame) => {
     if (isGameCompleted(game)) {
-      const back = `/schedule?view=${viewParam}&date=${formatDateParam(effectiveDate)}`;
+      const backPath = `/schedule?view=${viewParam}&date=${formatDateParam(effectiveDate)}`;
       navigate(`/game/${game.gameId}`, {
         state: {
-          sourcePath: back,
-          fallbackPath: back,
+          sourcePath: backPath,
+          fallbackPath: backPath,
           activeNavPath: '/schedule',
         },
       });
@@ -369,41 +188,18 @@ function SchedulePage() {
           />
         ) : (
           <>
-            <div className={styles['schedule-filter-bar']}>
-              <label className={styles['schedule-filter-field']}>
-                <span className={styles['schedule-filter-field__label']}>
-                  Team
-                </span>
-                <select
-                  className={styles['schedule-filter-field__select']}
-                  value={filter.team ?? ''}
-                  onChange={(e) => handleTeamChange(e.target.value)}
-                  aria-label="Filter by team"
-                >
-                  <option value="">All</option>
-                  {teamOptions.map((triCode) => (
-                    <option key={triCode} value={triCode}>
-                      {triCode}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <SlidingToggle
-                options={STATUS_OPTIONS}
-                value={filter.status ?? ''}
-                onChange={handleStatusChange}
-              />
-              <SlidingToggle
-                options={TYPE_OPTIONS}
-                value={filter.gameType ?? ''}
-                onChange={handleTypeChange}
-              />
-            </div>
+            <ScheduleFilterBar
+              filter={filter}
+              teamOptions={teamOptions}
+              onTeamChange={setTeamFilter}
+              onStatusChange={setStatusFilter}
+              onTypeChange={setTypeFilter}
+            />
             <div className={styles['schedule-view-toggle']}>
               <SlidingToggle
                 options={VIEW_OPTIONS}
                 value={viewParam}
-                onChange={handleViewChange}
+                onChange={setView}
               />
             </div>
             <DatePicker
@@ -420,7 +216,7 @@ function SchedulePage() {
                   gamesByDate={gamesByDate}
                   maxVisible={MAX_CHIPS_BY_VIEW[viewParam]}
                   isGameCompleted={isGameCompleted}
-                  onSelectDay={handleSelectDay}
+                  onSelectDay={openDay}
                   onSelectGame={goToGameDetails}
                 />
               ) : (

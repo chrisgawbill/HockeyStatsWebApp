@@ -6,15 +6,82 @@ import EmptyState from '@/components/EmptyState';
 import FormStrip from '@/features/teams/components/FormStrip';
 import { localTeamList } from '@/lib/teamListData';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
+import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { getTeamResults, lastN } from '@/features/teams/utils/teamFormHelper';
 import { getSeasonSeries } from '@/features/matchup/utils/seasonSeriesHelper';
 import shared from '@/styles/shared.module.css';
 import styles from './MatchupPage.module.css';
 
-const teams = localTeamList as { triCode: string; fullName: string }[];
-const label = (code: string) =>
-  teams.find((team) => team.triCode === code)?.fullName ?? code;
+const teams = localTeamList;
 
+/** Full club name for a tri-code, falling back to the code itself. */
+const getTeamName = (triCode: string) =>
+  teams.find((team) => team.triCode === triCode)?.fullName ?? triCode;
+
+/** Name of the page the user came from, shown on the breadcrumb back link. */
+function getSourceLabel(sourcePath: string): string {
+  if (sourcePath.startsWith('/game/')) return 'Game';
+  if (sourcePath.startsWith('/team/')) return 'Team';
+  if (sourcePath.startsWith('/standings')) return 'Standings';
+  if (sourcePath === '/') return 'Home';
+  return 'Schedule';
+}
+
+interface MeetingCardProps {
+  game: ScheduledGame;
+  teamA: string;
+  teamB: string;
+  isPlayed: boolean;
+}
+
+/** One meeting between the two teams: date, who hosted, and the score or "Upcoming". */
+function MeetingCard({ game, teamA, teamB, isPlayed }: MeetingCardProps) {
+  const teamAScore = game.homeTeam === teamA ? game.homeScore : game.awayScore;
+  const teamBScore = game.homeTeam === teamB ? game.homeScore : game.awayScore;
+  return (
+    <article className={`${shared.surface} ${styles.meeting}`}>
+      <span className={styles.date}>{game.date.toLocaleDateString()}</span>
+      <span>
+        {game.awayTeam} at {game.homeTeam}
+      </span>
+      <span className={styles.score}>
+        {isPlayed ? `${teamAScore} – ${teamBScore}` : 'Upcoming'}
+      </span>
+    </article>
+  );
+}
+
+interface TeamSelectProps {
+  label: string;
+  value: string;
+  onChange: (triCode: string) => void;
+}
+
+/** Labeled dropdown listing every NHL club. */
+function TeamSelect({ label, value, onChange }: TeamSelectProps) {
+  return (
+    <label className={styles.control}>
+      {label}
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {teams.map((team) => (
+          <option key={team.triCode} value={team.triCode}>
+            {team.fullName}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/**
+ * Head-to-head route (`/matchup?teamA=&teamB=`): the two chosen teams' season
+ * series (played and upcoming meetings, win and goal totals) and each team's
+ * recent form. Reads the already-loaded season games; nothing is fetched here.
+ */
 export default function MatchupPage() {
   const location = useLocation();
   const [params, setParams] = useSearchParams();
@@ -23,44 +90,17 @@ export default function MatchupPage() {
   const teamB = params.get('teamB')?.toUpperCase() || teams[1].triCode;
   const routeState = location.state as { sourcePath?: string } | null;
   const sourcePath = routeState?.sourcePath ?? '/schedule';
-  const sourceLabel = sourcePath.startsWith('/game/')
-    ? 'Game'
-    : sourcePath.startsWith('/team/')
-      ? 'Team'
-      : sourcePath.startsWith('/standings')
-        ? 'Standings'
-        : sourcePath === '/'
-          ? 'Home'
-          : 'Schedule';
+  const sourceLabel = getSourceLabel(sourcePath);
   const series = useMemo(
     () => getSeasonSeries(listOfGamesData, teamA, teamB),
     [listOfGamesData, teamA, teamB],
   );
-  const setTeam = (key: 'teamA' | 'teamB', value: string) =>
+  const setTeam = (key: 'teamA' | 'teamB', triCode: string) =>
     setParams((previous) => {
-      const next = new URLSearchParams(previous);
-      next.set(key, value);
-      return next;
+      const nextParams = new URLSearchParams(previous);
+      nextParams.set(key, triCode);
+      return nextParams;
     });
-  const renderMeeting = (game: (typeof series.played)[number]) => {
-    const aScore = game.homeTeam === teamA ? game.homeScore : game.awayScore;
-    const bScore = game.homeTeam === teamB ? game.homeScore : game.awayScore;
-    const played = series.played.includes(game);
-    return (
-      <article
-        className={`${shared.surface} ${styles.meeting}`}
-        key={game.gameId}
-      >
-        <span className={styles.date}>{game.date.toLocaleDateString()}</span>
-        <span>
-          {game.awayTeam} at {game.homeTeam}
-        </span>
-        <span className={styles.score}>
-          {played ? `${aScore} – ${bScore}` : 'Upcoming'}
-        </span>
-      </article>
-    );
-  };
   return (
     <div className={`${styles.page} ${shared.pageShell} ds-page-shell`}>
       <PageHeader />
@@ -92,34 +132,16 @@ export default function MatchupPage() {
             <p>Compare meetings, results, goals, and recent form.</p>
           </header>
           <div className={`${shared.surface} ${styles.controls}`}>
-            <label className={styles.control}>
-              Team A
-              <select
-                aria-label="Team A"
-                value={teamA}
-                onChange={(event) => setTeam('teamA', event.target.value)}
-              >
-                {teams.map((team) => (
-                  <option key={team.triCode} value={team.triCode}>
-                    {team.fullName}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={styles.control}>
-              Team B
-              <select
-                aria-label="Team B"
-                value={teamB}
-                onChange={(event) => setTeam('teamB', event.target.value)}
-              >
-                {teams.map((team) => (
-                  <option key={team.triCode} value={team.triCode}>
-                    {team.fullName}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <TeamSelect
+              label="Team A"
+              value={teamA}
+              onChange={(triCode) => setTeam('teamA', triCode)}
+            />
+            <TeamSelect
+              label="Team B"
+              value={teamB}
+              onChange={(triCode) => setTeam('teamB', triCode)}
+            />
           </div>
         </section>
         {loadingListOfGamesData ? (
@@ -136,7 +158,7 @@ export default function MatchupPage() {
               aria-labelledby="series-summary"
             >
               <h2 id="series-summary">
-                {label(teamA)} vs {label(teamB)}
+                {getTeamName(teamA)} vs {getTeamName(teamB)}
               </h2>
               <div className={styles.record}>
                 <span>
@@ -157,7 +179,15 @@ export default function MatchupPage() {
               Played ({series.played.length})
             </h2>
             {series.played.length ? (
-              series.played.map(renderMeeting)
+              series.played.map((game) => (
+                <MeetingCard
+                  key={game.gameId}
+                  game={game}
+                  teamA={teamA}
+                  teamB={teamB}
+                  isPlayed
+                />
+              ))
             ) : (
               <EmptyState
                 title="No Meetings Played"
@@ -168,7 +198,15 @@ export default function MatchupPage() {
               Upcoming ({series.upcoming.length})
             </h2>
             {series.upcoming.length ? (
-              series.upcoming.map(renderMeeting)
+              series.upcoming.map((game) => (
+                <MeetingCard
+                  key={game.gameId}
+                  game={game}
+                  teamA={teamA}
+                  teamB={teamB}
+                  isPlayed={false}
+                />
+              ))
             ) : (
               <EmptyState
                 title="No Upcoming Games"

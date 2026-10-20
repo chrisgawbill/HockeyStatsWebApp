@@ -1,5 +1,6 @@
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { LotteryResultEntry } from '@/features/draft-lottery/utils/draftLotterySim';
+import { joinClassNames } from '@/lib/joinClassNames';
 import styles from '@/features/draft-lottery/components/DraftLotteryOddsCard.module.css';
 
 interface DraftLotteryOddsCardProps {
@@ -7,21 +8,22 @@ interface DraftLotteryOddsCardProps {
   /** Board position (1-based): pre-lottery rank, or final pick after a draw. */
   rank: number;
   /** Present once a simulation has finished. */
-  result?: LotteryResultEntry;
+  lotteryResult?: LotteryResultEntry;
   selected: boolean;
   onSelect: () => void;
 }
 
+/** One team tile on the lottery board: rank, logo, odds, and pick movement after a draw. */
 export default function DraftLotteryOddsCard({
   team,
   rank,
-  result,
+  lotteryResult,
   selected,
   onSelect,
 }: DraftLotteryOddsCardProps) {
-  const isWinner = result?.drawWon != null;
+  const isWinner = lotteryResult?.drawWon != null;
   const odds = team.draftLotteryOdds.toFixed(1);
-  const movement = result?.movement ?? 0;
+  const movement = lotteryResult?.movement ?? 0;
   const rankLabel = isWinner ? `★${rank}` : `#${rank}`;
 
   const moveText =
@@ -36,13 +38,11 @@ export default function DraftLotteryOddsCard({
     <li className={styles['item']}>
       <button
         type="button"
-        className={[
+        className={joinClassNames(
           styles['slot'],
-          isWinner ? styles['slot--winner'] : '',
-          selected ? styles['slot--selected'] : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
+          isWinner && styles['slot--winner'],
+          selected && styles['slot--selected'],
+        )}
         aria-label={ariaLabel}
         aria-pressed={selected}
         title={team.teamName}
@@ -50,7 +50,7 @@ export default function DraftLotteryOddsCard({
       >
         <span className={styles['slot__top']} aria-hidden="true">
           <span className={styles['slot__rank']}>{rankLabel}</span>
-          {result && movement !== 0 && (
+          {lotteryResult && movement !== 0 && (
             <span
               className={
                 movement > 0

@@ -1,4 +1,5 @@
 import { TeamResult } from '@/features/teams/utils/teamFormHelper';
+import { joinClassNames } from '@/lib/joinClassNames';
 import styles from '@/features/teams/components/TeamPage.module.css';
 
 interface FormStripProps {
@@ -6,6 +7,7 @@ interface FormStripProps {
   className?: string;
 }
 
+/** Row of W/L/OTL chips for a team's recent results. */
 export default function FormStrip({ results, className }: FormStripProps) {
   const record = results.reduce(
     (counts, result) => {
@@ -17,7 +19,7 @@ export default function FormStrip({ results, className }: FormStripProps) {
 
   return (
     <div
-      className={[styles['form-strip'], className].filter(Boolean).join(' ')}
+      className={joinClassNames(styles['form-strip'], className)}
       role="img"
       aria-label={`Last ${results.length}: ${record.W}-${record.L}-${record.OTL}`}
     >

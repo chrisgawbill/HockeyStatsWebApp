@@ -4,7 +4,11 @@ import StandingsContainer from '@/features/standings/components/StandingsContain
 import SlidingToggle from '@/components/SlidingToggle';
 import PageHeader from '@/components/PageHeader';
 import { useStandingsData } from '@/features/standings/hooks/StandingsContext';
-import { StandingsTeam } from '@/features/standings/types/standingsTeam';
+import {
+  Conference,
+  StandingsView,
+  getStandingsSections,
+} from '@/features/standings/utils/standingsViewHelper';
 import StandingsClinchLegend from '@/features/standings/components/StandingsClinchLegend';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
@@ -13,15 +17,6 @@ import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import PlayoffRacePanel from '@/features/standings/components/PlayoffRacePanel';
-
-type Conference = 'Eastern' | 'Western';
-type StandingsView = 'conference' | 'division';
-
-interface StandingsEntry {
-  name: string;
-  data: StandingsTeam[];
-  format: 'Conference' | 'Division';
-}
 
 /**
  * Standings route. Pulls the pre-split conference/division arrays from
@@ -49,29 +44,18 @@ export default function StandingsPage() {
   const hasStandings =
     easternStandingsData.length > 0 || westernStandingsData.length > 0;
 
-  /**
-   * Maps the active view/conference toggles to the table sections to render: one
-   * combined conference table or two division tables.
-   */
-  const standingsLookup: Record<
-    StandingsView,
-    Record<Conference, StandingsEntry[]>
-  > = {
-    conference: {
-      Eastern: [{ name: '', data: easternStandingsData, format: 'Conference' }],
-      Western: [{ name: '', data: westernStandingsData, format: 'Conference' }],
+  const standingsSections = getStandingsSections(
+    {
+      easternStandingsData,
+      westernStandingsData,
+      metropolitanStandings,
+      atlanticStandings,
+      centralStandings,
+      pacificStandings,
     },
-    division: {
-      Eastern: [
-        { name: 'Metro', data: metropolitanStandings, format: 'Division' },
-        { name: 'Atlantic', data: atlanticStandings, format: 'Division' },
-      ],
-      Western: [
-        { name: 'Central', data: centralStandings, format: 'Division' },
-        { name: 'Pacific', data: pacificStandings, format: 'Division' },
-      ],
-    },
-  };
+    view,
+    conference,
+  );
 
   return (
     <>
@@ -125,12 +109,12 @@ export default function StandingsPage() {
               <StandingsClinchLegend className={styles['standings-legend']} />
             </div>
             <div className={styles['standings-page-table-container']}>
-              {standingsLookup[view][conference].map((entry) => (
+              {standingsSections.map((section) => (
                 <StandingsContainer
-                  key={entry.name}
-                  standingsName={entry.name}
-                  standingsData={entry.data}
-                  standingFormat={entry.format}
+                  key={section.name}
+                  standingsName={section.name}
+                  standingsData={section.teams}
+                  standingFormat={section.format}
                 />
               ))}
             </div>

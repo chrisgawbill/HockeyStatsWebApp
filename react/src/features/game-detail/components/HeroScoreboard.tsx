@@ -13,16 +13,14 @@ import { useTheme } from '@/lib/ThemeContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
-
-function cx(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
-}
+import { joinClassNames } from '@/lib/joinClassNames';
 
 interface Props {
   boxscore: GameDetailBoxscore;
   status: GameDetailStatus;
 }
 
+/** Top-of-page scoreboard: team logos, score, period or puck-drop time, and a status chip. */
 export default function HeroScoreboard({ boxscore, status }: Props) {
   const { theme } = useTheme();
   const location = useLocation();
@@ -118,7 +116,7 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
             <span className={styles['game-detail-dash']}>–</span>
           )}
           <span
-            className={cx(
+            className={joinClassNames(
               styles['game-detail-state-chip'],
               isLive && styles['game-detail-state-chip--live'],
             )}

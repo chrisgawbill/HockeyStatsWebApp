@@ -9,6 +9,7 @@ interface StatsLeaderModalProps {
   statsLeaderData: PlayerStatLeader[];
   modalTitle: string;
 }
+/** Dialog listing the leaders for one stat category. */
 export default function StatsLeaderModal({
   showModal,
   setShowStatsModal,

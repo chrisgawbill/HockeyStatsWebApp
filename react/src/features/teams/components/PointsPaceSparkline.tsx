@@ -4,6 +4,7 @@ interface PointsPaceSparklineProps {
   values: number[];
 }
 
+/** SVG line chart of rolling points percentage over the season. */
 export default function PointsPaceSparkline({
   values,
 }: PointsPaceSparklineProps) {
@@ -11,13 +12,13 @@ export default function PointsPaceSparkline({
   const height = 72;
   const padding = 6;
   const points = values.map((value, index) => {
-    const x =
+    const pointX =
       values.length <= 1
         ? width / 2
         : padding + (index / (values.length - 1)) * (width - padding * 2);
-    const y =
+    const pointY =
       padding + (1 - Math.max(0, Math.min(1, value))) * (height - padding * 2);
-    return `${x},${y}`;
+    return `${pointX},${pointY}`;
   });
   const referenceY = height / 2;
 

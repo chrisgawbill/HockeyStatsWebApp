@@ -19,11 +19,13 @@ const DARK_QUERY = '(prefers-color-scheme: dark)';
 const RECHECK_INTERVAL_MS = 60_000;
 const THEME_STORAGE_KEY = 'theme';
 
+/** The theme implied by the system setting and the hour of day. */
 function computeTheme(): Theme {
   const systemPrefersDark = window.matchMedia(DARK_QUERY).matches;
   return resolveTheme(systemPrefersDark, new Date().getHours());
 }
 
+/** The saved theme choice, or 'system' when none is saved or storage is unavailable. */
 function readPreference(): ThemePreference {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
@@ -33,6 +35,7 @@ function readPreference(): ThemePreference {
   }
 }
 
+/** Resolves a saved preference to the concrete light or dark theme. */
 function themeForPreference(preference: ThemePreference): Theme {
   return preference === 'system' ? computeTheme() : preference;
 }
@@ -89,6 +92,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Returns the active theme and a setter for the user's preference. */
 export function useTheme() {
   return useContext(ThemeContext);
 }

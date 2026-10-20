@@ -43,7 +43,7 @@ export default function JerseyToken({
       className={`${styles.token} ${size === 'sm' ? styles['token--sm'] : ''}`}
       aria-label={buildTokenAriaLabel(player, slot)}
       aria-haspopup="dialog"
-      onClick={(e) => openPlayer(player, slot, e.currentTarget)}
+      onClick={(event) => openPlayer(player, slot, event.currentTarget)}
     >
       {showPhoto ? (
         <span

@@ -20,6 +20,7 @@ interface PlayerStatsDialogProps {
   onClose: () => void;
 }
 
+/** Dialog showing one player's stat cells, tinted with the team's colors. */
 export default function PlayerStatsDialog({
   player,
   slot,

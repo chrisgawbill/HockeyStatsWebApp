@@ -2,7 +2,11 @@ import { useState } from 'react';
 import StandingsContainer from '@/features/standings/components/StandingsContainer';
 import SlidingToggle from '@/components/SlidingToggle';
 import { useStandingsData } from '@/features/standings/hooks/StandingsContext';
-import { StandingsTeam } from '@/features/standings/types/standingsTeam';
+import {
+  Conference,
+  StandingsView,
+  getStandingsSections,
+} from '@/features/standings/utils/standingsViewHelper';
 import StandingsClinchLegend from '@/features/standings/components/StandingsClinchLegend';
 import styles from '@/features/standings/components/LandingPageStandings.module.css';
 import LoadingState from '@/components/LoadingState';
@@ -11,15 +15,7 @@ import ErrorState from '@/components/ErrorState';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 
-type Conference = 'Eastern' | 'Western';
-type StandingsView = 'conference' | 'division';
-
-interface StandingsEntry {
-  name: string;
-  data: StandingsTeam[];
-  format: 'Conference' | 'Division';
-}
-
+/** Home-page standings card with conference/division and Eastern/Western toggles. */
 export default function LandingPageStandings() {
   const {
     easternStandingsData,
@@ -68,25 +64,18 @@ export default function LandingPageStandings() {
     );
   }
 
-  const standingsLookup: Record<
-    StandingsView,
-    Record<Conference, StandingsEntry[]>
-  > = {
-    conference: {
-      Eastern: [{ name: '', data: easternStandingsData, format: 'Conference' }],
-      Western: [{ name: '', data: westernStandingsData, format: 'Conference' }],
+  const standingsSections = getStandingsSections(
+    {
+      easternStandingsData,
+      westernStandingsData,
+      metropolitanStandings,
+      atlanticStandings,
+      centralStandings,
+      pacificStandings,
     },
-    division: {
-      Eastern: [
-        { name: 'Metro', data: metropolitanStandings, format: 'Division' },
-        { name: 'Atlantic', data: atlanticStandings, format: 'Division' },
-      ],
-      Western: [
-        { name: 'Central', data: centralStandings, format: 'Division' },
-        { name: 'Pacific', data: pacificStandings, format: 'Division' },
-      ],
-    },
-  };
+    view,
+    conference,
+  );
 
   return (
     <section className={`${styles['landing-standings']} ds-stack`}>
@@ -116,12 +105,12 @@ export default function LandingPageStandings() {
         />
       </div>
       <StandingsClinchLegend />
-      {standingsLookup[view][conference].map((entry) => (
-        <div key={entry.name} className={styles['landing-standings__entry']}>
+      {standingsSections.map((section) => (
+        <div key={section.name} className={styles['landing-standings__entry']}>
           <StandingsContainer
-            standingsName={entry.name}
-            standingsData={entry.data}
-            standingFormat={entry.format}
+            standingsName={section.name}
+            standingsData={section.teams}
+            standingFormat={section.format}
             fill
           />
         </div>

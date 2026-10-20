@@ -1,11 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import DraftLotteryOddsCard from '@/features/draft-lottery/components/DraftLotteryOddsCard';
-import {
-  LotteryResultEntry,
-  simulateDraftLottery,
-} from '@/features/draft-lottery/utils/draftLotterySim';
-import { buildLotteryAnnouncement } from '@/features/draft-lottery/utils/draftLotteryAnnouncement';
+import { useDraftLotterySimulation } from '@/features/draft-lottery/hooks/useDraftLotterySimulation';
+import { LotteryResultEntry } from '@/features/draft-lottery/utils/draftLotterySim';
+import { joinClassNames } from '@/lib/joinClassNames';
 import headerStyles from '@/styles/LandingPageRow.module.css';
 import styles from '@/features/draft-lottery/components/DraftLotteryOddsRow.module.css';
 
@@ -15,134 +12,77 @@ interface DraftLotteryOddsRowProps {
   data: StandingsTeam[];
 }
 
-type Phase = 'idle' | 'rolling' | 'reveal-2' | 'reveal-1' | 'done';
+interface StageSlotProps {
+  pick: 1 | 2;
+  entry: LotteryResultEntry | undefined;
+  revealed: boolean;
+  teamsById: Map<string, StandingsTeam>;
+}
 
-const ROLL_MS = 900;
-const REVEAL_2_MS = 1100;
-const REVEAL_1_MS = 1100;
+/** One "Pick #n" placeholder in the reveal stage: shows "?" until its team is revealed. */
+function StageSlot({ pick, entry, revealed, teamsById }: StageSlotProps) {
+  const team = entry ? teamsById.get(entry.id) : undefined;
+  return (
+    <div
+      className={joinClassNames(
+        styles['stage__slot'],
+        revealed && styles['stage__slot--revealed'],
+      )}
+    >
+      <span className={styles['stage__pick']}>Pick #{pick}</span>
+      {revealed && team ? (
+        <>
+          <img src={team.teamLogo} alt="" className={styles['stage__logo']} />
+          <span className={styles['stage__name']}>{team.teamName}</span>
+        </>
+      ) : (
+        <span className={styles['stage__mystery']}>?</span>
+      )}
+    </div>
+  );
+}
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+/**
+ * Home-page draft lottery board: the lottery teams in odds order, with a
+ * Simulate button that animates a draw and re-ranks the board by the result.
+ */
 export default function DraftLotteryOddsRow({
   title,
-  data,
+  data: lotteryTeams,
 }: DraftLotteryOddsRowProps) {
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [result, setResult] = useState<LotteryResultEntry[] | null>(null);
-  const [announcement, setAnnouncement] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const timers = useRef<number[]>([]);
+  const {
+    phase,
+    lotteryResult,
+    announcement,
+    selectedId,
+    setSelectedId,
+    teamsById,
+    animating,
+    simulate,
+    reset,
+  } = useDraftLotterySimulation(lotteryTeams);
 
-  const clearTimers = useCallback(() => {
-    timers.current.forEach((id) => window.clearTimeout(id));
-    timers.current = [];
-  }, []);
-  useEffect(() => clearTimers, [clearTimers]);
+  if (lotteryTeams.length <= 1) return null;
 
-  const teamsById = useMemo(
-    () => new Map(data.map((team) => [team.id, team])),
-    [data],
-  );
-
-  // A changed dataset (e.g. season switch) invalidates any simulation.
-  useEffect(() => {
-    clearTimers();
-    setPhase('idle');
-    setResult(null);
-    setAnnouncement('');
-    setSelectedId(null);
-  }, [data, clearTimers]);
-
-  if (data.length <= 1) return <></>;
-
-  const animating =
-    phase === 'rolling' || phase === 'reveal-2' || phase === 'reveal-1';
-
-  const finish = (outcome: LotteryResultEntry[]) => {
-    setPhase('done');
-    setAnnouncement(
-      buildLotteryAnnouncement(
-        outcome,
-        (id) => teamsById.get(id)?.teamName ?? 'Unknown team',
-      ),
-    );
-  };
-
-  const simulate = () => {
-    if (animating) return;
-    clearTimers();
-    const outcome = simulateDraftLottery(
-      data.map((team) => ({ id: team.id, odds: team.draftLotteryOdds })),
-    );
-    setResult(outcome);
-    setAnnouncement('');
-    if (prefersReducedMotion()) {
-      finish(outcome);
-      return;
-    }
-    setPhase('rolling');
-    const schedule = (fn: () => void, ms: number) =>
-      timers.current.push(window.setTimeout(fn, ms));
-    schedule(() => setPhase('reveal-2'), ROLL_MS);
-    schedule(() => setPhase('reveal-1'), ROLL_MS + REVEAL_2_MS);
-    schedule(() => finish(outcome), ROLL_MS + REVEAL_2_MS + REVEAL_1_MS);
-  };
-
-  const reset = () => {
-    clearTimers();
-    setPhase('idle');
-    setResult(null);
-    setAnnouncement('Draft lottery reset to the current odds.');
-  };
-
-  const showResult = phase === 'done' && result !== null;
+  const showResult = phase === 'done' && lotteryResult !== null;
   const board: {
     team: StandingsTeam;
     rank: number;
     entry?: LotteryResultEntry;
   }[] = showResult
-    ? result.flatMap((entry) => {
+    ? lotteryResult.flatMap((entry) => {
         const team = teamsById.get(entry.id);
         return team ? [{ team, rank: entry.pick, entry }] : [];
       })
-    : data.map((team, index) => ({ team, rank: index + 1 }));
+    : lotteryTeams.map((team, index) => ({ team, rank: index + 1 }));
 
   const revealed2 = phase === 'reveal-2' || phase === 'reveal-1';
   const revealed1 = phase === 'reveal-1';
 
-  const renderStageSlot = (
-    pick: 1 | 2,
-    entry: LotteryResultEntry | undefined,
-    revealed: boolean,
-  ) => {
-    const team = entry ? teamsById.get(entry.id) : undefined;
-    return (
-      <div
-        className={[
-          styles['stage__slot'],
-          revealed ? styles['stage__slot--revealed'] : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <span className={styles['stage__pick']}>Pick #{pick}</span>
-        {revealed && team ? (
-          <>
-            <img src={team.teamLogo} alt="" className={styles['stage__logo']} />
-            <span className={styles['stage__name']}>{team.teamName}</span>
-          </>
-        ) : (
-          <span className={styles['stage__mystery']}>?</span>
-        )}
-      </div>
-    );
-  };
-
   const selectedTeam = selectedId ? teamsById.get(selectedId) : undefined;
   const selectedRank = selectedTeam
-    ? board.findIndex((b) => b.team.id === selectedTeam.id) + 1
+    ? board.findIndex((boardEntry) => boardEntry.team.id === selectedTeam.id) +
+      1
     : 0;
 
   return (
@@ -200,7 +140,7 @@ export default function DraftLotteryOddsRow({
       </div>
       <div className={styles['frame']}>
         <div className={styles['frame__inner']}>
-          {animating && result && (
+          {animating && lotteryResult && (
             <div className={styles['stage']} aria-hidden="true">
               <p className={styles['stage__title']}>
                 {phase === 'rolling'
@@ -208,15 +148,23 @@ export default function DraftLotteryOddsRow({
                   : 'And the pick goes to…'}
               </p>
               <div
-                className={[
+                className={joinClassNames(
                   styles['stage__slots'],
-                  phase === 'rolling' ? styles['stage__slots--rolling'] : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                  phase === 'rolling' && styles['stage__slots--rolling'],
+                )}
               >
-                {renderStageSlot(2, result[1], revealed2)}
-                {renderStageSlot(1, result[0], revealed1)}
+                <StageSlot
+                  pick={2}
+                  entry={lotteryResult[1]}
+                  revealed={revealed2}
+                  teamsById={teamsById}
+                />
+                <StageSlot
+                  pick={1}
+                  entry={lotteryResult[0]}
+                  revealed={revealed1}
+                  teamsById={teamsById}
+                />
               </div>
             </div>
           )}
@@ -226,7 +174,7 @@ export default function DraftLotteryOddsRow({
                 key={team.id}
                 team={team}
                 rank={rank}
-                result={entry}
+                lotteryResult={entry}
                 selected={selectedId === team.id}
                 onSelect={() =>
                   setSelectedId((current) =>

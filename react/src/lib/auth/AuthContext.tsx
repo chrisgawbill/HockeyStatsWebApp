@@ -28,6 +28,7 @@ export interface AuthSession {
   signOut: () => void;
 }
 
+/** The saved session token, or null when absent or storage is unavailable. */
 function readStoredToken(): string | null {
   try {
     return globalThis.localStorage?.getItem(AUTH_TOKEN_KEY) ?? null;
@@ -36,6 +37,7 @@ function readStoredToken(): string | null {
   }
 }
 
+/** Saves or clears the session token. */
 function storeToken(token: string | null): void {
   try {
     if (token) {
@@ -48,6 +50,7 @@ function storeToken(token: string | null): void {
   }
 }
 
+/** The saved display profile (email and picture) for the signed-in user, or null. */
 function readCachedProfile(): CachedProfile | null {
   try {
     const raw = globalThis.localStorage?.getItem(AUTH_PROFILE_KEY);
@@ -59,6 +62,7 @@ function readCachedProfile(): CachedProfile | null {
   }
 }
 
+/** Saves or clears the cached display profile. */
 function storeCachedProfile(profile: CachedProfile | null): void {
   try {
     if (profile) {
@@ -152,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/** Returns the current Google session; throws outside `AuthProvider`. */
 export function useAuth(): AuthSession {
   const context = useContext(AuthContext);
   if (!context) {

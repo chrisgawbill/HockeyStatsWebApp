@@ -10,6 +10,7 @@ import InstallBanner from '@/features/install-prompt/components/InstallBanner';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 
+/** Placeholder shown while a lazily loaded route downloads. */
 function RouteLoadingFallback() {
   return (
     <div className="ds-page-shell">

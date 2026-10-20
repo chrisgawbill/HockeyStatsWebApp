@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 
+import { useVisibleLines } from '@/features/teams/hooks/useVisibleLines';
 import RinkStrip from '@/features/teams/components/RinkStrip';
 import {
   DisplayLine,
@@ -16,6 +17,7 @@ interface LineCarouselProps {
   columns: { lg: number; xl: number };
 }
 
+/** Whether the user asked the OS to reduce motion, so scrolling should not animate. */
 function prefersReducedMotion(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -37,51 +39,11 @@ export default function LineCarousel({
 }: LineCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  // Strips that have entered view at least once: they play the slide-in once
-  // and then stay visible for good.
-  const [seen, setSeen] = useState<ReadonlySet<number>>(new Set());
-
-  useEffect(() => {
-    const scroller = scrollerRef.current;
-    if (!scroller || lines.length === 0) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      setActiveIndex(0);
-      setSeen(new Set(lines.map((_, i) => i)));
-      return;
-    }
-    const ratios = new Map<Element, number>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          ratios.set(entry.target, entry.intersectionRatio);
-        }
-        let best = -1;
-        let bestRatio = 0;
-        const entered: number[] = [];
-        itemRefs.current.forEach((el, i) => {
-          const ratio = el ? (ratios.get(el) ?? 0) : 0;
-          // Strict > keeps the lowest index on ties.
-          if (ratio > bestRatio) {
-            best = i;
-            bestRatio = ratio;
-          }
-          if (ratio >= 0.2) entered.push(i);
-        });
-        if (best !== -1) setActiveIndex(best);
-        if (entered.length > 0) {
-          setSeen((prev) =>
-            entered.every((i) => prev.has(i))
-              ? prev
-              : new Set([...prev, ...entered]),
-          );
-        }
-      },
-      { root: scroller, threshold: [0, 0.25, 0.5, 0.75, 1] },
-    );
-    itemRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, [lines.length]);
+  const { activeIndex, seen } = useVisibleLines(
+    scrollerRef,
+    itemRefs,
+    lines.length,
+  );
 
   const scrollTo = useCallback((index: number) => {
     const scroller = scrollerRef.current;
@@ -104,14 +66,14 @@ export default function LineCarousel({
         role="group"
         aria-label={`${ariaLabel} pager`}
       >
-        {lines.map((line, i) => (
+        {lines.map((line, index) => (
           <button
             key={line.key}
             type="button"
-            className={`${styles.pager__btn} ${activeIndex === i ? styles['pager__btn--active'] : ''}`}
+            className={`${styles.pager__btn} ${activeIndex === index ? styles['pager__btn--active'] : ''}`}
             aria-label={line.label}
-            aria-current={activeIndex === i ? 'true' : undefined}
-            onClick={() => scrollTo(i)}
+            aria-current={activeIndex === index ? 'true' : undefined}
+            onClick={() => scrollTo(index)}
           >
             {line.pagerLabel}
           </button>
@@ -129,18 +91,18 @@ export default function LineCarousel({
         role="region"
         aria-label={ariaLabel}
       >
-        {lines.map((line, i) => (
+        {lines.map((line, index) => (
           <div
             key={line.key}
-            ref={(el) => {
-              itemRefs.current[i] = el;
+            ref={(item) => {
+              itemRefs.current[index] = item;
             }}
             className={styles.scroller__item}
           >
             <RinkStrip
               line={line}
               caption={formatLineCaption(line, view)}
-              live={seen.has(i)}
+              live={seen.has(index)}
             />
           </div>
         ))}

@@ -6,6 +6,7 @@ interface BasicInfoStripProps {
   team: TeamOverview;
 }
 
+/** Franchise facts: founding year, arena, Stanley Cups, championships, and Hall of Famers. */
 export default function BasicInfoStrip({ team }: BasicInfoStripProps) {
   const items = [
     { label: 'Year Founded', value: team.founded },

@@ -65,9 +65,9 @@ const METRICS: MetricDef[] = [
     key: 'offense',
     label: 'Offense',
     higherIsBetter: true,
-    read: (s) => s.goalsPerGame,
-    readOwn: (s) => s.goalsForPerGame,
-    format: (v) => `${v.toFixed(2)} GF/GP`,
+    read: (stats) => stats.goalsPerGame,
+    readOwn: (stats) => stats.goalsForPerGame,
+    format: (value) => `${value.toFixed(2)} GF/GP`,
     strength: ['Elite offense', 'Strong offense'],
     weakness: 'Low scoring',
   },
@@ -75,9 +75,9 @@ const METRICS: MetricDef[] = [
     key: 'defense',
     label: 'Defense',
     higherIsBetter: false,
-    read: (s) => s.goalsAgainstPerGame,
-    readOwn: (s) => s.goalsAgainstPerGame,
-    format: (v) => `${v.toFixed(2)} GA/GP`,
+    read: (stats) => stats.goalsAgainstPerGame,
+    readOwn: (stats) => stats.goalsAgainstPerGame,
+    format: (value) => `${value.toFixed(2)} GA/GP`,
     strength: ['Elite defense', 'Strong defense'],
     weakness: 'Leaky defense',
   },
@@ -85,8 +85,8 @@ const METRICS: MetricDef[] = [
     key: 'power-play',
     label: 'Power Play',
     higherIsBetter: true,
-    read: (s) => s.powerPlayPct,
-    readOwn: (s) => s.powerPlayPct,
+    read: (stats) => stats.powerPlayPct,
+    readOwn: (stats) => stats.powerPlayPct,
     format: pct,
     strength: ['Elite power play', 'Strong power play'],
     weakness: 'Struggling power play',
@@ -95,8 +95,8 @@ const METRICS: MetricDef[] = [
     key: 'penalty-kill',
     label: 'Penalty Kill',
     higherIsBetter: true,
-    read: (s) => s.penaltyKillPct,
-    readOwn: (s) => s.penaltyKillPct,
+    read: (stats) => stats.penaltyKillPct,
+    readOwn: (stats) => stats.penaltyKillPct,
     format: pct,
     strength: ['Elite penalty kill', 'Strong penalty kill'],
     weakness: 'Weak penalty kill',
@@ -105,9 +105,9 @@ const METRICS: MetricDef[] = [
     key: 'shot-volume',
     label: 'Shot Volume',
     higherIsBetter: true,
-    read: (s) => s.shotsForPerGame,
-    readOwn: (s) => s.shotsForPerGame,
-    format: (v) => `${v.toFixed(1)} shots/GP`,
+    read: (stats) => stats.shotsForPerGame,
+    readOwn: (stats) => stats.shotsForPerGame,
+    format: (value) => `${value.toFixed(1)} shots/GP`,
     strength: ['Elite shot volume', 'High shot volume'],
     weakness: 'Low shot volume',
   },
@@ -116,9 +116,9 @@ const METRICS: MetricDef[] = [
     label: 'Shot Suppression',
     note: 'Shots allowed per game',
     higherIsBetter: false,
-    read: (s) => s.shotsAgainstPerGame,
-    readOwn: (s) => s.shotsAgainstPerGame,
-    format: (v) => `${v.toFixed(1)} against/GP`,
+    read: (stats) => stats.shotsAgainstPerGame,
+    readOwn: (stats) => stats.shotsAgainstPerGame,
+    format: (value) => `${value.toFixed(1)} against/GP`,
     strength: ['Elite shot suppression', 'Limits shots'],
     weakness: 'Allows lots of shots',
   },
@@ -126,8 +126,8 @@ const METRICS: MetricDef[] = [
     key: 'faceoffs',
     label: 'Faceoffs',
     higherIsBetter: true,
-    read: (s) => s.faceoffWinPct,
-    readOwn: (s) => s.faceoffWinPct,
+    read: (stats) => stats.faceoffWinPct,
+    readOwn: (stats) => stats.faceoffWinPct,
     format: pct,
     strength: ['Elite faceoffs', 'Wins faceoffs'],
     weakness: 'Loses faceoffs',
@@ -148,23 +148,24 @@ const TIER_TEXT: Record<TeamDnaTier, string> = {
   weak: 'well below league average',
 };
 
+/** Type guard for numbers that are present and finite. */
 function finite(value: number | null | undefined): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
 /** "1st", "2nd", "3rd", "4th", "11th", "22nd"… */
-export function ordinal(n: number): string {
-  const mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
-  switch (n % 10) {
+export function ordinal(value: number): string {
+  const mod100 = value % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${value}th`;
+  switch (value % 10) {
     case 1:
-      return `${n}st`;
+      return `${value}st`;
     case 2:
-      return `${n}nd`;
+      return `${value}nd`;
     case 3:
-      return `${n}rd`;
+      return `${value}rd`;
     default:
-      return `${n}th`;
+      return `${value}th`;
   }
 }
 
@@ -221,8 +222,9 @@ export function describeRow(row: TeamDnaRow): string {
   return `${row.label}: ${row.value}, ${ordinal(row.rank)} of ${row.of}, ${TIER_TEXT[row.tier]}`;
 }
 
+/** Picks up to two strength and two weakness labels from the ranked rows. */
 function buildChips(rows: TeamDnaRow[]): TeamDnaChip[] {
-  const defs = new Map(METRICS.map((m) => [m.key, m]));
+  const defs = new Map(METRICS.map((metric) => [metric.key, metric]));
   const ranked = rows.filter(
     (row): row is TeamDnaRow & { rank: number; of: number } =>
       row.rank != null && row.of != null,
@@ -236,7 +238,7 @@ function buildChips(rows: TeamDnaRow[]): TeamDnaChip[] {
     .filter(
       (row) =>
         row.rank >= row.of - WEAKNESS_FROM_BOTTOM &&
-        !strengths.some((s) => s.key === row.key),
+        !strengths.some((strength) => strength.key === row.key),
     )
     .sort((a, b) => b.rank - a.rank)
     .slice(0, MAX_CHIPS_PER_SIDE);
@@ -256,6 +258,7 @@ function buildChips(rows: TeamDnaRow[]): TeamDnaChip[] {
     : [{ label: 'Middle of the pack', kind: 'neutral' }];
 }
 
+/** Total games played from wins, losses, and OT losses. */
 function gamesPlayedOf(stats: {
   wins?: number | null;
   losses?: number | null;
@@ -282,7 +285,9 @@ export function buildTeamDna({
   const leagueRows = league
     .map((team) => ({
       team,
-      stats: team.seasonStats.find((s) => s.seasonId === seasonId),
+      stats: team.seasonStats.find(
+        (seasonStats) => seasonStats.seasonId === seasonId,
+      ),
     }))
     .filter(
       (entry): entry is { team: Team; stats: TeamStats } => !!entry.stats,
@@ -332,7 +337,7 @@ export function buildTeamDna({
       .map((entry) => metric.read(entry.stats))
       .filter(finite);
     const rank = competitionRank(value, values, metric.higherIsBetter);
-    const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
     rows.push({
       key: metric.key,
       label: metric.label,
