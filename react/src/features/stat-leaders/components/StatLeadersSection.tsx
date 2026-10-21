@@ -3,6 +3,7 @@ import { TopStatLeader } from '@/features/stat-leaders/types/topStatLeader';
 import StatLeaderCard from '@/features/stat-leaders/components/StatLeaderCard';
 import EmptyState from '@/components/EmptyState';
 import { useMediaQuery } from '@/lib/useMediaQuery';
+import { useHorizontalSwipe } from '@/lib/useHorizontalSwipe';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 import { listAvailableLeaders } from '@/features/stat-leaders/utils/availableLeaders';
@@ -17,6 +18,9 @@ const GROUP_LABELS: Record<PlayerGroup, string> = {
   skaters: 'Skaters',
   goalies: 'Goalies',
 };
+
+/** Swipe order: swiping left moves to the next group, right to the previous. */
+const GROUP_ORDER: PlayerGroup[] = ['skaters', 'goalies'];
 
 /** Singular group name used in the empty-state message. */
 const GROUP_NOUNS: Record<PlayerGroup, string> = {
@@ -80,10 +84,16 @@ function GroupSwitch({
   );
 }
 
+/** The group one step from `group` in swipe order; stays put at either end. */
+function getNeighborGroup(group: PlayerGroup, step: 1 | -1): PlayerGroup {
+  const neighborIndex = GROUP_ORDER.indexOf(group) + step;
+  return GROUP_ORDER[neighborIndex] ?? group;
+}
+
 /**
  * Home-page stat leaders as favorite-style cards. Phones show one "Stat
- * leaders" section with a Skaters / Goalies switch over a 2x2 grid; wider
- * screens show both groups, each under its own heading.
+ * leaders" section with a Skaters / Goalies switch over a 2x2 grid that can
+ * also be swiped; wider screens show both groups, each under its own heading.
  */
 export default function StatLeadersSection({
   skaterLeaders,
@@ -91,6 +101,11 @@ export default function StatLeadersSection({
 }: StatLeadersSectionProps) {
   const isPhone = useMediaQuery(PHONE_QUERY);
   const [selectedGroup, setSelectedGroup] = useState<PlayerGroup>('skaters');
+  const swipeProps = useHorizontalSwipe({
+    onSwipeLeft: () => setSelectedGroup((group) => getNeighborGroup(group, 1)),
+    onSwipeRight: () =>
+      setSelectedGroup((group) => getNeighborGroup(group, -1)),
+  });
   const leadersByGroup: Record<PlayerGroup, TopStatLeader[]> = {
     skaters: listAvailableLeaders(skaterLeaders),
     goalies: listAvailableLeaders(goalieLeaders),
@@ -106,11 +121,15 @@ export default function StatLeadersSection({
           selectedGroup={selectedGroup}
           onSelect={setSelectedGroup}
         />
-        <LeaderGrid
-          group={selectedGroup}
-          leaders={leadersByGroup[selectedGroup]}
-          headingId="stat-leaders-title"
-        />
+        <div className={styles.swipeArea} {...swipeProps}>
+          <div key={selectedGroup} className={styles.groupPanel}>
+            <LeaderGrid
+              group={selectedGroup}
+              leaders={leadersByGroup[selectedGroup]}
+              headingId="stat-leaders-title"
+            />
+          </div>
+        </div>
       </section>
     );
   }
