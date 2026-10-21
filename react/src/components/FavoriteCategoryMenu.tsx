@@ -24,7 +24,9 @@ import styles from '@/components/FavoriteCategoryMenu.module.css';
 const MENU_WIDTH_PX = 280;
 /** Smallest gap kept between the menu and the screen edges. */
 const SCREEN_MARGIN_PX = 16;
-const GAP_BELOW_ANCHOR_PX = 8;
+const GAP_FROM_ANCHOR_PX = 8;
+/** About how tall the menu is with nothing cut off; below this much room under the star, it may open above. */
+const MENU_FULL_HEIGHT_PX = 260;
 
 const FOCUSABLE_SELECTOR =
   'input:not(:disabled), button:not(:disabled), [href], [tabindex]:not([tabindex="-1"])';
@@ -42,7 +44,7 @@ export interface FavoriteCategoryMenuProps {
   onClose: () => void;
 }
 
-/** Returns the fixed position that keeps the menu under its star and on screen. */
+/** Returns the fixed position that keeps the menu next to its star and on screen. */
 function getMenuPosition(anchor: HTMLElement | null): CSSProperties {
   const menuWidth = Math.min(
     MENU_WIDTH_PX,
@@ -54,12 +56,18 @@ function getMenuPosition(anchor: HTMLElement | null): CSSProperties {
     Math.max(preferredLeft, SCREEN_MARGIN_PX),
     window.innerWidth - menuWidth - SCREEN_MARGIN_PX,
   );
-  const top = (anchorBox?.bottom ?? 0) + GAP_BELOW_ANCHOR_PX;
+  const top = (anchorBox?.bottom ?? 0) + GAP_FROM_ANCHOR_PX;
+  const roomBelow = window.innerHeight - top - SCREEN_MARGIN_PX;
+  const roomAbove =
+    (anchorBox?.top ?? 0) - GAP_FROM_ANCHOR_PX - SCREEN_MARGIN_PX;
+  if (roomBelow >= MENU_FULL_HEIGHT_PX || roomBelow >= roomAbove) {
+    return { top, left, width: menuWidth, maxHeight: roomBelow };
+  }
   return {
-    top,
+    bottom: window.innerHeight - (anchorBox?.top ?? 0) + GAP_FROM_ANCHOR_PX,
     left,
     width: menuWidth,
-    maxHeight: window.innerHeight - top - SCREEN_MARGIN_PX,
+    maxHeight: roomAbove,
   };
 }
 

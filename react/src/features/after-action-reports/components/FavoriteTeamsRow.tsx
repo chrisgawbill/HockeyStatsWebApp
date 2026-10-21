@@ -1,5 +1,6 @@
 import { useAfterActionReports } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 import FavoriteCard from '@/components/FavoriteCard';
+import FavoriteTeamStar from '@/features/after-action-reports/components/FavoriteTeamStar';
 import FavoriteRowSection from '@/components/FavoriteRowSection';
 import { localTeamList } from '@/lib/teamListData';
 import { sortByFanTier } from '@/lib/favoriteCategory';
@@ -21,21 +22,30 @@ function getTeamLogoUrl(triCode: string, theme: Theme): string {
 }
 
 /**
- * Shows one favorite team: its logo on the card's top border, the team name,
- * and the category badge. The card links to the team page.
+ * Shows one favorite team: its logo with the favorite star on the card's top
+ * border, the team name, and the category badge. The card links to the team
+ * page; the star opens the fan category menu instead.
  */
 function FavoriteTeamCard({ team }: { team: FavoriteTeam }) {
   const { theme } = useTheme();
+  const teamName = getTeamDisplayName(team.triCode);
   return (
     <FavoriteCard
       picture={
-        <img
-          className={styles.logo}
-          src={getTeamLogoUrl(team.triCode, theme)}
-          alt=""
-        />
+        <span className={styles.logoFrame}>
+          <img
+            className={styles.logo}
+            src={getTeamLogoUrl(team.triCode, theme)}
+            alt=""
+          />
+          <FavoriteTeamStar
+            team={team}
+            teamName={teamName}
+            className={styles.star}
+          />
+        </span>
       }
-      name={getTeamDisplayName(team.triCode)}
+      name={teamName}
       category={team}
       linkTo={`/team/${team.triCode}`}
     />

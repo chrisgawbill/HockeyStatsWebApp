@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useFavoritePlayers } from '@/features/favorite-players/hooks/FavoritePlayersContext';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
+import FavoritePlayerStatsDialog from '@/features/favorite-players/components/FavoritePlayerStatsDialog';
 import FavoriteCard from '@/components/FavoriteCard';
 import FavoriteRowSection from '@/components/FavoriteRowSection';
 import {
@@ -13,33 +15,42 @@ import styles from '@/features/favorite-players/components/FavoritePlayersRow.mo
 
 /**
  * Shows one favorite player: headshot with its favorite star on the card's
- * top border, then name, team and position, and the category badge. The card
- * links to the player's team page when the team is known. The star never
- * navigates.
+ * top border, then name, team and position, and the category badge. Pressing
+ * the card opens the player's season stats; the star opens the fan category
+ * menu instead.
  */
 function FavoritePlayerCard({ player }: { player: FavoritePlayer }) {
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   return (
-    <FavoriteCard
-      picture={
-        <PlayerHeadshot
-          playerId={player.playerId}
-          playerName={player.name}
-          src={player.headshot}
-          starSize="sm"
-          className={styles.avatar}
-          imgClassName={styles.avatarImg}
-          fallback={
-            <span className={styles.avatarInitials} aria-hidden="true">
-              {getInitials(player.name)}
-            </span>
-          }
+    <>
+      <FavoriteCard
+        picture={
+          <PlayerHeadshot
+            playerId={player.playerId}
+            playerName={player.name}
+            src={player.headshot}
+            starSize="sm"
+            className={styles.avatar}
+            imgClassName={styles.avatarImg}
+            fallback={
+              <span className={styles.avatarInitials} aria-hidden="true">
+                {getInitials(player.name)}
+              </span>
+            }
+          />
+        }
+        name={player.name}
+        detail={formatTeamAndPosition(player)}
+        category={player}
+        onSelect={() => setIsStatsOpen(true)}
+      />
+      {isStatsOpen && (
+        <FavoritePlayerStatsDialog
+          player={player}
+          onClose={() => setIsStatsOpen(false)}
         />
-      }
-      name={player.name}
-      detail={formatTeamAndPosition(player)}
-      category={player}
-      linkTo={player.teamTriCode ? `/team/${player.teamTriCode}` : undefined}
-    />
+      )}
+    </>
   );
 }
 
