@@ -107,7 +107,7 @@ export default function LandingPage() {
                 ]}
               />
               <DraftLotteryOddsRow
-                title="Draft Lottery Odds"
+                title="Draft lottery"
                 data={draftLotteryOddsData}
               />
             </section>

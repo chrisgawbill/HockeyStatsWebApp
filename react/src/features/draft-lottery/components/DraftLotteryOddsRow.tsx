@@ -3,7 +3,6 @@ import DraftLotteryOddsCard from '@/features/draft-lottery/components/DraftLotte
 import { useDraftLotterySimulation } from '@/features/draft-lottery/hooks/useDraftLotterySimulation';
 import { LotteryResultEntry } from '@/features/draft-lottery/utils/draftLotterySim';
 import { joinClassNames } from '@/lib/joinClassNames';
-import headerStyles from '@/styles/LandingPageRow.module.css';
 import styles from '@/features/draft-lottery/components/DraftLotteryOddsRow.module.css';
 
 interface DraftLotteryOddsRowProps {
@@ -64,6 +63,7 @@ export default function DraftLotteryOddsRow({
 
   if (lotteryTeams.length <= 1) return null;
 
+  const hasCompletedDraw = phase !== 'idle' && !animating;
   const showResult = phase === 'done' && lotteryResult !== null;
   const board: {
     team: StandingsTeam;
@@ -86,12 +86,10 @@ export default function DraftLotteryOddsRow({
     : 0;
 
   return (
-    <div className={headerStyles['section-container']}>
-      <div
-        className={`${headerStyles['landing-header']} ${headerStyles['landing-header--actions']}`}
-      >
-        <h2>{title}</h2>
-        <div className={headerStyles['landing-header-actions']}>
+    <div>
+      <div className={styles['header']}>
+        <h2 className={styles['title']}>{title}</h2>
+        <div className={styles['header__actions']}>
           <button
             type="button"
             className={styles['action']}
@@ -110,29 +108,33 @@ export default function DraftLotteryOddsRow({
             </svg>
             Simulate
           </button>
-          <button
-            type="button"
-            className={styles['action-reset']}
-            onClick={reset}
-            disabled={phase === 'idle' || animating}
-            aria-label="Reset draft lottery"
-            title="Reset draft lottery"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+          {hasCompletedDraw && (
+            <button
+              type="button"
+              className={joinClassNames(
+                styles['action'],
+                styles['action--icon'],
+              )}
+              onClick={reset}
+              aria-label="Reset draft lottery"
+              title="Reset draft lottery"
             >
-              <path d="M3 12a9 9 0 1 0 3-6.7" />
-              <polyline points="3 3 3 9 9 9" />
-            </svg>
-          </button>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 12a9 9 0 1 0 3-6.7" />
+                <polyline points="3 3 3 9 9 9" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
       <div role="status" aria-live="polite" className={styles['sr-only']}>

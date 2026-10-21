@@ -1,4 +1,4 @@
-/* Compact tile: dark surface, gold only on the price tag and winners. */
+/* Compact tile in the landing-page card look; gold only on odds and winners. */
 .item {
   display: block;
   min-width: 0;
@@ -13,26 +13,27 @@
   margin: 0;
   padding: 6px 6px 7px;
   box-sizing: border-box;
-  color: #e4e3ec;
+  color: var(--color-text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  background: var(--board-tile);
-  border: 1px solid var(--board-tile-border);
-  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid var(--ds-aero-border);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-1);
 }
 
 .slot:focus-visible {
-  outline: 2px solid var(--board-accent);
+  outline: 2px solid var(--color-blue-accent);
   outline-offset: 2px;
 }
 
 .slot--selected {
-  border-color: var(--board-accent);
+  border-color: var(--color-blue-accent);
 }
 
 .slot--winner {
-  background: #2a2333;
+  background: color-mix(in srgb, var(--board-gold) 10%, var(--color-surface));
   border-color: var(--board-gold);
   box-shadow: 0 0 12px color-mix(in srgb, var(--board-gold) 35%, transparent);
 }
@@ -46,7 +47,7 @@
 }
 
 .slot__rank {
-  color: var(--board-muted);
+  color: var(--color-text-secondary);
   font-size: 10px;
   font-weight: 700;
 }
@@ -62,11 +63,11 @@
 }
 
 .slot__move--up {
-  color: #6fd39a;
+  color: var(--board-up);
 }
 
 .slot__move--down {
-  color: #e98a8a;
+  color: var(--board-down);
 }
 
 .slot__id {
@@ -98,12 +99,5 @@
   font-size: 15px;
   font-weight: 800;
   text-align: center;
-  background: color-mix(in srgb, var(--board-gold) 14%, transparent);
-  border-radius: 5px;
   font-variant-numeric: tabular-nums;
-}
-
-.slot--winner .slot__tag {
-  color: #1b1405;
-  background: var(--board-gold);
 }
