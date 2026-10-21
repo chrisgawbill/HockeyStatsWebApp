@@ -51,6 +51,28 @@
   font-variant-numeric: tabular-nums;
 }
 
+.stat-leader-modal__player {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  min-width: 0;
+}
+
+.stat-leader-modal__headshot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-chip-bg);
+}
+
+.stat-leader-modal__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .stat-leader-modal__team-cell {
   display: flex;
   align-items: center;
@@ -110,8 +132,9 @@
     font-size: var(--text-sm);
   }
 
-  /* Name takes the remaining width and truncates; team logo, position and
-     stat value get fixed narrow columns so the value is never clipped. */
+  /* Name takes the remaining width and truncates; team logo and stat value
+     get fixed narrow columns so the value is never clipped. Position is
+     dropped so full names fit beside the headshot. */
   .stat-leader-modal__table table th:first-child,
   .stat-leader-modal__table table td:first-child {
     overflow: hidden;
@@ -123,9 +146,8 @@
     width: 3rem;
   }
 
-  .stat-leader-modal__table table th:nth-child(3),
-  .stat-leader-modal__table table td:nth-child(3) {
-    width: 2.75rem;
+  .stat-leader-modal__table .stat-leader-modal__position {
+    display: none;
   }
 
   .stat-leader-modal__table table th:last-child,

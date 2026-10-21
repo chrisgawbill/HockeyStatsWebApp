@@ -1,6 +1,7 @@
 import React from 'react';
 import { LandingScoringPeriod } from '@/features/game-detail/types/gameDetail';
 import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
+import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 
@@ -24,7 +25,7 @@ function getStrengthBadge(strength: string, modifier: string): string | null {
   return null;
 }
 
-/** Goal-by-goal summary grouped by period. */
+/** Goal-by-goal summary grouped by period; the scorer's headshot carries the favorite star. */
 function ScoringSummary({ scoring }: ScoringSummaryProps) {
   const periodsWithGoals = scoring.filter((period) => period.goals.length > 0);
   if (periodsWithGoals.length === 0) return null;
@@ -64,13 +65,13 @@ function ScoringSummary({ scoring }: ScoringSummaryProps) {
                     } as React.CSSProperties
                   }
                 >
-                  <img
-                    className={styles['scoring-goal__headshot']}
+                  <PlayerHeadshot
+                    playerId={goal.playerId}
+                    playerName={goal.name.default}
                     src={goal.headshot}
                     alt={goal.name.default}
-                    onError={(event) => {
-                      (event.target as HTMLImageElement).style.display = 'none';
-                    }}
+                    imgClassName={styles['scoring-goal__headshot']}
+                    starSize="sm"
                   />
                   <div className={styles['scoring-goal__info']}>
                     <span className={styles['scoring-goal__scorer']}>

@@ -10,8 +10,7 @@ import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadsho
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
-
-const FALLBACK_HEADSHOT = 'https://assets.nhle.com/mugs/nhl/skater/default.png';
+import { DEFAULT_HEADSHOT_URL } from '@/lib/playerHeadshot';
 
 /**
  * Common leaderboard row shape for skaters and goalies. Goalies have no
@@ -198,14 +197,14 @@ export default function PlayerStatsSection({
                 <PlayerHeadshot
                   playerId={row.id}
                   playerName={row.name}
-                  src={headshotMap.get(row.id) || FALLBACK_HEADSHOT}
+                  src={headshotMap.get(row.id) || DEFAULT_HEADSHOT_URL}
                   alt={row.name}
                   imgClassName={styles['player-stat-row__headshot']}
                   starSize="sm"
                   fallback={
                     <img
                       className={styles['player-stat-row__headshot']}
-                      src={FALLBACK_HEADSHOT}
+                      src={DEFAULT_HEADSHOT_URL}
                       alt={row.name}
                     />
                   }
