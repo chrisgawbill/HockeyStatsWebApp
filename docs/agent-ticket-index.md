@@ -1255,7 +1255,9 @@ for the menu, row grouping, 375/1280 light/dark.
 ## HOME-LEAD-01 — Stat leaders use the favorite card on the home page
 
 **Status:** ACTIVE — Product Owner chose Option B on 2026-10-21 from the phone
-mockups (today / A swipe row / B 2×2 grid / C list).
+mockups (today / A swipe row / B 2×2 grid / C list). Implemented; QA PASS
+(10/10 browser criteria + checks, after fixing an empty modal wrapper that took
+a grid cell); readability pass done; awaiting Product Owner screenshot review.
 
 **Goal:** On phones all four leaders of a group are visible without swiping,
 and stat leaders look like the favorite rows above them.
