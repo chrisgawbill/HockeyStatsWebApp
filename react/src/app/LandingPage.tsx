@@ -1,5 +1,5 @@
 import LandingPageStandings from '@/features/standings/components/LandingPageStandings';
-import PlayerStatLeaderRow from '@/features/stat-leaders/components/PlayerStatLeaderRow';
+import StatLeadersSection from '@/features/stat-leaders/components/StatLeadersSection';
 import PageHeader from '@/components/PageHeader';
 import styles from '@/app/LandingPage.module.css';
 import {
@@ -92,18 +92,14 @@ export default function LandingPage() {
         ) : (
           <div className={`${styles['landingPage-content']} ds-grid`}>
             <section>
-              <PlayerStatLeaderRow
-                title="Skater Stat Leaders"
-                topStatLeaders={[
+              <StatLeadersSection
+                skaterLeaders={[
                   goalLeaderData,
                   assistLeaderData,
                   pointsLeaderData,
                   faceoffLeadersData,
                 ]}
-              />
-              <PlayerStatLeaderRow
-                title="Goalie Stat Leaders"
-                topStatLeaders={[
+                goalieLeaders={[
                   winsLeaderData,
                   savePercentageLeaderData,
                   gaaLeaderData,
