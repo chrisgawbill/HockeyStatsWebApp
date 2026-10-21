@@ -18,6 +18,12 @@ const GROUP_LABELS: Record<PlayerGroup, string> = {
   goalies: 'Goalies',
 };
 
+/** Singular group name used in the empty-state message. */
+const GROUP_NOUNS: Record<PlayerGroup, string> = {
+  skaters: 'skater',
+  goalies: 'goalie',
+};
+
 interface StatLeadersSectionProps {
   skaterLeaders: (TopStatLeader | undefined)[];
   goalieLeaders: (TopStatLeader | undefined)[];
@@ -36,7 +42,7 @@ function LeaderGrid({ group, leaders, headingId }: LeaderGridProps) {
   if (leaders.length < 1) {
     return (
       <EmptyState
-        message={`No ${group.slice(0, -1)} stat leaders available for ${formatSeasonLabel(season)}.`}
+        message={`No ${GROUP_NOUNS[group]} stat leaders available for ${formatSeasonLabel(season)}.`}
       />
     );
   }
