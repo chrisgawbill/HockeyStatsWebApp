@@ -52,7 +52,7 @@ acceptance are both necessary for DONE.
 | HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device. |
 | HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Product Owner reviews 375/1280 light/dark screenshots. |
 | STAR-01 | Which surfaces get a star (leaderboard dialog, box score, scoring summary) and the row layout at 375px. |
-| NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; Product Owner reviews 1001/1024/1200 screenshots. |
+| NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; accepted from 1001/1024/1200 screenshots 2026-10-21. |
 | FEED-01 | Feed sections, order, item cap, and where it lives (home vs. its own route) before implementation. |
 | PREVIEW-01 | Preview sections and which data is shown when lines or probable goalies are unknown. |
 | COMPARE-01 | Entry points, player picker, stat set per position, and chart vs. table presentation. |
@@ -1341,8 +1341,8 @@ cases above at 375/1280, light/dark, with screenshots.
 
 ## NAV-01 — Header nav fits at 1024px
 
-**Status:** ACTIVE — implemented and verified; awaiting Product Owner screenshot
-review.
+**Status:** DONE — accepted by the Product Owner from 1001/1024/1200
+screenshots 2026-10-21.
 
 **Measured (2026-10-21):** the overflow is the signed-out header (Google
 "Sign in" button) between the 1000px icon-only breakpoint and ~1100px: ~55px at
