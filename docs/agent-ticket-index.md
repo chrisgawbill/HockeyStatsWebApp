@@ -52,7 +52,7 @@ acceptance are both necessary for DONE.
 | HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device. |
 | HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Product Owner reviews 375/1280 light/dark screenshots. |
 | STAR-01 | Which surfaces get a star (leaderboard dialog, box score, scoring summary) and the row layout at 375px. |
-| NAV-01 | Overflow fix approach (tighter spacing, shorter labels, or a "More" menu) from 1024px screenshots. |
+| NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; Product Owner reviews 1001/1024/1200 screenshots. |
 | FEED-01 | Feed sections, order, item cap, and where it lives (home vs. its own route) before implementation. |
 | PREVIEW-01 | Preview sections and which data is shown when lines or probable goalies are unknown. |
 | COMPARE-01 | Entry points, player picker, stat set per position, and chart vs. table presentation. |
@@ -1341,7 +1341,19 @@ cases above at 375/1280, light/dark, with screenshots.
 
 ## NAV-01 — Header nav fits at 1024px
 
-**Status:** IDEA
+**Status:** ACTIVE — implemented and verified; awaiting Product Owner screenshot
+review.
+
+**Measured (2026-10-21):** the overflow is the signed-out header (Google
+"Sign in" button) between the 1000px icon-only breakpoint and ~1100px: ~55px at
+1001px and ~33px at 1024px with a 130px-wide button; the signed-in corner (bell
++ avatar) overflowed 6px at 1001px only. The search box is already hidden in
+this range.
+
+**Decision (Product Owner, 2026-10-21):** Option A. From 1001–1199px the header
+gap drops to `--ds-space-2`, item padding to 2px and pill padding to
+`6px 10px` (`PageHeader.module.css`); labels and items are unchanged. It fits
+with a Google button up to at least 160px wide.
 
 **Goal:** Fix the global header nav overflowing the viewport by ~35px at 1024px
 (found during TEAM-LINES-01, pre-existing).

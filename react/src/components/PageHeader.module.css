@@ -306,6 +306,24 @@
   padding: 2px 4px;
 }
 
+/* Labelled pills plus the signed-out Google button overflow just above the
+   icon-only breakpoint, so tighten pill padding and gaps until 1200px. */
+@media (min-width: 1001px) and (max-width: 1199px) {
+  .nav-inner {
+    gap: var(--ds-space-2);
+  }
+
+  .nav-bar-item,
+  .nav-corner,
+  .nav-theme-toggle {
+    padding: 2px;
+  }
+
+  .nav-btn {
+    padding: 6px 10px;
+  }
+}
+
 .theme-toggle {
   min-height: 32px;
   padding: 4px 10px;
