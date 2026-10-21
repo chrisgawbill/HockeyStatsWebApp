@@ -1,20 +1,22 @@
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 
 import AppDialog from '@/components/AppDialog';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
-import { RosterPlayer } from '@/features/teams/types/teamPageTypes';
-import {
-  buildPlayerStatCells,
-  getPositionLabel,
-  PlayerStatsLookup,
-} from '@/features/teams/utils/playerStatsHelper';
-import { TokenSlot } from '@/features/teams/utils/teamLinesHelper';
+import { StatCell } from '@/features/teams/utils/playerStatsHelper';
 import styles from '@/features/teams/components/PlayerStatsDialog.module.css';
 
 interface PlayerStatsDialogProps {
-  player: RosterPlayer;
-  slot: TokenSlot;
-  lookup: PlayerStatsLookup;
+  playerId: number;
+  playerName: string;
+  headshot?: string | null;
+  /** Line under the name, such as "#97 · Center". */
+  detail: string;
+  /** Shown in the headshot circle when there is no photo. */
+  headshotFallback: ReactNode;
+  /** The player's stat cells, or null when they have no stat line. */
+  statCells: StatCell[] | null;
+  /** Shown instead of the stat cells while they load or when loading failed. */
+  statusMessage?: string;
   teamColor: string;
   teamInk: string;
   onClose: () => void;
@@ -22,15 +24,18 @@ interface PlayerStatsDialogProps {
 
 /** Dialog showing one player's stat cells, tinted with the team's colors. */
 export default function PlayerStatsDialog({
-  player,
-  slot,
-  lookup,
+  playerId,
+  playerName,
+  headshot,
+  detail,
+  headshotFallback,
+  statCells,
+  statusMessage,
   teamColor,
   teamInk,
   onClose,
 }: PlayerStatsDialogProps) {
   const titleId = useId();
-  const cells = buildPlayerStatCells(player.id, slot, lookup, player.stat);
 
   return (
     <AppDialog
@@ -50,30 +55,32 @@ export default function PlayerStatsDialog({
       >
         <header className={styles.header}>
           <PlayerHeadshot
-            playerId={player.id}
-            playerName={player.name}
-            src={player.headshot}
+            playerId={playerId}
+            playerName={playerName}
+            src={headshot}
             className={styles.avatarFrame}
             innerClassName={styles.avatar}
             imgClassName={styles.avatar__img}
             fallback={
               <span className={styles.avatar__number} aria-hidden="true">
-                {player.number}
+                {headshotFallback}
               </span>
             }
           />
           <div className={styles.heading}>
             <h2 id={titleId} className={styles.name}>
-              {player.name}
+              {playerName}
             </h2>
-            <p className={styles.meta}>
-              #{player.number} · {getPositionLabel(slot, lookup, player.id)}
-            </p>
+            <p className={styles.meta}>{detail}</p>
           </div>
         </header>
-        {cells ? (
+        {statusMessage ? (
+          <p className={styles.empty} role="status">
+            {statusMessage}
+          </p>
+        ) : statCells ? (
           <dl className={styles.grid}>
-            {cells.map((cell) => (
+            {statCells.map((cell) => (
               <div key={cell.label} className={styles.cell}>
                 <dt className={styles.cell__label}>{cell.label}</dt>
                 <dd className={styles.cell__value}>{cell.value}</dd>

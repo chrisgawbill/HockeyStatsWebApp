@@ -13,14 +13,17 @@ export interface FavoriteCardProps {
   /** Second line, such as "EDM · C"; omitted when empty. */
   detail?: string;
   category: FavoriteCategory;
-  /** Where the card body links to; the card is not a link without it. */
+  /** Where the card body links to. */
   linkTo?: string;
+  /** Called when the card body is pressed, for cards that open a dialog instead of a page. */
+  onSelect?: () => void;
 }
 
 /**
  * Vertical favorite card: the picture straddles the top border, then the name,
  * an optional detail line, and the category badge (label if set, else tier).
- * Controls inside `picture` (the star) stay clickable above the card's link.
+ * The body is a link (`linkTo`), a button (`onSelect`), or plain text.
+ * Controls inside `picture` (the star) stay clickable above the card body.
  */
 export default function FavoriteCard({
   picture,
@@ -28,6 +31,7 @@ export default function FavoriteCard({
   detail,
   category,
   linkTo,
+  onSelect,
 }: FavoriteCardProps) {
   const cardText = (
     <>
@@ -46,6 +50,15 @@ export default function FavoriteCard({
         <Link to={linkTo} className={`${styles.body} ${styles.link}`}>
           {cardText}
         </Link>
+      ) : onSelect ? (
+        <button
+          type="button"
+          className={`${styles.body} ${styles.link} ${styles.button}`}
+          onClick={onSelect}
+          aria-haspopup="dialog"
+        >
+          {cardText}
+        </button>
       ) : (
         <div className={styles.body}>{cardText}</div>
       )}

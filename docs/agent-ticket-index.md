@@ -1160,8 +1160,9 @@ below the landing page intro header ("<season> at a glance").
   the loading/error/content block, so it does not wait for stat leaders.
 - Section title "Your favorite players". One card per favorite, in API order:
   `PlayerHeadshot` (with its star, so unstarring here works), name, and
-  "TEAM · POS". The card body links to `/team/<teamTriCode>` (there is no
-  player page); a player without a team is not a link.
+  "TEAM · POS". Pressing the card opens the player's season stats in the
+  team page's player stats dialog (Product Owner, 2026-10-21; it used to link
+  to the team page).
 - Signed in with zero favorites: one compact line, "Star a player's headshot
   to pin them here." Signed out, or `available === false` (old API): render
   nothing.
@@ -1174,8 +1175,8 @@ below the landing page intro header ("<season> at a glance").
 - Signed out: no row, landing page unchanged.
 - Signed in, favorites present: row appears under the header while stat
   leaders are still loading and when they error.
-- Card click opens the player's team page; star click unfavorites without
-  navigating and the card disappears; the toast/limit behavior is unchanged.
+- Card click opens the player's stats dialog and does not navigate; the star
+  opens the fan category menu; the toast/limit behavior is unchanged.
 - Zero favorites shows the hint; old-API 404 shows nothing.
 - 375px and 1280px, light and dark: readable, no page horizontal scroll.
 
@@ -1241,6 +1242,11 @@ favorite in a category and see favorites grouped or badged by it.
   shows a small badge (custom label if set, else the tier name).
 - Degrade gracefully until API-FAN-01 deploys (missing `tier` = Fan,
   menu hides category options).
+- Fix (Product Owner, 2026-10-21: "you cannot change fan level"): home team
+  cards had no star, so their tier could only be changed on the team page;
+  they now carry the same corner star as player cards. The menu opens above
+  its star when there is not enough room below, so it is no longer squeezed
+  into a scrolling sliver on phones. Saving still needs API-FAN-01 deployed.
 
 **Verify:** unit tests for ordering/badges; Playwright against a mocked API
 for the menu, row grouping, 375/1280 light/dark.

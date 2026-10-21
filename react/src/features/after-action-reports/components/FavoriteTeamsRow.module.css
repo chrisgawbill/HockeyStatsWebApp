@@ -1,3 +1,10 @@
+/* Positions the star on the logo's corner, like the player headshot star. */
+.logoFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .logo {
   box-sizing: border-box;
   width: 100%;
@@ -8,4 +15,11 @@
   background: var(--color-surface);
   box-shadow: var(--ds-elevation-1);
   object-fit: contain;
+}
+
+.star {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  z-index: 1;
 }

@@ -6,7 +6,9 @@ import LineCarousel from '@/features/teams/components/LineCarousel';
 import PlayerStatsDialog from '@/features/teams/components/PlayerStatsDialog';
 import { PlayerDialogContext } from '@/features/teams/hooks/PlayerDialogContext';
 import {
+  buildPlayerStatCells,
   buildStatsLookup,
+  getPositionLabel,
   PlayerStatsLookup,
 } from '@/features/teams/utils/playerStatsHelper';
 import {
@@ -166,9 +168,17 @@ export default function RosterLinesTabs({
         </div>
         {open && (
           <PlayerStatsDialog
-            player={open.player}
-            slot={open.slot}
-            lookup={lookup}
+            playerId={open.player.id}
+            playerName={open.player.name}
+            headshot={open.player.headshot}
+            detail={`#${open.player.number} · ${getPositionLabel(open.slot, lookup, open.player.id)}`}
+            headshotFallback={open.player.number}
+            statCells={buildPlayerStatCells(
+              open.player.id,
+              open.slot,
+              lookup,
+              open.player.stat,
+            )}
             teamColor={teamColor}
             teamInk={teamInk}
             onClose={closePlayer}

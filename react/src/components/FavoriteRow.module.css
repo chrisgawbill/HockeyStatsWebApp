@@ -88,6 +88,15 @@
   text-decoration: none;
 }
 
+/* Resets the button look so a button body matches a link body. */
+.button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
 /* Stretches the link over the whole card; the picture's z-index keeps its
    buttons above. */
 .link::after {
