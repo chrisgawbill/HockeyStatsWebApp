@@ -51,6 +51,13 @@ acceptance are both necessary for DONE.
 | HOME-LEAD-01 | Approved 2026-10-21: Option B (FavoriteCard in a 2×2 grid, Skaters/Goalies switch on phones); accepted from 375/1280 screenshots 2026-10-21. |
 | HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device. |
 | HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Product Owner reviews 375/1280 light/dark screenshots. |
+| STAR-01 | Which surfaces get a star (leaderboard dialog, box score, scoring summary) and the row layout at 375px. |
+| NAV-01 | Overflow fix approach (tighter spacing, shorter labels, or a "More" menu) from 1024px screenshots. |
+| FEED-01 | Feed sections, order, item cap, and where it lives (home vs. its own route) before implementation. |
+| PREVIEW-01 | Preview sections and which data is shown when lines or probable goalies are unknown. |
+| COMPARE-01 | Entry points, player picker, stat set per position, and chart vs. table presentation. |
+| API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
+| GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 
 ## Dependency outline
 
@@ -67,6 +74,10 @@ ON2-01 + ON2-02 + ON2-05 + ON2-09 + ON2-09A decision -> ON2-10
 ON2-03 + ON2-04 + ON2-10 -> ON2-11
 ON2-07 + ON2-10 + ON2-11 -> ON2-12
 approved implementation/content release set -> ON2-13
+WPR-01 -> STAR-01, FEED-01, COMPARE-01
+FAN-01 -> FEED-01
+API-LINES-01 -> PREVIEW-01
+API-PBP-01 -> GAME-SHOTS-01
 ```
 
 ON2-09A may run early using the existing game; it gates production presentation
@@ -1285,3 +1296,267 @@ a mocked API at 375 and 1280, light/dark: 4 cards visible per group on phone
 without horizontal scroll, switch toggles groups, card opens dialog, star works
 independently of the card.
 
+
+---
+
+## STAR-01 — Favorite star in leaderboards and box scores
+
+**Status:** IDEA
+
+**Goal:** A user can favorite any player wherever that player appears in a
+list, not only from stat-leader cards, home rows, the roster stats dialog and
+Three Stars.
+
+**Dependencies:** WPR-01 (`PlayerHeadshot`, `FavoritePlayerStar`,
+`FavoritePlayersProvider`). No API change: `PUT /api/favorite-players/:playerId`
+already validates any NHL player id.
+
+**Proposed scope (PM recommendation, confirm at checkpoint):**
+
+- `stat-leaders/components/StatsLeaderModal.tsx`: a `FavoritePlayerStar` on
+  each leaderboard row, next to the name.
+- `game-detail/components/PlayerStatsSelection.tsx`: a star on each skater and
+  goalie box-score row.
+- Optional: the scorer in each `ScoringSummary` goal row.
+- The star is its own button (tapping the row keeps the row's behaviour), with
+  the same signed-out toast, 10-player limit message, fan category menu
+  (FAN-01), and hidden-on-old-API behaviour as today.
+- `game-detail` already renders `favorite-players` components through
+  `ThreeStars`; update the cross-feature exception list in `architecture.md`
+  for any new consumer.
+
+**Acceptance:**
+
+- Starring from a leaderboard or box-score row adds the player and the home
+  favorites row updates without a reload; unstarring opens the category menu.
+- Signed out: the toast appears and nothing is saved. At 10 favorites: the
+  limit message.
+- Rows stay one line high at 375px; no page horizontal scroll; keyboard focus
+  reaches each star.
+
+**Verify:** tsc, `pnpm test`, build; Playwright against a mocked API for the
+cases above at 375/1280, light/dark, with screenshots.
+
+---
+
+## NAV-01 — Header nav fits at 1024px
+
+**Status:** IDEA
+
+**Goal:** Fix the global header nav overflowing the viewport by ~35px at 1024px
+(found during TEAM-LINES-01, pre-existing).
+
+**Dependencies:** none.
+
+**Proposed scope (PM recommendation, confirm at checkpoint):**
+
+- Measure the overflow in `components/PageHeader.tsx` /
+  `PageHeader.module.css` at 992–1280px with signed-out and signed-in
+  (`AccountCorner` bell + avatar) headers, since the signed-in corner is wider.
+- Options to bring to the Product Owner: (A) tighten gaps and padding in the
+  992–1199px range; (B) shorter labels in that range; (C) move the
+  lowest-traffic items into a "More" menu. Recommend A, falling back to C if A
+  can't absorb the signed-in corner.
+- No change to the phone bottom nav or the search FAB.
+
+**Acceptance:** at 992, 1024, 1100, 1200 and 1280px, signed in and out, light
+and dark: `document.documentElement.scrollWidth <= innerWidth`, no clipped or
+wrapped nav items, focus outlines fully visible.
+
+**Verify:** build; Playwright width sweep asserting no horizontal overflow, with
+screenshots for the Product Owner.
+
+---
+
+## FEED-01 — "My Hockey" personal feed
+
+**Status:** IDEA
+
+**Goal:** One place where a signed-in user sees what's happening with their
+favorite teams and players: next games, last results, and how their players
+are doing, without opening each team page.
+
+**Dependencies:** WPR-01 and FAN-01 (favorites with tiers). The first version
+needs no API change: it composes `/api/favorites`, `/api/favorite-players`,
+`/team/schedule/:triCode`, `/api/after-action-reports` and the skater/goalie
+summary endpoints the site already calls.
+
+**Proposed design (PM recommendation, confirm at checkpoint):**
+
+- Route `/my-hockey` (signed-in only; signed out shows a sign-in prompt), linked
+  from the avatar menu and from a "See all" on the home favorites rows. A
+  later decision can move a short version onto the home page.
+- Sections:
+  1. **Up next:** each favorite team's next game (date/time local, opponent,
+     home/away) linking to `/game/:gameId`, ordered by start time; live games
+     first with the score.
+  2. **Last results:** each favorite team's latest final with score, linking
+     to its After Action Report when there is one.
+  3. **Your players:** season line per favorite player (skaters G-A-P,
+     goalies W-SV%-GAA) and last-game line when available, sorted by tier.
+- Ordered within each section Diehard, Fan, Curious, then by time.
+- Feature home: new `features/my-hockey` composing data through its own `api/`
+  module; display components from other features go through the existing
+  exceptions or `components/` / `lib/` (update `architecture.md`).
+- Refreshes on focus and every 5 minutes while visible, like the inbox.
+
+**Out of scope (candidate follow-ups needing a backend ticket):** milestone
+watch ("3 goals from 300", needs career totals from the NHL player landing),
+injuries (no reliable public NHL source), and a server-side aggregate endpoint
+if the client fan-out proves slow.
+
+**Acceptance:**
+
+- Signed out: sign-in prompt, no API calls for private data.
+- Zero favorites: one hint linking to teams and stat leaders.
+- One team's schedule call failing hides only that team's rows.
+- With 10 players and several teams, the page loads with no more than one
+  schedule call per team and reuses cached summary data.
+- 375/1280, light/dark, no page horizontal scroll.
+
+**Verify:** unit tests for ordering and next/last game selection; Playwright
+against a mocked API for the cases above with screenshots.
+
+---
+
+## PREVIEW-01 — Pre-game preview on the game page
+
+**Status:** IDEA
+
+**Goal:** Before puck drop, `/game/:gameId` shows a useful preview instead of an
+empty box score: head-to-head, recent form, likely lines and goalies.
+
+**Dependencies:** API-LINES-01 (DONE) for lines. Reuses the `matchup` season
+series and `teams` form helpers. Probable goalies depend on what the NHL
+gamecenter landing returns for future games (spot-check before the
+checkpoint); no new API endpoint unless that check fails.
+
+**Proposed design (PM recommendation, confirm at checkpoint):**
+
+- Shown when the game state is future or pregame; replaced by the current
+  game detail once the game starts.
+- Sections:
+  1. **Season series** so far between the two teams (reuse
+     `matchup/utils/seasonSeriesHelper`), with a link to `/matchup`.
+  2. **Recent form:** last-5 strip per team (reuse `FormStrip`) and record.
+  3. **Team comparison:** goals for/against per game, PP%, PK% from standings
+     data, in the existing `TeamComparison` style.
+  4. **Projected lines:** each team's top two forward lines and top pair from
+     `/team/lines/:triCode`, labelled with the source game; hidden when
+     `source: 'none'`.
+  5. **Goalies:** probable starters with season SV%/GAA if the landing
+     provides them, else the last game's starter labelled "Last start".
+- Cross-feature use of `matchup` / `teams` helpers needs either moving the
+  shared helpers to `lib/` or a recorded exception in `architecture.md`.
+
+**Acceptance:**
+
+- A future game shows the preview; a live or final game shows today's page.
+- Each section hides on its own when its data is missing; the page never shows
+  a blank or broken section.
+- No more than the existing landing call plus one lines call per team.
+- 375/1280, light/dark, no page horizontal scroll.
+
+**Verify:** unit tests for section visibility rules; Playwright against a
+mocked API for future/live/final games with screenshots.
+
+---
+
+## COMPARE-01 — Player comparison
+
+**Status:** IDEA
+
+**Goal:** A user can pick two or three players and compare their season stats
+side by side.
+
+**Dependencies:** WPR-01 (headshots and stars). Season stats come from the
+existing skater/goalie summary endpoints; confirm at the checkpoint they return
+every player, not only leaders. Career comparison is out of scope (would need
+an API ticket for the NHL player landing).
+
+**Proposed design (PM recommendation, confirm at checkpoint):**
+
+- Route `/compare?players=<id>,<id>[,<id>]` so a comparison is shareable.
+- Entry points: a "Compare" action in `PlayerStatsDialog` and on favorite
+  player cards, which opens the page with that player pre-filled.
+- Player picker: search by name over the cached summary data; skaters and
+  goalies cannot be mixed (the picker filters to the first player's group).
+- Layout: headshot column per player, then stat rows (skaters: GP, G, A, P,
+  +/-, PPG, SOG, S%, TOI/GP; goalies: GP, W, GAA, SV%, SO) with the best value
+  in each row highlighted. Optional per-game bar chart per stat, following the
+  `dataviz` palette.
+- Phones: two players fit side by side; a third scrolls inside the table, never
+  the page.
+
+**Acceptance:**
+
+- Opening a shared URL rebuilds the same comparison; unknown ids show a
+  message for that slot only.
+- Leaders highlight correctly, including ties and lower-is-better stats (GAA).
+- 375/1280, light/dark, no page horizontal scroll; the picker is keyboard
+  usable.
+
+**Verify:** unit tests for best-value highlighting and URL parsing; Playwright
+against a mocked API with screenshots.
+
+---
+
+## API-PBP-01 — Play-by-play events for shot maps and game flow (backend)
+
+**Status:** IDEA — backend-owned dependency
+
+**Goal:** Expose a normalized, cached list of a game's shot and goal events so
+the frontend can draw a shot map and game flow chart.
+
+**Proposed contract (PM recommendation, confirm at checkpoint):**
+
+- `GET /schedule/playbyplay/:gameID` → `{ gameId, gameState, homeTeam,
+  awayTeam, events: [{ eventId, period, timeInPeriod, elapsedSeconds,
+  type: 'goal'|'shot'|'miss'|'block', teamTriCode, shooterId, goalieId|null,
+  x, y, shotType|null, strength: 'ev'|'pp'|'sh'|null }] }`.
+- Source: NHL `gamecenter/{id}/play-by-play`, cached raw through `GetOrFetch`
+  (forever once the game is `OFF`, about 30 seconds while live); mapping runs
+  after the cache read in `slices/schedule/mappers/`, per the Mapping
+  Boundary.
+- Coordinates normalized so each team always shoots toward the same end in the
+  response (the NHL flips sides by period); document the convention.
+- Unknown event types are dropped, not failed.
+
+**Verify:** mapper unit tests from a recorded payload (including a period side
+flip and missing coordinates), route test, README route table updated.
+
+---
+
+## GAME-SHOTS-01 — Shot map and game flow on the game page
+
+**Status:** IDEA
+
+**Goal:** `/game/:gameId` shows where each team shot from and how the game
+swung over time.
+
+**Dependencies:** API-PBP-01 contract (the page must work before it deploys:
+hide both views when the call 404s).
+
+**Proposed design (PM recommendation, confirm at checkpoint):**
+
+- **Shot map:** a half-rink SVG per team (or one full rink), goals as filled
+  markers, other shots as outlines, team colours that pass contrast in light
+  and dark. Tap/hover a marker for shooter, time, shot type. Filters: period,
+  strength (all / even / PP).
+- **Game flow:** cumulative shot attempts per team over elapsed time, with
+  goal markers and period dividers. Built per the `dataviz` skill.
+- New components inside `features/game-detail`; inline SVG, no new chart
+  dependency unless the Product Owner approves one.
+- Live games refresh with the existing game-detail polling.
+
+**Acceptance:**
+
+- Marker counts match the API events for the selected filters.
+- Goals, period boundaries and the side normalization render correctly for a
+  recorded game, including overtime.
+- Keyboard and screen-reader users get a text summary (shots and goals by
+  period) in place of the charts.
+- 375/1280, light/dark, no page horizontal scroll.
+
+**Verify:** unit tests for filtering and the flow series; Playwright against a
+mocked API with screenshots.
