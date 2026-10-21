@@ -1301,7 +1301,18 @@ independently of the card.
 
 ## STAR-01 — Favorite star in leaderboards and box scores
 
-**Status:** IDEA
+**Status:** ACTIVE — implemented and verified; awaiting Product Owner screenshot review
+
+**Approved decisions (Product Owner, 2026-10-21):**
+
+- The leaderboard dialog and scoring summary use the shared `PlayerHeadshot`
+  (photo with the corner star), matching the team Player Stats rows: a 36px
+  headshot before the leaderboard name, and the scorer's existing 36px
+  headshot gains the corner star (this reverses WPR-01's exclusion).
+- Box-score skater and goalie rows get no photos (tried at 28px; too
+  crowded): a small bare `FavoritePlayerStar` sits before the name.
+- Leaderboard dialog at phone width (≤576px) hides the Pos column so full
+  names fit (Option B); Pos stays on wider screens.
 
 **Goal:** A user can favorite any player wherever that player appears in a
 list, not only from stat-leader cards, home rows, the roster stats dialog and
@@ -1336,6 +1347,23 @@ already validates any NHL player id.
 
 **Verify:** tsc, `pnpm test`, build; Playwright against a mocked API for the
 cases above at 375/1280, light/dark, with screenshots.
+
+**Implemented:** `StatsLeaderModal` (`LeaderboardRow` with a 36px
+`PlayerHeadshot`; Pos hidden ≤576px), `PlayerStatsSelection`
+(`PlayerNameCell` with a small bare star), `ScoringSummary` (scorer
+`PlayerHeadshot`; `LandingGoal` now types `playerId`). The default-mug URL
+moved to `lib/playerHeadshot.ts` for the leaderboard and `PlayerStatsSection`.
+
+**Verification:** tsc, `pnpm test` (46 files, 177 tests), format check,
+build. Playwright against a mocked API on `vite preview` at 375/1280,
+light/dark: starring from the leaderboard, box score and scoring summary
+saves and the home favorites row updates without a reload; a starred star
+opens the category menu; signed-out toast with nothing saved; 409 limit
+message; Tab reaches the leaderboard star and box-score stars take focus;
+leaderboard rows 53px and box-score rows 41px, one line; Pos hidden only at
+375 and "Oliver Ekman-Larsson" untruncated; no page horizontal scroll. Not
+verifiable here: real NHL headshots and logos (asset host blocked) and real
+Google sign-in.
 
 ---
 

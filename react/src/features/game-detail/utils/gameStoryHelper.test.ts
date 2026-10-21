@@ -21,6 +21,7 @@ function landingWithGoals(
           goals: goals
             .filter((goal) => (goal.period ?? 1) === 1)
             .map((goal) => ({
+              playerId: 1,
               strength: 'ev',
               name: { default: `${goal.team} scorer` },
               teamAbbrev: { default: goal.team },
@@ -38,6 +39,7 @@ function landingWithGoals(
           goals: goals
             .filter((goal) => goal.period === 2)
             .map((goal) => ({
+              playerId: 2,
               strength: 'pp',
               name: { default: `${goal.team} scorer` },
               teamAbbrev: { default: goal.team },

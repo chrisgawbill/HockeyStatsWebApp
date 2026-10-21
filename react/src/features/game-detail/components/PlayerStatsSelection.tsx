@@ -5,6 +5,7 @@ import {
   BoxscoreTeamStats,
 } from '@/features/game-detail/types/gameDetail';
 import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
+import FavoritePlayerStar from '@/features/favorite-players/components/FavoritePlayerStar';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 
@@ -25,6 +26,24 @@ function toSeconds(toi: string): number {
 function formatSvPct(pct?: number): string {
   if (pct == null) return '—';
   return (pct * 100).toFixed(1) + '%';
+}
+
+/** Name cell: the favorite star, then the player's name. */
+function PlayerNameCell({
+  playerId,
+  name,
+}: {
+  playerId: number;
+  name: string;
+}) {
+  return (
+    <td className={styles['player-box-table__name-col']}>
+      <span className={styles['player-box-table__player']}>
+        <FavoritePlayerStar playerId={playerId} playerName={name} size="sm" />
+        {name}
+      </span>
+    </td>
+  );
 }
 
 /** Skater box score sorted by time on ice. */
@@ -59,9 +78,10 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
               <td className={styles['player-box-table__muted']}>
                 {skater.sweaterNumber}
               </td>
-              <td className={styles['player-box-table__name-col']}>
-                {skater.name.default}
-              </td>
+              <PlayerNameCell
+                playerId={skater.playerId}
+                name={skater.name.default}
+              />
               <td className={styles['player-box-table__muted']}>
                 {skater.position}
               </td>
@@ -128,9 +148,10 @@ function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
               <td className={styles['player-box-table__muted']}>
                 {goalie.sweaterNumber}
               </td>
-              <td className={styles['player-box-table__name-col']}>
-                {goalie.name.default}
-              </td>
+              <PlayerNameCell
+                playerId={goalie.playerId}
+                name={goalie.name.default}
+              />
               <td
                 className={
                   goalie.decision === 'W'

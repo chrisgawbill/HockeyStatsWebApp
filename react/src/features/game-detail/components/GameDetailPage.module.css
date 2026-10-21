@@ -868,6 +868,7 @@
 .player-box-table td {
   padding: var(--ds-space-2) var(--ds-space-3);
   text-align: center;
+  vertical-align: middle;
   border-bottom: 1px solid var(--color-subtle-divider);
   white-space: nowrap;
   color: var(--color-text);
@@ -888,6 +889,12 @@
 .player-box-table__name-col {
   text-align: left !important;
   min-width: 120px;
+}
+
+.player-box-table__player {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
 }
 
 .player-box-table__muted {

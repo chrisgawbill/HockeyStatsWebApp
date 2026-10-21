@@ -81,6 +81,7 @@ export interface LandingGoalAssist {
 }
 
 export interface LandingGoal {
+  playerId: number; // the scorer
   strength: string; // "ev" | "pp" | "sh"
   name: BoxscorePlayerName;
   teamAbbrev: { default: string };
