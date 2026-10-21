@@ -48,6 +48,7 @@ acceptance are both necessary for DONE.
 | HOME-FAV-01 | Started 2026-10-20 with PM-recommended layout (see block); Product Owner reviews 375/1280 screenshots. |
 | API-FAN-01 | Approved 2026-10-20: tiers Diehard/Fan/Curious + optional label on teams and players, display only (see block). |
 | FAN-01 | Approved 2026-10-20: teams row above players, sorted by tier; Product Owner reviews the category menu and rows in screenshots. |
+| HOME-LEAD-01 | Approved 2026-10-21: Option B (FavoriteCard in a 2×2 grid, Skaters/Goalies switch on phones); Product Owner reviews 375/1280 screenshots. |
 
 ## Dependency outline
 
@@ -1250,4 +1251,33 @@ favorite in a category and see favorites grouped or badged by it.
 
 **Verify:** unit tests for ordering/badges; Playwright against a mocked API
 for the menu, row grouping, 375/1280 light/dark.
+
+## HOME-LEAD-01 — Stat leaders use the favorite card on the home page
+
+**Status:** ACTIVE — Product Owner chose Option B on 2026-10-21 from the phone
+mockups (today / A swipe row / B 2×2 grid / C list).
+
+**Goal:** On phones all four leaders of a group are visible without swiping,
+and stat leaders look like the favorite rows above them.
+
+**Approved design (Product Owner, Option B):**
+
+- Each leader is a `FavoriteCard`: headshot straddling the top border with the
+  favorite star on its corner, then the category (small caps, accent colour),
+  the stat value large, the player name and "TEAM · POS" when known. The badge
+  slot shows the value instead of a fan tier. Tapping the card still opens the
+  category's leaderboard dialog.
+- Phones (< 768px): one "Stat leaders" section with a Skaters / Goalies
+  segmented switch (Skaters default) over a 2×2 grid of that group's cards. No
+  horizontal swipe row.
+- PM default (Product Owner may revise at review): from 768px both groups show
+  with their own left-aligned headings, each a 2-column grid of the same cards;
+  no switch.
+- Headings left-aligned at the favorite rows' size; loading, error, empty-group
+  and missing-category behaviour unchanged.
+
+**Verify:** unit tests for the card variant and the switch; Playwright against
+a mocked API at 375 and 1280, light/dark: 4 cards visible per group on phone
+without horizontal scroll, switch toggles groups, card opens dialog, star works
+independently of the card.
 
