@@ -18,7 +18,7 @@ export default function StatsLeaderModal({
 }: StatsLeaderModalProps) {
   const titleId = useId();
   return (
-    <div>
+    <>
       <AppDialog
         open={showModal}
         onClose={handleModalClose}
@@ -79,7 +79,7 @@ export default function StatsLeaderModal({
           </button>
         </footer>
       </AppDialog>
-    </div>
+    </>
   );
   function handleModalClose() {
     setShowStatsModal(false);
