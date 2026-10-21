@@ -2,7 +2,7 @@
    lottery moments: top bulb row, odds numbers, winners, reveal stage. */
 .frame {
   --board-gold: #8a5a00;
-  --board-up: #1b7a46;
+  --board-up: #156339;
   --board-down: #b3261e;
 
   container-type: inline-size;
