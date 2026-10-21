@@ -1,24 +1,28 @@
-/* Compact lottery board: dark frame with dotted bulb strips on the top and
-   bottom edges only. Board colour vars are shared with the tile styles. */
+/* Compact lottery board in the landing-page card look. Gold is reserved for
+   lottery moments: top bulb row, odds numbers, winners, reveal stage. */
 .frame {
-  --board-gold: #f2c14e;
-  --board-muted: #8d8a9e;
-  --board-accent: #a9c7ff;
-  --board-tile: #211d2c;
-  --board-tile-border: #2e2a3b;
+  --board-gold: #8a5a00;
+  --board-up: #156339;
+  --board-down: #b3261e;
 
   container-type: inline-size;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  background: #17141f;
-  border: 1px solid color-mix(in srgb, var(--board-gold) 28%, transparent);
-  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1px solid var(--ds-aero-border);
+  border-radius: var(--ds-radius-medium);
+  box-shadow: var(--ds-elevation-1);
 }
 
-/* 6px dotted bulb strips along the top and bottom edges. */
-.frame::before,
-.frame::after {
+[data-theme='dark'] .frame {
+  --board-gold: #f2c14e;
+  --board-up: #6fd39a;
+  --board-down: #e98a8a;
+}
+
+/* 6px dotted bulb row along the top edge only. */
+.frame::before {
   content: '';
   display: block;
   height: 6px;
@@ -31,8 +35,7 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .frame::before,
-  .frame::after {
+  .frame::before {
     animation: twinkle 3.2s ease-in-out infinite alternate;
   }
 }
@@ -74,51 +77,71 @@
 
 .caption {
   margin: 8px 0 0;
-  color: var(--board-muted);
+  color: var(--color-muted-text);
   font-size: 12px;
   text-align: center;
 }
 
-/* Header buttons */
+/* Heading row: same title style as the other landing sections. */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-2);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+/* Quiet chip buttons; the ::after widens the tap target to 44px. */
 .action {
+  position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 40px;
-  padding: 0 16px;
-  color: #0d1b33;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--color-primary);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  background: #a9c7ff;
+  background: var(--color-chip-bg);
   border: 0;
-  border-radius: 20px;
+  border-radius: 999px;
 }
 
-.action-reset {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
+.action--icon {
+  width: 32px;
   padding: 0;
-  color: var(--color-text, #c9cad6);
-  cursor: pointer;
-  background: transparent;
-  border: 1px solid var(--color-muted-text, #3a3d4d);
-  border-radius: 20px;
+  color: var(--color-text);
 }
 
-.action:disabled,
-.action-reset:disabled {
+.action::after {
+  content: '';
+  position: absolute;
+  inset: -6px -2px;
+}
+
+.action:disabled {
   cursor: not-allowed;
   opacity: 0.45;
 }
 
-.action:focus-visible,
-.action-reset:focus-visible {
-  outline: 2px solid #a9c7ff;
+.action:focus-visible {
+  outline: 2px solid var(--color-blue-accent);
   outline-offset: 2px;
 }
 
@@ -139,7 +162,7 @@
   margin-bottom: 8px;
   padding: 8px;
   text-align: center;
-  background: #252b4a;
+  background: color-mix(in srgb, var(--board-gold) 8%, var(--color-surface));
   border: 1px solid var(--board-gold);
   border-radius: var(--ds-radius-medium);
 }
@@ -167,9 +190,9 @@
   gap: 4px;
   min-height: 4.5rem;
   padding: 8px;
-  color: #eef0f8;
-  background: #1c2038;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--ds-aero-border);
   border-radius: var(--ds-radius-medium);
   box-sizing: border-box;
 }
@@ -179,7 +202,7 @@
   font-weight: 800;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #cfd3e6;
+  color: var(--color-text-secondary);
 }
 
 .stage__mystery {
