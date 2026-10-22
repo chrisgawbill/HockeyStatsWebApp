@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { useStreakSignInSync } from '@/features/board-game/hooks/useStreakSignInSync';
 import GameLengthPicker from '@/features/board-game/components/GameLengthPicker';
 import GameButton from '@/features/board-game/components/GameButton';
-import GoogleSignInButton from '@/components/GoogleSignInButton';
+import SignInDialog from '@/components/SignInDialog';
 import StreakCalendar from '@/features/board-game/components/StreakCalendar';
 import BoardGame from '@/features/board-game/components/BoardGame';
 import styles from '@/features/board-game/components/BoardGamePage.module.css';
@@ -20,6 +20,7 @@ type PreGameView = 'picker' | 'calendar';
 export default function BoardGamePage() {
   const [length, setLength] = useState<GameLength | null>(null);
   const [view, setView] = useState<PreGameView>('picker');
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
   const auth = useAuth();
   useStreakSignInSync(auth.token);
 
@@ -57,13 +58,9 @@ export default function BoardGamePage() {
                 Daily Streak
               </GameButton>
               {!auth.email && (
-                <div className={styles.authRow}>
-                  <GoogleSignInButton
-                    onCredential={auth.signIn}
-                    className={styles.signInFrame}
-                    unavailableClassName={styles.signInUnavailable}
-                  />
-                </div>
+                <GameButton onClick={() => setIsSignInOpen(true)}>
+                  Sign in
+                </GameButton>
               )}
             </>
           )
@@ -75,6 +72,10 @@ export default function BoardGamePage() {
           />
         )}
       </div>
+      <SignInDialog
+        open={isSignInOpen}
+        onClose={() => setIsSignInOpen(false)}
+      />
     </>
   );
 }

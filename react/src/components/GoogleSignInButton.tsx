@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from '@/components/GoogleSignInButton.module.css';
-import { joinClassNames } from '@/lib/joinClassNames';
 
 type GoogleButtonSize = 'large' | 'medium' | 'small';
 
@@ -39,9 +38,6 @@ export interface GoogleSignInButtonProps {
   size?: GoogleButtonSize;
   /** Button width in CSS pixels (Google allows up to 400); defaults to fit the label. */
   width?: number;
-  /** Extra frame styling, e.g. Rink Quest's pixel border. */
-  className?: string;
-  unavailableClassName?: string;
 }
 
 /** Whether Google's Identity Services script has loaded and exposes the sign-in API. */
@@ -63,14 +59,12 @@ function resolveGoogleButtonTheme(): 'outline' | 'filled_black' {
 
 /**
  * Renders Google's branded sign-in button (Google Identity Services). Used in
- * the sign-in dialog, the home Up next strip and on Rink Quest; the credential goes to `useAuth().signIn`.
+ * the sign-in dialog; the credential goes to `useAuth().signIn`.
  */
 export default function GoogleSignInButton({
   onCredential,
   size = 'large',
   width,
-  className,
-  unavailableClassName,
 }: GoogleSignInButtonProps) {
   const slotRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(isGoogleIdentityReady());
@@ -111,18 +105,14 @@ export default function GoogleSignInButton({
 
   if (!clientId) {
     return (
-      <div className={joinClassNames(styles.frame, className)}>
-        <span
-          className={joinClassNames(styles.unavailable, unavailableClassName)}
-        >
-          Sign-in unavailable
-        </span>
+      <div className={styles.frame}>
+        <span className={styles.unavailable}>Sign-in unavailable</span>
       </div>
     );
   }
 
   return (
-    <div className={joinClassNames(styles.frame, className)}>
+    <div className={styles.frame}>
       <div ref={slotRef} className={styles.slot} />
     </div>
   );
