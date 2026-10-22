@@ -7,16 +7,14 @@ export interface FavoriteRowSectionProps {
   titleId: string;
   title: string;
   /** Shown instead of the cards when the user has no favorites. */
-  emptyHint: string;
+  emptyHint: ReactNode;
   hasFavorites: boolean;
-  /** Optional link beside the title, such as "See all". */
-  titleLink?: { label: string; to: string };
   /** The `FavoriteCard` items. */
   children: ReactNode;
 }
 
 /**
- * A titled home-page section holding a horizontally scrolling row of favorite
+ * A titled section holding a horizontally scrolling row of favorite
  * cards, or a hint line when there are none. The row's top padding leaves room
  * for the picture that overhangs each card's top edge.
  */
@@ -25,12 +23,11 @@ export default function FavoriteRowSection({
   title,
   emptyHint,
   hasFavorites,
-  titleLink,
   children,
 }: FavoriteRowSectionProps) {
   return (
     <section className={styles.section} aria-labelledby={titleId}>
-      <SectionHeading id={titleId} title={title} link={titleLink} />
+      <SectionHeading id={titleId} title={title} />
       {hasFavorites ? (
         <ul className={styles.row}>{children}</ul>
       ) : (

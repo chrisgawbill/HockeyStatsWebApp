@@ -54,6 +54,7 @@ acceptance are both necessary for DONE.
 | STAR-01 | Approved 2026-10-21: starred PlayerHeadshot on the leaderboard dialog (Pos hidden ≤576px) and scoring summary; box score gets a bare star, no photos. |
 | NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; accepted from 1001/1024/1200 screenshots 2026-10-21. |
 | FEED-01 | Approved 2026-10-21: /my-hockey page plus an "Up next" strip on home (right-hand column on desktop); Up next / Last results / Your players; games by time, players by tier; hard cap of 5 favorite teams (API); season + last-game player lines. Accepted from screenshots 2026-10-22. |
+| FEED-02 | Approved 2026-10-22: Option A — Your teams and Your players rows move from home to the top of /my-hockey; the player row and the feed's player list merge into one card row (season + last-game lines on each card); home keeps only the Up next strip; Up next rows show the opponent logo right after the matchup. Pending Product Owner acceptance. |
 | PREVIEW-01 | Preview sections and which data is shown when lines or probable goalies are unknown. |
 | COMPARE-01 | Entry points, player picker, stat set per position, and chart vs. table presentation. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |

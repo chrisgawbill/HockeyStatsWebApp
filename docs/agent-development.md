@@ -154,6 +154,10 @@ Code ships readable by a person new to the file. On the passed diff, the PM:
 - gives a UI piece used in more than one place (or a large component's
   distinct parts) its own component file: cross-feature ones in
   `components/`, feature-only ones in the feature's `components/`;
+- reuses before it adds: search for an existing component that shows the
+  same thing and extend it (a prop or a slot) instead of writing a near-copy
+  file or an inline component that duplicates one; merge duplicates found
+  in the diff;
 - names things for what they mean in the domain, not how they are computed;
 - gives every variable, parameter, and function a name that says what it
   holds or does (`favoriteTeams`, `updatedRowCount`, `isLabelTooLong`), not
