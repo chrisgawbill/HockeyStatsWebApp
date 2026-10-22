@@ -1,6 +1,6 @@
 import React from 'react';
 import { LandingThreeStar } from '@/features/game-detail/types/gameDetail';
-import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
+import { getTeamPrimaryColor } from '@/lib/teamColor';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';

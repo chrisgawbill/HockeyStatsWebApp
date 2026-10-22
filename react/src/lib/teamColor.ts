@@ -1,4 +1,5 @@
 import { localTeamList } from '@/lib/teamListData';
+import type { Theme } from '@/lib/themeSchedule';
 
 /** A team's primary brand color by tri-code, with a neutral blue fallback. */
 export function getTeamPrimaryColor(abbrev?: string): string {
@@ -7,6 +8,18 @@ export function getTeamPrimaryColor(abbrev?: string): string {
     localTeamList.find((team) => team.triCode === normalizedAbbrev)?.primary ??
     '#1f5f99'
   );
+}
+
+/**
+ * A team's primary color as an accent for the given theme: the brand color in
+ * light mode, lightened to stay legible on dark surfaces.
+ */
+export function getTeamAccentColor(
+  abbrev: string | undefined,
+  theme: Theme,
+): string {
+  const primaryColor = getTeamPrimaryColor(abbrev);
+  return theme === 'dark' ? toDarkModeAccentColor(primaryColor) : primaryColor;
 }
 
 /**

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import FanCategoryBadge from '@/components/FanCategoryBadge';
 import TeamLogo from '@/components/TeamLogo';
+import { getGamePath } from '@/lib/gamePath';
 import { isInProgressGameState } from '@/lib/gameStatus';
 import type { FeedGameItem } from '@/features/my-hockey/types/myHockey';
 import {
@@ -23,7 +24,8 @@ export interface UpNextRowProps {
 /**
  * One upcoming or live game: when it starts (or LIVE and the period), the
  * matchup from the favorite's side between the two teams' logos, and the
- * score once it is live. Links to the game page.
+ * score once it is live. Links to the matchup preview before puck drop,
+ * else the game page.
  */
 export default function UpNextRow({
   item,
@@ -36,7 +38,7 @@ export default function UpNextRow({
   const { teamScore, opponentScore } = getScoreFor(game, team.triCode);
   return (
     <li>
-      <Link to={`/game/${game.gameId}`} className={styles.row}>
+      <Link to={getGamePath(game, now)} className={styles.row}>
         <span className={styles.when} data-live={isLive || undefined}>
           <span className={styles.whenDay}>
             {isLive ? 'Live' : formatGameDay(game.startTime, now)}

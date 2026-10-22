@@ -31,12 +31,8 @@ import {
 } from '@/features/schedule/utils/scheduleHelper';
 import { filterGames } from '@/features/schedule/utils/scheduleFilterHelper';
 import { parseLocalDate } from '@/lib/dateFormat';
-import { isCompletedGameState } from '@/lib/gameStatus';
+import { getGamePath } from '@/lib/gamePath';
 import { localTeamList } from '@/lib/teamListData';
-
-/** Whether a game has reached a completed NHL state and can link to its detail page. */
-const isGameCompleted = (game: ScheduledGame): boolean =>
-  isCompletedGameState(game.gameState);
 
 /**
  * Schedule route. Reads the whole season from ScheduleContext and renders one of
@@ -145,20 +141,19 @@ function SchedulePage() {
   };
 
   /**
-   * Navigates completed games to their detail route and carries schedule return
-   * state so the back link lands on the same view/date.
+   * Opens a game (its matchup preview before puck drop, else its game page)
+   * and carries schedule return state so the back link lands on the same
+   * view/date.
    */
   const goToGameDetails = (game: ScheduledGame) => {
-    if (isGameCompleted(game)) {
-      const backPath = `/schedule?view=${viewParam}&date=${formatDateParam(effectiveDate)}`;
-      navigate(`/game/${game.gameId}`, {
-        state: {
-          sourcePath: backPath,
-          fallbackPath: backPath,
-          activeNavPath: '/schedule',
-        },
-      });
-    }
+    const backPath = `/schedule?view=${viewParam}&date=${formatDateParam(effectiveDate)}`;
+    navigate(getGamePath({ ...game, startTime: game.gameTime }), {
+      state: {
+        sourcePath: backPath,
+        fallbackPath: backPath,
+        activeNavPath: '/schedule',
+      },
+    });
   };
 
   const hasGames = !!listOfGamesData && listOfGamesData.length > 0;
@@ -215,7 +210,6 @@ function SchedulePage() {
                   days={visibleDates}
                   gamesByDate={gamesByDate}
                   maxVisible={MAX_CHIPS_BY_VIEW[viewParam]}
-                  isGameCompleted={isGameCompleted}
                   onSelectDay={openDay}
                   onSelectGame={goToGameDetails}
                 />
@@ -241,7 +235,6 @@ function SchedulePage() {
                 <ScheduleCard
                   key={game.gameId}
                   game={game}
-                  isGameCompleted={isGameCompleted}
                   goToGameDetails={goToGameDetails}
                 />
               ))

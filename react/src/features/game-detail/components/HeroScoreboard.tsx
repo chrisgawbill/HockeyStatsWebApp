@@ -11,7 +11,7 @@ import {
 } from '@/features/game-detail/utils/gameDetailHelper';
 import { useTheme } from '@/lib/ThemeContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
+import { getTeamPrimaryColor } from '@/lib/teamColor';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
 

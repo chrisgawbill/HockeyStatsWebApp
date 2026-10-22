@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
-import { isCompletedGameState } from '@/lib/gameStatus';
+import { getGamePath } from '@/lib/gamePath';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import {
@@ -79,10 +79,9 @@ export default function ScheduleStrip({
     setAnimationKey((currentKey) => currentKey + 1);
   };
 
+  /** Opens a game: its matchup preview before puck drop, else its game page. */
   const goToGameDetails = (game: ScheduledGame) => {
-    if (!isCompletedGameState(game.gameState)) return;
-
-    navigate(`/game/${game.gameId}`, {
+    navigate(getGamePath({ ...game, startTime: game.gameTime }), {
       state: {
         sourcePath,
         sourceLabel,

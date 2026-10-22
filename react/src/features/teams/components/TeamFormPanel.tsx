@@ -1,9 +1,9 @@
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
-import FormStrip from '@/features/teams/components/FormStrip';
+import FormStrip from '@/components/FormStrip';
 import PointsPaceSparkline from '@/features/teams/components/PointsPaceSparkline';
 import SplitBars from '@/features/teams/components/SplitBars';
-import { TeamForm } from '@/features/teams/utils/teamFormHelper';
+import { TeamForm } from '@/lib/teamForm';
 
 /**
  * The "Team Form" panel: completed-game count and goal differential, the last

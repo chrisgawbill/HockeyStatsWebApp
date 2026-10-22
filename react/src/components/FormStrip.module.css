@@ -1,0 +1,51 @@
+/* Row of W/L/OTL chips for a team's recent results. */
+
+.form-strip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  min-height: 1.5rem;
+}
+
+.form-strip__result {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  color: var(--color-white);
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.form-strip__result--w {
+  background: var(--color-success);
+}
+
+.form-strip__result--l {
+  background: var(--color-danger);
+}
+
+.form-strip__result--otl {
+  background: var(--color-tertiary, #d18b1f);
+}
+
+.form-strip__empty {
+  color: var(--color-muted-text);
+  font-size: var(--text-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-strip__result {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-strip {
+    justify-content: flex-start;
+  }
+}

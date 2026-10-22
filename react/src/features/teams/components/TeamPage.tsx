@@ -9,7 +9,7 @@ import ErrorState from '@/components/ErrorState';
 import PlayerStatsSection from '@/features/teams/components/PlayerStatsSection';
 import RosterTab from '@/features/teams/components/tabs/RosterTab';
 import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
-import TeamDna from '@/features/teams/components/TeamDna';
+import TeamDna from '@/components/TeamDna';
 import TeamFormPanel from '@/features/teams/components/TeamFormPanel';
 import { localTeamList } from '@/lib/teamListData';
 import {
@@ -20,15 +20,15 @@ import { buildTeamOverview } from '@/features/teams/utils/teamPageHelper';
 import { useStandingsContext } from '@/features/standings/hooks/StandingsContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { useTheme } from '@/lib/ThemeContext';
-import { toDarkModeAccentColor } from '@/features/teams/utils/teamColor';
+import { toDarkModeAccentColor } from '@/lib/teamColor';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { useListOfTeamsData } from '@/features/teams/hooks/ListOfTeamsContext';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { useStickyOffsets } from '@/features/teams/hooks/useStickyOffsets';
 import { useTeamPageData } from '@/features/teams/hooks/useTeamPageData';
 import { useTeamSectionNav } from '@/features/teams/hooks/useTeamSectionNav';
-import { buildTeamForm } from '@/features/teams/utils/teamFormHelper';
-import { buildTeamDna } from '@/features/teams/utils/teamDnaHelper';
+import { buildTeamForm } from '@/lib/teamForm';
+import { buildTeamDna } from '@/lib/teamDna';
 import { joinClassNames } from '@/lib/joinClassNames';
 
 const FALLBACK_PRIMARY_COLOR = '#1B4F8A';

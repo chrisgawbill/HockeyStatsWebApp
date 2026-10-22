@@ -5,7 +5,7 @@ import {
   getContrastTextColor,
   getTeamPrimaryColor,
   toDarkModeAccentColor,
-} from '@/features/teams/utils/teamColor';
+} from '@/lib/teamColor';
 import {
   formatTeamAndPosition,
   getInitials,

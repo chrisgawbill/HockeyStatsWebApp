@@ -3,12 +3,16 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
-import FormStrip from '@/features/teams/components/FormStrip';
+import FormStrip from '@/components/FormStrip';
 import { localTeamList } from '@/lib/teamListData';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
-import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
-import { getTeamResults, lastN } from '@/features/teams/utils/teamFormHelper';
+import { getTeamResults, lastN } from '@/lib/teamForm';
 import { getSeasonSeries } from '@/features/matchup/utils/seasonSeriesHelper';
+import { findMatchupGame } from '@/features/matchup/utils/matchupGameContext';
+import MatchupIntro from '@/features/matchup/components/MatchupIntro';
+import MatchupTeamDna from '@/features/matchup/components/MatchupTeamDna';
+import MeetingCard from '@/features/matchup/components/MeetingCard';
+import TeamSelect from '@/features/matchup/components/TeamSelect';
 import shared from '@/styles/shared.module.css';
 import styles from './MatchupPage.module.css';
 
@@ -27,60 +31,12 @@ function getSourceLabel(sourcePath: string): string {
   return 'Schedule';
 }
 
-interface MeetingCardProps {
-  game: ScheduledGame;
-  teamA: string;
-  teamB: string;
-  isPlayed: boolean;
-}
-
-/** One meeting between the two teams: date, who hosted, and the score or "Upcoming". */
-function MeetingCard({ game, teamA, teamB, isPlayed }: MeetingCardProps) {
-  const teamAScore = game.homeTeam === teamA ? game.homeScore : game.awayScore;
-  const teamBScore = game.homeTeam === teamB ? game.homeScore : game.awayScore;
-  return (
-    <article className={`${shared.surface} ${styles.meeting}`}>
-      <span className={styles.date}>{game.date.toLocaleDateString()}</span>
-      <span>
-        {game.awayTeam} at {game.homeTeam}
-      </span>
-      <span className={styles.score}>
-        {isPlayed ? `${teamAScore} – ${teamBScore}` : 'Upcoming'}
-      </span>
-    </article>
-  );
-}
-
-interface TeamSelectProps {
-  label: string;
-  value: string;
-  onChange: (triCode: string) => void;
-}
-
-/** Labeled dropdown listing every NHL club. */
-function TeamSelect({ label, value, onChange }: TeamSelectProps) {
-  return (
-    <label className={styles.control}>
-      {label}
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {teams.map((team) => (
-          <option key={team.triCode} value={team.triCode}>
-            {team.fullName}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
 /**
- * Head-to-head route (`/matchup?teamA=&teamB=`): the two chosen teams' season
- * series (played and upcoming meetings, win and goal totals) and each team's
- * recent form. Reads the already-loaded season games; nothing is fetched here.
+ * Head-to-head route (`/matchup?teamA=&teamB=[&game=]`): the two chosen teams'
+ * season series, a Team DNA card for each, recent form, and their played and
+ * upcoming meetings. With `game=` naming one of their games it doubles as that
+ * game's preview. Reads the already-loaded season games and league team list;
+ * nothing is fetched or polled here.
  */
 export default function MatchupPage() {
   const location = useLocation();
@@ -88,6 +44,7 @@ export default function MatchupPage() {
   const { listOfGamesData, loadingListOfGamesData } = useListOfGames();
   const teamA = params.get('teamA')?.toUpperCase() || teams[0].triCode;
   const teamB = params.get('teamB')?.toUpperCase() || teams[1].triCode;
+  const gameIdParam = params.get('game');
   const routeState = location.state as { sourcePath?: string } | null;
   const sourcePath = routeState?.sourcePath ?? '/schedule';
   const sourceLabel = getSourceLabel(sourcePath);
@@ -95,12 +52,21 @@ export default function MatchupPage() {
     () => getSeasonSeries(listOfGamesData, teamA, teamB),
     [listOfGamesData, teamA, teamB],
   );
+  const previewGame = useMemo(
+    () => findMatchupGame(listOfGamesData, gameIdParam, teamA, teamB),
+    [listOfGamesData, gameIdParam, teamA, teamB],
+  );
+  /** Picks a team; the previewed game no longer applies, so `game=` goes. */
   const setTeam = (key: 'teamA' | 'teamB', triCode: string) =>
-    setParams((previous) => {
-      const nextParams = new URLSearchParams(previous);
-      nextParams.set(key, triCode);
-      return nextParams;
-    });
+    setParams(
+      (previous) => {
+        const nextParams = new URLSearchParams(previous);
+        nextParams.set(key, triCode);
+        nextParams.delete('game');
+        return nextParams;
+      },
+      { state: location.state },
+    );
   return (
     <div className={`${styles.page} ${shared.pageShell} ds-page-shell`}>
       <PageHeader />
@@ -126,11 +92,7 @@ export default function MatchupPage() {
             <span className={styles.breadcrumbSep}>/</span>
             <span className={styles.breadcrumbCurrent}>Matchup</span>
           </nav>
-          <header className={styles.intro}>
-            <p className={styles.kicker}>Season series</p>
-            <h1>Head-to-Head Matchup</h1>
-            <p>Compare meetings, results, goals, and recent form.</p>
-          </header>
+          <MatchupIntro previewGame={previewGame} />
           <div className={`${shared.surface} ${styles.controls}`}>
             <TeamSelect
               label="Team A"
@@ -175,6 +137,23 @@ export default function MatchupPage() {
                 Goals: {series.summary.teamAGoals} – {series.summary.teamBGoals}
               </div>
             </section>
+            <MatchupTeamDna teamA={teamA} teamB={teamB} />
+            <div className={styles.formGrid}>
+              <section className={`${shared.surface} ${styles.formCard}`}>
+                <h2 className={styles.formTitle}>{teamA} Form</h2>
+                <FormStrip
+                  results={lastN(getTeamResults(listOfGamesData, teamA), 10)}
+                  className={styles.formStrip}
+                />
+              </section>
+              <section className={`${shared.surface} ${styles.formCard}`}>
+                <h2 className={styles.formTitle}>{teamB} Form</h2>
+                <FormStrip
+                  results={lastN(getTeamResults(listOfGamesData, teamB), 10)}
+                  className={styles.formStrip}
+                />
+              </section>
+            </div>
             <h2 className={styles.sectionTitle}>
               Played ({series.played.length})
             </h2>
@@ -213,22 +192,6 @@ export default function MatchupPage() {
                 message="There are no remaining scheduled games in this series."
               />
             )}
-            <div className={styles.formGrid}>
-              <section className={`${shared.surface} ${styles.formCard}`}>
-                <h2 className={styles.formTitle}>{teamA} Form</h2>
-                <FormStrip
-                  results={lastN(getTeamResults(listOfGamesData, teamA), 10)}
-                  className={styles.formStrip}
-                />
-              </section>
-              <section className={`${shared.surface} ${styles.formCard}`}>
-                <h2 className={styles.formTitle}>{teamB} Form</h2>
-                <FormStrip
-                  results={lastN(getTeamResults(listOfGamesData, teamB), 10)}
-                  className={styles.formStrip}
-                />
-              </section>
-            </div>
           </>
         )}
       </main>

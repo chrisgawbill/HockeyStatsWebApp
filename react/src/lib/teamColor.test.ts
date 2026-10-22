@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getContrastTextColor,
-  toDarkModeAccentColor,
-} from '@/features/teams/utils/teamColor';
+import { getContrastTextColor, toDarkModeAccentColor } from '@/lib/teamColor';
 
 describe('teamColor', () => {
   it('toDarkModeAccentColor raises lightness to the floor, keeping hue', () => {

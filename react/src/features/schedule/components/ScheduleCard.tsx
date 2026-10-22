@@ -1,3 +1,4 @@
+import { MouseEvent } from 'react';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { useTheme } from '@/lib/ThemeContext';
 import { formatLocalTime } from '@/lib/dateFormat';
@@ -21,28 +22,25 @@ function themedLogoUrl(logoUrl: string, theme: string): string {
 
 type ScheduleCardProps = {
   game: ScheduledGame;
-  isGameCompleted: (game: ScheduledGame) => boolean;
   goToGameDetails: (game: ScheduledGame) => void;
 };
 
 /**
- * Opens the NHL ticket URL in a new tab. The caller supplies the already-vetted
- * ticket URL from the ScheduledGame model and no value is returned.
+ * Opens the NHL ticket URL in a new tab without also opening the game the
+ * card links to. The caller supplies the already-vetted ticket URL from the
+ * ScheduledGame model.
  */
-function handleTicketClick(ticketLink: string) {
+function openTickets(event: MouseEvent, ticketLink: string) {
+  event.stopPropagation();
   window.open(ticketLink, '_blank');
 }
 
 /**
  * The tall, full-width game card used in the schedule's day view. Shows the
  * matchup, score or start time, playoff badge, venue, tickets, and broadcasts;
- * a completed game is clickable through to its detail page.
+ * the card opens the game (its matchup preview before puck drop).
  */
-function ScheduleCard({
-  game,
-  isGameCompleted,
-  goToGameDetails,
-}: ScheduleCardProps) {
+function ScheduleCard({ game, goToGameDetails }: ScheduleCardProps) {
   const { theme } = useTheme();
   const homeLogo = themedLogoUrl(game.homeLogo, theme);
   const awayLogo = themedLogoUrl(game.awayLogo, theme);
@@ -53,26 +51,20 @@ function ScheduleCard({
       className={joinClassNames(
         sharedStyles.surfaceElevated,
         styles['game-card'],
-        isGameCompleted(game) && sharedStyles.surfaceInteractive,
-        isGameCompleted(game) && styles['game-card--clickable'],
+        sharedStyles.surfaceInteractive,
+        styles['game-card--clickable'],
       )}
-      onClick={() => isGameCompleted(game) && goToGameDetails(game)}
+      onClick={() => goToGameDetails(game)}
       onKeyDown={(event) => {
-        if (
-          isGameCompleted(game) &&
-          (event.key === 'Enter' || event.key === ' ')
-        ) {
+        if (event.target !== event.currentTarget) return;
+        if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           goToGameDetails(game);
         }
       }}
-      role={isGameCompleted(game) ? 'button' : undefined}
-      tabIndex={isGameCompleted(game) ? 0 : undefined}
-      aria-label={
-        isGameCompleted(game)
-          ? `View details for ${game.awayTeam} at ${game.homeTeam}`
-          : undefined
-      }
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for ${game.awayTeam} at ${game.homeTeam}`}
     >
       <div key={game.gameId} className={styles['game-row']}>
         <div className={styles['team-info']}>
@@ -150,7 +142,7 @@ function ScheduleCard({
             {game.ticketLink !== '' ? (
               <button
                 className="ds-button"
-                onClick={() => handleTicketClick(game.ticketLink)}
+                onClick={(event) => openTickets(event, game.ticketLink)}
               >
                 Tickets
               </button>

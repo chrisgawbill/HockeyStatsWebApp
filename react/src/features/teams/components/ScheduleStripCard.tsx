@@ -2,7 +2,7 @@ import React from 'react';
 import { localTeamList } from '@/lib/teamListData';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { hasScore } from '@/features/schedule/utils/gameStatusHelper';
-import { isCompletedGameState, isInProgressGameState } from '@/lib/gameStatus';
+import { isInProgressGameState } from '@/lib/gameStatus';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import {
@@ -34,7 +34,6 @@ export default function ScheduleStripCard({
   const teamScore = isHome ? game.homeScore : game.awayScore;
   const opponentScore = isHome ? game.awayScore : game.homeScore;
   const resultLabel = getTeamResultLabel(game, teamAbbrev);
-  const isClickable = isCompletedGameState(game.gameState);
   const isLive = isInProgressGameState(game.gameState);
 
   return (
@@ -42,19 +41,18 @@ export default function ScheduleStripCard({
       className={joinClassNames(
         styles['schedule-strip__card'],
         shared.surface,
-        isClickable && shared.surfaceInteractive,
-        isClickable && styles['schedule-strip__card--clickable'],
+        shared.surfaceInteractive,
+        styles['schedule-strip__card--clickable'],
       )}
       onClick={() => onOpenGame(game)}
       onKeyDown={(event) => {
-        if (isClickable && (event.key === 'Enter' || event.key === ' ')) {
+        if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           onOpenGame(game);
         }
       }}
-      role={isClickable ? 'button' : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      aria-disabled={!isClickable}
+      role="button"
+      tabIndex={0}
       style={{ '--card-index': index } as React.CSSProperties}
     >
       {game.isPlayoff && (
