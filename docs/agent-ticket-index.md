@@ -59,6 +59,7 @@ acceptance are both necessary for DONE.
 | COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
 | API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
+| HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 
@@ -1655,6 +1656,30 @@ goalie comparisons, keyboard picker) with 375/1280 light/dark screenshots.
 **Verify:** `pnpm test` (mapper fields, pager, league paging/cache key,
 persist-on-fetch). NHL field names were not checked live (the dev
 environment blocks api.nhle.com); confirm on the first deploy.
+
+---
+
+## HOME-LOAD-01 — Home sections load and fail on their own
+
+**Status:** IDEA
+
+**Context:** `app/LandingPage.tsx` shows one full-page spinner until skater
+leaders, goalie leaders and standings have all loaded, and replaces the whole
+page with "Couldn't load stat leaders" when either leader call fails, hiding
+standings and the draft lottery too. One slow or failed call (a waking API, a
+fresh incognito window with no cache) makes the home page look broken.
+Found 2026-10-22 alongside the Firefox private-window crash fix (service
+worker guard) and the signed-out Up next prompt, both done.
+
+**Proposed (confirm at checkpoint):**
+
+- Each section (stat leaders, draft lottery, standings) shows its own loading
+  placeholder and its own error with Try again; the rest of the page renders
+  as soon as its data arrives.
+- Keep the intro and Up next strip visible throughout.
+
+**Verify:** Playwright with one endpoint failing or delayed at a time;
+375/1280 screenshots.
 
 ---
 
