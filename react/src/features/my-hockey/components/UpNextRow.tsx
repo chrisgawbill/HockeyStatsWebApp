@@ -22,8 +22,8 @@ export interface UpNextRowProps {
 
 /**
  * One upcoming or live game: when it starts (or LIVE and the period), the
- * matchup from the favorite's side, and the score once it is live. Links to
- * the game page.
+ * matchup from the favorite's side between the two teams' logos, and the
+ * score once it is live. Links to the game page.
  */
 export default function UpNextRow({
   item,
@@ -53,16 +53,15 @@ export default function UpNextRow({
             </span>
             {showCategory && <FanCategoryBadge category={team} size="sm" />}
           </span>
+          <TeamLogo triCode={opponent} className={styles.logo} />
         </span>
-        {isLive ? (
+        {isLive && (
           <span
             className={styles.score}
             aria-label={`${team.triCode} ${teamScore}, ${opponent} ${opponentScore}`}
           >
             {teamScore}–{opponentScore}
           </span>
-        ) : (
-          <TeamLogo triCode={opponent} className={styles.opponentLogo} />
         )}
       </Link>
     </li>
