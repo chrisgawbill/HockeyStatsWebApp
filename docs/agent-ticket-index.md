@@ -56,7 +56,7 @@ acceptance are both necessary for DONE.
 | FEED-01 | Approved 2026-10-21: /my-hockey page plus an "Up next" strip on home (right-hand column on desktop); Up next / Last results / Your players; games by time, players by tier; hard cap of 5 favorite teams (API); season + last-game player lines. Accepted from screenshots 2026-10-22. |
 | FEED-02 | Approved 2026-10-22: Option A — Your teams and Your players rows move from home to the top of /my-hockey; the player row and the feed's player list merge into one card row (season + last-game lines on each card); home keeps only the Up next strip; Up next rows show the opponent logo right after the matchup. Pending Product Owner acceptance. |
 | PREVIEW-01 | Approved 2026-10-22: previews use /matchup (not the game page) with a Team DNA card per team; every game card links through one routing helper (future → /matchup, live/final → /game) and /game/:id redirects games that have not started; phones switch between the two DNA cards; the puck-drop chip turns into a game-page link at the start time (local timer, no polling); TeamDna/FormStrip move to `components/` and take the team color. Lines, goalies and the team comparison are dropped. Pending Product Owner acceptance. |
-| COMPARE-01 | Data approved 2026-10-22: option A (API-COMPARE-01, existing endpoints, no new endpoint). Still open: entry points, picker, stat set per position, table vs. bars (PM recommendation in block). |
+| COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
 | API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
@@ -1594,7 +1594,7 @@ serve both the picker and the table. Reading season stats from the database
 was considered and rejected: `player_season_stats` is filled only as a side
 effect of summary reads, so it has the same gaps, and nothing reads it yet.
 
-**Proposed design (PM recommendation, open at checkpoint):**
+**Approved design (2026-10-22; Product Owner left presentation to the PM):**
 
 - Route `/compare?players=<id>,<id>[,<id>]` (plus the app's `season=`) so a
   comparison is shareable. Non-numeric ids dropped, duplicates removed, max 3;
@@ -1610,7 +1610,7 @@ effect of summary reads, so it has the same gaps, and nothing reads it yet.
   Goalies `SlidingToggle` chooses it. A mismatched slot in a shared URL shows
   a message instead of joining the table.
 - Layout: headshot column per player, then stat rows (skaters: GP, G, A, P,
-  P/GP, +/-, PPG = power-play goals, SOG, S%, TOI/GP; goalies: GP, W, GAA,
+  PPG = points per game, +/-, SOG, S%, TOI/GP; goalies: GP, W, GAA,
   SV%, SO). Best value per row highlighted (bold, tint, dot, and hidden text):
   GAA lower-is-better, GP not highlighted, ties all marked at displayed
   rounding, all-tied rows unmarked, missing values skipped. Table only, no
