@@ -50,13 +50,16 @@ acceptance are both necessary for DONE.
 | FAN-01 | Approved 2026-10-20: teams row above players, sorted by tier; Product Owner reviews the category menu and rows in screenshots. |
 | HOME-LEAD-01 | Approved 2026-10-21: Option B (FavoriteCard in a 2×2 grid, Skaters/Goalies switch on phones); accepted from 375/1280 screenshots 2026-10-21. |
 | HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device. |
-| HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Product Owner reviews 375/1280 light/dark screenshots. |
+| HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Accepted from 375/1280 light/dark screenshots 2026-10-22. |
 | STAR-01 | Approved 2026-10-21: starred PlayerHeadshot on the leaderboard dialog (Pos hidden ≤576px) and scoring summary; box score gets a bare star, no photos. |
 | NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; accepted from 1001/1024/1200 screenshots 2026-10-21. |
 | FEED-01 | Approved 2026-10-21: /my-hockey page plus an "Up next" strip on home (right-hand column on desktop); Up next / Last results / Your players; games by time, players by tier; hard cap of 5 favorite teams (API); season + last-game player lines. Accepted from screenshots 2026-10-22. |
 | FEED-02 | Approved 2026-10-22: Option A — Your teams and Your players rows move from home to the top of /my-hockey; the player row and the feed's player list merge into one card row (season + last-game lines on each card); home keeps only the Up next strip; Up next rows show the opponent logo right after the matchup. Pending Product Owner acceptance. |
 | PREVIEW-01 | Approved 2026-10-22: previews use /matchup (not the game page) with a Team DNA card per team; every game card links through one routing helper (future → /matchup, live/final → /game) and /game/:id redirects games that have not started; phones switch between the two DNA cards; the puck-drop chip turns into a game-page link at the start time (local timer, no polling); TeamDna/FormStrip move to `components/` and take the team color. Lines, goalies and the team comparison are dropped. Pending Product Owner acceptance. |
-| COMPARE-01 | Entry points, player picker, stat set per position, and chart vs. table presentation. |
+| COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
+| API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
+| API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
+| HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 
@@ -76,6 +79,7 @@ ON2-03 + ON2-04 + ON2-10 -> ON2-11
 ON2-07 + ON2-10 + ON2-11 -> ON2-12
 approved implementation/content release set -> ON2-13
 WPR-01 -> STAR-01, FEED-01, COMPARE-01
+API-COMPARE-01 -> COMPARE-01
 FAN-01 -> FEED-01
 API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
@@ -1573,29 +1577,51 @@ light/dark). Up next links are covered by unit tests only (they need sign-in).
 
 ## COMPARE-01 — Player comparison
 
-**Status:** IDEA
+**Status:** DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22. QA PASS 1–9; dialog Compare link checked in source only. Release needs API-COMPARE-01 deployed first (league-wide summaries return every player).
 
 **Goal:** A user can pick two or three players and compare their season stats
 side by side.
 
-**Dependencies:** WPR-01 (headshots and stars). Season stats come from the
-existing skater/goalie summary endpoints; confirm at the checkpoint they return
-every player, not only leaders. Career comparison is out of scope (would need
+**Dependencies:** WPR-01 (headshots and stars), API-COMPARE-01 (every player
+in the league-wide summaries). Career comparison is out of scope (would need
 an API ticket for the NHL player landing).
 
-**Proposed design (PM recommendation, confirm at checkpoint):**
+**Data (approved 2026-10-22, option A):** The checkpoint check failed: team
+summaries (`?teamId=`) hold the whole team, but the league-wide call held only
+100 unsorted rows, and the contract had no team, shots, S% or PP goals.
+API-COMPARE-01 fixes both on the existing endpoints. The page makes two calls,
+`/player/skater/summary` and `/player/goalie/summary` with no `teamId`, which
+serve both the picker and the table. Reading season stats from the database
+was considered and rejected: `player_season_stats` is filled only as a side
+effect of summary reads, so it has the same gaps, and nothing reads it yet.
 
-- Route `/compare?players=<id>,<id>[,<id>]` so a comparison is shareable.
-- Entry points: a "Compare" action in `PlayerStatsDialog` and on favorite
-  player cards, which opens the page with that player pre-filled.
-- Player picker: search by name over the cached summary data; skaters and
-  goalies cannot be mixed (the picker filters to the first player's group).
+**Approved design (2026-10-22; Product Owner left presentation to the PM):**
+
+- Route `/compare?players=<id>,<id>[,<id>]` (plus the app's `season=`) so a
+  comparison is shareable. Non-numeric ids dropped, duplicates removed, max 3;
+  picking or removing replaces the URL. Unknown id: "not found this season"
+  with Remove, in that slot only.
+- Entry point: a "Compare" button beside Close in `PlayerStatsDialog`, which
+  covers roster rows and favorite player cards; opens `/compare?players=<id>`
+  with the picker focused. Leaderboards deferred; no header nav link.
+- Player picker: ARIA combobox over the cached summaries, from 2 letters,
+  case- and accent-insensitive, matching first- or last-name prefixes (last
+  name first, then by GP), up to 8 rows, picked players excluded; ↑/↓, Enter,
+  Esc, Tab. The first player sets the group; with none picked a Skaters |
+  Goalies `SlidingToggle` chooses it. A mismatched slot in a shared URL shows
+  a message instead of joining the table.
 - Layout: headshot column per player, then stat rows (skaters: GP, G, A, P,
-  +/-, PPG, SOG, S%, TOI/GP; goalies: GP, W, GAA, SV%, SO) with the best value
-  in each row highlighted. Optional per-game bar chart per stat, following the
-  `dataviz` palette.
-- Phones: two players fit side by side; a third scrolls inside the table, never
-  the page.
+  PPG = points per game, +/-, SOG, S%, TOI/GP; goalies: GP, W, GAA,
+  SV%, SO). Best value per row highlighted (bold, tint, dot, and hidden text):
+  GAA lower-is-better, GP not highlighted, ties all marked at displayed
+  rounding, all-tied rows unmarked, missing values skipped. Table only, no
+  bars.
+- Phones: sticky stat-label column, ~116px player columns; two players fit,
+  the third peeks and scrolls inside the table, never the page.
+- Shared pieces: `lib/comparePath.ts` (build/parse, used by the teams dialog
+  and the page), `lib/playerHeadshot.ts` gains the season mug URL; the rest in
+  `features/player-compare/`, which renders `favorite-players`
+  `PlayerHeadshot` as a listed exception.
 
 **Acceptance:**
 
@@ -1606,7 +1632,75 @@ an API ticket for the NHL player landing).
   usable.
 
 **Verify:** unit tests for best-value highlighting and URL parsing; Playwright
-against a mocked API with screenshots.
+against a mocked API (shared URL rebuild, unknown id in one slot, skater and
+goalie comparisons, keyboard picker) with 375/1280 light/dark screenshots.
+
+---
+
+## API-COMPARE-01 — Every player in the season summaries (backend)
+
+**Status:** ACTIVE — implemented and tested on HockeyStatsAPI branch `ccr-ed30da63-xt8i5s`; pending merge and deploy
+
+**Approved 2026-10-22 (option A):** no new endpoint.
+
+- `GET /player/skater/summary` and `/player/goalie/summary` page through the
+  NHL stats API (`platform/nhlStatsPages.js`, shared with the weekly report),
+  sorted by points/wins then player id. Without `teamId` they return every
+  player; league-wide entries use a new cache key (`*_summary_league_<season>`)
+  so the old 100-row entries are never served. Team keys are unchanged.
+- Skater contract adds `teamTriCodes` (string[]), `shots`, `shootingPct`
+  (fraction, null with no shots) and `powerPlayGoals`; goalie contract adds
+  `teamTriCodes`. Additive only; mapping still runs after the cache read.
+- Rows are persisted when fetched from the NHL, not again on each cache hit.
+
+**Verify:** `pnpm test` (mapper fields, pager, league paging/cache key,
+persist-on-fetch). NHL field names were not checked live (the dev
+environment blocks api.nhle.com); confirm on the first deploy.
+
+---
+
+## HOME-LOAD-01 — Home sections load and fail on their own
+
+**Status:** IDEA
+
+**Context:** `app/LandingPage.tsx` shows one full-page spinner until skater
+leaders, goalie leaders and standings have all loaded, and replaces the whole
+page with "Couldn't load stat leaders" when either leader call fails, hiding
+standings and the draft lottery too. One slow or failed call (a waking API, a
+fresh incognito window with no cache) makes the home page look broken.
+Found 2026-10-22 alongside the Firefox private-window crash fix (service
+worker guard) and the signed-out Up next prompt, both done.
+
+**Proposed (confirm at checkpoint):**
+
+- Each section (stat leaders, draft lottery, standings) shows its own loading
+  placeholder and its own error with Try again; the rest of the page renders
+  as soon as its data arrives.
+- Keep the intro and Up next strip visible throughout.
+
+**Verify:** Playwright with one endpoint failing or delayed at a time;
+375/1280 screenshots.
+
+---
+
+## API-CACHE-01 — Cache resilience (backend)
+
+**Status:** IDEA
+
+**Context:** With `CACHE_DATABASE_URL` set the cache already lives in Postgres
+(`app_cache`); confirm production does not set `CACHE_STORAGE=filesystem`.
+
+**Proposed (confirm at checkpoint):**
+
+- Serve-stale on error: when an entry has expired and the NHL fetch fails,
+  return the expired entry instead of failing.
+- Stale-while-revalidate (or a daily warm-up cron) for large entries such as
+  the league-wide summaries, so the first visitor after expiry does not wait
+  on a multi-page NHL fetch.
+- Never expire completed seasons' summaries, standings and leaders (like
+  official shift charts).
+- Optional, only if timings show it: a short in-memory layer in front of
+  Postgres for large entries.
 
 ---
 

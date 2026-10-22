@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { getServiceWorkerContainer } from '@/lib/serviceWorker';
 import { ApiError } from '@/lib/apiClient';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
@@ -213,7 +214,8 @@ export function AfterActionReportsProvider({
 
   // The service worker tells open tabs when a notification was tapped.
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) return;
+    const serviceWorker = getServiceWorkerContainer();
+    if (!serviceWorker) return;
     const onMessage = (event: MessageEvent) => {
       const data = event.data as { type?: string; gameId?: unknown } | null;
       if (data?.type === 'aar-navigate' && data.gameId != null) {
@@ -222,9 +224,8 @@ export function AfterActionReportsProvider({
         refreshReports(tokenRef.current);
       }
     };
-    navigator.serviceWorker.addEventListener('message', onMessage);
-    return () =>
-      navigator.serviceWorker.removeEventListener('message', onMessage);
+    serviceWorker.addEventListener('message', onMessage);
+    return () => serviceWorker.removeEventListener('message', onMessage);
   }, [refreshReports]);
 
   const isFavorite = useCallback(

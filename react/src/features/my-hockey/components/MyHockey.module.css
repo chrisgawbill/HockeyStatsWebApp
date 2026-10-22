@@ -209,6 +209,14 @@
   min-width: 0;
 }
 
+/* Signed out: the hint and the sign-in button on one line when they fit. */
+.signInPrompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-2) var(--ds-space-3);
+}
+
 /* Keeps the heading's link above the end of the narrow list. */
 .strip > * {
   max-width: 560px;

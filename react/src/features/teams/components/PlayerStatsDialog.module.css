@@ -113,7 +113,20 @@
 .footer {
   display: flex;
   justify-content: flex-end;
+  gap: var(--ds-space-2);
   margin-top: var(--ds-space-3);
+}
+
+.compare {
+  min-width: 5rem;
+  border-color: var(--pd-team);
+  background: transparent;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.compare:hover {
+  background: color-mix(in srgb, var(--pd-team) 12%, transparent);
 }
 
 .close {

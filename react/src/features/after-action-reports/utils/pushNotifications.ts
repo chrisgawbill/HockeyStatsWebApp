@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/lib/apiClient';
+import { getServiceWorkerContainer } from '@/lib/serviceWorker';
 
 /** What the inbox shows for phone notifications. */
 export type PushStatus =
@@ -41,8 +42,7 @@ export function urlBase64ToUint8Array(
 
 export function pushSupported(): boolean {
   return (
-    typeof navigator !== 'undefined' &&
-    'serviceWorker' in navigator &&
+    getServiceWorkerContainer() !== null &&
     typeof window !== 'undefined' &&
     'PushManager' in window &&
     typeof Notification !== 'undefined'
@@ -63,11 +63,10 @@ let registration: Promise<ServiceWorkerRegistration | null> | null = null;
  */
 export function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (registration) return registration;
-  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
-    return Promise.resolve(null);
-  }
+  const serviceWorker = getServiceWorkerContainer();
+  if (!serviceWorker) return Promise.resolve(null);
   const base = import.meta.env.BASE_URL;
-  registration = navigator.serviceWorker
+  registration = serviceWorker
     .register(`${base}sw.js?api=${encodeURIComponent(getApiBaseUrl())}`, {
       scope: base,
     })
@@ -81,7 +80,8 @@ export function registerServiceWorker(): Promise<ServiceWorkerRegistration | nul
 /** The active registration, or null when the worker could not be registered. */
 async function readyRegistration(): Promise<ServiceWorkerRegistration | null> {
   const registered = await registerServiceWorker();
-  return registered ? navigator.serviceWorker.ready : null;
+  const serviceWorker = getServiceWorkerContainer();
+  return registered && serviceWorker ? serviceWorker.ready : null;
 }
 
 /** This device's push subscription, if any. */

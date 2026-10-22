@@ -1,8 +1,10 @@
 import { useId, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 import AppDialog from '@/components/AppDialog';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import { StatCell } from '@/features/teams/utils/playerStatsHelper';
+import { getComparePath } from '@/lib/comparePath';
 import styles from '@/features/teams/components/PlayerStatsDialog.module.css';
 
 interface PlayerStatsDialogProps {
@@ -22,7 +24,10 @@ interface PlayerStatsDialogProps {
   onClose: () => void;
 }
 
-/** Dialog showing one player's stat cells, tinted with the team's colors. */
+/**
+ * Dialog showing one player's stat cells, tinted with the team's colors, with
+ * a Compare link that opens the comparison page with this player filled in.
+ */
 export default function PlayerStatsDialog({
   playerId,
   playerName,
@@ -91,6 +96,13 @@ export default function PlayerStatsDialog({
           <p className={styles.empty}>No stats this season yet</p>
         )}
         <footer className={styles.footer}>
+          <Link
+            to={getComparePath([playerId])}
+            className={`ds-button ${styles.compare}`}
+            onClick={onClose}
+          >
+            Compare
+          </Link>
           <button
             type="button"
             className={`ds-button ${styles.close}`}

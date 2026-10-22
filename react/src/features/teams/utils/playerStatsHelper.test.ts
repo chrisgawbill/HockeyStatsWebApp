@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   buildPlayerStatCells,
   buildStatsLookup,
-  formatSavePct,
   getPositionLabel,
   parseToiLabel,
 } from '@/features/teams/utils/playerStatsHelper';
+import { formatSavePct } from '@/lib/statFormat';
 
 const lookup = buildStatsLookup(
   [
