@@ -50,7 +50,7 @@ acceptance are both necessary for DONE.
 | FAN-01 | Approved 2026-10-20: teams row above players, sorted by tier; Product Owner reviews the category menu and rows in screenshots. |
 | HOME-LEAD-01 | Approved 2026-10-21: Option B (FavoriteCard in a 2×2 grid, Skaters/Goalies switch on phones); accepted from 375/1280 screenshots 2026-10-21. |
 | HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device. |
-| HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Product Owner reviews 375/1280 light/dark screenshots. |
+| HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Accepted from 375/1280 light/dark screenshots 2026-10-22. |
 | STAR-01 | Approved 2026-10-21: starred PlayerHeadshot on the leaderboard dialog (Pos hidden ≤576px) and scoring summary; box score gets a bare star, no photos. |
 | NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; accepted from 1001/1024/1200 screenshots 2026-10-21. |
 | FEED-01 | Approved 2026-10-21: /my-hockey page plus an "Up next" strip on home (right-hand column on desktop); Up next / Last results / Your players; games by time, players by tier; hard cap of 5 favorite teams (API); season + last-game player lines. Accepted from screenshots 2026-10-22. |
@@ -1577,7 +1577,7 @@ light/dark). Up next links are covered by unit tests only (they need sign-in).
 
 ## COMPARE-01 — Player comparison
 
-**Status:** ACTIVE — implemented, QA PASS 1–9 (shared URL, unknown slot, skater/goalie highlighting incl. GAA and ties, mixed groups, keyboard picker, malformed URL, load error, no page scroll at 375/1280 light/dark), readability pass done; dialog Compare link checked in source only (team page not mocked). Awaiting API-COMPARE-01 deploy and Product Owner screenshot review
+**Status:** DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22. QA PASS 1–9; dialog Compare link checked in source only. Release needs API-COMPARE-01 deployed first (league-wide summaries return every player).
 
 **Goal:** A user can pick two or three players and compare their season stats
 side by side.
