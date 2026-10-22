@@ -51,9 +51,9 @@ acceptance are both necessary for DONE.
 | HOME-LEAD-01 | Approved 2026-10-21: Option B (FavoriteCard in a 2×2 grid, Skaters/Goalies switch on phones); accepted from 375/1280 screenshots 2026-10-21. |
 | HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device. |
 | HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Product Owner reviews 375/1280 light/dark screenshots. |
-| STAR-01 | Which surfaces get a star (leaderboard dialog, box score, scoring summary) and the row layout at 375px. |
+| STAR-01 | Approved 2026-10-21: starred PlayerHeadshot on the leaderboard dialog (Pos hidden ≤576px) and scoring summary; box score gets a bare star, no photos. |
 | NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; accepted from 1001/1024/1200 screenshots 2026-10-21. |
-| FEED-01 | Feed sections, order, item cap, and where it lives (home vs. its own route) before implementation. |
+| FEED-01 | Approved 2026-10-21: /my-hockey page plus an "Up next" strip on home (right-hand column on desktop); Up next / Last results / Your players; games by time, players by tier; hard cap of 5 favorite teams (API); season + last-game player lines. Accepted from screenshots 2026-10-22. |
 | PREVIEW-01 | Preview sections and which data is shown when lines or probable goalies are unknown. |
 | COMPARE-01 | Entry points, player picker, stat set per position, and chart vs. table presentation. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
@@ -1301,7 +1301,7 @@ independently of the card.
 
 ## STAR-01 — Favorite star in leaderboards and box scores
 
-**Status:** ACTIVE — implemented and verified; awaiting Product Owner screenshot review
+**Status:** DONE — accepted by the Product Owner and merged 2026-10-21.
 
 **Approved decisions (Product Owner, 2026-10-21):**
 
@@ -1410,7 +1410,64 @@ screenshots for the Product Owner.
 
 ## FEED-01 — "My Hockey" personal feed
 
-**Status:** IDEA
+**Status:** DONE — accepted by the Product Owner from screenshots 2026-10-22.
+
+**Approved decisions (Product Owner, 2026-10-21, from 375/1280 mockups):**
+
+- Location: both. A `/my-hockey` page (sign-in prompt when signed out),
+  linked from the avatar menu and a "See all" on the home "Your teams" row,
+  plus a short "Up next" strip on home (first 3 games, "My Hockey →" link)
+  under the favorites rows.
+- Sections, in order: **Up next**, **Last results**, **Your players**
+  (desktop: the two game sections side by side, players in two columns).
+- Ordering: Up next live games first, then by start time; Last results newest
+  first; players by tier (Diehard, Fan, Curious). A game between two
+  favorites shows once.
+- Hard cap of **5 favorite teams** (API returns 409 past 5, like the
+  10-player cap; existing accounts over 5 keep theirs but cannot add). The
+  team star shows the same limit message as players. No "Show more" needed.
+- Every favorite player is shown with a season line (skaters GP · G · A · P;
+  goalies GP · W-L-OTL · SV% · GAA) and a last-game line from the box score
+  of the player's team's latest final.
+
+**Implemented:** `features/my-hockey` (`MyHockeyPage`, `UpNextStrip`,
+`UpNextRow`, `LastResultRow`, `FeedPlayerRow`, `FeedSection`, `FeedList`,
+`useMyHockeyData`, `useFeedFavorites`,
+`utils/feedSelection.ts`, `utils/feedFormat.ts`); `/my-hockey` route; avatar
+menu link; "See all" on "Your teams" (`FavoriteRowSection.titleLink`); the
+team-page star shows "You can favorite up to 5 teams. Unfavorite one first."
+on a 409. `/team/schedule` is cached 12 hours by the API, so games that have
+started but are not final there are corrected from their box scores (5-minute
+cache), which also give the players' last-game lines. HockeyStatsAPI: favorite
+teams capped at 5 (409, per-user advisory lock like players), and the goalie
+summary now includes `otLosses` (the frontend shows W-L when an older API
+leaves it out). `lib/teamLogo.ts` now holds the themed logo URL. Shared
+components added for reuse (Product Owner, 2026-10-22): `FanCategoryBadge`
+(home cards and feed rows), `TeamLogo`, `SectionHeading` (home rows, stat
+leaders, Up next strip) and `PageIntro` (My Hockey, Weekly Player Report).
+Desktop home (Product Owner, 2026-10-22): from 1001px the Up next strip sits
+in a 24rem right-hand column at the top, beside the favorite rows, which
+scroll sideways; phones and tablets keep the stacked order. Verified at
+375/1024/1280/1440 light/dark: strip top-aligned with "Your teams", rows
+scroll, no page horizontal scroll; without favorite teams there is no strip
+and the rows take the full width.
+
+**Verification:** tsc, `pnpm test` (48 files, 192 tests, incl. ordering and
+next/last selection), format check, build; API `node --test src/test/*.test.js`
+(84 pass). Playwright on `vite preview` against a mocked API at 375/1280,
+light/dark: live game first then by start time, a game between two favorites
+shown once, newest final first with Report pills and the unread dot, players
+in tier order with season and last-game lines (live, final, did not play);
+one schedule request per team (a failing team only adds the client's own
+retries) and box scores only for rechecks and player games; one failing team
+schedule hides only that team; opening a report row marks it read; home strip
+shows three games and reuses the page's requests; "See all" and avatar links;
+Tab reaches the rows; signed out: prompt with no private or feed calls and no
+strip; zero favorites: one hint; sixth team: limit message, star stays off; no
+page horizontal scroll. Not verifiable here: real NHL data, headshots and
+logos (hosts blocked), real Google sign-in. Note: a team whose schedule call
+keeps failing delays the feed by the client's retry backoff (~7s) before it
+renders without that team.
 
 **Goal:** One place where a signed-in user sees what's happening with their
 favorite teams and players: next games, last results, and how their players

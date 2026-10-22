@@ -1,0 +1,23 @@
+.header {
+  margin-bottom: var(--ds-space-4);
+}
+
+.kicker {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.title {
+  margin: var(--ds-space-1) 0;
+  font-size: var(--ds-font-size-headline, 1.75rem);
+  color: var(--color-text);
+}
+
+.description {
+  margin: 0;
+  color: var(--color-text-secondary);
+}

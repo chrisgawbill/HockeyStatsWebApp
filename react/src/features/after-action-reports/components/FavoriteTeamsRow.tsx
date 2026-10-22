@@ -2,10 +2,9 @@ import { useAfterActionReports } from '@/features/after-action-reports/hooks/Aft
 import FavoriteCard from '@/components/FavoriteCard';
 import FavoriteTeamStar from '@/features/after-action-reports/components/FavoriteTeamStar';
 import FavoriteRowSection from '@/components/FavoriteRowSection';
+import TeamLogo from '@/components/TeamLogo';
 import { localTeamList } from '@/lib/teamListData';
 import { sortByFanTier } from '@/lib/favoriteCategory';
-import { useTheme } from '@/lib/ThemeContext';
-import type { Theme } from '@/lib/themeSchedule';
 import type { FavoriteTeam } from '@/features/after-action-reports/types/afterActionReport';
 import styles from '@/features/after-action-reports/components/FavoriteTeamsRow.module.css';
 
@@ -15,29 +14,18 @@ function getTeamDisplayName(triCode: string): string {
   return team?.fullName ?? triCode;
 }
 
-/** Returns the NHL logo drawn for the current theme's background. */
-function getTeamLogoUrl(triCode: string, theme: Theme): string {
-  const logoVariant = theme === 'dark' ? 'dark' : 'light';
-  return `https://assets.nhle.com/logos/nhl/svg/${triCode}_${logoVariant}.svg`;
-}
-
 /**
  * Shows one favorite team: its logo with the favorite star on the card's top
  * border, the team name, and the category badge. The card links to the team
  * page; the star opens the fan category menu instead.
  */
 function FavoriteTeamCard({ team }: { team: FavoriteTeam }) {
-  const { theme } = useTheme();
   const teamName = getTeamDisplayName(team.triCode);
   return (
     <FavoriteCard
       picture={
         <span className={styles.logoFrame}>
-          <img
-            className={styles.logo}
-            src={getTeamLogoUrl(team.triCode, theme)}
-            alt=""
-          />
+          <TeamLogo triCode={team.triCode} className={styles.logo} />
           <FavoriteTeamStar
             team={team}
             teamName={teamName}
@@ -67,6 +55,11 @@ export default function FavoriteTeamsRow() {
       title="Your teams"
       emptyHint="Favorite a team from its page to pin it here."
       hasFavorites={favorites.length > 0}
+      titleLink={
+        favorites.length > 0
+          ? { label: 'See all', to: '/my-hockey' }
+          : undefined
+      }
     >
       {sortByFanTier(favorites).map((team) => (
         <FavoriteTeamCard key={team.triCode} team={team} />

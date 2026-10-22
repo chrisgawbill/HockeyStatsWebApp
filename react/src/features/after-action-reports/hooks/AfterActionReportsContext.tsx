@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { ApiError } from '@/lib/apiClient';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
   addFavorite,
@@ -45,6 +46,17 @@ const POLL_INTERVAL_MS = 5 * 60 * 1000;
 /** Returning to the tab refreshes at most this often. */
 const FOCUS_REFRESH_MIN_MS = 60 * 1000;
 
+/** The API refuses a sixth favorite team (accounts already over keep theirs). */
+export const MAX_FAVORITE_TEAMS = 5;
+
+/** Thrown by `toggleFavorite` when the API refused a team past the cap. */
+export class FavoriteTeamLimitError extends Error {
+  constructor() {
+    super('Favorite team limit reached');
+    this.name = 'FavoriteTeamLimitError';
+  }
+}
+
 export interface AfterActionReportsState {
   isSignedIn: boolean;
   favorites: FavoriteTeam[];
@@ -52,7 +64,10 @@ export interface AfterActionReportsState {
   unreadCount: number;
   alertPermission: AlertPermission;
   isFavorite: (triCode: string) => boolean;
-  /** Rejects after restoring the previous favorites when the save fails. */
+  /**
+   * Rejects after restoring the previous favorites when the save fails
+   * (FavoriteTeamLimitError on the cap).
+   */
   toggleFavorite: (triCode: string) => Promise<void>;
   /** Rejects after restoring the previous favorites when the save fails. */
   updateTeamCategory: (
@@ -243,8 +258,11 @@ export function AfterActionReportsProvider({
         setFavorites(next);
         await refreshReports(token);
       } catch (error) {
-        console.error('Failed to update favorite team:', error);
         setFavorites(previous);
+        if (error instanceof ApiError && error.status === 409) {
+          throw new FavoriteTeamLimitError();
+        }
+        console.error('Failed to update favorite team:', error);
         throw error;
       }
     },

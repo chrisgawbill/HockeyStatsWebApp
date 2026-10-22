@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  getCategoryBadgeText,
-  type FavoriteCategory,
-} from '@/lib/favoriteCategory';
+import type { FavoriteCategory } from '@/lib/favoriteCategory';
+import FanCategoryBadge from '@/components/FanCategoryBadge';
 import styles from '@/components/FavoriteRow.module.css';
 
 export interface FavoriteCardProps {
@@ -48,9 +46,7 @@ export default function FavoriteCard({
       <span className={styles.name}>{name}</span>
       {detail && <span className={styles.detail}>{detail}</span>}
       {category && (
-        <span className={styles.badge} data-tier={category.tier}>
-          {getCategoryBadgeText(category)}
-        </span>
+        <FanCategoryBadge category={category} className={styles.badge} />
       )}
     </>
   );

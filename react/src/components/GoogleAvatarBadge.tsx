@@ -7,6 +7,7 @@ import {
   type PointerEvent,
   type RefObject,
 } from 'react';
+import { Link } from 'react-router-dom';
 import styles from '@/components/GoogleAvatarBadge.module.css';
 
 /**
@@ -40,7 +41,8 @@ export interface GoogleAvatarBadgeProps {
  * Small circular sign-in status badge for the global nav bar (rendered by
  * `PageHeader`'s account corner on every page). Stays visible while
  * signed in; hovering (or clicking, for touch/keyboard) opens a small menu
- * with the "Sign out" action, rather than signing out on a plain click.
+ * with a My Hockey link and the "Sign out" action, rather than signing out
+ * on a plain click.
  */
 export default function GoogleAvatarBadge({
   email,
@@ -99,6 +101,14 @@ export default function GoogleAvatarBadge({
       {open && (
         <div className={styles.dropdown} role="menu">
           <p className={styles.dropdownEmail}>{email}</p>
+          <Link
+            to="/my-hockey"
+            role="menuitem"
+            className={styles.dropdownItem}
+            onClick={() => setOpen(false)}
+          >
+            My Hockey
+          </Link>
           <button
             type="button"
             role="menuitem"
