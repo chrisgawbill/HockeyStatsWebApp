@@ -354,6 +354,11 @@
    "game exists" marker; the chip's aria-label still names the matchup/score
    and tapping it behaves as before. --- */
 @media (max-width: 576px) {
+  /* Narrow month cells only fit the count. */
+  .calendar__more-word {
+    display: none;
+  }
+
   .calendar--month .game-chip {
     flex-direction: column;
     gap: 1px;

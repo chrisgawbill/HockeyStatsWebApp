@@ -35,6 +35,16 @@ function openTickets(event: MouseEvent, ticketLink: string) {
   window.open(ticketLink, '_blank');
 }
 
+/** The game's broadcasters, e.g. "ESPN (US), SN (CA)". */
+function formatBroadcasts(game: ScheduledGame): string {
+  return game.broadcasts
+    .map(
+      (broadcast) =>
+        `${broadcast.broadcasterName} (${broadcast.broadcastCountry})`,
+    )
+    .join(', ');
+}
+
 /**
  * The tall, full-width game card used in the schedule's day view. Shows the
  * matchup, score or start time, playoff badge, venue, tickets, and broadcasts;
@@ -137,30 +147,21 @@ function ScheduleCard({ game, goToGameDetails }: ScheduleCardProps) {
         <div>
           <p>Venue: {game.venue}</p>
         </div>
-        <div className="text-center">
-          <div className={`${styles['md3-btn-group']} ds-button-group`}>
-            {game.ticketLink !== '' ? (
-              <button
-                className="ds-button"
-                onClick={(event) => openTickets(event, game.ticketLink)}
-              >
-                Tickets
-              </button>
-            ) : (
-              <></>
-            )}
-          </div>
+        <div className={styles['game-details__tickets']}>
+          {game.ticketLink !== '' && (
+            <button
+              type="button"
+              className={`ds-button ${styles['game-tickets']}`}
+              onClick={(event) => openTickets(event, game.ticketLink)}
+            >
+              Tickets
+            </button>
+          )}
         </div>
         <div>
-          <p>
-            Broadcasts:{' '}
-            {game.broadcasts
-              .map(
-                (broadcast) =>
-                  `${broadcast.broadcasterName} (${broadcast.broadcastCountry}) `,
-              )
-              .join(',')}
-          </p>
+          {game.broadcasts.length > 0 && (
+            <p>Broadcasts: {formatBroadcasts(game)}</p>
+          )}
         </div>
       </div>
     </div>

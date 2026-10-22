@@ -197,12 +197,14 @@ function SchedulePage() {
                 onChange={setView}
               />
             </div>
-            <DatePicker
-              seasonRange={seasonDateRange}
-              selectedDate={effectiveDate}
-              view={viewParam}
-              onDateChange={handleDateChange}
-            />
+            <div className={styles['schedule-date-nav']}>
+              <DatePicker
+                seasonRange={seasonDateRange}
+                selectedDate={effectiveDate}
+                view={viewParam}
+                onDateChange={handleDateChange}
+              />
+            </div>
             {isCalendarView(viewParam) ? (
               periodHasGames ? (
                 <ScheduleCalendar

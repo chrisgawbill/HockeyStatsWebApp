@@ -144,9 +144,10 @@ const DatePicker = ({
   };
 
   return (
-    <div className={`${styles['date-row']} ds-button-group`}>
+    <div className={styles['date-row']}>
       <button
-        className={`ds-button ${styles['schedule-nav-btn']}`}
+        type="button"
+        className={styles['schedule-nav-btn']}
         onClick={() => goTo(-1)}
         disabled={isPrevButtonDisabled}
         aria-label={`Previous ${view}`}
@@ -169,7 +170,8 @@ const DatePicker = ({
         {formatPeriodLabel(selectedDate, view)}
       </p>
       <button
-        className={`ds-button ${styles['schedule-nav-btn']}`}
+        type="button"
+        className={styles['schedule-nav-btn']}
         onClick={() => goTo(1)}
         disabled={isNextButtonDisabled}
         aria-label={`Next ${view}`}

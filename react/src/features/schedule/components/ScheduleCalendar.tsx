@@ -101,8 +101,10 @@ export default function ScheduleCalendar({
                   type="button"
                   className={styles['calendar__more']}
                   onClick={() => onSelectDay(day)}
+                  aria-label={`${overflow} more games`}
                 >
-                  +{overflow} more
+                  +{overflow}
+                  <span className={styles['calendar__more-word']}> more</span>
                 </button>
               )}
             </div>
