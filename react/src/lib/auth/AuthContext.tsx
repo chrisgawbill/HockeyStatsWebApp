@@ -24,6 +24,8 @@ export interface AuthSession {
   token: string | null;
   email: string | null;
   picture: string | null;
+  /** True while a saved session is being checked on load. */
+  isRestoring: boolean;
   signIn: (credential: string) => void;
   signOut: () => void;
 }
@@ -91,6 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [picture, setPicture] = useState<string | null>(
     () => readCachedProfile()?.picture ?? null,
   );
+  const [isRestoring, setIsRestoring] = useState(
+    () => readStoredToken() !== null,
+  );
 
   useEffect(() => {
     const stored = readStoredToken();
@@ -114,6 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         storeToken(null);
         storeCachedProfile(null);
         setPicture(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsRestoring(false);
       });
 
     return () => {
@@ -149,8 +157,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ token, email, picture, signIn, signOut }),
-    [token, email, picture, signIn, signOut],
+    () => ({ token, email, picture, isRestoring, signIn, signOut }),
+    [token, email, picture, isRestoring, signIn, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
