@@ -6,8 +6,10 @@
   overflow: hidden;
 }
 
-/* A third player scrolls here, never the page. */
+/* A third player scrolls here, never the page. Positioned so the
+   screen-reader-only text inside cells is clipped here too. */
 .scroller {
+  position: relative;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
