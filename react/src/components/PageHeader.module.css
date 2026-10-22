@@ -380,7 +380,7 @@
     display: none;
   }
 
-  /* Back button, season selector, bell, and avatar share the row with even
+  /* Back button, season selector, share, bell, and avatar share the row with even
      space between and around them. */
   .nav-secondary-row {
     display: flex;
