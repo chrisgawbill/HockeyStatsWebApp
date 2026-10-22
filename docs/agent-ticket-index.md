@@ -61,6 +61,9 @@ acceptance are both necessary for DONE.
 | API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
+| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Implemented; pending Product Owner acceptance of 375/1280 light/dark screenshots. |
+| API-AUTH-02 | Approved 2026-10-22: Microsoft, Discord and emailed-code sign-in beside Google; emails encrypted at rest with a keyed lookup hash; accounts link on verified email only (Microsoft personal accounts only); Brevo sends the codes. No Apple. |
+| SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 
 ## Dependency outline
@@ -83,6 +86,7 @@ API-COMPARE-01 -> COMPARE-01
 FAN-01 -> FEED-01
 API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
+API-AUTH-02 -> SIGNIN-01
 ```
 
 ON2-09A may run early using the existing game; it gates production presentation
@@ -1763,3 +1767,85 @@ hide both views when the call 404s).
 
 **Verify:** unit tests for filtering and the flow series; Playwright against a
 mocked API with screenshots.
+
+---
+
+## SHARE-01 — Share button in the phone top bar
+
+**Status:** ACTIVE — implemented and verified 2026-10-22; pending Product Owner acceptance of 375/1280 light/dark screenshots
+
+**Goal:** On phones, one tap shares the page being viewed (a comparison, a
+game, a team, a matchup preview) through the phone's share sheet.
+
+**Context:** The phone top bar is `PageHeader`'s `nav-secondary-row` (back
+button, season selector, account corner). Every page is a hash route whose URL
+already rebuilds the view (`/compare?players=…`, `/matchup?teamA=…`,
+`?season=`), so sharing `location.href` is enough.
+
+**Approved (Product Owner, 2026-10-22):**
+
+- A share icon button in the phone top bar between the season selector and
+  the account controls (`[back] [season] [share] [bell] [avatar]`), styled like
+  the bell (40px glass circle, 48px target). Not rendered in the desktop header.
+- `navigator.share({ title, url })`; without it, copy the link and show a
+  "Link copied" toast (`role="status"`) above the bottom nav. A cancelled share
+  sheet (`AbortError`) is silent; other failures show an error toast.
+- Title: the page's first `h1` text + " · Hockey Stats", or "Hockey Stats".
+- Every page except `/diagnostics`; the URL (including `season=`) is shared
+  as is.
+- Logic in `lib/sharePage.ts`, the button in `components/ShareButton.tsx`.
+
+**Acceptance:** visible on phones at 375 in light and dark, absent at 1280;
+opens the share sheet with the current URL; the copy fallback works and
+announces itself to screen readers; a cancelled share shows nothing; the top
+bar fits at 320–430px signed in and out with no page horizontal scroll.
+
+**Verify:** unit tests for the share/copy decision; Playwright against a mocked
+API with `navigator.share` present, absent and rejected; 375/1280 light/dark
+screenshots.
+
+---
+
+## API-AUTH-02 — Microsoft, Discord and email-code sign-in (backend)
+
+**Status:** READY (after SHARE-01)
+
+**Approved (Product Owner, 2026-10-22):**
+
+- Providers: Google (existing), Microsoft (ID token checked against
+  Microsoft's keys, audience = app client id), Discord (OAuth code exchanged
+  on the API with its client secret and PKCE), emailed 6-digit code sent with
+  Brevo. No Apple.
+- A `user_identities` table maps `(provider, subject)` to a user and replaces
+  `users.google_sub` (existing rows migrated).
+- Email is encrypted at rest (AES-256-GCM, `EMAIL_ENCRYPTION_KEY`) and found by
+  a keyed hash (HMAC-SHA256 of the trimmed, lowercased address,
+  `EMAIL_LOOKUP_KEY`). A migration encrypts existing emails and drops the
+  plain-text column. Emails never appear in logs.
+- Accounts link only on a verified email: Google `email_verified`, Discord
+  `verified`, email code always, Microsoft personal accounts only (work and
+  school accounts get their own account).
+- Email codes: 10-minute expiry, single use, stored hashed, constant-time
+  compare, 5 wrong tries ends the code, sends rate-limited per address and per
+  IP, the same response whether or not the address has an account.
+- Each provider is disabled (endpoint 404, absent from a config endpoint)
+  until its settings exist.
+
+**Verify:** unit tests for encryption round-trip, lookup hashing, linking rules,
+code expiry/attempts/rate limits; existing API checks pass.
+
+---
+
+## SIGNIN-01 — Account icon and sign-in modal (frontend)
+
+**Status:** READY (after API-AUTH-02's contract)
+
+**Approved (Product Owner, 2026-10-22):** the signed-out Google pill becomes an
+account icon button (filled figure inside the bell's glass circle,
+`aria-label="Sign in"`) on phones and desktop. It opens an `AppDialog` with
+Google, Microsoft, Discord and "Email me a code"; a provider the API does not
+offer is hidden. Signed in is unchanged (bell + avatar).
+
+**Verify:** Playwright with mocked providers and API; 375/1280 light/dark
+screenshots; keyboard and screen-reader pass on the dialog.
+
