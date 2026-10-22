@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import FavoriteCategoryMenu from '@/components/FavoriteCategoryMenu';
 import { DEFAULT_FAN_TIER } from '@/lib/favoriteCategory';
-import { useAfterActionReports } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
+import {
+  FavoriteTeamLimitError,
+  MAX_FAVORITE_TEAMS,
+  useAfterActionReports,
+} from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 import styles from '@/features/after-action-reports/components/FavoriteTeamButton.module.css';
 
 function StarIcon({ filled }: { filled: boolean }) {
@@ -21,7 +25,7 @@ function StarIcon({ filled }: { filled: boolean }) {
   );
 }
 
-/** How long the save-failed message stays up. */
+/** How long a save error stays up. */
 const ERROR_VISIBLE_MS = 6000;
 
 export interface FavoriteTeamButtonProps {
@@ -33,7 +37,8 @@ export interface FavoriteTeamButtonProps {
  * Follows a team for After Action Reports. Signed-out users get a pointer to
  * the header's Google sign-in instead of a dead button. Once the team is a
  * favorite, the star opens the fan category menu (tier, label, Unfavorite). A
- * failed save reverts the star and says so briefly rather than failing silently.
+ * failed save reverts the star and says so briefly rather than failing silently;
+ * past the team cap it says to unfavorite one first.
  */
 export default function FavoriteTeamButton({
   triCode,
@@ -50,18 +55,18 @@ export default function FavoriteTeamButton({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [pending, setPending] = useState(false);
-  const [saveFailed, setSaveFailed] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const favorite = isSignedIn && isFavorite(triCode);
   const favoriteTeam = favorites.find((team) => team.triCode === triCode);
 
   useEffect(() => {
-    if (!saveFailed) return;
+    if (!saveError) return;
     const hideErrorTimer = window.setTimeout(
-      () => setSaveFailed(false),
+      () => setSaveError(null),
       ERROR_VISIBLE_MS,
     );
     return () => window.clearTimeout(hideErrorTimer);
-  }, [saveFailed]);
+  }, [saveError]);
 
   const respondToStarPress = async () => {
     if (!isSignedIn) {
@@ -72,13 +77,17 @@ export default function FavoriteTeamButton({
       setIsMenuOpen((isOpen) => !isOpen);
       return;
     }
-    setSaveFailed(false);
+    setSaveError(null);
     setPending(true);
     try {
       await toggleFavorite(triCode);
-    } catch {
-      // The provider already restored the star and logged the cause.
-      setSaveFailed(true);
+    } catch (error) {
+      // The provider already restored the star.
+      setSaveError(
+        error instanceof FavoriteTeamLimitError
+          ? `You can favorite up to ${MAX_FAVORITE_TEAMS} teams. Unfavorite one first.`
+          : "Couldn't save your favorite. Try again in a moment.",
+      );
     } finally {
       setPending(false);
     }
@@ -123,9 +132,9 @@ export default function FavoriteTeamButton({
           get an After Action Report after every game.
         </p>
       )}
-      {saveFailed && (
+      {saveError && (
         <p className={styles.hint} role="alert">
-          Couldn&apos;t save your favorite. Try again in a moment.
+          {saveError}
         </p>
       )}
     </div>

@@ -66,6 +66,33 @@
   font-size: var(--text-sm);
 }
 
+/* Favorite rows, then the Up next strip. On desktop the strip moves to a
+   right-hand column at the top and the rows, now narrower, scroll sideways.
+   Both keep their own page-width rules on phones and tablets. */
+@media (min-width: 1001px) {
+  .landingPage-favorites {
+    display: flex;
+    gap: var(--ds-space-4);
+    align-items: flex-start;
+    width: min(100% - (2 * var(--page-gutter)), var(--page-content-width));
+    margin: 0 auto;
+  }
+
+  .landingPage-favorite-rows {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .landingPage-favorites > section,
+  .landingPage-favorite-rows > section {
+    width: 100%;
+  }
+
+  .landingPage-favorites > section {
+    flex: 0 0 24rem;
+  }
+}
+
 .landingPage-content > section {
   min-width: 0;
 }

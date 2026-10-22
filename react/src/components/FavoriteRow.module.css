@@ -5,13 +5,6 @@
   min-width: 0;
 }
 
-.title {
-  margin: 0 0 var(--ds-space-2);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-
 .hint {
   margin: 0;
   color: var(--color-text-secondary);
@@ -116,8 +109,7 @@
 }
 
 .name,
-.detail,
-.badge {
+.detail {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,26 +127,9 @@
   font-size: var(--text-xs);
 }
 
+/* Space between the card text and its fan category badge. */
 .badge {
   margin-top: 4px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--color-chip-bg);
-  color: var(--color-text);
-  font-size: var(--text-xs);
-  font-weight: 600;
-}
-
-.badge[data-tier='diehard'] {
-  background: color-mix(
-    in srgb,
-    var(--color-primary) 18%,
-    var(--color-surface)
-  );
-}
-
-.badge[data-tier='curious'] {
-  color: var(--color-text-secondary);
 }
 
 /* Fills a grid cell instead of the row's fixed card width. */

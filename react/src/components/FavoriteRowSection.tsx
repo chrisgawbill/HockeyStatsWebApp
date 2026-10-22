@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import SectionHeading from '@/components/SectionHeading';
 import styles from '@/components/FavoriteRow.module.css';
 
 export interface FavoriteRowSectionProps {
@@ -8,6 +9,8 @@ export interface FavoriteRowSectionProps {
   /** Shown instead of the cards when the user has no favorites. */
   emptyHint: string;
   hasFavorites: boolean;
+  /** Optional link beside the title, such as "See all". */
+  titleLink?: { label: string; to: string };
   /** The `FavoriteCard` items. */
   children: ReactNode;
 }
@@ -22,13 +25,12 @@ export default function FavoriteRowSection({
   title,
   emptyHint,
   hasFavorites,
+  titleLink,
   children,
 }: FavoriteRowSectionProps) {
   return (
     <section className={styles.section} aria-labelledby={titleId}>
-      <h2 id={titleId} className={styles.title}>
-        {title}
-      </h2>
+      <SectionHeading id={titleId} title={title} link={titleLink} />
       {hasFavorites ? (
         <ul className={styles.row}>{children}</ul>
       ) : (

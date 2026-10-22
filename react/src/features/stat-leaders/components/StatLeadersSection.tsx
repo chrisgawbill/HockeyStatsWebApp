@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TopStatLeader } from '@/features/stat-leaders/types/topStatLeader';
 import StatLeaderCard from '@/features/stat-leaders/components/StatLeaderCard';
 import EmptyState from '@/components/EmptyState';
+import SectionHeading from '@/components/SectionHeading';
 import { useMediaQuery } from '@/lib/useMediaQuery';
 import { useHorizontalSwipe } from '@/lib/useHorizontalSwipe';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
@@ -114,9 +115,7 @@ export default function StatLeadersSection({
   if (isPhone) {
     return (
       <section className={styles.section} aria-labelledby="stat-leaders-title">
-        <h2 id="stat-leaders-title" className={rowStyles.title}>
-          Stat leaders
-        </h2>
+        <SectionHeading id="stat-leaders-title" title="Stat leaders" />
         <GroupSwitch
           selectedGroup={selectedGroup}
           onSelect={setSelectedGroup}
@@ -140,9 +139,7 @@ export default function StatLeadersSection({
         className={styles.section}
         aria-labelledby="skater-leaders-title"
       >
-        <h2 id="skater-leaders-title" className={rowStyles.title}>
-          Skater leaders
-        </h2>
+        <SectionHeading id="skater-leaders-title" title="Skater leaders" />
         <LeaderGrid
           group="skaters"
           leaders={leadersByGroup.skaters}
@@ -153,9 +150,7 @@ export default function StatLeadersSection({
         className={styles.section}
         aria-labelledby="goalie-leaders-title"
       >
-        <h2 id="goalie-leaders-title" className={rowStyles.title}>
-          Goalie leaders
-        </h2>
+        <SectionHeading id="goalie-leaders-title" title="Goalie leaders" />
         <LeaderGrid
           group="goalies"
           leaders={leadersByGroup.goalies}

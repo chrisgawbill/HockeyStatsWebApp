@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
+import PageIntro from '@/components/PageIntro';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import LoadingState from '@/components/LoadingState';
@@ -213,11 +214,11 @@ export default function WeeklyReportPage() {
   } else {
     content = (
       <>
-        <header className={styles.header}>
-          <p className={styles.kicker}>Weekly Player Report</p>
-          <h1 className={styles.title}>{report.label}</h1>
-          <p className={styles.headline}>{report.headline}</p>
-        </header>
+        <PageIntro
+          kicker="Weekly Player Report"
+          title={report.label}
+          description={report.headline}
+        />
         <ul className={styles.cards}>
           {report.players.map((player) => (
             <PlayerCard key={player.playerId} player={player} />
