@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { getServiceWorkerContainer } from '@/lib/serviceWorker';
 import { ApiError } from '@/lib/apiClient';
 import { useAuth } from '@/lib/auth/AuthContext';
 import {
@@ -152,7 +153,8 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
 
   // The service worker tells open tabs when a weekly notification was tapped.
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) return;
+    const serviceWorker = getServiceWorkerContainer();
+    if (!serviceWorker) return;
     const onMessage = (event: MessageEvent) => {
       const data = event.data as { type?: string; weekStart?: unknown } | null;
       if (data?.type === 'wpr-navigate' && typeof data.weekStart === 'string') {
@@ -161,9 +163,8 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
         refreshReports(tokenRef.current);
       }
     };
-    navigator.serviceWorker.addEventListener('message', onMessage);
-    return () =>
-      navigator.serviceWorker.removeEventListener('message', onMessage);
+    serviceWorker.addEventListener('message', onMessage);
+    return () => serviceWorker.removeEventListener('message', onMessage);
   }, [refreshReports]);
 
   const isFavorite = useCallback(
