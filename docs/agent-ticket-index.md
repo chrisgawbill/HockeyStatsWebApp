@@ -62,7 +62,7 @@ acceptance are both necessary for DONE.
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Implemented; pending Product Owner acceptance of 375/1280 light/dark screenshots. |
-| API-AUTH-02 | Approved 2026-10-22: Microsoft, Discord and emailed-code sign-in beside Google; emails encrypted at rest with a keyed lookup hash; accounts link on verified email only (Microsoft personal accounts only); Brevo sends the codes. No Apple. |
+| API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 
@@ -1806,33 +1806,42 @@ screenshots.
 
 ---
 
-## API-AUTH-02 — Microsoft, Discord and email-code sign-in (backend)
+## API-AUTH-02 — Discord sign-in and account linking (backend)
 
-**Status:** READY (after SHARE-01)
+**Status:** ACTIVE
 
-**Approved (Product Owner, 2026-10-22):**
+**Approved (Product Owner, 2026-10-22; narrowed the same day):**
 
-- Providers: Google (existing), Microsoft (ID token checked against
-  Microsoft's keys, audience = app client id), Discord (OAuth code exchanged
-  on the API with its client secret and PKCE), emailed 6-digit code sent with
-  Brevo. No Apple.
+- Providers: Google (existing) and Discord. Microsoft, emailed codes (Brevo)
+  and Apple are out of scope. No provider on/off config endpoint in this
+  ticket.
+- Discord sign-in and email encryption landed on `main` first (API `d6deb7c`,
+  migrations 007/008, `emailCrypto.js`); this ticket builds on them.
+- Discord: OAuth authorization code plus PKCE, exchanged on the API with
+  `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET`; `identify` and `email`
+  scopes; `verified` flag. `POST /api/auth/discord` body is
+  `{ code, codeVerifier, redirectUri }` (redirect URI on
+  `DISCORD_REDIRECT_URIS`).
 - A `user_identities` table maps `(provider, subject)` to a user and replaces
-  `users.google_sub` (existing rows migrated).
+  `users.google_sub` and `users.discord_id`; user ids are unchanged, so
+  favorites, push subscriptions and reports stay attached.
 - Email is encrypted at rest (AES-256-GCM, `EMAIL_ENCRYPTION_KEY`) and found by
   a keyed hash (HMAC-SHA256 of the trimmed, lowercased address,
-  `EMAIL_LOOKUP_KEY`). A migration encrypts existing emails and drops the
-  plain-text column. Emails never appear in logs.
-- Accounts link only on a verified email: Google `email_verified`, Discord
-  `verified`, email code always, Microsoft personal accounts only (work and
-  school accounts get their own account).
-- Email codes: 10-minute expiry, single use, stored hashed, constant-time
-  compare, 5 wrong tries ends the code, sends rate-limited per address and per
-  IP, the same response whether or not the address has an account.
-- Each provider is disabled (endpoint 404, absent from a config endpoint)
-  until its settings exist.
+  `EMAIL_LOOKUP_KEY`). Migration 009 encrypts any plaintext left and drops
+  `users.email`. Emails never appear in logs or error messages; auth errors
+  are fixed strings.
+- Accounts link only on a verified email (Google `email_verified`, Discord
+  `verified`). Existing Google emails count as verified. Accounts that
+  already share an email are not merged: the oldest keeps the lookup and is
+  the one new sign-ins link to. A verified sign-in updates the account email
+  when no other account holds it.
+- Session JWT and `GET /api/auth/me` (`{ email }`) are unchanged.
+- Rollback: `pg_dump` before deploying; `node bin/rollback-009.js` then revert
+  on `main`.
 
-**Verify:** unit tests for encryption round-trip, lookup hashing, linking rules,
-code expiry/attempts/rate limits; existing API checks pass.
+**Verify:** unit tests for encryption round-trip, lookup hashing, linking
+rules, PKCE validation, fixed error messages and migration 009; existing API
+checks pass.
 
 ---
 
@@ -1845,6 +1854,10 @@ account icon button (filled figure inside the bell's glass circle,
 `aria-label="Sign in"`) on phones and desktop. It opens an `AppDialog` with
 Google, Microsoft, Discord and "Email me a code"; a provider the API does not
 offer is hidden. Signed in is unchanged (bell + avatar).
+
+**Open (from API-AUTH-02, 2026-10-22):** the API now offers only Google and
+Discord and has no providers config endpoint; confirm the modal's provider
+list and how it hides one before starting.
 
 **Verify:** Playwright with mocked providers and API; 375/1280 light/dark
 screenshots; keyboard and screen-reader pass on the dialog.
