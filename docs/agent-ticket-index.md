@@ -1808,7 +1808,7 @@ screenshots.
 
 ## API-AUTH-02 — Discord sign-in and account linking (backend)
 
-**Status:** ACTIVE
+**Status:** DONE (2026-10-22; API branch `claude/api-auth-02-multi-provider-z77dqn`, not merged to `main`. Independent QA passed 11/11 on a real Postgres, `npm test` 111/111. Not verified: live Google/Discord calls and the rollback CLI with the server's `.env`.)
 
 **Approved (Product Owner, 2026-10-22; narrowed the same day):**
 
