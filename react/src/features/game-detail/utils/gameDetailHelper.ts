@@ -16,8 +16,11 @@ import { isCompletedGameState } from '@/lib/gameStatus';
  * Components must only receive the typed view models these functions return.
  */
 
-/** Live games are polled no more often than this. */
-export const LIVE_POLL_INTERVAL_MS = 60_000;
+/**
+ * Live games are polled no more often than this. Matches the API's 5-minute
+ * gamecenter cache, so a faster poll would only return the same data.
+ */
+export const LIVE_POLL_INTERVAL_MS = 5 * 60 * 1000;
 
 /**
  * Maps the raw NHL `gameState` string into the page's discriminated status.
