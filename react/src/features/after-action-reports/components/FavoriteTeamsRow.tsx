@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAfterActionReports } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
 import FavoriteCard from '@/components/FavoriteCard';
 import FavoriteTeamStar from '@/features/after-action-reports/components/FavoriteTeamStar';
@@ -42,8 +43,7 @@ function FavoriteTeamCard({ team }: { team: FavoriteTeam }) {
 
 /**
  * Shows the signed-in user's favorite teams, Diehard first, as a
- * horizontally scrolling row on the landing page. Renders nothing when signed
- * out.
+ * horizontally scrolling row on My Hockey. Renders nothing when signed out.
  */
 export default function FavoriteTeamsRow() {
   const { isSignedIn, favorites } = useAfterActionReports();
@@ -53,13 +53,13 @@ export default function FavoriteTeamsRow() {
     <FavoriteRowSection
       titleId="favorite-teams-title"
       title="Your teams"
-      emptyHint="Favorite a team from its page to pin it here."
-      hasFavorites={favorites.length > 0}
-      titleLink={
-        favorites.length > 0
-          ? { label: 'See all', to: '/my-hockey' }
-          : undefined
+      emptyHint={
+        <>
+          Favorite a team from its page to pin it here.{' '}
+          <Link to="/teamList">Browse teams</Link>
+        </>
       }
+      hasFavorites={favorites.length > 0}
     >
       {sortByFanTier(favorites).map((team) => (
         <FavoriteTeamCard key={team.triCode} team={team} />

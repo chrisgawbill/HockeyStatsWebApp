@@ -20,6 +20,8 @@ export interface FavoriteCardProps {
   linkTo?: string;
   /** Called when the card body is pressed, for cards that open a dialog instead of a page. */
   onSelect?: () => void;
+  /** Lines under the card body, outside it so they can hold their own links. */
+  footer?: ReactNode;
 }
 
 /**
@@ -27,7 +29,8 @@ export interface FavoriteCardProps {
  * an optional detail line, and the category badge (label if set, else tier);
  * a stat card shows its category name and value above the name instead.
  * The body is a link (`linkTo`), a button (`onSelect`), or plain text.
- * Controls inside `picture` (the star) stay clickable above the card body.
+ * Controls inside `picture` (the star) and links in `footer` stay clickable
+ * above the card body.
  */
 export default function FavoriteCard({
   picture,
@@ -38,6 +41,7 @@ export default function FavoriteCard({
   fillWidth = false,
   linkTo,
   onSelect,
+  footer,
 }: FavoriteCardProps) {
   const cardText = (
     <>
@@ -70,6 +74,7 @@ export default function FavoriteCard({
       ) : (
         <div className={styles.body}>{cardText}</div>
       )}
+      {footer && <div className={styles.footer}>{footer}</div>}
     </li>
   );
 }

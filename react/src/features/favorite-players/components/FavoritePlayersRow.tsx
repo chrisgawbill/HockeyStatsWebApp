@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useFavoritePlayers } from '@/features/favorite-players/hooks/FavoritePlayersContext';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import FavoritePlayerStatsDialog from '@/features/favorite-players/components/FavoritePlayerStatsDialog';
@@ -15,11 +15,17 @@ import styles from '@/features/favorite-players/components/FavoritePlayersRow.mo
 
 /**
  * Shows one favorite player: headshot with its favorite star on the card's
- * top border, then name, team and position, and the category badge. Pressing
- * the card opens the player's season stats; the star opens the fan category
- * menu instead.
+ * top border, then name, team and position, the category badge, and any
+ * footer lines. Pressing the card opens the player's season stats; the star
+ * opens the fan category menu instead.
  */
-function FavoritePlayerCard({ player }: { player: FavoritePlayer }) {
+function FavoritePlayerCard({
+  player,
+  footer,
+}: {
+  player: FavoritePlayer;
+  footer?: ReactNode;
+}) {
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   return (
     <>
@@ -43,6 +49,7 @@ function FavoritePlayerCard({ player }: { player: FavoritePlayer }) {
         detail={formatTeamAndPosition(player)}
         category={player}
         onSelect={() => setIsStatsOpen(true)}
+        footer={footer}
       />
       {isStatsOpen && (
         <FavoritePlayerStatsDialog
@@ -54,13 +61,19 @@ function FavoritePlayerCard({ player }: { player: FavoritePlayer }) {
   );
 }
 
+export interface FavoritePlayersRowProps {
+  /** Extra lines under a player's card, such as their season and last game. */
+  renderCardFooter?: (player: FavoritePlayer) => ReactNode;
+}
+
 /**
  * Shows the signed-in user's favorite players, Diehard first, as a
- * horizontally scrolling row on the landing page, or a hint when they have
- * none. Renders nothing when signed out or when the API predates favorite
- * players.
+ * horizontally scrolling row on My Hockey, or a hint when they have none.
+ * Renders nothing when signed out or when the API predates favorite players.
  */
-export default function FavoritePlayersRow() {
+export default function FavoritePlayersRow({
+  renderCardFooter,
+}: FavoritePlayersRowProps) {
   const { isSignedIn, available, favorites } = useFavoritePlayers();
   if (!isSignedIn || !available) return null;
 
@@ -71,12 +84,16 @@ export default function FavoritePlayersRow() {
   return (
     <FavoriteRowSection
       titleId="favorite-players-title"
-      title="Your favorite players"
+      title="Your players"
       emptyHint="Star a player's headshot to pin them here."
       hasFavorites={favorites.length > 0}
     >
       {visibleFavorites.map((player) => (
-        <FavoritePlayerCard key={player.playerId} player={player} />
+        <FavoritePlayerCard
+          key={player.playerId}
+          player={player}
+          footer={renderCardFooter?.(player)}
+        />
       ))}
     </FavoriteRowSection>
   );
