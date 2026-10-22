@@ -18,7 +18,7 @@ import type {
 } from '@/features/player-compare/types/playerCompare';
 
 /** One stat row of the comparison table. */
-export interface CompareStat<Player> {
+interface CompareStat<Player> {
   /** Short column label, e.g. "PPG". */
   label: string;
   /** Full name for the label's tooltip and screen readers. */
@@ -37,7 +37,7 @@ function roundTo(value: number, decimals: number): number {
 
 const formatCount = (value: number) => String(value);
 
-export const SKATER_STATS: CompareStat<SkaterSeason>[] = [
+const SKATER_STATS: CompareStat<SkaterSeason>[] = [
   {
     label: 'GP',
     title: 'Games played',
@@ -108,7 +108,7 @@ export const SKATER_STATS: CompareStat<SkaterSeason>[] = [
   },
 ];
 
-export const GOALIE_STATS: CompareStat<GoalieSeason>[] = [
+const GOALIE_STATS: CompareStat<GoalieSeason>[] = [
   {
     label: 'GP',
     title: 'Games played',

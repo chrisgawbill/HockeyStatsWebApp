@@ -1576,7 +1576,7 @@ light/dark). Up next links are covered by unit tests only (they need sign-in).
 
 ## COMPARE-01 — Player comparison
 
-**Status:** ACTIVE (started 2026-10-22; data approved, layout decisions open)
+**Status:** ACTIVE — implemented, QA PASS 1–9 (shared URL, unknown slot, skater/goalie highlighting incl. GAA and ties, mixed groups, keyboard picker, malformed URL, load error, no page scroll at 375/1280 light/dark), readability pass done; dialog Compare link checked in source only (team page not mocked). Awaiting API-COMPARE-01 deploy and Product Owner screenshot review
 
 **Goal:** A user can pick two or three players and compare their season stats
 side by side.
