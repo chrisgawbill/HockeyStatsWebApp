@@ -60,6 +60,10 @@ acceptance are both necessary for DONE.
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
 | API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
+| SHARE-01 | Share icon placement in the phone top bar, the fallback when Web Share is missing, and which pages get it. |
+| PLAYER-TAP-01 | Which surfaces open the player stats dialog, what tapping the photo vs. the name does, and where the shared dialog lives. |
+| LEADERS-DIALOG-01 | Swap-in-place vs. stacked dialogs, breadcrumb wording, and what Back/Escape do. |
+| PROJ-01 | Projection formula, minimum games, labels, and whether projections are highlighted in the comparison. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 
@@ -80,6 +84,8 @@ ON2-07 + ON2-10 + ON2-11 -> ON2-12
 approved implementation/content release set -> ON2-13
 WPR-01 -> STAR-01, FEED-01, COMPARE-01
 API-COMPARE-01 -> COMPARE-01
+PLAYER-TAP-01 -> LEADERS-DIALOG-01
+COMPARE-01 -> PROJ-01
 FAN-01 -> FEED-01
 API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
@@ -1680,6 +1686,156 @@ worker guard) and the signed-out Up next prompt, both done.
 
 **Verify:** Playwright with one endpoint failing or delayed at a time;
 375/1280 screenshots.
+
+---
+
+## SHARE-01 — Share button in the phone top bar
+
+**Status:** IDEA
+
+**Goal:** On phones, one tap shares the page being viewed (a comparison, a
+game, a team, a matchup preview) through the phone's share sheet.
+
+**Context:** The phone top bar is `PageHeader`'s `nav-secondary-row` (back
+button, season selector, account corner). Desktop is unchanged. Every page is
+a hash route whose URL already rebuilds the view (`/compare?players=…`,
+`/matchup?teamA=…`, `?season=`), so sharing `location.href` is enough.
+
+**Proposed (PM recommendation, confirm at checkpoint):**
+
+- A share icon button in the phone top bar, beside the account corner, shown
+  only where the bottom nav shows (phones); hidden from the desktop header.
+- Uses the Web Share API (`navigator.share({ title, url })`) with the page
+  title. Where it is missing (some desktop-class browsers, in-app browsers),
+  copy the link to the clipboard and show a short "Link copied" toast, reusing
+  the fixed-toast pattern from `FavoritePlayerStar`.
+- A cancelled share sheet is silent; only real failures show a message.
+- On every page, so the button never jumps around; the shared URL keeps the
+  current `season=`.
+- Shared logic in `lib/sharePage.ts`; the button in `components/`.
+
+**Acceptance:** visible on phones at 375 in light and dark, absent at 1280;
+opens the share sheet with the current URL; the copy fallback works and
+announces itself to screen readers; the top bar still fits at 320–430px with
+the season selector and account corner.
+
+**Verify:** unit test for the share/copy decision; Playwright with
+`navigator.share` stubbed and removed; 375/1280 screenshots.
+
+---
+
+## PLAYER-TAP-01 — Open a player's stats from more places
+
+**Status:** IDEA
+
+**Goal:** Wherever a player appears, tapping them opens the same player stats
+dialog the roster and favorite cards use.
+
+**Context:** Today only the roster (`RosterLinesTabs`) and favorite player
+cards (`FavoritePlayersRow` → `FavoritePlayerStatsDialog`) open
+`PlayerStatsDialog`. Players also appear, without that tap, in: stat leader
+rows (`StatsLeaderModal`), the team page stats table (`PlayerStatsSection`),
+the game page's `ThreeStars`, `ScoringSummary` and `PlayerStatsSelection`,
+the Weekly Player Report rows, My Hockey player lines, and the comparison
+column headers (`CompareSlotHeader`). `PlayerStatsDialog` lives in `teams` and
+`FavoritePlayerStatsDialog` (which loads stats by team) in
+`favorite-players`, so other features can't reuse them without cross-feature
+imports.
+
+**Proposed (PM recommendation, confirm at checkpoint):**
+
+- Move the dialog to `components/PlayerStatsDialog` and its loader to a shared
+  hook that takes a structural player ref (`playerId`, `name`, `teamTriCode`,
+  `position`, `headshot`), loading the team's skater/goalie summary as
+  `useFavoritePlayerStats` does today. Opened through one app-level
+  `PlayerDialogProvider` (`openPlayer(ref)`), so a surface only needs a
+  button, not its own dialog state.
+- Add the tap to: stat leader rows (see LEADERS-DIALOG-01), team stats table
+  rows, Three Stars, scoring summary goal scorers and assists, box score
+  names, Weekly Player Report rows, My Hockey player lines, and comparison
+  column headers.
+- The photo and the name both open the dialog; the corner favorite star keeps
+  its own action. Rows get a real `<button>` (keyboard, focus ring), not a
+  clickable `<div>`.
+- The game page box score keeps its compact layout: the name becomes the
+  button, no photo added.
+
+**Acceptance:** each listed surface opens the dialog for the right player and
+season; the star still toggles favorites without opening it; keyboard and
+screen reader reachable; focus returns to the tapped element on close.
+
+**Verify:** Playwright per surface against a mocked API; unit test for the
+player-ref → stats lookup.
+
+---
+
+## LEADERS-DIALOG-01 — From a stat leaders list to a player's stats
+
+**Status:** IDEA
+
+**Goal:** In the stat leaders dialog (`StatsLeaderModal`), tapping a player
+shows that player's stats dialog, with a breadcrumb in the upper left back to
+the leaders list.
+
+**Dependencies:** PLAYER-TAP-01 (shared player stats dialog).
+
+**Proposed (PM recommendation, confirm at checkpoint):**
+
+- One dialog that swaps its content rather than a second dialog stacked on
+  top: the leaders list slides out, the player's stats slide in (reduced
+  motion: no slide). A breadcrumb in the upper left, "‹ Goals leaders",
+  returns to the list at the same scroll position and focuses the row that
+  was tapped.
+- Close (✕ / Close button / backdrop) closes everything. Escape steps back
+  to the list first, then closes. The browser Back button behaves like the
+  breadcrumb while the player view is showing (one history entry).
+- The player view includes the Compare button (COMPARE-01), like everywhere
+  else the stats dialog opens.
+
+**Acceptance:** tapping a leader shows their stats; the breadcrumb, Escape
+and Back return to the same list position; Close closes the whole dialog;
+works with keyboard only; 375/1280 light/dark.
+
+**Verify:** Playwright for tap → stats → breadcrumb/Escape/Back/Close;
+screenshots.
+
+---
+
+## PROJ-01 — Projected goals, assists and points
+
+**Status:** IDEA
+
+**Goal:** Show each skater's projected season G, A and P in the comparison
+table (rows after TOI/GP) and in the player stats dialog.
+
+**Dependencies:** COMPARE-01 (table rows in `player-compare/utils/compareStats.ts`);
+the dialog's stat cells come from `teams/utils/playerStatsHelper.ts`
+(`buildPlayerStatCells`).
+
+**Proposed (PM recommendation, confirm at checkpoint):**
+
+- Formula options:
+  - **A (recommended):** current total plus the player's per-game rate over
+    the team's remaining games: `G + (G / GP) × (82 − team GP)`. Respects
+    games already missed; team GP comes from the loaded standings.
+  - **B:** simple pace, `(G / GP) × 82`. No team data needed, but assumes the
+    player plays every remaining game.
+- Rounded to whole numbers; shown as "Proj G", "Proj A", "Proj P" with a full
+  title ("Projected goals") and a short note under the table, "Projected over
+  82 games at the current pace".
+- Hidden (dash) under 5 games played, where the pace is noise; not shown for
+  a completed season (the totals are final); skaters only, no goalie rows.
+- Comparison table: highlighted higher-is-better like the other rows, ties at
+  the displayed whole number.
+- Pure helper in `lib/projection.ts` (structural input) so both features use
+  it without importing each other.
+
+**Acceptance:** values match the chosen formula; dash under the minimum and
+for past seasons; rows sit after TOI/GP; the dialog's cells fit the 3-column
+grid at 375.
+
+**Verify:** unit tests for the formula, rounding, minimum and past-season
+cases; screenshots of the table and dialog at 375/1280.
 
 ---
 
