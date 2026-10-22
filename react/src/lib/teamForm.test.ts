@@ -6,7 +6,7 @@ import {
   homeRoadSplits,
   lastN,
   rollingPointsPct,
-} from './teamFormHelper';
+} from '@/lib/teamForm';
 
 function game(
   date: string,

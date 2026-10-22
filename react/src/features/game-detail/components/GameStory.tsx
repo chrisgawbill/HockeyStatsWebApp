@@ -7,7 +7,7 @@ import {
   GameStoryFacts,
   GameStoryTurningPoint,
 } from '@/features/game-detail/utils/gameStoryHelper';
-import { getTeamPrimaryColor } from '@/features/teams/utils/teamColor';
+import { getTeamPrimaryColor } from '@/lib/teamColor';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 

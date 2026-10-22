@@ -1,6 +1,6 @@
-import { TeamResult } from '@/features/teams/utils/teamFormHelper';
+import { TeamResult } from '@/lib/teamForm';
 import { joinClassNames } from '@/lib/joinClassNames';
-import styles from '@/features/teams/components/TeamPage.module.css';
+import styles from '@/components/FormStrip.module.css';
 
 interface FormStripProps {
   results: TeamResult[];

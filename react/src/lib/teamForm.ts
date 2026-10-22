@@ -1,5 +1,18 @@
-import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { isCompletedGameState } from '@/lib/gameStatus';
+
+/**
+ * The schedule fields team form reads. The schedule feature's `ScheduledGame`
+ * satisfies it, so lib/ needs no feature types.
+ */
+export interface TeamFormGame {
+  date: Date;
+  gameState: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  periodType: string | null;
+}
 
 export type TeamResultOutcome = 'W' | 'L' | 'OTL';
 
@@ -24,7 +37,7 @@ export interface TeamSplit {
 
 /** Converts completed schedule rows into chronological results for one team. */
 export function getTeamResults(
-  games: ScheduledGame[],
+  games: TeamFormGame[],
   triCode: string,
 ): TeamResult[] {
   const normalizedCode = triCode.toUpperCase();
@@ -123,7 +136,7 @@ export interface TeamForm {
 
 /** Derives the Team Form panel's figures from the league schedule. */
 export function buildTeamForm(
-  games: ScheduledGame[],
+  games: TeamFormGame[],
   triCode: string,
 ): TeamForm {
   const results = getTeamResults(games, triCode);

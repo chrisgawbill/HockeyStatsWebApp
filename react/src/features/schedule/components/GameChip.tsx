@@ -20,7 +20,6 @@ function themedLogoUrl(logoUrl: string, theme: string): string {
 
 type GameChipProps = {
   game: ScheduledGame;
-  isGameCompleted: (game: ScheduledGame) => boolean;
   onSelect: (game: ScheduledGame) => void;
 };
 
@@ -29,16 +28,11 @@ type GameChipProps = {
  * (away over home) so abbreviations stay readable in narrow columns, with the
  * score aligned right per team and the start time / status on its own line.
  */
-export default function GameChip({
-  game,
-  isGameCompleted,
-  onSelect,
-}: GameChipProps) {
+export default function GameChip({ game, onSelect }: GameChipProps) {
   const { theme } = useTheme();
   const homeLogo = themedLogoUrl(game.homeLogo, theme);
   const awayLogo = themedLogoUrl(game.awayLogo, theme);
 
-  const completed = isGameCompleted(game);
   const live = isInProgressGameState(game.gameState);
   const scored = hasScore(game);
   const statusLabel = getGameStatusLabel(game);
@@ -53,12 +47,11 @@ export default function GameChip({
       type="button"
       className={joinClassNames(
         styles['game-chip'],
-        completed && styles['game-chip--clickable'],
+        styles['game-chip--clickable'],
         game.isPreseason && styles['game-chip--preseason'],
         live && styles['game-chip--live'],
       )}
-      onClick={() => completed && onSelect(game)}
-      disabled={!completed}
+      onClick={() => onSelect(game)}
       title={matchup}
       aria-label={label}
     >

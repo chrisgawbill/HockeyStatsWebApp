@@ -8,7 +8,8 @@ import {
   hasThreeStars,
 } from '@/features/game-detail/utils/gameDetailHelper';
 import { getGameStoryFacts } from '@/features/game-detail/utils/gameStoryHelper';
-import { useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
+import { getMatchupPreviewPath, isPreviewGame } from '@/lib/gamePath';
 import PageHeader from '@/components/PageHeader';
 import HeroScoreboard from '@/features/game-detail/components/HeroScoreboard';
 import PeriodGoalsBreakdownTable from '@/features/game-detail/components/PeriodScoresTable';
@@ -37,10 +38,13 @@ function GameDetailShell({ children }: { children: ReactNode }) {
 /**
  * Game route (`/game/:gameId`): hero scoreboard plus, for games that have
  * started, the story, period breakdown, scoring summary, three stars, team
- * comparison, and player stats.
+ * comparison, and player stats. A game whose box score shows it has not
+ * started yet moves to its matchup preview; past its scheduled start (a late
+ * puck drop) it stays here on the preview scoreboard.
  */
 const GameDetailPage = () => {
   const { gameId } = useParams<{ gameId: string }>();
+  const location = useLocation();
   const { boxscore, landing, loading, error, status } = useGameDetail(gameId);
 
   const periodGoalsBreakdown = useMemo(() => {
@@ -95,6 +99,20 @@ const GameDetailPage = () => {
           message="Game data unavailable."
         />
       </GameDetailShell>
+    );
+
+  if (isPreviewGame(boxscore.gameState, boxscore.startTimeUTC))
+    return (
+      <Navigate
+        key={location.key}
+        to={getMatchupPreviewPath({
+          gameId: boxscore.id,
+          awayTeam: boxscore.awayTeam.abbrev,
+          homeTeam: boxscore.homeTeam.abbrev,
+        })}
+        replace
+        state={location.state}
+      />
     );
 
   const isPreview = status === 'preview';

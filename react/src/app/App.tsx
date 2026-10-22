@@ -9,6 +9,7 @@ import { ErrorBoundary, getErrorMessage } from 'react-error-boundary';
 import InstallBanner from '@/features/install-prompt/components/InstallBanner';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
+import GamePreviewRedirect from '@/app/GamePreviewRedirect';
 
 /** Placeholder shown while a lazily loaded route downloads. */
 function RouteLoadingFallback() {
@@ -82,7 +83,14 @@ export default function App() {
                       <Route path="schedule" element={<SchedulePage />} />
                       <Route path="teamList" element={<TeamList />} />
                       <Route path="team/:teamId" element={<TeamPage />} />
-                      <Route path="game/:gameId" element={<GameDetailPage />} />
+                      <Route
+                        path="game/:gameId"
+                        element={
+                          <GamePreviewRedirect>
+                            <GameDetailPage />
+                          </GamePreviewRedirect>
+                        }
+                      />
                       <Route path="matchup" element={<MatchupPage />} />
                       <Route path="diagnostics" element={<DiagnosticsPage />} />
                       <Route path="board-game" element={<BoardGamePage />} />

@@ -13,7 +13,7 @@ import {
   getContrastTextColor,
   getTeamPrimaryColor,
   toDarkModeAccentColor,
-} from '@/features/teams/utils/teamColor';
+} from '@/lib/teamColor';
 import { useTheme } from '@/lib/ThemeContext';
 import shared from '@/styles/shared.module.css';
 

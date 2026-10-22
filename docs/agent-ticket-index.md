@@ -55,7 +55,7 @@ acceptance are both necessary for DONE.
 | NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; accepted from 1001/1024/1200 screenshots 2026-10-21. |
 | FEED-01 | Approved 2026-10-21: /my-hockey page plus an "Up next" strip on home (right-hand column on desktop); Up next / Last results / Your players; games by time, players by tier; hard cap of 5 favorite teams (API); season + last-game player lines. Accepted from screenshots 2026-10-22. |
 | FEED-02 | Approved 2026-10-22: Option A — Your teams and Your players rows move from home to the top of /my-hockey; the player row and the feed's player list merge into one card row (season + last-game lines on each card); home keeps only the Up next strip; Up next rows show the opponent logo right after the matchup. Pending Product Owner acceptance. |
-| PREVIEW-01 | Preview sections and which data is shown when lines or probable goalies are unknown. |
+| PREVIEW-01 | Approved 2026-10-22: previews use /matchup (not the game page) with a Team DNA card per team; every game card links through one routing helper (future → /matchup, live/final → /game) and /game/:id redirects games that have not started; phones switch between the two DNA cards; the puck-drop chip turns into a game-page link at the start time (local timer, no polling); TeamDna/FormStrip move to `components/` and take the team color. Lines, goalies and the team comparison are dropped. Pending Product Owner acceptance. |
 | COMPARE-01 | Entry points, player picker, stat set per position, and chart vs. table presentation. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
@@ -1517,46 +1517,57 @@ against a mocked API for the cases above with screenshots.
 
 ---
 
-## PREVIEW-01 — Pre-game preview on the game page
+## PREVIEW-01 — Pre-game preview on the matchup page
 
-**Status:** IDEA
+**Status:** ACTIVE — implemented and verified; pending Product Owner acceptance
+from screenshots.
 
-**Goal:** Before puck drop, `/game/:gameId` shows a useful preview instead of an
-empty box score: head-to-head, recent form, likely lines and goalies.
+**Goal:** Before puck drop, a game opens a useful preview instead of an empty
+box score: the `/matchup` page for its two teams with the game's date, arena and
+puck drop, the season series, a Team DNA card per team, and recent form.
 
-**Dependencies:** API-LINES-01 (DONE) for lines. Reuses the `matchup` season
-series and `teams` form helpers. Probable goalies depend on what the NHL
-gamecenter landing returns for future games (spot-check before the
-checkpoint); no new API endpoint unless that check fails.
+**Approved design (Product Owner, 2026-10-22):**
 
-**Proposed design (PM recommendation, confirm at checkpoint):**
-
-- Shown when the game state is future or pregame; replaced by the current
-  game detail once the game starts.
-- Sections:
-  1. **Season series** so far between the two teams (reuse
-     `matchup/utils/seasonSeriesHelper`), with a link to `/matchup`.
-  2. **Recent form:** last-5 strip per team (reuse `FormStrip`) and record.
-  3. **Team comparison:** goals for/against per game, PP%, PK% from standings
-     data, in the existing `TeamComparison` style.
-  4. **Projected lines:** each team's top two forward lines and top pair from
-     `/team/lines/:triCode`, labelled with the source game; hidden when
-     `source: 'none'`.
-  5. **Goalies:** probable starters with season SV%/GAA if the landing
-     provides them, else the last game's starter labelled "Last start".
-- Cross-feature use of `matchup` / `teams` helpers needs either moving the
-  shared helpers to `lib/` or a recorded exception in `architecture.md`.
+- **Entry (option A):** `lib/gamePath.ts` routes every game link: future or
+  pregame with the start still ahead → `/matchup?teamA=<away>&teamB=<home>&game=<id>`,
+  anything else → `/game/:id`. Schedule day cards, calendar chips, the team
+  schedule strip and the Up next rows use it; future and live cards become
+  clickable. Search keeps listing finished games only.
+- **Redirect:** `/game/:id` redirects (history replace) from the loaded season
+  list, with a box-score fallback in the game page; past the scheduled start it
+  never redirects, so a stale list cannot bounce a started game.
+- **Team DNA:** one card per team, tinted in the team color; side by side from
+  768px, a team switch (also swipe) on phones. Order: series summary, Team DNA,
+  form, played, upcoming. Shown on every matchup, preview or not.
+- **Puck drop:** plain "Puck drop 7:00 PM" before the start; at the start a
+  local timer turns it into "Game on · open the game page" (finished games:
+  "Final · open the game page"). The page makes no requests and never polls.
+- **Architecture:** `TeamDna` and `FormStrip` move to `components/` (own CSS
+  modules, optional `teamColor`, otherwise they inherit `--color-primary`);
+  `teamDna`, `teamForm`, `teamColor` helpers move to `lib/` with structural
+  types; recorded in `architecture.md`.
+- **Dropped from the original idea:** projected lines, goalies, and the team
+  comparison section.
 
 **Acceptance:**
 
-- A future game shows the preview; a live or final game shows today's page.
-- Each section hides on its own when its data is missing; the page never shows
-  a blank or broken section.
-- No more than the existing landing call plus one lines call per team.
+- Future game cards open the preview; live/final cards and `/game/:id` for
+  started games open the game page; `/game/:id` for a future game redirects.
+- No new API calls (season games and league team list only); no polling.
 - 375/1280, light/dark, no page horizontal scroll.
 
-**Verify:** unit tests for section visibility rules; Playwright against a
-mocked API for future/live/final games with screenshots.
+**Verify:** unit tests for the routing helper (`lib/gamePath.test.ts`) and game
+context parsing (`matchup/utils/matchupGameContext.test.ts`); Playwright against
+a mocked API for future/live/final games and a plain `/matchup`, with
+screenshots.
+
+**Evidence (2026-10-22):** tsc, Prettier, Vitest 50 files / 206 tests pass (14 new); build
+passes; Playwright 29/29 against a mocked API (schedule card and team strip →
+preview; live card → game page; warm and cold `/game/:id` redirect with history
+replace; live and final stay; puck-drop flip after 120 simulated minutes with
+zero requests; link opens the game page without bouncing; plain `/matchup`;
+team change drops `game=`; phone switch; no horizontal scroll at 375/1280
+light/dark). Up next links are covered by unit tests only (they need sign-in).
 
 ---
 

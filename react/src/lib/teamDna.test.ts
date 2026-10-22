@@ -7,7 +7,7 @@ import {
   ordinal,
   scalePosition,
   tierForRank,
-} from '@/features/teams/utils/teamDnaHelper';
+} from '@/lib/teamDna';
 
 const SEASON = '20262027';
 

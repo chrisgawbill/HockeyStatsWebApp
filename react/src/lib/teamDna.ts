@@ -1,6 +1,45 @@
-import { Team } from '@/features/teams/types/team';
-import { TeamStats } from '@/features/teams/types/teamStats';
-import { TeamStatsContract } from '@/features/teams/types/teamPageTypes';
+/**
+ * One season of league team stats, as Team DNA reads it. The teams feature's
+ * `TeamStats` satisfies it, so lib/ needs no feature types.
+ */
+export interface TeamDnaSeasonStats {
+  seasonId: number;
+  wins: number;
+  losses: number;
+  otLosses: number;
+  goalsPerGame: number;
+  goalsAgainstPerGame: number;
+  powerPlayPct: number;
+  penaltyKillPct: number;
+  shotsForPerGame: number;
+  shotsAgainstPerGame: number;
+  faceoffWinPct: number;
+}
+
+/** A club in the league set, as Team DNA reads it (the teams feature's `Team`). */
+export interface TeamDnaLeagueTeam {
+  id: number;
+  teamName: string;
+  seasonStats: TeamDnaSeasonStats[];
+}
+
+/**
+ * The team's own summary (the team page's stats contract), used to name the
+ * team and as the unranked fallback when the league set lacks it.
+ */
+export interface TeamDnaOwnStats {
+  teamFullName: string;
+  wins?: number;
+  losses?: number;
+  otLosses?: number;
+  goalsForPerGame?: number;
+  goalsAgainstPerGame?: number;
+  powerPlayPct?: number;
+  penaltyKillPct?: number;
+  shotsForPerGame?: number;
+  shotsAgainstPerGame?: number;
+  faceoffWinPct?: number;
+}
 
 export type TeamDnaTier = 'elite' | 'above' | 'average' | 'below' | 'weak';
 
@@ -38,8 +77,8 @@ export interface TeamDnaProfile {
 }
 
 export interface TeamDnaInput {
-  stats: TeamStatsContract;
-  league: Team[];
+  stats: TeamDnaOwnStats;
+  league: TeamDnaLeagueTeam[];
   /** Season as used by the page, e.g. "20262027". */
   season: string;
   /** Page team id, used when the full-name match fails. */
@@ -51,8 +90,8 @@ interface MetricDef {
   label: string;
   note?: string;
   higherIsBetter: boolean;
-  read: (stats: TeamStats) => number | null | undefined;
-  readOwn: (stats: TeamStatsContract) => number | null | undefined;
+  read: (stats: TeamDnaSeasonStats) => number | null | undefined;
+  readOwn: (stats: TeamDnaOwnStats) => number | null | undefined;
   format: (value: number) => string;
   strength: [elite: string, strong: string];
   weakness: string;
@@ -290,7 +329,10 @@ export function buildTeamDna({
       ),
     }))
     .filter(
-      (entry): entry is { team: Team; stats: TeamStats } => !!entry.stats,
+      (
+        entry,
+      ): entry is { team: TeamDnaLeagueTeam; stats: TeamDnaSeasonStats } =>
+        !!entry.stats,
     );
   const own =
     leagueRows.find(

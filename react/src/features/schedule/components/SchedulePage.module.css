@@ -3,9 +3,7 @@
   padding: var(--page-block-start) 0 var(--page-block-end);
 }
 
-.schedule-page :global(.sliding-toggle),
-.schedule-filter-field,
-.date-row.ds-button-group {
+.schedule-filter-field {
   transition:
     border-color var(--ds-motion-duration-short)
       var(--ds-motion-easing-standard),
@@ -14,8 +12,9 @@
       var(--ds-motion-easing-standard);
 }
 
-/* --- View toggle (Daily / Weekly / Monthly) --- */
-.schedule-view-toggle {
+/* --- View toggle (Daily / Weekly / Monthly) and date navigation rows --- */
+.schedule-view-toggle,
+.schedule-date-nav {
   max-width: 30rem;
   margin: 0 auto var(--ds-space-4);
   padding: 0 var(--ds-space-3);
@@ -33,7 +32,7 @@
   padding: 0 var(--ds-space-3);
 }
 
-.schedule-filter-bar > :global(.sliding-toggle) {
+.schedule-filter-toggle {
   width: min(100%, 18rem);
 }
 
@@ -86,81 +85,54 @@
   box-shadow: 0 0 0 1px var(--color-primary);
 }
 
-/* --- Date navigation --- */
+/* --- Date navigation: the same segmented pill as the toggles above --- */
 .date-row {
-  --bs-gutter-x: 0;
-  justify-content: center;
-  margin: 0 0 var(--ds-space-4);
-  padding: 0 var(--ds-space-3);
-}
-
-.date-row.ds-button-group {
-  width: 100%;
-  max-width: 42rem;
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 12%,
-    var(--color-surface)
-  );
-  border: 1px solid color-mix(in srgb, var(--color-primary) 42%, transparent);
-  border-radius: var(--ds-radius-full);
-  box-shadow: var(--ds-elevation-1);
-  padding: 4px;
-  display: flex;
+  composes: ds-segmented from global;
   align-items: center;
-}
-
-.date-row.ds-button-group > .ds-button {
-  background: transparent !important;
-  border: none !important;
-  border-radius: var(--ds-radius-full) !important;
-  box-shadow: none !important;
-  color: var(--color-primary) !important;
-  padding: 6px 20px;
-  font-weight: 500;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
-  white-space: nowrap;
-}
-
-.date-row.ds-button-group > .schedule-nav-btn {
-  padding: 6px 12px;
-  min-width: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.date-row.ds-button-group > .ds-button:hover:not(:disabled),
-.date-row.ds-button-group > .ds-button:focus-visible {
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 10%,
-    transparent
-  ) !important;
-  color: var(--color-primary-dark) !important;
-}
-
-.date-row.ds-button-group > .ds-button:active:not(:disabled) {
-  transform: translateY(1px);
+  gap: var(--ds-space-1);
 }
 
 .schedule-nav-btn {
-  padding: 6px 12px;
-  min-width: 44px;
+  composes: ds-segmented-button from global;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  transition:
+    background-color var(--ds-motion-duration-short)
+      var(--ds-motion-easing-standard),
+    color var(--ds-motion-duration-short) var(--ds-motion-easing-standard);
+}
+
+.schedule-nav-btn:hover:not(:disabled),
+.schedule-nav-btn:focus-visible {
+  background-color: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  color: var(--color-primary-dark);
+}
+
+.schedule-nav-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.schedule-nav-btn:disabled {
+  opacity: 0.38;
+  cursor: default;
 }
 
 .schedule-date-label {
   flex: 1;
-  text-align: center;
-  color: var(--color-primary);
-  font-weight: 700;
-  font-size: var(--text-base);
+  min-width: 0;
   margin: 0;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* --- Game cards --- */
@@ -319,8 +291,7 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   column-gap: var(--ds-space-3);
   align-items: center;
-  padding-top: 0.6rem;
-  padding-bottom: 0.6rem;
+  padding: 0.6rem var(--ds-space-4);
   background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
   border-top: 1px solid var(--color-divider);
   font-size: var(--text-sm);
@@ -328,10 +299,14 @@
   margin: 0;
 }
 
-.game-details .text-center {
+.game-details__tickets {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.game-tickets {
+  white-space: nowrap;
 }
 
 .game-details p {
@@ -345,17 +320,13 @@
     padding-top: calc(var(--page-block-start) + env(safe-area-inset-top, 0px));
   }
 
-  .date-row {
-    margin-bottom: var(--ds-space-5);
-  }
-
   .schedule-filter-bar {
     align-items: stretch;
     flex-direction: column;
     margin-bottom: var(--ds-space-4);
   }
 
-  .schedule-filter-bar > :global(.sliding-toggle),
+  .schedule-filter-toggle,
   .schedule-filter-field {
     width: 100%;
     max-width: 30rem;
@@ -365,10 +336,6 @@
 
   .schedule-filter-field {
     justify-content: space-between;
-  }
-
-  .schedule-date-label {
-    font-size: var(--text-sm);
   }
 
   .game-card {
@@ -426,56 +393,10 @@
     text-align: center;
   }
 
-  .md3-btn-group > .ds-button {
-    white-space: nowrap;
+  /* Stacked rows: a card without tickets or broadcasts leaves no gap. */
+  .game-details > div:empty {
+    display: none;
   }
-}
-
-/* MD3 Segmented Button Group */
-.md3-btn-group {
-  border: 1px solid var(--color-primary);
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.md3-btn-group > :global(.btn) {
-  background: transparent !important;
-  border: none !important;
-  border-left: 1px solid var(--color-primary) !important;
-  border-radius: 0 !important;
-  color: var(--color-primary) !important;
-  padding: 6px 16px;
-  font-size: var(--text-sm);
-  font-weight: 500;
-  letter-spacing: 0.1px;
-  box-shadow: none !important;
-  margin-left: 0 !important;
-  min-height: 40px;
-  transition: background-color 0.2s;
-}
-
-.md3-btn-group > :global(.btn):first-child {
-  border-left: none !important;
-}
-
-.md3-btn-group > :global(.btn):hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 8%,
-    transparent
-  ) !important;
-  color: var(--color-primary) !important;
-}
-
-.md3-btn-group > :global(.btn):focus,
-.md3-btn-group > :global(.btn):active {
-  background-color: color-mix(
-    in srgb,
-    var(--color-primary) 12%,
-    transparent
-  ) !important;
-  color: var(--color-primary) !important;
-  box-shadow: none !important;
 }
 
 :global([data-theme='dark']) .game-period-chip.overtime {
@@ -503,10 +424,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .schedule-page :global(.sliding-toggle),
   .schedule-filter-field,
-  .date-row :global(.btn-group),
-  .date-row :global(.btn-group) > :global(.btn) {
+  .schedule-nav-btn {
     transition: none;
   }
 }

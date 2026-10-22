@@ -40,16 +40,20 @@ export default function ScheduleFilterBar({
           ))}
         </select>
       </label>
-      <SlidingToggle
-        options={STATUS_OPTIONS}
-        value={filter.status ?? ''}
-        onChange={onStatusChange}
-      />
-      <SlidingToggle
-        options={TYPE_OPTIONS}
-        value={filter.gameType ?? ''}
-        onChange={onTypeChange}
-      />
+      <div className={styles['schedule-filter-toggle']}>
+        <SlidingToggle
+          options={STATUS_OPTIONS}
+          value={filter.status ?? ''}
+          onChange={onStatusChange}
+        />
+      </div>
+      <div className={styles['schedule-filter-toggle']}>
+        <SlidingToggle
+          options={TYPE_OPTIONS}
+          value={filter.gameType ?? ''}
+          onChange={onTypeChange}
+        />
+      </div>
     </div>
   );
 }

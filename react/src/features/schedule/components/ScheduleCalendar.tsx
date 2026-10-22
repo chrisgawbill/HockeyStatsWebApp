@@ -13,7 +13,6 @@ type ScheduleCalendarProps = {
   gamesByDate: Record<string, ScheduledGame[]>;
   /** Max chips shown per day before collapsing to "+N more". */
   maxVisible: number;
-  isGameCompleted: (game: ScheduledGame) => boolean;
   /** Jump into day view for the clicked day (cell header or "+N more"). */
   onSelectDay: (date: Date) => void;
   /** Open a completed game's detail page. */
@@ -34,7 +33,6 @@ export default function ScheduleCalendar({
   days,
   gamesByDate,
   maxVisible,
-  isGameCompleted,
   onSelectDay,
   onSelectGame,
 }: ScheduleCalendarProps) {
@@ -95,7 +93,6 @@ export default function ScheduleCalendar({
                 <GameChip
                   key={game.gameId}
                   game={game}
-                  isGameCompleted={isGameCompleted}
                   onSelect={onSelectGame}
                 />
               ))}
@@ -104,8 +101,10 @@ export default function ScheduleCalendar({
                   type="button"
                   className={styles['calendar__more']}
                   onClick={() => onSelectDay(day)}
+                  aria-label={`${overflow} more games`}
                 >
-                  +{overflow} more
+                  +{overflow}
+                  <span className={styles['calendar__more-word']}> more</span>
                 </button>
               )}
             </div>
