@@ -8,6 +8,11 @@ import {
   useState,
 } from 'react';
 import { fetchSession, googleSignIn } from '@/lib/auth/authApi';
+import {
+  completeDiscordReturn,
+  isDiscordCodeReturn,
+  startDiscordSignIn,
+} from '@/lib/auth/discordAuth';
 import { decodeGoogleProfile } from '@/lib/auth/googleCredential';
 
 // Keys predate site-wide sign-in (they came from Rink Quest); keeping them
@@ -24,9 +29,11 @@ export interface AuthSession {
   token: string | null;
   email: string | null;
   picture: string | null;
-  /** True while a saved session is being checked on load. */
+  /** True while a saved session or a Discord return is being checked on load. */
   isRestoring: boolean;
   signIn: (credential: string) => void;
+  /** Leaves for Discord; the session is set when Discord sends the user back. */
+  signInWithDiscord: () => void;
   signOut: () => void;
 }
 
@@ -83,8 +90,9 @@ function storeCachedProfile(profile: CachedProfile | null): void {
 const AuthContext = createContext<AuthSession | null>(null);
 
 /**
- * Site-wide Google sign-in session. Restores a stored app session token on
- * load and exchanges fresh Google credentials for one. Feature-specific sync
+ * Site-wide sign-in session (Google or Discord). Restores a stored app
+ * session token on load, finishes a Discord return, and exchanges fresh
+ * Google credentials for a token. Feature-specific sync
  * (Rink Quest streaks, favorite teams) reacts to `token` in its own slice.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -93,9 +101,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [picture, setPicture] = useState<string | null>(
     () => readCachedProfile()?.picture ?? null,
   );
-  const [isRestoring, setIsRestoring] = useState(
+  const [isRestoringStored, setIsRestoringStored] = useState(
     () => readStoredToken() !== null,
   );
+  const [isCompletingDiscord, setIsCompletingDiscord] = useState(() =>
+    isDiscordCodeReturn(),
+  );
+
+  /** Saves and applies a new app session; shared by every provider. */
+  const applySession = useCallback((newToken: string, newEmail: string) => {
+    storeToken(newToken);
+    setToken(newToken);
+    setEmail(newEmail);
+  }, []);
 
   useEffect(() => {
     const stored = readStoredToken();
@@ -115,13 +133,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch((error) => {
-        console.error('Failed to restore Google sign-in session:', error);
+        console.error('Failed to restore sign-in session:', error);
         storeToken(null);
         storeCachedProfile(null);
         setPicture(null);
       })
       .finally(() => {
-        if (!cancelled) setIsRestoring(false);
+        if (!cancelled) setIsRestoringStored(false);
       });
 
     return () => {
@@ -129,23 +147,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signIn = useCallback((credential: string) => {
-    const profile = decodeGoogleProfile(credential);
-
-    googleSignIn(credential)
-      .then(({ token: newToken, email: newEmail }) => {
-        storeToken(newToken);
-        setToken(newToken);
-        setEmail(newEmail);
-
-        if (profile?.picture) {
-          storeCachedProfile({ picture: profile.picture });
-          setPicture(profile.picture);
-        }
+  useEffect(() => {
+    completeDiscordReturn()
+      .then((session) => {
+        if (session) applySession(session.token, session.email);
       })
       .catch((error) => {
-        console.error('Google sign-in failed:', error);
-      });
+        console.error('Discord sign-in failed:', error);
+      })
+      .finally(() => setIsCompletingDiscord(false));
+  }, [applySession]);
+
+  const signIn = useCallback(
+    (credential: string) => {
+      const profile = decodeGoogleProfile(credential);
+
+      googleSignIn(credential)
+        .then(({ token: newToken, email: newEmail }) => {
+          applySession(newToken, newEmail);
+
+          if (profile?.picture) {
+            storeCachedProfile({ picture: profile.picture });
+            setPicture(profile.picture);
+          }
+        })
+        .catch((error) => {
+          console.error('Google sign-in failed:', error);
+        });
+    },
+    [applySession],
+  );
+
+  const signInWithDiscord = useCallback(() => {
+    startDiscordSignIn().catch((error) => {
+      console.error('Failed to start Discord sign-in:', error);
+    });
   }, []);
 
   const signOut = useCallback(() => {
@@ -156,15 +192,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPicture(null);
   }, []);
 
+  const isRestoring = isRestoringStored || isCompletingDiscord;
   const value = useMemo(
-    () => ({ token, email, picture, isRestoring, signIn, signOut }),
-    [token, email, picture, isRestoring, signIn, signOut],
+    () => ({
+      token,
+      email,
+      picture,
+      isRestoring,
+      signIn,
+      signInWithDiscord,
+      signOut,
+    }),
+    [token, email, picture, isRestoring, signIn, signInWithDiscord, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-/** Returns the current Google session; throws outside `AuthProvider`. */
+/** Returns the current sign-in session; throws outside `AuthProvider`. */
 export function useAuth(): AuthSession {
   const context = useContext(AuthContext);
   if (!context) {

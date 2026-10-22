@@ -15,6 +15,7 @@ interface GoogleButtonConfiguration {
   text: 'signin_with' | 'signin';
   shape: 'pill';
   logo_alignment: 'left';
+  width?: number;
 }
 declare global {
   interface Window {
@@ -36,6 +37,8 @@ export interface GoogleSignInButtonProps {
   onCredential: (credential: string) => void;
   /** Google's button size; `small` also shortens the label to "Sign in". */
   size?: GoogleButtonSize;
+  /** Button width in CSS pixels (Google allows up to 400); defaults to fit the label. */
+  width?: number;
   /** Extra frame styling, e.g. Rink Quest's pixel border. */
   className?: string;
   unavailableClassName?: string;
@@ -60,11 +63,12 @@ function resolveGoogleButtonTheme(): 'outline' | 'filled_black' {
 
 /**
  * Renders Google's branded sign-in button (Google Identity Services). Used in
- * the global header and on Rink Quest; the credential goes to `useAuth().signIn`.
+ * the sign-in dialog, the home Up next strip and on Rink Quest; the credential goes to `useAuth().signIn`.
  */
 export default function GoogleSignInButton({
   onCredential,
   size = 'large',
+  width,
   className,
   unavailableClassName,
 }: GoogleSignInButtonProps) {
@@ -98,11 +102,12 @@ export default function GoogleSignInButton({
         text: size === 'small' ? 'signin' : 'signin_with',
         shape: 'pill',
         logo_alignment: 'left',
+        ...(width ? { width } : {}),
       });
     } catch (error) {
       console.error('Failed to render Google Sign-In button:', error);
     }
-  }, [ready, clientId, onCredential, size]);
+  }, [ready, clientId, onCredential, size, width]);
 
   if (!clientId) {
     return (
