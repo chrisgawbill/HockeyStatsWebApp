@@ -18,8 +18,9 @@ The PM owns the reasoning: define rules, edge cases, worker scope, and expected
 checks. Workers implement and verify that contract; they do not make unresolved
 product decisions. Bring the human concrete options and a recommendation at the
 checkpoints below, reuse existing approvals, and record decisions in the ticket
-or design before affected implementation. QA evidence and required human
-acceptance are both necessary for DONE.
+or design before affected implementation. A passing Spotter run on the pushed
+branch (for tickets with browser checks) and required human acceptance are both
+necessary for DONE.
 
 | Ticket | Human decision or review checkpoint |
 | --- | --- |
@@ -1808,7 +1809,10 @@ screenshots.
 
 ## API-AUTH-02 — Discord sign-in and account linking (backend)
 
-**Status:** DONE (2026-10-22; API branch `claude/api-auth-02-multi-provider-z77dqn`, not merged to `main`. Independent QA passed 11/11 on a real Postgres, `npm test` 111/111. Not verified: live Google/Discord calls and the rollback CLI with the server's `.env`.)
+**Status:** ACTIVE — API implemented and unit-tested on branch
+`claude/api-auth-02-multi-provider-z77dqn` (`08a39a4`, 111/111), not merged.
+Remaining: a frontend Discord sign-in path so Spotter can test sign-in end to
+end, then merge and deploy.
 
 **Approved (Product Owner, 2026-10-22; narrowed the same day):**
 
