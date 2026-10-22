@@ -1876,8 +1876,10 @@ first place a Discord button appears; API-AUTH-02's Spotter run happens here.
 **Decided (Product Owner, 2026-10-22):** the modal offers Google and Discord
 only (no Microsoft, no email code). A provider is hidden when its
 `VITE_GOOGLE_CLIENT_ID` / `VITE_DISCORD_CLIENT_ID` was not set at build time;
-with neither, the dialog says sign-in is unavailable. Rink Quest and the home
-Up next strip keep the Google button.
+with neither, the dialog says sign-in is unavailable. Rink Quest keeps the
+Google button. **Changed (Product Owner, 2026-10-22):** the home Up next strip's
+signed-out prompt shows a generic "Sign in" button (`SignInButton`) that opens
+the sign-in dialog, instead of Google's personalized pill.
 
 **Verify:** Spotter on the pushed branch: 375/1280 light/dark, keyboard and
 screen-reader pass on the dialog, and API-AUTH-02's Discord checks.

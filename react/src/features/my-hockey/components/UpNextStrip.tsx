@@ -1,5 +1,5 @@
 import SectionHeading from '@/components/SectionHeading';
-import GoogleSignInButton from '@/components/GoogleSignInButton';
+import SignInButton from '@/components/SignInButton';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useFeedFavorites } from '@/features/my-hockey/hooks/useFeedFavorites';
 import { useMyHockeyData } from '@/features/my-hockey/hooks/useMyHockeyData';
@@ -17,9 +17,8 @@ const STRIP_GAME_COUNT = 3;
 /** Home strip players: none, so it fetches team schedules only. */
 const NO_PLAYERS: never[] = [];
 
-/** Signed-out "Up next": what the strip would show, and a Google sign-in button. */
+/** Signed-out "Up next": what the strip would show, and a sign-in button. */
 function UpNextSignInPrompt() {
-  const { signIn } = useAuth();
   return (
     <section className={styles.strip} aria-labelledby="up-next-strip-title">
       <SectionHeading id="up-next-strip-title" title="Up next" />
@@ -27,10 +26,7 @@ function UpNextSignInPrompt() {
         <p className={styles.hint}>
           Sign in to follow your teams and see their next games here.
         </p>
-        <GoogleSignInButton
-          onCredential={signIn}
-          unavailableClassName={styles.hint}
-        />
+        <SignInButton />
       </div>
     </section>
   );
