@@ -4,7 +4,8 @@
 
 Default workflow: **Human stakeholder → Luna PM → bounded workers when needed**.
 The human is Product Owner and final decision-maker. The PM is the reasoning and
-coordination lead; coding and QA agents are workers with bounded instructions.
+coordination lead; coding agents are workers with bounded instructions.
+Frontend QA is Spotter, the in-house tester, which runs against a pushed branch.
 
 Work inside the human-approved request or ticket. `Start <ticket>` approves that
 ticket only. Carry forward earlier approvals without asking again. Routine
@@ -43,70 +44,66 @@ of duplicating them across docs or asking each worker to repeat discovery.
 
 PM handles documentation and small, low-risk, localized changes directly when
 acceptance is clear and targeted verification is sufficient. Use a separate coder
-and independent QA for substantial implementation, gameplay/state changes, data
-contracts, or changes spanning coupled components. Ticket-required independent
-review still applies. Do not add planning, discovery, or summarization agents by
-default. Parallelize only substantial independent tasks with explicit ownership.
+for substantial implementation, gameplay/state changes, data contracts, or
+changes spanning coupled components. Do not add QA, planning, discovery, or
+summarization agents. Parallelize only substantial independent tasks with
+explicit ownership.
 
 ## Model routing and responsibilities
 
 | Role | Preferred model | Responsibility |
 | --- | --- | --- |
-| PM | Luna | Reason through rules and dependencies, prepare human decisions, write worker contracts, interpret QA evidence, and own delivery. |
-| Coder | Luna, separate worker | Implement the approved contract, add relevant tests, and report changes and uncertainties. |
-| QA | Mini, separate worker | Run specified tests and browser checks, compare results against acceptance criteria, and report evidence. |
+| PM | Luna | Reason through rules and dependencies, prepare human decisions, write worker contracts, hand the branch to Spotter, interpret its results, and own delivery. |
+| Coder | Luna, separate worker | Implement the approved contract, add relevant tests, run the repo checks, and report changes and uncertainties. |
 | Escalation | Sol | Help the PM with difficult interactions, architecture questions, or reasoning-related failures; perform a bounded repair when assigned. |
+| Frontend QA | Spotter (in-house, not an agent) | Tests a pushed branch in the browser against the ticket's acceptance criteria. |
 
-Use available Luna/Sol model IDs rather than assuming a release number. Mini is
-the preferred QA model when available. If it cannot be selected, use a separate
-Luna QA worker and report the substitution; never claim a model ran when it did
-not. If Luna or Sol is unavailable, report the available equivalent used without
-silently changing responsibilities. This document does not switch an already
-running agent's model.
+Use available Luna/Sol model IDs rather than assuming a release number. If Luna
+or Sol is unavailable, report the available equivalent used without silently
+changing responsibilities; never claim a model ran when it did not. This
+document does not switch an already running agent's model.
 
 PM reasoning defaults to medium; raise it for ambiguous decisions. Coder effort
-should match the ticket. QA may use low reasoning for deterministic checks, but
-must report unverified criteria instead of inferring a pass. Sol is an escalation
-within approved scope, not permission to change the product.
+should match the ticket. Sol is an escalation within approved scope, not
+permission to change the product.
 
 ## Execution loop
 
 1. PM confirms scope, dependencies, prior approvals, and unresolved decisions.
 2. PM defines expected behavior, edge cases, and verification before dispatch.
-3. PM or Luna coder implements the bounded task and runs relevant checks.
-4. For delegated implementation, independent Mini QA verifies the contract; for
-   direct work, PM performs the required verification.
-5. PM interprets the evidence and checks that meaningful criteria were covered.
-6. On failure, send the failing assertion and relevant trace to the coder.
+3. PM or Luna coder implements the bounded task and runs the repo checks.
+4. PM reviews the diff against the contract and does the readability pass (see
+   "Readability pass"), re-running the checks if anything changed.
+5. PM commits and pushes the work to the ticket's branch for Spotter to test,
+   and tells the human the branch, commit, and what Spotter should check.
+6. On a Spotter or check failure, send the failing result to the coder.
 7. Use Sol when deeper reasoning is needed; do not merely repeat a failed plan.
 8. After three repair cycles, return the remaining problem and smallest required
    decision to the human before a fourth cycle.
-9. After QA passes, the PM does a readability pass on the ticket's diff (see
-   "Readability pass") and re-runs the coder-owned checks if anything changed.
-10. Present the result and obtain any human acceptance required by the ticket.
+9. Present the result and obtain any human acceptance required by the ticket.
 
-Choose direct or delegated work using the delegation criteria above. Parallelize independent tasks only; do not
-let workers edit tightly coupled files concurrently. QA does not fix application
-code or decide product tradeoffs. The PM owns those follow-ups.
+Choose direct or delegated work using the delegation criteria above. Parallelize
+independent tasks only; do not let workers edit tightly coupled files
+concurrently.
 
 ## Verification
 
-QA is an execution and evidence role, not merely a test-command launcher. A green
-build alone cannot verify new rules, fairness, or visual behavior. PM specifies
-the checks and expected results; QA reports PASS, FAIL, or BLOCKED for each
-criterion, including checks that could not run. PM resolves missing coverage.
+A green build alone cannot verify new rules, fairness, or visual behavior.
+The coder runs the repo's own checks (unit tests, typecheck, build, format) and
+the ticket's required tests. Browser verification (responsive layout,
+screenshots, interaction, accessibility) is Spotter's: push the branch and list
+the acceptance criteria Spotter should check. Spotter is a general tool; its
+per-project config lives with Spotter, outside this repo, and points at the
+project's specs. A ticket's browser specs (Playwright, plain `.spec.mjs`) live
+in `react/qa/`, named after the flow, with test titles that start with the
+ticket ID and "Verify:". Do not add Spotter packages, imports, or config to
+either repo; pushing the branch is the whole hand-off. Report every check that
+did not run instead of inferring a pass.
 
-Tickets involving responsive layout, screenshots, interaction, or accessibility
-require browser verification. Use selective evidence tied to acceptance criteria.
 Human playtests decide feel and fun. Never substitute source inspection for
-required rendered checks or automated tests for stakeholder acceptance.
-
-Assign verification ownership before dispatch: coder runs focused checks; QA
-checks acceptance and owns the broader required suite and browser scenarios.
-PM reviews evidence and verifies integration once without rerunning every passing
-command. Repeat checks when code, environment, failures, or missing coverage
-justify it. Independent QA must exercise behavior, not merely accept the coder's
-report. Preserve all ticket-required checks and human acceptance gates.
+required rendered checks or automated tests for stakeholder acceptance. Repeat
+checks when code, environment, or failures justify it. Preserve all
+ticket-required checks and human acceptance gates.
 
 Repair dispatches contain the failure, relevant evidence, and changed decisions;
 do not resend the full task history. Keep detailed logs in referenced artifacts.
@@ -124,21 +121,9 @@ CHANGE: <bounded implementation and owned files>
 KEEP: <critical invariants>
 DO NOT: <scope traps>
 DONE: <acceptance criteria and important edge cases>
-RUN: <coder-owned checks; identify checks reserved for QA>
+RUN: <repo checks; browser checks are left to Spotter>
 RETURN: outcome, changed files, check results, unresolved issues; concise
 EVIDENCE: <artifact paths for detailed logs or reports when needed>
-```
-
-QA dispatch:
-
-```text
-TICKET: <id/title>
-READ: <applicable instructions, relevant files, and approved decisions>
-VERIFY: <criteria and expected behavior, including edge cases>
-RUN: <commands and any browser scenarios>
-DO NOT: modify application code or redefine acceptance criteria
-RETURN: PASS|FAIL|BLOCKED per criterion; concise evidence and unverified items
-ON FAILURE: failing assertion and at most 10 relevant log lines
 ```
 
 Workers report missing decisions or scope conflicts to the PM. They do not invent
@@ -201,8 +186,7 @@ Report model substitutions once. Never describe a planned worker as executed.
 
 ## Efficiency measurement
 
-Optimize total tokens per accepted ticket, including PM, workers, repairs, and
-QA. When usage is available, append one compact ticket record: total tokens,
+Optimize total tokens per accepted ticket, including PM, workers, and repairs. When usage is available, append one compact ticket record: total tokens,
 worker count, repair cycles, and accepted/pending outcome. Otherwise mark tokens
 as unavailable; do not estimate from response length. Reuse existing usage
 reports rather than building tracking infrastructure. Compare similar completed

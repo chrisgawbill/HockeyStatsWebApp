@@ -30,8 +30,10 @@ Stay at the lowest tier that permits correct work. Do not recursively browse "fo
 Prefer targeted search/ranges over full-file reads for large files. Do not reread unchanged files after editing unless verification exposes a reason. Do not paste or retain successful command logs; keep only the result needed for the ticket. Avoid broad repo-wide searches after the implementation path is known.
 
 Apply the delegation criteria in `docs/agent-development.md`. Small, low-risk
-changes may stay single-agent; substantial implementation uses separate coding
-and QA workers. Required ticket checks and human acceptance still apply.
+changes may stay single-agent; substantial implementation may use a separate
+coding worker. Browser verification is done by Spotter, the in-house frontend
+QA: push the work to a branch for Spotter to test. Required ticket checks and
+human acceptance still apply.
 
 At completion follow `docs/agent-development.md` and report:
 - `EXECUTION: single-agent | multi-agent — <roles only if multi>`

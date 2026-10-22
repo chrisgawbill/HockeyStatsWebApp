@@ -1,0 +1,4 @@
+/* Same glass circle as the signed-in bell, so the corner keeps its shape. */
+.button {
+  composes: bell from '../features/after-action-reports/components/NotificationBell.module.css';
+}

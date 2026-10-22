@@ -15,6 +15,26 @@ export async function googleSignIn(
 }
 
 /**
+ * Exchanges a Discord authorization code (with its PKCE verifier and the exact
+ * redirect URI sent to Discord) for an app session token.
+ */
+export async function discordSignIn({
+  code,
+  codeVerifier,
+  redirectUri,
+}: {
+  code: string;
+  codeVerifier: string;
+  redirectUri: string;
+}): Promise<{ token: string; email: string }> {
+  return post<{ token: string; email: string }>('/api/auth/discord', {
+    code,
+    codeVerifier,
+    redirectUri,
+  });
+}
+
+/**
  * Resolves a stored session token to the signed-in user's email, or `null`
  * for an expired/invalid session.
  */

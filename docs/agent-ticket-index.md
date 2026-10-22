@@ -18,8 +18,9 @@ The PM owns the reasoning: define rules, edge cases, worker scope, and expected
 checks. Workers implement and verify that contract; they do not make unresolved
 product decisions. Bring the human concrete options and a recommendation at the
 checkpoints below, reuse existing approvals, and record decisions in the ticket
-or design before affected implementation. QA evidence and required human
-acceptance are both necessary for DONE.
+or design before affected implementation. A passing Spotter run on the pushed
+branch (for tickets with browser checks) and required human acceptance are both
+necessary for DONE.
 
 | Ticket | Human decision or review checkpoint |
 | --- | --- |
@@ -61,7 +62,11 @@ acceptance are both necessary for DONE.
 | API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
+| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Implemented; pending Product Owner acceptance of 375/1280 light/dark screenshots. |
+| API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
+| SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
+| A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured. |
 
 ## Dependency outline
 
@@ -83,6 +88,7 @@ API-COMPARE-01 -> COMPARE-01
 FAN-01 -> FEED-01
 API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
+API-AUTH-02 -> SIGNIN-01
 ```
 
 ON2-09A may run early using the existing game; it gates production presentation
@@ -1763,3 +1769,163 @@ hide both views when the call 404s).
 
 **Verify:** unit tests for filtering and the flow series; Playwright against a
 mocked API with screenshots.
+
+---
+
+## SHARE-01 — Share button in the phone top bar
+
+**Status:** ACTIVE — implemented and verified 2026-10-22; pending Product Owner acceptance of 375/1280 light/dark screenshots
+
+**Goal:** On phones, one tap shares the page being viewed (a comparison, a
+game, a team, a matchup preview) through the phone's share sheet.
+
+**Context:** The phone top bar is `PageHeader`'s `nav-secondary-row` (back
+button, season selector, account corner). Every page is a hash route whose URL
+already rebuilds the view (`/compare?players=…`, `/matchup?teamA=…`,
+`?season=`), so sharing `location.href` is enough.
+
+**Approved (Product Owner, 2026-10-22):**
+
+- A share icon button in the phone top bar between the season selector and
+  the account controls (`[back] [season] [share] [bell] [avatar]`), styled like
+  the bell (40px glass circle, 48px target). Not rendered in the desktop header.
+- `navigator.share({ title, url })`; without it, copy the link and show a
+  "Link copied" toast (`role="status"`) above the bottom nav. A cancelled share
+  sheet (`AbortError`) is silent; other failures show an error toast.
+- Title: the page's first `h1` text + " · Hockey Stats", or "Hockey Stats".
+- Every page except `/diagnostics`; the URL (including `season=`) is shared
+  as is.
+- Logic in `lib/sharePage.ts`, the button in `components/ShareButton.tsx`.
+
+**Acceptance:** visible on phones at 375 in light and dark, absent at 1280;
+opens the share sheet with the current URL; the copy fallback works and
+announces itself to screen readers; a cancelled share shows nothing; the top
+bar fits at 320–430px signed in and out with no page horizontal scroll.
+
+**Verify:** unit tests for the share/copy decision; Playwright against a mocked
+API with `navigator.share` present, absent and rejected; 375/1280 light/dark
+screenshots.
+
+---
+
+## API-AUTH-02 — Discord sign-in and account linking (backend)
+
+**Status:** DONE — accepted by the Product Owner 2026-10-22. API merged to
+`main` (`8f99a1d`) and deployed by Jenkins 2026-10-22; Google sign-in confirmed
+working. The Discord button shipped in SIGNIN-01's modal; Spotter passed the
+Discord success, cancel, mismatched-state, rejected and expired-session specs
+against recorded API responses (`feature/signin-dialog`, `2a45e8d`). Follow-up:
+one live Discord sign-in after the web app deploys.
+
+**Decided (Product Owner, 2026-10-22):** no interim Discord button; it ships
+with SIGNIN-01's modal. The end-to-end Spotter run waits for that modal.
+
+**Approved (Product Owner, 2026-10-22; narrowed the same day):**
+
+- Providers: Google (existing) and Discord. Microsoft, emailed codes (Brevo)
+  and Apple are out of scope. No provider on/off config endpoint in this
+  ticket.
+- Discord sign-in and email encryption landed on `main` first (API `d6deb7c`,
+  migrations 007/008, `emailCrypto.js`); this ticket builds on them.
+- Discord: OAuth authorization code plus PKCE, exchanged on the API with
+  `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET`; `identify` and `email`
+  scopes; `verified` flag. `POST /api/auth/discord` body is
+  `{ code, codeVerifier, redirectUri }` (redirect URI on
+  `DISCORD_REDIRECT_URIS`).
+- A `user_identities` table maps `(provider, subject)` to a user and replaces
+  `users.google_sub` and `users.discord_id`; user ids are unchanged, so
+  favorites, push subscriptions and reports stay attached.
+- Email is encrypted at rest (AES-256-GCM, `EMAIL_ENCRYPTION_KEY`) and found by
+  a keyed hash (HMAC-SHA256 of the trimmed, lowercased address,
+  `EMAIL_LOOKUP_KEY`). Migration 009 encrypts any plaintext left and drops
+  `users.email`. Emails never appear in logs or error messages; auth errors
+  are fixed strings.
+- Accounts link only on a verified email (Google `email_verified`, Discord
+  `verified`). Existing Google emails count as verified. Accounts that
+  already share an email are not merged: the oldest keeps the lookup and is
+  the one new sign-ins link to. A verified sign-in updates the account email
+  when no other account holds it.
+- Session JWT and `GET /api/auth/me` (`{ email }`) are unchanged.
+- Rollback: `pg_dump` before deploying; `node bin/rollback-009.js` then revert
+  on `main`.
+
+**Verify:** unit tests for encryption round-trip, lookup hashing, linking
+rules, PKCE validation, fixed error messages and migration 009; existing API
+checks pass.
+
+---
+
+## SIGNIN-01 — Account icon and sign-in modal (frontend)
+
+**Status:** DONE — accepted by the Product Owner 2026-10-22. Spotter passed on
+`feature/signin-dialog` (`2a45e8d`, 32/32 specs in `react/qa/sign-in.spec.mjs`
+at 375/1280 light/dark, no new findings; signed-in screenshots unchanged).
+
+**Approved (Product Owner, 2026-10-22):** the signed-out Google pill becomes an
+account icon button (filled figure inside the bell's glass circle,
+`aria-label="Sign in"`) on phones and desktop. It opens an `AppDialog` with
+Google, Microsoft, Discord and "Email me a code"; a provider the API does not
+offer is hidden. Signed in is unchanged (bell + avatar).
+
+**Open (from API-AUTH-02, 2026-10-22):** the API now offers only Google and
+Discord and has no providers config endpoint; confirm the modal's provider
+list and how it hides one before starting. The Discord option calls
+`useAuth().signInWithDiscord()` (already built under API-AUTH-02) and is the
+first place a Discord button appears; API-AUTH-02's Spotter run happens here.
+
+**Decided (Product Owner, 2026-10-22):** the modal offers Google and Discord
+only (no Microsoft, no email code). A provider is hidden when its
+`VITE_GOOGLE_CLIENT_ID` / `VITE_DISCORD_CLIENT_ID` was not set at build time;
+with neither, the dialog says sign-in is unavailable. Rink Quest and the home
+Up next strip keep the Google button.
+
+**Verify:** Spotter on the pushed branch: 375/1280 light/dark, keyboard and
+screen-reader pass on the dialog, and API-AUTH-02's Discord checks.
+
+---
+
+## A11Y-01 — Accessibility fixes from the Spotter baseline
+
+**Status:** IDEA
+
+**Context:** Spotter's 2026-10-22 runs against `main` (merge base `66153ba`)
+flag these on every page they visit; none came from SIGNIN-01. Logged by the
+Product Owner 2026-10-22.
+
+- **Contrast (WCAG AA 4.5:1):** muted text `#74777f` on light surfaces scores
+  3.65–4.26 (stat-leader captions, standings sort buttons, schedule filter
+  labels, line-chart captions, game story text, empty-state messages). The
+  dark-mode active tab on Team List is white on `#aec6ff` (1.7). The team page
+  "stats" link in dark mode is `#337bff` on `#161b27` (4.44).
+- **Accessible names don't contain the visible text:** draft-lottery team
+  tiles (`title="Flames"`), standings rows (`aria-label="View Hurricanes"`),
+  schedule cards (`aria-label="View details for NSH at BOS"`), team-page line
+  pager and player tokens.
+- **Nested interactive controls:** schedule cards are clickable `div`s that
+  contain focusable children.
+- **Scroll areas without keyboard access:** the standings clinch legend on
+  phones and the playoff-race tables at 768px.
+- **Structure:** heading levels skip on standings (`#Eastern-race-heading`)
+  and schedule cards (`h3`); the phone nav bar landmark has no unique label;
+  `/board-game` has no `main` landmark and content outside landmarks.
+- **Focus visibility (verify by hand):** the season picker, phone nav links
+  and stat-leader cards show no outline or shadow on focus.
+
+**Proposed (confirm at checkpoint):**
+
+- Darken the muted text token until it passes on every surface it sits on,
+  and fix the two dark-mode colors; show before/after swatches first.
+- Give tiles, rows, cards and line tokens names that start with their visible
+  text; make each schedule card a single link (or a non-interactive card with
+  one link) so nothing interactive is nested.
+- Make the scroll containers focusable with a label; fix the heading levels;
+  label the phone nav; wrap the board game page in `main`.
+- One shared focus ring for the controls above.
+
+**Not included:** the 500 from `/player/goalie/statLeaders/shutouts` and the
+matchup Team DNA stat that runs 18px past the viewport at 768px; log
+separately if wanted.
+
+**Verify:** Spotter on the pushed branch across all routes at 375/768/1280
+light/dark with no accessibility findings left from the list above; Product
+Owner reviews the color changes in screenshots.

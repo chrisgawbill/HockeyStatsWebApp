@@ -15,7 +15,7 @@ vi.mock('@/lib/apiClient', () => ({
   put: (...args: unknown[]) => put(...args),
 }));
 
-import { fetchSession, googleSignIn } from '@/lib/auth/authApi';
+import { discordSignIn, fetchSession, googleSignIn } from '@/lib/auth/authApi';
 import { ApiError } from '@/lib/apiClient';
 
 describe('authApi', () => {
@@ -44,6 +44,23 @@ describe('authApi', () => {
       headers: { Authorization: 'Bearer token-1' },
     });
     expect(session).toEqual({ email: 'chris@example.com' });
+  });
+
+  it('discordSignIn POSTs the code, verifier and redirect URI', async () => {
+    post.mockResolvedValue({ token: 'abc', email: 'fan@example.com' });
+
+    const result = await discordSignIn({
+      code: 'discord-code',
+      codeVerifier: 'v'.repeat(43),
+      redirectUri: 'https://example.com/HockeyStatsWebApp/',
+    });
+
+    expect(post).toHaveBeenCalledWith('/api/auth/discord', {
+      code: 'discord-code',
+      codeVerifier: 'v'.repeat(43),
+      redirectUri: 'https://example.com/HockeyStatsWebApp/',
+    });
+    expect(result).toEqual({ token: 'abc', email: 'fan@example.com' });
   });
 
   it('fetchSession returns null on a 401 and rethrows other errors', async () => {

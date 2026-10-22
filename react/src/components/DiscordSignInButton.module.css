@@ -1,0 +1,30 @@
+/* Matches Google's large pill (40px tall, Roboto 14px medium) so the two
+   providers read as one stack. Blurple is Discord's brand color. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: var(--sign-in-button-width, auto);
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 20px;
+  background: #5865f2;
+  color: #ffffff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.button:hover {
+  background: #4752c4;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
