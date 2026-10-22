@@ -3,6 +3,7 @@ import {
   PlayerStatLine,
 } from '@/features/teams/types/teamPageTypes';
 import { TokenSlot } from '@/features/teams/utils/teamLinesHelper';
+import { formatGaa, formatPlusMinus, formatSavePct } from '@/lib/statFormat';
 
 export interface StatCell {
   label: string;
@@ -23,23 +24,6 @@ export function buildStatsLookup(
     skaters: new Map(players.map((player) => [player.playerId, player])),
     goalies: new Map(goalies.map((goalie) => [goalie.goalieId, goalie])),
   };
-}
-
-const DASH = '—';
-
-/** NHL style: three decimals, leading zero dropped (0.915 -> ".915"). */
-export function formatSavePct(value: number | null): string {
-  return value == null ? DASH : value.toFixed(3).replace(/^0\./, '.');
-}
-
-/** Goals-against average to two decimals, or a dash when missing. */
-export function formatGaa(value: number | null): string {
-  return value == null ? DASH : value.toFixed(2);
-}
-
-/** Plus/minus with an explicit + for positive values. */
-export function formatPlusMinus(value: number): string {
-  return value > 0 ? `+${value}` : String(value);
 }
 
 /** Roster `stat` is "18:22 TOI" (or ""); returns "18:22" or null. */
