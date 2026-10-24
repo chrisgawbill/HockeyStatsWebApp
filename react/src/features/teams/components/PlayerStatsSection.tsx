@@ -26,10 +26,14 @@ interface LeaderRow {
   skater: PlayerStatLine | null;
 }
 
+/** Regular-season length used to project a leader's end-of-season total. */
+const SEASON_GAMES = 82;
+
 /** An extra right-hand column some leaderboard categories show beside the value. */
 interface LeaderColumn {
   label: string;
-  formatValue: (row: LeaderRow) => string;
+  /** `teamGamesPlayed` is the most games any listed player has played. */
+  formatValue: (row: LeaderRow, teamGamesPlayed: number) => string;
 }
 
 /** A skater's value for the chosen leaderboard category. */
@@ -78,6 +82,17 @@ function formatPerGame(row: LeaderRow): string {
   return (row.value / row.gamesPlayed).toFixed(2);
 }
 
+/**
+ * A leader's projected season-end total: their current total plus their
+ * per-game pace over the team's remaining games ('—' with no games).
+ */
+function formatProjected(row: LeaderRow, teamGamesPlayed: number): string {
+  if (row.value === null || row.gamesPlayed === 0) return '—';
+  const remainingGames = Math.max(SEASON_GAMES - teamGamesPlayed, 0);
+  const perGame = row.value / row.gamesPlayed;
+  return String(Math.round(row.value + perGame * remainingGames));
+}
+
 /** A faceoff count, or '—' when the zone totals are unavailable. */
 function formatFaceoffCount(count: number | null | undefined): string {
   return count != null ? String(count) : '—';
@@ -86,6 +101,11 @@ function formatFaceoffCount(count: number | null | undefined): string {
 const PER_GAME_COLUMN: LeaderColumn = {
   label: '/GP',
   formatValue: formatPerGame,
+};
+
+const PROJECTED_COLUMN: LeaderColumn = {
+  label: 'PROJ',
+  formatValue: formatProjected,
 };
 
 const OFFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
@@ -100,9 +120,9 @@ const DEFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
 
 /** Extra columns per category; categories not listed show the value alone. */
 const EXTRA_COLUMNS: Partial<Record<StatCategoryKey, LeaderColumn[]>> = {
-  goals: [PER_GAME_COLUMN],
-  assists: [PER_GAME_COLUMN],
-  points: [PER_GAME_COLUMN],
+  goals: [PER_GAME_COLUMN, PROJECTED_COLUMN],
+  assists: [PER_GAME_COLUMN, PROJECTED_COLUMN],
+  points: [PER_GAME_COLUMN, PROJECTED_COLUMN],
   faceoffWinPct: [
     OFFENSIVE_ZONE_FACEOFFS_COLUMN,
     DEFENSIVE_ZONE_FACEOFFS_COLUMN,
@@ -201,6 +221,10 @@ export default function PlayerStatsSection({
   )!;
   const topTen = getTopTen(players, goalies, selectedCategory);
   const extraColumns = EXTRA_COLUMNS[selectedKey] ?? [];
+  const teamGamesPlayed = Math.max(
+    ...players.map((player) => player.gamesPlayed),
+    0,
+  );
 
   return (
     <section className={shared.section}>
@@ -289,7 +313,7 @@ export default function PlayerStatsSection({
                   key={column.label}
                   className={styles['player-stat-row__extra']}
                 >
-                  {column.formatValue(row)}
+                  {column.formatValue(row, teamGamesPlayed)}
                 </span>
               ))}
             </div>
