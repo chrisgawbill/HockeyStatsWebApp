@@ -8,6 +8,77 @@ Opening Night 2.0 direction is in `opening-night-2-design.md`. Read the shared
 delivery contract, the selected ticket's checkpoint row and block, and the design
 headings named by that ticket.
 
+## Ticket status overview
+
+Reviewed against `origin/main` (`3fa6f966`) on 2026-10-24. Checked boxes mean
+DONE under the delivery contract, including recorded Product Owner acceptance.
+Implementation or a merge alone does not close a ticket. Backend deployment and
+live-device checks remain pending wherever the ticket records them; they have
+not been independently verified by this documentation review.
+
+The tables are a navigation summary; each linked ticket block retains its
+scope, decisions, verification evidence and remaining gates. Keep its status
+and table row in sync when moving a ticket between states.
+
+### Completed tickets (11)
+
+| Complete | Ticket | Status / remaining gate |
+| --- | --- | --- |
+| [x] | [AAR-01 — Favorite teams and After Action Report inbox](#aar-01--favorite-teams-and-after-action-report-inbox) | DONE — accepted by the Product Owner (2026-10-19) |
+| [x] | [API-LINES-01 — Real line combinations from shift charts](#api-lines-01--real-line-combinations-from-shift-charts) | DONE (Product Owner approved 2026-10-19) (HockeyStatsAPI) |
+| [x] | [TEAM-LINES-01 — "Line Change" roster view](#team-lines-01--line-change-roster-view) | DONE (Product Owner approved 2026-10-19) (frontend) |
+| [x] | [HOME-LEAD-01 — Stat leaders use the favorite card on the home page](#home-lead-01--stat-leaders-use-the-favorite-card-on-the-home-page) | DONE — Product Owner accepted 2026-10-21. Chose Option B on 2026-10-21 from the phone mockups (today / A swipe row / B 2×2 grid / C list). Implemented; QA PASS (10/10 browser criteria + checks, after fixing an empty modal wrapper that took a grid cell); readability pass done. |
+| [x] | [STAR-01 — Favorite star in leaderboards and box scores](#star-01--favorite-star-in-leaderboards-and-box-scores) | DONE — accepted by the Product Owner and merged 2026-10-21. |
+| [x] | [NAV-01 — Header nav fits at 1024px](#nav-01--header-nav-fits-at-1024px) | DONE — accepted by the Product Owner from 1001/1024/1200 screenshots 2026-10-21. |
+| [x] | [FEED-01 — "My Hockey" personal feed](#feed-01--my-hockey-personal-feed) | DONE — accepted by the Product Owner from screenshots 2026-10-22. |
+| [x] | [HOME-LOTTERY-01 — Draft lottery matches the landing page](#home-lottery-01--draft-lottery-matches-the-landing-page) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22; merged in `8b3201ee` (#113). |
+| [x] | [COMPARE-01 — Player comparison](#compare-01--player-comparison) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22. QA PASS 1–9; dialog Compare link checked in source only. Release needs API-COMPARE-01 deployed first (league-wide summaries return every player). |
+| [x] | [API-AUTH-02 — Discord sign-in and account linking (backend)](#api-auth-02--discord-sign-in-and-account-linking-backend) | DONE — accepted by the Product Owner 2026-10-22. API merged to `main` (`8f99a1d`) and deployed by Jenkins 2026-10-22; Google sign-in confirmed working. The Discord button shipped in SIGNIN-01's modal; Spotter passed the Discord success, cancel, mismatched-state, rejected and expired-session specs against recorded API responses (`feature/signin-dialog`, `2a45e8d`). Follow-up: one live Discord sign-in after the web app deploys. |
+| [x] | [SIGNIN-01 — Account icon and sign-in modal (frontend)](#signin-01--account-icon-and-sign-in-modal-frontend) | DONE — accepted by the Product Owner 2026-10-22. Spotter passed on `feature/signin-dialog` (`2a45e8d`, 32/32 specs in `react/qa/sign-in.spec.mjs` at 375/1280 light/dark, no new findings; signed-in screenshots unchanged). |
+
+### In progress / awaiting acceptance (13)
+
+| Complete | Ticket | Status / remaining gate |
+| --- | --- | --- |
+| [ ] | [AAR-02 — Mobile push for After Action Reports](#aar-02--mobile-push-for-after-action-reports) | ACTIVE — implemented and QA-verified; awaiting Product Owner acceptance on a real phone |
+| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); awaiting deploy and Product Owner acceptance with WPR-01 |
+| [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); awaiting Product Owner screenshot review and deploy acceptance |
+| [ ] | [HOME-FAV-01 — Favorite players row on the home page](#home-fav-01--favorite-players-row-on-the-home-page) | ACTIVE — implemented, QA PASS (all criteria, 375/1280 light/dark), readability pass done; awaiting Product Owner screenshot review |
+| [ ] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; awaiting deploy (`pnpm run db:migrate` adds migration 006) |
+| [ ] | [FAN-01 — Favorite teams on home and fan categories (frontend)](#fan-01--favorite-teams-on-home-and-fan-categories-frontend) | ACTIVE — implemented, QA PASS (11/11 after a focus-trap fix), readability pass done; awaiting Product Owner screenshot review. Team logos follow the light/dark theme (Product Owner) |
+| [ ] | [HOME-LEAD-02 — Swipe between phone stat leader groups](#home-lead-02--swipe-between-phone-stat-leader-groups) | ACTIVE — merged in `8b3201ee` (#113); pending Product Owner review on device. |
+| [ ] | [FEED-02 — Favorites move to My Hockey](#feed-02--favorites-move-to-my-hockey) | ACTIVE — merged in `3d09840b` (#117); pending Product Owner acceptance. |
+| [ ] | [PREVIEW-01 — Pre-game preview on the matchup page](#preview-01--pre-game-preview-on-the-matchup-page) | ACTIVE — implemented and verified; pending Product Owner acceptance from screenshots. |
+| [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — implemented and tested on HockeyStatsAPI branch `ccr-ed30da63-xt8i5s`; pending merge and deploy |
+| [ ] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | ACTIVE — implemented and verified 2026-10-22; pending Product Owner acceptance of 375/1280 light/dark screenshots |
+| [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — accessibility fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a` on 2026-10-24; full baseline recheck and Product Owner color review are not recorded. Retain the acceptance gates below. |
+| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; pending notifier install on the dev server and a live check) |
+
+### Not started tickets (20)
+
+| Complete | Ticket | Status / remaining gate |
+| --- | --- | --- |
+| [ ] | [ON2-01 — Alternating shift activation engine](#on2-01--alternating-shift-activation-engine) | IDEA |
+| [ ] | [ON2-02 — Ranged diagonal skating and pass lanes](#on2-02--ranged-diagonal-skating-and-pass-lanes) | IDEA |
+| [ ] | [ON2-03 — Contextual card contracts and offers](#on2-03--contextual-card-contracts-and-offers) | IDEA |
+| [ ] | [ON2-04 — Hockey card library and identity packages](#on2-04--hockey-card-library-and-identity-packages) | IDEA |
+| [ ] | [ON2-05 — Screens and Clear Crease battles](#on2-05--screens-and-clear-crease-battles) | IDEA |
+| [ ] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | IDEA — backend-owned dependency |
+| [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | IDEA — backend-owned dependency |
+| [ ] | [ON2-06 — Team playbook and featured-star integration](#on2-06--team-playbook-and-featured-star-integration) | IDEA |
+| [ ] | [ON2-07 — Daily opponent and Rivalry Night selection](#on2-07--daily-opponent-and-rivalry-night-selection) | IDEA |
+| [ ] | [ON2-08 — Product Owner team-content pilot](#on2-08--product-owner-team-content-pilot) | IDEA |
+| [ ] | [ON2-09 — Pregame team, matchup, and star flow](#on2-09--pregame-team-matchup-and-star-flow) | IDEA |
+| [ ] | [ON2-09A — Dimensional arena and camera prototype](#on2-09a--dimensional-arena-and-camera-prototype) | IDEA |
+| [ ] | [ON2-10 — Fullscreen broadcast match shell and arena integration](#on2-10--fullscreen-broadcast-match-shell-and-arena-integration) | IDEA |
+| [ ] | [ON2-11 — Physical hand and battle stage](#on2-11--physical-hand-and-battle-stage) | IDEA |
+| [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
+| [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
+| [ ] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | IDEA |
+| [ ] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | IDEA |
+| [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | IDEA — backend-owned dependency |
+| [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
+
 ## Delivery contract for every ticket
 
 Follow [agent-development.md](agent-development.md) for delegation, model
@@ -1528,6 +1599,41 @@ against a mocked API for the cases above with screenshots.
 
 ---
 
+## HOME-LEAD-02 — Swipe between phone stat leader groups
+
+**Status:** ACTIVE — merged in `8b3201ee` (#113); pending Product Owner review on device.
+
+**Approved 2026-10-21:** swipe left for the next Skaters/Goalies group on
+phones, without wraparound; retain the segmented switch. See HOME-LEAD-01
+for the card layout and shared verification criteria.
+
+---
+
+## HOME-LOTTERY-01 — Draft lottery matches the landing page
+
+**Status:** DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22; merged in `8b3201ee` (#113).
+
+**Approved 2026-10-21 (option A):** use the landing page heading, button and
+card styles; retain gold for the top bulb strip, odds, winners and reveal.
+Support light mode.
+
+---
+
+## FEED-02 — Favorites move to My Hockey
+
+**Status:** ACTIVE — merged in `3d09840b` (#117); pending Product Owner acceptance.
+
+**Approved 2026-10-22 (option A):** move Your teams and Your players from
+home to the top of `/my-hockey`. Merge the player row and feed player list
+into one card row with season and last-game lines. Home keeps Up next only;
+its matchup rows show the opponent logo directly after the matchup.
+
+**Verify:** retain FEED-01's signed-out, empty, ordering, failure and request
+reuse checks; review the moved rows and opponent logos at 375/1280 in light
+and dark. A merge alone does not establish acceptance.
+
+---
+
 ## PREVIEW-01 — Pre-game preview on the matchup page
 
 **Status:** ACTIVE — implemented and verified; pending Product Owner acceptance
@@ -1868,7 +1974,7 @@ account icon button (filled figure inside the bell's glass circle,
 Google, Microsoft, Discord and "Email me a code"; a provider the API does not
 offer is hidden. Signed in is unchanged (bell + avatar).
 
-**Open (from API-AUTH-02, 2026-10-22):** the API now offers only Google and
+**Resolved question (from API-AUTH-02, 2026-10-22; decision below):** the API now offers only Google and
 Discord and has no providers config endpoint; confirm the modal's provider
 list and how it hides one before starting. The Discord option calls
 `useAuth().signInWithDiscord()` (already built under API-AUTH-02) and is the
@@ -1889,7 +1995,7 @@ screen-reader pass on the dialog, and API-AUTH-02's Discord checks.
 
 ## A11Y-01 — Accessibility fixes from the Spotter baseline
 
-**Status:** IDEA
+**Status:** ACTIVE — accessibility fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a` on 2026-10-24; full baseline recheck and Product Owner color review are not recorded. Retain the acceptance gates below.
 
 **Context:** Spotter's 2026-10-22 runs against `main` (merge base `66153ba`)
 flag these on every page they visit; none came from SIGNIN-01. Logged by the
