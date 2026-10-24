@@ -3,6 +3,11 @@ const { test, expect } = await import(process.env.SPOTTER_TEST_MODULE);
 const email = 'member@example.test';
 const token = 'synthetic-session';
 const tokenKey = 'rinkquest-auth-token';
+// The home Up next strip has its own "Sign in" button; these checks use the header's.
+const headerSignIn = (page) =>
+  page
+    .getByRole('navigation', { name: 'Site' })
+    .getByRole('button', { name: 'Sign in', exact: true });
 
 // Login flows must start signed out, even when the runner has saved sessions.
 test.use({ spotterSession: 'anonymous' });
@@ -54,10 +59,7 @@ for (const width of [375, 1280])
         page,
       }) => {
         await page.goto('./');
-        const trigger = page.getByRole('button', {
-          name: 'Sign in',
-          exact: true,
-        });
+        const trigger = headerSignIn(page);
         await trigger.focus();
         await page.keyboard.press('Enter');
         const dialog = page.getByRole('dialog', {
@@ -150,9 +152,7 @@ for (const width of [375, 1280])
             });
           });
           await page.goto('./');
-          await page
-            .getByRole('button', { name: 'Sign in', exact: true })
-            .click();
+          await headerSignIn(page).click();
           await page
             .getByRole('button', { name: 'Sign in with Discord' })
             .click();
@@ -168,9 +168,7 @@ for (const width of [375, 1280])
             await page.getByRole('menuitem', { name: 'Sign out' }).click();
             await page.reload();
           }
-          await expect(
-            page.getByRole('button', { name: 'Sign in', exact: true }),
-          ).toBeVisible();
+          await expect(headerSignIn(page)).toBeVisible();
           await expect.poll(() => new URL(page.url()).search).toBe('');
           expect(exchanges).toBe(
             ['success', 'rejected'].includes(outcome) ? 1 : 0,
@@ -193,9 +191,7 @@ for (const width of [375, 1280])
             name: `Signed in as ${email}`,
           });
           await expect(account).toBeVisible();
-          await expect(
-            page.getByRole('button', { name: 'Sign in', exact: true }),
-          ).not.toBeVisible();
+          await expect(headerSignIn(page)).not.toBeVisible();
           await page.reload();
           await expect(account).toBeVisible();
         },
@@ -208,18 +204,14 @@ for (const width of [375, 1280])
             .getByRole('button', { name: `Signed in as ${email}` })
             .hover();
           await page.getByRole('menuitem', { name: 'Sign out' }).click();
-          await expect(
-            page.getByRole('button', { name: 'Sign in', exact: true }),
-          ).toBeVisible();
+          await expect(headerSignIn(page)).toBeVisible();
           await expect
             .poll(() =>
               page.evaluate((key) => localStorage.getItem(key), tokenKey),
             )
             .toBeNull();
           await page.reload();
-          await expect(
-            page.getByRole('button', { name: 'Sign in', exact: true }),
-          ).toBeVisible();
+          await expect(headerSignIn(page)).toBeVisible();
         },
       );
       test('API-AUTH-02 Verify: expired session returns to signed out', async ({
@@ -234,9 +226,7 @@ for (const width of [375, 1280])
           route.fulfill({ status: 401, json: { error: 'Expired session' } }),
         );
         await page.goto('./');
-        await expect(
-          page.getByRole('button', { name: 'Sign in', exact: true }),
-        ).toBeVisible();
+        await expect(headerSignIn(page)).toBeVisible();
         await expect
           .poll(() =>
             page.evaluate((key) => localStorage.getItem(key), tokenKey),

@@ -108,20 +108,22 @@ function DiagnosticsPage() {
   return (
     <div className={styles['diagnostics-page']}>
       <PageHeader />
-      {loading && !authed ? (
-        <LoadingState label="Loading diagnostics" fullPage />
-      ) : authed ? (
-        renderReport()
-      ) : (
-        <DiagnosticsGate
-          passphrase={diagnostics.passphrase}
-          onPassphraseChange={diagnostics.setPassphrase}
-          onSubmit={diagnostics.handleSubmit}
-          loading={loading}
-          authError={diagnostics.authError}
-          fetchError={diagnostics.fetchError}
-        />
-      )}
+      <main>
+        {loading && !authed ? (
+          <LoadingState label="Loading diagnostics" fullPage />
+        ) : authed ? (
+          renderReport()
+        ) : (
+          <DiagnosticsGate
+            passphrase={diagnostics.passphrase}
+            onPassphraseChange={diagnostics.setPassphrase}
+            onSubmit={diagnostics.handleSubmit}
+            loading={loading}
+            authError={diagnostics.authError}
+            fetchError={diagnostics.fetchError}
+          />
+        )}
+      </main>
     </div>
   );
 }
