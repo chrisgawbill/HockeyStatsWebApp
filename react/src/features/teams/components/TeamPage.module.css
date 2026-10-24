@@ -69,10 +69,11 @@
   outline-offset: -3px;
 }
 
+/* Team colours vary too much for text; the underline carries the team colour. */
 .team-tab.active {
   background: transparent;
   border-bottom-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-text);
   font-weight: 600;
 }
 

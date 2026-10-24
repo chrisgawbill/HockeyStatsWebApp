@@ -90,7 +90,13 @@ export default function PlayoffRacePanel({
       {race.seasonOver && (
         <p className={styles.seasonNote}>Regular Season Complete.</p>
       )}
-      <div className={styles.tableWrap}>
+      <div
+        className={styles.tableWrap}
+        role="region"
+        aria-label={`${conference} playoff race table`}
+        // Narrow layouts scroll the table sideways, so keyboard users need a stop on it.
+        tabIndex={0}
+      >
         <table className={styles.table}>
           <caption className="ds-visually-hidden">
             {conference} Simplified Playoff Race

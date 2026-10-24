@@ -198,7 +198,10 @@ describe('caption and formatting helpers', () => {
     expect(getLastName('Pierre-Luc Dubois')).toBe('Dubois');
     expect(getLastName('Madonna')).toBe('Madonna');
     expect(buildTokenAriaLabel(player(97, 'Connor McDavid'), 'C')).toBe(
-      'Connor McDavid, number 97, center',
+      '97 McDavid C: Connor McDavid, center',
+    );
+    expect(buildTokenAriaLabel(player(97, 'Connor McDavid'), 'C', false)).toBe(
+      '97 McDavid: Connor McDavid, center',
     );
   });
 });

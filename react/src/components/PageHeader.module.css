@@ -227,6 +227,12 @@
   text-decoration: none;
 }
 
+/* The sheen change alone is too faint to show keyboard focus. */
+.nav-btn:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
 .nav-btn:hover,
 .nav-btn:focus-visible {
   background: linear-gradient(

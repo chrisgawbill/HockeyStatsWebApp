@@ -296,10 +296,17 @@ const SLOT_WORDS: Record<TokenSlot, string> = {
   D: 'defense',
 };
 
-/** "Connor McDavid, number 97, center" */
+/**
+ * "97 McDavid C: Connor McDavid, center". Starts with the token's visible
+ * text (number, last name, slot label when shown) so the spoken name
+ * matches what is on screen.
+ */
 export function buildTokenAriaLabel(
   player: RosterPlayer,
   slot: TokenSlot,
+  showSlotLabel = true,
 ): string {
-  return `${player.name}, number ${player.number}, ${SLOT_WORDS[slot]}`;
+  const visible = [String(player.number), getLastName(player.name)];
+  if (showSlotLabel) visible.push(slot);
+  return `${visible.join(' ')}: ${player.name}, ${SLOT_WORDS[slot]}`;
 }

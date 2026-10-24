@@ -164,7 +164,6 @@ export default function LandingPageStandingsTable({
                 key={team.id}
                 tabIndex={0}
                 role="button"
-                aria-label={`View ${team.teamName}`}
                 onClick={() => goToTeam(team)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {

@@ -6,7 +6,7 @@
   --color-bg: var(--ds-color-surface-container-low);
   --color-text: var(--ds-color-on-surface);
   --color-text-secondary: var(--ds-color-on-surface-variant);
-  --color-muted-text: var(--ds-color-outline);
+  --color-muted-text: var(--ds-color-on-surface-variant);
   --color-success: var(--ds-color-success);
   --color-danger: var(--ds-color-danger);
   --color-divider: var(--ds-color-outline-variant);

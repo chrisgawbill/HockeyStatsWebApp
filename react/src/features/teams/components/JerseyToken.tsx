@@ -21,8 +21,8 @@ interface JerseyTokenProps {
 /**
  * Round jersey token: team-color disc with the jersey number, the last name
  * below and an optional slot label. It is a real button that opens the
- * player stats dialog (via PlayerDialogContext) and is announced with name,
- * number and position.
+ * player stats dialog (via PlayerDialogContext) and is announced with its
+ * visible text, then the full name and position.
  */
 export default function JerseyToken({
   player,
@@ -41,7 +41,7 @@ export default function JerseyToken({
     <button
       type="button"
       className={`${styles.token} ${size === 'sm' ? styles['token--sm'] : ''}`}
-      aria-label={buildTokenAriaLabel(player, slot)}
+      aria-label={buildTokenAriaLabel(player, slot, showSlotLabel)}
       aria-haspopup="dialog"
       onClick={(event) => openPlayer(player, slot, event.currentTarget)}
     >
@@ -66,10 +66,10 @@ export default function JerseyToken({
         <span className={styles.token__disc} aria-hidden="true">
           {player.number}
         </span>
-      )}
+      )}{' '}
       <span className={styles.token__name} aria-hidden="true">
         {getLastName(player.name)}
-      </span>
+      </span>{' '}
       {showSlotLabel && (
         <span className={styles.token__slot} aria-hidden="true">
           {slot}

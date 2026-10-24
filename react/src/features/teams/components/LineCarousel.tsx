@@ -71,7 +71,7 @@ export default function LineCarousel({
             key={line.key}
             type="button"
             className={`${styles.pager__btn} ${activeIndex === index ? styles['pager__btn--active'] : ''}`}
-            aria-label={line.label}
+            aria-label={`${line.pagerLabel}, ${line.label}`}
             aria-current={activeIndex === index ? 'true' : undefined}
             onClick={() => scrollTo(index)}
           >
