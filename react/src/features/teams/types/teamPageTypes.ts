@@ -111,6 +111,13 @@ export interface SkaterCorsiEntry {
   satPercentage: number | null;
 }
 
+/** One row of the separate skater faceoff endpoint, merged in by playerId. */
+export interface SkaterFaceoffEntry {
+  playerId: number;
+  offensiveZoneFaceoffs: number | null;
+  defensiveZoneFaceoffs: number | null;
+}
+
 /** Fields TeamPage reads off the team summary response (`/team/:teamId`). */
 export interface TeamStatsContract {
   teamFullName: string;
@@ -138,6 +145,8 @@ export interface PlayerStatLine {
   plusMinus: number;
   penaltyMinutes: number;
   faceoffWinPct: number | null;
+  offensiveZoneFaceoffs: number | null;
+  defensiveZoneFaceoffs: number | null;
   corsiPct: number | null;
 }
 
@@ -173,8 +182,6 @@ export interface StatCategory {
   format: (val: number) => string;
   higherIsBetter: boolean;
   requiresMinGames?: boolean;
-  /** Counting stats whose leaderboard also shows a per-game (/GP) column. */
-  showsPerGame?: boolean;
   /**
    * Which view model this category's values come from. Skater categories read
    * off `PlayerStatLine`, goalie categories off `GoalieStatLine` — the two are
@@ -192,7 +199,6 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'G',
     format: (value) => String(value),
     higherIsBetter: true,
-    showsPerGame: true,
     source: 'skater',
   },
   {
@@ -201,7 +207,6 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'A',
     format: (value) => String(value),
     higherIsBetter: true,
-    showsPerGame: true,
     source: 'skater',
   },
   {
@@ -210,7 +215,6 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'P',
     format: (value) => String(value),
     higherIsBetter: true,
-    showsPerGame: true,
     source: 'skater',
   },
   {

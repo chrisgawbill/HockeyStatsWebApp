@@ -832,7 +832,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.player-stat-row__per-game {
+.player-stat-row__extra {
   font-size: var(--text-sm);
   color: var(--color-muted-text);
   min-width: 44px;
@@ -856,7 +856,7 @@
   text-align: right;
 }
 
-.player-stat-header__per-game {
+.player-stat-header__extra {
   min-width: 44px;
   text-align: right;
 }

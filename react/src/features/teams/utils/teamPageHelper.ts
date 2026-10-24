@@ -10,6 +10,7 @@ import {
   RosterPlayer,
   RosterPlayerContract,
   SkaterCorsiEntry,
+  SkaterFaceoffEntry,
   SkaterSummaryContract,
   SortDirection,
   TeamOverview,
@@ -173,18 +174,23 @@ export function buildDefensePairs(
 
 /**
  * Builds the per-player stat lines for the skaters table from the skater
- * summary, merging in Corsi (SAT%) by playerId since it comes from a separate
- * endpoint. Missing values default to 0/null; a null faceoff percentage means
- * the player did not take faceoffs.
+ * summary, merging in Corsi (SAT%) and zone faceoff totals by playerId since
+ * they come from separate endpoints. Missing values default to 0/null; a null
+ * faceoff percentage means the player did not take faceoffs.
  */
 export function transformPlayerStats(
   summary: SkaterSummaryContract[],
   corsiData: { data?: SkaterCorsiEntry[] } | null,
+  faceoffData: { data?: SkaterFaceoffEntry[] } | null = null,
 ): PlayerStatLine[] {
   const corsiMap = new Map<number, number>();
   for (const entry of corsiData?.data ?? []) {
     if (entry.playerId != null && entry.satPercentage != null)
       corsiMap.set(entry.playerId, entry.satPercentage);
+  }
+  const faceoffsByPlayerId = new Map<number, SkaterFaceoffEntry>();
+  for (const entry of faceoffData?.data ?? []) {
+    if (entry.playerId != null) faceoffsByPlayerId.set(entry.playerId, entry);
   }
   return (summary ?? []).map((skater): PlayerStatLine => ({
     playerId: skater.playerId,
@@ -197,6 +203,10 @@ export function transformPlayerStats(
     plusMinus: skater.plusMinus ?? 0,
     penaltyMinutes: skater.penaltyMinutes ?? 0,
     faceoffWinPct: skater.faceoffWinPct ?? null,
+    offensiveZoneFaceoffs:
+      faceoffsByPlayerId.get(skater.playerId)?.offensiveZoneFaceoffs ?? null,
+    defensiveZoneFaceoffs:
+      faceoffsByPlayerId.get(skater.playerId)?.defensiveZoneFaceoffs ?? null,
     corsiPct: corsiMap.get(skater.playerId) ?? null,
   }));
 }

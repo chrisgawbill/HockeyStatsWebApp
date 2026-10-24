@@ -3,12 +3,14 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   GetGoalieSummary,
   GetSkaterCorsi,
+  GetSkaterFaceoffs,
   GetSkaterSummary,
   GetTeamLines,
   GetTeamRoster,
   GetTeamSchedule,
   GetTeamStatsById,
   SkaterCorsiResponseDto,
+  SkaterFaceoffResponseDto,
   TeamRosterResponseDto,
   TeamStatsResponseDto,
 } from '@/features/teams/api/teamsApi';
@@ -67,7 +69,7 @@ export function useTeamPageData({
 
   /**
    * Fetches the season-dependent team data (stats, roster, schedule, skater
-   * totals, Corsi, optional goalie TOI) and stores the shaped view models.
+   * totals, Corsi, optional zone faceoffs and goalie TOI) and stores the shaped view models.
    */
   const fetchSeasonData = useCallback(async () => {
     setError(null);
@@ -78,6 +80,7 @@ export function useTeamPageData({
         scheduleResponse,
         skaterSummaries,
         corsiResponse,
+        faceoffResponse,
         goalieSummaries,
       ]: [
         TeamStatsResponseDto,
@@ -85,6 +88,7 @@ export function useTeamPageData({
         ScheduleResponseDto,
         SkaterSummaryContract[],
         SkaterCorsiResponseDto,
+        SkaterFaceoffResponseDto | null,
         GoalieSummaryContract[] | null,
       ] = await Promise.all([
         GetTeamStatsById(String(numericId), season),
@@ -92,6 +96,7 @@ export function useTeamPageData({
         GetTeamSchedule(triCode, season),
         GetSkaterSummary(String(numericId), season),
         GetSkaterCorsi(String(numericId), season),
+        GetSkaterFaceoffs(String(numericId), season).catch(() => null),
         GetGoalieSummary(String(numericId), season).catch(() => null),
       ]);
 
@@ -114,7 +119,9 @@ export function useTeamPageData({
       setHeadshotMap(newHeadshotMap);
       setSchedule(ConvertContractsToGames(scheduleResponse.games));
       setRoster(transformRoster(rosterResponse.players, toiPerGameByPlayerId));
-      setPlayerStats(transformPlayerStats(skaterSummaries, corsiResponse));
+      setPlayerStats(
+        transformPlayerStats(skaterSummaries, corsiResponse, faceoffResponse),
+      );
       setGoalieStats(transformGoalieStats(goalieSummaries));
     } catch (loadError) {
       console.error('Error loading team data', loadError);

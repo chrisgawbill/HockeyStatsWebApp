@@ -20,6 +20,8 @@ const lookup = buildStatsLookup(
       plusMinus: 3,
       penaltyMinutes: 0,
       faceoffWinPct: null,
+      offensiveZoneFaceoffs: null,
+      defensiveZoneFaceoffs: null,
       corsiPct: null,
     },
   ],

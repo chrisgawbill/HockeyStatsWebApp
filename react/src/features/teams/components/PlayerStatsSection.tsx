@@ -22,6 +22,14 @@ interface LeaderRow {
   positionLabel: string;
   gamesPlayed: number;
   value: number | null;
+  /** The skater's full stat line; null on goalie rows. */
+  skater: PlayerStatLine | null;
+}
+
+/** An extra right-hand column some leaderboard categories show beside the value. */
+interface LeaderColumn {
+  label: string;
+  formatValue: (row: LeaderRow) => string;
 }
 
 /** A skater's value for the chosen leaderboard category. */
@@ -70,6 +78,37 @@ function formatPerGame(row: LeaderRow): string {
   return (row.value / row.gamesPlayed).toFixed(2);
 }
 
+/** A faceoff count, or '—' when the zone totals are unavailable. */
+function formatFaceoffCount(count: number | null | undefined): string {
+  return count != null ? String(count) : '—';
+}
+
+const PER_GAME_COLUMN: LeaderColumn = {
+  label: '/GP',
+  formatValue: formatPerGame,
+};
+
+const OFFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
+  label: 'OZ FO',
+  formatValue: (row) => formatFaceoffCount(row.skater?.offensiveZoneFaceoffs),
+};
+
+const DEFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
+  label: 'DZ FO',
+  formatValue: (row) => formatFaceoffCount(row.skater?.defensiveZoneFaceoffs),
+};
+
+/** Extra columns per category; categories not listed show the value alone. */
+const EXTRA_COLUMNS: Partial<Record<StatCategoryKey, LeaderColumn[]>> = {
+  goals: [PER_GAME_COLUMN],
+  assists: [PER_GAME_COLUMN],
+  points: [PER_GAME_COLUMN],
+  faceoffWinPct: [
+    OFFENSIVE_ZONE_FACEOFFS_COLUMN,
+    DEFENSIVE_ZONE_FACEOFFS_COLUMN,
+  ],
+};
+
 /** Orders rows best-first (nulls last) and keeps the top few. */
 function sortAndSlice(rows: LeaderRow[], higherIsBetter: boolean): LeaderRow[] {
   return [...rows]
@@ -108,6 +147,7 @@ function getTopTen(
       positionLabel: 'G',
       gamesPlayed: goalie.gamesPlayed,
       value: getGoalieValue(goalie, category.key),
+      skater: null,
     }));
     return sortAndSlice(rows, category.higherIsBetter);
   }
@@ -137,6 +177,7 @@ function getTopTen(
     positionLabel: player.position,
     gamesPlayed: player.gamesPlayed,
     value: getSkaterValue(player, category.key),
+    skater: player,
   }));
   return sortAndSlice(rows, category.higherIsBetter);
 }
@@ -159,6 +200,7 @@ export default function PlayerStatsSection({
     (statCategory) => statCategory.key === selectedKey,
   )!;
   const topTen = getTopTen(players, goalies, selectedCategory);
+  const extraColumns = EXTRA_COLUMNS[selectedKey] ?? [];
 
   return (
     <section className={shared.section}>
@@ -188,12 +230,19 @@ export default function PlayerStatsSection({
         <p className={styles['player-stat-leaderboard__title']}>
           {selectedCategory.label} Leaders
         </p>
-        {selectedCategory.showsPerGame && (
+        {extraColumns.length > 0 && (
           <div className={styles['player-stat-header']} aria-hidden="true">
             <span className={styles['player-stat-header__value']}>
               {selectedCategory.shortLabel}
             </span>
-            <span className={styles['player-stat-header__per-game']}>/GP</span>
+            {extraColumns.map((column) => (
+              <span
+                key={column.label}
+                className={styles['player-stat-header__extra']}
+              >
+                {column.label}
+              </span>
+            ))}
           </div>
         )}
         {topTen.map((row, index) => {
@@ -235,11 +284,14 @@ export default function PlayerStatsSection({
               <span className={styles['player-stat-row__value']}>
                 {formatted}
               </span>
-              {selectedCategory.showsPerGame && (
-                <span className={styles['player-stat-row__per-game']}>
-                  {formatPerGame(row)}
+              {extraColumns.map((column) => (
+                <span
+                  key={column.label}
+                  className={styles['player-stat-row__extra']}
+                >
+                  {column.formatValue(row)}
                 </span>
-              )}
+              ))}
             </div>
           );
         })}

@@ -4,6 +4,7 @@ import {
   GoalieSummaryContract,
   RosterPlayerContract,
   SkaterCorsiEntry,
+  SkaterFaceoffEntry,
   SkaterSummaryContract,
   TeamStatsContract,
 } from '@/features/teams/types/teamPageTypes';
@@ -45,6 +46,10 @@ export interface TeamRosterResponseDto {
 
 export interface SkaterCorsiResponseDto {
   data?: SkaterCorsiEntry[];
+}
+
+export interface SkaterFaceoffResponseDto {
+  data?: SkaterFaceoffEntry[];
 }
 
 /** Team summary, roster, schedule, and the per-team player stat tables. */
@@ -105,6 +110,17 @@ export function GetSkaterCorsi(
     season,
   });
 }
+/** Skater faceoffs taken by zone, optionally for one team. */
+export function GetSkaterFaceoffs(
+  teamId?: string,
+  season?: string,
+): Promise<SkaterFaceoffResponseDto> {
+  return get<SkaterFaceoffResponseDto>('/player/skater/faceoffs', {
+    teamId,
+    season,
+  });
+}
+
 /** Goalie season totals, optionally for one team. */
 export function GetGoalieSummary(
   teamId?: string,
