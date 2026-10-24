@@ -219,6 +219,7 @@ export function transformGoalieStats(
     goalieId: goalie.goalieId,
     name: goalie.name ?? '',
     gamesPlayed: goalie.gamesPlayed ?? 0,
+    gamesStarted: goalie.gamesStarted ?? null,
     wins: goalie.wins ?? 0,
     losses: goalie.losses ?? 0,
     savePctg: goalie.savePctg ?? null,

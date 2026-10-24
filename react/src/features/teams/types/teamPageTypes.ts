@@ -97,6 +97,7 @@ export interface GoalieSummaryContract {
   goalieId: number;
   name: string;
   gamesPlayed: number;
+  gamesStarted: number | null;
   wins: number;
   losses: number;
   savePctg: number | null;
@@ -155,6 +156,7 @@ export interface GoalieStatLine {
   goalieId: number;
   name: string;
   gamesPlayed: number;
+  gamesStarted: number | null;
   wins: number;
   losses: number;
   savePctg: number | null;

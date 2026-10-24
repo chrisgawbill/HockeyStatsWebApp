@@ -861,6 +861,24 @@
   text-align: right;
 }
 
+/* Phones: narrower number columns leave the player name room to read. */
+@media (max-width: 576px) {
+  .player-stat-row,
+  .player-stat-header {
+    gap: var(--ds-space-2);
+  }
+
+  .player-stat-row__value,
+  .player-stat-header__value {
+    min-width: 44px;
+  }
+
+  .player-stat-row__extra,
+  .player-stat-header__extra {
+    min-width: 34px;
+  }
+}
+
 /* ── Dark mode overrides for hardcoded win/loss/playoff colors ──────────── */
 
 [data-theme='dark'] .schedule-strip__score.win,

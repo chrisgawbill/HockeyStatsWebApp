@@ -24,6 +24,8 @@ interface LeaderRow {
   value: number | null;
   /** The skater's full stat line; null on goalie rows. */
   skater: PlayerStatLine | null;
+  /** The goalie's full stat line; null on skater rows. */
+  goalie: GoalieStatLine | null;
 }
 
 /** An extra right-hand column some leaderboard categories show beside the value. */
@@ -78,8 +80,8 @@ function formatPerGame(row: LeaderRow): string {
   return (row.value / row.gamesPlayed).toFixed(2);
 }
 
-/** A faceoff count, or '—' when the zone totals are unavailable. */
-function formatFaceoffCount(count: number | null | undefined): string {
+/** A count stat, or '—' when it is unavailable. */
+function formatCount(count: number | null | undefined): string {
   return count != null ? String(count) : '—';
 }
 
@@ -90,12 +92,17 @@ const PER_GAME_COLUMN: LeaderColumn = {
 
 const OFFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
   label: 'OZ FO',
-  formatValue: (row) => formatFaceoffCount(row.skater?.offensiveZoneFaceoffs),
+  formatValue: (row) => formatCount(row.skater?.offensiveZoneFaceoffs),
 };
 
 const DEFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
   label: 'DZ FO',
-  formatValue: (row) => formatFaceoffCount(row.skater?.defensiveZoneFaceoffs),
+  formatValue: (row) => formatCount(row.skater?.defensiveZoneFaceoffs),
+};
+
+const GAMES_STARTED_COLUMN: LeaderColumn = {
+  label: 'GS',
+  formatValue: (row) => formatCount(row.goalie?.gamesStarted),
 };
 
 /** Extra columns per category; categories not listed show the value alone. */
@@ -103,6 +110,8 @@ const EXTRA_COLUMNS: Partial<Record<StatCategoryKey, LeaderColumn[]>> = {
   goals: [PER_GAME_COLUMN],
   assists: [PER_GAME_COLUMN],
   points: [PER_GAME_COLUMN],
+  savePctg: [GAMES_STARTED_COLUMN],
+  goalsAgainstAverage: [GAMES_STARTED_COLUMN],
   faceoffWinPct: [
     OFFENSIVE_ZONE_FACEOFFS_COLUMN,
     DEFENSIVE_ZONE_FACEOFFS_COLUMN,
@@ -148,6 +157,7 @@ function getTopTen(
       gamesPlayed: goalie.gamesPlayed,
       value: getGoalieValue(goalie, category.key),
       skater: null,
+      goalie,
     }));
     return sortAndSlice(rows, category.higherIsBetter);
   }
@@ -178,6 +188,7 @@ function getTopTen(
     gamesPlayed: player.gamesPlayed,
     value: getSkaterValue(player, category.key),
     skater: player,
+    goalie: null,
   }));
   return sortAndSlice(rows, category.higherIsBetter);
 }

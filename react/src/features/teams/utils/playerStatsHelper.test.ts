@@ -30,6 +30,7 @@ const lookup = buildStatsLookup(
       goalieId: 2,
       name: 'G',
       gamesPlayed: 5,
+      gamesStarted: 4,
       wins: 3,
       losses: 2,
       savePctg: 0.915,
