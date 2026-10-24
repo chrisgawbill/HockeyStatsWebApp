@@ -67,7 +67,7 @@ necessary for DONE.
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured. |
-| API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). PM's calls: notifier lives in `HockeyStatsAPI/notifier/` until it gets its own repo; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up. Product Owner confirms after the first live game night and Monday report. |
+| API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). Product Owner accepted 2026-10-24: notifier stays in `HockeyStatsAPI/notifier/`; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up; merge both to main. Product Owner checks the first live game night and Monday report. |
 
 ## Dependency outline
 
@@ -1937,7 +1937,7 @@ Owner reviews the color changes in screenshots.
 
 ## API-PUSH-02 — Reliable push delivery and scheduling (backend)
 
-**Status:** ACTIVE (code on the branch; pending server setup and a live check)
+**Status:** ACTIVE (merged to `main` 2026-10-24; pending notifier install on the dev server and a live check)
 
 **Problem:** pushes depended on GitHub Actions cron (runs late, skips runs,
 disables itself after 60 quiet days) and on one send attempt: the ledger row was
