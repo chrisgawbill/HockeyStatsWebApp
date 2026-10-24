@@ -83,14 +83,13 @@ function formatPerGame(row: LeaderRow): string {
 }
 
 /**
- * A leader's projected season-end total: their current total plus their
- * per-game pace over the team's remaining games ('—' with no games).
+ * A leader's projected season-end total: their pace per team game scaled to
+ * a full season, so games they missed count against the projection ('—'
+ * before the team has played).
  */
 function formatProjected(row: LeaderRow, teamGamesPlayed: number): string {
-  if (row.value === null || row.gamesPlayed === 0) return '—';
-  const remainingGames = Math.max(SEASON_GAMES - teamGamesPlayed, 0);
-  const perGame = row.value / row.gamesPlayed;
-  return String(Math.round(row.value + perGame * remainingGames));
+  if (row.value === null || teamGamesPlayed === 0) return '—';
+  return String(Math.round((row.value / teamGamesPlayed) * SEASON_GAMES));
 }
 
 /** A faceoff count, or '—' when the zone totals are unavailable. */
