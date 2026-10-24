@@ -146,9 +146,11 @@ for (const width of [375, 1280])
               outcome === 'cancel' ? 'error' : 'code',
               outcome === 'cancel' ? 'access_denied' : 'synthetic-code',
             );
+            // WebKit cannot fulfill a route with a redirect status; a page that
+            // replaces its own location returns to the app the same way.
             await route.fulfill({
-              status: 302,
-              headers: { location: callback.href },
+              contentType: 'text/html',
+              body: `<script>location.replace(${JSON.stringify(callback.href)})</script>`,
             });
           });
           await page.goto('./');
