@@ -17,41 +17,43 @@ live-device checks remain pending wherever the ticket records them; they have
 not been independently verified by this documentation review.
 
 The tables are a navigation summary; each linked ticket block retains its
-scope, decisions, verification evidence and remaining gates. Keep its status
+scope, decisions, verification evidence and remaining gates. Product Owner
+acceptance was granted on 2026-10-24 for tickets awaiting that review; this
+does not claim that pending deployments or verification checks ran. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (11)
+### Completed tickets (18)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
 | [x] | [AAR-01 — Favorite teams and After Action Report inbox](#aar-01--favorite-teams-and-after-action-report-inbox) | DONE — accepted by the Product Owner (2026-10-19) |
+| [x] | [AAR-02 — Mobile push for After Action Reports](#aar-02--mobile-push-for-after-action-reports) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and QA-verified. |
 | [x] | [API-LINES-01 — Real line combinations from shift charts](#api-lines-01--real-line-combinations-from-shift-charts) | DONE (Product Owner approved 2026-10-19) (HockeyStatsAPI) |
 | [x] | [TEAM-LINES-01 — "Line Change" roster view](#team-lines-01--line-change-roster-view) | DONE (Product Owner approved 2026-10-19) (frontend) |
+| [x] | [HOME-FAV-01 — Favorite players row on the home page](#home-fav-01--favorite-players-row-on-the-home-page) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS (all criteria, 375/1280 light/dark), readability pass done. |
+| [x] | [FAN-01 — Favorite teams on home and fan categories (frontend)](#fan-01--favorite-teams-on-home-and-fan-categories-frontend) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS (11/11 after a focus-trap fix), readability pass done. |
 | [x] | [HOME-LEAD-01 — Stat leaders use the favorite card on the home page](#home-lead-01--stat-leaders-use-the-favorite-card-on-the-home-page) | DONE — Product Owner accepted 2026-10-21. Chose Option B on 2026-10-21 from the phone mockups (today / A swipe row / B 2×2 grid / C list). Implemented; QA PASS (10/10 browser criteria + checks, after fixing an empty modal wrapper that took a grid cell); readability pass done. |
 | [x] | [STAR-01 — Favorite star in leaderboards and box scores](#star-01--favorite-star-in-leaderboards-and-box-scores) | DONE — accepted by the Product Owner and merged 2026-10-21. |
 | [x] | [NAV-01 — Header nav fits at 1024px](#nav-01--header-nav-fits-at-1024px) | DONE — accepted by the Product Owner from 1001/1024/1200 screenshots 2026-10-21. |
 | [x] | [FEED-01 — "My Hockey" personal feed](#feed-01--my-hockey-personal-feed) | DONE — accepted by the Product Owner from screenshots 2026-10-22. |
+| [x] | [HOME-LEAD-02 — Swipe between phone stat leader groups](#home-lead-02--swipe-between-phone-stat-leader-groups) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `8b3201ee` (#113). |
 | [x] | [HOME-LOTTERY-01 — Draft lottery matches the landing page](#home-lottery-01--draft-lottery-matches-the-landing-page) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22; merged in `8b3201ee` (#113). |
+| [x] | [FEED-02 — Favorites move to My Hockey](#feed-02--favorites-move-to-my-hockey) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `3d09840b` (#117). |
+| [x] | [PREVIEW-01 — Pre-game preview on the matchup page](#preview-01--pre-game-preview-on-the-matchup-page) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified. |
 | [x] | [COMPARE-01 — Player comparison](#compare-01--player-comparison) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22. QA PASS 1–9; dialog Compare link checked in source only. Release needs API-COMPARE-01 deployed first (league-wide summaries return every player). |
+| [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified 2026-10-22. |
 | [x] | [API-AUTH-02 — Discord sign-in and account linking (backend)](#api-auth-02--discord-sign-in-and-account-linking-backend) | DONE — accepted by the Product Owner 2026-10-22. API merged to `main` (`8f99a1d`) and deployed by Jenkins 2026-10-22; Google sign-in confirmed working. The Discord button shipped in SIGNIN-01's modal; Spotter passed the Discord success, cancel, mismatched-state, rejected and expired-session specs against recorded API responses (`feature/signin-dialog`, `2a45e8d`). Follow-up: one live Discord sign-in after the web app deploys. |
 | [x] | [SIGNIN-01 — Account icon and sign-in modal (frontend)](#signin-01--account-icon-and-sign-in-modal-frontend) | DONE — accepted by the Product Owner 2026-10-22. Spotter passed on `feature/signin-dialog` (`2a45e8d`, 32/32 specs in `react/qa/sign-in.spec.mjs` at 375/1280 light/dark, no new findings; signed-in screenshots unchanged). |
 
-### In progress / awaiting acceptance (13)
+### In progress / awaiting acceptance (6)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [AAR-02 — Mobile push for After Action Reports](#aar-02--mobile-push-for-after-action-reports) | ACTIVE — implemented and QA-verified; awaiting Product Owner acceptance on a real phone |
-| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); awaiting deploy and Product Owner acceptance with WPR-01 |
-| [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); awaiting Product Owner screenshot review and deploy acceptance |
-| [ ] | [HOME-FAV-01 — Favorite players row on the home page](#home-fav-01--favorite-players-row-on-the-home-page) | ACTIVE — implemented, QA PASS (all criteria, 375/1280 light/dark), readability pass done; awaiting Product Owner screenshot review |
+| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployment remains unverified. |
+| [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; awaiting deploy (`pnpm run db:migrate` adds migration 006) |
-| [ ] | [FAN-01 — Favorite teams on home and fan categories (frontend)](#fan-01--favorite-teams-on-home-and-fan-categories-frontend) | ACTIVE — implemented, QA PASS (11/11 after a focus-trap fix), readability pass done; awaiting Product Owner screenshot review. Team logos follow the light/dark theme (Product Owner) |
-| [ ] | [HOME-LEAD-02 — Swipe between phone stat leader groups](#home-lead-02--swipe-between-phone-stat-leader-groups) | ACTIVE — merged in `8b3201ee` (#113); pending Product Owner review on device. |
-| [ ] | [FEED-02 — Favorites move to My Hockey](#feed-02--favorites-move-to-my-hockey) | ACTIVE — merged in `3d09840b` (#117); pending Product Owner acceptance. |
-| [ ] | [PREVIEW-01 — Pre-game preview on the matchup page](#preview-01--pre-game-preview-on-the-matchup-page) | ACTIVE — implemented and verified; pending Product Owner acceptance from screenshots. |
 | [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — implemented and tested on HockeyStatsAPI branch `ccr-ed30da63-xt8i5s`; pending merge and deploy |
-| [ ] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | ACTIVE — implemented and verified 2026-10-22; pending Product Owner acceptance of 375/1280 light/dark screenshots |
-| [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — accessibility fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a` on 2026-10-24; full baseline recheck and Product Owner color review are not recorded. Retain the acceptance gates below. |
+| [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; pending notifier install on the dev server and a live check) |
 
 ### Not started tickets (20)
@@ -112,32 +114,32 @@ necessary for DONE.
 | ON2-12 | Ordinary/rivalry reveals, pregame/faceoff/shot/goal camera examples and durations, and reduced-motion treatment. |
 | ON2-13 | Simulation protocol and material-advantage threshold before evaluation; final playtest and release acceptance. |
 | AAR-01 | Product Owner review of favorite star, header bell/inbox, report wording, and browser-alert opt-in on a real deploy. |
-| AAR-02 | PWA vs. React Native, alert timing after the final horn, and the external scheduler before any push work. |
+| AAR-02 | PWA vs. React Native, alert timing after the final horn, and the external scheduler before any push work; accepted by the Product Owner 2026-10-24 |
 | API-LINES-01 | Approved: real lines from NHL shift charts, NHL calls batched/cached (see block). |
 | TEAM-LINES-01 | Approved: "Line Change" rink strips + Forwards/Defense/Goalies tab row; Product Owner reviews screenshots. |
-| API-WPR-01 | Approved 2026-10-19: Monday 9:00 ET, zero-league-games break, proposed stat lines, 10-player cap, one on/off switch (see block). |
-| WPR-01 | Approved 2026-10-19: reusable star headshot, proposed inbox/report design, best-performer wording; screenshots for Product Owner acceptance. |
-| HOME-FAV-01 | Started 2026-10-20 with PM-recommended layout (see block); Product Owner reviews 375/1280 screenshots. |
+| API-WPR-01 | Approved 2026-10-19: Monday 9:00 ET, zero-league-games break, proposed stat lines, 10-player cap, one on/off switch (see block); accepted by the Product Owner 2026-10-24 |
+| WPR-01 | Approved 2026-10-19: reusable star headshot, proposed inbox/report design, best-performer wording; screenshots for Product Owner acceptance; accepted by the Product Owner 2026-10-24 |
+| HOME-FAV-01 | Started 2026-10-20 with PM-recommended layout (see block); Product Owner reviews 375/1280 screenshots; accepted by the Product Owner 2026-10-24 |
 | API-FAN-01 | Approved 2026-10-20: tiers Diehard/Fan/Curious + optional label on teams and players, display only (see block). |
-| FAN-01 | Approved 2026-10-20: teams row above players, sorted by tier; Product Owner reviews the category menu and rows in screenshots. |
+| FAN-01 | Approved 2026-10-20: teams row above players, sorted by tier; Product Owner reviews the category menu and rows in screenshots; accepted by the Product Owner 2026-10-24 |
 | HOME-LEAD-01 | Approved 2026-10-21: Option B (FavoriteCard in a 2×2 grid, Skaters/Goalies switch on phones); accepted from 375/1280 screenshots 2026-10-21. |
-| HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device. |
+| HOME-LEAD-02 | Approved 2026-10-21: swipe the phone stat leader grid to switch Skaters/Goalies (left = next, no wraparound); Product Owner reviews on device; accepted by the Product Owner 2026-10-24 |
 | HOME-LOTTERY-01 | Approved 2026-10-21: Option A — draft lottery uses the landing page heading, button and card styles; gold kept for the top bulb strip, odds, winners and reveal; light-mode support. Accepted from 375/1280 light/dark screenshots 2026-10-22. |
 | STAR-01 | Approved 2026-10-21: starred PlayerHeadshot on the leaderboard dialog (Pos hidden ≤576px) and scoring summary; box score gets a bare star, no photos. |
 | NAV-01 | Approved 2026-10-21: Option A — tighter pill padding and gaps at 1001–1199px, labels unchanged; accepted from 1001/1024/1200 screenshots 2026-10-21. |
 | FEED-01 | Approved 2026-10-21: /my-hockey page plus an "Up next" strip on home (right-hand column on desktop); Up next / Last results / Your players; games by time, players by tier; hard cap of 5 favorite teams (API); season + last-game player lines. Accepted from screenshots 2026-10-22. |
-| FEED-02 | Approved 2026-10-22: Option A — Your teams and Your players rows move from home to the top of /my-hockey; the player row and the feed's player list merge into one card row (season + last-game lines on each card); home keeps only the Up next strip; Up next rows show the opponent logo right after the matchup. Pending Product Owner acceptance. |
-| PREVIEW-01 | Approved 2026-10-22: previews use /matchup (not the game page) with a Team DNA card per team; every game card links through one routing helper (future → /matchup, live/final → /game) and /game/:id redirects games that have not started; phones switch between the two DNA cards; the puck-drop chip turns into a game-page link at the start time (local timer, no polling); TeamDna/FormStrip move to `components/` and take the team color. Lines, goalies and the team comparison are dropped. Pending Product Owner acceptance. |
+| FEED-02 | Approved 2026-10-22: Option A — Your teams and Your players rows move from home to the top of /my-hockey; the player row and the feed's player list merge into one card row (season + last-game lines on each card); home keeps only the Up next strip; Up next rows show the opponent logo right after the matchup; accepted by the Product Owner 2026-10-24 |
+| PREVIEW-01 | Approved 2026-10-22: previews use /matchup (not the game page) with a Team DNA card per team; every game card links through one routing helper (future → /matchup, live/final → /game) and /game/:id redirects games that have not started; phones switch between the two DNA cards; the puck-drop chip turns into a game-page link at the start time (local timer, no polling); TeamDna/FormStrip move to `components/` and take the team color. Lines, goalies and the team comparison are dropped; accepted by the Product Owner 2026-10-24 |
 | COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
 | API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
-| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Implemented; pending Product Owner acceptance of 375/1280 light/dark screenshots. |
+| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Implemented; accepted by the Product Owner 2026-10-24 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
-| A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured. |
+| A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
 | API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). Product Owner accepted 2026-10-24: notifier stays in `HockeyStatsAPI/notifier/`; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up; merge both to main. Product Owner checks the first live game night and Monday report. |
 
 ## Dependency outline
@@ -882,7 +884,7 @@ and confirms a real game's report appears, reads well, and opens the game.
 
 ## AAR-02 — Mobile push for After Action Reports
 
-**Status:** ACTIVE — implemented and QA-verified; awaiting Product Owner acceptance on a real phone
+**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and QA-verified.
 
 **Goal:** Ping a user's phone when a favorite's After Action Report is ready,
 even with the site closed. Tapping the notification opens `#/game/<gameId>` and
@@ -1020,7 +1022,7 @@ already loads; no extra API calls.
 
 ## API-WPR-01 — Favorite players and the weekly player report (backend)
 
-**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); awaiting deploy and Product Owner acceptance with WPR-01
+**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployment remains unverified.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1164,7 +1166,7 @@ a double run.
 
 ## WPR-01 — Favorite players and the weekly report (frontend)
 
-**Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); awaiting Product Owner screenshot review and deploy acceptance
+**Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1241,7 +1243,7 @@ sends nothing.
 
 ## HOME-FAV-01 — Favorite players row on the home page
 
-**Status:** ACTIVE — implemented, QA PASS (all criteria, 375/1280 light/dark), readability pass done; awaiting Product Owner screenshot review
+**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS (all criteria, 375/1280 light/dark), readability pass done.
 
 **Goal:** A signed-in user sees their favorite players in a row directly
 below the landing page intro header ("<season> at a glance").
@@ -1319,7 +1321,7 @@ route table updated.
 
 ## FAN-01 — Favorite teams on home and fan categories (frontend)
 
-**Status:** ACTIVE — implemented, QA PASS (11/11 after a focus-trap fix), readability pass done; awaiting Product Owner screenshot review. Team logos follow the light/dark theme (Product Owner)
+**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS (11/11 after a focus-trap fix), readability pass done.
 
 **Goal:** Favorite teams join the home favorites area, and a user can put each
 favorite in a category and see favorites grouped or badged by it.
@@ -1601,7 +1603,7 @@ against a mocked API for the cases above with screenshots.
 
 ## HOME-LEAD-02 — Swipe between phone stat leader groups
 
-**Status:** ACTIVE — merged in `8b3201ee` (#113); pending Product Owner review on device.
+**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `8b3201ee` (#113).
 
 **Approved 2026-10-21:** swipe left for the next Skaters/Goalies group on
 phones, without wraparound; retain the segmented switch. See HOME-LEAD-01
@@ -1621,7 +1623,7 @@ Support light mode.
 
 ## FEED-02 — Favorites move to My Hockey
 
-**Status:** ACTIVE — merged in `3d09840b` (#117); pending Product Owner acceptance.
+**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `3d09840b` (#117).
 
 **Approved 2026-10-22 (option A):** move Your teams and Your players from
 home to the top of `/my-hockey`. Merge the player row and feed player list
@@ -1636,8 +1638,7 @@ and dark. A merge alone does not establish acceptance.
 
 ## PREVIEW-01 — Pre-game preview on the matchup page
 
-**Status:** ACTIVE — implemented and verified; pending Product Owner acceptance
-from screenshots.
+**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified.
 
 **Goal:** Before puck drop, a game opens a useful preview instead of an empty
 box score: the `/matchup` page for its two teams with the game's date, arena and
@@ -1881,7 +1882,7 @@ mocked API with screenshots.
 
 ## SHARE-01 — Share button in the phone top bar
 
-**Status:** ACTIVE — implemented and verified 2026-10-22; pending Product Owner acceptance of 375/1280 light/dark screenshots
+**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified 2026-10-22.
 
 **Goal:** On phones, one tap shares the page being viewed (a comparison, a
 game, a team, a matchup preview) through the phone's share sheet.
@@ -1995,7 +1996,7 @@ screen-reader pass on the dialog, and API-AUTH-02's Discord checks.
 
 ## A11Y-01 — Accessibility fixes from the Spotter baseline
 
-**Status:** ACTIVE — accessibility fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a` on 2026-10-24; full baseline recheck and Product Owner color review are not recorded. Retain the acceptance gates below.
+**Status:** ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified.
 
 **Context:** Spotter's 2026-10-22 runs against `main` (merge base `66153ba`)
 flag these on every page they visit; none came from SIGNIN-01. Logged by the
