@@ -90,16 +90,6 @@ const PER_GAME_COLUMN: LeaderColumn = {
   formatValue: formatPerGame,
 };
 
-const OFFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
-  label: 'OZ FO',
-  formatValue: (row) => formatCount(row.skater?.offensiveZoneFaceoffs),
-};
-
-const DEFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
-  label: 'DZ FO',
-  formatValue: (row) => formatCount(row.skater?.defensiveZoneFaceoffs),
-};
-
 const GAMES_STARTED_COLUMN: LeaderColumn = {
   label: 'GS',
   formatValue: (row) => formatCount(row.goalie?.gamesStarted),
@@ -113,8 +103,14 @@ const EXTRA_COLUMNS: Partial<Record<StatCategoryKey, LeaderColumn[]>> = {
   savePctg: [GAMES_STARTED_COLUMN],
   goalsAgainstAverage: [GAMES_STARTED_COLUMN],
   faceoffWinPct: [
-    OFFENSIVE_ZONE_FACEOFFS_COLUMN,
-    DEFENSIVE_ZONE_FACEOFFS_COLUMN,
+    {
+      label: 'OZ FO',
+      formatValue: (row) => formatCount(row.skater?.offensiveZoneFaceoffs),
+    },
+    {
+      label: 'DZ FO',
+      formatValue: (row) => formatCount(row.skater?.defensiveZoneFaceoffs),
+    },
   ],
 };
 

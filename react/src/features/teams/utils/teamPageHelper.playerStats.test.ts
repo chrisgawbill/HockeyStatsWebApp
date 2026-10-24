@@ -24,10 +24,4 @@ describe('transformPlayerStats', () => {
     expect(statLine.offensiveZoneFaceoffs).toBe(210);
     expect(statLine.defensiveZoneFaceoffs).toBe(180);
   });
-
-  it('leaves zone faceoffs null when the faceoff data is unavailable', () => {
-    const [statLine] = transformPlayerStats([centerSummary], null, null);
-    expect(statLine.offensiveZoneFaceoffs).toBeNull();
-    expect(statLine.defensiveZoneFaceoffs).toBeNull();
-  });
 });

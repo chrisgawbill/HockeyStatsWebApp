@@ -69,7 +69,8 @@ export function useTeamPageData({
 
   /**
    * Fetches the season-dependent team data (stats, roster, schedule, skater
-   * totals, Corsi, optional zone faceoffs and goalie TOI) and stores the shaped view models.
+   * totals, Corsi, optional zone faceoffs and goalie TOI) and stores the
+   * shaped view models.
    */
   const fetchSeasonData = useCallback(async () => {
     setError(null);
