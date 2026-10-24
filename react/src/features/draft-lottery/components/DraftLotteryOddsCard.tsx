@@ -32,7 +32,6 @@ export default function DraftLotteryOddsCard({
       : movement < 0
         ? `, moved down ${-movement}`
         : '';
-  const ariaLabel = `#${rank} ${team.teamName}: ${odds}% draft lottery odds${moveText}`;
 
   return (
     <li className={styles['item']}>
@@ -43,12 +42,11 @@ export default function DraftLotteryOddsCard({
           isWinner && styles['slot--winner'],
           selected && styles['slot--selected'],
         )}
-        aria-label={ariaLabel}
         aria-pressed={selected}
         title={team.teamName}
         onClick={onSelect}
       >
-        <span className={styles['slot__top']} aria-hidden="true">
+        <span className={styles['slot__top']}>
           <span className={styles['slot__rank']}>{rankLabel}</span>
           {lotteryResult && movement !== 0 && (
             <span
@@ -62,12 +60,15 @@ export default function DraftLotteryOddsCard({
             </span>
           )}
         </span>
-        <span className={styles['slot__id']} aria-hidden="true">
+        <span className={styles['slot__id']}>
           <img src={team.teamLogo} alt="" className={styles['slot__logo']} />
           <span className={styles['slot__abbr']}>{team.id}</span>
         </span>
-        <span className={styles['slot__tag']} aria-hidden="true">
-          {odds}%
+        <span className={styles['slot__tag']}>{odds}%</span>
+        {/* The name is built from the visible text, so this adds what the
+            tile only shows as a logo and arrows. */}
+        <span className="ds-visually-hidden">
+          {` ${team.teamName} draft lottery odds${moveText}`}
         </span>
       </button>
     </li>

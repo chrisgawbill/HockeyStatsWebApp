@@ -100,7 +100,7 @@ export default function PageHeader({
   return (
     <>
       <nav
-        aria-label="Primary"
+        aria-label="Site"
         className={styles['nav-bar']}
         ref={navRef}
         style={isSubPage ? { marginBottom: 0 } : undefined}

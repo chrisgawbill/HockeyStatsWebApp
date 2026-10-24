@@ -14,7 +14,10 @@ export default function StandingsClinchLegend({ className }: Props) {
   return (
     <div
       className={joinClassNames(styles['standings-clinch-legend'], className)}
+      role="region"
       aria-label="Standings clinch legend"
+      // Phones scroll the legend sideways, so keyboard users need a stop on it.
+      tabIndex={0}
     >
       {(Object.keys(CLINCH_STATUS_META) as ClinchStatus[]).map((status) => {
         const statusMeta = CLINCH_STATUS_META[status];

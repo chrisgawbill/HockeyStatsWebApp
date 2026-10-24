@@ -77,7 +77,7 @@ export default function PlayoffRacePanel({
     >
       <div className={styles.headingRow}>
         <div>
-          <h3 id={`${conference}-race-heading`}>{conference} Playoff Race</h3>
+          <h2 id={`${conference}-race-heading`}>{conference} Playoff Race</h2>
           <p className={styles.note}>
             Simplified Points-Only Math; NHL Tiebreakers Are Not Included.
           </p>

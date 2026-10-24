@@ -202,6 +202,11 @@
   box-shadow: var(--ds-elevation-1);
 }
 
+.standings-clinch-legend:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
+  outline-offset: 2px;
+}
+
 .standings-clinch-legend__item {
   display: inline-flex;
   align-items: center;

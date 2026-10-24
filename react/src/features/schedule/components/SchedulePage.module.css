@@ -143,10 +143,26 @@
 }
 
 .game-card--clickable {
+  position: relative;
   cursor: pointer;
 }
 
-.game-card--clickable:focus-visible {
+.game-card__open {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.game-card__open:focus-visible {
+  outline: none;
+}
+
+.game-card--clickable:has(.game-card__open:focus-visible) {
   outline: 3px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
   outline-offset: 3px;
 }
@@ -184,7 +200,7 @@
   flex-shrink: 0;
 }
 
-.team-info h3 {
+.team-info h2 {
   margin: 0;
   font-size: var(--text-lg);
   font-weight: 700;
@@ -202,12 +218,12 @@
   min-width: 7.5rem;
 }
 
-.vs h3 {
+.vs h2 {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--color-muted-text);
+  color: var(--color-text-secondary);
   margin: 0 0 2px;
 }
 
@@ -306,6 +322,8 @@
 }
 
 .game-tickets {
+  position: relative;
+  z-index: 1;
   white-space: nowrap;
 }
 
@@ -359,7 +377,7 @@
     width: 2.5rem;
   }
 
-  .team-info h3 {
+  .team-info h2 {
     font-size: var(--text-sm);
     min-width: 0;
     overflow: hidden;
@@ -415,7 +433,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
-:global([data-theme='dark']) .team-info h3 {
+:global([data-theme='dark']) .team-info h2 {
   color: var(--color-text);
 }
 

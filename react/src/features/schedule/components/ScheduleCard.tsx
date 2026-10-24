@@ -65,21 +65,18 @@ function ScheduleCard({ game, goToGameDetails }: ScheduleCardProps) {
         styles['game-card--clickable'],
       )}
       onClick={() => goToGameDetails(game)}
-      onKeyDown={(event) => {
-        if (event.target !== event.currentTarget) return;
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          goToGameDetails(game);
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={`View details for ${game.awayTeam} at ${game.homeTeam}`}
     >
+      {/* The card's one keyboard stop; it covers the card so a tap anywhere
+          opens the game, while Tickets sits above it as its own button. */}
+      <button
+        type="button"
+        className={styles['game-card__open']}
+        aria-label={`View details for ${game.awayTeam} at ${game.homeTeam}`}
+      />
       <div key={game.gameId} className={styles['game-row']}>
         <div className={styles['team-info']}>
           <img src={homeLogo} alt="home_logo" />
-          <h3>{game.homeTeam}</h3>
+          <h2>{game.homeTeam}</h2>
         </div>
         <div className={styles['vs']}>
           {hasScore(game) ? (
@@ -90,7 +87,7 @@ function ScheduleCard({ game, goToGameDetails }: ScheduleCardProps) {
             </>
           ) : (
             <>
-              <h3>VS</h3>
+              <h2>VS</h2>
               <p className={styles['game-time']}>
                 {formatLocalTime(game.gameTime)}
               </p>
@@ -139,7 +136,7 @@ function ScheduleCard({ game, goToGameDetails }: ScheduleCardProps) {
           </div>
         </div>
         <div className={styles['team-info']}>
-          <h3>{game.awayTeam}</h3>
+          <h2>{game.awayTeam}</h2>
           <img src={awayLogo} alt="away_logo" />
         </div>
       </div>

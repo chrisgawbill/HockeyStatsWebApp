@@ -34,7 +34,7 @@ export default function BoardGamePage() {
   return (
     <>
       <PageHeader />
-      <div className={styles.page}>
+      <main className={styles.page}>
         <h1 className={styles.title}>Rink Quest</h1>
         {length === null ? (
           view === 'calendar' ? (
@@ -71,7 +71,7 @@ export default function BoardGamePage() {
             authToken={auth.token}
           />
         )}
-      </div>
+      </main>
       <SignInDialog
         open={isSignInOpen}
         onClose={() => setIsSignInOpen(false)}
