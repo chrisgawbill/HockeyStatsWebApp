@@ -67,6 +67,7 @@ necessary for DONE.
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured. |
+| API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). PM's calls: notifier lives in `HockeyStatsAPI/notifier/` until it gets its own repo; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up. Product Owner confirms after the first live game night and Monday report. |
 
 ## Dependency outline
 
@@ -1931,3 +1932,40 @@ separately if wanted.
 **Verify:** Spotter on the pushed branch across all routes at 375/768/1280
 light/dark with no accessibility findings left from the list above; Product
 Owner reviews the color changes in screenshots.
+
+---
+
+## API-PUSH-02 — Reliable push delivery and scheduling (backend)
+
+**Status:** ACTIVE (code on the branch; pending server setup and a live check)
+
+**Problem:** pushes depended on GitHub Actions cron (runs late, skips runs,
+disables itself after 60 quiet days) and on one send attempt: the ledger row was
+claimed before sending, so a push-service 5xx/429 or network error lost that
+push for good.
+
+**Change:** a project-agnostic `notifier` service on the dev server
+(`HockeyStatsAPI/notifier/`, its own README; SQLite, systemd). It provides (1) a
+Web Push queue with per-app VAPID keys, dedupe keys, exponential-backoff
+retries until the TTL, and a `subscription.gone` webhook back to the app; and
+(2) a cron-style HTTP scheduler with time zones, retries, run history and
+catch-up after downtime. The API queues pushes there when `NOTIFIER_URL` and
+`NOTIFIER_TOKEN` are set, and otherwise sends directly as before. If no device
+got a push, its ledger claim is released so the next dispatch retries it.
+`POST /api/push/dispatch` now gates itself on the NHL scoreboard (the logic
+from the removed `bin/aar-push-cron.js`). The new `POST /api/push/notifier-events`
+deletes gone subscriptions. The GitHub workflows and cron scripts are removed;
+the schedules are AAR every 5 minutes from 16:00 to 08:59 UTC, and weekly on
+Mondays at 9:00 and 12:00 America/New_York. Frontend unchanged.
+
+**Deploy order:** install and start the notifier (README "Install on the dev
+server"), set `NOTIFIER_URL`, `NOTIFIER_TOKEN` and `NOTIFIER_CALLBACK_SECRET`
+in the API `.env`, then merge the API to `main` (Jenkins deploys it). Once
+`/health` shows runs succeeding, delete the `CRON_SECRET`/`AAR_PUSH_API_URL`
+GitHub secrets.
+
+**Verify:** API and notifier unit tests. A local smoke run of the notifier
+covered startup, a scheduled authenticated call, an enqueue with real Web Push
+encryption, and a network failure left queued for retry. Not yet verified: the
+systemd install, real push services, and a real game night or Monday report.
+
