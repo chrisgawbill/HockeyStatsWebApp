@@ -173,6 +173,8 @@ export interface StatCategory {
   format: (val: number) => string;
   higherIsBetter: boolean;
   requiresMinGames?: boolean;
+  /** Counting stats whose leaderboard also shows a per-game (/GP) column. */
+  showsPerGame?: boolean;
   /**
    * Which view model this category's values come from. Skater categories read
    * off `PlayerStatLine`, goalie categories off `GoalieStatLine` — the two are
@@ -190,6 +192,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'G',
     format: (value) => String(value),
     higherIsBetter: true,
+    showsPerGame: true,
     source: 'skater',
   },
   {
@@ -198,6 +201,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'A',
     format: (value) => String(value),
     higherIsBetter: true,
+    showsPerGame: true,
     source: 'skater',
   },
   {
@@ -206,6 +210,7 @@ export const STAT_CATEGORIES: StatCategory[] = [
     shortLabel: 'P',
     format: (value) => String(value),
     higherIsBetter: true,
+    showsPerGame: true,
     source: 'skater',
   },
   {

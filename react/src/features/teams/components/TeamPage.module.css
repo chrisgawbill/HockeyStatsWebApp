@@ -832,6 +832,35 @@
   font-variant-numeric: tabular-nums;
 }
 
+.player-stat-row__per-game {
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+  min-width: 44px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.player-stat-header {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-1) var(--ds-space-3);
+  border-bottom: 1px solid var(--color-subtle-divider);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted-text);
+}
+
+.player-stat-header__value {
+  min-width: 52px;
+  text-align: right;
+}
+
+.player-stat-header__per-game {
+  min-width: 44px;
+  text-align: right;
+}
+
 /* ── Dark mode overrides for hardcoded win/loss/playoff colors ──────────── */
 
 [data-theme='dark'] .schedule-strip__score.win,

@@ -64,6 +64,12 @@ function getGoalieValue(
   }
 }
 
+/** A leader's stat per game played, to two decimals ('—' with no games). */
+function formatPerGame(row: LeaderRow): string {
+  if (row.value === null || row.gamesPlayed === 0) return '—';
+  return (row.value / row.gamesPlayed).toFixed(2);
+}
+
 /** Orders rows best-first (nulls last) and keeps the top few. */
 function sortAndSlice(rows: LeaderRow[], higherIsBetter: boolean): LeaderRow[] {
   return [...rows]
@@ -182,6 +188,14 @@ export default function PlayerStatsSection({
         <p className={styles['player-stat-leaderboard__title']}>
           {selectedCategory.label} Leaders
         </p>
+        {selectedCategory.showsPerGame && (
+          <div className={styles['player-stat-header']} aria-hidden="true">
+            <span className={styles['player-stat-header__value']}>
+              {selectedCategory.shortLabel}
+            </span>
+            <span className={styles['player-stat-header__per-game']}>/GP</span>
+          </div>
+        )}
         {topTen.map((row, index) => {
           const formatted =
             row.value !== null ? selectedCategory.format(row.value) : '—';
@@ -221,6 +235,11 @@ export default function PlayerStatsSection({
               <span className={styles['player-stat-row__value']}>
                 {formatted}
               </span>
+              {selectedCategory.showsPerGame && (
+                <span className={styles['player-stat-row__per-game']}>
+                  {formatPerGame(row)}
+                </span>
+              )}
             </div>
           );
         })}
