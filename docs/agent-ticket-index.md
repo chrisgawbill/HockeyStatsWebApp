@@ -1928,9 +1928,12 @@ already rebuilds the view (`/compare?players=…`, `/matchup?teamA=…`,
 
 - A share icon button in the phone top bar between the season selector and
   the account controls (`[back] [season] [share] [bell] [avatar]`), styled like
-  the bell (40px glass circle, 48px target). Not rendered in the desktop header.
+  the bell (its 32px glass circle; Product Owner kept the bell's size
+  2026-10-25). Not rendered in the desktop header.
 - `navigator.share({ title, url })`; without it, copy the link and show a
-  "Link copied" toast (`role="status"`) above the bottom nav. A cancelled share
+  "Link copied" toast (`role="status"`) just under the top bar (Product Owner
+  kept this position 2026-10-25, clear of the bottom nav, search button and
+  install banner). A cancelled share
   sheet (`AbortError`) is silent; other failures show an error toast.
 - Title: the page's first `h1` text + " · Hockey Stats", or "Hockey Stats".
 - Every page except `/diagnostics`; the URL (including `season=`) is shared
