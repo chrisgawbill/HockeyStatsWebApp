@@ -1,6 +1,7 @@
 import { ReactNode, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SeasonSelector from '@/components/SeasonSelector';
+import ShareButton from '@/components/ShareButton';
 import AccountCorner from '@/components/AccountCorner';
 import HeaderSearchBox from '@/components/HeaderSearchBox';
 import MobileSearchOverlay from '@/components/MobileSearchOverlay';
@@ -56,9 +57,9 @@ export interface PageHeaderProps {
 
 /**
  * Global header rendered at the top of every page: brand, back button on team
- * and game pages, desktop search, season selector, primary navigation (a
- * glass top bar on desktop, a bottom bar on phones), the account corner, and
- * the phone search overlay.
+ * and game pages, desktop search, season selector, the phone-only share
+ * button, primary navigation (a glass top bar on desktop, a bottom bar on
+ * phones), the account corner, and the phone search overlay.
  */
 export default function PageHeader({
   corner = <AccountCorner />,
@@ -77,6 +78,7 @@ export default function PageHeader({
   const isTeamSubPage = pathname.startsWith('/team/');
   const isGameSubPage = pathname.startsWith('/game/');
   const isSubPage = isTeamSubPage || isGameSubPage;
+  const isShareablePage = pathname !== '/diagnostics';
   const routeState = location.state as {
     sourcePath?: string;
     fallbackPath?: string;
@@ -121,6 +123,7 @@ export default function PageHeader({
               <SeasonSelector className="page-header-season-selector" />
             </div>
             <div className={styles['nav-secondary-utility']}>
+              {isShareablePage && <ShareButton />}
               {corner && <div className={styles['nav-corner']}>{corner}</div>}
             </div>
           </div>
