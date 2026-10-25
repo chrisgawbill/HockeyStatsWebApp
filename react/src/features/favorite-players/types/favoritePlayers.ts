@@ -11,6 +11,8 @@ export interface FavoritePlayer {
   since: string;
   tier: FanTier;
   label: string | null;
+  /** Left out of the Monday weekly-report push. */
+  pushMuted: boolean;
 }
 
 export interface SkaterWeekStats {

@@ -18,6 +18,7 @@ import {
   fetchWeeklyReports,
   markWeeklyReportRead,
   removeFavoritePlayer,
+  setFavoritePlayerPushMuted,
   setWeeklyReportPush,
   updateFavoritePlayerCategory,
 } from '@/features/favorite-players/api/favoritePlayersApi';
@@ -60,6 +61,8 @@ export interface FavoritePlayersState {
     playerId: number,
     category: FavoriteCategory,
   ) => Promise<void>;
+  /** Rejects after restoring the previous favorites when the save fails. */
+  setPlayerPushMuted: (playerId: number, muted: boolean) => Promise<void>;
   markReportRead: (weekStart: string) => void;
   markAllReportsRead: () => void;
   /** The Monday push switch; null until loaded. */
@@ -191,6 +194,7 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
                 since: new Date().toISOString(),
                 tier: DEFAULT_FAN_TIER,
                 label: null,
+                pushMuted: false,
               },
             ],
       );
@@ -227,6 +231,26 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
         );
       } catch (error) {
         console.error('Failed to update favorite player category:', error);
+        setFavorites(previous);
+        throw error;
+      }
+    },
+    [token, favorites],
+  );
+
+  const setPlayerPushMuted = useCallback(
+    async (playerId: number, muted: boolean) => {
+      if (!token) return;
+      const previous = favorites;
+      setFavorites(
+        favorites.map((f) =>
+          f.playerId === playerId ? { ...f, pushMuted: muted } : f,
+        ),
+      );
+      try {
+        setFavorites(await setFavoritePlayerPushMuted(token, playerId, muted));
+      } catch (error) {
+        console.error('Failed to update player push setting:', error);
         setFavorites(previous);
         throw error;
       }
@@ -282,6 +306,7 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
       isFavorite,
       toggleFavorite,
       updatePlayerCategory,
+      setPlayerPushMuted,
       markReportRead,
       markAllReportsRead,
       weeklyPush,
@@ -295,6 +320,7 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
       isFavorite,
       toggleFavorite,
       updatePlayerCategory,
+      setPlayerPushMuted,
       markReportRead,
       markAllReportsRead,
       weeklyPush,

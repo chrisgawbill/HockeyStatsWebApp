@@ -12,6 +12,7 @@ const base: PushEnvironment = {
   standalone: false,
   permission: 'default',
   subscribed: false,
+  accountEnabled: true,
 };
 
 describe('urlBase64ToUint8Array', () => {
@@ -52,5 +53,15 @@ describe('derivePushStatus', () => {
     ).toBe('on');
     expect(derivePushStatus({ ...base, subscribed: true })).toBe('off');
     expect(derivePushStatus(base)).toBe('off');
+
+    // A subscribed device is off while the account switch is off.
+    expect(
+      derivePushStatus({
+        ...base,
+        permission: 'granted',
+        subscribed: true,
+        accountEnabled: false,
+      }),
+    ).toBe('off');
   });
 });
