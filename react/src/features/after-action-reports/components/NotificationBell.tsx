@@ -114,6 +114,46 @@ function WeeklyReportRow({
   );
 }
 
+/** Per-player toggles for who counts in the Monday weekly-report push. */
+function WeeklyReportPlayerMutes() {
+  const { favorites, setPlayerPushMuted } = useFavoritePlayers();
+  const [muteError, setMuteError] = useState(false);
+  if (favorites.length === 0) return null;
+  return (
+    <>
+      <ul
+        className={styles.muteList}
+        aria-label="Weekly player report notifications by player"
+      >
+        {favorites.map((player) => (
+          <li key={player.playerId} className={styles.muteRow}>
+            <span className={styles.muteTeam}>{player.name}</span>
+            <button
+              type="button"
+              className={styles.textButton}
+              aria-pressed={player.pushMuted}
+              aria-label={`Mute ${player.name} in the weekly report notification`}
+              onClick={() => {
+                setMuteError(false);
+                setPlayerPushMuted(player.playerId, !player.pushMuted).catch(
+                  () => setMuteError(true),
+                );
+              }}
+            >
+              {player.pushMuted ? 'Muted' : 'Mute'}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {muteError && (
+        <p className={styles.footnote} role="alert">
+          Couldn't update that player. Try again.
+        </p>
+      )}
+    </>
+  );
+}
+
 /** The Monday Weekly Player Report push switch (one per account). */
 function WeeklyReportPushToggle() {
   const { available, weeklyPush, setWeeklyPush } = useFavoritePlayers();
@@ -121,7 +161,7 @@ function WeeklyReportPushToggle() {
   if (!available || weeklyPush === null) return null;
   return (
     <>
-      <div className={styles.muteRow}>
+      <div className={cx(styles.muteRow, styles.settingRow)}>
         <span className={styles.muteTeam}>
           Weekly player report notifications
         </span>
@@ -143,6 +183,7 @@ function WeeklyReportPushToggle() {
           Couldn't update the weekly report setting. Try again.
         </p>
       )}
+      {weeklyPush && <WeeklyReportPlayerMutes />}
     </>
   );
 }
@@ -196,7 +237,8 @@ function PushControls() {
       {push.status === 'on' && (
         <>
           <p className={styles.footnote}>
-            Phone notifications are on. Browser alerts are off on this device.
+            Phone notifications are on for your account, on every device that
+            allows them. Browser alerts are off on this device.
           </p>
           {favorites.length > 0 && (
             <ul

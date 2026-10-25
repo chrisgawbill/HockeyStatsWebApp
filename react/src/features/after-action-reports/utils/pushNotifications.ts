@@ -19,6 +19,8 @@ export interface PushEnvironment {
   permission: NotificationPermission | 'unsupported';
   /** This device currently has a push subscription. */
   subscribed: boolean;
+  /** The account-wide notifications switch; false while unknown. */
+  accountEnabled: boolean;
 }
 
 export function derivePushStatus(env: PushEnvironment): PushStatus {
@@ -26,7 +28,9 @@ export function derivePushStatus(env: PushEnvironment): PushStatus {
   if (env.ios && !env.standalone) return 'ios-install';
   if (!env.supported) return 'hidden';
   if (env.permission === 'denied') return 'denied';
-  return env.subscribed && env.permission === 'granted' ? 'on' : 'off';
+  return env.subscribed && env.accountEnabled && env.permission === 'granted'
+    ? 'on'
+    : 'off';
 }
 
 /** Decodes a base64url VAPID public key for `pushManager.subscribe`. */

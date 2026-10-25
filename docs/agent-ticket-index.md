@@ -45,7 +45,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-AUTH-02 — Discord sign-in and account linking (backend)](#api-auth-02--discord-sign-in-and-account-linking-backend) | DONE — accepted by the Product Owner 2026-10-22. API merged to `main` (`8f99a1d`) and deployed by Jenkins 2026-10-22; Google sign-in confirmed working. The Discord button shipped in SIGNIN-01's modal; Spotter passed the Discord success, cancel, mismatched-state, rejected and expired-session specs against recorded API responses (`feature/signin-dialog`, `2a45e8d`). Follow-up: one live Discord sign-in after the web app deploys. |
 | [x] | [SIGNIN-01 — Account icon and sign-in modal (frontend)](#signin-01--account-icon-and-sign-in-modal-frontend) | DONE — accepted by the Product Owner 2026-10-22. Spotter passed on `feature/signin-dialog` (`2a45e8d`, 32/32 specs in `react/qa/sign-in.spec.mjs` at 375/1280 light/dark, no new findings; signed-in screenshots unchanged). |
 
-### In progress / awaiting acceptance (6)
+### In progress / awaiting acceptance (8)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -55,6 +55,8 @@ and table row in sync when moving a ticket between states.
 | [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
+| [ ] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live); awaiting Product Owner acceptance with PUSH-03 |
+| [ ] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); API-PUSH-03 is deployed; ready for Spotter, then Product Owner review |
 
 ### Not started tickets (20)
 
@@ -141,6 +143,8 @@ necessary for DONE.
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
 | API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). Product Owner accepted 2026-10-24: notifier stays in `HockeyStatsAPI/notifier/`; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up; merge both to main. Product Owner checks the first live game night and Monday report. |
+| API-PUSH-03 | Decided 2026-10-25: one account-wide notifications switch over everything; per-player toggle controls only the weekly push (see block). |
+| PUSH-03 | Decided 2026-10-25: permission is asked only from the bell; devices that already allow notifications subscribe automatically (see block). Product Owner reviews the bell panel. |
 
 ## Dependency outline
 
@@ -2117,3 +2121,75 @@ send (no rejected event in its log or queue). `push_subscriptions` is empty, so
 no device can receive a push yet. Pending: subscribe a device and confirm a real
 push arrives, the first Monday run, then delete the `CRON_SECRET` and
 `AAR_PUSH_API_URL` GitHub Actions secrets.
+
+---
+
+## API-PUSH-03 — Account-level push settings and automatic device subscription (backend)
+
+**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live); awaiting Product Owner acceptance with PUSH-03
+
+**Requested by Product Owner (2026-10-25):** subscriptions are automatic, tied
+to the account, and governed by whether notifications are on in general, per
+team and per player.
+
+**Decisions (Product Owner, 2026-10-25):**
+
+- One account-wide notifications switch (default on) is the master: off sends
+  nothing (After Action Reports and the weekly report); on, the team mutes,
+  player toggles and the weekly switch each apply.
+- Each favorite player gets a weekly-push toggle (default on). It decides only
+  whether that player counts in the Monday weekly push; game pushes and their
+  player highlights are unchanged, and the stored report and inbox still list
+  every favorite.
+- The weekly report switch stays.
+
+**PM decisions:** a week whose included players all did not play (or are all
+toggled off) is claimed without a push, like a game whose teams are all muted,
+so turning a toggle back on never pushes an old week. Turning the account
+switch back on records the current inbox as sent for the same reason.
+Re-sending an existing subscription (the frontend re-syncs it automatically)
+does not reseed the sent ledger; only a device new to the account does, so an
+automatic re-sync cannot swallow a push another device is waiting for.
+
+**Contract:**
+
+- Migration 010: `users.push_enabled boolean NOT NULL DEFAULT true`;
+  `favorite_players.push_muted boolean NOT NULL DEFAULT false`.
+- `GET` / `PUT /api/push/notifications` (session): `{ enabled }`; 400 unless
+  boolean.
+- `PUT /api/favorite-players/:playerId/push-mute` (session): body
+  `{ muted: boolean }`; returns `{ favorites }`; 400 bad body or id, 404 if not
+  a favorite. Favorite players gain `pushMuted`.
+- Both dispatches skip users with the account switch off. The weekly push body
+  is the headline built from the user's unmuted players.
+
+**Verify:** route and service unit tests (switch, player mute, dispatch
+filtering, weekly body from unmuted players, re-sync does not reseed),
+migration on Postgres, README route tables updated.
+
+---
+
+## PUSH-03 — Automatic device subscription and account push settings (frontend)
+
+**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); API-PUSH-03 is deployed; ready for Spotter, then Product Owner review
+
+**Decisions (Product Owner, 2026-10-25):** permission is asked only from the
+bell (no banner, no prompt during sign-in). A signed-in device whose browser
+already allows notifications (and, on iOS, runs from the Home Screen) is
+subscribed and re-synced automatically on every app load and after signing
+in again, with no prompt. Signing out still removes that device.
+
+**PM decisions:** because devices re-subscribe automatically, the bell's
+"Turn off phone notifications" now turns the account switch off (all
+devices) instead of unsubscribing only this device; "Turn on" asks for
+permission when needed, subscribes this device and turns the account switch
+on. The bell panel lists favorite players with an "In weekly push" toggle
+below the weekly report switch, mirroring the team mutes.
+
+**Depends on:** API-PUSH-03 deployed first. Against an older API the bell
+reads the missing switch as off and every load re-seeds the sent ledger.
+
+**Verify:** tsc, `pnpm test`, build; Spotter on the pushed branch: auto
+subscribe with permission already granted, re-sync after sign-out/sign-in,
+bell on/off sets the account switch, player toggles, denied and iOS-install
+states unchanged, 375/1280 light/dark.

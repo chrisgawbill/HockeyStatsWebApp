@@ -154,10 +154,22 @@ for (const width of [375, 1280])
             });
           });
           await page.goto('./');
+          // The checks below also hold on the page before it leaves for
+          // Discord, so wait for the app's own callback navigation first.
+          const appOrigin = new URL(page.url()).origin;
+          const callbackLoaded = page.waitForEvent('framenavigated', {
+            predicate: (frame) => {
+              if (frame !== page.mainFrame()) return false;
+              const url = new URL(frame.url());
+              return url.origin === appOrigin && url.searchParams.has('state');
+            },
+          });
           await headerSignIn(page).click();
           await page
             .getByRole('button', { name: 'Sign in with Discord' })
             .click();
+          await callbackLoaded;
+          await page.waitForLoadState();
           if (outcome === 'success') {
             const avatar = page.getByRole('button', {
               name: `Signed in as ${email}`,
@@ -172,14 +184,16 @@ for (const width of [375, 1280])
           }
           await expect(headerSignIn(page)).toBeVisible();
           await expect.poll(() => new URL(page.url()).search).toBe('');
-          expect(exchanges).toBe(
-            ['success', 'rejected'].includes(outcome) ? 1 : 0,
-          );
-          expect(
-            await page.evaluate(() =>
-              sessionStorage.getItem('discord-sign-in-pending'),
-            ),
-          ).toBeNull();
+          await expect
+            .poll(() => exchanges)
+            .toBe(['success', 'rejected'].includes(outcome) ? 1 : 0);
+          await expect
+            .poll(() =>
+              page.evaluate(() =>
+                sessionStorage.getItem('discord-sign-in-pending'),
+              ),
+            )
+            .toBeNull();
           expect(
             await page.evaluate((key) => localStorage.getItem(key), tokenKey),
           ).toBeNull();

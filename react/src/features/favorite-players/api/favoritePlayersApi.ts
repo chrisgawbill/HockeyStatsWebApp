@@ -11,16 +11,20 @@ import type {
   WeeklyPlayerReportInbox,
 } from '@/features/favorite-players/types/favoritePlayers';
 
-type FavoritePlayerDto = Omit<FavoritePlayer, 'tier' | 'label'> & {
+type FavoritePlayerDto = Omit<
+  FavoritePlayer,
+  'tier' | 'label' | 'pushMuted'
+> & {
   tier?: unknown;
   label?: unknown;
+  pushMuted?: unknown;
 };
 
 interface FavoritePlayersResponseDto {
   favorites: FavoritePlayerDto[];
 }
 
-/** Fills in the tier and label an API that predates fan categories leaves out. */
+/** Fills in the tier, label and push toggle an older API leaves out. */
 function readFavoritePlayers(
   response: FavoritePlayersResponseDto,
 ): FavoritePlayer[] {
@@ -28,6 +32,7 @@ function readFavoritePlayers(
     ...favorite,
     tier: readFanTier(favorite.tier),
     label: readCategoryLabel(favorite.label),
+    pushMuted: favorite.pushMuted === true,
   }));
 }
 
@@ -76,6 +81,20 @@ export async function updateFavoritePlayerCategory(
   const response = await patch<FavoritePlayersResponseDto>(
     `/api/favorite-players/${playerId}`,
     category,
+    authHeader(token),
+  );
+  return readFavoritePlayers(response);
+}
+
+/** Includes or leaves out one favorite player in the weekly-report push. */
+export async function setFavoritePlayerPushMuted(
+  token: string,
+  playerId: number,
+  muted: boolean,
+): Promise<FavoritePlayer[]> {
+  const response = await put<FavoritePlayersResponseDto>(
+    `/api/favorite-players/${playerId}/push-mute`,
+    { muted },
     authHeader(token),
   );
   return readFavoritePlayers(response);

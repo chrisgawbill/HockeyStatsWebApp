@@ -250,6 +250,11 @@
   font-size: 0.85rem;
 }
 
+/* A setting row outside a .muteList lines up with the list's rows. */
+.settingRow {
+  padding-inline: var(--ds-space-2);
+}
+
 .muteTeam {
   font-weight: 600;
 }
