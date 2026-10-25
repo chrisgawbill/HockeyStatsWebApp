@@ -58,7 +58,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
-| [ ] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported onto `main` on `feature/share-page` with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; ready for Spotter, then Product Owner review. |
+| [ ] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; Spotter passed 2026-10-25 (reported by the Product Owner). Pending Product Owner review. |
 
 ### Not started tickets (19)
 
@@ -1934,7 +1934,7 @@ mocked API with screenshots.
 
 ## SHARE-01 — Share button in the phone top bar
 
-**Status:** ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported onto `main` on `feature/share-page` with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; ready for Spotter, then Product Owner review.
+**Status:** ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; Spotter passed 2026-10-25 (reported by the Product Owner). Pending Product Owner review.
 
 **Goal:** On phones, one tap shares the page being viewed (a comparison, a
 game, a team, a matchup preview) through the phone's share sheet.
