@@ -19,10 +19,11 @@ not been independently verified by this documentation review.
 The tables are a navigation summary; each linked ticket block retains its
 scope, decisions, verification evidence and remaining gates. Product Owner
 acceptance was granted on 2026-10-24 for tickets awaiting that review; this
-does not claim that pending deployments or verification checks ran. Keep its status
+does not claim that pending deployments or verification checks ran. On 2026-10-25
+the Product Owner accepted API-FAN-01, API-COMPARE-01 and API-PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (18)
+### Completed tickets (21)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -44,18 +45,18 @@ and table row in sync when moving a ticket between states.
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified 2026-10-22. |
 | [x] | [API-AUTH-02 — Discord sign-in and account linking (backend)](#api-auth-02--discord-sign-in-and-account-linking-backend) | DONE — accepted by the Product Owner 2026-10-22. API merged to `main` (`8f99a1d`) and deployed by Jenkins 2026-10-22; Google sign-in confirmed working. The Discord button shipped in SIGNIN-01's modal; Spotter passed the Discord success, cancel, mismatched-state, rejected and expired-session specs against recorded API responses (`feature/signin-dialog`, `2a45e8d`). Follow-up: one live Discord sign-in after the web app deploys. |
 | [x] | [SIGNIN-01 — Account icon and sign-in modal (frontend)](#signin-01--account-icon-and-sign-in-modal-frontend) | DONE — accepted by the Product Owner 2026-10-22. Spotter passed on `feature/signin-dialog` (`2a45e8d`, 32/32 specs in `react/qa/sign-in.spec.mjs` at 375/1280 light/dark, no new findings; signed-in screenshots unchanged). |
+| [x] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25). |
+| [x] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25). |
+| [x] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live). |
 
-### In progress / awaiting acceptance (8)
+### In progress / awaiting acceptance (5)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
 | [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26 13:00 UTC) and the real-NHL report spot-check are pending. |
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
-| [ ] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25); awaiting Product Owner acceptance |
-| [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
-| [ ] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live); awaiting Product Owner acceptance with PUSH-03 |
 | [ ] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); API-PUSH-03 is deployed; ready for Spotter, then Product Owner review |
 
 ### Not started tickets (20)
@@ -1304,7 +1305,7 @@ below the landing page intro header ("<season> at a glance").
 
 ## API-FAN-01 — Fan categories for favorite teams (and players) (backend)
 
-**Status:** ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25); awaiting Product Owner acceptance
+**Status:** DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25).
 
 **Approved decisions (Product Owner, 2026-10-20):** fixed tiers named
 **Diehard / Fan / Curious** (values `diehard`, `fan`, `curious`; new favorites
@@ -1776,7 +1777,7 @@ goalie comparisons, keyboard picker) with 375/1280 light/dark screenshots.
 
 ## API-COMPARE-01 — Every player in the season summaries (backend)
 
-**Status:** ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance
+**Status:** DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25).
 
 **Approved 2026-10-22 (option A):** no new endpoint.
 
@@ -2126,7 +2127,7 @@ push arrives, the first Monday run, then delete the `CRON_SECRET` and
 
 ## API-PUSH-03 — Account-level push settings and automatic device subscription (backend)
 
-**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live); awaiting Product Owner acceptance with PUSH-03
+**Status:** DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live).
 
 **Requested by Product Owner (2026-10-25):** subscriptions are automatic, tied
 to the account, and governed by whether notifications are on in general, per
