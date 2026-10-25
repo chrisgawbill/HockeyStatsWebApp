@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (22)
+### Completed tickets (21)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -42,7 +42,6 @@ and table row in sync when moving a ticket between states.
 | [x] | [FEED-02 — Favorites move to My Hockey](#feed-02--favorites-move-to-my-hockey) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `3d09840b` (#117). |
 | [x] | [PREVIEW-01 — Pre-game preview on the matchup page](#preview-01--pre-game-preview-on-the-matchup-page) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified. |
 | [x] | [COMPARE-01 — Player comparison](#compare-01--player-comparison) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22. QA PASS 1–9; dialog Compare link checked in source only. Release needs API-COMPARE-01 deployed first (league-wide summaries return every player). |
-| [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified 2026-10-22. |
 | [x] | [API-AUTH-02 — Discord sign-in and account linking (backend)](#api-auth-02--discord-sign-in-and-account-linking-backend) | DONE — accepted by the Product Owner 2026-10-22. API merged to `main` (`8f99a1d`) and deployed by Jenkins 2026-10-22; Google sign-in confirmed working. The Discord button shipped in SIGNIN-01's modal; Spotter passed the Discord success, cancel, mismatched-state, rejected and expired-session specs against recorded API responses (`feature/signin-dialog`, `2a45e8d`). Follow-up: one live Discord sign-in after the web app deploys. |
 | [x] | [SIGNIN-01 — Account icon and sign-in modal (frontend)](#signin-01--account-icon-and-sign-in-modal-frontend) | DONE — accepted by the Product Owner 2026-10-22. Spotter passed on `feature/signin-dialog` (`2a45e8d`, 32/32 specs in `react/qa/sign-in.spec.mjs` at 375/1280 light/dark, no new findings; signed-in screenshots unchanged). |
 | [x] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25). |
@@ -50,7 +49,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live). |
 | [x] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed. |
 
-### In progress / awaiting acceptance (4)
+### In progress / awaiting acceptance (5)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -58,6 +57,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
+| [ ] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported onto `main` on `feature/share-page` with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; ready for Spotter, then Product Owner review. |
 
 ### Not started tickets (20)
 
@@ -138,7 +138,7 @@ necessary for DONE.
 | API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
-| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Implemented; accepted by the Product Owner 2026-10-24 |
+| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported on `feature/share-page` |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
@@ -1914,7 +1914,7 @@ mocked API with screenshots.
 
 ## SHARE-01 — Share button in the phone top bar
 
-**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified 2026-10-22.
+**Status:** ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported onto `main` on `feature/share-page` with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; ready for Spotter, then Product Owner review.
 
 **Goal:** On phones, one tap shares the page being viewed (a comparison, a
 game, a team, a matchup preview) through the phone's share sheet.
@@ -1928,9 +1928,12 @@ already rebuilds the view (`/compare?players=…`, `/matchup?teamA=…`,
 
 - A share icon button in the phone top bar between the season selector and
   the account controls (`[back] [season] [share] [bell] [avatar]`), styled like
-  the bell (40px glass circle, 48px target). Not rendered in the desktop header.
+  the bell (its 32px glass circle; Product Owner kept the bell's size
+  2026-10-25). Not rendered in the desktop header.
 - `navigator.share({ title, url })`; without it, copy the link and show a
-  "Link copied" toast (`role="status"`) above the bottom nav. A cancelled share
+  "Link copied" toast (`role="status"`) just under the top bar (Product Owner
+  kept this position 2026-10-25, clear of the bottom nav, search button and
+  install banner). A cancelled share
   sheet (`AbortError`) is silent; other failures show an error toast.
 - Title: the page's first `h1` text + " · Hockey Stats", or "Hockey Stats".
 - Every page except `/diagnostics`; the URL (including `season=`) is shared
