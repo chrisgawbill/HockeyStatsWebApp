@@ -55,8 +55,8 @@ and table row in sync when moving a ticket between states.
 | [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
-| [ ] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on HockeyStatsAPI branch `feature/account-push-settings` (unit tests and migration 010 on Postgres 17 pass); awaiting merge and deploy |
-| [ ] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); needs API-PUSH-03 deployed, then Spotter and Product Owner review |
+| [ ] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live); awaiting Product Owner acceptance with PUSH-03 |
+| [ ] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); API-PUSH-03 is deployed; ready for Spotter, then Product Owner review |
 
 ### Not started tickets (20)
 
@@ -2126,7 +2126,7 @@ push arrives, the first Monday run, then delete the `CRON_SECRET` and
 
 ## API-PUSH-03 — Account-level push settings and automatic device subscription (backend)
 
-**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on HockeyStatsAPI branch `feature/account-push-settings` (unit tests and migration 010 on Postgres 17 pass); awaiting merge and deploy
+**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live); awaiting Product Owner acceptance with PUSH-03
 
 **Requested by Product Owner (2026-10-25):** subscriptions are automatic, tied
 to the account, and governed by whether notifications are on in general, per
@@ -2171,7 +2171,7 @@ migration on Postgres, README route tables updated.
 
 ## PUSH-03 — Automatic device subscription and account push settings (frontend)
 
-**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); needs API-PUSH-03 deployed, then Spotter and Product Owner review
+**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); API-PUSH-03 is deployed; ready for Spotter, then Product Owner review
 
 **Decisions (Product Owner, 2026-10-25):** permission is asked only from the
 bell (no banner, no prompt during sign-in). A signed-in device whose browser
