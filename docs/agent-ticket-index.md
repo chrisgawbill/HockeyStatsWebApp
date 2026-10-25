@@ -49,7 +49,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live). |
 | [x] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed. |
 
-### In progress / awaiting acceptance (5)
+### In progress / awaiting acceptance (6)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -57,9 +57,10 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
+| [ ] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | ACTIVE — decided and implemented 2026-10-25 on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`b1dd7fe`); tests pass. Pending merge, deploy and Product Owner acceptance. |
 | [ ] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported onto `main` on `feature/share-page` with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; ready for Spotter, then Product Owner review. |
 
-### Not started tickets (20)
+### Not started tickets (19)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -80,7 +81,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
 | [ ] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | IDEA |
-| [ ] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | IDEA |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | IDEA — backend-owned dependency |
 | [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
 
@@ -135,7 +135,7 @@ necessary for DONE.
 | PREVIEW-01 | Approved 2026-10-22: previews use /matchup (not the game page) with a Team DNA card per team; every game card links through one routing helper (future → /matchup, live/final → /game) and /game/:id redirects games that have not started; phones switch between the two DNA cards; the puck-drop chip turns into a game-page link at the start time (local timer, no polling); TeamDna/FormStrip move to `components/` and take the team color. Lines, goalies and the team comparison are dropped; accepted by the Product Owner 2026-10-24 |
 | COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
-| API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
+| API-CACHE-01 | Decided 2026-10-25: stale-while-revalidate for entries on their default TTL, serve-stale on error for caller-set (live) TTLs; completed seasons permanent once cached after they ended; no in-memory layer; production confirmed on Postgres (see block). |
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported on `feature/share-page` |
@@ -1831,12 +1831,32 @@ worker guard) and the signed-out Up next prompt, both done.
 
 ## API-CACHE-01 — Cache resilience (backend)
 
-**Status:** IDEA
+**Status:** ACTIVE — implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd`
+(`b1dd7fe`); pending merge, deploy and Product Owner acceptance.
 
 **Context:** With `CACHE_DATABASE_URL` set the cache already lives in Postgres
-(`app_cache`); confirm production does not set `CACHE_STORAGE=filesystem`.
+(`app_cache`); the Product Owner confirmed 2026-10-25 that production uses it.
 
-**Proposed (confirm at checkpoint):**
+**Decided 2026-10-25 (Product Owner):**
+
+- Entries on their type's default TTL (12h/24h: summaries, standings,
+  leaders, rosters, schedules, team stats) are served expired at once while
+  one background refresh runs; a failed refresh keeps the expired copy.
+- Entries on a caller-set TTL (5-minute gamecenter and preliminary shift
+  charts, 10-minute current week, push dispatch's forced refresh) wait for
+  the refetch and fall back to the expired copy when the NHL call fails.
+  A cache miss still fails when the NHL call fails.
+- Standings, stat leaders, team summaries and player summaries/Corsi/faceoffs
+  of a completed season never expire once cached after that season ended
+  (September 1 of its end year); a mid-season copy refreshes once, then stays.
+- No in-memory layer for now; revisit only with timings.
+
+**Implementation:** `getOrFetchCached` in `src/platform/cacheManager.js`
+(callers pass `{ seasonId }` for the permanent-season rule;
+`getSeasonEndMs` in `seasonHelper.js`). Tests in `src/test/cacheManager.test.js`;
+README "Caching" section. No browser checks (backend only).
+
+**Original proposal:**
 
 - Serve-stale on error: when an entry has expired and the NHL fetch fails,
   return the expired entry instead of failing.
