@@ -20,10 +20,10 @@ The tables are a navigation summary; each linked ticket block retains its
 scope, decisions, verification evidence and remaining gates. Product Owner
 acceptance was granted on 2026-10-24 for tickets awaiting that review; this
 does not claim that pending deployments or verification checks ran. On 2026-10-25
-the Product Owner accepted API-FAN-01, API-COMPARE-01 and API-PUSH-03. Keep its status
+the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (21)
+### Completed tickets (22)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -48,8 +48,9 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25). |
 | [x] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25). |
 | [x] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live). |
+| [x] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed. |
 
-### In progress / awaiting acceptance (5)
+### In progress / awaiting acceptance (4)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -57,7 +58,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
-| [ ] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); API-PUSH-03 is deployed; ready for Spotter, then Product Owner review |
 
 ### Not started tickets (20)
 
@@ -2172,7 +2172,7 @@ migration on Postgres, README route tables updated.
 
 ## PUSH-03 — Automatic device subscription and account push settings (frontend)
 
-**Status:** ACTIVE — requested and decided by the Product Owner 2026-10-25; implemented on branch `feature/account-push-settings` (tsc, tests, build pass); API-PUSH-03 is deployed; ready for Spotter, then Product Owner review
+**Status:** DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed.
 
 **Decisions (Product Owner, 2026-10-25):** permission is asked only from the
 bell (no banner, no prompt during sign-in). A signed-in device whose browser
