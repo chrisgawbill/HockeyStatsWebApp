@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (22)
+### Completed tickets (23)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -49,8 +49,9 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live). |
 | [x] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed. |
 | [x] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | DONE — Product Owner accepted 2026-10-25. Merged to HockeyStatsAPI `main` (`1e11b15`); tests pass; deploy not independently verified. |
+| [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
 
-### In progress / awaiting acceptance (5)
+### In progress / awaiting acceptance (4)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -58,7 +59,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
-| [ ] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; Spotter passed 2026-10-25 (reported by the Product Owner). Pending Product Owner review. |
 
 ### Not started tickets (19)
 
@@ -138,7 +138,7 @@ necessary for DONE.
 | API-CACHE-01 | Decided 2026-10-25: stale-while-revalidate for entries on their default TTL, serve-stale on error for caller-set (live) TTLs; completed seasons permanent once cached after they ended; no in-memory layer; production confirmed on Postgres (see block); accepted by the Product Owner 2026-10-25 |
 | HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
-| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported on `feature/share-page` |
+| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
@@ -1934,7 +1934,7 @@ mocked API with screenshots.
 
 ## SHARE-01 — Share button in the phone top bar
 
-**Status:** ACTIVE — reopened 2026-10-25: the 2026-10-22 implementation (`ed085ec7`) never reached `main`. Ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass; Spotter passed 2026-10-25 (reported by the Product Owner). Pending Product Owner review.
+**Status:** DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass.
 
 **Goal:** On phones, one tap shares the page being viewed (a comparison, a
 game, a team, a matchup preview) through the phone's share sheet.
