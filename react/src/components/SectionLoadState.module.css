@@ -1,0 +1,5 @@
+/* A grid so the spinner or error stretches to the held height and centres in it. */
+.placeholder {
+  display: grid;
+  min-width: 0;
+}

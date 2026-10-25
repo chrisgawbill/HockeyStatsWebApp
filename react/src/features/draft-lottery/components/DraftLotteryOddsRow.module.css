@@ -255,3 +255,14 @@
     opacity: 1;
   }
 }
+
+/* Holds the loaded board's height (its tiles shrink on wider columns). */
+.placeholder {
+  min-height: 25rem;
+}
+
+@media (min-width: 1024px) {
+  .placeholder {
+    min-height: 19.5rem;
+  }
+}
