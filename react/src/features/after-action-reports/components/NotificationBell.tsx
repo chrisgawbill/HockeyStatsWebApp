@@ -161,7 +161,7 @@ function WeeklyReportPushToggle() {
   if (!available || weeklyPush === null) return null;
   return (
     <>
-      <div className={styles.muteRow}>
+      <div className={cx(styles.muteRow, styles.settingRow)}>
         <span className={styles.muteTeam}>
           Weekly player report notifications
         </span>
