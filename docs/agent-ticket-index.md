@@ -49,12 +49,12 @@ and table row in sync when moving a ticket between states.
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployment remains unverified. |
+| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26 13:00 UTC) and the real-NHL report spot-check are pending. |
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
-| [ ] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; awaiting deploy (`pnpm run db:migrate` adds migration 006) |
-| [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — implemented and tested on HockeyStatsAPI branch `ccr-ed30da63-xt8i5s`; pending merge and deploy |
+| [ ] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25); awaiting Product Owner acceptance |
+| [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
-| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; pending notifier install on the dev server and a live check) |
+| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
 
 ### Not started tickets (20)
 
@@ -1022,7 +1022,7 @@ already loads; no extra API calls.
 
 ## API-WPR-01 — Favorite players and the weekly player report (backend)
 
-**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployment remains unverified.
+**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26 13:00 UTC) and the real-NHL report spot-check are pending.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1164,6 +1164,18 @@ real-Postgres run of the new SQL; QA drives `/api/push/weekly-dispatch`
 against a fake push service for a normal week, a break week, a DST week and
 a double run.
 
+**Deploy check (2026-10-25, dev server, read-only):** HockeyStatsAPI `main`
+(`81da435`) runs on Node 24.22.1 on port 9000; `schema_migrations` lists 001–009.
+`GET /api/favorite-players`, `/api/weekly-player-reports`,
+`/api/weekly-player-reports/:weekStart` and `/api/push/weekly-report` answer 401
+without a session (an unknown route is 404), and the journal shows signed-in
+304 (not modified) responses to them since 23:00 UTC 2026-10-24. The workflow schedule is
+replaced by the notifier's `weekly-player-report` schedule (Mondays 9:00 and
+12:00 America/New_York, bearer matches `CRON_SECRET`); `/health` shows its next
+run at 2026-10-26 13:00 UTC and no run yet. No weekly reports exist yet.
+Pending: the first Monday run, a spot-check of the first real report's NHL
+payload shapes, and an authenticated response-body check.
+
 ## WPR-01 — Favorite players and the weekly report (frontend)
 
 **Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified.
@@ -1288,7 +1300,7 @@ below the landing page intro header ("<season> at a glance").
 
 ## API-FAN-01 — Fan categories for favorite teams (and players) (backend)
 
-**Status:** ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; awaiting deploy (`pnpm run db:migrate` adds migration 006)
+**Status:** ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25); awaiting Product Owner acceptance
 
 **Approved decisions (Product Owner, 2026-10-20):** fixed tiers named
 **Diehard / Fan / Curious** (values `diehard`, `fan`, `curious`; new favorites
@@ -1316,6 +1328,13 @@ and label favorites (e.g. Diehard, Curious, "My West Coast team").
 
 **Verify:** route/service unit tests, migration run on real Postgres, README
 route table updated.
+
+**Deploy check (2026-10-25, dev server, read-only):** migration
+`006_add_favorite_tiers_and_labels.sql` is applied; `GET /api/favorites` and
+`GET /api/favorite-players` answer 401 without a session and serve signed-in
+requests (journal). Stored favorites already hold non-default tiers (`diehard`,
+`curious`), so tier writes work on the live database. Not yet checked: an
+authenticated response body showing `tier` and `label`.
 
 ---
 
@@ -1753,7 +1772,7 @@ goalie comparisons, keyboard picker) with 375/1280 light/dark screenshots.
 
 ## API-COMPARE-01 — Every player in the season summaries (backend)
 
-**Status:** ACTIVE — implemented and tested on HockeyStatsAPI branch `ccr-ed30da63-xt8i5s`; pending merge and deploy
+**Status:** ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance
 
 **Approved 2026-10-22 (option A):** no new endpoint.
 
@@ -1770,6 +1789,14 @@ goalie comparisons, keyboard picker) with 375/1280 light/dark screenshots.
 **Verify:** `pnpm test` (mapper fields, pager, league paging/cache key,
 persist-on-fetch). NHL field names were not checked live (the dev
 environment blocks api.nhle.com); confirm on the first deploy.
+
+**Deploy check (2026-10-25):** branch `ccr-ed30da63-xt8i5s` no longer exists on
+`origin`; its change is on `main` as `0d39d93` and is live. On the dev server,
+`GET /player/skater/summary?season=20262027` returned 717 skaters (sorted by
+points) and `/player/goalie/summary` 68 goalies, with `teamTriCodes`, `shots`,
+`shootingPct` (null only with zero shots) and `powerPlayGoals` populated from
+the real NHL API, so the NHL field names are confirmed. `pnpm test` mapper and
+summary tests pass (10/10).
 
 ---
 
@@ -2044,7 +2071,7 @@ Owner reviews the color changes in screenshots.
 
 ## API-PUSH-02 — Reliable push delivery and scheduling (backend)
 
-**Status:** ACTIVE (merged to `main` 2026-10-24; pending notifier install on the dev server and a live check)
+**Status:** ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets)
 
 **Problem:** pushes depended on GitHub Actions cron (runs late, skips runs,
 disables itself after 60 quiet days) and on one send attempt: the ledger row was
@@ -2076,3 +2103,17 @@ covered startup, a scheduled authenticated call, an enqueue with real Web Push
 encryption, and a network failure left queued for retry. Not yet verified: the
 systemd install, real push services, and a real game night or Monday report.
 
+
+**Live check (2026-10-25 00:30 UTC, dev server):** `notifier.service` runs from
+`~/projects/notifier` (`81da435`) on 127.0.0.1:9100 under Node 24.22.1, config in
+`/etc/notifier`; the API `.env` points `NOTIFIER_URL` at it, and its app token,
+callback secret, VAPID keys and schedule bearer match the API values. `/health`:
+`ok`, 0 queued messages, `oldestQueuedAgeSeconds` null, 0 pending events.
+`after-action-push` ran 18 times from 23:05 to 00:30 UTC, all `ok`/200
+(`{"users":0,"sent":0,"removed":0}`); `weekly-player-report` first runs
+2026-10-26 13:00 UTC. Journals since 23:00 UTC show no notifier errors and one
+API 401 on `POST /api/push/notifier-events` at 23:03:09 that the notifier did not
+send (no rejected event in its log or queue). `push_subscriptions` is empty, so
+no device can receive a push yet. Pending: subscribe a device and confirm a real
+push arrives, the first Monday run, then delete the `CRON_SECRET` and
+`AAR_PUSH_API_URL` GitHub Actions secrets.
