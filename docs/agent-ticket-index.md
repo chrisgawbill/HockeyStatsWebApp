@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (23)
+### Completed tickets (24)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -38,6 +38,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [NAV-01 — Header nav fits at 1024px](#nav-01--header-nav-fits-at-1024px) | DONE — accepted by the Product Owner from 1001/1024/1200 screenshots 2026-10-21. |
 | [x] | [FEED-01 — "My Hockey" personal feed](#feed-01--my-hockey-personal-feed) | DONE — accepted by the Product Owner from screenshots 2026-10-22. |
 | [x] | [HOME-LEAD-02 — Swipe between phone stat leader groups](#home-lead-02--swipe-between-phone-stat-leader-groups) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `8b3201ee` (#113). |
+| [x] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | DONE — Spotter passed and the Product Owner accepted 2026-10-25; merged to `main` with `react/qa/home-loading.spec.mjs`; tsc, tests, format and build pass. |
 | [x] | [HOME-LOTTERY-01 — Draft lottery matches the landing page](#home-lottery-01--draft-lottery-matches-the-landing-page) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22; merged in `8b3201ee` (#113). |
 | [x] | [FEED-02 — Favorites move to My Hockey](#feed-02--favorites-move-to-my-hockey) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `3d09840b` (#117). |
 | [x] | [PREVIEW-01 — Pre-game preview on the matchup page](#preview-01--pre-game-preview-on-the-matchup-page) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified. |
@@ -60,7 +61,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
 
-### Not started tickets (19)
+### Not started tickets (18)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -80,7 +81,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-11 — Physical hand and battle stage](#on2-11--physical-hand-and-battle-stage) | IDEA |
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
-| [ ] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | IDEA |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | IDEA — backend-owned dependency |
 | [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
 
@@ -136,7 +136,7 @@ necessary for DONE.
 | COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
 | API-CACHE-01 | Decided 2026-10-25: stale-while-revalidate for entries on their default TTL, serve-stale on error for caller-set (live) TTLs; completed seasons permanent once cached after they ended; no in-memory layer; production confirmed on Postgres (see block); accepted by the Product Owner 2026-10-25 |
-| HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
+| HOME-LOAD-01 | Decided 2026-10-25: option 1 — each section's heading stays with the existing spinner in space held at its loaded height (mockups compared against skeleton cards); a failed section shows the inline error with its own Try again (lottery and standings share one call and recover together); skater and goalie leaders load and fail separately. Spotter passed; accepted by the Product Owner 2026-10-25 |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
@@ -1807,7 +1807,8 @@ summary tests pass (10/10).
 
 ## HOME-LOAD-01 — Home sections load and fail on their own
 
-**Status:** IDEA
+**Status:** DONE — Spotter passed on the pushed branch and the Product Owner
+accepted 2026-10-25; merged to `main`.
 
 **Context:** `app/LandingPage.tsx` shows one full-page spinner until skater
 leaders, goalie leaders and standings have all loaded, and replaces the whole
@@ -1824,8 +1825,33 @@ worker guard) and the signed-out Up next prompt, both done.
   as soon as its data arrives.
 - Keep the intro and Up next strip visible throughout.
 
-**Verify:** Playwright with one endpoint failing or delayed at a time;
-375/1280 screenshots.
+**Decided 2026-10-25 (Product Owner):**
+
+- Loading: option 1 of the design sheet — each section's heading shows at
+  once and the existing `LoadingState` spinner sits in space held at about
+  the loaded height (leader grid 23.75rem; lottery board 25rem, 19.5rem from
+  1024px; standings fill their desktop column). Skeleton cards were declined.
+- Error: the inline `ErrorState` under the section heading, no repeated
+  title, with Try again re-running only that section's fetch. Draft lottery
+  and standings share `GET /standings`, so both show the error and either
+  Try again restores both.
+- Skater and goalie leaders load and fail separately (each group errors only
+  when all four of its categories fail, as before); on phones the switch and
+  swipe keep working and the selected group shows its own state.
+
+**Implementation:** `components/SectionLoadState` (spinner or error in held
+space, children once loaded) is used by `StatLeadersSection` (per group),
+`DraftLotteryOddsRow` (Simulate hidden until the board is ready) and
+`LandingPageStandings`. The leaders hook's error names its group
+("Couldn't load skater leaders."). A section with no data for the season keeps
+its existing empty state; the lottery still disappears when there are no
+lottery teams.
+
+**Verify:** `react/qa/home-loading.spec.mjs` (`HOME-LOAD-01 Verify:`) fails
+skater leaders, goalie leaders and standings one at a time (500s, after the
+client's ~7s of retries) and delays each one at a time; it passed 12/12 at
+375 and 1280 against a local stand-in for the fixtures and failed 12/12 on
+the previous `main`. Spotter passed on the pushed branch (2026-10-25).
 
 ---
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TopStatLeader } from '@/features/stat-leaders/types/topStatLeader';
 import StatLeaderCard from '@/features/stat-leaders/components/StatLeaderCard';
 import EmptyState from '@/components/EmptyState';
+import SectionLoadState from '@/components/SectionLoadState';
 import SectionHeading from '@/components/SectionHeading';
 import { useMediaQuery } from '@/lib/useMediaQuery';
 import { useHorizontalSwipe } from '@/lib/useHorizontalSwipe';
@@ -29,9 +30,18 @@ const GROUP_NOUNS: Record<PlayerGroup, string> = {
   goalies: 'goalie',
 };
 
+/** One player group's leaders and the state of their fetch. */
+interface LeaderGroupData {
+  /** One entry per category; undefined while loading or when it has no leader. */
+  categoryLeaders: (TopStatLeader | undefined)[];
+  loading: boolean;
+  error: string | null;
+  retry: () => void;
+}
+
 interface StatLeadersSectionProps {
-  skaterLeaders: (TopStatLeader | undefined)[];
-  goalieLeaders: (TopStatLeader | undefined)[];
+  skaters: LeaderGroupData;
+  goalies: LeaderGroupData;
 }
 
 interface LeaderGridProps {
@@ -57,6 +67,34 @@ function LeaderGrid({ group, leaders, headingId }: LeaderGridProps) {
         <StatLeaderCard key={leader.statIndicator} topStatLeader={leader} />
       ))}
     </ul>
+  );
+}
+
+interface LeaderGroupPanelProps {
+  group: PlayerGroup;
+  data: LeaderGroupData;
+  headingId: string;
+}
+
+/**
+ * One group's leader grid, or its own spinner or error with Try again while
+ * the group's categories load or after all of them failed.
+ */
+function LeaderGroupPanel({ group, data, headingId }: LeaderGroupPanelProps) {
+  return (
+    <SectionLoadState
+      loading={data.loading}
+      error={data.error}
+      loadingLabel={`Loading ${GROUP_NOUNS[group]} leaders`}
+      onRetry={data.retry}
+      className={styles.placeholder}
+    >
+      <LeaderGrid
+        group={group}
+        leaders={listAvailableLeaders(data.categoryLeaders)}
+        headingId={headingId}
+      />
+    </SectionLoadState>
   );
 }
 
@@ -95,10 +133,11 @@ function getNeighborGroup(group: PlayerGroup, step: 1 | -1): PlayerGroup {
  * Home-page stat leaders as favorite-style cards. Phones show one "Stat
  * leaders" section with a Skaters / Goalies switch over a 2x2 grid that can
  * also be swiped; wider screens show both groups, each under its own heading.
+ * Each group loads and fails on its own.
  */
 export default function StatLeadersSection({
-  skaterLeaders,
-  goalieLeaders,
+  skaters,
+  goalies,
 }: StatLeadersSectionProps) {
   const isPhone = useMediaQuery(PHONE_QUERY);
   const [selectedGroup, setSelectedGroup] = useState<PlayerGroup>('skaters');
@@ -107,9 +146,9 @@ export default function StatLeadersSection({
     onSwipeRight: () =>
       setSelectedGroup((group) => getNeighborGroup(group, -1)),
   });
-  const leadersByGroup: Record<PlayerGroup, TopStatLeader[]> = {
-    skaters: listAvailableLeaders(skaterLeaders),
-    goalies: listAvailableLeaders(goalieLeaders),
+  const dataByGroup: Record<PlayerGroup, LeaderGroupData> = {
+    skaters,
+    goalies,
   };
 
   if (isPhone) {
@@ -122,9 +161,9 @@ export default function StatLeadersSection({
         />
         <div className={styles.swipeArea} {...swipeProps}>
           <div key={selectedGroup} className={styles.groupPanel}>
-            <LeaderGrid
+            <LeaderGroupPanel
               group={selectedGroup}
-              leaders={leadersByGroup[selectedGroup]}
+              data={dataByGroup[selectedGroup]}
               headingId="stat-leaders-title"
             />
           </div>
@@ -140,9 +179,9 @@ export default function StatLeadersSection({
         aria-labelledby="skater-leaders-title"
       >
         <SectionHeading id="skater-leaders-title" title="Skater leaders" />
-        <LeaderGrid
+        <LeaderGroupPanel
           group="skaters"
-          leaders={leadersByGroup.skaters}
+          data={skaters}
           headingId="skater-leaders-title"
         />
       </section>
@@ -151,9 +190,9 @@ export default function StatLeadersSection({
         aria-labelledby="goalie-leaders-title"
       >
         <SectionHeading id="goalie-leaders-title" title="Goalie leaders" />
-        <LeaderGrid
+        <LeaderGroupPanel
           group="goalies"
-          leaders={leadersByGroup.goalies}
+          data={goalies}
           headingId="goalie-leaders-title"
         />
       </section>

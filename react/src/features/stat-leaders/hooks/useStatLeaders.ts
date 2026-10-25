@@ -47,7 +47,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
       (stat) => failedRefs.current[stat.displayKey],
     );
     if (allFailed) {
-      setError("Couldn't load stat leaders.");
+      setError(`Couldn't load ${type} leaders.`);
     }
   }
 
