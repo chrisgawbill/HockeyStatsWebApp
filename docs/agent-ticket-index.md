@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (23)
+### Completed tickets (24)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -38,6 +38,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [NAV-01 — Header nav fits at 1024px](#nav-01--header-nav-fits-at-1024px) | DONE — accepted by the Product Owner from 1001/1024/1200 screenshots 2026-10-21. |
 | [x] | [FEED-01 — "My Hockey" personal feed](#feed-01--my-hockey-personal-feed) | DONE — accepted by the Product Owner from screenshots 2026-10-22. |
 | [x] | [HOME-LEAD-02 — Swipe between phone stat leader groups](#home-lead-02--swipe-between-phone-stat-leader-groups) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `8b3201ee` (#113). |
+| [x] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | DONE — Spotter passed and the Product Owner accepted 2026-10-25; merged to `main` with `react/qa/home-loading.spec.mjs`; tsc, tests, format and build pass. |
 | [x] | [HOME-LOTTERY-01 — Draft lottery matches the landing page](#home-lottery-01--draft-lottery-matches-the-landing-page) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22; merged in `8b3201ee` (#113). |
 | [x] | [FEED-02 — Favorites move to My Hockey](#feed-02--favorites-move-to-my-hockey) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `3d09840b` (#117). |
 | [x] | [PREVIEW-01 — Pre-game preview on the matchup page](#preview-01--pre-game-preview-on-the-matchup-page) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified. |
@@ -51,7 +52,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | DONE — Product Owner accepted 2026-10-25. Merged to HockeyStatsAPI `main` (`1e11b15`); tests pass; deploy not independently verified. |
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
 
-### In progress / awaiting acceptance (5)
+### In progress / awaiting acceptance (4)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -59,7 +60,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
-| [ ] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | ACTIVE — decided 2026-10-25 (spinner with space held, inline error and own retry, leader groups separate); pushed for Spotter; 375/1280 review pending. |
 
 ### Not started tickets (18)
 
@@ -136,7 +136,7 @@ necessary for DONE.
 | COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
 | API-CACHE-01 | Decided 2026-10-25: stale-while-revalidate for entries on their default TTL, serve-stale on error for caller-set (live) TTLs; completed seasons permanent once cached after they ended; no in-memory layer; production confirmed on Postgres (see block); accepted by the Product Owner 2026-10-25 |
-| HOME-LOAD-01 | Decided 2026-10-25: option 1 — each section's heading stays with the existing spinner in space held at its loaded height (mockups compared against skeleton cards); a failed section shows the inline error with its own Try again (lottery and standings share one call and recover together); skater and goalie leaders load and fail separately. Product Owner reviews 375/1280. |
+| HOME-LOAD-01 | Decided 2026-10-25: option 1 — each section's heading stays with the existing spinner in space held at its loaded height (mockups compared against skeleton cards); a failed section shows the inline error with its own Try again (lottery and standings share one call and recover together); skater and goalie leaders load and fail separately. Spotter passed; accepted by the Product Owner 2026-10-25 |
 | API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
@@ -1807,8 +1807,8 @@ summary tests pass (10/10).
 
 ## HOME-LOAD-01 — Home sections load and fail on their own
 
-**Status:** ACTIVE — decided and implemented 2026-10-25; pushed for Spotter;
-Product Owner reviews 375/1280.
+**Status:** DONE — Spotter passed on the pushed branch and the Product Owner
+accepted 2026-10-25; merged to `main`.
 
 **Context:** `app/LandingPage.tsx` shows one full-page spinner until skater
 leaders, goalie leaders and standings have all loaded, and replaces the whole
@@ -1851,8 +1851,7 @@ lottery teams.
 skater leaders, goalie leaders and standings one at a time (500s, after the
 client's ~7s of retries) and delays each one at a time; it passed 12/12 at
 375 and 1280 against a local stand-in for the fixtures and failed 12/12 on
-the previous `main`. Spotter run on the pushed branch and 375/1280
-screenshots pending.
+the previous `main`. Spotter passed on the pushed branch (2026-10-25).
 
 ---
 
