@@ -61,7 +61,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
-| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass). Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. |
+| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. |
 
 ### Not started tickets (18)
 
@@ -1376,7 +1376,8 @@ logo/headshot requests the browser cancelled in Firefox at 375 (the same kind
 churns in "fixed vs base"; this branch does not touch the home page). Its
 advisory visual review flagged 11 WebKit/Pixel 7 shots, including team at
 375/768; the previous run on identical code flagged no team shots, so these
-are treated as run-to-run noise.
+are treated as run-to-run noise. Merged to `main` 2026-10-26 at the Product Owner's request,
+ahead of API-WPR-02 (reports without `teams` show no team section).
 
 **Verify:** unit tests for any new form/week helpers; TeamPage's Team Form
 looks unchanged after the move (before/after screenshot); Playwright against a
