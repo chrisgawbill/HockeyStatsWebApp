@@ -53,7 +53,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
 | [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
 
-### In progress / awaiting acceptance (4)
+### In progress / awaiting acceptance (5)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -61,8 +61,9 @@ and table row in sync when moving a ticket between states.
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
+| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Pending: Spotter run on the pushed branch, API-WPR-02 deploy, Product Owner screenshot review. |
 
-### Not started tickets (19)
+### Not started tickets (18)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -84,7 +85,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
 | [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
 | [ ] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | IDEA — backend-owned dependency of WPR-02 |
-| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | IDEA — decisions recorded 2026-10-26 |
 
 ## Delivery contract for every ticket
 
@@ -1298,7 +1298,8 @@ the frozen `teams[]`, README report fields updated.
 
 ## WPR-02 — Favorite teams and their form in the weekly report
 
-**Status:** IDEA — requested by the Product Owner 2026-10-26: "add a team
+**Status:** ACTIVE — started 2026-10-26; mockups approved 2026-10-26; awaiting
+Spotter and the Product Owner's screenshot review. Requested by the Product Owner 2026-10-26: "add a team
 section to weekly report with team forms (if that component from TeamPage is
 not its own component file it should be)".
 
@@ -1337,8 +1338,30 @@ a piece used by two features moves to `components/`:
    week" with its form.
 4. **Headline and push:** gain a team line (API-WPR-02).
 
+**Presentation approved 2026-10-26 (Product Owner, from 375/1280 light/dark
+mockups):** a "Favorite teams" heading; a "2-0-1 this week" line under each
+team name; results card beside the Team Form panel from 769px, stacked on
+phones; each card and its sparkline in the team's accent color; each result
+row links to its game page; the fan tier orders the cards but no tier badge
+is shown.
+
 **Dependencies:** API-WPR-02 contract (build against it; a report without
 `teams` shows no team section, so the page works before the API deploys).
+
+**Implemented (2026-10-26):** `components/TeamFormPanel` (with
+`PointsPaceSparkline`, `SplitBars` and `TeamFormPanel.module.css`) takes
+`className`, `headingId` and `headingLevel`; TeamPage passes its margin and
+entry animation as `.team-form`. `WeeklyReportTeamCard` and the page's
+`ReportTeamsSection` render `report.teams` via `utils/weeklyReportTeams.ts`
+(`listReportTeams`, `buildReportTeamForm`, week formatting). Logos come from
+`TeamLogo` (theme-aware) rather than the frozen `logo` URL.
+
+**Verification so far:** unit tests for `weeklyReportTeams`; tsc, vitest,
+format check, build. TeamPage's Team Form pixel-identical before/after the move
+at 375/1280 light/dark against a mocked API. `qa/weekly-report-teams.spec.mjs`
+(16 tests, "WPR-02 Verify:") passed locally with a stand-in for Spotter's test
+module; its TeamPage check also passes on the pre-move code. Spotter has not
+run yet; real NHL data and logos were not reachable here.
 
 **Verify:** unit tests for any new form/week helpers; TeamPage's Team Form
 looks unchanged after the move (before/after screenshot); Playwright against a

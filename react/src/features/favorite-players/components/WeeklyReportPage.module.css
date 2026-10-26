@@ -12,6 +12,19 @@
   list-style: none;
 }
 
+.teamSection {
+  margin-top: var(--page-section-gap);
+}
+
+.teamCards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .card {
   display: flex;
   gap: var(--ds-space-3);

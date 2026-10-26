@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { fetchWeeklyReport } from '@/features/favorite-players/api/favoritePlayersApi';
 import { useFavoritePlayers } from '@/features/favorite-players/hooks/FavoritePlayersContext';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
+import WeeklyReportTeamCard from '@/features/favorite-players/components/WeeklyReportTeamCard';
 import type {
   WeeklyPlayerReport,
   WeeklyReportPlayer,
@@ -21,6 +22,7 @@ import {
   playerStatItems,
   teamsLabel,
 } from '@/features/favorite-players/utils/weeklyReportFormat';
+import { listReportTeams } from '@/features/favorite-players/utils/weeklyReportTeams';
 import { getInitials } from '@/features/favorite-players/utils/playerCardFormat';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/favorite-players/components/WeeklyReportPage.module.css';
@@ -69,6 +71,25 @@ function PlayerCard({ player }: { player: WeeklyReportPlayer }) {
         )}
       </div>
     </li>
+  );
+}
+
+/** The report's favorite teams in fan-tier order; nothing when it has none. */
+function ReportTeamsSection({ report }: { report: WeeklyPlayerReport }) {
+  const teams = listReportTeams(report);
+  if (teams.length === 0) return null;
+
+  return (
+    <section className={styles.teamSection} aria-labelledby="report-teams">
+      <h2 id="report-teams" className={shared.sectionTitle}>
+        Favorite teams
+      </h2>
+      <ul className={styles.teamCards}>
+        {teams.map((team) => (
+          <WeeklyReportTeamCard key={team.triCode} team={team} />
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -130,8 +151,9 @@ type LoadState =
 
 /**
  * One week's frozen Weekly Player Report (`/weekly-report/:weekStart`), or the
- * newest one (`/weekly-report`). Opening it marks it read. The user's
- * favorite players, with unstar buttons, sit underneath.
+ * newest one (`/weekly-report`). Opening it marks it read. The favorite
+ * teams' week follows the players; the user's favorite players, with unstar
+ * buttons, sit underneath.
  */
 export default function WeeklyReportPage() {
   const { weekStart } = useParams();
@@ -224,6 +246,7 @@ export default function WeeklyReportPage() {
             <PlayerCard key={player.playerId} player={player} />
           ))}
         </ul>
+        <ReportTeamsSection report={report} />
       </>
     );
   }
