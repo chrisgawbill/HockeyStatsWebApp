@@ -61,7 +61,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
-| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Pending: Spotter run on the pushed branch, API-WPR-02 deploy, Product Owner screenshot review. |
+| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `c8b3ff9` (2026-10-26), but its config does not list `qa/weekly-report-teams.spec.mjs` yet, so the WPR-02 specs did not run there. Pending: Spotter run with that spec, API-WPR-02 deploy, Product Owner screenshot review. |
 
 ### Not started tickets (18)
 
@@ -1360,8 +1360,15 @@ entry animation as `.team-form`. `WeeklyReportTeamCard` and the page's
 format check, build. TeamPage's Team Form pixel-identical before/after the move
 at 375/1280 light/dark against a mocked API. `qa/weekly-report-teams.spec.mjs`
 (16 tests, "WPR-02 Verify:") passed locally with a stand-in for Spotter's test
-module; its TeamPage check also passes on the pre-move code. Spotter has not
-run yet; real NHL data and logos were not reachable here.
+module; its TeamPage check also passes on the pre-move code. Real NHL data and
+logos were not reachable here. Spotter on `c8b3ff9` (2026-10-26): PASS —
+typecheck, unit tests and format pass; 286 anonymous page visits and 170
+replayed project specs pass; 3 low findings: two home-page headshot requests
+aborted in Firefox at 375 dark (an image request the browser cancelled; this
+branch does not touch the home page), and its config lacks
+`qa/weekly-report-teams.spec.mjs`, so the WPR-02 specs were not executed.
+Spotter has no signed-in sweep, so the report page itself was not visited.
+Pending: add the spec to Spotter's config and re-run.
 
 **Verify:** unit tests for any new form/week helpers; TeamPage's Team Form
 looks unchanged after the move (before/after screenshot); Playwright against a
