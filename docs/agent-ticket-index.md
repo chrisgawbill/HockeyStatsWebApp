@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (24)
+### Completed tickets (25)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -51,15 +51,15 @@ and table row in sync when moving a ticket between states.
 | [x] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed. |
 | [x] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | DONE — Product Owner accepted 2026-10-25. Merged to HockeyStatsAPI `main` (`1e11b15`); tests pass; deploy not independently verified. |
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
+| [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
 
-### In progress / awaiting acceptance (5)
+### In progress / awaiting acceptance (4)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26) done; the Product Owner checked the real-NHL report 2026-10-26 ("looked good"). |
-| [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
+| [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
-| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly run produced a report the Product Owner checked 2026-10-26; pending confirmation of a real push to a device and deletion of the old GitHub secrets) |
+| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
 
 ### Not started tickets (19)
@@ -1032,8 +1032,9 @@ already loads; no extra API calls.
 
 ## API-WPR-01 — Favorite players and the weekly player report (backend)
 
-**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26) done; the Product Owner checked the real-NHL report
-2026-10-26 ("looked good").
+**Status:** DONE — Product Owner accepted 2026-10-24; the first Monday run
+(2026-10-26) produced a report the Product Owner checked against real NHL
+data ("looked good") and the push reached their phone. HockeyStatsAPI `f243cce`.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1189,7 +1190,7 @@ payload shapes, and an authenticated response-body check.
 
 ## WPR-01 — Favorite players and the weekly report (frontend)
 
-**Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified.
+**Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -2232,7 +2233,7 @@ Owner reviews the color changes in screenshots.
 
 ## API-PUSH-02 — Reliable push delivery and scheduling (backend)
 
-**Status:** ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly run produced a report the Product Owner checked 2026-10-26; pending confirmation of a real push to a device and deletion of the old GitHub secrets)
+**Status:** ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets)
 
 **Problem:** pushes depended on GitHub Actions cron (runs late, skips runs,
 disables itself after 60 quiet days) and on one send attempt: the ledger row was
