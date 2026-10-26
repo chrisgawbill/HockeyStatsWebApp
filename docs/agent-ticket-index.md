@@ -1934,6 +1934,8 @@ dropped), service TTL test, route test, README route table. Done in
 so the fixture is not yet a recorded payload: confirm field names (notably
 blocked-shot ownership and `homeTeamDefendingSide`) against a real OT game
 and swap in the excerpt; Product Owner checks the route on the dev server.
+A fresh cloud session on 2026-10-26 (03:04 UTC) was also refused
+`api-web.nhle.com`, so the environment's allow-list change has not taken effect.
 
 ---
 
