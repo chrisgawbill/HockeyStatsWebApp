@@ -1,5 +1,5 @@
 import { TeamSplit } from '@/lib/teamForm';
-import styles from '@/features/teams/components/TeamPage.module.css';
+import styles from '@/components/TeamFormPanel.module.css';
 
 interface SplitBarsProps {
   home: TeamSplit;
