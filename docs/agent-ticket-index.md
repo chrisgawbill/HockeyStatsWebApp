@@ -1283,6 +1283,11 @@ a piece used by two features moves to `components/`:
 - Move `TeamFormPanel`, `PointsPaceSparkline` and `SplitBars` to
   `components/` with their own `TeamFormPanel.module.css` (the `form-panel`,
   `points-sparkline` and `split-bars` rules leave `TeamPage.module.css`).
+- Add an optional `className` prop (as `FormStrip`, `TeamLogo` and other
+  `components/` pieces already take) for the outer surface. Placement that
+  belongs to one page stays with that page: TeamPage passes its margin and
+  entry animation from `TeamPage.module.css`; the report passes its own
+  spacing or width.
 - Give the panel a heading/id prop so each instance is unique; TeamPage keeps
   its current heading and looks unchanged.
 
