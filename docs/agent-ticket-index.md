@@ -56,13 +56,13 @@ and table row in sync when moving a ticket between states.
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26 13:00 UTC) and the real-NHL report spot-check are pending. |
+| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26) done; the Product Owner checked the real-NHL report 2026-10-26 ("looked good"). |
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
-| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
+| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly run produced a report the Product Owner checked 2026-10-26; pending confirmation of a real push to a device and deletion of the old GitHub secrets) |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
 
-### Not started tickets (17)
+### Not started tickets (18)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -83,6 +83,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
 | [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
+| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | IDEA — requested by the Product Owner 2026-10-26 |
 
 ## Delivery contract for every ticket
 
@@ -142,6 +143,7 @@ necessary for DONE.
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
+| WPR-02 | Frozen team data in the report (API) vs. computed on view; what each team card shows; order and empty weeks; Product Owner reviews 375/1280 light/dark screenshots. |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
 | API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). Product Owner accepted 2026-10-24: notifier stays in `HockeyStatsAPI/notifier/`; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up; merge both to main. Product Owner checks the first live game night and Monday report. |
 | API-PUSH-03 | Decided 2026-10-25: one account-wide notifications switch over everything; per-player toggle controls only the weekly push (see block). |
@@ -167,6 +169,7 @@ API-COMPARE-01 -> COMPARE-01
 FAN-01 -> FEED-01
 API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
+WPR-01 -> WPR-02 (+ API-WPR-02 if option B)
 API-AUTH-02 -> SIGNIN-01
 ```
 
@@ -1027,7 +1030,8 @@ already loads; no extra API calls.
 
 ## API-WPR-01 — Favorite players and the weekly player report (backend)
 
-**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26 13:00 UTC) and the real-NHL report spot-check are pending.
+**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26) done; the Product Owner checked the real-NHL report
+2026-10-26 ("looked good").
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1255,6 +1259,56 @@ not play", the notification toggle, and the service-worker click route.
 **Acceptance:** Product Owner favorites players on the deployed site,
 receives the first Monday report on a phone, and confirms that a break week
 sends nothing.
+
+---
+
+## WPR-02 — Favorite teams and their form in the weekly report
+
+**Status:** IDEA — requested by the Product Owner 2026-10-26: "add a team
+section to weekly report with team forms (if that component from TeamPage is
+not its own component file it should be)".
+
+**Goal:** The Weekly Player Report also has a team section: for each favorite
+team, that week's results and its Team Form as of the end of the week.
+
+**Reuse finding (PM, 2026-10-26):** the TeamPage "Team Form" panel is already
+its own file, `features/teams/components/TeamFormPanel.tsx`, built on
+`components/FormStrip`, `features/teams/components/PointsPaceSparkline` and
+`SplitBars`, and `buildTeamForm(games, triCode)` in `lib/teamForm.ts`. It is
+not yet reusable: it lives in `features/teams`, takes its styles from
+`TeamPage.module.css`, and hard-codes the heading id `team-form-heading`
+(several teams on one page would repeat it). Per the readability pass,
+a piece used by two features moves to `components/`:
+
+- Move `TeamFormPanel`, `PointsPaceSparkline` and `SplitBars` to
+  `components/` with their own `TeamFormPanel.module.css` (the `form-panel`,
+  `points-sparkline` and `split-bars` rules leave `TeamPage.module.css`).
+- Give the panel a heading/id prop so each instance is unique; TeamPage keeps
+  its current heading and looks unchanged.
+
+**Decisions for the checkpoint (PM recommendation in bold):**
+
+1. **Data source.** Reports are frozen so reopening never re-fetches.
+   - **B: API-WPR-02 adds a frozen `teams[]` to new reports** (the user's
+     favorite teams when the report is made, the week's games with scores, and
+     the season's completed results up to the week's end for the form).
+     Older reports have no `teams[]` and show no team section.
+   - A: the frontend computes form on view from `/team/schedule/:triCode`
+     cut at `weekEnd`, for the user's current favorite teams. No backend
+     work, but an old report changes when favorites change.
+2. **Each team card:** **team logo and name, the week's results (opponent,
+   score, W/L/OTL), then the full Team Form panel as of the week's end**; or
+   a compact card (week results + Last 10 strip only).
+3. **Order and empty weeks:** **teams section above the players, sorted by fan
+   tier (as on My Hockey)**; a team that did not play that week shows "No
+   games this week" with its form.
+4. **Headline and push:** **unchanged** (they stay about players).
+
+**Verify:** unit tests for any new form/week helpers; TeamPage's Team Form
+looks unchanged after the move (before/after screenshot); Playwright against a
+mocked API for the report's team section, including a no-games week and a
+report without teams, at 375/1280 light/dark without horizontal scroll. The
+Product Owner reviews screenshots.
 
 ---
 
@@ -2143,7 +2197,7 @@ Owner reviews the color changes in screenshots.
 
 ## API-PUSH-02 — Reliable push delivery and scheduling (backend)
 
-**Status:** ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets)
+**Status:** ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly run produced a report the Product Owner checked 2026-10-26; pending confirmation of a real push to a device and deletion of the old GitHub secrets)
 
 **Problem:** pushes depended on GitHub Actions cron (runs late, skips runs,
 disables itself after 60 quiet days) and on one send attempt: the ledger row was
