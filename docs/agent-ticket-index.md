@@ -52,7 +52,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | DONE — Product Owner accepted 2026-10-25. Merged to HockeyStatsAPI `main` (`1e11b15`); tests pass; deploy not independently verified. |
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
 
-### In progress / awaiting acceptance (4)
+### In progress / awaiting acceptance (5)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -60,8 +60,9 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
+| [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — implemented on HockeyStatsAPI branch `ccr-54dd4737-q7e2xd` (`ef41cce`); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
 
-### Not started tickets (18)
+### Not started tickets (17)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -81,7 +82,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-11 — Physical hand and battle stage](#on2-11--physical-hand-and-battle-stage) | IDEA |
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
-| [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | IDEA — backend-owned dependency |
 | [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
 
 ## Delivery contract for every ticket
@@ -137,7 +137,7 @@ necessary for DONE.
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
 | API-CACHE-01 | Decided 2026-10-25: stale-while-revalidate for entries on their default TTL, serve-stale on error for caller-set (live) TTLs; completed seasons permanent once cached after they ended; no in-memory layer; production confirmed on Postgres (see block); accepted by the Product Owner 2026-10-25 |
 | HOME-LOAD-01 | Decided 2026-10-25: option 1 — each section's heading stays with the existing spinner in space held at its loaded height (mockups compared against skeleton cards); a failed section shows the inline error with its own Try again (lottery and standings share one call and recover together); skater and goalie leaders load and fail separately. Spotter passed; accepted by the Product Owner 2026-10-25 |
-| API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
+| API-PBP-01 | Decided 2026-10-26: PM recommendations — ticket contract plus `shooterName` and `periodType`, shootouts left out; home always shoots toward +x (flipped periods turned 180°), missing or unknown coordinates kept as `null`; raw payload cached forever once `OFF`, 1 minute live, 5 minutes otherwise (see block). |
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
@@ -1898,27 +1898,42 @@ README "Caching" section. No browser checks (backend only).
 
 ## API-PBP-01 — Play-by-play events for shot maps and game flow (backend)
 
-**Status:** IDEA — backend-owned dependency
+**Status:** ACTIVE — implemented on HockeyStatsAPI branch
+`ccr-54dd4737-q7e2xd` (`ef41cce`), not merged. 138 tests pass.
 
 **Goal:** Expose a normalized, cached list of a game's shot and goal events so
 the frontend can draw a shot map and game flow chart.
 
-**Proposed contract (PM recommendation, confirm at checkpoint):**
+**Decided 2026-10-26 (Product Owner, PM recommendations):**
 
-- `GET /schedule/playbyplay/:gameID` → `{ gameId, gameState, homeTeam,
-  awayTeam, events: [{ eventId, period, timeInPeriod, elapsedSeconds,
-  type: 'goal'|'shot'|'miss'|'block', teamTriCode, shooterId, goalieId|null,
-  x, y, shotType|null, strength: 'ev'|'pp'|'sh'|null }] }`.
-- Source: NHL `gamecenter/{id}/play-by-play`, cached raw through `GetOrFetch`
-  (forever once the game is `OFF`, about 30 seconds while live); mapping runs
-  after the cache read in `slices/schedule/mappers/`, per the Mapping
-  Boundary.
-- Coordinates normalized so each team always shoots toward the same end in the
-  response (the NHL flips sides by period); document the convention.
-- Unknown event types are dropped, not failed.
+- `GET /schedule/playbyplay/:gameID` → `{ gameId, gameState, homeTeam:
+  { id, triCode }, awayTeam, events: [{ eventId, period, periodType
+  ('REG'|'OT'), timeInPeriod, elapsedSeconds, type:
+  'goal'|'shot'|'miss'|'block', teamTriCode, shooterId, shooterName,
+  goalieId|null, x, y, shotType|null, strength: 'ev'|'pp'|'sh'|null }] }`.
+  Shootout attempts and every other play type are dropped. A game that has
+  not started has no events; a malformed or unknown id is a 404.
+- `teamTriCode` is the shooting team, also on blocked shots (the NHL credits
+  those to the blocker). Strength is from the shooter's side; a pulled goalie
+  counts one skater fewer, so an extra attacker alone is `ev`.
+- Coordinates: home always shoots toward +x, away toward -x; a flipped period
+  negates x and y. Ends come from `homeTeamDefendingSide`, else from the
+  period's offensive-zone events; events without coordinates or with unknown
+  ends keep `x`/`y` null. Documented in the API README and mapper.
+- Cache: raw payload under `schedule:playbyplay_<id>`; permanent once `OFF`,
+  60 seconds while `LIVE`/`CRIT`, 5 minutes otherwise (all caller-set TTLs,
+  so per API-CACHE-01 they wait for the refetch and serve the expired copy on
+  an NHL failure). Mapping runs after the cache read.
 
-**Verify:** mapper unit tests from a recorded payload (including a period side
-flip and missing coordinates), route test, README route table updated.
+**Verify:** mapper unit tests (period side flip, inferred ends, overtime,
+missing coordinates, blocked shots, strength, shootout and unknown types
+dropped), service TTL test, route test, README route table. Done in
+`ef41cce` against a hand-built payload in the NHL shape.
+
+**Pending:** `api-web.nhle.com` was unreachable from the build environment,
+so the fixture is not yet a recorded payload: confirm field names (notably
+blocked-shot ownership and `homeTeamDefendingSide`) against a real OT game
+and swap in the excerpt; Product Owner checks the route on the dev server.
 
 ---
 
