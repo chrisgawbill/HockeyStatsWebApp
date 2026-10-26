@@ -60,7 +60,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
-| [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — implemented on HockeyStatsAPI branch `ccr-54dd4737-q7e2xd` (`ef41cce`); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
+| [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
 
 ### Not started tickets (17)
 
@@ -1898,8 +1898,9 @@ README "Caching" section. No browser checks (backend only).
 
 ## API-PBP-01 — Play-by-play events for shot maps and game flow (backend)
 
-**Status:** ACTIVE — implemented on HockeyStatsAPI branch
-`ccr-54dd4737-q7e2xd` (`ef41cce`), not merged. 138 tests pass.
+**Status:** ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`,
+2026-10-26; change `ef41cce`). 138 tests pass. Deploy not independently
+verified.
 
 **Goal:** Expose a normalized, cached list of a game's shot and goal events so
 the frontend can draw a shot map and game flow chart.
