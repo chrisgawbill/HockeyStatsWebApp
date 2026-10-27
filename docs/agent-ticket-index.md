@@ -84,7 +84,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-11 — Physical hand and battle stage](#on2-11--physical-hand-and-battle-stage) | IDEA |
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
-| [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
+| [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | ACTIVE — started 2026-10-27; mockups at kickoff, awaiting Product Owner confirmation before implementation. |
 
 ## Delivery contract for every ticket
 
@@ -143,7 +143,7 @@ necessary for DONE.
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
-| GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
+| GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. Started 2026-10-27; scope adds a Player filter on the shot map (see block). Kickoff mockups pending confirmation. |
 | WPR-02 | Decided 2026-10-26: team data frozen in the report (API-WPR-02); each team card shows the week's results and the full Team Form panel; team section below the players; headline and push gain a team line (see block). Product Owner reviews 375/1280 light/dark screenshots. |
 | API-WPR-02 | Decided with WPR-02 2026-10-26: frozen `teams[]` in new reports and a team line in the headline/push. Kickoff confirmed 2026-10-27: wording, team mute ignored in the weekly push, team-only users included, `formGames` limited to the report week (see block). |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
@@ -2118,7 +2118,19 @@ A fresh cloud session on 2026-10-26 (03:04 UTC) was also refused
 
 ## GAME-SHOTS-01 — Shot map and game flow on the game page
 
-**Status:** IDEA
+**Status:** ACTIVE — started 2026-10-27. Kickoff mockups (375/1280,
+light/dark, a recorded-shape BOS at TOR overtime game) brought to the Product
+Owner; implementation waits for confirmation.
+
+**Scope addition (Product Owner, 2026-10-27):** the shot map gets a Player
+filter next to period and strength, built from `shooterId`/`shooterName` in
+the game's events, so one player's shots and goals in that game can be shown.
+A season-long player shot map is out of scope.
+
+**Carried forward from API-PBP-01 (not reopened):** the contract as decided;
+home always shoots toward +x and away toward -x; events without coordinates
+have null `x`/`y`; shootout attempts are not in the feed; a 404 means the route
+is not deployed or the id is unknown. No backend changes in this ticket.
 
 **Goal:** `/game/:gameId` shows where each team shot from and how the game
 swung over time.
