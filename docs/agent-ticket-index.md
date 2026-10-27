@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (32)
+### Completed tickets (33)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -59,12 +59,12 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Merged to `main` (`fff44ed`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here). Pending: deploy check, then the Product Owner checks the first Monday report with teams (2026-11-02). Not run: the deploy check and the first Monday report with teams (2026-11-02). |
 | [x] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) Not run: deleting the old GitHub secrets. |
 | [x] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. Not run: the check against a recorded NHL payload and the dev-server deploy check. |
+| [x] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. Not run: the full Spotter baseline recheck. |
 
-### In progress / awaiting acceptance (1)
+### In progress / awaiting acceptance (0)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
 
 ### Not started tickets (16)
 
@@ -2351,7 +2351,7 @@ screen-reader pass on the dialog, and API-AUTH-02's Discord checks.
 
 ## A11Y-01 — Accessibility fixes from the Spotter baseline
 
-**Status:** ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified.
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the full Spotter baseline recheck. Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified.
 
 **Context:** Spotter's 2026-10-22 runs against `main` (merge base `66153ba`)
 flag these on every page they visit; none came from SIGNIN-01. Logged by the
