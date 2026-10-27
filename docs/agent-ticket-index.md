@@ -23,10 +23,11 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (33)
+### Completed tickets (34)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
+| [x] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | DONE — merged to HockeyStatsAPI `main`; Product Owner accepted 2026-10-27. Not run: deploy check. |
 | [x] | [AAR-01 — Favorite teams and After Action Report inbox](#aar-01--favorite-teams-and-after-action-report-inbox) | DONE — accepted by the Product Owner (2026-10-19) |
 | [x] | [AAR-02 — Mobile push for After Action Reports](#aar-02--mobile-push-for-after-action-reports) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and QA-verified. |
 | [x] | [API-LINES-01 — Real line combinations from shift charts](#api-lines-01--real-line-combinations-from-shift-charts) | DONE (Product Owner approved 2026-10-19) (HockeyStatsAPI) |
@@ -61,11 +62,10 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. Not run: the check against a recorded NHL payload and the dev-server deploy check. |
 | [x] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. Spotter recheck passed (reported by the Product Owner 2026-10-27). |
 
-### In progress / awaiting acceptance (1)
+### In progress / awaiting acceptance (0)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | ACTIVE — on HockeyStatsAPI branch `ccr-54dd4737-q7e2xd`; pending merge, deploy, and Product Owner acceptance |
 
 ### Not started tickets (15)
 
@@ -389,8 +389,8 @@ build.
 
 ## API-ON2-01 — Site-wide rivalry records and contract
 
-**Status:** ACTIVE — implemented on HockeyStatsAPI branch `ccr-54dd4737-q7e2xd`
-(2026-10-27); pending merge, deploy, and Product Owner acceptance.
+**Status:** DONE — merged to HockeyStatsAPI `main`; Product Owner accepted
+2026-10-27 without a deploy check (none possible at the time).
 
 **Approved decisions (Product Owner, 2026-10-27):**
 
