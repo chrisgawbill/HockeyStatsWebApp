@@ -53,7 +53,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
 | [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
 
-### In progress / awaiting acceptance (5)
+### In progress / awaiting acceptance (6)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -62,8 +62,9 @@ and table row in sync when moving a ticket between states.
 | [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
 | [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. |
+| [ ] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Pending: merge and deploy, then the Product Owner checks the first Monday report with teams (2026-11-02). |
 
-### Not started tickets (18)
+### Not started tickets (17)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -84,7 +85,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
 | [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
-| [ ] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | IDEA — backend-owned dependency of WPR-02 |
 
 ## Delivery contract for every ticket
 
@@ -145,7 +145,7 @@ necessary for DONE.
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
 | GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
 | WPR-02 | Decided 2026-10-26: team data frozen in the report (API-WPR-02); each team card shows the week's results and the full Team Form panel; team section below the players; headline and push gain a team line (see block). Product Owner reviews 375/1280 light/dark screenshots. |
-| API-WPR-02 | Decided with WPR-02 2026-10-26: frozen `teams[]` in new reports and a team line in the headline/push; confirm the exact wording and payload at kickoff. |
+| API-WPR-02 | Decided with WPR-02 2026-10-26: frozen `teams[]` in new reports and a team line in the headline/push. Kickoff confirmed 2026-10-27: wording, team mute ignored in the weekly push, team-only users included, `formGames` limited to the report week (see block). |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
 | API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). Product Owner accepted 2026-10-24: notifier stays in `HockeyStatsAPI/notifier/`; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up; merge both to main. Product Owner checks the first live game night and Monday report. |
 | API-PUSH-03 | Decided 2026-10-25: one account-wide notifications switch over everything; per-player toggle controls only the weekly push (see block). |
@@ -1267,7 +1267,8 @@ sends nothing.
 
 ## API-WPR-02 — Favorite teams in the weekly report (backend)
 
-**Status:** IDEA — backend-owned dependency of WPR-02 (decided 2026-10-26).
+**Status:** ACTIVE — started 2026-10-26, kickoff decisions recorded
+2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`).
 
 **Goal:** New Weekly Player Reports freeze the user's favorite teams and
 their week, so WPR-02 can show results and Team Form that never change on
@@ -1293,6 +1294,47 @@ reopening.
 **Verify:** report builder unit tests (week records, OT losses, a team with
 no games, the team line, a report with no favorite teams), dispatch test for
 the frozen `teams[]`, README report fields updated.
+
+**Kickoff decisions (Product Owner, 2026-10-27, recorded on the kickoff page):**
+
+1. **Team line** as proposed: `Connor McDavid: 2G 4A in 3 GP and 2 more.
+   Teams: EDM 2-0-1, DAL 1-2-0.`; teams in fan-tier order, idle teams left
+   out, no line (headline unchanged) when no team played; only teams played:
+   `Your favorite players did not play this week. Teams: COL 2-0-1.`; no
+   favorite players: `Teams: COL 2-0-1, DAL 1-2-0.`
+2. **Weekly push:** body is the headline built from the players not muted for
+   the weekly push plus the team line for every team that played; a team's
+   push mute covers After Action game alerts only. The push is sent when an
+   unmuted player or any team played.
+3. **Team-only users are included:** a user with favorite teams and no
+   favorite players gets a Monday report and push when a team played.
+4. **`formGames` hold only the report week's completed regular-season games**
+   ("weekly reports should just show that week's performance and those
+   games"). Field names and shape are unchanged; this replaces "through
+   `weekEnd`" above, so WPR-02's Team Form panel in a report reflects the
+   week rather than the season.
+
+**Implemented (`aa7b308`):** `scheduleService.getClubSeason(triCode, season,
+{ fresh })` (club season schedule from the 12-hour cache, plus the team's name
+and logo from the payload); `weeklyReportBuilder` `buildReportTeams`,
+`isClubScheduleCurrent`, and `buildHeadline(players, teams)`; the service loads
+every user's favorite teams (`listAllFavoriteTeams`) and one club schedule per
+distinct team across users, in parallel with the player stats. Week games are
+the club games the league week schedule lists as completed regular-season or
+playoff games. A cached club schedule missing one of those finals (the cache
+serves expired copies) is refetched once; still missing, or any team schedule
+failing, is a 502 with nothing written, so the second Monday run retries.
+Users with no favorite teams get `teams: []`. README report fields updated.
+
+**Verification so far:** `npm test` 146/146: builder tests for week records,
+OT and shootout losses, a team with no games, fan-tier order, a playoff OT
+loss, the team line in every case, a report with no favorite teams and
+team-only reports; dispatch tests for the frozen `teams[]` (one club schedule
+per distinct team, team-only user pushed, rerun unchanged), a stale club
+schedule refetched once, a team schedule failure writing nothing, and the
+team-only push body when every player is muted; a `getClubSeason` mapping test.
+Not verifiable here: real NHL club schedule payloads (team name fields, OT/SO
+`periodDescriptor`), a real Postgres run, and a real push.
 
 ---
 
@@ -1378,6 +1420,11 @@ advisory visual review flagged 11 WebKit/Pixel 7 shots, including team at
 375/768; the previous run on identical code flagged no team shots, so these
 are treated as run-to-run noise. Merged to `main` 2026-10-26 at the Product Owner's request,
 ahead of API-WPR-02 (reports without `teams` show no team section).
+API-WPR-02 kickoff (2026-10-27): `formGames` hold only the report week's
+regular-season games, so each card's Team Form panel shows that week's form
+(e.g. a 3-game strip and splits) instead of the season to date; no frontend
+change, the shape is unchanged. Check the panel's look with week-only data at
+the Product Owner's real-data review.
 
 **Verify:** unit tests for any new form/week helpers; TeamPage's Team Form
 looks unchanged after the move (before/after screenshot); Playwright against a
