@@ -2119,8 +2119,9 @@ A fresh cloud session on 2026-10-26 (03:04 UTC) was also refused
 ## GAME-SHOTS-01 — Shot map and game flow on the game page
 
 **Status:** ACTIVE — kickoff confirmed and implemented 2026-10-27 on
-`ccr-54dd4737-q7e2xd`. Pending: Spotter run, Product Owner review of
-screenshots and real games on the dev server.
+`ccr-54dd4737-q7e2xd`. Spotter passed (see below). Pending: the GAME-SHOTS-01 specs in
+Spotter's config, Product Owner review of screenshots and real games on the
+dev server.
 
 **Scope addition (Product Owner, 2026-10-27):** the shot map gets a Player
 filter next to period and strength, built from `shooterId`/`shooterName` in
@@ -2183,7 +2184,19 @@ change.
 matchup colours for all 992 pairings in both themes) and build pass.
 `react/qa/game-shots.spec.mjs` (8 tests, titles "GAME-SHOTS-01 Verify:")
 passed locally against a stand-in for the Spotter test module and a mocked
-API; Spotter has not run it yet.
+API.
+
+**Spotter (2026-10-27, `5c05fdb`):** first run FAIL — the play-by-play
+call was missing from the recorded fixtures (404 plus a logged console
+error on every game visit). After the fixtures were re-recorded: PASS, no
+medium or high findings; typecheck, unit tests and format pass; 286/286 page
+visits plus fault visits across chromium, firefox, webkit, iPhone 13 and
+Pixel 7; 250/250 project specs. Remaining lows: Firefox
+`NS_BINDING_ABORTED` logo/headshot requests on the home page (the same
+kind also shows as fixed vs base, so it comes and goes between runs and
+this branch doesn't touch home), and Spotter's config does not yet list
+`qa/game-shots.spec.mjs`, so the eight GAME-SHOTS-01 specs were not part
+of the 250.
 
 **Goal:** `/game/:gameId` shows where each team shot from and how the game
 swung over time.
