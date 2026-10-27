@@ -62,17 +62,17 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. Not run: the check against a recorded NHL payload and the dev-server deploy check. |
 | [x] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. Spotter recheck passed (reported by the Product Owner 2026-10-27). |
 
-### In progress / awaiting acceptance (1)
+### In progress / awaiting acceptance (2)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
+| [ ] | [ON2-01 — Alternating shift activation engine](#on2-01--alternating-shift-activation-engine) | ACTIVE — started 2026-10-27; rules decided (see block); implemented on `ccr-54dd4737-q7e2xd`; typecheck, tests, format and build pass. Pending: Spotter, Product Owner playtest. |
 | [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | ACTIVE — merged to HockeyStatsAPI `main` (`bb084dd`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here); 160 API tests pass; checked on real Postgres. Pending: pilot player ID check, Product Owner acceptance. Not run: deploy check. |
 
-### Not started tickets (14)
+### Not started tickets (13)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [ON2-01 — Alternating shift activation engine](#on2-01--alternating-shift-activation-engine) | IDEA |
 | [ ] | [ON2-02 — Ranged diagonal skating and pass lanes](#on2-02--ranged-diagonal-skating-and-pass-lanes) | IDEA |
 | [ ] | [ON2-03 — Contextual card contracts and offers](#on2-03--contextual-card-contracts-and-offers) | IDEA |
 | [ ] | [ON2-04 — Hockey card library and identity packages](#on2-04--hockey-card-library-and-identity-packages) | IDEA |
@@ -103,7 +103,7 @@ necessary for DONE.
 
 | Ticket | Human decision or review checkpoint |
 | --- | --- |
-| ON2-01 | Initiative, stoppage/reset behavior, stunned or unavailable skaters, and an example complete shift. |
+| ON2-01 | Decided 2026-10-27 from the PM's example shift: faceoff winner opens, initiative then alternates by shift; a whistle ends the shift; no eligible skater forfeits the team's remaining activations; a stun lasts the rest of the current shift (see block). |
 | ON2-02 | Diagonal pressure/corner rules and a movement example; playtest range changes. |
 | ON2-03 | Unplayed-card lifecycle, exhausted/undersized pools, and hidden CPU commitment behavior. |
 | ON2-04 | Proposed card list, identity strengths, weaknesses, and functional budgets. |
@@ -188,7 +188,25 @@ implementation; starting them here does not authorize backend edits.
 
 ## ON2-01 — Alternating shift activation engine
 
-**Status:** IDEA
+**Status:** ACTIVE — started 2026-10-27.
+
+**Decisions (Product Owner, 2026-10-27):**
+
+- Initiative: the faceoff winner opens the first shift after a faceoff; each
+  later shift opens with the team that went second in the previous one.
+- Stoppage: a whistle (covered save, boxed-in carrier) ends the shift; stuns
+  clear, and the faceoff winner opens a fresh shift.
+- No eligible skater: a team with activations left but no eligible skater
+  forfeits them; the other team plays out its activations.
+- Stun: a stunned skater sits out the rest of the current shift. A faceoff
+  `stunLoser` stun lands in the shift that faceoff opens.
+
+**PM calls (within approved scope):** movement stays one orthogonal tile per
+step, two tiles per activation (diagonal and defenseman range are ON2-02);
+collecting a loose puck is the activation's action; ending an activation
+without moving holds position and uses the activation; the `bonusMp` faceoff
+card becomes `bonusSteps`, +1 tile on the opening activation; a faceoff scrum
+keeps today's tiebreak (user opens).
 
 **Goal:** Replace dice/shared movement points with symmetric alternating
 three-activation shifts and move-plus-action turns.

@@ -18,14 +18,14 @@ export interface Skater {
   team: TeamId;
   role: Role;
   pos: Coord;
-  stunnedUntilTurn: number | null;
+  /** Stunned skaters sit out until the current shift ends. */
+  stunned: boolean;
 }
 
 export type Puck =
   { kind: 'carried'; skaterId: string } | { kind: 'loose'; pos: Coord };
 
-export type Phase =
-  'faceoff' | 'roll' | 'move' | 'duel' | 'duelResult' | 'gameOver';
+export type Phase = 'faceoff' | 'move' | 'duel' | 'duelResult' | 'gameOver';
 
 export type DuelKind = 'faceoff' | 'deke' | 'check' | 'intercept' | 'shot';
 
@@ -45,7 +45,7 @@ export type CardEffect =
  * reveal, so it is deliberately kept off `CardEffect`.
  */
 export type FaceoffCardEffect =
-  'backDraw' | 'stunLoser' | 'bonusMp' | 'scrumOnLoss' | 'freeJump';
+  'backDraw' | 'stunLoser' | 'bonusSteps' | 'scrumOnLoss' | 'freeJump';
 
 /** A card definition shared across the match deck. */
 export interface CardDef {
@@ -279,10 +279,20 @@ export interface GameState {
   length: GameLength;
   /** Daily-streak energy bonus for the user only. Set at game creation; engine code reads it but does not mutate it. */
   bonusEnergy: number;
+  /** The team taking the current activation. */
   activeTeam: TeamId;
-  turn: number;
-  mp: number;
-  dice: [number, number] | null;
+  /** Shifts started this match; 0 before the opening faceoff. */
+  shift: number;
+  /** The team that took the first activation of this shift. */
+  initiative: TeamId;
+  /** Activations each team still has this shift. */
+  activationsLeft: Record<TeamId, number>;
+  /** Skaters who have already activated this shift. */
+  activatedSkaterIds: string[];
+  /** The skater acting in the current activation, once it has moved or acted. */
+  activeSkaterId: string | null;
+  /** Tiles the current activation may still move. */
+  stepsLeft: number;
   skaters: Skater[];
   puck: Puck;
   deck: Deck;
@@ -293,7 +303,6 @@ export interface GameState {
   lastReveal: RevealResult | null;
   winner: TeamId | null;
   rngSeed: number;
-  actionsThisTurn: number;
   /** True right after a whistle reset (boxed-in carrier), until START_FACEOFF is dispatched. */
   whistle: boolean;
   /**
@@ -331,21 +340,21 @@ export interface GameState {
    */
   faceoffSpot: Coord;
   /**
-   * MP to add on top of the next `ROLL_DICE` roll (`bonusMp`
+   * Extra tiles for the opening activation of the next shift (`bonusSteps`
    * faceoff effect). Zero except right after a clean faceoff win with that
-   * effect; `ROLL_DICE` consumes and clears it.
+   * effect; starting the shift consumes and clears it.
    */
-  pendingBonusMp: number;
+  pendingBonusSteps: number;
 }
 
 export type Action =
   | { type: 'START_FACEOFF' }
-  | { type: 'ROLL_DICE' }
   | { type: 'MOVE'; skaterId: string; to: Coord }
   | { type: 'PASS'; toSkaterId: string }
   | { type: 'SHOOT' }
   | { type: 'CHECK'; skaterId: string }
-  | { type: 'END_TURN' }
+  /** Ends the current activation; with no move or action taken, the team holds position. */
+  | { type: 'END_ACTIVATION' }
   | { type: 'PLAY_CARD'; handIndex: number }
   | { type: 'UNQUEUE_CARD'; queueIndex: number }
   | { type: 'END_DUEL_ROUND' }

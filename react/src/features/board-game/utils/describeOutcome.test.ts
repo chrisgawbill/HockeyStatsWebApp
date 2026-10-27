@@ -8,7 +8,7 @@ function makeSkater(overrides: Partial<Skater> = {}): Skater {
     team: 'user',
     role: 'C',
     pos: { col: 5, row: 3 },
-    stunnedUntilTurn: null,
+    stunned: false,
     ...overrides,
   };
 }

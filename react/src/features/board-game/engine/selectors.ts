@@ -1,5 +1,5 @@
-import { COST } from '@/features/board-game/data/balance';
 import {
+  canActivate,
   isAdjacent,
   isOffensiveZone,
   isPlayable,
@@ -18,50 +18,49 @@ export function getCarrier(state: GameState): Skater | undefined {
   return state.skaters.find((s) => s.id === puck.skaterId);
 }
 
-export function canRoll(state: GameState): boolean {
-  return state.phase === 'roll';
+export function canEndActivation(state: GameState): boolean {
+  return state.phase === 'move';
 }
 
-export function canEndTurn(state: GameState): boolean {
-  return state.phase === 'move';
+/** The active team's carrier, if it may take the current activation's action. */
+function activeCarrier(state: GameState): Skater | undefined {
+  if (state.phase !== 'move') return undefined;
+  const carrier = getCarrier(state);
+  return carrier && canActivate(state, carrier) ? carrier : undefined;
 }
 
 /** True if the active team's carrier may `SHOOT` right now. */
 export function canShoot(state: GameState): boolean {
-  if (state.phase !== 'move' || state.mp < COST.shoot) return false;
-  const carrier = getCarrier(state);
-  if (!carrier || carrier.team !== state.activeTeam) return false;
-  return isOffensiveZone(carrier.team, carrier.pos);
+  const carrier = activeCarrier(state);
+  return !!carrier && isOffensiveZone(carrier.team, carrier.pos);
 }
 
 /**
  * Teammates `carrier` could legally pass to: non-goalie, non-stunned, at
- * least 2 tiles away in the same row/column with a clear lane. Ignores MP,
- * phase, and whose turn it is - shared by `passTargets` and `isBoxedIn`.
+ * least 2 tiles away in the same row/column with a clear lane. Ignores
+ * phase and activations - shared by `passTargets` and `isBoxedIn`.
  */
 export function eligibleReceivers(state: GameState, carrier: Skater): Skater[] {
   return state.skaters
     .filter((s) => s.team === carrier.team && s.id !== carrier.id)
     .filter((s) => s.role !== 'G')
-    .filter((s) => !isStunned(s, state.turn))
+    .filter((s) => !isStunned(s))
     .filter((s) => manhattan(carrier.pos, s.pos) >= 2)
     .filter((s) => laneBetween(carrier.pos, s.pos) !== null);
 }
 
 /** Legal receiver ids for the active team's carrier's `PASS`. Empty whenever a pass isn't currently legal. */
 export function passTargets(state: GameState): string[] {
-  if (state.phase !== 'move' || state.mp < COST.pass) return [];
-  const carrier = getCarrier(state);
-  if (!carrier || carrier.team !== state.activeTeam) return [];
+  const carrier = activeCarrier(state);
+  if (!carrier) return [];
   return eligibleReceivers(state, carrier).map((s) => s.id);
 }
 
-/** True if `skaterId` may `CHECK` right now: own-team, eligible, and adjacent to the enemy carrier. */
+/** True if `skaterId` may `CHECK` right now: able to take this activation and adjacent to the enemy carrier. */
 export function checkTargets(state: GameState, skaterId: string): boolean {
-  if (state.phase !== 'move' || state.mp < COST.check) return false;
+  if (state.phase !== 'move') return false;
   const checker = state.skaters.find((s) => s.id === skaterId);
-  if (!checker || checker.team !== state.activeTeam) return false;
-  if (checker.role === 'G' || isStunned(checker, state.turn)) return false;
+  if (!checker || !canActivate(state, checker)) return false;
 
   const carrier = getCarrier(state);
   if (!carrier || carrier.team === checker.team) return false;
@@ -71,7 +70,7 @@ export function checkTargets(state: GameState, skaterId: string): boolean {
 /**
  * True if `skaterId` is boxed in for the §3 whistle rule: no free playable
  * orthogonal neighbor, no eligible pass receiver, and not in its own
- * offensive zone. Ignores whose turn it is, MP, and phase.
+ * offensive zone. Ignores whose activation it is and phase.
  */
 export function isBoxedIn(state: GameState, skaterId: string): boolean {
   const skater = state.skaters.find((s) => s.id === skaterId);

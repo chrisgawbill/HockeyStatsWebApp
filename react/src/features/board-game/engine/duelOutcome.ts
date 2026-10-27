@@ -27,8 +27,8 @@ export interface DuelOutcomeResult {
   cleanSave: boolean;
   /** `rngSeed` after any rolls this outcome needed (currently only the faceoff scrum tile pick); unchanged if nothing was rolled. */
   rngSeed: number;
-  /** MP to add on the winning side's next `ROLL_DICE` (the faceoff `bonusMp` effect). Zero otherwise. */
-  bonusMp: number;
+  /** Extra tiles for the winning side's opening activation (the faceoff `bonusSteps` effect). Zero otherwise. */
+  bonusSteps: number;
 }
 
 /** Non-goalie skater on `team` nearest `tile`; prefers non-stunned, falling back to stunned. Ties keep array order. Never moves anyone. */
@@ -40,7 +40,7 @@ function nearestSkaterOfTeam(
   const candidates = state.skaters.filter(
     (s) => s.team === team && s.role !== 'G',
   );
-  const nonStunned = candidates.filter((s) => !isStunned(s, state.turn));
+  const nonStunned = candidates.filter((s) => !isStunned(s));
   const pool = nonStunned.length > 0 ? nonStunned : candidates;
   return pool.sort(
     (a, b) => manhattan(a.pos, tile) - manhattan(b.pos, tile),
@@ -90,7 +90,7 @@ export function applyOutcome(
   let goal = false;
   let cleanSave = false;
   let rngSeed = state.rngSeed;
-  let bonusMp = 0;
+  let bonusSteps = 0;
 
   switch (duel.kind) {
     case 'faceoff': {
@@ -150,8 +150,8 @@ export function applyOutcome(
               ? duel.defender.skaterId
               : duel.attacker.skaterId;
             break;
-          case 'bonusMp':
-            bonusMp = 1;
+          case 'bonusSteps':
+            bonusSteps = 1;
             break;
           // `scrumOnLoss` and `freeJump` have no clean-win-time bonus -
           // they're handled above (scrum downgrade) and in
@@ -217,5 +217,5 @@ export function applyOutcome(
     }
   }
 
-  return { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusMp };
+  return { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusSteps };
 }

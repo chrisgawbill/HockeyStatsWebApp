@@ -1,5 +1,5 @@
-import { COST } from '@/features/board-game/data/balance';
 import { createDuel } from '@/features/board-game/engine/duel';
+import { completeActivation } from '@/features/board-game/engine/shift';
 import { createShotDuel } from '@/features/board-game/engine/shotDuel';
 import {
   isAdjacent,
@@ -35,14 +35,19 @@ function findDekeDefender(
       s.team !== carrier.team &&
       s.role !== 'G' &&
       isAdjacent(s.pos, carrier.pos) &&
-      !isStunned(s, state.turn),
+      !isStunned(s),
   );
   return candidates.sort(
     (a, b) => DEKE_ROLE_ORDER.indexOf(a.role) - DEKE_ROLE_ORDER.indexOf(b.role),
   )[0];
 }
 
-/** `MOVE`: spends 1 MP, picks up a loose puck on arrival, then checks the automatic deke trigger. */
+/**
+ * `MOVE`: one tile of the activation's allowance, which also makes this
+ * skater the activation's skater. Collecting a loose puck is the
+ * activation's action; arriving next to an opponent with the puck starts
+ * a deke battle, which uses the action instead.
+ */
 export function handleMove(
   state: GameState,
   skaterId: string,
@@ -64,8 +69,8 @@ export function handleMove(
     ...state,
     skaters,
     puck,
-    mp: state.mp - COST.move,
-    actionsThisTurn: state.actionsThisTurn + 1,
+    activeSkaterId: skaterId,
+    stepsLeft: state.stepsLeft - 1,
   };
 
   const isNowCarrier =
@@ -74,12 +79,11 @@ export function handleMove(
 
   const carrier = skaters.find((s) => s.id === skaterId)!;
   const defender = findDekeDefender(nextState, carrier);
-  if (!defender) return nextState;
-
-  return createDuel(nextState, 'deke', skaterId, defender.id);
+  if (defender) return createDuel(nextState, 'deke', skaterId, defender.id);
+  return picksUpLoosePuck ? completeActivation(nextState) : nextState;
 }
 
-/** `PASS`: spends 2 MP, then either an intercept duel or a completed pass to the receiver. */
+/** `PASS`: the carrier's action - either an intercept duel or a completed pass. The receiver is not activated. */
 export function handlePass(state: GameState, toSkaterId: string): GameState {
   if (!passTargets(state).includes(toSkaterId)) return state;
   const carrier = getCarrier(state)!;
@@ -88,11 +92,7 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
     (a, b) => manhattan(carrier.pos, a) - manhattan(carrier.pos, b),
   );
 
-  const spentState: GameState = {
-    ...state,
-    mp: state.mp - COST.pass,
-    actionsThisTurn: state.actionsThisTurn + 1,
-  };
+  const spentState: GameState = { ...state, activeSkaterId: carrier.id };
 
   for (const tile of lane) {
     const occupant = skaterAt(state, tile);
@@ -100,7 +100,7 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
       occupant &&
       occupant.team !== carrier.team &&
       occupant.role !== 'G' &&
-      !isStunned(occupant, state.turn)
+      !isStunned(occupant)
     ) {
       return createDuel(
         spentState,
@@ -112,32 +112,27 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
     }
   }
 
-  return { ...spentState, puck: { kind: 'carried', skaterId: toSkaterId } };
+  return completeActivation({
+    ...spentState,
+    puck: { kind: 'carried', skaterId: toSkaterId },
+  });
 }
 
-/** `SHOOT`: spends 3 MP and starts a shot duel against the opposing goalie. */
+/** `SHOOT`: the carrier's action - a shot duel against the opposing goalie. */
 export function handleShoot(state: GameState): GameState {
   if (!canShoot(state)) return state;
   const carrier = getCarrier(state)!;
   const goalie = state.skaters.find(
     (s) => s.team !== carrier.team && s.role === 'G',
   )!;
-  const spentState: GameState = {
-    ...state,
-    mp: state.mp - COST.shoot,
-    actionsThisTurn: state.actionsThisTurn + 1,
-  };
+  const spentState: GameState = { ...state, activeSkaterId: carrier.id };
   return createShotDuel(spentState, carrier.id, goalie.id);
 }
 
-/** `CHECK`: spends 1 MP and starts a check duel against the enemy carrier. */
+/** `CHECK`: the checker's action - a check duel against the enemy carrier. */
 export function handleCheck(state: GameState, skaterId: string): GameState {
   if (!checkTargets(state, skaterId)) return state;
   const carrier = getCarrier(state)!;
-  const spentState: GameState = {
-    ...state,
-    mp: state.mp - COST.check,
-    actionsThisTurn: state.actionsThisTurn + 1,
-  };
+  const spentState: GameState = { ...state, activeSkaterId: skaterId };
   return createDuel(spentState, 'check', skaterId, carrier.id);
 }

@@ -4,6 +4,7 @@ import {
   createInitialState,
   gameReducer,
 } from '@/features/board-game/engine/gameReducer';
+import { MOVE_ALLOWANCE } from '@/features/board-game/data/balance';
 import type { GameState } from '@/features/board-game/types/game';
 
 function makeState(overrides: Partial<GameState> = {}): GameState {
@@ -11,7 +12,6 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     ...createInitialState(1, 'long'),
     phase: 'move',
     activeTeam: 'user',
-    mp: 3,
     ...overrides,
   };
 }
@@ -22,7 +22,7 @@ describe('createInitialState', () => {
     expect(state.phase).toBe('faceoff');
     expect(state.bonusEnergy).toBe(0);
     expect(state.activeTeam).toBe('user');
-    expect(state.turn).toBe(1);
+    expect(state.shift).toBe(0);
     expect(state.puck).toEqual({ kind: 'loose', pos: { col: 7, row: 3 } });
     expect(state.skaters.find((s) => s.id === 'user-C')?.pos).toEqual({
       col: 6,
@@ -35,8 +35,8 @@ describe('createInitialState', () => {
   });
 });
 
-describe('START_FACEOFF / ROLL_DICE (canRoll)', () => {
-  it('starts the faceoff only in its phase and rolls 2d6 deterministically only in the roll phase', () => {
+describe('START_FACEOFF', () => {
+  it('starts the faceoff only in its phase', () => {
     const state = createInitialState(1, 'long');
     const next = gameReducer(state, { type: 'START_FACEOFF' });
     expect(next.phase).toBe('duel');
@@ -44,29 +44,12 @@ describe('START_FACEOFF / ROLL_DICE (canRoll)', () => {
 
     const illegal = gameReducer(next, { type: 'START_FACEOFF' });
     expect(illegal).toBe(next);
-
-    // Rolls 2d6 deterministically for a seed and is only legal in the roll phase.
-    {
-      const state = makeState({ phase: 'roll', mp: 0, dice: null });
-      const rolled = gameReducer(state, { type: 'ROLL_DICE' });
-      expect(rolled.phase).toBe('move');
-      expect(rolled.dice).not.toBeNull();
-      const [d1, d2] = rolled.dice!;
-      expect(rolled.mp).toBe(d1 + d2);
-
-      // same seed, same result
-      const again = gameReducer(state, { type: 'ROLL_DICE' });
-      expect(again.dice).toEqual(rolled.dice);
-
-      const illegal = gameReducer(rolled, { type: 'ROLL_DICE' });
-      expect(illegal).toBe(rolled);
-    }
   });
 });
 
 describe('MOVE', () => {
-  it('spends MP within budget, blocks occupied tiles, and picks up a loose puck', () => {
-    const state = makeState({ mp: 0 });
+  it('stays within the allowance, blocks occupied tiles, and collecting a loose puck ends the activation', () => {
+    const state = makeState({ stepsLeft: 0 });
     const next = gameReducer(state, {
       type: 'MOVE',
       skaterId: 'user-C',
@@ -91,16 +74,31 @@ describe('MOVE', () => {
       expect(next).toBe(blocked);
     }
 
-    // Picks up a loose puck on arrival and spends 1 MP.
+    // A plain move spends one tile and makes the mover the activation's skater.
     {
-      const state = makeState({ mp: 3 });
+      const next = gameReducer(makeState(), {
+        type: 'MOVE',
+        skaterId: 'user-C',
+        to: { col: 6, row: 4 },
+      });
+      expect(next.stepsLeft).toBe(1);
+      expect(next.activeSkaterId).toBe('user-C');
+      expect(next.activeTeam).toBe('user');
+    }
+
+    // Collecting the loose puck is the action: the activation ends.
+    {
+      const state = makeState({
+        puck: { kind: 'loose', pos: { col: 6, row: 4 } },
+      });
       const next = gameReducer(state, {
         type: 'MOVE',
         skaterId: 'user-C',
-        to: { col: 7, row: 3 },
+        to: { col: 6, row: 4 },
       });
       expect(next.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
-      expect(next.mp).toBe(2);
+      expect(next.activatedSkaterIds).toEqual(['user-C']);
+      expect(next.activeTeam).toBe('cpu');
     }
   });
 
@@ -124,9 +122,7 @@ describe('MOVE', () => {
     {
       const state = makeState();
       const skaters = state.skaters.map((s) =>
-        s.id === 'cpu-C'
-          ? { ...s, pos: { col: 8, row: 3 }, stunnedUntilTurn: 99 }
-          : s,
+        s.id === 'cpu-C' ? { ...s, pos: { col: 8, row: 3 }, stunned: true } : s,
       );
       const next = gameReducer(
         { ...state, skaters },
@@ -153,7 +149,7 @@ describe('PASS (passTargets)', () => {
     expect(next.duel!.kind).toBe('intercept');
     expect(next.duel!.defender.skaterId).toBe('cpu-LD');
     expect(next.duel!.receiverId).toBe('user-RW');
-    expect(next.mp).toBe(1); // 3 - COST.pass(2)
+    expect(next.activeSkaterId).toBe('user-C');
 
     // Completes the pass when the lane is clear.
     {
@@ -163,6 +159,9 @@ describe('PASS (passTargets)', () => {
       const next = gameReducer(state, { type: 'PASS', toSkaterId: 'user-RW' });
       expect(next.puck).toEqual({ kind: 'carried', skaterId: 'user-RW' });
       expect(next.duel).toBeNull();
+      // The pass ends the passer's activation; the receiver is not activated.
+      expect(next.activatedSkaterIds).toEqual(['user-C']);
+      expect(next.activeTeam).toBe('cpu');
     }
   });
 });
@@ -175,7 +174,7 @@ describe('SHOOT (canShoot)', () => {
 
     // Starts a shot duel against the opposing goalie inside the zone.
     {
-      const state = makeState({ mp: 3 });
+      const state = makeState();
       const skaters = state.skaters.map((s) =>
         s.id === 'user-C' ? { ...s, pos: { col: 11, row: 3 } } : s,
       );
@@ -215,42 +214,33 @@ describe('CHECK (checkTargets)', () => {
   });
 });
 
-describe('END_TURN (canEndTurn)', () => {
-  it('is legal only in the move phase, switches team and clears expired stuns', () => {
-    const illegal = gameReducer(makeState({ phase: 'roll' }), {
-      type: 'END_TURN',
+describe('END_ACTIVATION (canEndActivation)', () => {
+  it('is legal only in the move phase and hands the next activation over', () => {
+    const illegal = makeState({ phase: 'duel' });
+    expect(gameReducer(illegal, { type: 'END_ACTIVATION' })).toBe(illegal);
+
+    // Holding position spends an activation without activating a skater.
+    const held = gameReducer(makeState(), { type: 'END_ACTIVATION' });
+    expect(held.activeTeam).toBe('cpu');
+    expect(held.activationsLeft).toEqual({ user: 2, cpu: 3 });
+    expect(held.activatedSkaterIds).toEqual([]);
+
+    // After moving, ending records the mover as activated.
+    const moved = gameReducer(makeState(), {
+      type: 'MOVE',
+      skaterId: 'user-LW',
+      to: { col: 6, row: 0 },
     });
-    expect(illegal.phase).toBe('roll');
-
-    const state = makeState({ turn: 3, activeTeam: 'user' });
-    const skaters = state.skaters.map((s) =>
-      s.id === 'user-LW' ? { ...s, stunnedUntilTurn: 4 } : s,
-    );
-    const next = gameReducer({ ...state, skaters }, { type: 'END_TURN' });
-    expect(next.turn).toBe(4);
-    expect(next.activeTeam).toBe('cpu');
-    expect(next.phase).toBe('roll');
-    expect(next.mp).toBe(0);
-    expect(next.dice).toBeNull();
-    expect(next.actionsThisTurn).toBe(0);
-    // stunnedUntilTurn (4) is not yet < new turn (4), so still stunned
-    expect(next.skaters.find((s) => s.id === 'user-LW')!.stunnedUntilTurn).toBe(
-      4,
-    );
-
-    const laterTurn = gameReducer(
-      { ...next, phase: 'move' },
-      { type: 'END_TURN' },
-    );
-    expect(
-      laterTurn.skaters.find((s) => s.id === 'user-LW')!.stunnedUntilTurn,
-    ).toBeNull();
+    const ended = gameReducer(moved, { type: 'END_ACTIVATION' });
+    expect(ended.activatedSkaterIds).toEqual(['user-LW']);
+    expect(ended.activeSkaterId).toBeNull();
+    expect(ended.stepsLeft).toBe(MOVE_ALLOWANCE);
   });
 });
 
 describe('Whistle (isBoxedIn)', () => {
   it('a boxed-in carrier is whistled and reset; a free neighbor avoids it; START_FACEOFF clears it', () => {
-    const base = makeState({ activeTeam: 'cpu', turn: 5 });
+    const base = makeState({ activeTeam: 'cpu' });
     const skaters = base.skaters.map((s) => {
       if (s.id === 'user-C') return { ...s, pos: { col: 7, row: 3 } };
       if (s.id === 'cpu-LD') return { ...s, pos: { col: 6, row: 3 } };
@@ -263,14 +253,10 @@ describe('Whistle (isBoxedIn)', () => {
       skaters,
       puck: { kind: 'carried' as const, skaterId: 'user-C' },
     };
-    const next = gameReducer(state, { type: 'END_TURN' });
+    const next = gameReducer(state, { type: 'END_ACTIVATION' });
     expect(next.phase).toBe('faceoff');
-    expect(next.activeTeam).toBe('user');
     expect(next.whistle).toBe(true);
     expect(next.puck).toEqual({ kind: 'loose', pos: { col: 7, row: 3 } });
-    expect(next.mp).toBe(0);
-    expect(next.dice).toBeNull();
-    expect(next.turn).toBe(6); // the turn still increments
     expect(next.skaters.find((s) => s.id === 'user-C')!.pos).toEqual({
       col: 6,
       row: 3,
@@ -280,12 +266,11 @@ describe('Whistle (isBoxedIn)', () => {
     {
       const state = makeState({
         activeTeam: 'cpu',
-        turn: 5,
         puck: { kind: 'carried', skaterId: 'user-C' },
       });
-      const next = gameReducer(state, { type: 'END_TURN' });
+      const next = gameReducer(state, { type: 'END_ACTIVATION' });
       expect(next.whistle).toBe(false);
-      expect(next.phase).toBe('roll');
+      expect(next.phase).toBe('move');
     }
 
     // START_FACEOFF clears whistle.
@@ -298,10 +283,10 @@ describe('Whistle (isBoxedIn)', () => {
 });
 
 describe('DISMISS_DUEL_RESULT', () => {
-  it('after a faceoff hands the roll to the winner; otherwise returns to move keeping MP', () => {
+  it('after a faceoff opens a shift for the winner; any other battle ends the activation', () => {
     const state = makeState({
       phase: 'duelResult',
-      turn: 1,
+      shift: 1,
       lastOutcome: {
         kind: 'faceoff',
         winner: 'defender',
@@ -313,21 +298,19 @@ describe('DISMISS_DUEL_RESULT', () => {
         summary: 'faceoff defender wins',
         receiverId: null,
       },
-      mp: 5,
-      dice: [2, 3],
     });
     const next = gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
-    expect(next.phase).toBe('roll');
+    expect(next.phase).toBe('move');
     expect(next.activeTeam).toBe('cpu');
-    expect(next.mp).toBe(0);
-    expect(next.dice).toBeNull();
-    expect(next.turn).toBe(1);
+    expect(next.initiative).toBe('cpu');
+    expect(next.shift).toBe(2);
+    expect(next.activationsLeft).toEqual({ user: 3, cpu: 3 });
 
-    // Otherwise returns to move and keeps remaining MP.
+    // A check battle used the checker's action: its activation ends.
     {
       const state = makeState({
         phase: 'duelResult',
-        mp: 2,
+        activeSkaterId: 'user-LW',
         lastOutcome: {
           kind: 'check',
           winner: 'attacker',
@@ -342,14 +325,14 @@ describe('DISMISS_DUEL_RESULT', () => {
       });
       const next = gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
       expect(next.phase).toBe('move');
-      expect(next.mp).toBe(2);
+      expect(next.activatedSkaterIds).toEqual(['user-LW']);
+      expect(next.activeTeam).toBe('cpu');
     }
   });
 
   it('a rebound save returns to move; a covered save whistles to the covering end-zone dot', () => {
     const state = makeState({
       phase: 'duelResult',
-      mp: 1,
       lastOutcome: {
         kind: 'shot',
         winner: 'defender',
@@ -383,7 +366,6 @@ describe('DISMISS_DUEL_RESULT', () => {
       const state = makeState({
         phase: 'duelResult',
         activeTeam: 'cpu',
-        mp: 1,
         skaters: movedSkaters,
         lastOutcome: {
           kind: 'shot',
@@ -409,8 +391,6 @@ describe('DISMISS_DUEL_RESULT', () => {
       const next = gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
       expect(next.phase).toBe('faceoff');
       expect(next.whistle).toBe(true);
-      expect(next.mp).toBe(0);
-      expect(next.dice).toBeNull();
       expect(next.lastOutcome).toBeNull();
       expect(next.lastShotSaveResult).toBeNull();
 
@@ -446,7 +426,7 @@ describe('illegal actions and gameOver', () => {
     // Only NEW_GAME is legal once the game is over.
     {
       const state = makeState({ phase: 'gameOver', winner: 'user' });
-      const next = gameReducer(state, { type: 'END_TURN' });
+      const next = gameReducer(state, { type: 'END_ACTIVATION' });
       expect(next).toBe(state);
       const fresh = gameReducer(state, {
         type: 'NEW_GAME',
@@ -465,7 +445,7 @@ describe('seeded replay', () => {
   it('the same seed and action list give a deep-equal final state', () => {
     const run = () => {
       let state = createInitialState(42, 'long');
-      state = gameReducer(state, { type: 'ROLL_DICE' }); // illegal (phase faceoff), no-op
+      state = gameReducer(state, { type: 'END_ACTIVATION' }); // illegal (phase faceoff), no-op
       state = gameReducer(state, { type: 'START_FACEOFF' });
       return state;
     };

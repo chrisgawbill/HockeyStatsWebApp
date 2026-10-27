@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   isPlayable,
-  isStunned,
   laneBetween,
   legalSteps,
   skaterAt,
@@ -20,7 +19,7 @@ function makeSkater(overrides: Partial<Skater> = {}): Skater {
     team: 'user',
     role: 'C',
     pos: { col: 5, row: 3 },
-    stunnedUntilTurn: null,
+    stunned: false,
     ...overrides,
   };
 }
@@ -31,9 +30,12 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     length: 'long',
     bonusEnergy: 0,
     activeTeam: 'user',
-    turn: 1,
-    mp: 3,
-    dice: null,
+    shift: 1,
+    initiative: 'user',
+    activationsLeft: { user: 3, cpu: 3 },
+    activatedSkaterIds: [],
+    activeSkaterId: null,
+    stepsLeft: 2,
     skaters: [],
     puck: { kind: 'loose', pos: { col: 7, row: 3 } },
     deck: { drawPile: [], hand: [], discardPile: [], exhaustPile: [] },
@@ -45,11 +47,10 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
     lastFaceoffResult: null,
     winner: null,
     rngSeed: 1,
-    actionsThisTurn: 0,
     whistle: false,
     goaliePoise: { user: 43, cpu: 43 },
     faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
+    pendingBonusSteps: 0,
     ...overrides,
   };
 }
@@ -135,26 +136,29 @@ describe('legalSteps', () => {
     expect(steps).not.toContainEqual({ col: 6, row: 3 });
     expect(steps).toContainEqual({ col: 4, row: 3 });
 
-    // Lets a stun expire once turn passes stunnedUntilTurn.
-    const stunned = makeSkater({
-      id: 'user-LD',
-      stunnedUntilTurn: 2,
-      pos: { col: 3, row: 2 },
-    });
-    expect(isStunned(stunned, 2)).toBe(true);
-    expect(isStunned(stunned, 3)).toBe(false);
-    expect(
-      legalSteps(makeState({ skaters: [stunned], turn: 2 }), 'user-LD'),
-    ).toEqual([]);
-    expect(
-      legalSteps(makeState({ skaters: [stunned], turn: 3 }), 'user-LD').length,
-    ).toBeGreaterThan(0);
-
-    // Is empty when the skater has zero MP.
+    // Is empty once the activation has no tiles left.
     {
       const carrier = makeSkater();
-      const state = makeState({ skaters: [carrier], mp: 0 });
+      const state = makeState({ skaters: [carrier], stepsLeft: 0 });
       expect(legalSteps(state, 'user-C')).toEqual([]);
+    }
+
+    // Is empty for a skater already activated this shift, or for anyone but
+    // the activation's skater once it has moved.
+    {
+      const carrier = makeSkater();
+      expect(
+        legalSteps(
+          makeState({ skaters: [carrier], activatedSkaterIds: ['user-C'] }),
+          'user-C',
+        ),
+      ).toEqual([]);
+      expect(
+        legalSteps(
+          makeState({ skaters: [carrier], activeSkaterId: 'user-LW' }),
+          'user-C',
+        ),
+      ).toEqual([]);
     }
 
     // Is empty for the goalie, a stunned skater, or the wrong phase/team.
@@ -166,14 +170,14 @@ describe('legalSteps', () => {
       });
       const stunned = makeSkater({
         id: 'user-LD',
-        stunnedUntilTurn: 5,
+        stunned: true,
         pos: { col: 3, row: 2 },
       });
       const state = makeState({ skaters: [goalie, stunned] });
       expect(legalSteps(state, 'user-G')).toEqual([]);
       expect(legalSteps(state, 'user-LD')).toEqual([]);
       expect(
-        legalSteps(makeState({ skaters: [stunned], phase: 'roll' }), 'user-LD'),
+        legalSteps(makeState({ skaters: [stunned], phase: 'duel' }), 'user-LD'),
       ).toEqual([]);
       expect(
         legalSteps(

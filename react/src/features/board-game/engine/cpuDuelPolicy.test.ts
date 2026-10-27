@@ -18,7 +18,7 @@ function makeSkater(
   role: Role,
   team: 'user' | 'cpu' = 'cpu',
 ): Skater {
-  return { id, team, role, pos: { col: 0, row: 0 }, stunnedUntilTurn: null };
+  return { id, team, role, pos: { col: 0, row: 0 }, stunned: false };
 }
 
 function makeDuel(overrides: Partial<DuelState> = {}): DuelState {
@@ -54,9 +54,12 @@ function makeState(
     length: 'long',
     bonusEnergy: 0,
     activeTeam: 'user',
-    turn: 1,
-    mp: 0,
-    dice: null,
+    shift: 1,
+    initiative: 'user',
+    activationsLeft: { user: 3, cpu: 3 },
+    activatedSkaterIds: [],
+    activeSkaterId: null,
+    stepsLeft: 2,
     skaters: [
       makeSkater('user-LD', 'LD', 'user'),
       makeSkater('cpu-C', cpuRole, 'cpu'),
@@ -71,11 +74,10 @@ function makeState(
     lastFaceoffResult: null,
     winner: null,
     rngSeed: 1,
-    actionsThisTurn: 0,
     whistle: false,
     goaliePoise: { user: 43, cpu: 43 },
     faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
+    pendingBonusSteps: 0,
   };
 }
 
