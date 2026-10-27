@@ -64,6 +64,7 @@ export function createInitialState(
     activatedSkaterIds: [],
     activeSkaterId: null,
     stepsLeft: MOVE_ALLOWANCE,
+    activationPath: [],
     skaters: formationSkaters(),
     puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
     deck,

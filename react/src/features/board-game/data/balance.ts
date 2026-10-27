@@ -27,6 +27,8 @@ export const MAX_ROUNDS = 3;
 export const ACTIVATIONS_PER_SHIFT = 3;
 /** Tiles a skater may move in one activation, before its action. */
 export const MOVE_ALLOWANCE = 2;
+/** Extra tiles for an LD/RD whose whole path stays in its defensive zone. */
+export const DEFENSE_RANGE_BONUS = 1;
 
 /** LW/RW shot accuracy bonus, on the same 0-100 scale as card accuracy. */
 export const PERK_WING_SHOT_ACCURACY = 15;

@@ -27,6 +27,7 @@ export function makeState(overrides: Partial<GameState> = {}): GameState {
     activatedSkaterIds: [],
     activeSkaterId: null,
     stepsLeft: 2,
+    activationPath: [],
     skaters: [],
     puck: { kind: 'loose', pos: { col: 7, row: 3 } },
     deck: { drawPile: [], hand: [], discardPile: [], exhaustPile: [] },

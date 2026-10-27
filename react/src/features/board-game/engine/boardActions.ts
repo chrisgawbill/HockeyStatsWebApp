@@ -6,7 +6,6 @@ import {
   isStunned,
   laneBetween,
   legalSteps,
-  manhattan,
   sameCoord,
   skaterAt,
 } from '@/features/board-game/engine/rink';
@@ -56,6 +55,7 @@ export function handleMove(
   const legal = legalSteps(state, skaterId).some((c) => sameCoord(c, to));
   if (!legal) return state;
 
+  const from = state.skaters.find((s) => s.id === skaterId)!.pos;
   const skaters = state.skaters.map((s) =>
     s.id === skaterId ? { ...s, pos: to } : s,
   );
@@ -71,6 +71,10 @@ export function handleMove(
     puck,
     activeSkaterId: skaterId,
     stepsLeft: state.stepsLeft - 1,
+    activationPath: [
+      ...(state.activationPath.length > 0 ? state.activationPath : [from]),
+      to,
+    ],
   };
 
   const isNowCarrier =
@@ -88,9 +92,7 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
   if (!passTargets(state).includes(toSkaterId)) return state;
   const carrier = getCarrier(state)!;
   const receiver = state.skaters.find((s) => s.id === toSkaterId)!;
-  const lane = laneBetween(carrier.pos, receiver.pos)!.sort(
-    (a, b) => manhattan(carrier.pos, a) - manhattan(carrier.pos, b),
-  );
+  const lane = laneBetween(carrier.pos, receiver.pos)!;
 
   const spentState: GameState = { ...state, activeSkaterId: carrier.id };
 

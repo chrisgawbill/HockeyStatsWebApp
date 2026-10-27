@@ -1,12 +1,13 @@
 import { CREASE_FRONT } from '@/features/board-game/data/rink';
 import {
   canActivate,
+  cutsCorner,
   isAdjacent,
   isPlayable,
   isStunned,
   legalSteps,
   manhattan,
-  orthNeighbors,
+  neighbors,
   sameCoord,
   skaterAt,
 } from '@/features/board-game/engine/rink';
@@ -32,6 +33,16 @@ function threatCount(state: GameState, team: TeamId, tile: Coord): number {
   ).length;
 }
 
+/**
+ * `legalSteps` in this team's tie-break order. The CPU's list is reversed,
+ * which mirrors the board's 180° symmetry, so neither side's
+ * first-listed direction is its attacking one.
+ */
+function stepsInTeamOrder(state: GameState, mover: Skater): Coord[] {
+  const steps = legalSteps(state, mover.id);
+  return mover.team === 'cpu' ? steps.reverse() : steps;
+}
+
 function coordKey(c: Coord): string {
   return `${c.col},${c.row}`;
 }
@@ -52,9 +63,10 @@ function distancesTo(
   while (queue.length > 0) {
     const current = queue.shift()!;
     const currentDist = distances.get(coordKey(current))!;
-    for (const next of orthNeighbors(current)) {
+    for (const next of neighbors(current)) {
       const key = coordKey(next);
       if (distances.has(key) || !isPlayable(next)) continue;
+      if (cutsCorner(state, current, next)) continue;
       const occupant = skaterAt(state, next);
       if (occupant && occupant.id !== mover.id && !sameCoord(next, target))
         continue;
@@ -76,8 +88,9 @@ function pickStepToward(
   target: Coord,
 ): Coord | null {
   const mover = state.skaters.find((s) => s.id === skaterId);
-  const steps = legalSteps(state, skaterId);
-  if (!mover || steps.length === 0) return null;
+  if (!mover) return null;
+  const steps = stepsInTeamOrder(state, mover);
+  if (steps.length === 0) return null;
 
   const distances = distancesTo(state, mover, target);
   const fallback = (c: Coord) => manhattan(c, target);
@@ -148,12 +161,12 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
     const anyPassTarget = passTargets(state)[0];
     if (anyPassTarget) return { type: 'PASS', toSkaterId: anyPassTarget };
 
-    // Truly last resort: a carrier can have one free neighbor that doesn't
+    // Truly last resort: a carrier can have one legal step that doesn't
     // shorten the path to net (so pickStepToward finds "no useful step")
-    // without being isBoxedIn (zero free neighbors) - e.g. boxed in by its
+    // without being isBoxedIn (no legal step) - e.g. boxed in by its
     // own teammates. Take the step anyway rather than holding with the puck
     // frozen in place.
-    const anyStep = legalSteps(state, carrier.id)[0];
+    const anyStep = stepsInTeamOrder(state, carrier)[0];
     if (anyStep) return { type: 'MOVE', skaterId: carrier.id, to: anyStep };
     return { type: 'END_ACTIVATION' };
   }

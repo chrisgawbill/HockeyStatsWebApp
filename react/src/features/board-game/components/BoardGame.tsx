@@ -16,6 +16,7 @@ import {
   getCarrier,
   passTargets,
 } from '@/features/board-game/engine/selectors';
+import { stepsRemaining } from '@/features/board-game/engine/rink';
 import {
   canUnqueueCard,
   cardBlockReason,
@@ -260,7 +261,10 @@ export default function BoardGame({
             possession={possession}
             shift={state.shift}
             activationsLeft={state.activationsLeft}
-            stepsLeft={state.stepsLeft}
+            stepsLeft={stepsRemaining(
+              state,
+              state.activeSkaterId ?? selectedId,
+            )}
             canPass={passEnabled}
             canShoot={shootEnabled}
             canEnd={endActivationEnabled}

@@ -50,6 +50,7 @@ export function startShift(state: GameState, initiative: TeamId): GameState {
     activatedSkaterIds: [],
     activeSkaterId: null,
     stepsLeft: MOVE_ALLOWANCE + state.pendingBonusSteps,
+    activationPath: [],
     pendingBonusSteps: 0,
   };
 }
@@ -117,6 +118,7 @@ export function completeActivation(state: GameState): GameState {
     },
     activeSkaterId: null,
     stepsLeft: MOVE_ALLOWANCE,
+    activationPath: [],
   };
   return whistleIfBoxedIn(handOverActivation(spent));
 }

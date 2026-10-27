@@ -80,6 +80,14 @@ describe('laneBetween', () => {
 
     // Is empty for adjacent tiles and null for a non-straight or equal pair.
     expect(laneBetween({ col: 2, row: 3 }, { col: 3, row: 3 })).toEqual([]);
+    expect(laneBetween({ col: 4, row: 2 }, { col: 7, row: 5 })).toEqual([
+      { col: 5, row: 3 },
+      { col: 6, row: 4 },
+    ]);
+    expect(laneBetween({ col: 7, row: 5 }, { col: 4, row: 2 })).toEqual([
+      { col: 6, row: 4 },
+      { col: 5, row: 3 },
+    ]);
     expect(laneBetween({ col: 2, row: 3 }, { col: 5, row: 4 })).toBeNull();
     expect(laneBetween({ col: 2, row: 3 }, { col: 2, row: 3 })).toBeNull();
   });

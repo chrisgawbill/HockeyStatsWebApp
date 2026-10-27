@@ -291,8 +291,10 @@ export interface GameState {
   activatedSkaterIds: string[];
   /** The skater acting in the current activation, once it has moved or acted. */
   activeSkaterId: string | null;
-  /** Tiles the current activation may still move. */
+  /** Tiles the current activation may still move, before a defenseman's range tile (-1 once that tile is used). */
   stepsLeft: number;
+  /** Tiles the activation's skater has stood on this activation, start first; empty until it moves. */
+  activationPath: Coord[];
   skaters: Skater[];
   puck: Puck;
   deck: Deck;

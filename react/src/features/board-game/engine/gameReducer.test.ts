@@ -4,6 +4,9 @@ import {
   createInitialState,
   gameReducer,
 } from '@/features/board-game/engine/gameReducer';
+import { legalSteps, stepsRemaining } from '@/features/board-game/engine/rink';
+import { isBoxedIn, passTargets } from '@/features/board-game/engine/selectors';
+import type { GameState, Skater } from '@/features/board-game/types/game';
 import { makeMoveState as makeState } from '@/test/fixtures/boardScenarios';
 import { describe, expect, it } from 'vitest';
 
@@ -441,5 +444,149 @@ describe('seeded replay', () => {
       return state;
     };
     expect(run()).toEqual(run());
+  });
+});
+
+describe('Diagonal skating and pass lanes (ON2-02)', () => {
+  function skater(id: string, col: number, row: number): Skater {
+    const [team, role] = id.split('-') as [Skater['team'], Skater['role']];
+    return { id, team, role, pos: { col, row }, stunned: false };
+  }
+
+  function move(state: GameState, skaterId: string, col: number, row: number) {
+    return gameReducer(state, { type: 'MOVE', skaterId, to: { col, row } });
+  }
+
+  it('steps in eight directions; a diagonal is blocked by an unplayable side or two occupied sides', () => {
+    const open = makeState({ skaters: [skater('user-C', 5, 3)] });
+    expect(legalSteps(open, 'user-C')).toHaveLength(8);
+
+    // One occupied side: skating past is fine.
+    const onePlayer = makeState({
+      skaters: [skater('user-C', 5, 3), skater('cpu-C', 6, 3)],
+    });
+    expect(legalSteps(onePlayer, 'user-C')).toContainEqual({ col: 6, row: 2 });
+
+    // Two occupied sides: no squeezing between them.
+    const twoPlayers = makeState({
+      skaters: [
+        skater('user-C', 5, 3),
+        skater('cpu-C', 6, 3),
+        skater('user-LW', 5, 2),
+      ],
+    });
+    expect(legalSteps(twoPlayers, 'user-C')).not.toContainEqual({
+      col: 6,
+      row: 2,
+    });
+
+    // An unplayable board-corner side blocks the cut.
+    const corner = makeState({ skaters: [skater('user-C', 1, 1)] });
+    const cornerSteps = legalSteps(corner, 'user-C');
+    expect(cornerSteps).not.toContainEqual({ col: 0, row: 2 });
+    expect(cornerSteps).not.toContainEqual({ col: 2, row: 0 });
+    expect(cornerSteps).toContainEqual({ col: 2, row: 2 });
+  });
+
+  it('a diagonal neighbour pressures the carrier (deke) and can be checked', () => {
+    const state = makeState({
+      skaters: [skater('user-C', 5, 3), skater('cpu-RD', 7, 1)],
+      puck: { kind: 'carried', skaterId: 'user-C' },
+    });
+    const deked = move(state, 'user-C', 6, 2);
+    expect(deked.duel!.kind).toBe('deke');
+    expect(deked.duel!.defender.skaterId).toBe('cpu-RD');
+
+    const checkState = makeState({
+      skaters: [skater('cpu-C', 8, 3), skater('user-LW', 7, 2)],
+      puck: { kind: 'carried', skaterId: 'cpu-C' },
+    });
+    const checked = gameReducer(checkState, {
+      type: 'CHECK',
+      skaterId: 'user-LW',
+    });
+    expect(checked.duel!.kind).toBe('check');
+  });
+
+  it('a defenseman gets a third tile only while start, path and end stay in its defensive zone', () => {
+    // User defends cols 0-4: (2,2) -> (3,3) -> (4,4) -> third tile in zone only.
+    let state = makeState({ skaters: [skater('user-LD', 2, 2)] });
+    expect(stepsRemaining(state, 'user-LD')).toBe(3);
+    state = move(move(state, 'user-LD', 3, 3), 'user-LD', 4, 4);
+    const thirdTiles = legalSteps(state, 'user-LD');
+    expect(thirdTiles.length).toBeGreaterThan(0);
+    expect(thirdTiles.every((c) => c.col <= 4)).toBe(true);
+    state = move(state, 'user-LD', 4, 5);
+    expect(state.skaters[0].pos).toEqual({ col: 4, row: 5 });
+    expect(legalSteps(state, 'user-LD')).toEqual([]);
+
+    // Touching col 5 ends the range, even back in the zone.
+    let outAndBack = makeState({ skaters: [skater('user-LD', 4, 2)] });
+    outAndBack = move(move(outAndBack, 'user-LD', 5, 2), 'user-LD', 4, 3);
+    expect(stepsRemaining(outAndBack, 'user-LD')).toBe(0);
+
+    // Starting outside the zone: two tiles, even skating back in.
+    let fromNeutral = makeState({ skaters: [skater('user-LD', 5, 2)] });
+    fromNeutral = move(move(fromNeutral, 'user-LD', 4, 3), 'user-LD', 3, 4);
+    expect(legalSteps(fromNeutral, 'user-LD')).toEqual([]);
+
+    // Forwards never get it; the CPU defends cols 10-14 the same way.
+    const forward = makeState({ skaters: [skater('user-C', 2, 2)] });
+    expect(stepsRemaining(forward, 'user-C')).toBe(2);
+    const cpuDefense = makeState({
+      activeTeam: 'cpu',
+      skaters: [skater('cpu-LD', 12, 2)],
+    });
+    expect(stepsRemaining(cpuDefense, 'cpu-LD')).toBe(3);
+  });
+
+  it('passes along straight diagonals; only an opponent on the lane intercepts', () => {
+    const carrier = skater('user-C', 4, 2);
+    const receiver = skater('user-RW', 7, 5);
+    const beside = makeState({
+      skaters: [carrier, receiver, skater('cpu-C', 5, 2)],
+      puck: { kind: 'carried', skaterId: 'user-C' },
+    });
+    expect(
+      gameReducer(beside, { type: 'PASS', toSkaterId: 'user-RW' }).puck,
+    ).toEqual({ kind: 'carried', skaterId: 'user-RW' });
+
+    const onLane = makeState({
+      skaters: [carrier, receiver, skater('cpu-C', 6, 4)],
+      puck: { kind: 'carried', skaterId: 'user-C' },
+    });
+    const intercepted = gameReducer(onLane, {
+      type: 'PASS',
+      toSkaterId: 'user-RW',
+    });
+    expect(intercepted.duel!.kind).toBe('intercept');
+
+    // A diagonal neighbour is a handoff, not a pass.
+    const neighbour = makeState({
+      skaters: [carrier, skater('user-LW', 5, 3)],
+      puck: { kind: 'carried', skaterId: 'user-C' },
+    });
+    expect(passTargets(neighbour)).toEqual([]);
+  });
+
+  it('a carrier boxed in on all four sides escapes the whistle with a diagonal pass receiver', () => {
+    const boxIn = [
+      skater('cpu-LD', 6, 3),
+      skater('cpu-LW', 7, 4),
+      skater('cpu-RW', 7, 2),
+      skater('cpu-C', 8, 3),
+    ];
+    const boxed = makeState({
+      activeTeam: 'cpu',
+      skaters: [skater('user-C', 7, 3), ...boxIn],
+      puck: { kind: 'carried', skaterId: 'user-C' },
+    });
+    expect(isBoxedIn(boxed, 'user-C')).toBe(true);
+
+    const withReceiver = {
+      ...boxed,
+      skaters: [...boxed.skaters, skater('user-RW', 9, 5)],
+    };
+    expect(isBoxedIn(withReceiver, 'user-C')).toBe(false);
   });
 });

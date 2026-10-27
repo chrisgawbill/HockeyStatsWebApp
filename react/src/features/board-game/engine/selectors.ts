@@ -1,13 +1,12 @@
 import {
   canActivate,
+  canStep,
   isAdjacent,
   isOffensiveZone,
-  isPlayable,
   isStunned,
   laneBetween,
-  manhattan,
-  orthNeighbors,
-  skaterAt,
+  neighbors,
+  tileDistance,
 } from '@/features/board-game/engine/rink';
 import type { GameState, Skater } from '@/features/board-game/types/game';
 
@@ -37,7 +36,7 @@ export function canShoot(state: GameState): boolean {
 
 /**
  * Teammates `carrier` could legally pass to: non-goalie, non-stunned, at
- * least 2 tiles away in the same row/column with a clear lane. Ignores
+ * least 2 tiles away in the same row, column or straight diagonal. Ignores
  * phase and activations - shared by `passTargets` and `isBoxedIn`.
  */
 export function eligibleReceivers(state: GameState, carrier: Skater): Skater[] {
@@ -45,7 +44,7 @@ export function eligibleReceivers(state: GameState, carrier: Skater): Skater[] {
     .filter((s) => s.team === carrier.team && s.id !== carrier.id)
     .filter((s) => s.role !== 'G')
     .filter((s) => !isStunned(s))
-    .filter((s) => manhattan(carrier.pos, s.pos) >= 2)
+    .filter((s) => tileDistance(carrier.pos, s.pos) >= 2)
     .filter((s) => laneBetween(carrier.pos, s.pos) !== null);
 }
 
@@ -68,18 +67,18 @@ export function checkTargets(state: GameState, skaterId: string): boolean {
 }
 
 /**
- * True if `skaterId` is boxed in for the §3 whistle rule: no free playable
- * orthogonal neighbor, no eligible pass receiver, and not in its own
+ * True if `skaterId` is boxed in for the §3 whistle rule: no legal step in
+ * any of the eight directions, no eligible pass receiver, and not in its own
  * offensive zone. Ignores whose activation it is and phase.
  */
 export function isBoxedIn(state: GameState, skaterId: string): boolean {
   const skater = state.skaters.find((s) => s.id === skaterId);
   if (!skater) return false;
 
-  const hasFreeNeighbor = orthNeighbors(skater.pos).some(
-    (c) => isPlayable(c) && !skaterAt(state, c),
+  const hasLegalStep = neighbors(skater.pos).some((to) =>
+    canStep(state, skater.pos, to),
   );
-  if (hasFreeNeighbor) return false;
+  if (hasLegalStep) return false;
   if (eligibleReceivers(state, skater).length > 0) return false;
   return !isOffensiveZone(skater.team, skater.pos);
 }
