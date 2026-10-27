@@ -23,10 +23,11 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (34)
+### Completed tickets (35)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
+| [x] | [ON2-01 — Alternating shift activation engine](#on2-01--alternating-shift-activation-engine) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Implemented on branch `ON2` (`76926691`); typecheck, tests, format and build pass. Not run: Spotter and a Product Owner playtest. |
 | [x] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | DONE — merged to HockeyStatsAPI `main`; Product Owner accepted 2026-10-27. Not run: deploy check. |
 | [x] | [AAR-01 — Favorite teams and After Action Report inbox](#aar-01--favorite-teams-and-after-action-report-inbox) | DONE — accepted by the Product Owner (2026-10-19) |
 | [x] | [AAR-02 — Mobile push for After Action Reports](#aar-02--mobile-push-for-after-action-reports) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and QA-verified. |
@@ -62,11 +63,10 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. Not run: the check against a recorded NHL payload and the dev-server deploy check. |
 | [x] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. Spotter recheck passed (reported by the Product Owner 2026-10-27). |
 
-### In progress / awaiting acceptance (2)
+### In progress / awaiting acceptance (1)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [ON2-01 — Alternating shift activation engine](#on2-01--alternating-shift-activation-engine) | ACTIVE — started 2026-10-27; rules decided (see block); implemented on `ccr-54dd4737-q7e2xd`; typecheck, tests, format and build pass. Pending: Spotter, Product Owner playtest. |
 | [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | ACTIVE — merged to HockeyStatsAPI `main` (`bb084dd`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here); 160 API tests pass; checked on real Postgres. Pending: pilot player ID check, Product Owner acceptance. Not run: deploy check. |
 
 ### Not started tickets (13)
@@ -188,7 +188,7 @@ implementation; starting them here does not authorize backend edits.
 
 ## ON2-01 — Alternating shift activation engine
 
-**Status:** ACTIVE — started 2026-10-27.
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Implemented on branch `ON2` (`76926691`). Not run: Spotter and a Product Owner playtest.
 
 **Decisions (Product Owner, 2026-10-27):**
 
