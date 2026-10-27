@@ -206,6 +206,8 @@ The independently deployed HockeyStatsAPI owns database migrations and contracts
 Rink Quest consumes normalized team profiles through its own feature API boundary.
 A profile identifies a team's primary and optional secondary system and whether
 the team is enabled for Opening Night 2.0.
+The supported systems are Heavy Forecheck, Speed & Transition, Puck
+Possession, Heavy Game and Defensive Structure (API-ON2-02).
 
 Systems distribute a comparable mechanical budget differently. Real NHL
 performance may inform identity but must not make current standings a raw power
