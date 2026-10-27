@@ -61,12 +61,13 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. Not run: the check against a recorded NHL payload and the dev-server deploy check. |
 | [x] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. Spotter recheck passed (reported by the Product Owner 2026-10-27). |
 
-### In progress / awaiting acceptance (0)
+### In progress / awaiting acceptance (1)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
+| [ ] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | ACTIVE — on HockeyStatsAPI branch `ccr-54dd4737-q7e2xd`; pending merge, deploy, and Product Owner acceptance |
 
-### Not started tickets (16)
+### Not started tickets (15)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -75,7 +76,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-03 — Contextual card contracts and offers](#on2-03--contextual-card-contracts-and-offers) | IDEA |
 | [ ] | [ON2-04 — Hockey card library and identity packages](#on2-04--hockey-card-library-and-identity-packages) | IDEA |
 | [ ] | [ON2-05 — Screens and Clear Crease battles](#on2-05--screens-and-clear-crease-battles) | IDEA |
-| [ ] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | IDEA — backend-owned dependency |
 | [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | IDEA — backend-owned dependency |
 | [ ] | [ON2-06 — Team playbook and featured-star integration](#on2-06--team-playbook-and-featured-star-integration) | IDEA |
 | [ ] | [ON2-07 — Daily opponent and Rivalry Night selection](#on2-07--daily-opponent-and-rivalry-night-selection) | IDEA |
@@ -389,7 +389,28 @@ build.
 
 ## API-ON2-01 — Site-wide rivalry records and contract
 
-**Status:** IDEA — backend-owned dependency
+**Status:** ACTIVE — implemented on HockeyStatsAPI branch `ccr-54dd4737-q7e2xd`
+(2026-10-27); pending merge, deploy, and Product Owner acceptance.
+
+**Approved decisions (Product Owner, 2026-10-27):**
+
+- Table `team_rivalries` keyed by (`team_a_id`, `team_b_id`) → `teams.team_id`,
+  lower id first (one check rejects self-pairs and reversed duplicates);
+  `tier` `primary`/`secondary`, optional `display_name`, `enabled`. The seed
+  migration stubs missing `teams` rows so a fresh database satisfies the keys.
+- Read contract: `GET /rivalries` and `GET /rivalries/:triCode` →
+  `{ rivalries: [{ teams: [triCode, triCode], tier, displayName }] }`, teams
+  alphabetical; disabled pairs are never returned; a team with none gets `[]`.
+- Primary: BOS–MTL, MTL–TOR, EDM–CGY "Battle of Alberta", PIT–PHI "Battle of
+  Pennsylvania", NYR–NYI, CHI–DET, COL–DET, TOR–OTT "Battle of Ontario",
+  FLA–TBL "Battle of Florida", ANA–LAK "Freeway Face-Off", VGK–LAK.
+- Secondary: BOS–TOR, NYR–NJD "Hudson River Rivalry", WSH–PIT, MTL–OTT,
+  NYR–PHI, CHI–STL, VAN–CHI, LAK–SJS.
+
+**Verification (2026-10-27):** API tests pass (154). On a local Postgres 16,
+all migrations apply, 19 pairs seed, self and reversed inserts are rejected,
+lookup from either side matches, a disabled pair is hidden, and SEA returns
+`[]`. Not run: deploy check.
 
 **Goal:** Provide one normalized source of traditional team rivalries for Rink
 Quest and later site-wide consumers.
