@@ -12,7 +12,6 @@ export function makeShootState(seed = 1): GameState {
   return {
     ...state,
     phase: 'move',
-    mp: 3,
     skaters,
     puck: { kind: 'carried', skaterId: 'user-C' },
   };
@@ -39,7 +38,6 @@ export function shotState(seed: number): GameState {
   return {
     ...initial,
     phase: 'move',
-    mp: 3,
     skaters: initial.skaters.map((skater) =>
       skater.id === 'user-C' ? { ...skater, pos: { col: 11, row: 3 } } : skater,
     ),
@@ -52,7 +50,6 @@ export function makeMoveState(overrides: Partial<GameState> = {}): GameState {
     ...createInitialState(1, 'long'),
     phase: 'move',
     activeTeam: 'user',
-    mp: 3,
     ...overrides,
   };
 }

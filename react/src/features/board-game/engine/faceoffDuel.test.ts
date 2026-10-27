@@ -1,4 +1,5 @@
 import { CARDS } from '@/features/board-game/data/cards';
+import { MOVE_ALLOWANCE } from '@/features/board-game/data/balance';
 import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
 import {
   FACEOFF_ANTE_SIZE,
@@ -275,14 +276,17 @@ describe('faceoffEffect: stunLoser', () => {
       'clean',
     );
     expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
-    expect(
-      result.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
-    ).not.toBeNull();
+    expect(result.skaters.find((s) => s.id === 'cpu-C')!.stunned).toBe(true);
+
+    // The stun lasts through the shift the faceoff opens.
+    const opened = gameReducer(result, { type: 'DISMISS_DUEL_RESULT' });
+    expect(opened.shift).toBe(result.shift + 1);
+    expect(opened.skaters.find((s) => s.id === 'cpu-C')!.stunned).toBe(true);
   });
 });
 
-describe('faceoffEffect: bonusMp', () => {
-  it('a clean win with that card adds 1 MP; a plain clean win does not', () => {
+describe('faceoffEffect: bonusSteps', () => {
+  it('a clean win with that card adds 1 tile to the opening activation; a plain clean win does not', () => {
     let state = makeFaceoffState();
     state = withFaceoffCards(state, 'forehand_pull', 'quick_hands');
     state = pickFaceoffCard(state, 0);
@@ -298,15 +302,14 @@ describe('faceoffEffect: bonusMp', () => {
       'clean',
     );
     expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
-    expect(result.pendingBonusMp).toBe(1);
+    expect(result.pendingBonusSteps).toBe(1);
 
-    const dismissed = gameReducer(result, { type: 'DISMISS_DUEL_RESULT' });
-    const rolled = gameReducer(dismissed, { type: 'ROLL_DICE' });
-    const [d1, d2] = rolled.dice!;
-    expect(rolled.mp).toBe(d1 + d2 + 1);
-    expect(rolled.pendingBonusMp).toBe(0);
+    const opened = gameReducer(result, { type: 'DISMISS_DUEL_RESULT' });
+    expect(opened.activeTeam).toBe('user');
+    expect(opened.stepsLeft).toBe(MOVE_ALLOWANCE + 1);
+    expect(opened.pendingBonusSteps).toBe(0);
 
-    // A plain (non-bonus) clean win does not add MP.
+    // A plain (non-bonus) clean win does not add a tile.
     {
       // Neither card here carries scrumOnLoss, so a user win stays a plain win.
       let state = makeFaceoffState();
@@ -324,7 +327,7 @@ describe('faceoffEffect: bonusMp', () => {
         'quick_hands',
         'clean',
       );
-      expect(result.pendingBonusMp).toBe(0);
+      expect(result.pendingBonusSteps).toBe(0);
     }
   });
 });
@@ -437,9 +440,7 @@ describe('the CPU centre goes through the identical head-to-head contest as the 
         'late',
       );
       if (result.puck.kind === 'carried' && result.puck.skaterId === 'cpu-C') {
-        const stunned =
-          result.skaters.find((s) => s.id === 'user-C')!.stunnedUntilTurn !==
-          null;
+        const stunned = result.skaters.find((s) => s.id === 'user-C')!.stunned;
         if (stunned) sawFired = true;
         else sawNotFired = true;
       }

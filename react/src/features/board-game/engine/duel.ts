@@ -32,18 +32,6 @@ import type {
 } from '@/features/board-game/types/game';
 
 /**
- * A stun lasts at most one turn for `team`. If stunned during its own turn,
- * it skips the rest of this turn and its next one; if stunned during the
- * opponent's turn, it skips its immediately upcoming turn.
- */
-export function stunUntil(
-  state: GameState,
-  team: GameState['activeTeam'],
-): number {
-  return team === state.activeTeam ? state.turn + 2 : state.turn + 1;
-}
-
-/**
  * Draws both sides' hands for a round and secretly plans the CPU's cards.
  * Each hand is filtered to cards legal for this duel kind, so a card never
  * sits in hand dead-on-arrival; ineligible cards stay in the deck.
@@ -318,17 +306,14 @@ export function resolveDuel(
   byKo: boolean,
 ): GameState {
   const duel = state.duel!;
-  const { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusMp } =
+  const { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusSteps } =
     applyOutcome(state, duel, winner);
 
-  let skaters = state.skaters;
-  if (stunSkaterId) {
-    const stunnedSkater = skaters.find((s) => s.id === stunSkaterId)!;
-    const until = stunUntil(state, stunnedSkater.team);
-    skaters = skaters.map((s) =>
-      s.id === stunSkaterId ? { ...s, stunnedUntilTurn: until } : s,
-    );
-  }
+  const skaters = stunSkaterId
+    ? state.skaters.map((s) =>
+        s.id === stunSkaterId ? { ...s, stunned: true } : s,
+      )
+    : state.skaters;
 
   const winnerTeam = goal
     ? state.skaters.find((s) => s.id === duel.attacker.skaterId)!.team
@@ -350,7 +335,7 @@ export function resolveDuel(
     skaters,
     puck,
     rngSeed,
-    pendingBonusMp: bonusMp,
+    pendingBonusSteps: bonusSteps,
     deck: discardHand(state.deck),
     cpuDeck: discardHand(state.cpuDeck),
     duel: null,

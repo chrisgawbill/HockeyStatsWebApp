@@ -81,23 +81,33 @@ export function laneBetween(a: Coord, b: Coord): Coord[] | null {
   return null;
 }
 
-/** True if `skater` is still stunned on `turn` (the single stun check — never re-implement). */
-export function isStunned(skater: Skater, turn: number): boolean {
-  return skater.stunnedUntilTurn !== null && turn <= skater.stunnedUntilTurn;
+/** True if `skater` is stunned (the single stun check — never re-implement). */
+export function isStunned(skater: Skater): boolean {
+  return skater.stunned;
 }
 
 /**
- * Tiles a skater may step onto this turn: empty if it's the goalie, stunned,
- * not the move phase, not their team's turn, or they have no MP.
+ * True if `skater` may take the current activation: on the active team, not
+ * a goalie, not stunned, and either already the activation's skater or not
+ * yet activated this shift. Ignores phase.
+ */
+export function canActivate(state: GameState, skater: Skater): boolean {
+  if (skater.team !== state.activeTeam) return false;
+  if (skater.role === 'G' || isStunned(skater)) return false;
+  if (state.activeSkaterId !== null) return state.activeSkaterId === skater.id;
+  return !state.activatedSkaterIds.includes(skater.id);
+}
+
+/**
+ * Tiles a skater may step onto now: empty outside the move phase, when it
+ * can't take this activation, or when the activation has no tiles left.
  */
 export function legalSteps(state: GameState, skaterId: string): Coord[] {
   const skater = state.skaters.find((s) => s.id === skaterId);
   if (!skater) return [];
-  if (skater.role === 'G') return [];
-  if (isStunned(skater, state.turn)) return [];
   if (state.phase !== 'move') return [];
-  if (state.activeTeam !== skater.team) return [];
-  if (state.mp < 1) return [];
+  if (!canActivate(state, skater)) return [];
+  if (state.stepsLeft < 1) return [];
   return orthNeighbors(skater.pos)
     .filter(isPlayable)
     .filter((c) => !skaterAt(state, c));

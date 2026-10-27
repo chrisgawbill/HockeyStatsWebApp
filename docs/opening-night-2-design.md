@@ -83,11 +83,12 @@ that receiver later.
 
 There is no movement die and no shared movement-point pool.
 
-Before ON2-01 implementation, the PM brings the human a concrete proposal for
-opening and subsequent-shift initiative, stoppage resets, and skipped activations
-when a team has no eligible skater. The proposal must explain how faceoffs,
-stuns, and possession changes interact with alternation. These are open rules,
-not permission for the coder to invent extra turns.
+Approved 2026-10-27 (ON2-01): the faceoff winner opens the shift after a
+faceoff, and each later shift opens with the team that went second in the
+previous one. A whistle ends the shift. A team with activations left but no
+eligible skater forfeits them. A stunned skater sits out the rest of the
+current shift. Possession changes do not change the alternation: after any
+battle, the next activation goes to the other team if it has one left.
 
 ### Movement
 

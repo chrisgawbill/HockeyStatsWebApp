@@ -10,8 +10,7 @@ import type {
 } from '@/features/board-game/types/game';
 import { useBoardGame } from '@/features/board-game/hooks/useBoardGame';
 import {
-  canEndTurn,
-  canRoll,
+  canEndActivation,
   canShoot,
   checkTargets,
   getCarrier,
@@ -23,13 +22,16 @@ import {
 } from '@/features/board-game/engine/duel';
 import { faceoffBandWindowsFor } from '@/features/board-game/engine/faceoffDuel';
 import { describeOutcome } from '@/features/board-game/utils/describeOutcome';
-import { isStunned, sameCoord } from '@/features/board-game/engine/rink';
+import {
+  canActivate,
+  isStunned,
+  sameCoord,
+} from '@/features/board-game/engine/rink';
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
 import { TEAM_NAME } from '@/features/board-game/data/teams';
 import RinkBoard from '@/features/board-game/components/RinkBoard';
 import SkaterSprite from '@/features/board-game/components/SkaterSprite';
-import DiceRoller from '@/features/board-game/components/DiceRoller';
 import TurnHud from '@/features/board-game/components/TurnHud';
 import GameButton from '@/features/board-game/components/GameButton';
 import DuelScreen from '@/features/board-game/components/DuelScreen';
@@ -100,8 +102,7 @@ export default function BoardGame({
     !cpuThinking &&
     state.skaters.some((s) => s.team === 'user' && legalSteps(s.id).length > 0);
 
-  const rollEnabled = canRoll(state) && isUserTurn;
-  const endTurnEnabled = canEndTurn(state) && isUserTurn;
+  const endActivationEnabled = canEndActivation(state) && isUserTurn;
   const shootEnabled = canShoot(state) && isUserTurn;
   const targets = isUserTurn ? passTargets(state) : [];
   const passEnabled = targets.length > 0;
@@ -114,7 +115,7 @@ export default function BoardGame({
   useEffect(() => {
     setSelectedId(null);
     setMode('move');
-  }, [state.phase, state.activeTeam]);
+  }, [state.phase, state.activeTeam, state.activationsLeft]);
 
   useEffect(() => {
     if (mode !== 'pass') return;
@@ -124,11 +125,6 @@ export default function BoardGame({
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [mode]);
-
-  function handleRoll() {
-    if (!rollEnabled) return;
-    dispatch({ type: 'ROLL_DICE' });
-  }
 
   function handleTileClick(coord: Coord) {
     if (!isUserTurn || mode !== 'move' || !selectedId) return;
@@ -149,7 +145,7 @@ export default function BoardGame({
       return;
     }
 
-    if (skater.team === state.activeTeam) {
+    if (canActivate(state, skater)) {
       setSelectedId(id);
       return;
     }
@@ -173,9 +169,9 @@ export default function BoardGame({
     dispatch({ type: 'SHOOT' });
   }
 
-  function handleEndTurn() {
-    if (!endTurnEnabled) return;
-    dispatch({ type: 'END_TURN' });
+  function handleEndActivation() {
+    if (!endActivationEnabled) return;
+    dispatch({ type: 'END_ACTIVATION' });
   }
 
   /**
@@ -227,7 +223,7 @@ export default function BoardGame({
         skater={skater}
         hasPuck={hasPuck}
         selected={skater.id === selectedId}
-        stunned={isStunned(skater, state.turn)}
+        stunned={isStunned(skater)}
         moving={false}
         movable={
           showMoveCue &&
@@ -256,24 +252,21 @@ export default function BoardGame({
         </>
       )}
 
-      {(state.phase === 'roll' || state.phase === 'move') && (
+      {state.phase === 'move' && (
         <>
-          <DiceRoller
-            dice={state.dice}
-            canRoll={rollEnabled}
-            onRoll={handleRoll}
-          />
           <TurnHud
             activeTeam={state.activeTeam}
             length={state.length}
             possession={possession}
-            mp={state.mp}
+            shift={state.shift}
+            activationsLeft={state.activationsLeft}
+            stepsLeft={state.stepsLeft}
             canPass={passEnabled}
             canShoot={shootEnabled}
-            canEnd={endTurnEnabled}
+            canEnd={endActivationEnabled}
             onPass={handlePass}
             onShoot={handleShoot}
-            onEndTurn={handleEndTurn}
+            onEndActivation={handleEndActivation}
           />
           {cpuThinking && (
             <p role="status" className={styles.hint}>
@@ -288,7 +281,7 @@ export default function BoardGame({
           )}
           {showMoveCue && (
             <p className={styles.hint}>
-              Select one of your blue players to move.
+              Select one of your blue players to activate.
             </p>
           )}
         </>

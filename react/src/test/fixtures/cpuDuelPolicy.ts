@@ -11,7 +11,7 @@ export function makeSkater(
   role: Role,
   team: 'user' | 'cpu' = 'cpu',
 ): Skater {
-  return { id, team, role, pos: { col: 0, row: 0 }, stunnedUntilTurn: null };
+  return { id, team, role, pos: { col: 0, row: 0 }, stunned: false };
 }
 export function makeDuel(overrides: Partial<DuelState> = {}): DuelState {
   return {
@@ -43,7 +43,6 @@ export function makeState(
   return {
     ...makeBaseState(),
     phase: 'duel',
-    mp: 0,
     skaters: [
       makeSkater('user-LD', 'LD', 'user'),
       makeSkater('cpu-C', cpuRole, 'cpu'),

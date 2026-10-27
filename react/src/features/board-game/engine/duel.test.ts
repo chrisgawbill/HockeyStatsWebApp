@@ -9,12 +9,10 @@ import {
   endDuelRound,
   playCard,
   resolveDuel,
-  stunUntil,
   unqueueCard,
 } from '@/features/board-game/engine/duel';
-import { isStunned } from '@/features/board-game/engine/rink';
 import type { Deck, GameState } from '@/features/board-game/types/game';
-import { makeSkater, makeState } from '@/test/fixtures/duel';
+import { makeState } from '@/test/fixtures/duel';
 import { describe, expect, it } from 'vitest';
 
 /** Drives a duel to completion by discarding the user's hand every round (a passive human). */
@@ -25,50 +23,6 @@ function driveToCompletion(state: GameState, maxRounds = 10): GameState {
   }
   return s;
 }
-
-describe('stunUntil', () => {
-  it("lasts through the team's next turn, whichever turn the stun lands on", () => {
-    const state = makeState({ turn: 3, activeTeam: 'user' });
-    expect(stunUntil(state, 'user')).toBe(5);
-    expect(stunUntil(state, 'cpu')).toBe(4);
-
-    // A skater stunned on its own turn cannot move next turn but can the turn after.
-    {
-      const state = makeState({ turn: 3, activeTeam: 'user' });
-      const until = stunUntil(state, 'user');
-      expect(
-        isStunned(
-          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-          until,
-        ),
-      ).toBe(true);
-      expect(
-        isStunned(
-          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-          until + 2,
-        ),
-      ).toBe(false);
-    }
-
-    // A skater stunned on the opponent's turn cannot move its next turn but can the turn after.
-    {
-      const state = makeState({ turn: 3, activeTeam: 'cpu' });
-      const until = stunUntil(state, 'user');
-      expect(
-        isStunned(
-          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-          until,
-        ),
-      ).toBe(true);
-      expect(
-        isStunned(
-          { ...makeSkater('user', 'LW'), stunnedUntilTurn: until },
-          until + 2,
-        ),
-      ).toBe(false);
-    }
-  });
-});
 
 describe('createDuel', () => {
   // BG-A15b: the faceoff duel no longer goes through this generic
@@ -587,9 +541,9 @@ describe('resolveDuel outcome table', () => {
       };
       const result = resolveDuel(state, 'defender', true);
       expect(result.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
-      expect(
-        result.skaters.find((s) => s.id === 'user-LD')!.stunnedUntilTurn,
-      ).not.toBeNull();
+      expect(result.skaters.find((s) => s.id === 'user-LD')!.stunned).toBe(
+        true,
+      );
     }
 
     // Deke: attacker win keeps the puck and stuns the defender; defender win flips both.
@@ -597,15 +551,15 @@ describe('resolveDuel outcome table', () => {
       const state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
       const attackerWin = resolveDuel(state, 'attacker', true);
       expect(attackerWin.puck).toEqual({ kind: 'carried', skaterId: 'user-C' });
-      expect(
-        attackerWin.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
-      ).not.toBeNull();
+      expect(attackerWin.skaters.find((s) => s.id === 'cpu-C')!.stunned).toBe(
+        true,
+      );
 
       const defenderWin = resolveDuel(state, 'defender', true);
       expect(defenderWin.puck).toEqual({ kind: 'carried', skaterId: 'cpu-C' });
-      expect(
-        defenderWin.skaters.find((s) => s.id === 'user-LW')!.stunnedUntilTurn,
-      ).not.toBeNull();
+      expect(defenderWin.skaters.find((s) => s.id === 'user-LW')!.stunned).toBe(
+        true,
+      );
     }
 
     // Check: attacker (checker) win takes the puck and stuns the carrier.
@@ -613,9 +567,7 @@ describe('resolveDuel outcome table', () => {
       const state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
       const result = resolveDuel(state, 'attacker', true);
       expect(result.puck).toEqual({ kind: 'carried', skaterId: 'user-LD' });
-      expect(
-        result.skaters.find((s) => s.id === 'cpu-C')!.stunnedUntilTurn,
-      ).not.toBeNull();
+      expect(result.skaters.find((s) => s.id === 'cpu-C')!.stunned).toBe(true);
     }
   });
 

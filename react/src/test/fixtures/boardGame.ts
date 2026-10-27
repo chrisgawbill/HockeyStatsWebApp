@@ -11,7 +11,7 @@ export function makeSkater(overrides: Partial<Skater> = {}): Skater {
     team: 'user',
     role: 'C',
     pos: { col: 5, row: 3 },
-    stunnedUntilTurn: null,
+    stunned: false,
     ...overrides,
   };
 }
@@ -21,9 +21,12 @@ export function makeState(overrides: Partial<GameState> = {}): GameState {
     length: 'long',
     bonusEnergy: 0,
     activeTeam: 'user',
-    turn: 1,
-    mp: 3,
-    dice: null,
+    shift: 1,
+    initiative: 'user',
+    activationsLeft: { user: 3, cpu: 3 },
+    activatedSkaterIds: [],
+    activeSkaterId: null,
+    stepsLeft: 2,
     skaters: [],
     puck: { kind: 'loose', pos: { col: 7, row: 3 } },
     deck: { drawPile: [], hand: [], discardPile: [], exhaustPile: [] },
@@ -35,11 +38,10 @@ export function makeState(overrides: Partial<GameState> = {}): GameState {
     lastFaceoffResult: null,
     winner: null,
     rngSeed: 1,
-    actionsThisTurn: 0,
     whistle: false,
     goaliePoise: { user: 43, cpu: 43 },
     faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
+    pendingBonusSteps: 0,
     ...overrides,
   };
 }

@@ -1,6 +1,9 @@
-import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
+import {
+  ACTIVATIONS_PER_SHIFT,
+  GOALIE_POISE_BY_LENGTH,
+  MOVE_ALLOWANCE,
+} from '@/features/board-game/data/balance';
 import { STARTER_DECK } from '@/features/board-game/data/cards';
-import { FORMATIONS, ROLES } from '@/features/board-game/data/formations';
 import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
 import {
   handleCheck,
@@ -21,40 +24,22 @@ import {
   pickFaceoffCard,
   resolveFaceoffBand,
 } from '@/features/board-game/engine/faceoffDuel';
-import { rollDie } from '@/features/board-game/engine/rng';
 import {
   autoResolveShot,
   pickShotCard,
   resolveShotBand,
 } from '@/features/board-game/engine/shotDuel';
+import { canEndActivation } from '@/features/board-game/engine/selectors';
 import {
-  canEndTurn,
-  canRoll,
-  getCarrier,
-  isBoxedIn,
-} from '@/features/board-game/engine/selectors';
+  completeActivation,
+  formationSkaters,
+  startShift,
+} from '@/features/board-game/engine/shift';
 import type {
   Action,
   GameLength,
   GameState,
-  Skater,
-  TeamId,
 } from '@/features/board-game/types/game';
-
-const TEAMS: TeamId[] = ['user', 'cpu'];
-
-/** Every skater back on its starting tile, stuns cleared. Shared by a new game and a whistle reset. */
-function formationSkaters(): Skater[] {
-  return TEAMS.flatMap((team) =>
-    ROLES.map((role) => ({
-      id: `${team}-${role}`,
-      team,
-      role,
-      pos: FORMATIONS[team][role],
-      stunnedUntilTurn: null,
-    })),
-  );
-}
 
 /** Builds a fresh match: starting formations, the puck dropped at center, awaiting the opening faceoff. */
 export function createInitialState(
@@ -70,9 +55,15 @@ export function createInitialState(
     length,
     bonusEnergy: bonusEnergy > 0 ? 1 : 0,
     activeTeam: 'user',
-    turn: 1,
-    mp: 0,
-    dice: null,
+    shift: 0,
+    initiative: 'user',
+    activationsLeft: {
+      user: ACTIVATIONS_PER_SHIFT,
+      cpu: ACTIVATIONS_PER_SHIFT,
+    },
+    activatedSkaterIds: [],
+    activeSkaterId: null,
+    stepsLeft: MOVE_ALLOWANCE,
     skaters: formationSkaters(),
     puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
     deck,
@@ -82,7 +73,6 @@ export function createInitialState(
     lastReveal: null,
     winner: null,
     rngSeed,
-    actionsThisTurn: 0,
     whistle: false,
     goaliePoise: {
       user: GOALIE_POISE_BY_LENGTH[length],
@@ -91,13 +81,8 @@ export function createInitialState(
     lastShotSaveResult: null,
     lastFaceoffResult: null,
     faceoffSpot: FACEOFF_SPOTS.centreIce,
-    pendingBonusMp: 0,
+    pendingBonusSteps: 0,
   };
-}
-
-/** The other team. */
-export function otherTeam(team: TeamId): TeamId {
-  return team === 'user' ? 'cpu' : 'user';
 }
 
 /** The single state-change entry point. Returns the same reference for any illegal action. */
@@ -115,20 +100,6 @@ export function gameReducer(state: GameState, action: Action): GameState {
       };
     }
 
-    case 'ROLL_DICE': {
-      if (!canRoll(state)) return state;
-      const [d1, seed1] = rollDie(state.rngSeed);
-      const [d2, seed2] = rollDie(seed1);
-      return {
-        ...state,
-        dice: [d1, d2],
-        mp: d1 + d2 + state.pendingBonusMp,
-        pendingBonusMp: 0,
-        phase: 'move',
-        rngSeed: seed2,
-      };
-    }
-
     case 'MOVE':
       return handleMove(state, action.skaterId, action.to);
 
@@ -141,42 +112,9 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case 'CHECK':
       return handleCheck(state, action.skaterId);
 
-    case 'END_TURN': {
-      if (!canEndTurn(state)) return state;
-      const turn = state.turn + 1;
-      const skaters = state.skaters.map((s) =>
-        s.stunnedUntilTurn !== null && turn > s.stunnedUntilTurn
-          ? { ...s, stunnedUntilTurn: null }
-          : s,
-      );
-      const switched: GameState = {
-        ...state,
-        turn,
-        activeTeam: otherTeam(state.activeTeam),
-        phase: 'roll',
-        mp: 0,
-        dice: null,
-        actionsThisTurn: 0,
-        skaters,
-      };
-
-      const carrier = getCarrier(switched);
-      if (carrier && isBoxedIn(switched, carrier.id)) {
-        return {
-          ...switched,
-          skaters: formationSkaters(),
-          puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
-          phase: 'faceoff',
-          activeTeam: 'user',
-          mp: 0,
-          dice: null,
-          whistle: true,
-          faceoffSpot: FACEOFF_SPOTS.centreIce,
-        };
-      }
-
-      return switched;
-    }
+    case 'END_ACTIVATION':
+      if (!canEndActivation(state)) return state;
+      return completeActivation(state);
 
     case 'PLAY_CARD':
       return playCard(state, action.handIndex);
@@ -250,21 +188,21 @@ export function gameReducer(state: GameState, action: Action): GameState {
             ? outcome.attackerId
             : outcome.defenderId;
         const winnerTeam = state.skaters.find((s) => s.id === winnerId)!.team;
-        return {
-          ...state,
-          phase: 'roll',
-          activeTeam: winnerTeam,
-          mp: 0,
-          dice: null,
-          lastOutcome: null,
-          lastShotSaveResult: null,
-          lastFaceoffResult: null,
-        };
+        return startShift(
+          {
+            ...state,
+            lastOutcome: null,
+            lastShotSaveResult: null,
+            lastFaceoffResult: null,
+          },
+          winnerTeam,
+        );
       }
-      // A covered save whistles play dead, routing to the end-zone dot
-      // nearest the shooter's row on the goalie's own team's side (ties
-      // broken by a seeded flip). Only the two centres move; everyone else
-      // stays put (unlike the boxed-in-carrier whistle above, a full reset).
+      // A covered save whistles play dead and ends the shift, routing to the
+      // end-zone dot nearest the shooter's row on the goalie's own team's
+      // side (ties broken by a seeded flip). Only the two centres move and
+      // stuns clear; everyone else stays put (unlike the boxed-in-carrier
+      // whistle, a full reset).
       if (outcome.kind === 'shot' && state.lastShotSaveResult?.covered) {
         const goalieTeam = state.skaters.find(
           (s) => s.id === outcome.defenderId,
@@ -279,14 +217,13 @@ export function gameReducer(state: GameState, action: Action): GameState {
         );
         return {
           ...state,
-          skaters: state.skaters.map((s) =>
-            s.id === 'user-C' || s.id === 'cpu-C' ? { ...s, pos: dot } : s,
-          ),
+          skaters: state.skaters.map((s) => ({
+            ...s,
+            stunned: false,
+            pos: s.id === 'user-C' || s.id === 'cpu-C' ? dot : s.pos,
+          })),
           puck: { kind: 'loose', pos: dot },
           phase: 'faceoff',
-          activeTeam: 'user',
-          mp: 0,
-          dice: null,
           whistle: true,
           faceoffSpot: dot,
           rngSeed: seed,
@@ -295,13 +232,13 @@ export function gameReducer(state: GameState, action: Action): GameState {
           lastFaceoffResult: null,
         };
       }
-      return {
+      // Any other battle used the activation's action.
+      return completeActivation({
         ...state,
-        phase: 'move',
         lastOutcome: null,
         lastShotSaveResult: null,
         lastFaceoffResult: null,
-      };
+      });
     }
 
     default:

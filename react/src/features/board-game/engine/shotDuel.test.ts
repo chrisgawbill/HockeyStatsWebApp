@@ -181,7 +181,6 @@ describe('createShotDuel (CPU shooter)', () => {
       ...state,
       phase: 'move',
       activeTeam: 'cpu',
-      mp: 3,
       skaters,
       puck: { kind: 'carried', skaterId: 'cpu-C' },
     };

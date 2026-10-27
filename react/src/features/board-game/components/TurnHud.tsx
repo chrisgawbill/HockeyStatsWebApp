@@ -7,13 +7,15 @@ export interface TurnHudProps {
   activeTeam: TeamId;
   length: GameLength;
   possession: string;
-  mp: number;
+  shift: number;
+  activationsLeft: Record<TeamId, number>;
+  stepsLeft: number;
   canPass: boolean;
   canShoot: boolean;
   canEnd: boolean;
   onPass: () => void;
   onShoot: () => void;
-  onEndTurn: () => void;
+  onEndActivation: () => void;
 }
 
 const LENGTH_LABEL: Record<GameLength, string> = {
@@ -21,18 +23,20 @@ const LENGTH_LABEL: Record<GameLength, string> = {
   long: 'Long game',
 };
 
-/** Whose turn it is, the game length, MP pips, and the Pass / Shoot / End Turn actions. */
+/** Whose activation it is, the shift and activations left, tiles-left pips, and the Pass / Shoot / End activation actions. */
 export default function TurnHud({
   activeTeam,
   length,
   possession,
-  mp,
+  shift,
+  activationsLeft,
+  stepsLeft,
   canPass,
   canShoot,
   canEnd,
   onPass,
   onShoot,
-  onEndTurn,
+  onEndActivation,
 }: TurnHudProps) {
   return (
     <div className={styles.hud}>
@@ -40,13 +44,17 @@ export default function TurnHud({
         {TEAM_NAME[activeTeam]}&apos;s turn
       </span>
       <span className={styles.lengthLabel}>{LENGTH_LABEL[length]}</span>
+      <span className={styles.shiftLabel}>
+        Shift {shift} · activations left: {TEAM_NAME.user}{' '}
+        {activationsLeft.user}, {TEAM_NAME.cpu} {activationsLeft.cpu}
+      </span>
       <span className={styles.possession}>{possession}</span>
       <div
         className={styles.pips}
         role="img"
-        aria-label={`${mp} movement points left`}
+        aria-label={`${stepsLeft} tiles left this activation`}
       >
-        {Array.from({ length: Math.max(mp, 0) }, (_, i) => (
+        {Array.from({ length: Math.max(stepsLeft, 0) }, (_, i) => (
           <span key={i} className={styles.pip} />
         ))}
       </div>
@@ -57,8 +65,12 @@ export default function TurnHud({
         <GameButton onClick={onShoot} disabled={!canShoot}>
           Shoot
         </GameButton>
-        <GameButton onClick={onEndTurn} disabled={!canEnd} variant="primary">
-          End Turn
+        <GameButton
+          onClick={onEndActivation}
+          disabled={!canEnd}
+          variant="primary"
+        >
+          End activation
         </GameButton>
       </div>
     </div>

@@ -1,4 +1,3 @@
-import { CPU_TURN_ACTION_CAP } from '@/features/board-game/data/balance';
 import { chooseActionFor } from '@/features/board-game/ai/cpuBoardAgent';
 import { planCards } from '@/features/board-game/engine/cpuDuelPolicy';
 import { pickBestFaceoffCard } from '@/features/board-game/engine/faceoffDuel';
@@ -15,15 +14,16 @@ import type {
 
 export interface AutoplayResult {
   finalState: GameState;
-  /** The state.turn value at the end of the game (or when the turn cap was hit). */
-  turns: number;
-  /** The largest actionsThisTurn seen over the whole game, for cap-safety assertions. */
-  maxActionsInATurn: number;
+  /** The state.shift value at the end of the game (or when the shift cap was hit). */
+  shifts: number;
   /** How many times the §3 whistle (boxed-in carrier) reset the board this game. */
   whistles: number;
   /** Every duel outcome resolved this game, in order, for balance breakdowns. */
   duelOutcomes: DuelOutcome[];
 }
+
+/** Generous per-shift step budget: six activations of a few moves plus duel steps. */
+const STEP_BUDGET_PER_SHIFT = 100;
 
 function stepDuel(state: GameState): GameState {
   const plan = planCards(state, 'user');
@@ -79,7 +79,6 @@ function step(state: GameState): GameState {
       return stepDuel(state);
     case 'duelResult':
       return gameReducer(state, { type: 'DISMISS_DUEL_RESULT' });
-    case 'roll':
     case 'move':
       return gameReducer(state, chooseActionFor(state, state.activeTeam));
     default:
@@ -89,23 +88,22 @@ function step(state: GameState): GameState {
 
 /**
  * Plays a full seeded game headlessly, both sides driven by `chooseActionFor`.
- * Used for balance sims and their tests. Stops early past `maxTurns` or a
+ * Used for balance sims and their tests. Stops early past `maxShifts` or a
  * generous overall step budget, in case a bug causes a true stall.
  */
 export function playHeadlessGame(
   seed: number,
   length: GameLength,
-  maxTurns = 400,
+  maxShifts = 200,
 ): AutoplayResult {
   let state = createInitialState(seed, length);
-  let maxActionsInATurn = 0;
   let whistles = 0;
   const duelOutcomes: DuelOutcome[] = [];
-  const maxSteps = maxTurns * (CPU_TURN_ACTION_CAP + 10);
+  const maxSteps = maxShifts * STEP_BUDGET_PER_SHIFT;
 
   for (
     let i = 0;
-    i < maxSteps && state.phase !== 'gameOver' && state.turn <= maxTurns;
+    i < maxSteps && state.phase !== 'gameOver' && state.shift <= maxShifts;
     i++
   ) {
     const wasWhistle = state.whistle;
@@ -115,14 +113,11 @@ export function playHeadlessGame(
     if (state.lastOutcome && state.lastOutcome !== previousOutcome) {
       duelOutcomes.push(state.lastOutcome);
     }
-    if (state.actionsThisTurn > maxActionsInATurn)
-      maxActionsInATurn = state.actionsThisTurn;
   }
 
   return {
     finalState: state,
-    turns: state.turn,
-    maxActionsInATurn,
+    shifts: state.shift,
     whistles,
     duelOutcomes,
   };

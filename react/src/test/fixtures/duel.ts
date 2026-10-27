@@ -15,7 +15,7 @@ export function makeSkater(team: TeamId, role: Role): Skater {
     team,
     role,
     pos: FORMATIONS[team][role],
-    stunnedUntilTurn: null,
+    stunned: false,
   };
 }
 export function makeState(overrides: Partial<GameState> = {}): GameState {
