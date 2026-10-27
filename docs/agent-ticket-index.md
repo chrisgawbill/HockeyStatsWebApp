@@ -66,7 +66,7 @@ and table row in sync when moving a ticket between states.
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | ACTIVE — implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`1b53b69`); 160 API tests pass; checked on real Postgres. Pending: merge, pilot player ID check, Product Owner acceptance. Not run: deploy check. |
+| [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | ACTIVE — merged to HockeyStatsAPI `main` (`bb084dd`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here); 160 API tests pass; checked on real Postgres. Pending: pilot player ID check, Product Owner acceptance. Not run: deploy check. |
 
 ### Not started tickets (14)
 
@@ -441,8 +441,8 @@ Quest and later site-wide consumers.
 
 ## API-ON2-02 — Rink Quest team and player profiles
 
-**Status:** ACTIVE — implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd`
-(`1b53b69`). Pending: merge, pilot player ID check, Product Owner acceptance.
+**Status:** ACTIVE — merged to HockeyStatsAPI `main` (`bb084dd`) 2026-10-27.
+Pending: deploy check, pilot player ID check, Product Owner acceptance.
 
 **Goal:** Link reviewed Rink Quest identities to canonical teams and players
 without duplicating factual records.
