@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (26)
+### Completed tickets (27)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -53,8 +53,9 @@ and table row in sync when moving a ticket between states.
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
 | [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
 | [x] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | DONE — Spotter passed and the Product Owner accepted 2026-10-27; merged to `main`. Follow-ups: add `qa/game-shots.spec.mjs` to Spotter's config; check against real games once API-PBP-01 deploys. |
+| [x] | [SCHED-STATUS-01 — Live and final states on the schedule from cached game data](#sched-status-01--live-and-final-states-on-the-schedule-from-cached-game-data) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. API and web checks pass; merged to `main` 2026-10-27 (HockeyStatsAPI `0a3e9dc`, web app `71f6a65d`). Not run: Spotter, the dev-server deploy check and a game-night check. |
 
-### In progress / awaiting acceptance (7)
+### In progress / awaiting acceptance (6)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -64,7 +65,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
 | [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. |
 | [ ] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Merged to `main` (`fff44ed`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here). Pending: deploy check, then the Product Owner checks the first Monday report with teams (2026-11-02). |
-| [ ] | [SCHED-STATUS-01 — Live and final states on the schedule from cached game data](#sched-status-01--live-and-final-states-on-the-schedule-from-cached-game-data) | ACTIVE — requested 2026-10-27; API and web checks pass; merged to `main` 2026-10-27 (HockeyStatsAPI `0a3e9dc`, which starts the Jenkins deploy, not confirmed from here; web app `71f6a65d`). Pending: Spotter run and a Product Owner check on a game night. |
 
 ### Not started tickets (16)
 
@@ -2520,7 +2520,7 @@ states unchanged, 375/1280 light/dark.
 
 ## SCHED-STATUS-01 — Live and final states on the schedule from cached game data
 
-**Status:** ACTIVE — requested by the Product Owner 2026-10-27 ("more reliably
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket; Spotter, the dev-server deploy check and a game-night check were not run. Requested by the Product Owner 2026-10-27 ("more reliably
 mark a game done in schedule view when we know the game is done via our DB …
 mark a game as live when we have in-game results"). HockeyStatsAPI + frontend.
 
