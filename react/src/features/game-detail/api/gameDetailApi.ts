@@ -3,6 +3,7 @@ import {
   GameDetailBoxscore,
   GameLanding,
 } from '@/features/game-detail/types/gameDetail';
+import { GamePlayByPlay } from '@/features/game-detail/types/playByPlay';
 
 /**
  * Single-game endpoints. `GetGameDetails` (boxscore) is also used by the
@@ -14,4 +15,8 @@ export function GetGameLanding(gameID: number): Promise<GameLanding> {
 /** A game's boxscore. */
 export function GetGameDetails(gameID: number): Promise<GameDetailBoxscore> {
   return get<GameDetailBoxscore>(`/schedule/${gameID}`);
+}
+/** A game's shot and goal events for the shot map and game flow (404 until the API route deploys). */
+export function GetGamePlayByPlay(gameID: number): Promise<GamePlayByPlay> {
+  return get<GamePlayByPlay>(`/schedule/playbyplay/${gameID}`);
 }

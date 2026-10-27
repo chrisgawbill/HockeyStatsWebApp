@@ -84,7 +84,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-11 — Physical hand and battle stage](#on2-11--physical-hand-and-battle-stage) | IDEA |
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
-| [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | ACTIVE — started 2026-10-27; mockups at kickoff, awaiting Product Owner confirmation before implementation. |
+| [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | ACTIVE — kickoff confirmed and implemented 2026-10-27 on `ccr-54dd4737-q7e2xd`; awaiting Spotter and Product Owner review of screenshots and real games. |
 
 ## Delivery contract for every ticket
 
@@ -143,7 +143,7 @@ necessary for DONE.
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
-| GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. Started 2026-10-27; scope adds a Player filter on the shot map (see block). Kickoff mockups pending confirmation. |
+| GAME-SHOTS-01 | Decided 2026-10-27 (PM recommendations): one full rink; period/strength/player filters on the shot map only; views after Goals by period, side by side on desktop; blocked shots counted but not drawn; team colours with a both-theme fallback; Player filter added to scope (see block). Product Owner reviews screenshots and real games. |
 | WPR-02 | Decided 2026-10-26: team data frozen in the report (API-WPR-02); each team card shows the week's results and the full Team Form panel; team section below the players; headline and push gain a team line (see block). Product Owner reviews 375/1280 light/dark screenshots. |
 | API-WPR-02 | Decided with WPR-02 2026-10-26: frozen `teams[]` in new reports and a team line in the headline/push. Kickoff confirmed 2026-10-27: wording, team mute ignored in the weekly push, team-only users included, `formGames` limited to the report week (see block). |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
@@ -2118,9 +2118,9 @@ A fresh cloud session on 2026-10-26 (03:04 UTC) was also refused
 
 ## GAME-SHOTS-01 — Shot map and game flow on the game page
 
-**Status:** ACTIVE — started 2026-10-27. Kickoff mockups (375/1280,
-light/dark, a recorded-shape BOS at TOR overtime game) brought to the Product
-Owner; implementation waits for confirmation.
+**Status:** ACTIVE — kickoff confirmed and implemented 2026-10-27 on
+`ccr-54dd4737-q7e2xd`. Pending: Spotter run, Product Owner review of
+screenshots and real games on the dev server.
 
 **Scope addition (Product Owner, 2026-10-27):** the shot map gets a Player
 filter next to period and strength, built from `shooterId`/`shooterName` in
@@ -2131,6 +2131,59 @@ A season-long player shot map is out of scope.
 home always shoots toward +x and away toward -x; events without coordinates
 have null `x`/`y`; shootout attempts are not in the feed; a 404 means the route
 is not deployed or the id is unknown. No backend changes in this ticket.
+
+**Decided at kickoff (Product Owner, 2026-10-27, PM recommendations):**
+
+- **Rink:** one full rink, home attacking right; "◀ AWAY shoots / HOME shoots ▶"
+  in the neutral zone. Goals filled, shots on goal as rings, misses as ×.
+  Blocked shots are counted (totals, table, game flow) but not drawn: their
+  location is where the block happened.
+- **Filters (shot map only):** period segmented control All · 1st · 2nd · 3rd
+  (· OT, 2OT… only when played); strength select All strengths / Even / Power
+  play / Shorthanded; player select grouped by team (away first), sorted by
+  last name, built from all events. Filters combine (all must match). "All"
+  = no restriction: every period including OT, every strength including
+  events with none, both teams. On phones the period control is full width
+  with the two selects side by side below. The totals line and summary table
+  follow the filters; the game flow always shows the whole game. An empty
+  combination fades the rink with a sentence naming the filters and a Reset
+  filters button.
+- **Placement and states:** after Goals by period, before the Scoring
+  summary; side by side at ≥900px, stacked below. Live games refresh on the
+  existing game-detail polling interval (failed refresh keeps the last
+  events). Games that have not started already redirect or show the preview
+  scoreboard, so no views. A live game with no events shows "No shots yet"
+  in both. A 404 hides both views silently; other failures show an inline
+  error with Try again.
+- **Null x/y:** left off the map, counted in the game flow, totals and table,
+  with a note under the rink. (Events with a null time are left off the game
+  flow only.)
+- **Colours:** home keeps its primary (else secondary) moved into the
+  data-viz lightness band and to 3:1 on the rendered chart card; the away team
+  tries primary, secondary, then chart blue/orange, taking the first that
+  stays distinct (OKLab ΔE ≥ 15 normal, ≥ 8 protan/deutan) in both themes.
+  The pair is chosen once for both themes. About 40% of matchups keep both
+  team colours. Legends, end labels and rink sides always name the team.
+- **Accessibility:** charts are `aria-hidden`; a visible "Shots and goals by
+  period (table)" disclosure (G, SOG, attempts per team per period, plus
+  totals) is the text version and follows the filters; markers are not tab
+  stops; tooltips (marker hover/tap, flow crosshair) only repeat table values.
+
+**Implementation (2026-10-27):** `features/game-detail`: `GameShots`
+(loads via `usePlayByPlay`, picks colours), `GameFlowChart` + `GameFlowGrid`,
+`ShotMap` + `ShotMapFilters` + `ShotRink` + `RinkOutline` +
+`ShotSummaryTable`, `ChartTooltip`; helpers `shotMapHelper`,
+`gameFlowHelper`, `matchupChartColors`, `chartColorMath`, `rinkGeometry`;
+`GetGamePlayByPlay` in the feature API. `SlidingToggle` gained an optional
+`label` (accessible group name). Inline SVG, no new dependency, no backend
+change.
+
+**Verified (2026-10-27):** typecheck, format check, unit tests (65 files,
+310 tests; new: filtering incl. the player filter, flow series/timeline,
+matchup colours for all 992 pairings in both themes) and build pass.
+`react/qa/game-shots.spec.mjs` (8 tests, titles "GAME-SHOTS-01 Verify:")
+passed locally against a stand-in for the Spotter test module and a mocked
+API; Spotter has not run it yet.
 
 **Goal:** `/game/:gameId` shows where each team shot from and how the game
 swung over time.

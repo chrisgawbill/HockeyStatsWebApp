@@ -10,6 +10,8 @@ interface Props<T extends string> {
   options: [...Option<T>[]];
   value: T;
   onChange: (value: T) => void;
+  /** Accessible name for the group, such as "Period". */
+  label?: string;
 }
 
 /**
@@ -22,6 +24,7 @@ export default function SlidingToggle<T extends string>({
   options,
   value,
   onChange,
+  label,
 }: Props<T>) {
   const activeIndex = Math.max(
     0,
@@ -33,7 +36,12 @@ export default function SlidingToggle<T extends string>({
   } as CSSProperties;
 
   return (
-    <div className={styles['sliding-toggle']} role="group" style={segmentStyle}>
+    <div
+      className={styles['sliding-toggle']}
+      role="group"
+      aria-label={label}
+      style={segmentStyle}
+    >
       <div className="ds-segmented-indicator" />
       {options.map((opt) => (
         <button
