@@ -12,6 +12,7 @@ import { GetScheduledGames } from '@/features/schedule/api/scheduleApi';
 import { GetGameDetails } from '@/features/game-detail/api/gameDetailApi';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { isCompletedGameState } from '@/lib/gameStatus';
 
 interface ListOfGamesData {
   listOfGamesData: ScheduledGame[];
@@ -102,9 +103,10 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   );
 
   /**
-   * Finds completed games whose schedule entry lacks a score, fetches each game
-   * detail payload, and swaps scored copies into `listOfGamesData`. This keeps
-   * stale schedule-cache rows useful without reloading the whole season. Each
+   * Finds past games whose schedule entry lacks a score or a final state,
+   * fetches each game detail payload, and swaps updated copies into
+   * `listOfGamesData`. This keeps stale schedule-cache rows useful without
+   * reloading the whole season. Each
    * game is attempted once per season load: the state update below re-runs
    * this effect, and a game that still has no score (failed request, postponed
    * game) would otherwise be re-requested in an endless loop.
@@ -138,9 +140,10 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   }, [listOfGamesData, loadingListOfGamesData]);
 
   /**
-   * Fetches one game-detail payload and returns a ScheduledGame copy with scores
-   * filled from the detail response. Returns undefined when the detail payload is
-   * missing the team data needed to update safely.
+   * Fetches one game-detail payload and returns a ScheduledGame copy with the
+   * scores, game state and period type from the detail response. Returns
+   * undefined when the detail payload is missing the team data needed to
+   * update safely.
    */
   async function updateGame(game: ScheduledGame) {
     try {
@@ -164,11 +167,11 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
         game.isPlayoff,
         game.isPreseason,
         game.playoffRound,
-        game.periodType,
+        response.periodDescriptor?.periodType ?? game.periodType,
         game.seriesWins,
         game.topSeedTeamAbbrev,
         game.bottomSeedTeamAbbrev,
-        game.gameState,
+        response.gameState ?? game.gameState,
       );
     } catch (error) {
       console.error('Error updating game: ', error);
@@ -176,15 +179,18 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   }
 
   /**
-   * Returns true when a game is in the past and both scores are still absent.
-   * `== null` is deliberate because missing scores can arrive as null or
-   * undefined depending on which layer produced the ScheduledGame.
+   * Returns true when a game is in the past and either both scores are still
+   * absent or it is not yet marked final. `== null` is deliberate because
+   * missing scores can arrive as null or undefined depending on which layer
+   * produced the ScheduledGame.
    */
   function doesGameNeedToUpdate(game: ScheduledGame) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const isMissingScores = game.homeScore == null && game.awayScore == null;
     return (
-      game.date < today && game.homeScore == null && game.awayScore == null
+      game.date < today &&
+      (isMissingScores || !isCompletedGameState(game.gameState))
     );
   }
 

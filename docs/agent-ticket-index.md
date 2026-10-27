@@ -54,7 +54,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
 | [x] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | DONE — Spotter passed and the Product Owner accepted 2026-10-27; merged to `main`. Follow-ups: add `qa/game-shots.spec.mjs` to Spotter's config; check against real games once API-PBP-01 deploys. |
 
-### In progress / awaiting acceptance (6)
+### In progress / awaiting acceptance (7)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -64,6 +64,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
 | [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. |
 | [ ] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Merged to `main` (`fff44ed`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here). Pending: deploy check, then the Product Owner checks the first Monday report with teams (2026-11-02). |
+| [ ] | [SCHED-STATUS-01 — Live and final states on the schedule from cached game data](#sched-status-01--live-and-final-states-on-the-schedule-from-cached-game-data) | ACTIVE — requested 2026-10-27; implemented on `ccr-54dd4737-q7e2xd` in both repos; API and web checks pass. Pending: Spotter run and a Product Owner check on a game night. |
 
 ### Not started tickets (16)
 
@@ -2516,3 +2517,31 @@ reads the missing switch as off and every load re-seeds the sent ledger.
 subscribe with permission already granted, re-sync after sign-out/sign-in,
 bell on/off sets the account switch, player toggles, denied and iOS-install
 states unchanged, 375/1280 light/dark.
+
+## SCHED-STATUS-01 — Live and final states on the schedule from cached game data
+
+**Status:** ACTIVE — requested by the Product Owner 2026-10-27 ("more reliably
+mark a game done in schedule view when we know the game is done via our DB …
+mark a game as live when we have in-game results"). HockeyStatsAPI + frontend.
+
+**Problem:** `GET /schedule/` serves the season schedule from a 12-hour cache
+(refreshed 8:00, 19:00 and 23:00 UTC), so games read FUT or LIVE for hours
+after the game page, My Hockey or push dispatch already cached them live or
+final. The frontend backfill only filled scores and kept the stale state.
+
+**Decisions (PM, within the request):** no contract change. For each game in
+the season response that has started (`gameTime` passed) and is not `OFF`,
+the API reads, from the cache only (any age, never an NHL call), the game's
+`boxscore_<id>` and `landing_<id>` payloads and its teams' `team_<tri>_week_now`
+club weeks (kept fresh by After Action Report dispatch). The furthest-along
+state wins (FUT < PRE < LIVE/CRIT < FINAL < OFF, more goals on a tie); the game
+never moves backwards. Its scores and period type come with it, and the ticket
+link is dropped once it leaves FUT. Play-by-play payloads are skipped (large,
+and the game page caches the boxscore alongside them). The frontend backfill
+now also covers past games not yet final and takes `gameState` and period type
+from the boxscore it fetches. Today's games are not polled by the schedule.
+
+**Verify:** API `pnpm test` (overlay tests in `scheduleService.test.js`); web
+tsc, `pnpm test`, build, format. Spotter: a game cached final or live shows
+FINAL (F/OT, F/SO) or LIVE with its score on the day card and calendar chip
+before the next schedule refresh. Product Owner: check a real game night.
