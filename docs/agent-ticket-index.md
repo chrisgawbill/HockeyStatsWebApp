@@ -23,10 +23,11 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (33)
+### Completed tickets (34)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
+| [x] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | DONE — merged to HockeyStatsAPI `main`; Product Owner accepted 2026-10-27. Not run: deploy check. |
 | [x] | [AAR-01 — Favorite teams and After Action Report inbox](#aar-01--favorite-teams-and-after-action-report-inbox) | DONE — accepted by the Product Owner (2026-10-19) |
 | [x] | [AAR-02 — Mobile push for After Action Reports](#aar-02--mobile-push-for-after-action-reports) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and QA-verified. |
 | [x] | [API-LINES-01 — Real line combinations from shift charts](#api-lines-01--real-line-combinations-from-shift-charts) | DONE (Product Owner approved 2026-10-19) (HockeyStatsAPI) |
@@ -66,7 +67,7 @@ and table row in sync when moving a ticket between states.
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
 
-### Not started tickets (16)
+### Not started tickets (15)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -75,7 +76,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-03 — Contextual card contracts and offers](#on2-03--contextual-card-contracts-and-offers) | IDEA |
 | [ ] | [ON2-04 — Hockey card library and identity packages](#on2-04--hockey-card-library-and-identity-packages) | IDEA |
 | [ ] | [ON2-05 — Screens and Clear Crease battles](#on2-05--screens-and-clear-crease-battles) | IDEA |
-| [ ] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | IDEA — backend-owned dependency |
 | [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | IDEA — backend-owned dependency |
 | [ ] | [ON2-06 — Team playbook and featured-star integration](#on2-06--team-playbook-and-featured-star-integration) | IDEA |
 | [ ] | [ON2-07 — Daily opponent and Rivalry Night selection](#on2-07--daily-opponent-and-rivalry-night-selection) | IDEA |
@@ -389,7 +389,28 @@ build.
 
 ## API-ON2-01 — Site-wide rivalry records and contract
 
-**Status:** IDEA — backend-owned dependency
+**Status:** DONE — merged to HockeyStatsAPI `main`; Product Owner accepted
+2026-10-27 without a deploy check (none possible at the time).
+
+**Approved decisions (Product Owner, 2026-10-27):**
+
+- Table `team_rivalries` keyed by (`team_a_id`, `team_b_id`) → `teams.team_id`,
+  lower id first (one check rejects self-pairs and reversed duplicates);
+  `tier` `primary`/`secondary`, optional `display_name`, `enabled`. The seed
+  migration stubs missing `teams` rows so a fresh database satisfies the keys.
+- Read contract: `GET /rivalries` and `GET /rivalries/:triCode` →
+  `{ rivalries: [{ teams: [triCode, triCode], tier, displayName }] }`, teams
+  alphabetical; disabled pairs are never returned; a team with none gets `[]`.
+- Primary: BOS–MTL, MTL–TOR, EDM–CGY "Battle of Alberta", PIT–PHI "Battle of
+  Pennsylvania", NYR–NYI, CHI–DET, COL–DET, TOR–OTT "Battle of Ontario",
+  FLA–TBL "Battle of Florida", ANA–LAK "Freeway Face-Off", VGK–LAK.
+- Secondary: BOS–TOR, NYR–NJD "Hudson River Rivalry", WSH–PIT, MTL–OTT,
+  NYR–PHI, CHI–STL, VAN–CHI, LAK–SJS.
+
+**Verification (2026-10-27):** API tests pass (154). On a local Postgres 16,
+all migrations apply, 19 pairs seed, self and reversed inserts are rejected,
+lookup from either side matches, a disabled pair is hidden, and SEA returns
+`[]`. Not run: deploy check.
 
 **Goal:** Provide one normalized source of traditional team rivalries for Rink
 Quest and later site-wide consumers.
