@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (25)
+### Completed tickets (26)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -52,6 +52,7 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | DONE — Product Owner accepted 2026-10-25. Merged to HockeyStatsAPI `main` (`1e11b15`); tests pass; deploy not independently verified. |
 | [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
 | [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
+| [x] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | DONE — Spotter passed and the Product Owner accepted 2026-10-27; merged to `main`. Follow-ups: add `qa/game-shots.spec.mjs` to Spotter's config; check against real games once API-PBP-01 deploys. |
 
 ### In progress / awaiting acceptance (6)
 
@@ -64,7 +65,7 @@ and table row in sync when moving a ticket between states.
 | [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. |
 | [ ] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Merged to `main` (`fff44ed`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here). Pending: deploy check, then the Product Owner checks the first Monday report with teams (2026-11-02). |
 
-### Not started tickets (17)
+### Not started tickets (16)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -84,7 +85,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-11 — Physical hand and battle stage](#on2-11--physical-hand-and-battle-stage) | IDEA |
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
-| [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | ACTIVE — kickoff confirmed and implemented 2026-10-27 on `ccr-54dd4737-q7e2xd`; awaiting Spotter and Product Owner review of screenshots and real games. |
 
 ## Delivery contract for every ticket
 
@@ -143,7 +143,7 @@ necessary for DONE.
 | SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
-| GAME-SHOTS-01 | Decided 2026-10-27 (PM recommendations): one full rink; period/strength/player filters on the shot map only; views after Goals by period, side by side on desktop; blocked shots counted but not drawn; team colours with a both-theme fallback; Player filter added to scope (see block). Product Owner reviews screenshots and real games. |
+| GAME-SHOTS-01 | Decided 2026-10-27 (PM recommendations): one full rink; period/strength/player filters on the shot map only; views after Goals by period, side by side on desktop; blocked shots counted but not drawn; team colours with a both-theme fallback; Player filter added to scope (see block). Accepted by the Product Owner 2026-10-27 after Spotter passed. |
 | WPR-02 | Decided 2026-10-26: team data frozen in the report (API-WPR-02); each team card shows the week's results and the full Team Form panel; team section below the players; headline and push gain a team line (see block). Product Owner reviews 375/1280 light/dark screenshots. |
 | API-WPR-02 | Decided with WPR-02 2026-10-26: frozen `teams[]` in new reports and a team line in the headline/push. Kickoff confirmed 2026-10-27: wording, team mute ignored in the weekly push, team-only users included, `formGames` limited to the report week (see block). |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
@@ -2118,10 +2118,11 @@ A fresh cloud session on 2026-10-26 (03:04 UTC) was also refused
 
 ## GAME-SHOTS-01 — Shot map and game flow on the game page
 
-**Status:** ACTIVE — kickoff confirmed and implemented 2026-10-27 on
-`ccr-54dd4737-q7e2xd`. Spotter passed (see below). Pending: the GAME-SHOTS-01 specs in
-Spotter's config, Product Owner review of screenshots and real games on the
-dev server.
+**Status:** DONE — Spotter passed and the Product Owner accepted
+2026-10-27; merged to `main`. Follow-ups that do not block acceptance: add
+`qa/game-shots.spec.mjs` to Spotter's config so the eight specs run there;
+check real games once API-PBP-01 is deployed and checked against a recorded
+NHL payload (blocked-shot coordinates).
 
 **Scope addition (Product Owner, 2026-10-27):** the shot map gets a Player
 filter next to period and strength, built from `shooterId`/`shooterName` in
