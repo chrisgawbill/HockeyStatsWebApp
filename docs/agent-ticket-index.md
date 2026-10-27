@@ -23,7 +23,7 @@ does not claim that pending deployments or verification checks ran. On 2026-10-2
 the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (27)
+### Completed tickets (31)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -54,17 +54,17 @@ and table row in sync when moving a ticket between states.
 | [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
 | [x] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | DONE — Spotter passed and the Product Owner accepted 2026-10-27; merged to `main`. Follow-ups: add `qa/game-shots.spec.mjs` to Spotter's config; check against real games once API-PBP-01 deploys. |
 | [x] | [SCHED-STATUS-01 — Live and final states on the schedule from cached game data](#sched-status-01--live-and-final-states-on-the-schedule-from-cached-game-data) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. API and web checks pass; merged to `main` 2026-10-27 (HockeyStatsAPI `0a3e9dc`, web app `71f6a65d`). Not run: Spotter, the dev-server deploy check and a game-night check. |
+| [x] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing. Not run: the break-week check (a week without games sends nothing). |
+| [x] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. Not run: the Product Owner review of the team section with real data. |
+| [x] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Merged to `main` (`fff44ed`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here). Pending: deploy check, then the Product Owner checks the first Monday report with teams (2026-11-02). Not run: the deploy check and the first Monday report with teams (2026-11-02). |
+| [x] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) Not run: deleting the old GitHub secrets. |
 
-### In progress / awaiting acceptance (6)
+### In progress / awaiting acceptance (2)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing. |
 | [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
-| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) |
 | [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. |
-| [ ] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. |
-| [ ] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Merged to `main` (`fff44ed`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here). Pending: deploy check, then the Product Owner checks the first Monday report with teams (2026-11-02). |
 
 ### Not started tickets (16)
 
@@ -1191,7 +1191,7 @@ payload shapes, and an authenticated response-body check.
 
 ## WPR-01 — Favorite players and the weekly report (frontend)
 
-**Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing.
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the break-week check (a week without games sends nothing). Previously recorded: ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1268,7 +1268,7 @@ sends nothing.
 
 ## API-WPR-02 — Favorite teams in the weekly report (backend)
 
-**Status:** ACTIVE — started 2026-10-26, kickoff decisions recorded
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the deploy check and the first Monday report with teams (2026-11-02). Previously recorded: ACTIVE — started 2026-10-26, kickoff decisions recorded
 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`).
 
 **Goal:** New Weekly Player Reports freeze the user's favorite teams and
@@ -1341,7 +1341,7 @@ Not verifiable here: real NHL club schedule payloads (team name fields, OT/SO
 
 ## WPR-02 — Favorite teams and their form in the weekly report
 
-**Status:** ACTIVE — started 2026-10-26; mockups approved 2026-10-26; awaiting
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the Product Owner review of the team section with real data. Previously recorded: ACTIVE — started 2026-10-26; mockups approved 2026-10-26; awaiting
 Spotter and the Product Owner's screenshot review. Requested by the Product Owner 2026-10-26: "add a team
 section to weekly report with team forms (if that component from TeamPage is
 not its own component file it should be)".
@@ -2399,7 +2399,7 @@ Owner reviews the color changes in screenshots.
 
 ## API-PUSH-02 — Reliable push delivery and scheduling (backend)
 
-**Status:** ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets)
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: deleting the old GitHub secrets. Previously recorded: ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets)
 
 **Problem:** pushes depended on GitHub Actions cron (runs late, skips runs,
 disables itself after 60 quiet days) and on one send attempt: the ledger row was
