@@ -33,20 +33,11 @@ import {
 import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
-
-/**
- * The API refreshes a team's stats in its database after each of its games,
- * so an open team page re-reads them in the background while visible.
- */
-const POLL_INTERVAL_MS = 5 * 60 * 1000;
-/** Returning to the tab refreshes only if the last request is older than this. */
-const FOCUS_REFRESH_MIN_MS = 60 * 1000;
+import { useBackgroundRefresh } from '@/lib/useBackgroundRefresh';
 
 interface FetchSeasonDataOptions {
   /** Background refresh: keeps the shown data and error state if it fails. */
   silent?: boolean;
-  /** False once the team or season changed, so a stale response is dropped. */
-  isCurrent?: () => boolean;
 }
 
 interface UseTeamPageDataArgs {
@@ -83,18 +74,20 @@ export function useTeamPageData({
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const lastRequestRef = useRef(0);
+  // The team and season the page shows now, so a response for one the user
+  // has left is dropped.
+  const requestKey = `${numericId}:${triCode}:${season}`;
+  const requestKeyRef = useRef(requestKey);
+  requestKeyRef.current = requestKey;
 
   /**
    * Fetches the season-dependent team data (stats, roster, schedule, skater
    * totals, Corsi, optional zone faceoffs and goalie TOI) and stores the shaped view models.
    */
   const fetchSeasonData = useCallback(
-    async ({
-      silent = false,
-      isCurrent = () => true,
-    }: FetchSeasonDataOptions = {}) => {
-      lastRequestRef.current = Date.now();
+    async ({ silent = false }: FetchSeasonDataOptions = {}) => {
+      const isCurrent = () =>
+        requestKeyRef.current === `${numericId}:${triCode}:${season}`;
       if (!silent) setError(null);
       try {
         const [
@@ -168,30 +161,14 @@ export function useTeamPageData({
 
   useEffect(() => {
     if (!triCode) return;
-    let current = true;
-    const isCurrent = () => current;
-    const refreshSilently = () => fetchSeasonData({ silent: true, isCurrent });
+    refetchTeam();
+  }, [triCode, refetchTeam]);
 
-    setLoading(true);
-    fetchSeasonData({ isCurrent });
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') refreshSilently();
-    }, POLL_INTERVAL_MS);
-    const refreshOnReturn = () => {
-      if (
-        document.visibilityState === 'visible' &&
-        Date.now() - lastRequestRef.current > FOCUS_REFRESH_MIN_MS
-      ) {
-        refreshSilently();
-      }
-    };
-    document.addEventListener('visibilitychange', refreshOnReturn);
-    return () => {
-      current = false;
-      window.clearInterval(interval);
-      document.removeEventListener('visibilitychange', refreshOnReturn);
-    };
-  }, [triCode, fetchSeasonData]);
+  useBackgroundRefresh(
+    () => fetchSeasonData({ silent: true }),
+    requestKey,
+    Boolean(triCode),
+  );
 
   useEffect(() => {
     if (!triCode) return;
