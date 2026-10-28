@@ -1,20 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StreakData } from '@/features/board-game/data/dailyStreak';
 
-const get = vi.fn();
-const post = vi.fn();
-const put = vi.fn();
+import { get, post, put } from '@/test/fixtures/apiClient';
 
-vi.mock('@/lib/apiClient', () => ({
-  ApiError: class ApiError extends Error {
-    constructor(public readonly status: number) {
-      super();
-    }
-  },
-  get: (...args: unknown[]) => get(...args),
-  post: (...args: unknown[]) => post(...args),
-  put: (...args: unknown[]) => put(...args),
-}));
+vi.mock('@/lib/apiClient', () => import('@/test/fixtures/apiClient'));
 
 import {
   fetchRemoteStreak,

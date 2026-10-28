@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import {
   cumulativeGoalDiff,
@@ -7,25 +6,8 @@ import {
   lastN,
   rollingPointsPct,
 } from '@/lib/teamForm';
-
-function game(
-  date: string,
-  homeTeam: string,
-  awayTeam: string,
-  homeScore: number,
-  awayScore: number,
-  periodType: string | null = null,
-): ScheduledGame {
-  return {
-    date: new Date(`${date}T12:00:00`),
-    homeTeam,
-    awayTeam,
-    homeScore,
-    awayScore,
-    periodType,
-    gameState: 'FINAL',
-  } as ScheduledGame;
-}
+import { makeFormGame as game } from '@/test/fixtures/matchup';
+import { describe, expect, it } from 'vitest';
 
 describe('teamFormHelper', () => {
   const games = [

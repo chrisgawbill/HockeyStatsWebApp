@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   currentStreak,
   hasStreakBonus,
@@ -9,30 +8,11 @@ import {
   todayKey,
   type StreakData,
 } from '@/features/board-game/data/dailyStreak';
+import { makeStorage } from '@/test/fixtures/dailyStreak';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 function setDate(year: number, month: number, day: number) {
   vi.setSystemTime(new Date(year, month - 1, day, 12));
-}
-
-function makeStorage(initial: Record<string, string> = {}) {
-  const store = new Map(Object.entries(initial));
-
-  return {
-    getItem: vi.fn((key: string) => store.get(key) ?? null),
-    setItem: vi.fn((key: string, value: string) => {
-      store.set(key, value);
-    }),
-    removeItem: vi.fn((key: string) => {
-      store.delete(key);
-    }),
-    clear: vi.fn(() => {
-      store.clear();
-    }),
-    key: vi.fn((index: number) => Array.from(store.keys())[index] ?? null),
-    get length() {
-      return store.size;
-    },
-  } satisfies Storage;
 }
 
 describe('dailyStreak', () => {

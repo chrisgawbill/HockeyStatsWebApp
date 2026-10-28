@@ -1,20 +1,6 @@
+import { makeCard } from '@/test/fixtures/boardGame';
 import { describe, expect, it } from 'vitest';
 import { cardPerkBadge, cardText } from '@/features/board-game/utils/cardText';
-import type { CardDef } from '@/features/board-game/types/game';
-
-function makeCard(overrides: Partial<CardDef> = {}): CardDef {
-  return {
-    id: 'protect_puck',
-    name: 'Protect Puck',
-    cost: 1,
-    text: '5 block',
-    tags: ['block'],
-    allowedIn: 'any',
-    exhaust: false,
-    effects: [{ type: 'block', amount: 5 }],
-    ...overrides,
-  };
-}
 
 describe('cardText', () => {
   it('applies role perks only where they match, keeping draw and exhaust suffixes', () => {

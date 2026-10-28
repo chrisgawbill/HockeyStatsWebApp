@@ -1,11 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { FavoritePlayer } from '@/features/favorite-players/types/favoritePlayers';
-import type {
-  FeedBoxscore,
-  FeedGame,
-  FeedTeam,
-  MyHockeyData,
-} from '@/features/my-hockey/types/myHockey';
+import type { FeedBoxscore } from '@/features/my-hockey/types/myHockey';
 import {
   buildLastResults,
   buildMyHockeyFeed,
@@ -14,40 +8,15 @@ import {
   selectLastResult,
   selectNextGame,
 } from '@/features/my-hockey/utils/feedSelection';
+import { makeFeedGame as game } from '@/test/fixtures/feed';
+import { data, team } from '@/test/fixtures/feed';
+import { describe, expect, it } from 'vitest';
 
 const NOW = Date.parse('2026-10-21T20:00:00Z');
 const HOUR_MS = 60 * 60 * 1000;
 
-function game(overrides: Partial<FeedGame>): FeedGame {
-  return {
-    gameId: 1,
-    startTime: new Date(NOW + 3 * HOUR_MS).toISOString(),
-    gameState: 'FUT',
-    homeTeam: 'MTL',
-    awayTeam: 'BOS',
-    homeScore: null,
-    awayScore: null,
-    periodType: null,
-    period: null,
-    ...overrides,
-  };
-}
-
 function hoursFromNow(hours: number): string {
   return new Date(NOW + hours * HOUR_MS).toISOString();
-}
-
-function team(triCode: string, tier: FeedTeam['tier'] = 'fan'): FeedTeam {
-  return { triCode, tier, label: null };
-}
-
-function data(overrides: Partial<MyHockeyData>): MyHockeyData {
-  return {
-    gamesByTeam: new Map(),
-    boxscoresByGameId: new Map(),
-    seasonTotalsByPlayerId: new Map(),
-    ...overrides,
-  };
 }
 
 describe('next and last game selection', () => {

@@ -1,20 +1,10 @@
-import { describe, expect, it } from 'vitest';
 import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
 import {
   createInitialState,
   gameReducer,
 } from '@/features/board-game/engine/gameReducer';
-import type { GameState } from '@/features/board-game/types/game';
-
-function makeState(overrides: Partial<GameState> = {}): GameState {
-  return {
-    ...createInitialState(1, 'long'),
-    phase: 'move',
-    activeTeam: 'user',
-    mp: 3,
-    ...overrides,
-  };
-}
+import { makeMoveState as makeState } from '@/test/fixtures/boardScenarios';
+import { describe, expect, it } from 'vitest';
 
 describe('createInitialState', () => {
   it('sets formations, a loose center puck, the opening faceoff, and any streak bonus', () => {

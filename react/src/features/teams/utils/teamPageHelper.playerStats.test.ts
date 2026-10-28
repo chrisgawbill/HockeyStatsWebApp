@@ -1,14 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import { transformPlayerStats } from '@/features/teams/utils/teamPageHelper';
-import { SkaterSummaryContract } from '@/features/teams/types/teamPageTypes';
-
-const centerSummary = {
-  playerId: 29,
-  name: 'Nathan MacKinnon',
-  position: 'C',
-  gamesPlayed: 10,
-  faceoffWinPct: 0.52,
-} as SkaterSummaryContract;
+import { centerSummary } from '@/test/fixtures/teams';
+import { describe, expect, it } from 'vitest';
 
 describe('transformPlayerStats', () => {
   it('merges zone faceoff totals by playerId', () => {

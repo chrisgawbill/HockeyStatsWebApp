@@ -1,62 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { GameLanding } from '@/features/game-detail/types/gameDetail';
 import { getGameStoryFacts } from '@/features/game-detail/utils/gameStoryHelper';
-
-function landingWithGoals(
-  goals: Array<{
-    team: string;
-    awayScore: number;
-    homeScore: number;
-    period?: number;
-    time?: string;
-  }>,
-): GameLanding {
-  return {
-    id: 1,
-    gameState: 'FINAL',
-    summary: {
-      scoring: [
-        {
-          periodDescriptor: { number: 1, periodType: 'REG' },
-          goals: goals
-            .filter((goal) => (goal.period ?? 1) === 1)
-            .map((goal) => ({
-              playerId: 1,
-              strength: 'ev',
-              name: { default: `${goal.team} scorer` },
-              teamAbbrev: { default: goal.team },
-              headshot: '',
-              timeInPeriod: goal.time ?? '10:00',
-              goalModifier: 'none',
-              awayScore: goal.awayScore,
-              homeScore: goal.homeScore,
-              isHome: goal.team === 'HOM',
-              assists: [],
-            })),
-        },
-        {
-          periodDescriptor: { number: 2, periodType: 'REG' },
-          goals: goals
-            .filter((goal) => goal.period === 2)
-            .map((goal) => ({
-              playerId: 2,
-              strength: 'pp',
-              name: { default: `${goal.team} scorer` },
-              teamAbbrev: { default: goal.team },
-              headshot: '',
-              timeInPeriod: goal.time ?? '10:00',
-              goalModifier: 'none',
-              awayScore: goal.awayScore,
-              homeScore: goal.homeScore,
-              isHome: goal.team === 'HOM',
-              assists: [],
-            })),
-        },
-      ],
-      threeStars: [],
-    },
-  };
-}
+import { landingWithGoals } from '@/test/fixtures/matchup';
+import { describe, expect, it } from 'vitest';
 
 describe('getGameStoryFacts', () => {
   it('keeps scoring events in source order and derives ties and lead changes', () => {

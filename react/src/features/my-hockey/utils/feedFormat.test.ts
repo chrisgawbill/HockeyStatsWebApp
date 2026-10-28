@@ -1,3 +1,16 @@
+import { makeFeedGame } from '@/test/fixtures/feed';
+const game = (overrides: Partial<FeedGame>) =>
+  makeFeedGame({
+    startTime: '2026-10-19T23:00:00Z',
+    gameState: 'OFF',
+    homeTeam: 'TOR',
+    awayTeam: 'MTL',
+    homeScore: 2,
+    awayScore: 4,
+    periodType: 'REG',
+    period: 3,
+    ...overrides,
+  });
 import { describe, expect, it } from 'vitest';
 import type { FeedGame } from '@/features/my-hockey/types/myHockey';
 import {
@@ -9,21 +22,6 @@ import {
   formatSeasonLine,
   getResultLetter,
 } from '@/features/my-hockey/utils/feedFormat';
-
-function game(overrides: Partial<FeedGame>): FeedGame {
-  return {
-    gameId: 1,
-    startTime: '2026-10-19T23:00:00Z',
-    gameState: 'OFF',
-    homeTeam: 'TOR',
-    awayTeam: 'MTL',
-    homeScore: 2,
-    awayScore: 4,
-    periodType: 'REG',
-    period: 3,
-    ...overrides,
-  };
-}
 
 describe('feed formatting', () => {
   it('names the day relative to now', () => {

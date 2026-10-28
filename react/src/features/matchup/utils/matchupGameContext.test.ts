@@ -1,14 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import {
   findMatchupGame,
   parseGameIdParam,
 } from '@/features/matchup/utils/matchupGameContext';
-
-const game = (gameId: number, awayTeam: string, homeTeam: string) =>
-  ({ gameId, awayTeam, homeTeam, gameState: 'FUT' }) as ScheduledGame;
-
-const SEASON = [game(2026020123, 'NYR', 'BOS'), game(2026020124, 'TOR', 'MTL')];
+import { SEASON } from '@/test/fixtures/matchup';
+import { describe, expect, it } from 'vitest';
 
 describe('parseGameIdParam', () => {
   it('reads a numeric id, ignoring surrounding spaces', () => {

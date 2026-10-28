@@ -1,21 +1,14 @@
-import { describe, expect, it } from 'vitest';
 import {
   getGamePath,
   getMatchupPreviewPath,
   isPreviewGame,
 } from '@/lib/gamePath';
+import { makeRouteGame as game } from '@/test/fixtures/matchup';
+import { describe, expect, it } from 'vitest';
 
 const NOW = new Date('2026-10-23T22:00:00Z');
 const LATER = '2026-10-23T23:00:00Z';
 const EARLIER = '2026-10-23T21:00:00Z';
-
-const game = (gameState: string, startTime: string) => ({
-  gameId: 2026020123,
-  gameState,
-  startTime,
-  awayTeam: 'NYR',
-  homeTeam: 'BOS',
-});
 
 describe('isPreviewGame', () => {
   it('is true for future and pregame games that start later', () => {

@@ -1,10 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import { CARDS } from '@/features/board-game/data/cards';
 import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
-import {
-  createInitialState,
-  gameReducer,
-} from '@/features/board-game/engine/gameReducer';
 import {
   FACEOFF_ANTE_SIZE,
   canPickFaceoffCard,
@@ -19,27 +14,17 @@ import {
   rollBandFromAnticipation,
   rollFaceoffHeadToHead,
 } from '@/features/board-game/engine/faceoffModel';
+import {
+  createInitialState,
+  gameReducer,
+} from '@/features/board-game/engine/gameReducer';
 import { manhattan } from '@/features/board-game/engine/rink';
 import type { FaceoffBand, GameState } from '@/features/board-game/types/game';
-
-/** Fresh state right after START_FACEOFF (the opening centre-ice draw). */
-function makeFaceoffState(seed = 1): GameState {
-  const state = createInitialState(seed, 'long');
-  return gameReducer(state, { type: 'START_FACEOFF' });
-}
-
-/** Forces the user's and CPU's ante picks for a deterministic scenario. */
-function withFaceoffCards(
-  state: GameState,
-  userCardId: string,
-  cpuCardId: string,
-): GameState {
-  return {
-    ...state,
-    deck: { ...state.deck, hand: [userCardId] },
-    duel: { ...state.duel!, faceoffCpuCardId: cpuCardId },
-  };
-}
+import {
+  makeFaceoffState,
+  withFaceoffCards,
+} from '@/test/fixtures/boardScenarios';
+import { describe, expect, it } from 'vitest';
 
 /**
  * The smallest seed >= `from` where resolving `band` (the user's real,

@@ -1,3 +1,4 @@
+import { makeSkater, makeState } from '@/test/fixtures/boardGame';
 import { describe, expect, it } from 'vitest';
 import {
   isPlayable,
@@ -12,47 +13,6 @@ import {
   RINK_CORNER_RADIUS,
   UNPLAYABLE_CORNERS,
 } from '@/features/board-game/data/rink';
-import type { GameState, Skater } from '@/features/board-game/types/game';
-
-function makeSkater(overrides: Partial<Skater> = {}): Skater {
-  return {
-    id: 'user-C',
-    team: 'user',
-    role: 'C',
-    pos: { col: 5, row: 3 },
-    stunnedUntilTurn: null,
-    ...overrides,
-  };
-}
-
-function makeState(overrides: Partial<GameState> = {}): GameState {
-  return {
-    phase: 'move',
-    length: 'long',
-    bonusEnergy: 0,
-    activeTeam: 'user',
-    turn: 1,
-    mp: 3,
-    dice: null,
-    skaters: [],
-    puck: { kind: 'loose', pos: { col: 7, row: 3 } },
-    deck: { drawPile: [], hand: [], discardPile: [], exhaustPile: [] },
-    cpuDeck: { drawPile: [], hand: [], discardPile: [], exhaustPile: [] },
-    duel: null,
-    lastOutcome: null,
-    lastReveal: null,
-    lastShotSaveResult: null,
-    lastFaceoffResult: null,
-    winner: null,
-    rngSeed: 1,
-    actionsThisTurn: 0,
-    whistle: false,
-    goaliePoise: { user: 43, cpu: 43 },
-    faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
-    ...overrides,
-  };
-}
 
 describe('isPlayable', () => {
   it('rejects corners, clipped tiles, and goalie tiles; accepts the rest', () => {

@@ -1,43 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import { describeOutcome } from '@/features/board-game/utils/describeOutcome';
-import type { DuelOutcome, Skater } from '@/features/board-game/types/game';
-
-function makeSkater(overrides: Partial<Skater> = {}): Skater {
-  return {
-    id: 'user-C',
-    team: 'user',
-    role: 'C',
-    pos: { col: 5, row: 3 },
-    stunnedUntilTurn: null,
-    ...overrides,
-  };
-}
-
-const skaters: Skater[] = [
-  makeSkater({ id: 'user-C', team: 'user', role: 'C' }),
-  makeSkater({ id: 'cpu-C', team: 'cpu', role: 'C' }),
-  makeSkater({ id: 'user-LW', team: 'user', role: 'LW' }),
-  makeSkater({ id: 'cpu-LD', team: 'cpu', role: 'LD' }),
-  makeSkater({ id: 'cpu-C-checker', team: 'cpu', role: 'C' }),
-  makeSkater({ id: 'user-RW', team: 'user', role: 'RW' }),
-  makeSkater({ id: 'cpu-RD', team: 'cpu', role: 'RD' }),
-  makeSkater({ id: 'cpu-G', team: 'cpu', role: 'G' }),
-];
-
-function makeOutcome(overrides: Partial<DuelOutcome> = {}): DuelOutcome {
-  return {
-    kind: 'faceoff',
-    winner: 'attacker',
-    byKo: false,
-    attackerId: 'user-C',
-    defenderId: 'cpu-C',
-    goal: false,
-    cleanSave: false,
-    summary: 'debug summary',
-    receiverId: null,
-    ...overrides,
-  };
-}
+import { makeOutcome, skaters } from '@/test/fixtures/boardGame';
+import { describe, expect, it } from 'vitest';
 
 describe('describeOutcome', () => {
   it('describes faceoff and deke outcomes', () => {

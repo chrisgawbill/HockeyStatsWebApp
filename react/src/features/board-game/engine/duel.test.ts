@@ -1,10 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import {
-  ENERGY,
-  GOALIE_POISE_BY_LENGTH,
-} from '@/features/board-game/data/balance';
+import { ENERGY } from '@/features/board-game/data/balance';
 import { CARDS, STARTER_DECK } from '@/features/board-game/data/cards';
-import { FORMATIONS } from '@/features/board-game/data/formations';
 import { createDeck } from '@/features/board-game/engine/deck';
 import {
   canPlayCard,
@@ -18,60 +13,9 @@ import {
   unqueueCard,
 } from '@/features/board-game/engine/duel';
 import { isStunned } from '@/features/board-game/engine/rink';
-import type {
-  Deck,
-  GameState,
-  Role,
-  Skater,
-  TeamId,
-} from '@/features/board-game/types/game';
-
-function makeSkater(team: TeamId, role: Role): Skater {
-  return {
-    id: `${team}-${role}`,
-    team,
-    role,
-    pos: FORMATIONS[team][role],
-    stunnedUntilTurn: null,
-  };
-}
-
-function makeState(overrides: Partial<GameState> = {}): GameState {
-  const skaters: Skater[] = (
-    ['LW', 'C', 'RW', 'LD', 'RD', 'G'] as Role[]
-  ).flatMap((role) => [makeSkater('user', role), makeSkater('cpu', role)]);
-  const [deck, seed1] = createDeck(STARTER_DECK, 1);
-  const [cpuDeck, rngSeed] = createDeck(STARTER_DECK, seed1);
-  return {
-    phase: 'move',
-    length: 'long',
-    bonusEnergy: 0,
-    activeTeam: 'user',
-    turn: 1,
-    mp: 3,
-    dice: null,
-    skaters,
-    puck: { kind: 'carried', skaterId: 'user-C' },
-    deck,
-    cpuDeck,
-    duel: null,
-    lastOutcome: null,
-    lastReveal: null,
-    lastShotSaveResult: null,
-    lastFaceoffResult: null,
-    winner: null,
-    rngSeed,
-    actionsThisTurn: 0,
-    whistle: false,
-    goaliePoise: {
-      user: GOALIE_POISE_BY_LENGTH.long,
-      cpu: GOALIE_POISE_BY_LENGTH.long,
-    },
-    faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
-    ...overrides,
-  };
-}
+import type { Deck, GameState } from '@/features/board-game/types/game';
+import { makeSkater, makeState } from '@/test/fixtures/duel';
+import { describe, expect, it } from 'vitest';
 
 /** Drives a duel to completion by discarding the user's hand every round (a passive human). */
 function driveToCompletion(state: GameState, maxRounds = 10): GameState {

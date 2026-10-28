@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import {
   didNotPlayText,
   formatSavePct,
@@ -8,23 +7,8 @@ import {
   teamsLabel,
   weeklyReportTitle,
 } from '@/features/favorite-players/utils/weeklyReportFormat';
-import type { WeeklyReportPlayer } from '@/features/favorite-players/types/favoritePlayers';
-
-function player(overrides: Partial<WeeklyReportPlayer>): WeeklyReportPlayer {
-  return {
-    playerId: 1,
-    name: 'Connor McDavid',
-    position: 'C',
-    headshot: null,
-    team: 'EDM',
-    teams: ['EDM'],
-    played: false,
-    teamGames: 3,
-    type: 'skater',
-    stats: null,
-    ...overrides,
-  } as WeeklyReportPlayer;
-}
+import { makeWeeklyPlayer as player } from '@/test/fixtures/reports';
+import { describe, expect, it } from 'vitest';
 
 describe('weeklyReportFormat', () => {
   it('formats the approved skater and goalie lines', () => {

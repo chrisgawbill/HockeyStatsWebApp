@@ -1,30 +1,10 @@
-import { describe, expect, it } from 'vitest';
 import { CARDS } from '@/features/board-game/data/cards';
-import {
-  createInitialState,
-  gameReducer,
-} from '@/features/board-game/engine/gameReducer';
 import { cardBlockReason } from '@/features/board-game/engine/duel';
+import { gameReducer } from '@/features/board-game/engine/gameReducer';
 import { resolveShotBand } from '@/features/board-game/engine/shotDuel';
 import type { GameState, ShotBand } from '@/features/board-game/types/game';
-
-/**
- * Deterministic UI-state smoke harness for browser QA follow-ups. It keeps
- * seeded setup in one place so visual passes can target the same result,
- * disabled-card, and reset states without relying on timing or random play.
- */
-function shotState(seed: number): GameState {
-  const initial = createInitialState(seed, 'short');
-  return {
-    ...initial,
-    phase: 'move',
-    mp: 3,
-    skaters: initial.skaters.map((skater) =>
-      skater.id === 'user-C' ? { ...skater, pos: { col: 11, row: 3 } } : skater,
-    ),
-    puck: { kind: 'carried', skaterId: 'user-C' },
-  };
-}
+import { shotState } from '@/test/fixtures/boardScenarios';
+import { describe, expect, it } from 'vitest';
 
 function resolveShot(seed: number, band: ShotBand): GameState {
   let state = gameReducer(shotState(seed), { type: 'SHOOT' });

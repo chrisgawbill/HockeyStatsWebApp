@@ -9,7 +9,7 @@ import {
 } from '@/lib/favoriteCategory';
 
 describe('sortByFanTier', () => {
-  it('orders Diehard, Fan, Curious and keeps API order within a tier', () => {
+  it('sorts tiers stably without mutating the input', () => {
     const favorites = [
       { id: 'a', tier: 'curious' },
       { id: 'b', tier: 'fan' },
@@ -17,6 +17,7 @@ describe('sortByFanTier', () => {
       { id: 'd', tier: 'fan' },
       { id: 'e', tier: 'diehard' },
     ] as const;
+    const original = structuredClone(favorites);
     expect(sortByFanTier(favorites).map(({ id }) => id)).toEqual([
       'c',
       'e',
@@ -24,12 +25,7 @@ describe('sortByFanTier', () => {
       'd',
       'a',
     ]);
-  });
-
-  it('does not change the list it was given', () => {
-    const favorites = [{ tier: 'curious' }, { tier: 'diehard' }] as const;
-    sortByFanTier(favorites);
-    expect(favorites[0].tier).toBe('curious');
+    expect(favorites).toEqual(original);
   });
 });
 
@@ -54,16 +50,12 @@ describe('label length', () => {
     expect(countGraphemes('❤️')).toBe(1);
     expect(countGraphemes('👨‍👩‍👧 ok')).toBe(4);
   });
-  it('allows 24 characters and rejects 25', () => {
-    expect(isCategoryLabelTooLong('a'.repeat(24))).toBe(false);
-    expect(isCategoryLabelTooLong('a'.repeat(25))).toBe(true);
-  });
-  it('counts 24 emoji as within the limit', () => {
-    expect(isCategoryLabelTooLong('❤️'.repeat(24))).toBe(false);
-    expect(isCategoryLabelTooLong('❤️'.repeat(25))).toBe(true);
-  });
-  it('ignores surrounding spaces', () => {
-    expect(isCategoryLabelTooLong(`  ${'a'.repeat(24)}  `)).toBe(false);
+  it('enforces the trimmed 24-grapheme boundary for text and emoji', () => {
+    for (const character of ['a', '❤️']) {
+      expect(isCategoryLabelTooLong(character.repeat(24))).toBe(false);
+      expect(isCategoryLabelTooLong(character.repeat(25))).toBe(true);
+      expect(isCategoryLabelTooLong(`  ${character.repeat(24)}  `)).toBe(false);
+    }
   });
 });
 

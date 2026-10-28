@@ -1,27 +1,11 @@
+import { makeReport } from '@/test/fixtures/reports';
+const report = (gameId: number, read = false) =>
+  makeReport({ gameId, read, homeScore: 3, awayTeam: 'BOS', awayScore: 1 });
 import { describe, expect, it } from 'vitest';
-import type { AfterActionReport } from '@/features/after-action-reports/types/afterActionReport';
 import {
   alertContent,
   planAlerts,
 } from '@/features/after-action-reports/utils/browserAlerts';
-
-function report(gameId: number, read = false): AfterActionReport {
-  return {
-    gameId,
-    date: '2026-10-18',
-    gameTime: '2026-10-18T23:00:00Z',
-    homeTeam: 'TOR',
-    homeLogo: '',
-    homeScore: 3,
-    awayTeam: 'BOS',
-    awayLogo: '',
-    awayScore: 1,
-    periodType: 'REG',
-    isPlayoff: false,
-    favoriteTeams: ['TOR'],
-    read,
-  };
-}
 
 describe('planAlerts', () => {
   it('primes on first poll, then alerts only new unread reports, bounded memory', () => {

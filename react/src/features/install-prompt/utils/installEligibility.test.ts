@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import {
   INSTALL_KEYS,
   SNOOZE_MS,
@@ -6,37 +5,17 @@ import {
   isEngagedPath,
   readInstallState,
   recordVisit,
-  type InstallEnvironment,
-  type InstallState,
   type KeyValueStorage,
 } from '@/features/install-prompt/utils/installEligibility';
+import {
+  android,
+  fresh,
+  ios,
+  memoryStorage,
+} from '@/test/fixtures/installEligibility';
+import { describe, expect, it } from 'vitest';
 
 const NOW = 1_800_000_000_000;
-const fresh: InstallState = {
-  visits: 1,
-  engaged: false,
-  installed: false,
-  dismissedAt: null,
-};
-const android: InstallEnvironment = {
-  standalone: false,
-  ios: false,
-  hasInstallPrompt: true,
-};
-const ios: InstallEnvironment = {
-  standalone: false,
-  ios: true,
-  hasInstallPrompt: false,
-};
-
-function memoryStorage(): KeyValueStorage & { data: Map<string, string> } {
-  const data = new Map<string, string>();
-  return {
-    data,
-    getItem: (k) => data.get(k) ?? null,
-    setItem: (k, v) => void data.set(k, v),
-  };
-}
 
 describe('getInstallVariant', () => {
   it('shows from the second visit or once engaged', () => {

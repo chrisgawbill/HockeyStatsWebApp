@@ -1,25 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { getSeasonSeries } from '@/features/matchup/utils/seasonSeriesHelper';
-
-const game = (
-  id: number,
-  date: string,
-  homeTeam: string,
-  awayTeam: string,
-  homeScore: number | null,
-  awayScore: number | null,
-  gameState = 'OFF',
-) =>
-  ({
-    gameId: id,
-    date: new Date(date),
-    homeTeam,
-    awayTeam,
-    homeScore,
-    awayScore,
-    gameState,
-  }) as ScheduledGame;
+import { makeSeriesGame as game } from '@/test/fixtures/matchup';
+import { describe, expect, it } from 'vitest';
 
 describe('getSeasonSeries', () => {
   it('separates meetings and aggregates goals from team A perspective', () => {
