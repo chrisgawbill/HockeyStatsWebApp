@@ -133,10 +133,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch((error) => {
+        // The API is unreachable or failing, which says nothing about the
+        // session; keep the saved token so the next load can restore it.
         console.error('Failed to restore sign-in session:', error);
-        storeToken(null);
-        storeCachedProfile(null);
-        setPicture(null);
       })
       .finally(() => {
         if (!cancelled) setIsRestoringStored(false);
