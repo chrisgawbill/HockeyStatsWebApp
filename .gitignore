@@ -26,9 +26,10 @@ __pycache__/
 /react/build
 /react/dist
 
+# local assistant settings and installed skills
+/.claude/
+
 # misc
-/.claude/*
-!/.claude/skills/
 /react/.DS_Store
 /react/.env
 /react/.env.local
