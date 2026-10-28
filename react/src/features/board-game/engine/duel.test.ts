@@ -1,5 +1,6 @@
 import { ENERGY } from '@/features/board-game/data/balance';
-import { CARDS, STARTER_DECK } from '@/features/board-game/data/cards';
+import { CARDS } from '@/features/board-game/data/cards';
+import { composePlaybook } from '@/features/board-game/data/playbooks';
 import { planCards } from '@/features/board-game/engine/cpuDuelPolicy';
 import { createDeck } from '@/features/board-game/engine/deck';
 import type { Side } from '@/features/board-game/engine/duelShared';
@@ -25,7 +26,10 @@ type OrdinaryKind = 'deke' | 'check' | 'intercept';
 const ORDINARY_KINDS: OrdinaryKind[] = ['deke', 'check', 'intercept'];
 const BASIC_ACTIONS = ['shield_the_puck', 'stay_on_him'];
 
-/** The Product Owner's ON2-03 card map, written out independently of the card data so the data is checked against it. */
+/** The neutral playbook both teams start from until teams are assigned. */
+const NEUTRAL_PLAYBOOK = composePlaybook();
+
+/** The Product Owner's ON2-04 card map, written out independently of the card data so the data is checked against it. */
 const BATTLE_CARD_MAP: Record<OrdinaryKind, Record<BattleSide, string[]>> = {
   deke: {
     possession: [
@@ -33,17 +37,56 @@ const BATTLE_CARD_MAP: Record<OrdinaryKind, Record<BattleSide, string[]>> = {
       'toe_drag',
       'protect_puck',
       'stickhandle',
+      'drive_wide',
+      'cutback',
       'shield_the_puck',
     ],
-    challenger: ['poke_check', 'body_check', 'stay_on_him'],
+    challenger: [
+      'poke_check',
+      'body_check',
+      'angle_out',
+      'gap_control',
+      'stick_lift',
+      'active_stick',
+      'stay_on_him',
+    ],
   },
   check: {
-    possession: ['protect_puck', 'stickhandle', 'shield_the_puck'],
-    challenger: ['poke_check', 'body_check', 'stay_on_him'],
+    possession: [
+      'protect_puck',
+      'stickhandle',
+      'slip_the_check',
+      'brace_for_contact',
+      'shield_the_puck',
+    ],
+    challenger: [
+      'poke_check',
+      'body_check',
+      'stick_lift',
+      'pin_to_boards',
+      'finish_the_check',
+      'stay_on_him',
+    ],
   },
   intercept: {
-    possession: ['stickhandle', 'deke', 'protect_puck', 'shield_the_puck'],
-    challenger: ['poke_check', 'stay_on_him'],
+    possession: [
+      'stickhandle',
+      'deke',
+      'protect_puck',
+      'cutback',
+      'saucer_pass',
+      'quick_touch',
+      'shield_the_puck',
+    ],
+    challenger: [
+      'poke_check',
+      'angle_out',
+      'read_the_lane',
+      'active_stick',
+      'step_up',
+      'deflect_pass',
+      'stay_on_him',
+    ],
   },
 };
 
@@ -126,11 +169,25 @@ describe('createDuel', () => {
   });
 });
 
+describe('ordinary card contexts', () => {
+  it('match the Product Owner card map for every ordinary battle and side', () => {
+    for (const kind of ORDINARY_KINDS) {
+      for (const side of ['possession', 'challenger'] as BattleSide[]) {
+        const eligible = Object.values(CARDS)
+          .filter((card) => card.allowedIn[kind]?.includes(side))
+          .map((card) => card.id)
+          .sort();
+        expect(eligible).toEqual([...BATTLE_CARD_MAP[kind][side]].sort());
+      }
+    }
+  });
+});
+
 describe('filtered duel draw (BG-A13)', () => {
   const isAllowedIn = (id: string, kind: OrdinaryKind, side: Side) =>
     BATTLE_CARD_MAP[kind][battleSideFor(kind, side)].includes(id);
 
-  // BG-A15b: STARTER_DECK now carries the 6 faceoff-pool cards too (they're
+  // BG-A15b: the starter deck (now the neutral playbook) carries the 6 faceoff-pool cards too (they're
   // drawn by the faceoff ante instead, see engine/faceoffDuel.test.ts), so
   // this also guards that a faceoff-only card never leaks into a deke hand -
   // it's the same filter path a shot- or check-only card was already
@@ -177,7 +234,7 @@ describe('filtered duel draw (BG-A13)', () => {
         ...deke.deck.discardPile,
         ...deke.deck.hand,
       ];
-      expect([...remaining].sort()).toEqual([...STARTER_DECK].sort());
+      expect([...remaining].sort()).toEqual([...NEUTRAL_PLAYBOOK].sort());
     }
 
     // Is deterministic for a fixed seed.
@@ -508,12 +565,97 @@ describe('endDuelRound (simultaneous reveal)', () => {
         cpuDamageDealt: 5,
         userBlock: 0,
         cpuBlock: 0,
+        userBrokeResistance: false,
+        cpuBrokeResistance: false,
+      });
+    }
+  });
+
+  it('breaks resistance for the whole round, perk bonus included, for either side', () => {
+    /** Sets both sides' committed cards directly and reveals the round. */
+    const revealRound = (
+      state: GameState,
+      userQueue: string[],
+      cpuPlan: string[],
+    ): GameState =>
+      endDuelRound({
+        ...state,
+        deck: { ...state.deck, hand: [] },
+        cpuDeck: { ...state.cpuDeck, hand: [...cpuPlan] },
+        duel: { ...state.duel!, userQueue, cpuPlan },
+      });
+
+    // The user's Saucer Pass zeroes the CPU LD's perk-boosted Read the Lane (5 + 2) before its 4 pressure lands.
+    {
+      const pass = createDuel(
+        makeState(),
+        'intercept',
+        'user-C',
+        'cpu-LD',
+        'user-LW',
+      );
+      const next = revealRound(pass, ['saucer_pass'], ['read_the_lane']);
+      expect(next.lastReveal).toMatchObject({
+        userDamageDealt: 4,
+        cpuBlock: 0,
+        userBrokeResistance: true,
+        cpuBrokeResistance: false,
+      });
+      expect(next.duel!.defender.poise).toBe(pass.duel!.defender.poise - 4);
+
+      // Without the break, the same resistance absorbs the pressure.
+      const blocked = revealRound(pass, ['quick_touch'], ['read_the_lane']);
+      expect(blocked.lastReveal).toMatchObject({
+        userDamageDealt: 0,
+        cpuBlock: 7,
+        userBrokeResistance: false,
+      });
+    }
+
+    // The CPU's Pin to Boards breaks the user LD's perk-boosted Brace for Contact (11 + 2), and covers all its pressure.
+    {
+      const check = createDuel(makeState(), 'check', 'cpu-C', 'user-LD');
+      const next = revealRound(
+        check,
+        ['brace_for_contact'],
+        ['pin_to_boards', 'poke_check'],
+      );
+      expect(next.lastReveal).toMatchObject({
+        cpuDamageDealt: 8,
+        userBlock: 0,
+        userBrokeResistance: false,
+        cpuBrokeResistance: true,
+      });
+      expect(next.duel!.defender.poise).toBe(check.duel!.defender.poise - 8);
+    }
+
+    // When both sides break resistance, neither side's resistance stands (the LD's Pin to Boards carries its +2 perk).
+    {
+      const pass = createDuel(
+        makeState(),
+        'intercept',
+        'user-C',
+        'cpu-LD',
+        'user-LW',
+      );
+      const next = revealRound(
+        pass,
+        ['saucer_pass', 'protect_puck'],
+        ['pin_to_boards', 'read_the_lane'],
+      );
+      expect(next.lastReveal).toMatchObject({
+        userDamageDealt: 4,
+        cpuDamageDealt: 5,
+        userBlock: 0,
+        cpuBlock: 0,
+        userBrokeResistance: true,
+        cpuBrokeResistance: true,
       });
     }
   });
 
   it('a mid-round KO discards the leftover hand, keeping every card across piles', () => {
-    const [starterDeck] = createDeck(STARTER_DECK, 1);
+    const [starterDeck] = createDeck(NEUTRAL_PLAYBOOK, 1);
     const toeDragIndex = starterDeck.drawPile.indexOf('toe_drag');
     const deck: Deck = {
       drawPile: starterDeck.drawPile.filter((_, i) => i !== toeDragIndex),
@@ -541,7 +683,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
       next.deck.drawPile.length +
       next.deck.discardPile.length +
       next.deck.exhaustPile.length;
-    expect(total).toBe(STARTER_DECK.length);
+    expect(total).toBe(NEUTRAL_PLAYBOOK.length);
   });
 });
 
@@ -740,8 +882,8 @@ describe('contextual offers (ON2-03)', () => {
   it('never offers a card outside the battle/side map, always offers 3, and keeps every deck card exactly once', () => {
     for (let seed = 1; seed <= 12; seed++) {
       const thin = seed % 2 === 0;
-      const [userDeck, seed1] = createDeck(STARTER_DECK, seed);
-      const [cpuDeck, rngSeed] = createDeck(STARTER_DECK, seed1);
+      const [userDeck, seed1] = createDeck(NEUTRAL_PLAYBOOK, seed);
+      const [cpuDeck, rngSeed] = createDeck(NEUTRAL_PLAYBOOK, seed1);
       const thinned = ['deke', 'protect_puck', 'poke_check'];
       let state = makeState({
         rngSeed,
@@ -779,8 +921,10 @@ describe('contextual offers (ON2-03)', () => {
           for (const id of state.deck.hand) expect(userAllowed).toContain(id);
           for (const id of state.cpuDeck.hand) expect(cpuAllowed).toContain(id);
           for (const id of state.duel.cpuPlan) expect(cpuAllowed).toContain(id);
-          expect(deckCardIds(state.deck)).toEqual([...STARTER_DECK].sort());
-          expect(deckCardIds(state.cpuDeck)).toEqual([...STARTER_DECK].sort());
+          expect(deckCardIds(state.deck)).toEqual([...NEUTRAL_PLAYBOOK].sort());
+          expect(deckCardIds(state.cpuDeck)).toEqual(
+            [...NEUTRAL_PLAYBOOK].sort(),
+          );
 
           state = queueUserPlan(state);
           for (const id of state.deck.hand) expect(userAllowed).toContain(id);

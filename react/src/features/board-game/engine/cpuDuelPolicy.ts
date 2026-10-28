@@ -11,10 +11,16 @@ import type {
   Role,
 } from '@/features/board-game/types/game';
 
-/** Combat value of a card for `role`: its (perked) damage plus its (perked) block. Draw effects add none. */
+/**
+ * Combat value the CPU gives breaking resistance: about what the budget
+ * guide prices it at, since the opponent's resistance is unknown when planning.
+ */
+const BREAK_RESISTANCE_VALUE = 3;
+
+/** Combat value of a card for `role`: its (perked) damage plus its (perked) block, plus a flat value for breaking resistance. Draw effects add none. */
 function cardValue(card: CardDef, role: Role): number {
-  const { damage, block } = cardEffects(card, role);
-  return damage + block;
+  const { damage, block, breaksResistance } = cardEffects(card, role);
+  return damage + block + (breaksResistance ? BREAK_RESISTANCE_VALUE : 0);
 }
 
 function cardCategory(card: CardDef): 'block' | 'damage' | 'other' {

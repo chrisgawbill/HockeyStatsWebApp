@@ -3,7 +3,7 @@ import {
   GOALIE_POISE_BY_LENGTH,
   MOVE_ALLOWANCE,
 } from '@/features/board-game/data/balance';
-import { STARTER_DECK } from '@/features/board-game/data/cards';
+import { composePlaybook } from '@/features/board-game/data/playbooks';
 import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
 import {
   handleCheck,
@@ -47,8 +47,8 @@ export function createInitialState(
   length: GameLength,
   bonusEnergy = 0,
 ): GameState {
-  const [deck, seed1] = createDeck(STARTER_DECK, seed);
-  const [cpuDeck, rngSeed] = createDeck(STARTER_DECK, seed1);
+  const [deck, seed1] = createDeck(composePlaybook(), seed);
+  const [cpuDeck, rngSeed] = createDeck(composePlaybook(), seed1);
 
   return {
     phase: 'faceoff',

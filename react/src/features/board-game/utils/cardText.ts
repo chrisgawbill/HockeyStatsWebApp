@@ -4,7 +4,7 @@ import {
 } from '@/features/board-game/engine/duelShared';
 import type { CardDef, Role } from '@/features/board-game/types/game';
 
-/** Card display text: `card.text` with no role, else effects recomputed for `role`'s perks (e.g. an LD's block card shows the bonus amount). */
+/** Card display text: `card.text` with no role, else effects recomputed for `role`'s perks (e.g. an LD's resistance card shows the bonus amount). */
 export function cardText(card: CardDef, role?: Role): string {
   if (!role) return card.text;
   const totals = cardEffects(card, role);
@@ -13,9 +13,10 @@ export function cardText(card: CardDef, role?: Role): string {
   for (const effect of card.effects) {
     if (seen.has(effect.type)) continue;
     seen.add(effect.type);
-    if (effect.type === 'damage') parts.push(`${totals.damage} damage`);
-    else if (effect.type === 'block') parts.push(`${totals.block} block`);
-    else parts.push(`draw ${totals.draw}`);
+    if (effect.type === 'damage') parts.push(`${totals.damage} pressure`);
+    else if (effect.type === 'block') parts.push(`${totals.block} resistance`);
+    else if (effect.type === 'draw') parts.push(`draw ${totals.draw}`);
+    else parts.push('breaks resistance');
   }
   if (card.exhaust) parts.push('exhaust');
   return parts.join(', ');

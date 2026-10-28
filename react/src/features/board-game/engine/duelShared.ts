@@ -151,30 +151,37 @@ export function applyDamage(target: Duelist, amount: number): Duelist {
   };
 }
 
+/** What one card, or a whole queue, does in a round: perked damage/block, draws, and whether it breaks the opponent's resistance. */
+export interface CardEffectTotals {
+  damage: number;
+  block: number;
+  draw: number;
+  breaksResistance: boolean;
+}
+
 /** A card's total damage/block/draw for `role`, perks included. The one effect-math path every caller composes from. */
-export function cardEffects(
-  card: CardDef,
-  role: Role,
-): { damage: number; block: number; draw: number } {
+export function cardEffects(card: CardDef, role: Role): CardEffectTotals {
   let damage = 0;
   let block = 0;
   let draw = 0;
+  let breaksResistance = false;
   for (const effect of card.effects) {
     if (effect.type === 'damage')
       damage += effect.amount + perkBonus(role, card.tags, 'damage');
     else if (effect.type === 'block')
       block += effect.amount + perkBonus(role, card.tags, 'block');
     else if (effect.type === 'draw') draw += effect.amount;
+    else breaksResistance = true;
   }
-  return { damage, block, draw };
+  return { damage, block, draw, breaksResistance };
 }
 
 /** Sums `cardEffects` over several cards (e.g. a whole queue or plan). Unknown ids are skipped. */
 export function totalCardEffects(
   cardIds: string[],
   role: Role,
-): { damage: number; block: number; draw: number } {
-  return cardIds.reduce(
+): CardEffectTotals {
+  return cardIds.reduce<CardEffectTotals>(
     (totals, id) => {
       const card = CARDS[id];
       if (!card) return totals;
@@ -183,10 +190,22 @@ export function totalCardEffects(
         damage: totals.damage + e.damage,
         block: totals.block + e.block,
         draw: totals.draw + e.draw,
+        breaksResistance: totals.breaksResistance || e.breaksResistance,
       };
     },
-    { damage: 0, block: 0, draw: 0 },
+    { damage: 0, block: 0, draw: 0, breaksResistance: false },
   );
+}
+
+/**
+ * The resistance `defending` keeps this round: its played block, or zero
+ * when `opposing` played a card that breaks resistance.
+ */
+export function standingResistance(
+  defending: CardEffectTotals,
+  opposing: CardEffectTotals,
+): number {
+  return opposing.breaksResistance ? 0 : defending.block;
 }
 
 /** Moves each of `cardIds` (already out of hand) to exhaust or discard; basic actions simply vanish. */

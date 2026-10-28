@@ -42,12 +42,25 @@ export type CardContexts = Partial<Record<DuelKind, readonly BattleSide[]>>;
 export type CardBlockReason =
   'energy' | 'shotOnly' | 'faceoffOnly' | 'otherBattle' | 'otherSide';
 
+/**
+ * A team's playbook identity package (API-ON2-02 system keys): forecheck,
+ * speed & transition, puck possession, heavy game, defensive structure.
+ */
+export type Identity =
+  'forecheck' | 'transition' | 'possession' | 'physical' | 'structure';
+
 export type CardTag = 'skill' | 'block' | 'shot' | 'check' | 'faceoff';
 
+/**
+ * A card's round effect. Card copy calls `damage` pressure and `block`
+ * resistance. `breakResistance` zeroes the opponent's resistance for the
+ * whole round before any pressure lands.
+ */
 export type CardEffect =
   | { type: 'damage'; amount: number }
   | { type: 'block'; amount: number }
-  | { type: 'draw'; amount: number };
+  | { type: 'draw'; amount: number }
+  | { type: 'breakResistance' };
 
 /**
  * Faceoff-ante outcome effect: fires at contest-resolution time, not during a
@@ -265,8 +278,12 @@ export interface RevealResult {
   cpuCards: string[];
   userDamageDealt: number;
   cpuDamageDealt: number;
+  /** Resistance that stood this round: zero when the opponent broke it. */
   userBlock: number;
   cpuBlock: number;
+  /** True when that side played a card that breaks resistance. */
+  userBrokeResistance: boolean;
+  cpuBrokeResistance: boolean;
 }
 
 export interface DuelOutcome {

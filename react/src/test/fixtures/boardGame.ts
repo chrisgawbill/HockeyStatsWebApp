@@ -52,7 +52,7 @@ export function makeCard(overrides: Partial<CardDef> = {}): CardDef {
     id: 'protect_puck',
     name: 'Protect Puck',
     cost: 1,
-    text: '5 block',
+    text: '5 resistance',
     tags: ['block'],
     allowedIn: { deke: ['possession'], check: ['possession'] },
     exhaust: false,

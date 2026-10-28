@@ -45,6 +45,13 @@ describe('planCpuCards', () => {
       // Both poke checks first, then body_check no longer fits the remaining energy.
       expect(plan).toEqual(['poke_check', 'poke_check']);
     }
+
+    // Values breaking resistance: pin_to_boards (3 pressure + 3 for the break) outranks poke_check's 5.
+    {
+      const duel = makeCpuCheckingDuel();
+      const state = makeState(['poke_check', 'pin_to_boards'], duel);
+      expect(planCpuCards(state)).toEqual(['pin_to_boards', 'poke_check']);
+    }
   });
 
   it('prefers block when the user could KO again, else damage first', () => {

@@ -14,7 +14,12 @@ export interface RevealPanelProps {
   cpuRole?: Role;
 }
 
-/** Simultaneous-reveal result for one duel round: both hands face-up plus damage/block. Dumb, read-only. */
+/** How one side's resistance fared, e.g. `resisted 5` or `resistance broken`. */
+function describeResistance(resistance: number, wasBroken: boolean): string {
+  return wasBroken ? 'resistance broken' : `resisted ${resistance}`;
+}
+
+/** Simultaneous-reveal result for one duel round: both hands face-up plus pressure/resistance. Dumb, read-only. */
 export default function RevealPanel({
   reveal,
   userRole,
@@ -52,9 +57,10 @@ export default function RevealPanel({
         </div>
       </div>
       <p className={styles.summary}>
-        You dealt {reveal.userDamageDealt} ({TEAM_NAME.cpu} blocked{' '}
-        {reveal.cpuBlock}) · {TEAM_NAME.cpu} dealt {reveal.cpuDamageDealt} (you
-        blocked {reveal.userBlock})
+        You dealt {reveal.userDamageDealt} ({TEAM_NAME.cpu}{' '}
+        {describeResistance(reveal.cpuBlock, reveal.userBrokeResistance)}) ·{' '}
+        {TEAM_NAME.cpu} dealt {reveal.cpuDamageDealt} (you{' '}
+        {describeResistance(reveal.userBlock, reveal.cpuBrokeResistance)})
       </p>
     </div>
   );

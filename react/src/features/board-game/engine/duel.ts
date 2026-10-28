@@ -18,6 +18,7 @@ import {
   removeIdsFromHand,
   ruleBlockReason,
   settleCards,
+  standingResistance,
   totalCardEffects,
   type Side,
 } from '@/features/board-game/engine/duelShared';
@@ -240,7 +241,7 @@ export function unqueueCard(state: GameState, queueIndex: number): GameState {
 
 /**
  * Ends the round with a simultaneous reveal: resets both blocks, applies
- * block then damage from both queues, settles and discards both hands,
+ * block (zeroed by an opposing breaks-resistance card) then damage from both queues, settles and discards both hands,
  * records `lastReveal`, then resolves a KO, a timeout, or the next round.
  */
 export function endDuelRound(state: GameState): GameState {
@@ -271,10 +272,10 @@ export function endDuelRound(state: GameState): GameState {
     seed = nextSeed;
   }
 
-  let userDuelist = { ...duel[userSide], block: userTotals.block };
-  let cpuDuelist = { ...duel[cpuSide], block: cpuTotals.block };
-  const userBlockBeforeDamage = userDuelist.block;
-  const cpuBlockBeforeDamage = cpuDuelist.block;
+  const userBlockBeforeDamage = standingResistance(userTotals, cpuTotals);
+  const cpuBlockBeforeDamage = standingResistance(cpuTotals, userTotals);
+  let userDuelist = { ...duel[userSide], block: userBlockBeforeDamage };
+  let cpuDuelist = { ...duel[cpuSide], block: cpuBlockBeforeDamage };
 
   cpuDuelist = applyDamage(cpuDuelist, userTotals.damage);
   userDuelist = applyDamage(userDuelist, cpuTotals.damage);
@@ -293,8 +294,10 @@ export function endDuelRound(state: GameState): GameState {
     cpuCards: duel.cpuPlan,
     userDamageDealt,
     cpuDamageDealt,
-    userBlock: userTotals.block,
-    cpuBlock: cpuTotals.block,
+    userBlock: userBlockBeforeDamage,
+    cpuBlock: cpuBlockBeforeDamage,
+    userBrokeResistance: userTotals.breaksResistance,
+    cpuBrokeResistance: cpuTotals.breaksResistance,
   };
 
   const roundDuel: DuelState = {

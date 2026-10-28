@@ -63,5 +63,7 @@ export function makeReveal(userDamageDealt: number): RevealResult {
     cpuDamageDealt: 0,
     userBlock: 0,
     cpuBlock: 0,
+    userBrokeResistance: false,
+    cpuBrokeResistance: false,
   };
 }
