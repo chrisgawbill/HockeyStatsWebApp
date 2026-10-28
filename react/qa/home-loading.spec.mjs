@@ -96,9 +96,11 @@ async function expectIntroAndUpNext(page) {
 }
 
 test.describe('Home sections load and fail on their own', () => {
-  test('HOME-LOAD-01 Verify: failed skater leaders retry alone while the rest of home shows', async ({
+  test('HOME-LOAD-01 Verify: failed skater leaders retry alone while the rest of home shows @critical', async ({
     page,
   }) => {
+    const pageErrors = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
     const skaters = await failEndpoint(page, ENDPOINTS.skaters.pattern);
     await page.goto('./');
 
@@ -116,12 +118,18 @@ test.describe('Home sections load and fail on their own', () => {
     if (isPhone(page)) {
       await page.getByRole('button', { name: 'Skaters', exact: true }).click();
     }
+    const retry = error.getByRole('button', { name: 'Try again' });
+    await expect(retry).toBeEnabled();
     skaters.recover();
-    await error.getByRole('button', { name: 'Try again' }).click();
+    await retry.click();
     await expect(
       leaderList(page, 'skaters').getByRole('listitem').first(),
     ).toBeVisible();
     await expect(error).toHaveCount(0);
+    await expect(
+      sectionLoading(page, ENDPOINTS.skaters.loadingText),
+    ).toHaveCount(0);
+    expect(pageErrors).toEqual([]);
   });
 
   test('HOME-LOAD-01 Verify: failed goalie leaders retry alone while skaters still show', async ({

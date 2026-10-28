@@ -45,3 +45,70 @@ above excludes that fixture from the baseline, matching its new home under
 Unit tests, coverage, typecheck, build, and format check passed. The changed
 Spotter spec and its shared fixture passed Node syntax checks; browser execution
 remains Spotter's responsibility and was not run for this test-only refactor.
+
+## Spotter integration
+
+After updating to `origin/main` (`32bbc7e1`), the combined suite has 305 tests.
+The coverage thresholds in `vite.config.ts` use that measured baseline:
+87.84% statements, 80.60% branches, 90.54% functions, and 88.86% lines.
+These still measure imported production modules; they are not whole-app or
+browser coverage. `pnpm test:coverage` fails when a metric drops below its floor.
+
+Spotter owns the machine-local project configuration. Apply these entries to
+`Spotter/projects/hockeystats-webapp.yml`, retaining the other checks and web
+settings:
+
+```yaml
+checks:
+  - name: unit-tests
+    run: pnpm exec vitest run --coverage --reporter=json --outputFile={output}
+    repro: pnpm test:coverage
+    parser: vitest
+coverage:
+  required: [typecheck, unit-tests, format, specs]
+  minSpecs: 106
+web:
+  specs:
+    files: ['qa/*.spec.mjs', 'qa/*.journey.mjs']
+    workers: 2
+```
+
+The globs discover all seven current spec files (106 tests in one browser),
+including the weekly-report spec that exists on current main. They avoid
+stale explicit lists when another spec is added. Update `minSpecs` when
+intentionally consolidating or adding browser scenarios. Spotter's low level
+uses its `@critical` selection and intentionally drops the full-suite minimum.
+
+Home-loading already tests recovery of skaters, goalies, and standings, so
+there is no additional duplicate recovery journey. The skater case is now
+critical and checks that Retry is enabled, loading clears, content returns,
+and no uncaught page errors occur. Normal runs still execute all six home
+loading cases. Unit tests retain retry timing and error-classification details;
+browser tests verify the user can recover through the rendered controls.
+
+To run from Spotter after the branch is pushed:
+
+```sh
+bin/spotter run hockeystats-webapp --ref feature/spotter-test-integration
+```
+
+Spotter reports a nonzero Vitest coverage exit as a failed check even if every
+test passed. This was verified by temporarily overriding the line threshold to
+100% in the command (without changing the committed configuration).
+
+### Verification after updating main (2026-10-28)
+
+- Unit coverage, typecheck, build, and format passed (305 unit tests).
+- Focused Spotter run `qa-test-integration/20261028-033312-working-tree-7c5d7f6c`
+  passed all 106 browser specs and both home/team desktop visits, with the
+  minimum of 106 enforced. Accessibility, keyboard sweep, generic fault visits,
+  rules, and baseline comparison were outside that focused run.
+- The real `hockeystats-webapp` low run
+  `20261028-033430-working-tree-b84b1670` completed both critical specs and
+  home/matchup phone visits. It passed with one advisory keyboard finding;
+  low intentionally excludes the full browser matrix and full-suite minimum.
+- Initial browser verification exposed two missing recordings introduced by
+  newer main: `GET /player/stats/version` and `GET /team/schedule/TOR`. Both
+  were captured from the local API and added to Spotter's machine-local fixture
+  map without changing existing responses or its frozen clock. The second run
+  passed; do not suppress missing-response assertions when updating fixtures.
