@@ -46,6 +46,25 @@ Unit tests, coverage, typecheck, build, and format check passed. The changed
 Spotter spec and its shared fixture passed Node syntax checks; browser execution
 remains Spotter's responsibility and was not run for this test-only refactor.
 
+## Follow-up review (2026-10-28)
+
+Reviewed all 65 non-Spotter unit test files and shared fixtures. The suite now
+has **304 cases**, down from 305, with all files retained. The redundant
+all-undefined `listAvailableLeaders` case is covered alongside the existing
+filter/order case, including both undefined-only and empty inputs. Existing
+shared builders already cover the repeated player, team, report, feed, matchup,
+and board-game data; the remaining local fixtures use distinct frozen report
+contracts or browser harnesses, so they stayed local. The shared report,
+play-by-play, draft-lottery, and storage builders now also hold the repeated
+domain defaults previously local to individual tests. Scenario-specific time,
+randomness, and browser-worker harnesses remain with their assertions. No
+Spotter artifact changed.
+
+Coverage is unchanged from the 305-case baseline: statements 2341/2665
+(87.84%), branches 1475/1830 (80.60%), functions 661/730 (90.54%), and lines
+2083/2344 (88.86%). Unit tests, coverage, typecheck, format check, and build
+passed.
+
 ## Spotter integration
 
 After updating to `origin/main` (`32bbc7e1`), the combined suite has 305 tests.

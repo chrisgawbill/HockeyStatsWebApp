@@ -1,18 +1,5 @@
-import { makeFeedGame } from '@/test/fixtures/feed';
-const game = (overrides: Partial<FeedGame>) =>
-  makeFeedGame({
-    startTime: '2026-10-19T23:00:00Z',
-    gameState: 'OFF',
-    homeTeam: 'TOR',
-    awayTeam: 'MTL',
-    homeScore: 2,
-    awayScore: 4,
-    periodType: 'REG',
-    period: 3,
-    ...overrides,
-  });
+import { makeFinalFeedGame as game } from '@/test/fixtures/feed';
 import { describe, expect, it } from 'vitest';
-import type { FeedGame } from '@/features/my-hockey/types/myHockey';
 import {
   describeMatchup,
   formatGameDay,

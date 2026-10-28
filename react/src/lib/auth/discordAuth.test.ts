@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { makeStorage } from '@/test/fixtures/storage';
 
 const discordSignIn = vi.fn();
 
@@ -23,21 +24,6 @@ import {
 const PKCE_VERIFIER_PATTERN = /^[A-Za-z0-9\-._~]{43,128}$/;
 
 const APP_ROOT = 'https://example.com/HockeyStatsWebApp/';
-
-/** An in-memory stand-in for sessionStorage. */
-function makeStorage(): Storage {
-  const items = new Map<string, string>();
-  return {
-    get length() {
-      return items.size;
-    },
-    clear: () => items.clear(),
-    getItem: (key) => items.get(key) ?? null,
-    key: (index) => [...items.keys()][index] ?? null,
-    removeItem: (key) => void items.delete(key),
-    setItem: (key, value) => void items.set(key, String(value)),
-  };
-}
 
 /** Stubs `window` with a location at `href` and a history that records replaceState. */
 function stubPage(href: string) {

@@ -19,6 +19,20 @@ export function makeFeedGame(overrides: Partial<FeedGame>): FeedGame {
   };
 }
 
+export function makeFinalFeedGame(overrides: Partial<FeedGame> = {}): FeedGame {
+  return makeFeedGame({
+    startTime: '2026-10-19T23:00:00Z',
+    gameState: 'OFF',
+    homeTeam: 'TOR',
+    awayTeam: 'MTL',
+    homeScore: 2,
+    awayScore: 4,
+    periodType: 'REG',
+    period: 3,
+    ...overrides,
+  });
+}
+
 export function team(
   triCode: string,
   tier: FeedTeam['tier'] = 'fan',
