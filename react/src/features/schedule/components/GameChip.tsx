@@ -77,7 +77,9 @@ export default function GameChip({ game, onSelect }: GameChipProps) {
           live && styles['game-chip__meta--live'],
         )}
       >
-        {scored ? statusLabel : formatLocalTime(game.gameTime)}
+        {scored
+          ? (game.liveClock ?? statusLabel)
+          : formatLocalTime(game.gameTime)}
       </span>
     </button>
   );

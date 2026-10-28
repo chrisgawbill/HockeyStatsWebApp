@@ -10,9 +10,13 @@ import {
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { GetScheduledGames } from '@/features/schedule/api/scheduleApi';
 import { GetGameDetails } from '@/features/game-detail/api/gameDetailApi';
+import {
+  getScheduleClockLabel,
+  LIVE_POLL_INTERVAL_MS,
+} from '@/features/game-detail/utils/gameDetailHelper';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { isCompletedGameState } from '@/lib/gameStatus';
+import { isCompletedGameState, isInProgressGameState } from '@/lib/gameStatus';
 
 interface ListOfGamesData {
   listOfGamesData: ScheduledGame[];
@@ -46,6 +50,9 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   // Games whose scores were already backfilled (or attempted) for the loaded
   // season, so updatePastGames requests each game detail at most once.
   const backfilledGameIds = useRef(new Set<number>());
+  // Latest games for the live poll's interval, which outlives each render.
+  const latestGames = useRef<ScheduledGame[]>([]);
+  latestGames.current = listOfGamesData;
 
   /**
    * Fetches the full schedule for one season, converts backend contracts into
@@ -172,6 +179,7 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
         game.topSeedTeamAbbrev,
         game.bottomSeedTeamAbbrev,
         response.gameState ?? game.gameState,
+        getScheduleClockLabel(response),
       );
     } catch (error) {
       console.error('Error updating game: ', error);
@@ -212,14 +220,43 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!loadingListOfGamesData && listOfGamesData.length > 0) {
       updatePastGames();
-      fetchGamesByDate(new Date());
     }
-  }, [
-    loadingListOfGamesData,
-    listOfGamesData,
-    updatePastGames,
-    fetchGamesByDate,
-  ]);
+  }, [loadingListOfGamesData, listOfGamesData, updatePastGames]);
+
+  /**
+   * Refreshes every in-progress game's score and clock from its boxscore,
+   * right away and then every LIVE_POLL_INTERVAL_MS while the season is
+   * loaded.
+   */
+  useEffect(() => {
+    if (loadingListOfGamesData) return;
+    let cancelled = false;
+    async function refreshLiveGames() {
+      const liveGames = latestGames.current.filter((game) =>
+        isInProgressGameState(game.gameState),
+      );
+      if (liveGames.length === 0) return;
+      const updatedGames = await Promise.all(liveGames.map(updateGame));
+      if (cancelled) return;
+      const refreshedGamesById = new Map<number, ScheduledGame>();
+      for (const game of updatedGames) {
+        if (game) refreshedGamesById.set(game.gameId, game);
+      }
+      if (refreshedGamesById.size === 0) return;
+      setListOfGamesData((currentGames) =>
+        currentGames.map((game) => refreshedGamesById.get(game.gameId) ?? game),
+      );
+    }
+    refreshLiveGames();
+    const interval = window.setInterval(
+      refreshLiveGames,
+      LIVE_POLL_INTERVAL_MS,
+    );
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [loadingListOfGamesData]);
 
   return (
     <ListOfGamesContext.Provider

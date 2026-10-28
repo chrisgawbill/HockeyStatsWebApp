@@ -346,6 +346,20 @@
   margin: var(--ds-space-1) 0;
 }
 
+.game-detail-clock {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: var(--ds-radius-full);
+  padding: 4px 14px;
+  margin: var(--ds-space-1) 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .game-detail-state-chip {
   background: rgba(255, 255, 255, 0.18);
   color: white;
