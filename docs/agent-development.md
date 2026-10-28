@@ -81,6 +81,10 @@ permission to change the product.
 8. After three repair cycles, return the remaining problem and smallest required
    decision to the human before a fourth cycle.
 9. Present the result and obtain any human acceptance required by the ticket.
+10. Record decisions, verification evidence, and acceptance in the ticket branch,
+    then merge through a pull request using squash merge. Use one descriptive
+    commit on main per completed ticket (or approved standalone change), following
+    the commit rules below.
 
 Choose direct or delegated work using the delegation criteria above. Parallelize
 independent tasks only; do not let workers edit tightly coupled files
@@ -165,6 +169,25 @@ Behavior must not change: the same checks must still pass afterwards.
 Branch names describe the work (`feature/<short-topic>`). Do not mention
 Claude or any AI tool in code, comments, commit messages, or pull requests,
 and commit as the repository owner.
+
+Preserve existing main history. All future changes reach main through pull
+requests using **squash merge only**; do not push changes directly to main or
+create merge commits there. Repository merge settings should allow squash merge
+only, and branch protection should require pull requests into main.
+
+Keep implementation, fixes, ticket decisions, QA evidence, and acceptance updates
+on the work branch until the required checks and human acceptance are complete.
+Squash them into one descriptive commit per completed ticket (or approved
+standalone change). Name the squash commit for the delivered behavior and include
+the ticket ID when applicable; avoid generic branch names or administrative
+messages such as "record merge". Intermediate branch commits may remain granular
+for development and Spotter testing.
+
+If acceptance or new verification evidence arrives after a merge, record it in a
+meaningful follow-up pull request and squash that change. Do not rewrite main to
+fold it into the earlier commit, and do not create a commit solely to record that
+a merge happened. Rewriting published main history requires separate explicit
+Product Owner approval.
 
 ## Ticket states and completion
 
