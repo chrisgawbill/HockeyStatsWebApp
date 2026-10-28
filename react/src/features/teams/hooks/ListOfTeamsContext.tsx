@@ -12,7 +12,7 @@ import { GetTeamStatsById } from '@/features/teams/api/teamsApi';
 import { ConvertToListOfTeams } from '@/features/teams/utils/teamHelpers';
 import { Team } from '@/features/teams/types/team';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useBackgroundRefresh } from '@/lib/useBackgroundRefresh';
+import { useRefreshOnStatsChange } from '@/lib/statsVersion';
 
 interface ListOfTeamsData {
   listOfTeamsData: Team[];
@@ -25,8 +25,8 @@ const ListOfTeamsContext = createContext<ListOfTeamsData | null>(null);
 
 /**
  * Loads every club with its per-season stats for the selected season and
- * shares it with the team pages. While the app is visible the stats refresh in
- * the background, keeping the shown list when a refresh fails.
+ * shares it with the team pages. When the API's stored stats change
+ * they refresh in the background, keeping the shown list when a refresh fails.
  */
 function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
   const [listOfTeamsData, setListOfTeamsData] = useState<Team[]>([]);
@@ -81,7 +81,7 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     refetchListOfTeams();
   }, [refetchListOfTeams]);
 
-  useBackgroundRefresh(() => loadTeams(true), season);
+  useRefreshOnStatsChange(() => loadTeams(true));
   return (
     <ListOfTeamsContext.Provider
       value={{

@@ -37,6 +37,11 @@ function getRecent<Response>(
   return response;
 }
 
+/** Drops the reused responses, so the next calls fetch fresh data. */
+export function forgetRecentResponses() {
+  recentResponses.clear();
+}
+
 interface TeamScheduleGameDto {
   gameId: number;
   gameTime: string;
