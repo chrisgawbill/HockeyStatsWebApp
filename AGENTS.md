@@ -1,41 +1,29 @@
 # HockeyStatsWebApp Agent Entry Point
 
-Keep startup context small.
+Keep startup context small. Read in this order:
 
-1. Read `docs/agent-development.md`.
-2. Read the shared delivery contract, the selected ticket's decision-checkpoint row, and its block in `docs/agent-ticket-index.md`; do not read unrelated ticket blocks when a ticket ID is known.
-3. Search `docs/architecture.md` for ticket-relevant headings/terms and read only those sections; do not dump the whole file.
-4. Search for relevant symbols/files, then inspect the smallest useful ranges before editing.
-5. Do not preload legacy backlog/progress docs unless the compact ticket has a specific missing requirement.
+1. [Development workflow](docs/agent-development.md): authority, delegation,
+   verification, delivery, and completion reporting.
+2. The selected `docs/tickets/<ID>.md`; use the
+   [ticket index](docs/agent-ticket-index.md) only to find a ticket or dependency.
+3. For code changes, [code conventions](docs/code-conventions.md), then only
+   ticket-relevant headings in [architecture](docs/architecture.md) and designs.
+4. Search for relevant symbols and inspect the smallest useful source ranges.
 
-The human stakeholder is Product Owner and stays involved in product decisions.
-"Start <ticket>" approves that ticket only. Carry forward decisions already made;
-bring unresolved gameplay, presentation, and scope choices to the human with
-concrete options and a recommendation before implementing affected work.
-
-Workflow and model routing live in `docs/agent-development.md`: the PM owns
-scope, shared discovery, bounded dispatch, and evidence review. Use the smallest
-team appropriate to the task; pass task-specific context instead of full history.
+The human is Product Owner. Follow the workflow's decision gates and carry
+forward existing approvals. Starting a ticket authorizes only that ticket.
 
 ## Context budget
 
-Use progressive disclosure:
-- **Tier 0:** this file + selected compact ticket.
-- **Tier 1:** relevant architecture section(s) + directly named source files.
-- **Tier 2:** neighboring files/types/helpers only when an unresolved dependency requires them.
-- **Tier 3:** legacy docs/history only when a concrete missing fact cannot be found in current code/docs.
+- Tier 0: this entry point, development workflow, and selected ticket.
+- Tier 1: code conventions, relevant architecture/design sections, named sources.
+- Tier 2: neighboring files/types/helpers needed to resolve a specific uncertainty.
+- Tier 3: legacy docs/history only when current sources lack a required fact.
 
-Stay at the lowest tier that permits correct work. Do not recursively browse "for context."
+Stay at the lowest useful tier. Do not recursively browse for context, reread
+unchanged files without a verification reason, or retain successful raw logs.
+Once the implementation path is known, keep searches targeted. A requested
+documentation review may read the documents in scope.
 
-Prefer targeted search/ranges over full-file reads for large files. Do not reread unchanged files after editing unless verification exposes a reason. Do not paste or retain successful command logs; keep only the result needed for the ticket. Avoid broad repo-wide searches after the implementation path is known.
-
-Apply the delegation criteria in `docs/agent-development.md`. Small, low-risk
-changes may stay single-agent; substantial implementation may use a separate
-coding worker. Browser verification is done by Spotter, the in-house frontend
-QA: push the work to a branch for Spotter to test. Required ticket checks and
-human acceptance still apply.
-
-At completion follow `docs/agent-development.md` and report:
-- `EXECUTION: single-agent | multi-agent — <roles only if multi>`
-- `CONTEXT: targeted | expanded`
-- `EXPANSION: none | <one short reason>`
+Use the workflow's delegation criteria and task-specific worker packets.
+Completion reporting is defined there; do not duplicate it in tickets.

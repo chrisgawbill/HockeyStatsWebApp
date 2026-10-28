@@ -51,17 +51,16 @@ Backend environment variables and migrations are documented in the [HockeyStatsA
 
 ## Testing
 
-API tests run in HockeyStatsAPI; frontend tests run from `react/` with `pnpm test`. See the Testing section of [docs/architecture.md](./docs/architecture.md#testing) for what the frontend suite covers.
+API tests run in HockeyStatsAPI; frontend tests run from `react/` with `pnpm test`. See [test documentation](./react/src/test/README.md) for coverage and verification commands.
 
 ## Documentation
 
-| Document                                                                 | What it is                                                           |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| [docs/architecture.md](./docs/architecture.md)                           | How the app fits together; conventions for new code. **Read first.** |
-| [docs/phase-2-backlog.md](./docs/phase-2-backlog.md)                     | Feature roadmap with self-contained implementation prompts           |
-| [docs/phase-2-progress.md](./docs/phase-2-progress.md)                   | Working journal for the Phase 2 roadmap                              |
-| [docs/cleanup-backlog.md](./docs/cleanup-backlog.md)                     | Refactor, hygiene, and hardening tickets                             |
-| [docs/frontend-backlog.md](./docs/frontend-backlog.md)                   | Material Design 3 alignment tickets                                  |
-| [docs/exciting-features-backlog.md](./docs/exciting-features-backlog.md) | Differentiating feature ideas (mostly zero-fetch, client-side)       |
-| [docs/board-game-design.md](./docs/board-game-design.md)                 | Rink Quest board game rules and design rationale                     |
-| [docs/board-game-notes.md](./docs/board-game-notes.md)                   | Rink Quest maintainer notes and optional Google sign-in setup         |
+| Document | Purpose |
+| --- | --- |
+| [AGENTS.md](AGENTS.md) | Agent entry point and targeted reading order. |
+| [Development workflow](docs/agent-development.md) | Decisions, delegation, verification, and delivery. |
+| [Code conventions](docs/code-conventions.md) | Naming, readability, reuse, and comments. |
+| [Ticket index](docs/agent-ticket-index.md) | Links to individual tickets and dependency overview. |
+| [Architecture](docs/architecture.md) | Current system behavior and boundaries. |
+| [Rink Quest design](docs/board-game-design.md) | Board game rules and rationale. |
+| [Opening Night 2.0 design](docs/opening-night-2-design.md) | Proposed next-generation game direction. |
