@@ -10,9 +10,7 @@ describe('listAvailableLeaders', () => {
       goals,
       points,
     ]);
-  });
-
-  it('returns an empty list when nothing has loaded', () => {
     expect(listAvailableLeaders([undefined, undefined])).toEqual([]);
+    expect(listAvailableLeaders([])).toEqual([]);
   });
 });

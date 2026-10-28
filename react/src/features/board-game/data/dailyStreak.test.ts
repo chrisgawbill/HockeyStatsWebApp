@@ -8,7 +8,7 @@ import {
   todayKey,
   type StreakData,
 } from '@/features/board-game/data/dailyStreak';
-import { makeStorage } from '@/test/fixtures/dailyStreak';
+import { makeStorage } from '@/test/fixtures/storage';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 function setDate(year: number, month: number, day: number) {

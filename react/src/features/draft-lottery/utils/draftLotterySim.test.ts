@@ -1,16 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
-  LotteryEntrant,
   simulateDraftLottery,
+  type LotteryEntrant,
 } from '@/features/draft-lottery/utils/draftLotterySim';
-
-const ODDS = [
-  18.5, 13.5, 11.5, 9.5, 8.5, 7.5, 6.5, 6, 5, 3.5, 3, 2.5, 2, 1.5, 0.5, 0.5,
-];
-const teams: LotteryEntrant[] = ODDS.map((odds, i) => ({
-  id: `T${i + 1}`,
-  odds,
-}));
+import { lotteryTeams as teams } from '@/test/fixtures/draftLottery';
 
 /** rng that returns the given values in order, then repeats the last. */
 const seq = (...values: number[]) => {

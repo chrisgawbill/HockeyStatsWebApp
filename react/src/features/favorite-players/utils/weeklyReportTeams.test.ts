@@ -7,72 +7,17 @@ import {
   formatWeekRecord,
   listReportTeams,
 } from '@/features/favorite-players/utils/weeklyReportTeams';
-import type {
-  WeeklyPlayerReport,
-  WeeklyReportFormGame,
-  WeeklyReportTeam,
-  WeeklyReportTeamGame,
-} from '@/features/favorite-players/types/favoritePlayers';
-
-function weekGame(
-  overrides: Partial<WeeklyReportTeamGame>,
-): WeeklyReportTeamGame {
-  return {
-    gameId: 2026020110,
-    date: '2026-10-21',
-    opponent: 'MTL',
-    isHome: true,
-    teamScore: 4,
-    opponentScore: 2,
-    outcome: 'W',
-    ...overrides,
-  };
-}
-
-function formGame(
-  overrides: Partial<WeeklyReportFormGame>,
-): WeeklyReportFormGame {
-  return {
-    date: '2026-10-10',
-    gameState: 'OFF',
-    homeTeam: 'COL',
-    awayTeam: 'DAL',
-    homeScore: 3,
-    awayScore: 1,
-    periodType: 'REG',
-    ...overrides,
-  };
-}
-
-function team(overrides: Partial<WeeklyReportTeam>): WeeklyReportTeam {
-  return {
-    triCode: 'COL',
-    name: 'Colorado Avalanche',
-    logo: null,
-    tier: 'fan',
-    label: null,
-    weekGames: [],
-    formGames: [],
-    ...overrides,
-  };
-}
-
-function report(teams?: WeeklyReportTeam[]): WeeklyPlayerReport {
-  return {
-    weekStart: '2026-10-19',
-    weekEnd: '2026-10-25',
-    label: 'Oct 19–25',
-    headline: '',
-    players: [],
-    createdAt: '2026-10-26T13:00:00Z',
-    read: false,
-    ...(teams ? { teams } : {}),
-  };
-}
+import {
+  makeWeeklyReport,
+  makeWeeklyReportFormGame as formGame,
+  makeWeeklyReportTeam as team,
+  makeWeeklyReportTeamGame as weekGame,
+} from '@/test/fixtures/reports';
+import type { WeeklyReportTeam } from '@/features/favorite-players/types/favoritePlayers';
 
 describe('listReportTeams', () => {
   it('returns no teams for a report made before teams were added', () => {
-    expect(listReportTeams(report())).toEqual([]);
+    expect(listReportTeams(makeWeeklyReport())).toEqual([]);
   });
 
   it('orders teams Diehard, Fan, Curious and keeps order within a tier', () => {
@@ -82,12 +27,9 @@ describe('listReportTeams', () => {
       team({ triCode: 'COL', tier: 'diehard' }),
       team({ triCode: 'MTL', tier: 'fan' }),
     ];
-    expect(listReportTeams(report(teams)).map((t) => t.triCode)).toEqual([
-      'COL',
-      'TOR',
-      'MTL',
-      'DAL',
-    ]);
+    expect(
+      listReportTeams(makeWeeklyReport(teams)).map((t) => t.triCode),
+    ).toEqual(['COL', 'TOR', 'MTL', 'DAL']);
   });
 
   it('treats an unknown tier as the default Fan tier', () => {
@@ -95,7 +37,7 @@ describe('listReportTeams', () => {
       team({ triCode: 'DAL', tier: 'curious' }),
       team({ triCode: 'TOR', tier: 'superfan' as WeeklyReportTeam['tier'] }),
     ];
-    const listed = listReportTeams(report(teams));
+    const listed = listReportTeams(makeWeeklyReport(teams));
     expect(listed.map((t) => [t.triCode, t.tier])).toEqual([
       ['TOR', 'fan'],
       ['DAL', 'curious'],

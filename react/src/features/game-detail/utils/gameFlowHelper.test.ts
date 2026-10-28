@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ShotEvent } from '@/features/game-detail/types/playByPlay';
+import { makeShotEvent } from '@/test/fixtures/playByPlay';
 import {
   buildFlowSeries,
   buildFlowTimeline,
@@ -19,23 +20,16 @@ function shotAt(
 ): ShotEvent {
   const period =
     elapsedSeconds === null ? 1 : Math.floor(elapsedSeconds / 1200) + 1;
-  return {
+  return makeShotEvent({
     eventId: nextEventId++,
     period,
     periodType: period > 3 ? 'OT' : 'REG',
     timeInPeriod: null,
     elapsedSeconds,
-    type: 'shot',
-    teamTriCode: 'TOR',
     shooterId: 1,
-    shooterName: 'Auston Matthews',
-    goalieId: 1,
-    x: 70,
     y: 0,
-    shotType: 'wrist',
-    strength: 'ev',
     ...overrides,
-  };
+  });
 }
 
 const overtimeGame: ShotEvent[] = [

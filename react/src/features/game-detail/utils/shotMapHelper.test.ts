@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ShotEvent } from '@/features/game-detail/types/playByPlay';
+import type { ShotEvent } from '@/features/game-detail/types/playByPlay';
+import { makeShotEvent } from '@/test/fixtures/playByPlay';
 import {
   ALL_SHOTS,
   countTeamShots,
@@ -20,22 +21,10 @@ let nextEventId = 1;
 
 /** A shot event with sensible defaults: a TOR wrist shot on goal in the 1st at even strength. */
 function shot(overrides: Partial<ShotEvent> = {}): ShotEvent {
-  return {
+  return makeShotEvent({
     eventId: nextEventId++,
-    period: 1,
-    periodType: 'REG',
-    timeInPeriod: '05:00',
-    elapsedSeconds: 300,
-    type: 'shot',
-    teamTriCode: 'TOR',
-    ...MATTHEWS,
-    goalieId: 1,
-    x: 70,
-    y: 10,
-    shotType: 'wrist',
-    strength: 'ev',
     ...overrides,
-  };
+  });
 }
 
 const events: ShotEvent[] = [

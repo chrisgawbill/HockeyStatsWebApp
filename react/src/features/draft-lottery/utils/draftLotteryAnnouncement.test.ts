@@ -1,13 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { buildLotteryAnnouncement } from '@/features/draft-lottery/utils/draftLotteryAnnouncement';
-
-const nameOf = (id: string) => `Team ${id}`;
-const entry = (
-  id: string,
-  pick: number,
-  movement: number,
-  drawWon: 1 | 2 | null,
-) => ({ id, preLotteryPosition: pick + movement, pick, movement, drawWon });
+import {
+  lotteryTeamName as nameOf,
+  makeLotteryResultEntry as entry,
+} from '@/test/fixtures/draftLottery';
 
 describe('buildLotteryAnnouncement', () => {
   it('names the #1 and #2 teams', () => {
