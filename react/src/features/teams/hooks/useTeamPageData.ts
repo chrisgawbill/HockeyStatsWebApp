@@ -33,7 +33,7 @@ import {
 import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
-import { useBackgroundRefresh } from '@/lib/useBackgroundRefresh';
+import { useRefreshOnStatsChange } from '@/lib/statsVersion';
 
 interface FetchSeasonDataOptions {
   /** Background refresh: keeps the shown data and error state if it fails. */
@@ -52,8 +52,9 @@ interface UseTeamPageDataArgs {
  * stats, roster, club schedule, skater and goalie stats, and the real line
  * combinations. Team lines load independently so they never block the roster;
  * until they arrive (or if the call fails) the roster shows projected lines.
- * While the page is visible the season data refreshes in the background, so a
- * finished game's stats show up without a reload. `error` holds a
+ * When the API's stored stats change (a game went final) the season data
+ * refreshes in the background, so a finished game's stats show up without a
+ * reload. `error` holds a
  * human-readable message rather than the raw API error.
  */
 export function useTeamPageData({
@@ -164,9 +165,8 @@ export function useTeamPageData({
     refetchTeam();
   }, [triCode, refetchTeam]);
 
-  useBackgroundRefresh(
+  useRefreshOnStatsChange(
     () => fetchSeasonData({ silent: true }),
-    requestKey,
     Boolean(triCode),
   );
 

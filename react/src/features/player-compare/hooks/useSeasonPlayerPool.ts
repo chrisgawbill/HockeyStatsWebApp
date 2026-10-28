@@ -7,7 +7,7 @@ import type {
   ComparePlayer,
   SeasonPlayerPool,
 } from '@/features/player-compare/types/playerCompare';
-import { useBackgroundRefresh } from '@/lib/useBackgroundRefresh';
+import { useRefreshOnStatsChange } from '@/lib/statsVersion';
 
 export type SeasonPlayerPoolLoad =
   | { status: 'loading' }
@@ -32,8 +32,8 @@ async function fetchSeasonPlayerPool(
 /**
  * Loads every skater's and goalie's season totals (two league-wide summary
  * calls) for searching and comparing. `retry` loads again after a failure.
- * While the page is visible the totals refresh in the background, keeping the
- * shown pool when a refresh fails.
+ * When the API's stored stats change the totals refresh in the background,
+ * keeping the shown pool when a refresh fails.
  */
 export function useSeasonPlayerPool(season: string): {
   load: SeasonPlayerPoolLoad;
@@ -61,7 +61,7 @@ export function useSeasonPlayerPool(season: string): {
     };
   }, [season, attempt]);
 
-  useBackgroundRefresh(() => {
+  useRefreshOnStatsChange(() => {
     const refreshedSeason = season;
     fetchSeasonPlayerPool(refreshedSeason)
       .then((pool) => {
@@ -69,7 +69,7 @@ export function useSeasonPlayerPool(season: string): {
           setLoad({ status: 'loaded', pool });
       })
       .catch(() => {});
-  }, season);
+  });
 
   const retry = useCallback(() => setAttempt((count) => count + 1), []);
   return { load, retry };

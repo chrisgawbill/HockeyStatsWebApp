@@ -7,7 +7,7 @@ import {
   StatEntry,
   StatLeaderType,
 } from '@/features/stat-leaders/utils/statLeaderTypes';
-import { useBackgroundRefresh } from '@/lib/useBackgroundRefresh';
+import { useRefreshOnStatsChange } from '@/lib/statsVersion';
 
 /**
  * Loads the stat-leader categories for one player type (skater or goalie),
@@ -15,8 +15,8 @@ import { useBackgroundRefresh } from '@/lib/useBackgroundRefresh';
  * and a single `loading` flag. Each category is fetched independently for `season`
  * and added as it resolves, so the UI can show categories as they arrive.
  * Also exposes `error` (set only when every category failed) and `retry`.
- * While the page is visible the categories refresh in the background, keeping
- * a category's shown leaders when its refresh fails.
+ * When the API's stored stats change the categories refresh in the
+ * background, keeping a category's shown leaders when its refresh fails.
  */
 export function useStatLeaders(type: StatLeaderType, season?: string) {
   const { stats, fetcher } = STAT_CONFIG[type];
@@ -134,7 +134,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
     runFetch();
   }, [runFetch]);
 
-  useBackgroundRefresh(refreshQuietly, `${type}:${season}`);
+  useRefreshOnStatsChange(refreshQuietly);
 
   return { leaders, loading, error, retry: runFetch };
 }
