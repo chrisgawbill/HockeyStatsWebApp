@@ -23,6 +23,7 @@ export interface ScheduledGameShape {
   topSeedTeamAbbrev: string | null;
   bottomSeedTeamAbbrev: string | null;
   gameState: string;
+  liveClock: string | null;
 }
 export class ScheduledGame implements ScheduledGameShape {
   gameId: number;
@@ -47,6 +48,8 @@ export class ScheduledGame implements ScheduledGameShape {
   topSeedTeamAbbrev: string | null;
   bottomSeedTeamAbbrev: string | null;
   gameState: string;
+  /** "P2 · 12:34" while live, from the polled boxscore; null otherwise. */
+  liveClock: string | null;
 
   constructor(
     gameId: number,
@@ -71,6 +74,7 @@ export class ScheduledGame implements ScheduledGameShape {
     topSeedTeamAbbrev: string | null,
     bottomSeedTeamAbbrev: string | null,
     gameState: string,
+    liveClock: string | null = null,
   ) {
     this.gameId = gameId;
     this.date = date;
@@ -94,5 +98,6 @@ export class ScheduledGame implements ScheduledGameShape {
     this.topSeedTeamAbbrev = topSeedTeamAbbrev;
     this.bottomSeedTeamAbbrev = bottomSeedTeamAbbrev;
     this.gameState = gameState;
+    this.liveClock = liveClock;
   }
 }

@@ -61,6 +61,22 @@ export function getLiveClockLabel(
 }
 
 /**
+ * Period and clock for a live game's schedule card ("P2 · 12:34",
+ * "P2 · INT"). Null when the boxscore isn't live or has no clock.
+ */
+export function getScheduleClockLabel(
+  boxscore: GameDetailBoxscore,
+): string | null {
+  const clock = getLiveClockLabel(
+    boxscore,
+    mapGameStateToStatus(boxscore.gameState),
+  );
+  const period = boxscore.periodDescriptor?.number;
+  if (!clock || period == null) return null;
+  return `P${period} · ${clock}`;
+}
+
+/**
  * Formats an NHL "YYYY-MM-DD" calendar date as a local long-form date string.
  */
 export function formatGameDate(gameDate: string): string {
