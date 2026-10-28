@@ -189,6 +189,13 @@ fold it into the earlier commit, and do not create a commit solely to record tha
 a merge happened. Rewriting published main history requires separate explicit
 Product Owner approval.
 
+Keep shared project instructions (`AGENTS.md` and the development/ticket docs)
+tracked. Personal assistant settings, credentials, session history, caches, logs,
+and generic installed skills belong outside version control. The local `.claude/`
+directory is ignored; install generic skills through personal tooling instead of
+vendoring them into this repository. Project-specific instructions remain shared
+documentation.
+
 ## Ticket states and completion
 
 Use `docs/agent-ticket-index.md`: IDEA, READY, ACTIVE, BLOCKED, DONE. Human
