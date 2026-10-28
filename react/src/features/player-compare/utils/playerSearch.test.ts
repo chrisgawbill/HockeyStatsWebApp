@@ -1,34 +1,7 @@
-import { describe, expect, it } from 'vitest';
 import { searchPlayers } from '@/features/player-compare/utils/playerSearch';
-import { makeSkater } from '@/features/player-compare/utils/testPlayers';
-
-const makar = makeSkater({ playerId: 1, name: 'Cale Makar', gamesPlayed: 30 });
-const stutzle = makeSkater({
-  playerId: 2,
-  name: 'Tim Stützle',
-  gamesPlayed: 29,
-});
-const mcdavid = makeSkater({
-  playerId: 3,
-  name: 'Connor McDavid',
-  gamesPlayed: 30,
-});
-const mcavoy = makeSkater({
-  playerId: 4,
-  name: 'Charlie McAvoy',
-  gamesPlayed: 12,
-});
-const callahan = makeSkater({
-  playerId: 5,
-  name: 'Mac Callahan',
-  gamesPlayed: 40,
-});
-const oreilly = makeSkater({
-  playerId: 6,
-  name: "Ryan O'Reilly",
-  gamesPlayed: 30,
-});
-const skaters = [makar, stutzle, mcdavid, mcavoy, callahan, oreilly];
+import { makeSkater } from '@/test/fixtures/players';
+import { searchSkaters as skaters } from '@/test/fixtures/players';
+import { describe, expect, it } from 'vitest';
 
 /** Ids of the players a query finds, in result order. */
 const findIds = (query: string, excludedIds: number[] = []) =>

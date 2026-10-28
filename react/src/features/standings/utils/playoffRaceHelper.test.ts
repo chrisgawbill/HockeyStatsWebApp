@@ -1,42 +1,6 @@
+import { game, team } from '@/test/fixtures/standings';
 import { describe, expect, it } from 'vitest';
-import { StandingsTeam } from '@/features/standings/types/standingsTeam';
-import { derivePlayoffRace, PlayoffRaceGame } from './playoffRaceHelper';
-
-function team(id: string, place: number, points: number): StandingsTeam {
-  return new StandingsTeam(
-    id,
-    '',
-    id,
-    'Eastern',
-    '',
-    0,
-    0,
-    0,
-    points,
-    0,
-    place,
-    place,
-    place,
-    0,
-    '',
-    0,
-    '',
-  );
-}
-
-function game(
-  homeTeam: string,
-  awayTeam: string,
-  gameState = 'FUT',
-): PlayoffRaceGame {
-  return {
-    homeTeam,
-    awayTeam,
-    gameState,
-    isPlayoff: false,
-    isPreseason: false,
-  };
-}
+import { derivePlayoffRace } from '@/features/standings/utils/playoffRaceHelper';
 
 describe('derivePlayoffRace', () => {
   it('calculates remaining, maximum points, cutline pace, and magic number', () => {

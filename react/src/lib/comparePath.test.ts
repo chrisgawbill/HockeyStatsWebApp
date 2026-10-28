@@ -6,12 +6,6 @@ import {
 } from '@/lib/comparePath';
 
 describe('parseComparePlayerIds', () => {
-  it('reads ids in order', () => {
-    expect(parseComparePlayerIds('8478402,8477492')).toEqual([
-      8478402, 8477492,
-    ]);
-  });
-
   it('is empty for a missing or blank value', () => {
     expect(parseComparePlayerIds(null)).toEqual([]);
     expect(parseComparePlayerIds('')).toEqual([]);
@@ -30,12 +24,8 @@ describe('parseComparePlayerIds', () => {
     ]);
   });
 
-  it('keeps the first place of a repeated id', () => {
-    expect(parseComparePlayerIds('1,2,1,3')).toEqual([1, 2, 3]);
-  });
-
-  it('keeps at most three players', () => {
-    expect(parseComparePlayerIds('1,2,3,4,5')).toEqual([1, 2, 3]);
+  it('preserves order, removes duplicates and keeps at most three players', () => {
+    expect(parseComparePlayerIds('1,2,1,3,4,5')).toEqual([1, 2, 3]);
   });
 });
 

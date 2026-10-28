@@ -1,95 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { ENERGY } from '@/features/board-game/data/balance';
+import { CARDS } from '@/features/board-game/data/cards';
 import {
   planCards,
   planCpuCards,
 } from '@/features/board-game/engine/cpuDuelPolicy';
-import { CARDS } from '@/features/board-game/data/cards';
-import { ENERGY } from '@/features/board-game/data/balance';
-import type {
-  DuelState,
-  GameState,
-  RevealResult,
-  Role,
-  Skater,
-} from '@/features/board-game/types/game';
-
-function makeSkater(
-  id: string,
-  role: Role,
-  team: 'user' | 'cpu' = 'cpu',
-): Skater {
-  return { id, team, role, pos: { col: 0, row: 0 }, stunnedUntilTurn: null };
-}
-
-function makeDuel(overrides: Partial<DuelState> = {}): DuelState {
-  return {
-    kind: 'check',
-    attacker: { skaterId: 'user-LD', poise: 20, maxPoise: 20, block: 0 },
-    defender: { skaterId: 'cpu-C', poise: 20, maxPoise: 20, block: 0 },
-    userSide: 'attacker',
-    round: 1,
-    energy: 3,
-    cpuPlan: [],
-    userQueue: [],
-    queueDraws: [],
-    receiverId: null,
-    shotPickedCardId: null,
-    faceoffPickedCardId: null,
-    faceoffCpuCardId: null,
-    faceoffJumped: false,
-    faceoffResult: null,
-    ...overrides,
-  };
-}
-
-function makeState(
-  cpuHand: string[],
-  duel: DuelState,
-  cpuRole: Role = 'C',
-  lastReveal: RevealResult | null = null,
-  userHand: string[] = [],
-): GameState {
-  return {
-    phase: 'duel',
-    length: 'long',
-    bonusEnergy: 0,
-    activeTeam: 'user',
-    turn: 1,
-    mp: 0,
-    dice: null,
-    skaters: [
-      makeSkater('user-LD', 'LD', 'user'),
-      makeSkater('cpu-C', cpuRole, 'cpu'),
-    ],
-    puck: { kind: 'carried', skaterId: 'user-LD' },
-    deck: { drawPile: [], hand: userHand, discardPile: [], exhaustPile: [] },
-    cpuDeck: { drawPile: [], hand: cpuHand, discardPile: [], exhaustPile: [] },
-    duel,
-    lastOutcome: null,
-    lastReveal,
-    lastShotSaveResult: null,
-    lastFaceoffResult: null,
-    winner: null,
-    rngSeed: 1,
-    actionsThisTurn: 0,
-    whistle: false,
-    goaliePoise: { user: 43, cpu: 43 },
-    faceoffSpot: { col: 7, row: 3 },
-    pendingBonusMp: 0,
-  };
-}
-
-function makeReveal(userDamageDealt: number): RevealResult {
-  return {
-    round: 1,
-    userCards: [],
-    cpuCards: [],
-    userDamageDealt,
-    cpuDamageDealt: 0,
-    userBlock: 0,
-    cpuBlock: 0,
-  };
-}
+import { makeDuel, makeReveal, makeState } from '@/test/fixtures/cpuDuelPolicy';
+import { describe, expect, it } from 'vitest';
 
 describe('planCpuCards', () => {
   it('plans nothing without a duel, filters by duel kind, and fills energy greedily', () => {

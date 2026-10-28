@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import {
   buildTeamLinesView,
   buildTokenAriaLabel,
@@ -7,60 +6,9 @@ import {
   formatTogether,
   getLastName,
 } from '@/features/teams/utils/teamLinesHelper';
-import { buildEmptyRoster } from '@/features/teams/utils/teamPageHelper';
-import { TeamLinesDto } from '@/features/teams/types/teamLines';
-import { Position, RosterPlayer } from '@/features/teams/types/teamPageTypes';
-
-function player(id: number, name = `P${id} Last${id}`): RosterPlayer {
-  return { id, name, number: id, stat: '' };
-}
-
-function roster(o: Partial<Record<Position, RosterPlayer[]>>) {
-  return { ...buildEmptyRoster(), ...o };
-}
-
-const baseRoster = roster({
-  Center: [player(1), player(2)],
-  'Left Wing': [player(3), player(4)],
-  'Right Wing': [player(5), player(6)],
-  Defenseman: [player(7), player(8), player(9)],
-  Goalie: [player(10), player(11)],
-});
-
-const game = {
-  gameId: 1,
-  gameDate: '2025-10-18',
-  opponent: 'BOS',
-  homeAway: 'home' as const,
-};
-
-function dto(over: Partial<TeamLinesDto> = {}): TeamLinesDto {
-  return {
-    source: 'shifts',
-    game,
-    forwardLines: [
-      {
-        players: [
-          { id: 5, slot: 'RW' },
-          { id: 1, slot: 'C' },
-          { id: 3, slot: 'LW' },
-        ],
-        togetherSeconds: 872,
-      },
-    ],
-    defensePairs: [
-      {
-        players: [
-          { id: 8, slot: 'RD' },
-          { id: 7, slot: 'LD' },
-        ],
-        togetherSeconds: 600,
-      },
-    ],
-    goalies: { starterId: 11 },
-    ...over,
-  };
-}
+import { player, roster } from '@/test/fixtures/teams';
+import { baseRoster, dto, lineGame as game } from '@/test/fixtures/teams';
+import { describe, expect, it } from 'vitest';
 
 describe('buildTeamLinesView', () => {
   it('maps shift lines to roster players, dropping unknown ids, with extras and goalies', () => {

@@ -1,15 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import { buildCompareSlots } from '@/features/player-compare/utils/compareSlots';
-import {
-  makeGoalie,
-  makePool,
-  makeSkater,
-} from '@/features/player-compare/utils/testPlayers';
-
-const skater = makeSkater({ playerId: 1 });
-const otherSkater = makeSkater({ playerId: 2 });
-const goalie = makeGoalie({ playerId: 100 });
-const pool = makePool([skater, otherSkater, goalie]);
+import { otherSkater, pool, skater } from '@/test/fixtures/players';
+import { describe, expect, it } from 'vitest';
 
 describe('buildCompareSlots', () => {
   it('keeps URL order and takes the group from the first player', () => {

@@ -1,30 +1,11 @@
+import { makeReport as report } from '@/test/fixtures/reports';
 import { describe, expect, it } from 'vitest';
-import type { AfterActionReport } from '@/features/after-action-reports/types/afterActionReport';
 import {
   describeReport,
   finalLabel,
   reportOutcome,
   reportScoreLine,
 } from '@/features/after-action-reports/utils/afterActionReportFormat';
-
-function report(overrides: Partial<AfterActionReport> = {}): AfterActionReport {
-  return {
-    gameId: 1,
-    date: '2026-10-18',
-    gameTime: '2026-10-18T23:00:00Z',
-    homeTeam: 'TOR',
-    homeLogo: '',
-    homeScore: 4,
-    awayTeam: 'MTL',
-    awayLogo: '',
-    awayScore: 2,
-    periodType: 'REG',
-    isPlayoff: false,
-    favoriteTeams: ['TOR'],
-    read: false,
-    ...overrides,
-  };
-}
 
 describe('afterActionReportFormat', () => {
   it('labels finals and scores outcomes from the favorite side', () => {

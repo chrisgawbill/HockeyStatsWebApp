@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
 import {
@@ -13,21 +12,8 @@ import {
   shotBandWidthsFor,
 } from '@/features/board-game/engine/shotDuel';
 import type { GameState } from '@/features/board-game/types/game';
-
-/** Fresh 'move' state with the user carrying the puck in the offensive zone, ready to SHOOT. */
-function makeShootState(seed = 1): GameState {
-  const state = createInitialState(seed, 'long');
-  const skaters = state.skaters.map((s) =>
-    s.id === 'user-C' ? { ...s, pos: { col: 11, row: 3 } } : s,
-  );
-  return {
-    ...state,
-    phase: 'move',
-    mp: 3,
-    skaters,
-    puck: { kind: 'carried', skaterId: 'user-C' },
-  };
-}
+import { makeShootState } from '@/test/fixtures/boardScenarios';
+import { describe, expect, it } from 'vitest';
 
 describe('createShotDuel (user shooter)', () => {
   it('draws a deterministic 3-card shot-pool ante and waits in the duel phase', () => {

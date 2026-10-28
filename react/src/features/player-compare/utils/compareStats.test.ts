@@ -1,10 +1,7 @@
-import { describe, expect, it } from 'vitest';
 import { buildCompareRows } from '@/features/player-compare/utils/compareStats';
-import type { CompareSlot } from '@/features/player-compare/types/playerCompare';
-import {
-  makeGoalie,
-  makeSkater,
-} from '@/features/player-compare/utils/testPlayers';
+import { mcdavid, skaterSlots } from '@/test/fixtures/players';
+import { makeGoalie, makeSkater } from '@/test/fixtures/players';
+import { describe, expect, it } from 'vitest';
 
 /** The row with this label, as [text, isBest] pairs per column. */
 function readRow(rows: ReturnType<typeof buildCompareRows>, label: string) {
@@ -12,44 +9,6 @@ function readRow(rows: ReturnType<typeof buildCompareRows>, label: string) {
   if (!row) throw new Error(`No ${label} row`);
   return row.cells.map((cell) => [cell.text, cell.isBest]);
 }
-
-const mcdavid = makeSkater({
-  playerId: 1,
-  gamesPlayed: 30,
-  goals: 17,
-  assists: 34,
-  points: 51,
-  plusMinus: 6,
-  shots: 98,
-  shootingPct: 0.17347,
-  toiPerGame: 1324,
-});
-const mackinnon = makeSkater({
-  playerId: 2,
-  gamesPlayed: 30,
-  goals: 19,
-  assists: 29,
-  points: 48,
-  plusMinus: 11,
-  shots: 121,
-  shootingPct: 0.157,
-  toiPerGame: 1351,
-});
-const matthews = makeSkater({
-  playerId: 3,
-  gamesPlayed: 28,
-  goals: 19,
-  assists: 15,
-  points: 34,
-  plusMinus: -2,
-  shots: 110,
-  shootingPct: 0.17272,
-  toiPerGame: 1247,
-});
-
-const skaterSlots: CompareSlot[] = [mcdavid, mackinnon, matthews].map(
-  (player) => ({ kind: 'player', player }),
-);
 
 describe('buildCompareRows for skaters', () => {
   const rows = buildCompareRows('skater', skaterSlots);

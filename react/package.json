@@ -15,6 +15,7 @@
     "preview": "vite preview",
     "tsc": "tsc",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{ts,json,html}\" \"types/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{ts,json,html}\" \"types/**/*.ts\""
   },
@@ -23,6 +24,7 @@
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/coverage-v8": "5.0.1",
     "prettier": "^3.8.3",
     "typescript": "^5.9.3",
     "vite": "^8.3.0",

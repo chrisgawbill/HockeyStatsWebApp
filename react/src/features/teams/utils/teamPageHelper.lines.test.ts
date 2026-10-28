@@ -1,18 +1,9 @@
+import { player, roster } from '@/test/fixtures/teams';
 import { describe, expect, it } from 'vitest';
 import {
   buildDefensePairs,
   buildForwardLines,
-  buildEmptyRoster,
 } from '@/features/teams/utils/teamPageHelper';
-import { Position, RosterPlayer } from '@/features/teams/types/teamPageTypes';
-
-function player(id: number, name: string): RosterPlayer {
-  return { id, name, number: id, stat: '' };
-}
-
-function roster(overrides: Partial<Record<Position, RosterPlayer[]>>) {
-  return { ...buildEmptyRoster(), ...overrides };
-}
 
 describe('buildForwardLines', () => {
   it('zips LW-C-RW by index, omitting exhausted slots and labeling only 4 lines', () => {

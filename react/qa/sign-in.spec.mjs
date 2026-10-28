@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 const { test, expect } = await import(process.env.SPOTTER_TEST_MODULE);
-const email = 'member@example.test';
-const token = 'synthetic-session';
+import { email, token, accountResponses } from '../src/test/fixtures/account.mjs';
 const tokenKey = 'rinkquest-auth-token';
 // The home Up next strip has its own "Sign in" button; these checks use the header's.
 const headerSignIn = (page) =>
@@ -32,17 +31,9 @@ const signedInTest = test.extend({
 
 // Account responses are synthetic; ordinary hockey data still uses Spotter fixtures.
 test.beforeEach(async ({ context }) => {
-  const responses = {
-    '/api/auth/me': { email },
-    '/api/push/config': { enabled: false, publicKey: '' },
-    '/api/favorites': { favorites: [] },
-    '/api/favorite-players': { favorites: [] },
-    '/api/after-action-reports': { reports: [], unreadCount: 0 },
-    '/api/weekly-player-reports': { reports: [], unreadCount: 0 },
-    '/api/push/weekly-report': { enabled: false },
-  };
+
   await context.route('http://api.spotter.test/api/**', (route) => {
-    const response = responses[new URL(route.request().url()).pathname];
+    const response = accountResponses[new URL(route.request().url()).pathname];
     return response ? route.fulfill({ json: response }) : route.fallback();
   });
   // Neither Google's SDK nor Discord's authorization page is needed in controlled checks.

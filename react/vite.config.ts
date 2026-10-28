@@ -17,5 +17,16 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
     environment: 'node',
+    coverage: {
+      provider: 'v8',
+      exclude: ['src/test/**'],
+      reporter: ['text-summary', 'json', 'json-summary'],
+      thresholds: {
+        statements: 87.84,
+        branches: 80.6,
+        functions: 90.54,
+        lines: 88.86,
+      },
+    },
   },
 });

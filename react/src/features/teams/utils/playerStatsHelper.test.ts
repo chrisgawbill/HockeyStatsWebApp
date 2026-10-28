@@ -1,43 +1,11 @@
-import { describe, expect, it } from 'vitest';
 import {
   buildPlayerStatCells,
-  buildStatsLookup,
   getPositionLabel,
   parseToiLabel,
 } from '@/features/teams/utils/playerStatsHelper';
 import { formatSavePct } from '@/lib/statFormat';
-
-const lookup = buildStatsLookup(
-  [
-    {
-      playerId: 1,
-      name: 'A',
-      position: 'L',
-      gamesPlayed: 10,
-      goals: 4,
-      assists: 6,
-      points: 10,
-      plusMinus: 3,
-      penaltyMinutes: 0,
-      faceoffWinPct: null,
-      offensiveZoneFaceoffs: null,
-      defensiveZoneFaceoffs: null,
-      corsiPct: null,
-    },
-  ],
-  [
-    {
-      goalieId: 2,
-      name: 'G',
-      gamesPlayed: 5,
-      wins: 3,
-      losses: 2,
-      savePctg: 0.915,
-      goalsAgainstAverage: 2.5,
-      shutouts: 1,
-    },
-  ],
-);
+import { lookup } from '@/test/fixtures/teams';
+import { describe, expect, it } from 'vitest';
 
 describe('playerStatsHelper', () => {
   it('builds skater and goalie cells, or null without a stat line', () => {
