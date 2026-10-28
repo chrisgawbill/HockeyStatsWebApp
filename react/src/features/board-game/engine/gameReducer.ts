@@ -7,8 +7,10 @@ import { composePlaybook } from '@/features/board-game/data/playbooks';
 import { FACEOFF_SPOTS } from '@/features/board-game/data/rink';
 import {
   handleCheck,
+  handleClearCrease,
   handleMove,
   handlePass,
+  handleSetScreen,
   handleShoot,
 } from '@/features/board-game/engine/boardActions';
 import { createDeck } from '@/features/board-game/engine/deck';
@@ -67,6 +69,7 @@ export function createInitialState(
     activationPath: [],
     skaters: formationSkaters(),
     puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
+    screen: null,
     deck,
     cpuDeck,
     duel: null,
@@ -112,6 +115,12 @@ export function gameReducer(state: GameState, action: Action): GameState {
 
     case 'CHECK':
       return handleCheck(state, action.skaterId);
+
+    case 'SET_SCREEN':
+      return handleSetScreen(state, action.skaterId);
+
+    case 'CLEAR_CREASE':
+      return handleClearCrease(state, action.skaterId);
 
     case 'END_ACTIVATION':
       if (!canEndActivation(state)) return state;
@@ -224,6 +233,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
             pos: s.id === 'user-C' || s.id === 'cpu-C' ? dot : s.pos,
           })),
           puck: { kind: 'loose', pos: dot },
+          screen: null,
           phase: 'faceoff',
           whistle: true,
           faceoffSpot: dot,

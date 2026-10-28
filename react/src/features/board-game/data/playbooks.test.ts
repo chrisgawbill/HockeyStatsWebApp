@@ -47,7 +47,10 @@ function comboName([primary, secondary]: [
 
 /** True for a card legal in at least one ordinary battle. */
 function isBattleCard(id: string): boolean {
-  return ORDINARY_KINDS.some((kind) => CARDS[id].allowedIn[kind]);
+  return (
+    ORDINARY_KINDS.some((kind) => CARDS[id].allowedIn[kind]) ||
+    Boolean(CARDS[id].allowedIn.netFront)
+  );
 }
 
 /** True for a shot- or faceoff-pool card. */
@@ -66,11 +69,11 @@ describe('composePlaybook', () => {
     ]);
   });
 
-  it('assembles 27 known cards with the same slot types for every combo', () => {
+  it('assembles 31 known cards with the same slot types for every combo', () => {
     for (const combo of IDENTITY_COMBOS) {
       const playbook = composePlaybook(...combo);
       const name = comboName(combo);
-      expect(playbook, name).toHaveLength(27);
+      expect(playbook, name).toHaveLength(31);
       expect(
         playbook.every((id) => CARDS[id]),
         name,
@@ -85,6 +88,23 @@ describe('composePlaybook', () => {
         expect(isBattleCard(id), `${name} ${id}`).toBe(true);
       expect(isShotOrFaceoffCard(special), `${name} ${special}`).toBe(true);
     }
+  });
+
+  it('adds the four universal net-front cards and replaces the approved package slots', () => {
+    expect(UNIVERSAL_CORE).toHaveLength(25);
+    for (const id of [
+      'establish_position',
+      'find_the_rebound',
+      'clear_the_crease',
+      'lift_the_stick',
+    ])
+      expect(UNIVERSAL_CORE).toContain(id);
+    expect(IDENTITY_PACKAGES.physical.battleCards).toContain(
+      'hold_your_ground',
+    );
+    expect(IDENTITY_PACKAGES.structure.battleCards).toContain(
+      'front_the_shooter',
+    );
   });
 
   it('fills primary with the full package and secondary with its first two battle cards', () => {

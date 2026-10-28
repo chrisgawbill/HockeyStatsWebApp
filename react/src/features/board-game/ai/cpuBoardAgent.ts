@@ -13,6 +13,8 @@ import {
 } from '@/features/board-game/engine/rink';
 import {
   canShoot,
+  canClearCrease,
+  canSetScreen,
   checkTargets,
   getCarrier,
   passTargets,
@@ -146,6 +148,11 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
   if (state.activeTeam !== team || state.phase !== 'move')
     return { type: 'END_ACTIVATION' };
 
+  const clearer = state.skaters.find(
+    (skater) => skater.team === team && canClearCrease(state, skater.id),
+  );
+  if (clearer) return { type: 'CLEAR_CREASE', skaterId: clearer.id };
+
   const carrier = getCarrier(state);
   if (carrier && carrier.team === team && canActivate(state, carrier)) {
     if (canShoot(state)) return { type: 'SHOOT' };
@@ -178,6 +185,13 @@ export function chooseActionFor(state: GameState, team: TeamId): Action {
       ? state.puck.pos
       : null;
   if (!puckTarget) return { type: 'END_ACTIVATION' };
+
+  if (carrier?.team === team) {
+    const screener = state.skaters.find(
+      (skater) => skater.team === team && canSetScreen(state, skater.id),
+    );
+    if (screener) return { type: 'SET_SCREEN', skaterId: screener.id };
+  }
 
   const chaser = pickChaser(state, puckTarget);
   if (!chaser) return { type: 'END_ACTIVATION' };

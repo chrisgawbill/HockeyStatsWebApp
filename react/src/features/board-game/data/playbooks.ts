@@ -15,6 +15,10 @@ export const UNIVERSAL_CORE: readonly string[] = [
   'toe_drag',
   'protect_puck',
   'protect_puck',
+  'establish_position',
+  'find_the_rebound',
+  'clear_the_crease',
+  'lift_the_stick',
   'stickhandle',
   'stickhandle',
   'slip_the_check',
@@ -53,12 +57,12 @@ export const IDENTITY_PACKAGES: Record<Identity, IdentityPackage> = {
   },
   // Wins battles of attrition; little pressure, no draw, slow knockouts.
   physical: {
-    battleCards: ['brace_for_contact', 'gap_control', 'protect_puck'],
+    battleCards: ['brace_for_contact', 'gap_control', 'hold_your_ground'],
     specialCard: 'slapshot',
   },
   // Shuts down passing and wins on timeouts; weak carrier support, struggles in check battles.
   structure: {
-    battleCards: ['active_stick', 'deflect_pass', 'read_the_lane'],
+    battleCards: ['active_stick', 'deflect_pass', 'front_the_shooter'],
     specialCard: 'tie_it_up',
   },
 };
@@ -81,7 +85,7 @@ export function secondaryCardsOf(identity: Identity): readonly string[] {
 }
 
 /**
- * Builds a 27-card playbook: the universal core, the primary package (or
+ * Builds a 31-card playbook: the universal core, the primary package (or
  * neutral fill), then the secondary package (or neutral fill). Throws when
  * the secondary repeats the primary, since a team's two identities must differ.
  */

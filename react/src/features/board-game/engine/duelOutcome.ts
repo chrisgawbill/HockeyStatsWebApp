@@ -215,6 +215,9 @@ export function applyOutcome(
       }
       break;
     }
+    case 'netFront':
+      // A clear-crease battle changes only the screen; possession stays put.
+      break;
   }
 
   return { puck, stunSkaterId, goal, cleanSave, rngSeed, bonusSteps };

@@ -16,6 +16,7 @@ export interface SkaterSpriteProps {
   moving: boolean;
   /** Shows an idle "you can move this skater" ring cue. Never true while `selected` is true. */
   movable?: boolean;
+  screened?: boolean;
 }
 
 const PALETTE: Record<string, string> = {
@@ -69,6 +70,7 @@ export default function SkaterSprite({
   stunned,
   moving,
   movable = false,
+  screened = false,
 }: SkaterSpriteProps) {
   const frame: SpriteFrame =
     skater.role === 'G' ? GOALIE_IDLE : moving ? SKATER_SKATE : SKATER_IDLE;
@@ -114,6 +116,11 @@ export default function SkaterSprite({
       {hasPuck && (
         <span className={styles.puckBadge}>
           <PuckToken loose={false} />
+        </span>
+      )}
+      {screened && (
+        <span className={styles.screenBadge} aria-label="Screen set">
+          Screen
         </span>
       )}
       {stunned && (

@@ -125,7 +125,7 @@ export default function DuelScreen({
   const cpuRole = (cpuSide === 'attacker' ? attackerSkater : defenderSkater)
     ?.role;
 
-  const title = `${capitalize(duel.kind)} — ${skaterLabel(attackerSkater)} vs ${skaterLabel(defenderSkater)}`;
+  const title = `${duel.kind === 'netFront' ? 'Clear Crease' : capitalize(duel.kind)} — ${skaterLabel(attackerSkater)} vs ${skaterLabel(defenderSkater)}`;
 
   const showReveal = lastReveal !== null && lastReveal.round === duel.round - 1;
 

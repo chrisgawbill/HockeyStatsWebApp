@@ -45,6 +45,11 @@ export function describeOutcome(
         ? `Pass completed to ${outcome.receiverId ? label(outcome.receiverId, skaters) : attacker}`
         : `${defender} intercepts the pass`;
       break;
+    case 'netFront':
+      text = attackerWins
+        ? `${attacker} clears the crease`
+        : `${defender} holds the screen`;
+      break;
     default:
       text = outcome.summary;
   }

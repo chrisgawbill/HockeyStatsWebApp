@@ -142,6 +142,19 @@ describe('shotModel', () => {
     expect(sa).toEqual(sb);
   });
 
+  it('applies the screen penalty as five percentage points before the clamps', () => {
+    const [open] = rollShotSave('weak', 13, 20, 20, 7);
+    const [screened] = rollShotSave('weak', 13, 20, 20, 7, true);
+    expect(open.saveChance).toBe(60);
+    expect(screened.saveChance).toBe(55);
+    expect(screened.screenPenalty).toBe(5);
+
+    const [ceiling] = rollShotSave('miss', -100, 0, 20, 7, true);
+    const [floor] = rollShotSave('weak', 100, 20, 20, 7, true);
+    expect(ceiling.saveChance).toBe(MAX_SAVE_CHANCE);
+    expect(floor.saveChance).toBe(5);
+  });
+
   it('the LW/RW accuracy perk measurably widens the yellow band', () => {
     expect(shotAccuracyBonus('LW')).toBeGreaterThan(0);
     expect(shotAccuracyBonus('RW')).toBeGreaterThan(0);

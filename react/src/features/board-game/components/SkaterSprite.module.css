@@ -97,3 +97,18 @@
   /* Press Start 2P is illegible at this size. */
   font-family: 'Roboto', sans-serif;
 }
+
+.screenBadge {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 1px 3px;
+  border-radius: 3px;
+  color: var(--color-text);
+  background: var(--color-tile-highlight);
+  font:
+    0.45rem/1 'Roboto',
+    sans-serif;
+}

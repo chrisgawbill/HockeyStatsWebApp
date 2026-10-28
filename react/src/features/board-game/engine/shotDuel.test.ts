@@ -61,6 +61,61 @@ describe('resolveShotBand', () => {
     return state;
   }
 
+  it('applies the active screen penalty through the shared human shot duel path', () => {
+    const openShot = pickedState(21);
+    const screenedShot = {
+      ...pickedState(21),
+      screen: { screenerId: 'user-LW', team: 'user' as const },
+    };
+    const open = resolveShotBand(
+      openShot,
+      openShot.duel!.shotPickedCardId!,
+      'weak',
+    );
+    const screened = resolveShotBand(
+      screenedShot,
+      screenedShot.duel!.shotPickedCardId!,
+      'weak',
+    );
+    expect(screened.lastShotSaveResult?.screenPenalty).toBe(5);
+    expect(screened.lastShotSaveResult?.saveChance).toBe(
+      open.lastShotSaveResult!.saveChance - 5,
+    );
+  });
+
+  it('clears a screen immediately on a goal, freeze, or covered-save stoppage', () => {
+    let sawGoal = false;
+    let sawFreeze = false;
+    let sawCover = false;
+    for (
+      let seed = 1;
+      seed <= 200 && !(sawGoal && sawFreeze && sawCover);
+      seed++
+    ) {
+      const shot = pickedState(seed);
+      const screened = {
+        ...shot,
+        screen: { screenerId: 'user-LW', team: 'user' as const },
+      };
+      const cardId = screened.duel!.shotPickedCardId!;
+      const weak = resolveShotBand(screened, cardId, 'weak');
+      if (weak.lastOutcome?.goal) {
+        expect(weak.screen).toBeNull();
+        sawGoal = true;
+      } else if (weak.lastShotSaveResult?.freeze) {
+        expect(weak.screen).toBeNull();
+        sawFreeze = true;
+      }
+
+      const perfect = resolveShotBand(screened, cardId, 'perfect');
+      if (perfect.lastShotSaveResult?.covered) {
+        expect(perfect.screen).toBeNull();
+        sawCover = true;
+      }
+    }
+    expect(sawGoal && sawFreeze && sawCover).toBe(true);
+  });
+
   it('a beat scores; a weak-band save freezes; a good-band save rebounds', () => {
     // slapshot power 9 vs a fresh goalie should beat a perfect band often; try seeds until we find one.
     let found = false;

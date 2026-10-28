@@ -13,9 +13,13 @@ export interface TurnHudProps {
   canPass: boolean;
   canShoot: boolean;
   canEnd: boolean;
+  canSetScreen: boolean;
+  canClearCrease: boolean;
   onPass: () => void;
   onShoot: () => void;
   onEndActivation: () => void;
+  onSetScreen: () => void;
+  onClearCrease: () => void;
 }
 
 const LENGTH_LABEL: Record<GameLength, string> = {
@@ -34,9 +38,13 @@ export default function TurnHud({
   canPass,
   canShoot,
   canEnd,
+  canSetScreen,
+  canClearCrease,
   onPass,
   onShoot,
   onEndActivation,
+  onSetScreen,
+  onClearCrease,
 }: TurnHudProps) {
   return (
     <div className={styles.hud}>
@@ -64,6 +72,12 @@ export default function TurnHud({
         </GameButton>
         <GameButton onClick={onShoot} disabled={!canShoot}>
           Shoot
+        </GameButton>
+        <GameButton onClick={onSetScreen} disabled={!canSetScreen}>
+          Set Screen
+        </GameButton>
+        <GameButton onClick={onClearCrease} disabled={!canClearCrease}>
+          Clear Crease
         </GameButton>
         <GameButton
           onClick={onEndActivation}

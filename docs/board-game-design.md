@@ -60,6 +60,20 @@ Goalies never move.
    On a whistle: all skaters return to formation, stuns clear, the puck is placed loose at center, and phase goes to `faceoff` (the user's C attacks as usual). The turn still increments.
 4. **Game over:** the first goal ends the game.
 
+### Net-front screens (ON2-05)
+
+With its team controlling the puck in the offensive zone, an off-puck C/LW/RW
+can spend an activation to Set Screen at column 13 (Blue attacking) or column 1
+(Red attacking), rows 2–4. Only one screen is active. An adjacent opposing
+LD/RD, including diagonally, can spend an activation on a Clear Crease card
+battle. The screener defends and holds the screen on timeout; a successful
+clear removes the screen without transferring the puck or stunning a player.
+
+The screen subtracts 5 percentage points from goalie save chance before the
+existing clamp. It expires when the screener moves or receives the puck, on a
+turnover, when the puck leaves the offensive zone, or at a stoppage. Both teams
+use these rules. Approved cards and decisions: [ON2-05](tickets/ON2-05.md).
+
 ## 4. Duels [C: encounter battles]
 - **Sides:** each duel has an **attacker** and a **defender**. Each side has `poise` (skater 20, goalie 30), `block`, and a stun/possession stake. The user always plays cards, whichever team's turn it is.
 - **CPU deck [C]:** the CPU has its own 12-card deck (same `STARTER_DECK`, separate piles, cycling across the match). At the start of each round, the CPU draws a hand (same size rules) and plans cards with 3 energy. Its **planned cards are shown face-up** as its intent. On `END_DUEL_ROUND`, it plays them in order. Position perks apply to the CPU duelist's role too. Draw effects add cards to its hand, but those aren't played that round. Its planning policy lives in `engine/cpuDuelPolicy.ts` (a deterministic game rule, not a board heuristic).

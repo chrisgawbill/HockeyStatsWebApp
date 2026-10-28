@@ -11,6 +11,7 @@ import {
   POISE_SAVE_PENALTY_MAX,
   SHOT_BLUE_BAND_WIDTH,
   SHOT_COVER_CHANCE,
+  SCREEN_SAVE_CHANCE_PENALTY,
   SHOT_YELLOW_BASE_WIDTH,
   SHOT_YELLOW_WIDTH_PER_ACCURACY,
 } from '@/features/board-game/data/balance';
@@ -96,9 +97,14 @@ export function rollShotSave(
   goaliePoise: number,
   goalieMaxPoise: number,
   seed: number,
+  screened = false,
 ): [ShotSaveResult, number] {
+  const screenPenalty = screened ? SCREEN_SAVE_CHANCE_PENALTY : 0;
   const rawChance =
-    BASE_SAVE_BY_BAND[band] + poiseFactor(goaliePoise, goalieMaxPoise) - power;
+    BASE_SAVE_BY_BAND[band] +
+    poiseFactor(goaliePoise, goalieMaxPoise) -
+    power -
+    screenPenalty;
   const saveChance = clamp(rawChance, MIN_SAVE_CHANCE, MAX_SAVE_CHANCE);
   const [roll, seedAfterSave] = nextFloat(seed);
   const saved = roll * 100 < saveChance;
@@ -108,6 +114,7 @@ export function rollShotSave(
         band,
         saved,
         saveChance,
+        screenPenalty,
         poiseDrain: 0,
         freeze: false,
         rebound: false,
@@ -124,7 +131,16 @@ export function rollShotSave(
   const covered = canCover && coverRoll * 100 < SHOT_COVER_CHANCE;
   const rebound = canCover && !covered;
   return [
-    { band, saved, saveChance, poiseDrain: power, freeze, rebound, covered },
+    {
+      band,
+      saved,
+      saveChance,
+      screenPenalty,
+      poiseDrain: power,
+      freeze,
+      rebound,
+      covered,
+    },
     nextSeed,
   ];
 }

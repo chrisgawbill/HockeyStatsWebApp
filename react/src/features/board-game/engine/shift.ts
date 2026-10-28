@@ -73,6 +73,7 @@ function whistleIfBoxedIn(state: GameState): GameState {
     ...state,
     skaters: formationSkaters(),
     puck: { kind: 'loose', pos: FACEOFF_SPOTS.centreIce },
+    screen: null,
     phase: 'faceoff',
     whistle: true,
     faceoffSpot: FACEOFF_SPOTS.centreIce,

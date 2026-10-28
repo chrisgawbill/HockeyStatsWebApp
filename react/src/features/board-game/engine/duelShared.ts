@@ -40,11 +40,13 @@ export function makeDuelist(skater: Skater): Duelist {
 
 /**
  * The battle side `side` plays in a duel of `kind`: the puck carrier is the
- * defender in a check (the attacker is the checker) and the attacker in
- * every other battle. Faceoff cards allow both sides, so the mapping is moot there.
+ * defender in checks and net-front battles (the attacker is the checker or
+ * crease clearer) and the attacker in every other battle. Faceoff cards allow
+ * both sides, so the mapping is moot there.
  */
 export function battleSideOf(kind: DuelKind, side: Side): BattleSide {
-  const carrierSide: Side = kind === 'check' ? 'defender' : 'attacker';
+  const carrierSide: Side =
+    kind === 'check' || kind === 'netFront' ? 'defender' : 'attacker';
   return side === carrierSide ? 'possession' : 'challenger';
 }
 

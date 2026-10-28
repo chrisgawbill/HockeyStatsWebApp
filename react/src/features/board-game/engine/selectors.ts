@@ -10,6 +10,10 @@ import {
 } from '@/features/board-game/engine/rink';
 import type { GameState, Skater } from '@/features/board-game/types/game';
 
+const SCREEN_ROLES = ['C', 'LW', 'RW'] as const;
+const SCREEN_ROWS = [2, 3, 4] as const;
+const CLEAR_CREASE_ROLES = ['LD', 'RD'] as const;
+
 /** The skater currently carrying the puck, if any. Team-agnostic. */
 export function getCarrier(state: GameState): Skater | undefined {
   const puck = state.puck;
@@ -32,6 +36,58 @@ function activeCarrier(state: GameState): Skater | undefined {
 export function canShoot(state: GameState): boolean {
   const carrier = activeCarrier(state);
   return !!carrier && isOffensiveZone(carrier.team, carrier.pos);
+}
+
+/** True when `skaterId` may spend its action to establish the net-front screen. */
+export function canSetScreen(state: GameState, skaterId: string): boolean {
+  if (state.phase !== 'move' || state.screen) return false;
+  const screener = state.skaters.find((s) => s.id === skaterId);
+  const carrier = getCarrier(state);
+  if (
+    !screener ||
+    !SCREEN_ROLES.includes(screener.role as (typeof SCREEN_ROLES)[number]) ||
+    !canActivate(state, screener) ||
+    !carrier ||
+    carrier.team !== screener.team ||
+    carrier.id === screener.id ||
+    !isOffensiveZone(carrier.team, carrier.pos)
+  )
+    return false;
+  const frontColumn = carrier.team === 'user' ? 13 : 1;
+  return (
+    screener.pos.col === frontColumn &&
+    SCREEN_ROWS.includes(screener.pos.row as (typeof SCREEN_ROWS)[number])
+  );
+}
+
+/** True when `skaterId` may spend its action to challenge the active screen. */
+export function canClearCrease(state: GameState, skaterId: string): boolean {
+  if (state.phase !== 'move' || !state.screen) return false;
+  const clearer = state.skaters.find((s) => s.id === skaterId);
+  const screener = state.skaters.find((s) => s.id === state.screen!.screenerId);
+  return !!(
+    clearer &&
+    screener &&
+    CLEAR_CREASE_ROLES.includes(
+      clearer.role as (typeof CLEAR_CREASE_ROLES)[number],
+    ) &&
+    clearer.team !== screener.team &&
+    canActivate(state, clearer) &&
+    isAdjacent(clearer.pos, screener.pos)
+  );
+}
+
+/** Removes a screen when its team loses possession, leaves the zone, or the screener gets the puck. */
+export function expireInvalidScreen(state: GameState): GameState {
+  if (!state.screen) return state;
+  const carrier = getCarrier(state);
+  if (
+    carrier?.team === state.screen.team &&
+    carrier.id !== state.screen.screenerId &&
+    isOffensiveZone(carrier.team, carrier.pos)
+  )
+    return state;
+  return { ...state, screen: null };
 }
 
 /**

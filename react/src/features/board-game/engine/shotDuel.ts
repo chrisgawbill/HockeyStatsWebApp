@@ -189,6 +189,7 @@ export function resolveShotBand(
     goaliePoise,
     goalieMaxPoise,
     state.rngSeed,
+    state.screen?.team === shooterSkater.team,
   );
   const nextGoaliePoise = Math.max(0, goaliePoise - result.poiseDrain);
 

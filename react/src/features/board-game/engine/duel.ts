@@ -23,6 +23,7 @@ import {
   type Side,
 } from '@/features/board-game/engine/duelShared';
 import { applyOutcome } from '@/features/board-game/engine/duelOutcome';
+import { expireInvalidScreen } from '@/features/board-game/engine/selectors';
 import type {
   CardBlockReason,
   Deck,
@@ -363,6 +364,17 @@ export function resolveDuel(
   const winnerTeam = goal
     ? state.skaters.find((s) => s.id === duel.attacker.skaterId)!.team
     : null;
+  const screenState = expireInvalidScreen({
+    ...state,
+    puck,
+    screen:
+      goal ||
+      state.lastShotSaveResult?.covered ||
+      state.lastShotSaveResult?.freeze ||
+      (duel.kind === 'netFront' && winner === 'attacker')
+        ? null
+        : state.screen,
+  });
   const outcome: DuelOutcome = {
     kind: duel.kind,
     winner,
@@ -371,12 +383,16 @@ export function resolveDuel(
     defenderId: duel.defender.skaterId,
     goal,
     cleanSave,
-    summary: `${duel.kind} ${winner} wins${byKo ? ' by KO' : ' on timeout'}${goal ? ' - GOAL!' : ''}`,
+    summary:
+      duel.kind === 'netFront'
+        ? `${winner === 'attacker' ? 'Defenseman clears the crease' : 'Screener holds position'}${byKo ? ' by KO' : ' on timeout'}`
+        : `${duel.kind} ${winner} wins${byKo ? ' by KO' : ' on timeout'}${goal ? ' - GOAL!' : ''}`,
     receiverId: duel.receiverId,
   };
 
   return {
     ...state,
+    screen: screenState.screen,
     skaters,
     puck,
     rngSeed,

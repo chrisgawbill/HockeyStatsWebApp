@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { playHeadlessGame } from '@/features/board-game/ai/autoplay';
-import { chooseCpuAction } from '@/features/board-game/ai/cpuBoardAgent';
+import {
+  chooseActionFor,
+  chooseCpuAction,
+} from '@/features/board-game/ai/cpuBoardAgent';
 import {
   createInitialState,
   gameReducer,
@@ -14,6 +17,7 @@ const DUEL_KINDS: DuelKind[] = [
   'deke',
   'check',
   'intercept',
+  'netFront',
   'shot',
 ];
 const LENGTHS: GameLength[] = ['short', 'long'];
@@ -32,6 +36,47 @@ describe('chooseCpuAction', () => {
     const next = gameReducer(state, chooseCpuAction(state));
     expect(next).not.toBe(state);
   });
+
+  it('sets a legal screen and challenges an adjacent screen with a card battle', () => {
+    const initial = createInitialState(7, 'long');
+    const cpuAttack = {
+      ...initial,
+      phase: 'move' as const,
+      activeTeam: 'cpu' as const,
+      activatedSkaterIds: ['cpu-C'],
+      puck: { kind: 'carried' as const, skaterId: 'cpu-C' },
+      skaters: initial.skaters.map((skater) =>
+        skater.id === 'cpu-C'
+          ? { ...skater, pos: { col: 3, row: 3 } }
+          : skater.id === 'cpu-RW'
+            ? { ...skater, pos: { col: 1, row: 4 } }
+            : skater,
+      ),
+    };
+    const setupAction = chooseActionFor(cpuAttack, 'cpu');
+    expect(setupAction).toEqual({ type: 'SET_SCREEN', skaterId: 'cpu-RW' });
+    expect(gameReducer(cpuAttack, setupAction).screen?.team).toBe('cpu');
+
+    const screened = {
+      ...cpuAttack,
+      activatedSkaterIds: [],
+      screen: { screenerId: 'user-LW', team: 'user' as const },
+      puck: { kind: 'carried' as const, skaterId: 'user-C' },
+      skaters: cpuAttack.skaters.map((skater) =>
+        skater.id === 'cpu-LD'
+          ? { ...skater, pos: { col: 12, row: 1 } }
+          : skater.id === 'user-LW'
+            ? { ...skater, pos: { col: 13, row: 2 } }
+            : skater.id === 'user-C'
+              ? { ...skater, pos: { col: 11, row: 3 } }
+              : skater,
+      ),
+    };
+    expect(chooseActionFor(screened, 'cpu')).toEqual({
+      type: 'CLEAR_CREASE',
+      skaterId: 'cpu-LD',
+    });
+  });
 });
 
 describe('200 seeded headless games per length', () => {
@@ -47,6 +92,7 @@ describe('200 seeded headless games per length', () => {
         deke: { attacker: 0, defender: 0 },
         check: { attacker: 0, defender: 0 },
         intercept: { attacker: 0, defender: 0 },
+        netFront: { attacker: 0, defender: 0 },
         shot: { attacker: 0, defender: 0 },
       };
 

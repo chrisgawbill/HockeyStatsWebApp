@@ -10,10 +10,13 @@ import {
   skaterAt,
 } from '@/features/board-game/engine/rink';
 import {
+  canClearCrease,
+  canSetScreen,
   canShoot,
   checkTargets,
   getCarrier,
   passTargets,
+  expireInvalidScreen,
 } from '@/features/board-game/engine/selectors';
 import type {
   Coord,
@@ -77,14 +80,20 @@ export function handleMove(
     ],
   };
 
-  const isNowCarrier =
-    nextState.puck.kind === 'carried' && nextState.puck.skaterId === skaterId;
-  if (!isNowCarrier) return nextState;
+  const movedState = expireInvalidScreen(
+    state.screen?.screenerId === skaterId
+      ? { ...nextState, screen: null }
+      : nextState,
+  );
 
-  const carrier = skaters.find((s) => s.id === skaterId)!;
-  const defender = findDekeDefender(nextState, carrier);
-  if (defender) return createDuel(nextState, 'deke', skaterId, defender.id);
-  return picksUpLoosePuck ? completeActivation(nextState) : nextState;
+  const isNowCarrier =
+    movedState.puck.kind === 'carried' && movedState.puck.skaterId === skaterId;
+  if (!isNowCarrier) return movedState;
+
+  const carrier = movedState.skaters.find((s) => s.id === skaterId)!;
+  const defender = findDekeDefender(movedState, carrier);
+  if (defender) return createDuel(movedState, 'deke', skaterId, defender.id);
+  return picksUpLoosePuck ? completeActivation(movedState) : movedState;
 }
 
 /** `PASS`: the carrier's action - either an intercept duel or a completed pass. The receiver is not activated. */
@@ -114,10 +123,37 @@ export function handlePass(state: GameState, toSkaterId: string): GameState {
     }
   }
 
+  return completeActivation(
+    expireInvalidScreen({
+      ...spentState,
+      puck: { kind: 'carried', skaterId: toSkaterId },
+    }),
+  );
+}
+
+/** A legal forward spends its action to establish the single active screen. */
+export function handleSetScreen(state: GameState, skaterId: string): GameState {
+  if (!canSetScreen(state, skaterId)) return state;
+  const screener = state.skaters.find((s) => s.id === skaterId)!;
   return completeActivation({
-    ...spentState,
-    puck: { kind: 'carried', skaterId: toSkaterId },
+    ...state,
+    screen: { screenerId: skaterId, team: screener.team },
+    activeSkaterId: skaterId,
   });
+}
+
+/** An adjacent defenseman spends its action to battle the screener. */
+export function handleClearCrease(
+  state: GameState,
+  skaterId: string,
+): GameState {
+  if (!canClearCrease(state, skaterId)) return state;
+  return createDuel(
+    { ...state, activeSkaterId: skaterId },
+    'netFront',
+    skaterId,
+    state.screen!.screenerId,
+  );
 }
 
 /** `SHOOT`: the carrier's action - a shot duel against the opposing goalie. */

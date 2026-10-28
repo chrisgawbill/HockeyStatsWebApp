@@ -53,6 +53,8 @@ export const SHOT_COVER_CHANCE = 25;
 export const MIN_SAVE_CHANCE = 5;
 /** Save chance ceiling after modifiers. */
 export const MAX_SAVE_CHANCE = 97;
+/** A net-front screen reduces the goalie save chance by five percentage points. */
+export const SCREEN_SAVE_CHANCE_PENALTY = 5;
 /** Maximum save-chance penalty from depleted goalie poise. */
 export const POISE_SAVE_PENALTY_MAX = 15;
 /** Perfect (yellow) band width at 0 accuracy. */

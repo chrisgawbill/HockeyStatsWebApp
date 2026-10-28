@@ -5,6 +5,7 @@ import type {
   ShotBand,
   ShotSaveResult,
 } from '@/features/board-game/types/game';
+import { SCREEN_SAVE_CHANCE_PENALTY } from '@/features/board-game/data/balance';
 import {
   bandForPosition,
   bandWidthsForAccuracy,
@@ -22,6 +23,8 @@ export interface ShotMinigameProps {
   role: Role;
   goaliePoise: number;
   goalieMaxPoise: number;
+  /** Whether an active teammate screen modifies the goalie save chance. */
+  screened: boolean;
   /** RNG seed for the reduced-motion band roll only. The save roll is never this component's job. */
   seed: number;
   /**
@@ -81,6 +84,7 @@ export default function ShotMinigame({
   role,
   goaliePoise,
   goalieMaxPoise,
+  screened,
   seed,
   result = null,
   onResolve,
@@ -205,6 +209,12 @@ export default function ShotMinigame({
         <h2 id={titleId} className={styles.title}>
           Take the shot
         </h2>
+        {screened && (
+          <p className={styles.instructions}>
+            Net-front screen: −{SCREEN_SAVE_CHANCE_PENALTY} percentage points to
+            goalie save chance.
+          </p>
+        )}
 
         <div className={styles.poiseRow}>
           <span className={styles.poiseLabel}>Goalie poise</span>
@@ -270,7 +280,14 @@ export default function ShotMinigame({
           <div className={styles.result} role="status">
             <p className={styles.bandLabel}>{bandLabel(resolvedBand)}</p>
             {showResult && result ? (
-              <p className={styles.outcome}>{saveResultText(result)}</p>
+              <>
+                <p className={styles.outcome}>{saveResultText(result)}</p>
+                <p className={styles.instructions}>
+                  Save chance: {result.saveChance}%
+                  {result.screenPenalty > 0 &&
+                    ` (screen −${result.screenPenalty} percentage points)`}
+                </p>
+              </>
             ) : (
               <p className={styles.outcome}>Resolving…</p>
             )}

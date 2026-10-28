@@ -57,6 +57,7 @@ describe('card library', () => {
       card.effects.some((effect) => effect.type === 'breakResistance'),
     );
     expect(breakers.map((card) => card.id).sort()).toEqual([
+      'lift_the_stick',
       'pin_to_boards',
       'saucer_pass',
     ]);
@@ -64,5 +65,30 @@ describe('card library', () => {
       expect(card.effects.some((effect) => effect.type === 'damage')).toBe(
         true,
       );
+  });
+
+  it('offers the approved net-front cards on the correct battle sides', () => {
+    const possessionCards = Object.values(CARDS)
+      .filter((card) => card.allowedIn.netFront?.includes('possession'))
+      .map((card) => card.id)
+      .sort();
+    const challengerCards = Object.values(CARDS)
+      .filter((card) => card.allowedIn.netFront?.includes('challenger'))
+      .map((card) => card.id)
+      .sort();
+    expect(possessionCards).toEqual([
+      'brace_for_contact',
+      'establish_position',
+      'find_the_rebound',
+      'hold_your_ground',
+      'shield_the_puck',
+    ]);
+    expect(challengerCards).toEqual([
+      'body_check',
+      'clear_the_crease',
+      'front_the_shooter',
+      'lift_the_stick',
+      'stay_on_him',
+    ]);
   });
 });

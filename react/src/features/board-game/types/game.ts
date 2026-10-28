@@ -27,7 +27,8 @@ export type Puck =
 
 export type Phase = 'faceoff' | 'move' | 'duel' | 'duelResult' | 'gameOver';
 
-export type DuelKind = 'faceoff' | 'deke' | 'check' | 'intercept' | 'shot';
+export type DuelKind =
+  'faceoff' | 'deke' | 'check' | 'intercept' | 'netFront' | 'shot';
 
 /**
  * A participant's role in a battle: the puck carrier (`possession`) or the
@@ -139,6 +140,8 @@ export interface ShotSaveResult {
   saved: boolean;
   /** The clamped save chance actually rolled against, 0-100, for tests/UI display. */
   saveChance: number;
+  /** Screen penalty in percentage points, applied before the save-chance clamp. */
+  screenPenalty: number;
   /** Poise to subtract from the goalie: `power` on any save, 0 on a goal. */
   poiseDrain: number;
   /** True on a `weak`/`miss` save: the existing clean-save freeze path. */
@@ -323,6 +326,8 @@ export interface GameState {
   activationPath: Coord[];
   skaters: Skater[];
   puck: Puck;
+  /** The single active screen, if a forward has established the net front. */
+  screen: { screenerId: string; team: TeamId } | null;
   deck: Deck;
   cpuDeck: Deck;
   duel: DuelState | null;
@@ -381,6 +386,8 @@ export type Action =
   | { type: 'PASS'; toSkaterId: string }
   | { type: 'SHOOT' }
   | { type: 'CHECK'; skaterId: string }
+  | { type: 'SET_SCREEN'; skaterId: string }
+  | { type: 'CLEAR_CREASE'; skaterId: string }
   /** Ends the current activation; with no move or action taken, the team holds position. */
   | { type: 'END_ACTIVATION' }
   | { type: 'PLAY_CARD'; handIndex: number }

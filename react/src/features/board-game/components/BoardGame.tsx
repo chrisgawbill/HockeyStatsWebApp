@@ -11,6 +11,8 @@ import type {
 import { useBoardGame } from '@/features/board-game/hooks/useBoardGame';
 import {
   canEndActivation,
+  canClearCrease,
+  canSetScreen,
   canShoot,
   checkTargets,
   getCarrier,
@@ -32,7 +34,10 @@ import {
   isStunned,
   sameCoord,
 } from '@/features/board-game/engine/rink';
-import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
+import {
+  GOALIE_POISE_BY_LENGTH,
+  SCREEN_SAVE_CHANCE_PENALTY,
+} from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
 import { TEAM_NAME } from '@/features/board-game/data/teams';
 import MatchBoard from '@/features/board-game/components/MatchBoard';
@@ -120,6 +125,10 @@ export default function BoardGame({
     state.skaters.some((s) => s.team === 'user' && legalSteps(s.id).length > 0);
 
   const endActivationEnabled = canEndActivation(state) && isUserTurn;
+  const setScreenEnabled =
+    isUserTurn && !!selectedId && canSetScreen(state, selectedId);
+  const clearCreaseEnabled =
+    isUserTurn && !!selectedId && canClearCrease(state, selectedId);
   const shootEnabled = canShoot(state) && isUserTurn;
   const targets = isUserTurn ? passTargets(state) : [];
   const passEnabled = targets.length > 0;
@@ -191,6 +200,16 @@ export default function BoardGame({
     dispatch({ type: 'END_ACTIVATION' });
   }
 
+  function handleSetScreen() {
+    if (setScreenEnabled && selectedId)
+      dispatch({ type: 'SET_SCREEN', skaterId: selectedId });
+  }
+
+  function handleClearCrease() {
+    if (clearCreaseEnabled && selectedId)
+      dispatch({ type: 'CLEAR_CREASE', skaterId: selectedId });
+  }
+
   /**
    * `ShotMinigame` reports pick and band together; the reducer wants them as
    * two actions, dispatched here. Never also dispatch `AUTO_RESOLVE_SHOT` -
@@ -241,6 +260,7 @@ export default function BoardGame({
         hasPuck={hasPuck}
         selected={skater.id === selectedId}
         stunned={isStunned(skater)}
+        screened={state.screen?.screenerId === skater.id}
         moving={false}
         movable={
           showMoveCue &&
@@ -284,10 +304,21 @@ export default function BoardGame({
             canPass={passEnabled}
             canShoot={shootEnabled}
             canEnd={endActivationEnabled}
+            canSetScreen={setScreenEnabled}
+            canClearCrease={clearCreaseEnabled}
             onPass={handlePass}
             onShoot={handleShoot}
             onEndActivation={handleEndActivation}
+            onSetScreen={handleSetScreen}
+            onClearCrease={handleClearCrease}
           />
+          {state.screen && (
+            <p role="status" className={styles.hint}>
+              Screen set by {TEAM_NAME[state.screen.team]}{' '}
+              {state.screen.screenerId.split('-')[1]} · goalie save chance −
+              {SCREEN_SAVE_CHANCE_PENALTY} percentage points.
+            </p>
+          )}
           {cpuThinking && (
             <p role="status" className={styles.hint}>
               {TEAM_NAME.cpu} is thinking…
@@ -339,6 +370,11 @@ export default function BoardGame({
             goalieMaxPoise={GOALIE_POISE_BY_LENGTH[state.length]}
             seed={state.rngSeed}
             result={state.lastShotSaveResult}
+            screened={
+              state.screen?.team ===
+              state.skaters.find((s) => s.id === state.duel!.attacker.skaterId)
+                ?.team
+            }
             onResolve={handleResolveShot}
           />
         )}
