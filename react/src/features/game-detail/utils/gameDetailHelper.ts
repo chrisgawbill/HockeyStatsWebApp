@@ -48,6 +48,19 @@ export function getStateLabel(
 }
 
 /**
+ * Period clock for a live game ("12:34", or "INT" during an intermission).
+ * Returns null when the game isn't live or the boxscore has no clock.
+ */
+export function getLiveClockLabel(
+  boxscore: GameDetailBoxscore,
+  status: GameDetailStatus,
+): string | null {
+  if (status !== 'live' || !boxscore.clock) return null;
+  if (boxscore.clock.inIntermission) return 'INT';
+  return boxscore.clock.timeRemaining || null;
+}
+
+/**
  * Formats an NHL "YYYY-MM-DD" calendar date as a local long-form date string.
  */
 export function formatGameDate(gameDate: string): string {

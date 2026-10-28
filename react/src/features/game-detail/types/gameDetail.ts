@@ -66,6 +66,7 @@ export interface GameDetailBoxscore {
   homeTeam: BoxscoreTeam;
   awayTeam: BoxscoreTeam;
   periodDescriptor: { number: number; periodType: string };
+  clock?: { timeRemaining: string; running: boolean; inIntermission: boolean }; // timeRemaining is "MM:SS"
   gameOutcome?: { lastPeriodType: string }; // "REG" | "OT" | "SO"
   playerByGameStats?: {
     homeTeam: BoxscoreTeamStats;
