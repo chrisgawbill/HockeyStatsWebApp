@@ -1,0 +1,56 @@
+/* ── Arena container: the canvas fills it, controls float above ───────── */
+.arena {
+  position: relative;
+  width: min(100%, 960px);
+  aspect-ratio: 2 / 1;
+  max-height: 85svh;
+  margin: 0 auto;
+  border-radius: var(--ds-radius-md, 12px);
+  overflow: hidden;
+  background-color: #0f1720;
+  touch-action: manipulation;
+}
+
+.arenaTall {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  aspect-ratio: auto;
+  max-height: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Accessible control layer over the projected tiles and tokens ────── */
+.controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hitTarget {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.hitTarget:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: -3px;
+  box-shadow: 0 0 0 2px #111111;
+}
+
+.skaterTarget {
+  z-index: 1;
+}

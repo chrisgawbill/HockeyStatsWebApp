@@ -24,6 +24,10 @@ import {
 import { faceoffBandWindowsFor } from '@/features/board-game/engine/faceoffDuel';
 import { describeOutcome } from '@/features/board-game/utils/describeOutcome';
 import {
+  arenaCameraShotFor,
+  type ArenaCameraState,
+} from '@/features/board-game/utils/arenaCamera';
+import {
   canActivate,
   isStunned,
   sameCoord,
@@ -31,7 +35,7 @@ import {
 import { GOALIE_POISE_BY_LENGTH } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
 import { TEAM_NAME } from '@/features/board-game/data/teams';
-import RinkBoard from '@/features/board-game/components/RinkBoard';
+import MatchBoard from '@/features/board-game/components/MatchBoard';
 import SkaterSprite from '@/features/board-game/components/SkaterSprite';
 import TurnHud from '@/features/board-game/components/TurnHud';
 import GameButton from '@/features/board-game/components/GameButton';
@@ -92,6 +96,18 @@ export default function BoardGame({
     user: string;
     cpu: string | null;
   } | null>(null);
+
+  /**
+   * Where the board's camera is, as reported by the board. The shot timing
+   * control waits for the shot view to settle so no camera move eats into
+   * its window; the HTML fallback board reports every view settled at once.
+   */
+  const [boardCamera, setBoardCamera] = useState<ArenaCameraState>({
+    view: 'tactical',
+    settled: true,
+  });
+  const cameraShot = arenaCameraShotFor(state);
+  const shotCameraSettled = boardCamera.view === 'shot' && boardCamera.settled;
 
   const isUserTurn = state.activeTeam === 'user';
   const highlighted: Coord[] = selectedId ? legalSteps(selectedId) : [];
@@ -291,7 +307,7 @@ export default function BoardGame({
         </>
       )}
 
-      <RinkBoard
+      <MatchBoard
         skaters={state.skaters}
         puck={state.puck}
         highlighted={highlighted}
@@ -299,27 +315,33 @@ export default function BoardGame({
         onTileClick={handleTileClick}
         onSkaterClick={handleSkaterClick}
         renderSkater={renderSkater}
+        cameraShot={cameraShot}
+        onCameraChange={setBoardCamera}
       />
 
-      {state.phase === 'duel' && state.duel && state.duel.kind === 'shot' && (
-        <ShotMinigame
-          cards={state.deck.hand.map((id) => CARDS[id])}
-          role={
-            state.skaters.find((s) => s.id === state.duel!.attacker.skaterId)!
-              .role
-          }
-          goaliePoise={
-            state.goaliePoise[
-              state.skaters.find((s) => s.id === state.duel!.defender.skaterId)!
-                .team
-            ]
-          }
-          goalieMaxPoise={GOALIE_POISE_BY_LENGTH[state.length]}
-          seed={state.rngSeed}
-          result={state.lastShotSaveResult}
-          onResolve={handleResolveShot}
-        />
-      )}
+      {state.phase === 'duel' &&
+        state.duel &&
+        state.duel.kind === 'shot' &&
+        shotCameraSettled && (
+          <ShotMinigame
+            cards={state.deck.hand.map((id) => CARDS[id])}
+            role={
+              state.skaters.find((s) => s.id === state.duel!.attacker.skaterId)!
+                .role
+            }
+            goaliePoise={
+              state.goaliePoise[
+                state.skaters.find(
+                  (s) => s.id === state.duel!.defender.skaterId,
+                )!.team
+              ]
+            }
+            goalieMaxPoise={GOALIE_POISE_BY_LENGTH[state.length]}
+            seed={state.rngSeed}
+            result={state.lastShotSaveResult}
+            onResolve={handleResolveShot}
+          />
+        )}
 
       {state.phase === 'duel' &&
         state.duel &&

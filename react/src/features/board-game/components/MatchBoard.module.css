@@ -1,0 +1,4 @@
+/* Marks which renderer drew the board without adding a layout box. */
+.rendererSlot {
+  display: contents;
+}

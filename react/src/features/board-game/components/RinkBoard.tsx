@@ -1,10 +1,14 @@
-import type { KeyboardEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { Coord, Puck, Skater } from '@/features/board-game/types/game';
 import { BOARD_COLS, BOARD_ROWS } from '@/features/board-game/data/balance';
 import { RINK_CORNER_RADIUS } from '@/features/board-game/data/rink';
-import { TEAM_NAME } from '@/features/board-game/data/teams';
 import { useIsNarrow } from '@/features/board-game/hooks/useIsNarrow';
 import { gridPositionFor } from '@/features/board-game/utils/rinkGridPosition';
+import {
+  coordKey,
+  focusNextRinkTile,
+  skaterControlLabel,
+} from '@/features/board-game/utils/rinkControls';
 import RinkTile from '@/features/board-game/components/RinkTile';
 import PuckToken from '@/features/board-game/components/PuckToken';
 import RinkOverlay from '@/features/board-game/components/RinkOverlay';
@@ -18,10 +22,6 @@ export interface RinkBoardProps {
   onTileClick: (coord: Coord) => void;
   onSkaterClick: (id: string) => void;
   renderSkater: (skater: Skater) => ReactNode;
-}
-
-function coordKey(c: Coord): string {
-  return `${c.col},${c.row}`;
 }
 
 /**
@@ -64,44 +64,6 @@ export default function RinkBoard({
     .filter(Boolean)
     .join(' ');
 
-  function handleTileKeyDown(
-    coord: Coord,
-    event: KeyboardEvent<HTMLButtonElement>,
-  ) {
-    if (
-      !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)
-    )
-      return;
-    event.preventDefault();
-
-    const direction = {
-      ArrowUp: { col: 0, row: -1 },
-      ArrowDown: { col: 0, row: 1 },
-      ArrowLeft: { col: -1, row: 0 },
-      ArrowRight: { col: 1, row: 0 },
-    }[event.key];
-    if (!direction) return;
-
-    const candidates = highlighted.filter((candidate) => {
-      const col = candidate.col - coord.col;
-      const row = candidate.row - coord.row;
-      return direction.col * col + direction.row * row > 0;
-    });
-    candidates.sort((a, b) => {
-      const aDistance =
-        Math.abs(a.col - coord.col) + Math.abs(a.row - coord.row);
-      const bDistance =
-        Math.abs(b.col - coord.col) + Math.abs(b.row - coord.row);
-      return aDistance - bDistance;
-    });
-    const next = candidates[0];
-    if (!next) return;
-    const button = document.querySelector<HTMLButtonElement>(
-      `[data-rink-tile="${coordKey(next)}"]`,
-    );
-    button?.focus();
-  }
-
   return (
     <div
       className={boardClassName}
@@ -120,7 +82,7 @@ export default function RinkBoard({
           narrow={narrow}
           actionable={highlightedKeys.has(coordKey(coord))}
           onClick={() => onTileClick(coord)}
-          onKeyDown={(event) => handleTileKeyDown(coord, event)}
+          onKeyDown={(event) => focusNextRinkTile(event, coord, highlighted)}
         />
       ))}
       {loosePuckCoord && (
@@ -133,7 +95,6 @@ export default function RinkBoard({
       )}
       {skaters.map((skater) => {
         const hasPuck = skater.id === carrierId;
-        const label = `${TEAM_NAME[skater.team]} ${skater.role}${hasPuck ? ', has puck' : ''}`;
         return (
           <button
             key={skater.id}
@@ -141,7 +102,7 @@ export default function RinkBoard({
             className={styles.skaterSlot}
             style={gridPositionFor(skater.pos, narrow)}
             aria-pressed={skater.id === selectedId}
-            aria-label={label}
+            aria-label={skaterControlLabel(skater, hasPuck)}
             onClick={() => onSkaterClick(skater.id)}
           >
             {renderSkater(skater)}
