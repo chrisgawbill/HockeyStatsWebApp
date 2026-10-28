@@ -6,6 +6,7 @@ import {
 } from '@/features/game-detail/types/gameDetail';
 import {
   formatGameDate,
+  getLiveClockLabel,
   getLocalPuckDropTime,
   getStateLabel,
 } from '@/features/game-detail/utils/gameDetailHelper';
@@ -32,6 +33,7 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
     theme === 'dark' ? boxscore.homeTeam.darkLogo : boxscore.homeTeam.logo;
   const stateLabel = getStateLabel(boxscore, status);
   const isLive = status === 'live';
+  const clockLabel = getLiveClockLabel(boxscore, status);
   const isFuture = status === 'preview';
   const puckDropTime = isFuture
     ? getLocalPuckDropTime(boxscore.startTimeUTC)
@@ -112,6 +114,17 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
         <div className={styles['game-detail-center']}>
           {isFuture ? (
             <span className={styles['game-detail-vs']}>VS</span>
+          ) : clockLabel ? (
+            <span
+              className={styles['game-detail-clock']}
+              aria-label={
+                clockLabel === 'INT'
+                  ? 'Intermission'
+                  : `${clockLabel} remaining`
+              }
+            >
+              {clockLabel}
+            </span>
           ) : (
             <span className={styles['game-detail-dash']}>–</span>
           )}

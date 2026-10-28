@@ -121,6 +121,11 @@ function ScheduleCard({ game, goToGameDetails }: ScheduleCardProps) {
                 </span>
               </span>
             )}
+            {game.liveClock && (
+              <span className={styles['game-clock-chip']}>
+                {game.liveClock}
+              </span>
+            )}
             {statusLabel && (
               <span
                 className={joinClassNames(

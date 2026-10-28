@@ -27,7 +27,8 @@ __pycache__/
 /react/dist
 
 # misc
-/.claude/
+/.claude/*
+!/.claude/skills/
 /react/.DS_Store
 /react/.env
 /react/.env.local

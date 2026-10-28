@@ -1,4 +1,4 @@
-import { del, get, post } from '@/lib/apiClient';
+import { del, get, post, put } from '@/lib/apiClient';
 import { authHeader } from '@/lib/auth/authApi';
 
 export interface PushConfig {
@@ -21,6 +21,28 @@ export async function saveSubscription(
     subscription,
     authHeader(token),
   );
+}
+
+/** The account-wide notifications switch (every device, every push). */
+export async function fetchAccountPush(token: string): Promise<boolean> {
+  const { enabled } = await get<{ enabled: boolean }>(
+    '/api/push/notifications',
+    undefined,
+    authHeader(token),
+  );
+  return enabled;
+}
+
+export async function setAccountPush(
+  token: string,
+  enabled: boolean,
+): Promise<boolean> {
+  const result = await put<{ enabled: boolean }>(
+    '/api/push/notifications',
+    { enabled },
+    authHeader(token),
+  );
+  return result.enabled;
 }
 
 export async function deleteSubscription(

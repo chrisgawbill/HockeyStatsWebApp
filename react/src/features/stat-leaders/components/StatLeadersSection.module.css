@@ -60,3 +60,8 @@
     animation: none;
   }
 }
+
+/* Holds a loaded 2x2 card grid's height while a group loads or has failed. */
+.placeholder {
+  min-height: 23.75rem;
+}

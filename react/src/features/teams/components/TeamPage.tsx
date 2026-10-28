@@ -10,7 +10,7 @@ import PlayerStatsSection from '@/features/teams/components/PlayerStatsSection';
 import RosterTab from '@/features/teams/components/tabs/RosterTab';
 import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
 import TeamDna from '@/components/TeamDna';
-import TeamFormPanel from '@/features/teams/components/TeamFormPanel';
+import TeamFormPanel from '@/components/TeamFormPanel';
 import { localTeamList } from '@/lib/teamListData';
 import {
   TeamOverview,
@@ -220,7 +220,10 @@ export default function TeamPage() {
 
           <section id="stats" className={styles['team-section']}>
             <TeamDna profile={teamDna} season={season} />
-            <TeamFormPanel teamForm={teamForm} />
+            <TeamFormPanel
+              teamForm={teamForm}
+              className={styles['team-form']}
+            />
           </section>
           <section id="leaders" className={styles['team-section']}>
             <PlayerStatsSection

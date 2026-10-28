@@ -1,4 +1,5 @@
 import type { FanTier } from '@/lib/favoriteCategory';
+import type { TeamFormGame, TeamResultOutcome } from '@/lib/teamForm';
 
 /** A favorited player as stored by the API (display fields from the NHL). */
 export interface FavoritePlayer {
@@ -11,6 +12,8 @@ export interface FavoritePlayer {
   since: string;
   tier: FanTier;
   label: string | null;
+  /** Left out of the Monday weekly-report push. */
+  pushMuted: boolean;
 }
 
 export interface SkaterWeekStats {
@@ -62,6 +65,35 @@ export type WeeklyReportPlayer =
       stats: GoalieWeekStats | null;
     });
 
+/** One of a favorite team's games in the report week, from its side. */
+export interface WeeklyReportTeamGame {
+  gameId: number;
+  /** YYYY-MM-DD. */
+  date: string;
+  opponent: string;
+  isHome: boolean;
+  teamScore: number;
+  opponentScore: number;
+  outcome: TeamResultOutcome;
+}
+
+/** A completed regular-season game through the week's end, for Team Form. */
+export type WeeklyReportFormGame = Omit<TeamFormGame, 'date'> & {
+  /** YYYY-MM-DD. */
+  date: string;
+};
+
+/** A favorite team frozen into the report (API-WPR-02). */
+export interface WeeklyReportTeam {
+  triCode: string;
+  name: string;
+  logo: string | null;
+  tier: FanTier;
+  label: string | null;
+  weekGames: WeeklyReportTeamGame[];
+  formGames: WeeklyReportFormGame[];
+}
+
 /** One frozen Monday–Sunday (Eastern) Weekly Player Report. */
 export interface WeeklyPlayerReport {
   /** Monday, YYYY-MM-DD. */
@@ -71,6 +103,8 @@ export interface WeeklyPlayerReport {
   label: string;
   headline: string;
   players: WeeklyReportPlayer[];
+  /** Favorite teams; absent on reports made before API-WPR-02. */
+  teams?: WeeklyReportTeam[];
   /** ISO timestamp the report was generated. */
   createdAt: string;
   read: boolean;

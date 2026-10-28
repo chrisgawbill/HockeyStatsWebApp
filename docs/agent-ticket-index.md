@@ -19,13 +19,15 @@ not been independently verified by this documentation review.
 The tables are a navigation summary; each linked ticket block retains its
 scope, decisions, verification evidence and remaining gates. Product Owner
 acceptance was granted on 2026-10-24 for tickets awaiting that review; this
-does not claim that pending deployments or verification checks ran. Keep its status
+does not claim that pending deployments or verification checks ran. On 2026-10-25
+the Product Owner accepted API-FAN-01, API-COMPARE-01, API-PUSH-03 and PUSH-03. Keep its status
 and table row in sync when moving a ticket between states.
 
-### Completed tickets (18)
+### Completed tickets (34)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
+| [x] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | DONE — merged to HockeyStatsAPI `main`; Product Owner accepted 2026-10-27. Not run: deploy check. |
 | [x] | [AAR-01 — Favorite teams and After Action Report inbox](#aar-01--favorite-teams-and-after-action-report-inbox) | DONE — accepted by the Product Owner (2026-10-19) |
 | [x] | [AAR-02 — Mobile push for After Action Reports](#aar-02--mobile-push-for-after-action-reports) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and QA-verified. |
 | [x] | [API-LINES-01 — Real line combinations from shift charts](#api-lines-01--real-line-combinations-from-shift-charts) | DONE (Product Owner approved 2026-10-19) (HockeyStatsAPI) |
@@ -37,26 +39,36 @@ and table row in sync when moving a ticket between states.
 | [x] | [NAV-01 — Header nav fits at 1024px](#nav-01--header-nav-fits-at-1024px) | DONE — accepted by the Product Owner from 1001/1024/1200 screenshots 2026-10-21. |
 | [x] | [FEED-01 — "My Hockey" personal feed](#feed-01--my-hockey-personal-feed) | DONE — accepted by the Product Owner from screenshots 2026-10-22. |
 | [x] | [HOME-LEAD-02 — Swipe between phone stat leader groups](#home-lead-02--swipe-between-phone-stat-leader-groups) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `8b3201ee` (#113). |
+| [x] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | DONE — Spotter passed and the Product Owner accepted 2026-10-25; merged to `main` with `react/qa/home-loading.spec.mjs`; tsc, tests, format and build pass. |
 | [x] | [HOME-LOTTERY-01 — Draft lottery matches the landing page](#home-lottery-01--draft-lottery-matches-the-landing-page) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22; merged in `8b3201ee` (#113). |
 | [x] | [FEED-02 — Favorites move to My Hockey](#feed-02--favorites-move-to-my-hockey) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: merged in `3d09840b` (#117). |
 | [x] | [PREVIEW-01 — Pre-game preview on the matchup page](#preview-01--pre-game-preview-on-the-matchup-page) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified. |
 | [x] | [COMPARE-01 — Player comparison](#compare-01--player-comparison) | DONE — accepted by the Product Owner from 375/1280 light/dark screenshots 2026-10-22. QA PASS 1–9; dialog Compare link checked in source only. Release needs API-COMPARE-01 deployed first (league-wide summaries return every player). |
-| [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified 2026-10-22. |
 | [x] | [API-AUTH-02 — Discord sign-in and account linking (backend)](#api-auth-02--discord-sign-in-and-account-linking-backend) | DONE — accepted by the Product Owner 2026-10-22. API merged to `main` (`8f99a1d`) and deployed by Jenkins 2026-10-22; Google sign-in confirmed working. The Discord button shipped in SIGNIN-01's modal; Spotter passed the Discord success, cancel, mismatched-state, rejected and expired-session specs against recorded API responses (`feature/signin-dialog`, `2a45e8d`). Follow-up: one live Discord sign-in after the web app deploys. |
 | [x] | [SIGNIN-01 — Account icon and sign-in modal (frontend)](#signin-01--account-icon-and-sign-in-modal-frontend) | DONE — accepted by the Product Owner 2026-10-22. Spotter passed on `feature/signin-dialog` (`2a45e8d`, 32/32 specs in `react/qa/sign-in.spec.mjs` at 375/1280 light/dark, no new findings; signed-in screenshots unchanged). |
+| [x] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25). |
+| [x] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25). |
+| [x] | [API-PUSH-03 — Account-level push settings and automatic device subscription (backend)](#api-push-03--account-level-push-settings-and-automatic-device-subscription-backend) | DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live). |
+| [x] | [PUSH-03 — Automatic device subscription and account push settings (frontend)](#push-03--automatic-device-subscription-and-account-push-settings-frontend) | DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed. |
+| [x] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | DONE — Product Owner accepted 2026-10-25. Merged to HockeyStatsAPI `main` (`1e11b15`); tests pass; deploy not independently verified. |
+| [x] | [SHARE-01 — Share button in the phone top bar](#share-01--share-button-in-the-phone-top-bar) | DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass. |
+| [x] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | DONE — Product Owner accepted 2026-10-24; first Monday run 2026-10-26 checked by the Product Owner (report and phone push); HockeyStatsAPI `f243cce`. |
+| [x] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | DONE — Spotter passed and the Product Owner accepted 2026-10-27; merged to `main`. Follow-ups: add `qa/game-shots.spec.mjs` to Spotter's config; check against real games once API-PBP-01 deploys. |
+| [x] | [SCHED-STATUS-01 — Live and final states on the schedule from cached game data](#sched-status-01--live-and-final-states-on-the-schedule-from-cached-game-data) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. API and web checks pass; merged to `main` 2026-10-27 (HockeyStatsAPI `0a3e9dc`, web app `71f6a65d`). Not run: Spotter, the dev-server deploy check and a game-night check. |
+| [x] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing. Not run: the break-week check (a week without games sends nothing). |
+| [x] | [WPR-02 — Favorite teams and their form in the weekly report](#wpr-02--favorite-teams-and-their-form-in-the-weekly-report) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — started 2026-10-26; Team Form panel moved to `components/`, team section built against the API-WPR-02 contract; mockups approved 2026-10-26. Spotter PASS on `b5deb3d` (2026-10-26) with the WPR-02 specs (16 tests × 5 browsers, all pass); merged to `main` 2026-10-26. Pending: API-WPR-02 deploy and Product Owner review of the team section with real data. Not run: the Product Owner review of the team section with real data. |
+| [x] | [API-WPR-02 — Favorite teams in the weekly report (backend)](#api-wpr-02--favorite-teams-in-the-weekly-report-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — kickoff decisions recorded 2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`), 146 API tests pass. Merged to `main` (`fff44ed`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here). Pending: deploy check, then the Product Owner checks the first Monday report with teams (2026-11-02). Not run: the deploy check and the first Monday report with teams (2026-11-02). |
+| [x] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets) Not run: deleting the old GitHub secrets. |
+| [x] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`, 2026-10-26); tests pass. Pending: check against a recorded NHL payload (host unreachable from the build environment) and the dev-server check. Not run: the check against a recorded NHL payload and the dev-server deploy check. |
+| [x] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. Spotter recheck passed (reported by the Product Owner 2026-10-27). |
 
-### In progress / awaiting acceptance (6)
+### In progress / awaiting acceptance (1)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
-| [ ] | [API-WPR-01 — Favorite players and the weekly player report (backend)](#api-wpr-01--favorite-players-and-the-weekly-player-report-backend) | ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26 13:00 UTC) and the real-NHL report spot-check are pending. |
-| [ ] | [WPR-01 — Favorite players and the weekly report (frontend)](#wpr-01--favorite-players-and-the-weekly-report-frontend) | ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified. |
-| [ ] | [API-FAN-01 — Fan categories for favorite teams (and players) (backend)](#api-fan-01--fan-categories-for-favorite-teams-and-players-backend) | ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25); awaiting Product Owner acceptance |
-| [ ] | [API-COMPARE-01 — Every player in the season summaries (backend)](#api-compare-01--every-player-in-the-season-summaries-backend) | ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance |
-| [ ] | [A11Y-01 — Accessibility fixes from the Spotter baseline](#a11y-01--accessibility-fixes-from-the-spotter-baseline) | ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified. |
-| [ ] | [API-PUSH-02 — Reliable push delivery and scheduling (backend)](#api-push-02--reliable-push-delivery-and-scheduling-backend) | ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets) |
+| [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | ACTIVE — merged to HockeyStatsAPI `main` (`bb084dd`) 2026-10-27, which starts the Jenkins deploy (not confirmed from here); 160 API tests pass; checked on real Postgres. Pending: pilot player ID check, Product Owner acceptance. Not run: deploy check. |
 
-### Not started tickets (20)
+### Not started tickets (14)
 
 | Complete | Ticket | Status / remaining gate |
 | --- | --- | --- |
@@ -65,8 +77,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-03 — Contextual card contracts and offers](#on2-03--contextual-card-contracts-and-offers) | IDEA |
 | [ ] | [ON2-04 — Hockey card library and identity packages](#on2-04--hockey-card-library-and-identity-packages) | IDEA |
 | [ ] | [ON2-05 — Screens and Clear Crease battles](#on2-05--screens-and-clear-crease-battles) | IDEA |
-| [ ] | [API-ON2-01 — Site-wide rivalry records and contract](#api-on2-01--site-wide-rivalry-records-and-contract) | IDEA — backend-owned dependency |
-| [ ] | [API-ON2-02 — Rink Quest team and player profiles](#api-on2-02--rink-quest-team-and-player-profiles) | IDEA — backend-owned dependency |
 | [ ] | [ON2-06 — Team playbook and featured-star integration](#on2-06--team-playbook-and-featured-star-integration) | IDEA |
 | [ ] | [ON2-07 — Daily opponent and Rivalry Night selection](#on2-07--daily-opponent-and-rivalry-night-selection) | IDEA |
 | [ ] | [ON2-08 — Product Owner team-content pilot](#on2-08--product-owner-team-content-pilot) | IDEA |
@@ -76,10 +86,6 @@ and table row in sync when moving a ticket between states.
 | [ ] | [ON2-11 — Physical hand and battle stage](#on2-11--physical-hand-and-battle-stage) | IDEA |
 | [ ] | [ON2-12 — Broadcast moments and Rivalry Night clash](#on2-12--broadcast-moments-and-rivalry-night-clash) | IDEA |
 | [ ] | [ON2-13 — Coach's Report and 2.0 release gate](#on2-13--coachs-report-and-20-release-gate) | IDEA |
-| [ ] | [HOME-LOAD-01 — Home sections load and fail on their own](#home-load-01--home-sections-load-and-fail-on-their-own) | IDEA |
-| [ ] | [API-CACHE-01 — Cache resilience (backend)](#api-cache-01--cache-resilience-backend) | IDEA |
-| [ ] | [API-PBP-01 — Play-by-play events for shot maps and game flow (backend)](#api-pbp-01--play-by-play-events-for-shot-maps-and-game-flow-backend) | IDEA — backend-owned dependency |
-| [ ] | [GAME-SHOTS-01 — Shot map and game flow on the game page](#game-shots-01--shot-map-and-game-flow-on-the-game-page) | IDEA |
 
 ## Delivery contract for every ticket
 
@@ -103,7 +109,7 @@ necessary for DONE.
 | ON2-04 | Proposed card list, identity strengths, weaknesses, and functional budgets. |
 | ON2-05 | Net-front eligibility, screen expiry on turnovers, and initial save penalty. |
 | API-ON2-01 | Rivalry pairs, tiers, and shared read contract. |
-| API-ON2-02 | Profile fields, supported vocabularies, and pilot records. |
+| API-ON2-02 | Decided 2026-10-27: profiles enabled by default; five team identities; six skater archetypes, skaters only, rank 1–3; TOR/MTL pilot; `/rink-quest` routes that refresh the roster (see block). |
 | ON2-06 | Archetype passives/signatures, compatible roles, CPU star choice, and sparse-data behavior. |
 | ON2-07 | Daily weights, repeat window, fallback behavior, and Rivalry Night frequency. |
 | ON2-08 | Pilot teams and each team's/player's content before enablement. |
@@ -132,15 +138,19 @@ necessary for DONE.
 | PREVIEW-01 | Approved 2026-10-22: previews use /matchup (not the game page) with a Team DNA card per team; every game card links through one routing helper (future → /matchup, live/final → /game) and /game/:id redirects games that have not started; phones switch between the two DNA cards; the puck-drop chip turns into a game-page link at the start time (local timer, no polling); TeamDna/FormStrip move to `components/` and take the team color. Lines, goalies and the team comparison are dropped; accepted by the Product Owner 2026-10-24 |
 | COMPARE-01 | Approved 2026-10-22: option A data (API-COMPARE-01); Compare button in `PlayerStatsDialog` only; PPG = points per game; PM's call on presentation: table only, GP unmarked, ties at displayed rounding. Product Owner reviews 375/1280 light/dark screenshots. |
 | API-COMPARE-01 | Approved 2026-10-22 (option A): league-wide summaries return every player; contract adds team, shots, S%, PP goals. |
-| API-CACHE-01 | Serve-stale behaviour (on NHL error, and while refreshing), past-season TTL, and whether an in-memory layer is needed. |
-| HOME-LOAD-01 | Per-section loading and error states on home, and what a failed section shows. |
-| API-PBP-01 | Play-by-play contract, coordinate normalization, and cache TTLs. |
-| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Implemented; accepted by the Product Owner 2026-10-24 |
+| API-CACHE-01 | Decided 2026-10-25: stale-while-revalidate for entries on their default TTL, serve-stale on error for caller-set (live) TTLs; completed seasons permanent once cached after they ended; no in-memory layer; production confirmed on Postgres (see block); accepted by the Product Owner 2026-10-25 |
+| HOME-LOAD-01 | Decided 2026-10-25: option 1 — each section's heading stays with the existing spinner in space held at its loaded height (mockups compared against skeleton cards); a failed section shows the inline error with its own Try again (lottery and standings share one call and recover together); skater and goalie leaders load and fail separately. Spotter passed; accepted by the Product Owner 2026-10-25 |
+| API-PBP-01 | Decided 2026-10-26: PM recommendations — ticket contract plus `shooterName` and `periodType`, shootouts left out; home always shoots toward +x (flipped periods turned 180°), missing or unknown coordinates kept as `null`; raw payload cached forever once `OFF`, 1 minute live, 5 minutes otherwise (see block). |
+| SHARE-01 | Approved 2026-10-22: share icon in the phone top bar before the account controls (no desktop button); Web Share API, copy + "Link copied" toast fallback, cancel silent; title = page heading + " · Hockey Stats"; every page except /diagnostics; URL shared as is. Reopened 2026-10-25: never merged; ported in #125; accepted by the Product Owner 2026-10-25 |
 | API-AUTH-02 | Approved 2026-10-22, narrowed same day: Discord sign-in beside Google (PKCE); emails encrypted at rest with a keyed lookup hash; a `user_identities` table links Google and Discord on a verified email only. Microsoft and emailed codes dropped. No Apple. Accepted 2026-10-22. |
 | SIGNIN-01 | Approved 2026-10-22: the Google pill becomes an account icon button (option 1: filled figure in the glass circle) on phones and desktop, opening a sign-in modal with Google, Microsoft, Discord and email code; each provider hidden until configured. Narrowed to Google and Discord; accepted 2026-10-22. |
-| GAME-SHOTS-01 | Shot map and game flow designs from mockups; filters and phone layout. |
+| GAME-SHOTS-01 | Decided 2026-10-27 (PM recommendations): one full rink; period/strength/player filters on the shot map only; views after Goals by period, side by side on desktop; blocked shots counted but not drawn; team colours with a both-theme fallback; Player filter added to scope (see block). Accepted by the Product Owner 2026-10-27 after Spotter passed. |
+| WPR-02 | Decided 2026-10-26: team data frozen in the report (API-WPR-02); each team card shows the week's results and the full Team Form panel; team section below the players; headline and push gain a team line (see block). Product Owner reviews 375/1280 light/dark screenshots. |
+| API-WPR-02 | Decided with WPR-02 2026-10-26: frozen `teams[]` in new reports and a team line in the headline/push. Kickoff confirmed 2026-10-27: wording, team mute ignored in the weekly push, team-only users included, `formGames` limited to the report week (see block). |
 | A11Y-01 | Color changes for the low-contrast grey and the dark-mode active tab (before/after swatches), and how clickable schedule cards and standings rows are restructured; accepted by the Product Owner 2026-10-24 |
 | API-PUSH-02 | Requested 2026-10-24 ("make notification pushes more reliable … a project-agnostic notification service on my dev server, so be it"). Product Owner accepted 2026-10-24: notifier stays in `HockeyStatsAPI/notifier/`; 5-minute AAR cadence; weekly runs 9:00 + 12:00 ET with catch-up; merge both to main. Product Owner checks the first live game night and Monday report. |
+| API-PUSH-03 | Decided 2026-10-25: one account-wide notifications switch over everything; per-player toggle controls only the weekly push (see block). |
+| PUSH-03 | Decided 2026-10-25: permission is asked only from the bell; devices that already allow notifications subscribe automatically (see block). Product Owner reviews the bell panel. |
 
 ## Dependency outline
 
@@ -162,6 +172,7 @@ API-COMPARE-01 -> COMPARE-01
 FAN-01 -> FEED-01
 API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
+WPR-01 + API-WPR-02 -> WPR-02
 API-AUTH-02 -> SIGNIN-01
 ```
 
@@ -378,7 +389,28 @@ build.
 
 ## API-ON2-01 — Site-wide rivalry records and contract
 
-**Status:** IDEA — backend-owned dependency
+**Status:** DONE — merged to HockeyStatsAPI `main`; Product Owner accepted
+2026-10-27 without a deploy check (none possible at the time).
+
+**Approved decisions (Product Owner, 2026-10-27):**
+
+- Table `team_rivalries` keyed by (`team_a_id`, `team_b_id`) → `teams.team_id`,
+  lower id first (one check rejects self-pairs and reversed duplicates);
+  `tier` `primary`/`secondary`, optional `display_name`, `enabled`. The seed
+  migration stubs missing `teams` rows so a fresh database satisfies the keys.
+- Read contract: `GET /rivalries` and `GET /rivalries/:triCode` →
+  `{ rivalries: [{ teams: [triCode, triCode], tier, displayName }] }`, teams
+  alphabetical; disabled pairs are never returned; a team with none gets `[]`.
+- Primary: BOS–MTL, MTL–TOR, EDM–CGY "Battle of Alberta", PIT–PHI "Battle of
+  Pennsylvania", NYR–NYI, CHI–DET, COL–DET, TOR–OTT "Battle of Ontario",
+  FLA–TBL "Battle of Florida", ANA–LAK "Freeway Face-Off", VGK–LAK.
+- Secondary: BOS–TOR, NYR–NJD "Hudson River Rivalry", WSH–PIT, MTL–OTT,
+  NYR–PHI, CHI–STL, VAN–CHI, LAK–SJS.
+
+**Verification (2026-10-27):** API tests pass (154). On a local Postgres 16,
+all migrations apply, 19 pairs seed, self and reversed inserts are rejected,
+lookup from either side matches, a disabled pair is hidden, and SEA returns
+`[]`. Not run: deploy check.
 
 **Goal:** Provide one normalized source of traditional team rivalries for Rink
 Quest and later site-wide consumers.
@@ -409,7 +441,8 @@ Quest and later site-wide consumers.
 
 ## API-ON2-02 — Rink Quest team and player profiles
 
-**Status:** IDEA — backend-owned dependency
+**Status:** ACTIVE — merged to HockeyStatsAPI `main` (`bb084dd`) 2026-10-27.
+Pending: deploy check, pilot player ID check, Product Owner acceptance.
 
 **Goal:** Link reviewed Rink Quest identities to canonical teams and players
 without duplicating factual records.
@@ -440,6 +473,60 @@ without duplicating factual records.
 
 **Exclusions:** automatic inference, secondary player archetypes, gameplay
 ratings, full-line construction.
+
+**Decisions (Product Owner, 2026-10-27):**
+
+- Tables `rink_quest_team_profiles` (team_id PK, `primary_identity`, optional
+  `secondary_identity` that must differ, `enabled`) and
+  `rink_quest_player_profiles` (player_id PK, `archetype`, `appearance_rank`,
+  `enabled`). No team column on player profiles; the team comes from the
+  roster. Values enforced by database CHECKs. `enabled` defaults to **true**.
+  The seed stubs missing player rows (teams come from migration 011).
+- Team identities (five): `forecheck`, `transition`, `possession`, `physical`,
+  `structure`. No goaltending or shooting identity.
+- Skater archetypes: `finisher`, `playmaker`, `power_forward`,
+  `two_way_center`, `mobile_defenseman`, `defensive_anchor`. Skaters only;
+  goalies get no profile and are filtered out of candidates. Archetype is not
+  checked against position.
+- Appearance rank 1–3: 1 headliner, 2 regular, 3 occasional; lower is offered
+  more often, never stronger. Ties are left to ON2-06's seeded choice.
+- Pilot, seeded enabled: TOR `possession`/`structure` — Matthews 8479318
+  finisher 1, Nylander 8477939 finisher 2, Tavares 8475166 playmaker 1, Domi
+  8477503 playmaker 2, Knies 8482720 power_forward 1, Rielly 8476853
+  mobile_defenseman 1, Tanev 8475690 defensive_anchor 1, McCabe 8476931
+  defensive_anchor 2. MTL `transition`/`forecheck` — Suzuki 8480018
+  two_way_center 1, Caufield 8481540 finisher 1, Laine 8479339 finisher 2,
+  Slafkovsky 8483515 power_forward 1, Hutson 8483457 mobile_defenseman 1,
+  Matheson 8476875 mobile_defenseman 2, Guhle 8482087 defensive_anchor 1.
+  IDs were written without NHL API access; a wrong or traded ID is simply not
+  a candidate.
+- Read contract:
+  - `GET /rink-quest/teams` → `{ teams: [{ teamId, triCode, name, logoUrl,
+    primaryIdentity, secondaryIdentity }] }`, enabled teams by tri-code.
+  - `GET /rink-quest/teams/:triCode/candidates` → `{ team, candidates:
+    [{ playerId, name, positionCode, sweaterNumber, headshotUrl, archetype,
+    appearanceRank }] }`, ordered by archetype, rank, name. 400 for a bad
+    tri-code, 404 when the team has no enabled profile. Name, logo, position,
+    number and headshot are joined at read time and may be `null`.
+  - The candidates read first refreshes the team's current-season roster
+    through the cached roster service; if that fails it answers from the
+    stored roster.
+
+**Implementation facts:** `roster_entries` is upsert-only and its `team_id`
+is often null, so the read joins by `tri_code`. One roster refresh writes a
+team's rows in one transaction with one `updated_at`, so a team's active
+roster is its current-season rows from its newest refresh. A player found in
+two teams' newest refreshes counts for the more recent one.
+
+**Verification (2026-10-27):** `pnpm test` 160/160 (six new contract tests in
+`src/test/rinkQuestProfiles.test.js`). Real Postgres 16: migrations 001–012
+apply on a fresh database; CHECKs reject an unknown identity, a matching or
+unknown secondary, an unknown archetype, rank 4 and an unknown player id; a
+null secondary and the enabled default work. Through the real roster write
+path: a player traded MTL→TOR shows only on TOR and keeps his profile, a
+player dropped from TOR's newest refresh leaves, goalie and disabled profiles
+are excluded, and missing headshots are `null`. Not run: the NHL roster
+fetch (host blocked here), the pilot ID check and the deploy check.
 
 ---
 
@@ -1022,7 +1109,9 @@ already loads; no extra API calls.
 
 ## API-WPR-01 — Favorite players and the weekly player report (backend)
 
-**Status:** ACTIVE — implemented and QA-verified (HockeyStatsAPI `f243cce`); Product Owner accepted 2026-10-24; deployed to the dev server (routes live, migration 005 applied, notifier schedule set; checked 2026-10-25). First Monday run (2026-10-26 13:00 UTC) and the real-NHL report spot-check are pending.
+**Status:** DONE — Product Owner accepted 2026-10-24; the first Monday run
+(2026-10-26) produced a report the Product Owner checked against real NHL
+data ("looked good") and the push reached their phone. HockeyStatsAPI `f243cce`.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1178,7 +1267,7 @@ payload shapes, and an authenticated response-body check.
 
 ## WPR-01 — Favorite players and the weekly report (frontend)
 
-**Status:** ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; deployment remains unverified.
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the break-week check (a week without games sends nothing). Previously recorded: ACTIVE — implemented and QA-verified (`909cf01`, fixes `2f53aee`); Product Owner accepted 2026-10-24; first Monday report received on the Product Owner's phone and checked 2026-10-26. Pending: a break week sends nothing.
 
 **Approved decisions (Product Owner, 2026-10-19):**
 
@@ -1253,6 +1342,175 @@ sends nothing.
 
 ---
 
+## API-WPR-02 — Favorite teams in the weekly report (backend)
+
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the deploy check and the first Monday report with teams (2026-11-02). Previously recorded: ACTIVE — started 2026-10-26, kickoff decisions recorded
+2026-10-27; implemented on HockeyStatsAPI `ccr-54dd4737-q7e2xd` (`aa7b308`).
+
+**Goal:** New Weekly Player Reports freeze the user's favorite teams and
+their week, so WPR-02 can show results and Team Form that never change on
+reopening.
+
+**Proposed contract (PM recommendation, confirm at kickoff):**
+
+- Each new report gains `teams: [{ triCode, name, logo, tier, label,
+  weekGames: [{ gameId, date, opponent, isHome, teamScore, opponentScore,
+  outcome: 'W'|'L'|'OTL' }], formGames: [...] }]`, where `formGames` are the
+  team's completed regular-season games through `weekEnd` in the fields
+  `buildTeamForm` reads (`date, gameState, homeTeam, awayTeam, homeScore,
+  awayScore, periodType`). Teams are the user's favorite teams when the
+  report is made. Existing reports are not rewritten.
+- Source: the cached club season schedule (12-hour cache), one per distinct
+  favorite team across users during dispatch, like the player stats.
+- Team line (Product Owner chose to add one): the headline gains a second
+  sentence with each team's week record, e.g. "… Teams: COL 2-0-1, DAL 1-2-0."
+  Teams without games are left out of the line; no line when none played.
+  The push body is the headline, as today.
+- A user is still skipped only when none of their players or teams played.
+
+**Verify:** report builder unit tests (week records, OT losses, a team with
+no games, the team line, a report with no favorite teams), dispatch test for
+the frozen `teams[]`, README report fields updated.
+
+**Kickoff decisions (Product Owner, 2026-10-27, recorded on the kickoff page):**
+
+1. **Team line** as proposed: `Connor McDavid: 2G 4A in 3 GP and 2 more.
+   Teams: EDM 2-0-1, DAL 1-2-0.`; teams in fan-tier order, idle teams left
+   out, no line (headline unchanged) when no team played; only teams played:
+   `Your favorite players did not play this week. Teams: COL 2-0-1.`; no
+   favorite players: `Teams: COL 2-0-1, DAL 1-2-0.`
+2. **Weekly push:** body is the headline built from the players not muted for
+   the weekly push plus the team line for every team that played; a team's
+   push mute covers After Action game alerts only. The push is sent when an
+   unmuted player or any team played.
+3. **Team-only users are included:** a user with favorite teams and no
+   favorite players gets a Monday report and push when a team played.
+4. **`formGames` hold only the report week's completed regular-season games**
+   ("weekly reports should just show that week's performance and those
+   games"). Field names and shape are unchanged; this replaces "through
+   `weekEnd`" above, so WPR-02's Team Form panel in a report reflects the
+   week rather than the season.
+
+**Implemented (`aa7b308`):** `scheduleService.getClubSeason(triCode, season,
+{ fresh })` (club season schedule from the 12-hour cache, plus the team's name
+and logo from the payload); `weeklyReportBuilder` `buildReportTeams`,
+`isClubScheduleCurrent`, and `buildHeadline(players, teams)`; the service loads
+every user's favorite teams (`listAllFavoriteTeams`) and one club schedule per
+distinct team across users, in parallel with the player stats. Week games are
+the club games the league week schedule lists as completed regular-season or
+playoff games. A cached club schedule missing one of those finals (the cache
+serves expired copies) is refetched once; still missing, or any team schedule
+failing, is a 502 with nothing written, so the second Monday run retries.
+Users with no favorite teams get `teams: []`. README report fields updated.
+
+**Verification so far:** `npm test` 146/146: builder tests for week records,
+OT and shootout losses, a team with no games, fan-tier order, a playoff OT
+loss, the team line in every case, a report with no favorite teams and
+team-only reports; dispatch tests for the frozen `teams[]` (one club schedule
+per distinct team, team-only user pushed, rerun unchanged), a stale club
+schedule refetched once, a team schedule failure writing nothing, and the
+team-only push body when every player is muted; a `getClubSeason` mapping test.
+Not verifiable here: real NHL club schedule payloads (team name fields, OT/SO
+`periodDescriptor`), a real Postgres run, and a real push.
+
+---
+
+## WPR-02 — Favorite teams and their form in the weekly report
+
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the Product Owner review of the team section with real data. Previously recorded: ACTIVE — started 2026-10-26; mockups approved 2026-10-26; awaiting
+Spotter and the Product Owner's screenshot review. Requested by the Product Owner 2026-10-26: "add a team
+section to weekly report with team forms (if that component from TeamPage is
+not its own component file it should be)".
+
+**Goal:** The Weekly Player Report also has a team section: for each favorite
+team, that week's results and its Team Form as of the end of the week.
+
+**Reuse finding (PM, 2026-10-26):** the TeamPage "Team Form" panel is already
+its own file, `features/teams/components/TeamFormPanel.tsx`, built on
+`components/FormStrip`, `features/teams/components/PointsPaceSparkline` and
+`SplitBars`, and `buildTeamForm(games, triCode)` in `lib/teamForm.ts`. It is
+not yet reusable: it lives in `features/teams`, takes its styles from
+`TeamPage.module.css`, and hard-codes the heading id `team-form-heading`
+(several teams on one page would repeat it). Per the readability pass,
+a piece used by two features moves to `components/`:
+
+- Move `TeamFormPanel`, `PointsPaceSparkline` and `SplitBars` to
+  `components/` with their own `TeamFormPanel.module.css` (the `form-panel`,
+  `points-sparkline` and `split-bars` rules leave `TeamPage.module.css`).
+- Add an optional `className` prop (as `FormStrip`, `TeamLogo` and other
+  `components/` pieces already take) for the outer surface. Placement that
+  belongs to one page stays with that page: TeamPage passes its margin and
+  entry animation from `TeamPage.module.css`; the report passes its own
+  spacing or width.
+- Give the panel a heading/id prop so each instance is unique; TeamPage keeps
+  its current heading and looks unchanged.
+
+**Decided 2026-10-26 (Product Owner):**
+
+1. **Data:** frozen in the report. API-WPR-02 adds `teams[]` to new reports;
+   older reports have none and show no team section. The page builds each
+   panel with `buildTeamForm` from the frozen games.
+2. **Team card:** logo and name, the week's results (opponent, score,
+   W/L/OTL), then the full Team Form panel as of the week's end.
+3. **Order:** the team section goes **below** the players, sorted by fan tier
+   (as on My Hockey); a team with no games that week shows "No games this
+   week" with its form.
+4. **Headline and push:** gain a team line (API-WPR-02).
+
+**Presentation approved 2026-10-26 (Product Owner, from 375/1280 light/dark
+mockups):** a "Favorite teams" heading; a "2-0-1 this week" line under each
+team name; results card beside the Team Form panel from 769px, stacked on
+phones; each card and its sparkline in the team's accent color; each result
+row links to its game page; the fan tier orders the cards but no tier badge
+is shown.
+
+**Dependencies:** API-WPR-02 contract (build against it; a report without
+`teams` shows no team section, so the page works before the API deploys).
+
+**Implemented (2026-10-26):** `components/TeamFormPanel` (with
+`PointsPaceSparkline`, `SplitBars` and `TeamFormPanel.module.css`) takes
+`className`, `headingId` and `headingLevel`; TeamPage passes its margin and
+entry animation as `.team-form`. `WeeklyReportTeamCard` and the page's
+`ReportTeamsSection` render `report.teams` via `utils/weeklyReportTeams.ts`
+(`listReportTeams`, `buildReportTeamForm`, week formatting). Logos come from
+`TeamLogo` (theme-aware) rather than the frozen `logo` URL.
+
+**Verification so far:** unit tests for `weeklyReportTeams`; tsc, vitest,
+format check, build. TeamPage's Team Form pixel-identical before/after the move
+at 375/1280 light/dark against a mocked API. `qa/weekly-report-teams.spec.mjs`
+(16 tests, "WPR-02 Verify:") passed locally with a stand-in for Spotter's test
+module; its TeamPage check also passes on the pre-move code. Real NHL data and
+logos were not reachable here. Spotter on `c8b3ff9` (2026-10-26): PASS —
+typecheck, unit tests and format pass; 286 anonymous page visits and 170
+replayed project specs pass; 3 low findings: two home-page headshot requests
+aborted in Firefox at 375 dark (an image request the browser cancelled; this
+branch does not touch the home page), and its config lacks
+`qa/weekly-report-teams.spec.mjs`, so the WPR-02 specs were not executed.
+Spotter has no signed-in sweep, so the report page itself was not visited.
+Spotter on `b5deb3d` (2026-10-26, same code as `c8b3ff9`, spec added to its
+config): PASS — project specs 250/250 (the 80 new runs are the 16 WPR-02
+Verify tests in chromium, firefox, webkit, iPhone 13 and Pixel 7);
+typecheck, unit tests and format pass; 4 low findings, all home-page
+logo/headshot requests the browser cancelled in Firefox at 375 (the same kind
+churns in "fixed vs base"; this branch does not touch the home page). Its
+advisory visual review flagged 11 WebKit/Pixel 7 shots, including team at
+375/768; the previous run on identical code flagged no team shots, so these
+are treated as run-to-run noise. Merged to `main` 2026-10-26 at the Product Owner's request,
+ahead of API-WPR-02 (reports without `teams` show no team section).
+API-WPR-02 kickoff (2026-10-27): `formGames` hold only the report week's
+regular-season games, so each card's Team Form panel shows that week's form
+(e.g. a 3-game strip and splits) instead of the season to date; no frontend
+change, the shape is unchanged. Check the panel's look with week-only data at
+the Product Owner's real-data review.
+
+**Verify:** unit tests for any new form/week helpers; TeamPage's Team Form
+looks unchanged after the move (before/after screenshot); Playwright against a
+mocked API for the report's team section, including a no-games week and a
+report without teams, at 375/1280 light/dark without horizontal scroll. The
+Product Owner reviews screenshots.
+
+---
+
 ## HOME-FAV-01 — Favorite players row on the home page
 
 **Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS (all criteria, 375/1280 light/dark), readability pass done.
@@ -1300,7 +1558,7 @@ below the landing page intro header ("<season> at a glance").
 
 ## API-FAN-01 — Fan categories for favorite teams (and players) (backend)
 
-**Status:** ACTIVE — implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25); awaiting Product Owner acceptance
+**Status:** DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented, QA PASS on real Postgres (label-length fix included), readability pass done; deployed to the dev server (migration 006 applied, routes live; checked 2026-10-25).
 
 **Approved decisions (Product Owner, 2026-10-20):** fixed tiers named
 **Diehard / Fan / Curious** (values `diehard`, `fan`, `curious`; new favorites
@@ -1772,7 +2030,7 @@ goalie comparisons, keyboard picker) with 375/1280 light/dark screenshots.
 
 ## API-COMPARE-01 — Every player in the season summaries (backend)
 
-**Status:** ACTIVE — merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25); awaiting Product Owner acceptance
+**Status:** DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: merged to HockeyStatsAPI `main` (`0d39d93`, 2026-10-22) and live on the dev server (league-wide summaries return every player; checked 2026-10-25).
 
 **Approved 2026-10-22 (option A):** no new endpoint.
 
@@ -1802,7 +2060,8 @@ summary tests pass (10/10).
 
 ## HOME-LOAD-01 — Home sections load and fail on their own
 
-**Status:** IDEA
+**Status:** DONE — Spotter passed on the pushed branch and the Product Owner
+accepted 2026-10-25; merged to `main`.
 
 **Context:** `app/LandingPage.tsx` shows one full-page spinner until skater
 leaders, goalie leaders and standings have all loaded, and replaces the whole
@@ -1819,19 +2078,64 @@ worker guard) and the signed-out Up next prompt, both done.
   as soon as its data arrives.
 - Keep the intro and Up next strip visible throughout.
 
-**Verify:** Playwright with one endpoint failing or delayed at a time;
-375/1280 screenshots.
+**Decided 2026-10-25 (Product Owner):**
+
+- Loading: option 1 of the design sheet — each section's heading shows at
+  once and the existing `LoadingState` spinner sits in space held at about
+  the loaded height (leader grid 23.75rem; lottery board 25rem, 19.5rem from
+  1024px; standings fill their desktop column). Skeleton cards were declined.
+- Error: the inline `ErrorState` under the section heading, no repeated
+  title, with Try again re-running only that section's fetch. Draft lottery
+  and standings share `GET /standings`, so both show the error and either
+  Try again restores both.
+- Skater and goalie leaders load and fail separately (each group errors only
+  when all four of its categories fail, as before); on phones the switch and
+  swipe keep working and the selected group shows its own state.
+
+**Implementation:** `components/SectionLoadState` (spinner or error in held
+space, children once loaded) is used by `StatLeadersSection` (per group),
+`DraftLotteryOddsRow` (Simulate hidden until the board is ready) and
+`LandingPageStandings`. The leaders hook's error names its group
+("Couldn't load skater leaders."). A section with no data for the season keeps
+its existing empty state; the lottery still disappears when there are no
+lottery teams.
+
+**Verify:** `react/qa/home-loading.spec.mjs` (`HOME-LOAD-01 Verify:`) fails
+skater leaders, goalie leaders and standings one at a time (500s, after the
+client's ~7s of retries) and delays each one at a time; it passed 12/12 at
+375 and 1280 against a local stand-in for the fixtures and failed 12/12 on
+the previous `main`. Spotter passed on the pushed branch (2026-10-25).
 
 ---
 
 ## API-CACHE-01 — Cache resilience (backend)
 
-**Status:** IDEA
+**Status:** DONE — merged to HockeyStatsAPI `main` (`1e11b15`, 2026-10-25);
+accepted by the Product Owner 2026-10-25. Deploy not independently verified.
 
 **Context:** With `CACHE_DATABASE_URL` set the cache already lives in Postgres
-(`app_cache`); confirm production does not set `CACHE_STORAGE=filesystem`.
+(`app_cache`); the Product Owner confirmed 2026-10-25 that production uses it.
 
-**Proposed (confirm at checkpoint):**
+**Decided 2026-10-25 (Product Owner):**
+
+- Entries on their type's default TTL (12h/24h: summaries, standings,
+  leaders, rosters, schedules, team stats) are served expired at once while
+  one background refresh runs; a failed refresh keeps the expired copy.
+- Entries on a caller-set TTL (5-minute gamecenter and preliminary shift
+  charts, 10-minute current week, push dispatch's forced refresh) wait for
+  the refetch and fall back to the expired copy when the NHL call fails.
+  A cache miss still fails when the NHL call fails.
+- Standings, stat leaders, team summaries and player summaries/Corsi/faceoffs
+  of a completed season never expire once cached after that season ended
+  (September 1 of its end year); a mid-season copy refreshes once, then stays.
+- No in-memory layer for now; revisit only with timings.
+
+**Implementation:** `getOrFetchCached` in `src/platform/cacheManager.js`
+(callers pass `{ seasonId }` for the permanent-season rule;
+`getSeasonEndMs` in `seasonHelper.js`). Tests in `src/test/cacheManager.test.js`;
+README "Caching" section. No browser checks (backend only).
+
+**Original proposal:**
 
 - Serve-stale on error: when an entry has expired and the NHL fetch fails,
   return the expired entry instead of failing.
@@ -1847,33 +2151,130 @@ worker guard) and the signed-out Up next prompt, both done.
 
 ## API-PBP-01 — Play-by-play events for shot maps and game flow (backend)
 
-**Status:** IDEA — backend-owned dependency
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: the check against a recorded NHL payload and the dev-server deploy check. Previously recorded: ACTIVE — merged to HockeyStatsAPI `main` (`f769f5c`,
+2026-10-26; change `ef41cce`). 138 tests pass. Deploy not independently
+verified.
 
 **Goal:** Expose a normalized, cached list of a game's shot and goal events so
 the frontend can draw a shot map and game flow chart.
 
-**Proposed contract (PM recommendation, confirm at checkpoint):**
+**Decided 2026-10-26 (Product Owner, PM recommendations):**
 
-- `GET /schedule/playbyplay/:gameID` → `{ gameId, gameState, homeTeam,
-  awayTeam, events: [{ eventId, period, timeInPeriod, elapsedSeconds,
-  type: 'goal'|'shot'|'miss'|'block', teamTriCode, shooterId, goalieId|null,
-  x, y, shotType|null, strength: 'ev'|'pp'|'sh'|null }] }`.
-- Source: NHL `gamecenter/{id}/play-by-play`, cached raw through `GetOrFetch`
-  (forever once the game is `OFF`, about 30 seconds while live); mapping runs
-  after the cache read in `slices/schedule/mappers/`, per the Mapping
-  Boundary.
-- Coordinates normalized so each team always shoots toward the same end in the
-  response (the NHL flips sides by period); document the convention.
-- Unknown event types are dropped, not failed.
+- `GET /schedule/playbyplay/:gameID` → `{ gameId, gameState, homeTeam:
+  { id, triCode }, awayTeam, events: [{ eventId, period, periodType
+  ('REG'|'OT'), timeInPeriod, elapsedSeconds, type:
+  'goal'|'shot'|'miss'|'block', teamTriCode, shooterId, shooterName,
+  goalieId|null, x, y, shotType|null, strength: 'ev'|'pp'|'sh'|null }] }`.
+  Shootout attempts and every other play type are dropped. A game that has
+  not started has no events; a malformed or unknown id is a 404.
+- `teamTriCode` is the shooting team, also on blocked shots (the NHL credits
+  those to the blocker). Strength is from the shooter's side; a pulled goalie
+  counts one skater fewer, so an extra attacker alone is `ev`.
+- Coordinates: home always shoots toward +x, away toward -x; a flipped period
+  negates x and y. Ends come from `homeTeamDefendingSide`, else from the
+  period's offensive-zone events; events without coordinates or with unknown
+  ends keep `x`/`y` null. Documented in the API README and mapper.
+- Cache: raw payload under `schedule:playbyplay_<id>`; permanent once `OFF`,
+  60 seconds while `LIVE`/`CRIT`, 5 minutes otherwise (all caller-set TTLs,
+  so per API-CACHE-01 they wait for the refetch and serve the expired copy on
+  an NHL failure). Mapping runs after the cache read.
 
-**Verify:** mapper unit tests from a recorded payload (including a period side
-flip and missing coordinates), route test, README route table updated.
+**Verify:** mapper unit tests (period side flip, inferred ends, overtime,
+missing coordinates, blocked shots, strength, shootout and unknown types
+dropped), service TTL test, route test, README route table. Done in
+`ef41cce` against a hand-built payload in the NHL shape.
+
+**Pending:** `api-web.nhle.com` was unreachable from the build environment,
+so the fixture is not yet a recorded payload: confirm field names (notably
+blocked-shot ownership and `homeTeamDefendingSide`) against a real OT game
+and swap in the excerpt; Product Owner checks the route on the dev server.
+A fresh cloud session on 2026-10-26 (03:04 UTC) was also refused
+`api-web.nhle.com`, so the environment's allow-list change has not taken effect.
 
 ---
 
 ## GAME-SHOTS-01 — Shot map and game flow on the game page
 
-**Status:** IDEA
+**Status:** DONE — Spotter passed and the Product Owner accepted
+2026-10-27; merged to `main`. Follow-ups that do not block acceptance: add
+`qa/game-shots.spec.mjs` to Spotter's config so the eight specs run there;
+check real games once API-PBP-01 is deployed and checked against a recorded
+NHL payload (blocked-shot coordinates).
+
+**Scope addition (Product Owner, 2026-10-27):** the shot map gets a Player
+filter next to period and strength, built from `shooterId`/`shooterName` in
+the game's events, so one player's shots and goals in that game can be shown.
+A season-long player shot map is out of scope.
+
+**Carried forward from API-PBP-01 (not reopened):** the contract as decided;
+home always shoots toward +x and away toward -x; events without coordinates
+have null `x`/`y`; shootout attempts are not in the feed; a 404 means the route
+is not deployed or the id is unknown. No backend changes in this ticket.
+
+**Decided at kickoff (Product Owner, 2026-10-27, PM recommendations):**
+
+- **Rink:** one full rink, home attacking right; "◀ AWAY shoots / HOME shoots ▶"
+  in the neutral zone. Goals filled, shots on goal as rings, misses as ×.
+  Blocked shots are counted (totals, table, game flow) but not drawn: their
+  location is where the block happened.
+- **Filters (shot map only):** period segmented control All · 1st · 2nd · 3rd
+  (· OT, 2OT… only when played); strength select All strengths / Even / Power
+  play / Shorthanded; player select grouped by team (away first), sorted by
+  last name, built from all events. Filters combine (all must match). "All"
+  = no restriction: every period including OT, every strength including
+  events with none, both teams. On phones the period control is full width
+  with the two selects side by side below. The totals line and summary table
+  follow the filters; the game flow always shows the whole game. An empty
+  combination fades the rink with a sentence naming the filters and a Reset
+  filters button.
+- **Placement and states:** after Goals by period, before the Scoring
+  summary; side by side at ≥900px, stacked below. Live games refresh on the
+  existing game-detail polling interval (failed refresh keeps the last
+  events). Games that have not started already redirect or show the preview
+  scoreboard, so no views. A live game with no events shows "No shots yet"
+  in both. A 404 hides both views silently; other failures show an inline
+  error with Try again.
+- **Null x/y:** left off the map, counted in the game flow, totals and table,
+  with a note under the rink. (Events with a null time are left off the game
+  flow only.)
+- **Colours:** home keeps its primary (else secondary) moved into the
+  data-viz lightness band and to 3:1 on the rendered chart card; the away team
+  tries primary, secondary, then chart blue/orange, taking the first that
+  stays distinct (OKLab ΔE ≥ 15 normal, ≥ 8 protan/deutan) in both themes.
+  The pair is chosen once for both themes. About 40% of matchups keep both
+  team colours. Legends, end labels and rink sides always name the team.
+- **Accessibility:** charts are `aria-hidden`; a visible "Shots and goals by
+  period (table)" disclosure (G, SOG, attempts per team per period, plus
+  totals) is the text version and follows the filters; markers are not tab
+  stops; tooltips (marker hover/tap, flow crosshair) only repeat table values.
+
+**Implementation (2026-10-27):** `features/game-detail`: `GameShots`
+(loads via `usePlayByPlay`, picks colours), `GameFlowChart` + `GameFlowGrid`,
+`ShotMap` + `ShotMapFilters` + `ShotRink` + `RinkOutline` +
+`ShotSummaryTable`, `ChartTooltip`; helpers `shotMapHelper`,
+`gameFlowHelper`, `matchupChartColors`, `chartColorMath`, `rinkGeometry`;
+`GetGamePlayByPlay` in the feature API. `SlidingToggle` gained an optional
+`label` (accessible group name). Inline SVG, no new dependency, no backend
+change.
+
+**Verified (2026-10-27):** typecheck, format check, unit tests (65 files,
+310 tests; new: filtering incl. the player filter, flow series/timeline,
+matchup colours for all 992 pairings in both themes) and build pass.
+`react/qa/game-shots.spec.mjs` (8 tests, titles "GAME-SHOTS-01 Verify:")
+passed locally against a stand-in for the Spotter test module and a mocked
+API.
+
+**Spotter (2026-10-27, `5c05fdb`):** first run FAIL — the play-by-play
+call was missing from the recorded fixtures (404 plus a logged console
+error on every game visit). After the fixtures were re-recorded: PASS, no
+medium or high findings; typecheck, unit tests and format pass; 286/286 page
+visits plus fault visits across chromium, firefox, webkit, iPhone 13 and
+Pixel 7; 250/250 project specs. Remaining lows: Firefox
+`NS_BINDING_ABORTED` logo/headshot requests on the home page (the same
+kind also shows as fixed vs base, so it comes and goes between runs and
+this branch doesn't touch home), and Spotter's config does not yet list
+`qa/game-shots.spec.mjs`, so the eight GAME-SHOTS-01 specs were not part
+of the 250.
 
 **Goal:** `/game/:gameId` shows where each team shot from and how the game
 swung over time.
@@ -1909,7 +2310,7 @@ mocked API with screenshots.
 
 ## SHARE-01 — Share button in the phone top bar
 
-**Status:** DONE — Product Owner accepted 2026-10-24 by explicitly closing tickets awaiting acceptance. Previously recorded: implemented and verified 2026-10-22.
+**Status:** DONE — accepted by the Product Owner 2026-10-25 after Spotter passed. Reopened 2026-10-25 because the 2026-10-22 implementation (`ed085ec7`) never reached `main`; ported and merged to `main` in `fa7e782` (#125) with `react/qa/share.spec.mjs`; tsc, tests, format and build pass.
 
 **Goal:** On phones, one tap shares the page being viewed (a comparison, a
 game, a team, a matchup preview) through the phone's share sheet.
@@ -1923,9 +2324,12 @@ already rebuilds the view (`/compare?players=…`, `/matchup?teamA=…`,
 
 - A share icon button in the phone top bar between the season selector and
   the account controls (`[back] [season] [share] [bell] [avatar]`), styled like
-  the bell (40px glass circle, 48px target). Not rendered in the desktop header.
+  the bell (its 32px glass circle; Product Owner kept the bell's size
+  2026-10-25). Not rendered in the desktop header.
 - `navigator.share({ title, url })`; without it, copy the link and show a
-  "Link copied" toast (`role="status"`) above the bottom nav. A cancelled share
+  "Link copied" toast (`role="status"`) just under the top bar (Product Owner
+  kept this position 2026-10-25, clear of the bottom nav, search button and
+  install banner). A cancelled share
   sheet (`AbortError`) is silent; other failures show an error toast.
 - Title: the page's first `h1` text + " · Hockey Stats", or "Hockey Stats".
 - Every page except `/diagnostics`; the URL (including `season=`) is shared
@@ -2023,7 +2427,7 @@ screen-reader pass on the dialog, and API-AUTH-02's Discord checks.
 
 ## A11Y-01 — Accessibility fixes from the Spotter baseline
 
-**Status:** ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified.
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Spotter recheck passed (reported by the Product Owner 2026-10-27). Previously recorded: ACTIVE — fixes merged in `ac18b5c8`, `6b3b2058` and `28f1e50a`; Product Owner accepted 2026-10-24; full baseline recheck remains unverified.
 
 **Context:** Spotter's 2026-10-22 runs against `main` (merge base `66153ba`)
 flag these on every page they visit; none came from SIGNIN-01. Logged by the
@@ -2071,7 +2475,7 @@ Owner reviews the color changes in screenshots.
 
 ## API-PUSH-02 — Reliable push delivery and scheduling (backend)
 
-**Status:** ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; pending a real push to a device, the first Monday weekly run, and deletion of the old GitHub secrets)
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket. Not run: deleting the old GitHub secrets. Previously recorded: ACTIVE (merged to `main` 2026-10-24; notifier installed and running on the dev server, scheduled runs succeeding, checked 2026-10-25; first Monday weekly push reached the Product Owner's phone 2026-10-26; pending deletion of the old GitHub secrets)
 
 **Problem:** pushes depended on GitHub Actions cron (runs late, skips runs,
 disables itself after 60 quiet days) and on one send attempt: the ledger row was
@@ -2117,3 +2521,103 @@ send (no rejected event in its log or queue). `push_subscriptions` is empty, so
 no device can receive a push yet. Pending: subscribe a device and confirm a real
 push arrives, the first Monday run, then delete the `CRON_SECRET` and
 `AAR_PUSH_API_URL` GitHub Actions secrets.
+
+---
+
+## API-PUSH-03 — Account-level push settings and automatic device subscription (backend)
+
+**Status:** DONE — Product Owner accepted 2026-10-25 by explicitly closing tickets awaiting acceptance. Previously recorded: requested and decided 2026-10-25; merged to HockeyStatsAPI `main` (`39080a8`) and deployed 2026-10-25 (migration 010 applied, routes live).
+
+**Requested by Product Owner (2026-10-25):** subscriptions are automatic, tied
+to the account, and governed by whether notifications are on in general, per
+team and per player.
+
+**Decisions (Product Owner, 2026-10-25):**
+
+- One account-wide notifications switch (default on) is the master: off sends
+  nothing (After Action Reports and the weekly report); on, the team mutes,
+  player toggles and the weekly switch each apply.
+- Each favorite player gets a weekly-push toggle (default on). It decides only
+  whether that player counts in the Monday weekly push; game pushes and their
+  player highlights are unchanged, and the stored report and inbox still list
+  every favorite.
+- The weekly report switch stays.
+
+**PM decisions:** a week whose included players all did not play (or are all
+toggled off) is claimed without a push, like a game whose teams are all muted,
+so turning a toggle back on never pushes an old week. Turning the account
+switch back on records the current inbox as sent for the same reason.
+Re-sending an existing subscription (the frontend re-syncs it automatically)
+does not reseed the sent ledger; only a device new to the account does, so an
+automatic re-sync cannot swallow a push another device is waiting for.
+
+**Contract:**
+
+- Migration 010: `users.push_enabled boolean NOT NULL DEFAULT true`;
+  `favorite_players.push_muted boolean NOT NULL DEFAULT false`.
+- `GET` / `PUT /api/push/notifications` (session): `{ enabled }`; 400 unless
+  boolean.
+- `PUT /api/favorite-players/:playerId/push-mute` (session): body
+  `{ muted: boolean }`; returns `{ favorites }`; 400 bad body or id, 404 if not
+  a favorite. Favorite players gain `pushMuted`.
+- Both dispatches skip users with the account switch off. The weekly push body
+  is the headline built from the user's unmuted players.
+
+**Verify:** route and service unit tests (switch, player mute, dispatch
+filtering, weekly body from unmuted players, re-sync does not reseed),
+migration on Postgres, README route tables updated.
+
+---
+
+## PUSH-03 — Automatic device subscription and account push settings (frontend)
+
+**Status:** DONE — Product Owner accepted 2026-10-25 after Spotter passed. Merged to `main` in `394ca08f` (#124); tsc, tests and build pass; API-PUSH-03 is deployed.
+
+**Decisions (Product Owner, 2026-10-25):** permission is asked only from the
+bell (no banner, no prompt during sign-in). A signed-in device whose browser
+already allows notifications (and, on iOS, runs from the Home Screen) is
+subscribed and re-synced automatically on every app load and after signing
+in again, with no prompt. Signing out still removes that device.
+
+**PM decisions:** because devices re-subscribe automatically, the bell's
+"Turn off phone notifications" now turns the account switch off (all
+devices) instead of unsubscribing only this device; "Turn on" asks for
+permission when needed, subscribes this device and turns the account switch
+on. The bell panel lists favorite players with an "In weekly push" toggle
+below the weekly report switch, mirroring the team mutes.
+
+**Depends on:** API-PUSH-03 deployed first. Against an older API the bell
+reads the missing switch as off and every load re-seeds the sent ledger.
+
+**Verify:** tsc, `pnpm test`, build; Spotter on the pushed branch: auto
+subscribe with permission already granted, re-sync after sign-out/sign-in,
+bell on/off sets the account switch, player toggles, denied and iOS-install
+states unchanged, 375/1280 light/dark.
+
+## SCHED-STATUS-01 — Live and final states on the schedule from cached game data
+
+**Status:** DONE — Product Owner accepted 2026-10-27 by explicitly closing the ticket; Spotter, the dev-server deploy check and a game-night check were not run. Requested by the Product Owner 2026-10-27 ("more reliably
+mark a game done in schedule view when we know the game is done via our DB …
+mark a game as live when we have in-game results"). HockeyStatsAPI + frontend.
+
+**Problem:** `GET /schedule/` serves the season schedule from a 12-hour cache
+(refreshed 8:00, 19:00 and 23:00 UTC), so games read FUT or LIVE for hours
+after the game page, My Hockey or push dispatch already cached them live or
+final. The frontend backfill only filled scores and kept the stale state.
+
+**Decisions (PM, within the request):** no contract change. For each game in
+the season response that has started (`gameTime` passed) and is not `OFF`,
+the API reads, from the cache only (any age, never an NHL call), the game's
+`boxscore_<id>` and `landing_<id>` payloads and its teams' `team_<tri>_week_now`
+club weeks (kept fresh by After Action Report dispatch). The furthest-along
+state wins (FUT < PRE < LIVE/CRIT < FINAL < OFF, more goals on a tie); the game
+never moves backwards. Its scores and period type come with it, and the ticket
+link is dropped once it leaves FUT. Play-by-play payloads are skipped (large,
+and the game page caches the boxscore alongside them). The frontend backfill
+now also covers past games not yet final and takes `gameState` and period type
+from the boxscore it fetches. Today's games are not polled by the schedule.
+
+**Verify:** API `pnpm test` (overlay tests in `scheduleService.test.js`); web
+tsc, `pnpm test`, build, format. Spotter: a game cached final or live shows
+FINAL (F/OT, F/SO) or LIVE with its score on the day card and calendar chip
+before the next schedule refresh. Product Owner: check a real game night.

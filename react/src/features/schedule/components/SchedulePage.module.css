@@ -291,6 +291,17 @@
   white-space: nowrap;
 }
 
+.game-clock-chip {
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: var(--color-chip-bg);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
 .game-period-chip.overtime {
   background: rgba(33, 150, 243, 0.12);
   color: #0d47a1;

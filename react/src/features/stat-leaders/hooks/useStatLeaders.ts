@@ -7,6 +7,7 @@ import {
   StatEntry,
   StatLeaderType,
 } from '@/features/stat-leaders/utils/statLeaderTypes';
+import { useRefreshOnStatsChange } from '@/lib/statsVersion';
 
 /**
  * Loads the stat-leader categories for one player type (skater or goalie),
@@ -14,6 +15,8 @@ import {
  * and a single `loading` flag. Each category is fetched independently for `season`
  * and added as it resolves, so the UI can show categories as they arrive.
  * Also exposes `error` (set only when every category failed) and `retry`.
+ * When the API's stored stats change the categories refresh in the
+ * background, keeping a category's shown leaders when its refresh fails.
  */
 export function useStatLeaders(type: StatLeaderType, season?: string) {
   const { stats, fetcher } = STAT_CONFIG[type];
@@ -47,7 +50,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
       (stat) => failedRefs.current[stat.displayKey],
     );
     if (allFailed) {
-      setError("Couldn't load stat leaders.");
+      setError(`Couldn't load ${type} leaders.`);
     }
   }
 
@@ -63,19 +66,8 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
     try {
       const leaderContracts = await fetcher(apiKey, season);
       if (isStale()) return;
-      const statLeaders: PlayerStatLeader[] =
-        PlayerStatLeaderConverter(leaderContracts);
       failedRefs.current[displayKey] = false;
-      if (statLeaders.length === 0) return;
-      const topLeader = new TopStatLeader(
-        displayKey,
-        statLeaders[0],
-        statLeaders,
-      );
-      setLeaders((currentLeaders) => ({
-        ...currentLeaders,
-        [displayKey]: topLeader,
-      }));
+      showLeaders(displayKey, leaderContracts);
     } catch (fetchError) {
       if (isStale()) return;
       console.error(`Error fetching ${displayKey}: `, fetchError);
@@ -85,6 +77,41 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
         loadingRefs.current[displayKey] = false;
         checkLoadingStatus();
       }
+    }
+  }
+
+  /** Stores a category's top leader; a category with no leaders is left out. */
+  function showLeaders(
+    displayKey: string,
+    leaderContracts: Awaited<ReturnType<typeof fetcher>>,
+  ) {
+    const statLeaders: PlayerStatLeader[] =
+      PlayerStatLeaderConverter(leaderContracts);
+    if (statLeaders.length === 0) return;
+    const topLeader = new TopStatLeader(
+      displayKey,
+      statLeaders[0],
+      statLeaders,
+    );
+    setLeaders((currentLeaders) => ({
+      ...currentLeaders,
+      [displayKey]: topLeader,
+    }));
+  }
+
+  /**
+   * Re-reads every category without clearing what is shown or the loading and
+   * error state; a failed category keeps its leaders.
+   */
+  function refreshQuietly() {
+    const runId = latestRun.current;
+    for (const { displayKey, apiKey } of stats) {
+      fetcher(apiKey, season)
+        .then((leaderContracts) => {
+          if (runId === latestRun.current)
+            showLeaders(displayKey, leaderContracts);
+        })
+        .catch(() => {});
     }
   }
 
@@ -106,6 +133,8 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   useEffect(() => {
     runFetch();
   }, [runFetch]);
+
+  useRefreshOnStatsChange(refreshQuietly);
 
   return { leaders, loading, error, retry: runFetch };
 }

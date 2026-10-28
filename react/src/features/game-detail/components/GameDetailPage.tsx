@@ -22,6 +22,7 @@ import styles from '@/features/game-detail/components/GameDetailPage.module.css'
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 import GameStory from '@/features/game-detail/components/GameStory';
+import GameShots from '@/features/game-detail/components/GameShots';
 
 /** Header plus page-width main wrapper shared by every state of the game page. */
 function GameDetailShell({ children }: { children: ReactNode }) {
@@ -37,8 +38,8 @@ function GameDetailShell({ children }: { children: ReactNode }) {
 
 /**
  * Game route (`/game/:gameId`): hero scoreboard plus, for games that have
- * started, the story, period breakdown, scoring summary, three stars, team
- * comparison, and player stats. A game whose box score shows it has not
+ * started, the story, period breakdown, game flow and shot map, scoring
+ * summary, three stars, team comparison, and player stats. A game whose box score shows it has not
  * started yet moves to its matchup preview; past its scheduled start (a late
  * puck drop) it stays here on the preview scoreboard.
  */
@@ -138,6 +139,14 @@ const GameDetailPage = () => {
               periodGoalsBreakdown={periodGoalsBreakdown}
               homeAbbrev={boxscore.homeTeam.abbrev}
               awayAbbrev={boxscore.awayTeam.abbrev}
+            />
+          )}
+          {gameId && (
+            <GameShots
+              gameId={gameId}
+              status={status}
+              homeTriCode={boxscore.homeTeam.abbrev}
+              awayTriCode={boxscore.awayTeam.abbrev}
             />
           )}
           {hasScoringSummary(landing) && (

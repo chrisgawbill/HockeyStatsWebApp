@@ -3,10 +3,12 @@ import { localTeamList } from '@/lib/teamListData';
 import type { FavoritePlayer } from '@/features/favorite-players/types/favoritePlayers';
 import {
   fetchGameBoxscore,
+  forgetRecentResponses,
   fetchGoalieSeasonTotals,
   fetchSkaterSeasonTotals,
   fetchTeamGames,
 } from '@/features/my-hockey/api/myHockeyApi';
+import { subscribeToStatsChanges } from '@/lib/statsVersion';
 import {
   applyBoxscores,
   listGamesToRecheck,
@@ -207,10 +209,16 @@ export function useMyHockeyData(
       }
     };
     document.addEventListener('visibilitychange', refreshOnReturn);
+    // Season totals change when a game goes final; fetch them fresh then.
+    const unsubscribeFromStats = subscribeToStatsChanges(() => {
+      forgetRecentResponses();
+      refresh();
+    });
     return () => {
       isCurrent = false;
       window.clearInterval(interval);
       document.removeEventListener('visibilitychange', refreshOnReturn);
+      unsubscribeFromStats();
     };
   }, [enabled, requestKey]);
 

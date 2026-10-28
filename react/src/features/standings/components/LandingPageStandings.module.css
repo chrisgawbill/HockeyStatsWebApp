@@ -584,3 +584,11 @@
     height: auto;
   }
 }
+
+/* From 768px the standings column is as tall as the leaders column; the
+   spinner or error fills it rather than sitting at the top. */
+@media (min-width: 768px) {
+  .landing-standings__placeholder {
+    flex: 1;
+  }
+}

@@ -147,6 +147,7 @@ describe('buildMyHockeyFeed', () => {
     since: '2026-10-01T00:00:00Z',
     tier: 'diehard',
     label: null,
+    pushMuted: false,
   };
 
   it('applies box scores so a game the schedule still has upcoming shows as final', () => {
