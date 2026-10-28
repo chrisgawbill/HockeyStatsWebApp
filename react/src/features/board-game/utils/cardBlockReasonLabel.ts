@@ -14,9 +14,11 @@ export function cardBlockReasonLabel(
       return `Costs ${card.cost}⚡ · you have ${energy}`;
     case 'shotOnly':
       return 'Only when shooting';
-    case 'checkOnly':
-      return 'Only when checking';
     case 'faceoffOnly':
       return 'Only at a faceoff';
+    case 'otherBattle':
+      return 'Not in this battle';
+    case 'otherSide':
+      return 'Not for your side';
   }
 }

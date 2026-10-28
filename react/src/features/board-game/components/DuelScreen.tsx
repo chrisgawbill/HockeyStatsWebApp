@@ -9,9 +9,9 @@ import type {
 import { CARDS } from '@/features/board-game/data/cards';
 import { ENERGY, MAX_ROUNDS } from '@/features/board-game/data/balance';
 import { TEAM_NAME } from '@/features/board-game/data/teams';
+import { describeCpuIntent } from '@/features/board-game/engine/cpuDuelPolicy';
 import SkaterSprite from '@/features/board-game/components/SkaterSprite';
 import CardView from '@/features/board-game/components/CardView';
-import CardBack from '@/features/board-game/components/CardBack';
 import GameButton from '@/features/board-game/components/GameButton';
 import ModalOverlay from '@/features/board-game/components/ModalOverlay';
 import RevealPanel, {
@@ -91,15 +91,8 @@ function DuelistPanel({
       {cpuPlan && (
         <div className={styles.plan}>
           <span className={styles.planLabel}>
-            {TEAM_NAME.cpu} has {cpuPlan.length} card(s) ready
+            {TEAM_NAME.cpu} intent: {describeCpuIntent(cpuPlan)}
           </span>
-          {cpuPlan.length > 0 && (
-            <div className={styles.planCards}>
-              {Array.from({ length: cpuPlan.length }, (_, i) => (
-                <CardBack key={i} />
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>

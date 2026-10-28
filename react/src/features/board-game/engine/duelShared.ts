@@ -3,8 +3,9 @@ import {
   PERK_DEFENSE_BONUS,
   SKATER_POISE,
 } from '@/features/board-game/data/balance';
-import { CARDS } from '@/features/board-game/data/cards';
+import { BASIC_ACTION_BY_SIDE, CARDS } from '@/features/board-game/data/cards';
 import type {
+  BattleSide,
   CardBlockReason,
   CardDef,
   CardTag,
@@ -38,7 +39,27 @@ export function makeDuelist(skater: Skater): Duelist {
 }
 
 /**
- * Hand size for a round of this duel kind. Never called with `kind ===
+ * The battle side `side` plays in a duel of `kind`: the puck carrier is the
+ * defender in a check (the attacker is the checker) and the attacker in
+ * every other battle. Faceoff cards allow both sides, so the mapping is moot there.
+ */
+export function battleSideOf(kind: DuelKind, side: Side): BattleSide {
+  const carrierSide: Side = kind === 'check' ? 'defender' : 'attacker';
+  return side === carrierSide ? 'possession' : 'challenger';
+}
+
+/** The free basic action that pads `side`'s ordinary-battle offer. */
+export function basicActionFor(kind: DuelKind, side: Side): string {
+  return BASIC_ACTION_BY_SIDE[battleSideOf(kind, side)];
+}
+
+/** True for a padding basic action, which must never enter a deck pile. */
+export function isBasicAction(cardId: string): boolean {
+  return Object.values(BASIC_ACTION_BY_SIDE).includes(cardId);
+}
+
+/**
+ * Cards offered each round of this duel kind. Never called with `kind ===
  * 'faceoff'` — faceoffs resolve through `engine/faceoffDuel.ts`'s ante instead.
  */
 export function handSizeFor(_kind: DuelKind): number {
@@ -73,41 +94,40 @@ export function isCardAllowedFor(
   return ruleBlockReason(duel, side, card) === null;
 }
 
-/** `allowedIn`'s single restricted pool, as the `CardBlockReason` explaining why a card outside it is blocked. */
-const RESTRICTED_POOL_REASON: Record<DuelKind, CardBlockReason | null> = {
-  shot: 'shotOnly',
-  check: 'checkOnly',
-  faceoff: 'faceoffOnly',
-  deke: null,
-  intercept: null,
-};
+/**
+ * The reason a card is blocked in a duel kind its `allowedIn` omits: its
+ * single pool (shot or faceoff) when it has one, else just another battle.
+ */
+function otherContextReason(card: CardDef): CardBlockReason {
+  const kinds = Object.keys(card.allowedIn);
+  if (kinds.length === 1 && kinds[0] === 'shot') return 'shotOnly';
+  if (kinds.length === 1 && kinds[0] === 'faceoff') return 'faceoffOnly';
+  return 'otherBattle';
+}
 
 /**
  * Why the game's rules (not energy) forbid `side` from playing `card` in
- * this duel, or null if allowed — the one rule-legality path
- * `isCardAllowedFor`/`cardBlockReason` build on. Checked ahead of energy
- * since these restrictions are permanent for the duel.
- *
- * Shot/faceoff duels never reach this for their OWN pool's cards (those
- * resolve as an ante pick, not a card duel). It's still reached when a
- * shot- or faceoff-pool card sits in a *different* kind's hand —
- * `RESTRICTED_POOL_REASON` is what keeps it out of a hand it's not allowed
- * in (`drawFilteredCards` calls this via `isDrawEligibleCard`).
+ * this duel, or null if allowed — the one rule-legality path drawing,
+ * `isCardAllowedFor` and `cardBlockReason` build on. A card is legal only
+ * when its `allowedIn` lists this duel kind with `side`'s battle side.
+ * Checked ahead of energy since these restrictions are permanent for the duel.
  */
 export function ruleBlockReason(
   duel: DuelState,
-  _side: Side,
+  side: Side,
   card: CardDef,
 ): CardBlockReason | null {
-  if (card.allowedIn === 'any' || card.allowedIn.includes(duel.kind))
-    return null;
-  return RESTRICTED_POOL_REASON[card.allowedIn[0]] ?? null;
+  const allowedSides = card.allowedIn[duel.kind];
+  if (!allowedSides) return otherContextReason(card);
+  return allowedSides.includes(battleSideOf(duel.kind, side))
+    ? null
+    : 'otherSide';
 }
 
 /**
  * True if `cardId` may be drawn into `side`'s hand: rule-legal per
- * `ruleBlockReason`, ignoring energy. Filters the initial and per-round
- * hand draws so no dead-for-this-duel card ever reaches hand. Never called
+ * `ruleBlockReason`, ignoring energy. Filters each round's offer and
+ * mid-round draw effects so no dead-for-this-duel card ever reaches hand. Never called
  * with `duel.kind === 'shot'` — shot duels don't draw a card-duel hand at all.
  */
 export function isDrawEligibleCard(
@@ -169,11 +189,12 @@ export function totalCardEffects(
   );
 }
 
-/** Moves each of `cardIds` (already out of hand) to exhaust or discard. */
+/** Moves each of `cardIds` (already out of hand) to exhaust or discard; basic actions simply vanish. */
 export function settleCards(deck: Deck, cardIds: string[]): Deck {
   const discardPile = [...deck.discardPile];
   const exhaustPile = [...deck.exhaustPile];
   for (const id of cardIds) {
+    if (isBasicAction(id)) continue;
     if (CARDS[id]?.exhaust) exhaustPile.push(id);
     else discardPile.push(id);
   }

@@ -54,7 +54,7 @@ export function makeCard(overrides: Partial<CardDef> = {}): CardDef {
     cost: 1,
     text: '5 block',
     tags: ['block'],
-    allowedIn: 'any',
+    allowedIn: { deke: ['possession'], check: ['possession'] },
     exhaust: false,
     effects: [{ type: 'block', amount: 5 }],
     ...overrides,

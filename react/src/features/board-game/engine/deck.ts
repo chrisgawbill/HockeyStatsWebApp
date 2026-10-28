@@ -1,4 +1,7 @@
-import { removeIdsFromHand } from '@/features/board-game/engine/duelShared';
+import {
+  isBasicAction,
+  removeIdsFromHand,
+} from '@/features/board-game/engine/duelShared';
 import { shuffle } from '@/features/board-game/engine/rng';
 import type { Deck } from '@/features/board-game/types/game';
 
@@ -6,32 +9,6 @@ import type { Deck } from '@/features/board-game/types/game';
 export function createDeck(ids: string[], seed: number): [Deck, number] {
   const [drawPile, nextSeed] = shuffle(ids, seed);
   return [{ drawPile, hand: [], discardPile: [], exhaustPile: [] }, nextSeed];
-}
-
-/**
- * Draws up to `n` cards into the hand, reshuffling the discard pile into the
- * draw pile when it runs out. Stops early once both piles are empty.
- */
-export function drawCards(deck: Deck, n: number, seed: number): [Deck, number] {
-  let drawPile = [...deck.drawPile];
-  let discardPile = [...deck.discardPile];
-  const hand = [...deck.hand];
-  let currentSeed = seed;
-
-  for (let i = 0; i < n; i++) {
-    if (drawPile.length === 0) {
-      if (discardPile.length === 0) break;
-      const [reshuffled, nextSeed] = shuffle(discardPile, currentSeed);
-      drawPile = reshuffled;
-      discardPile = [];
-      currentSeed = nextSeed;
-    }
-    const [card, ...rest] = drawPile;
-    hand.push(card);
-    drawPile = rest;
-  }
-
-  return [{ ...deck, drawPile, discardPile, hand }, currentSeed];
 }
 
 /**
@@ -75,22 +52,51 @@ export function drawFilteredCards(
   return [{ ...deck, drawPile, discardPile, hand }, currentSeed];
 }
 
+/**
+ * Draws an ordinary battle offer of exactly `size` cards: up to `size`
+ * eligible cards (see `drawFilteredCards`), with every slot the eligible
+ * pool can't fill padded by `basicActionId`. Padding is created for this
+ * offer only and is stripped again when the hand is settled or discarded.
+ */
+export function drawPaddedOffer(
+  deck: Deck,
+  size: number,
+  seed: number,
+  isEligible: (cardId: string) => boolean,
+  basicActionId: string,
+): [Deck, number] {
+  const [drawnDeck, nextSeed] = drawFilteredCards(deck, size, seed, isEligible);
+  const drawnCount = drawnDeck.hand.length - deck.hand.length;
+  const padding = Array.from(
+    { length: size - drawnCount },
+    () => basicActionId,
+  );
+  return [{ ...drawnDeck, hand: [...drawnDeck.hand, ...padding] }, nextSeed];
+}
+
+/** Moves the whole hand to the discard pile; basic actions are dropped instead. */
 export function discardHand(deck: Deck): Deck {
+  const deckCards = deck.hand.filter((id) => !isBasicAction(id));
   return {
     ...deck,
     hand: [],
-    discardPile: [...deck.discardPile, ...deck.hand],
+    discardPile: [...deck.discardPile, ...deckCards],
   };
 }
 
-/** Removes `ids` from hand and shuffles them back into the draw pile, so an unqueue can't be used to peek at the next card. */
+/**
+ * Removes `ids` from hand and shuffles them back into the draw pile, so an
+ * unqueue can't be used to peek at the next card. Basic actions never
+ * enter the draw pile.
+ */
 export function returnCardsToDeck(
   deck: Deck,
   ids: string[],
   seed: number,
 ): [Deck, number] {
   const { hand } = removeIdsFromHand(deck, ids);
-  const [drawPile, nextSeed] = shuffle([...deck.drawPile, ...ids], seed);
+  const deckCards = ids.filter((id) => !isBasicAction(id));
+  const [drawPile, nextSeed] = shuffle([...deck.drawPile, ...deckCards], seed);
   return [{ ...deck, hand, drawPile }, nextSeed];
 }
 

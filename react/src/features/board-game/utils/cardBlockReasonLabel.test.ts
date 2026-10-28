@@ -10,8 +10,9 @@ describe('cardBlockReasonLabel', () => {
     );
     const cases = [
       ['shotOnly', 'Only when shooting'],
-      ['checkOnly', 'Only when checking'],
       ['faceoffOnly', 'Only at a faceoff'],
+      ['otherBattle', 'Not in this battle'],
+      ['otherSide', 'Not for your side'],
     ] as const;
     for (const [reason, label] of cases) {
       expect(cardBlockReasonLabel(reason, makeCard(), 3)).toBe(label);

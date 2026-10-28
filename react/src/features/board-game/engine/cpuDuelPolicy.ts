@@ -86,3 +86,24 @@ export function planCards(state: GameState, side: 'user' | 'cpu'): string[] {
 /** Pure, deterministic CPU plan with no RNG. */
 export const planCpuCards = (state: GameState): string[] =>
   planCards(state, 'cpu');
+
+/** Broad, honest read on how much of its round the CPU committed, shown before the reveal. */
+export type CpuIntent =
+  'Conservative' | 'Balanced' | 'Aggressive' | 'Heavy Commitment';
+
+/**
+ * The CPU's intent for a planned round, from the share of its base `ENERGY`
+ * the plan spends: up to 25% Conservative, up to 50% Balanced, under 75%
+ * Aggressive, else Heavy Commitment. Reveals neither card names nor count.
+ */
+export function describeCpuIntent(cpuPlan: string[]): CpuIntent {
+  const committedEnergy = cpuPlan.reduce(
+    (total, id) => total + (CARDS[id]?.cost ?? 0),
+    0,
+  );
+  const committedShare = committedEnergy / ENERGY;
+  if (committedShare <= 0.25) return 'Conservative';
+  if (committedShare <= 0.5) return 'Balanced';
+  if (committedShare < 0.75) return 'Aggressive';
+  return 'Heavy Commitment';
+}

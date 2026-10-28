@@ -18,8 +18,8 @@ export const GOALIE_POISE_BY_LENGTH: Record<GameLength, number> = {
 
 /** Energy budget per duel round. */
 export const ENERGY = 3;
-/** Cards dealt at the start of a duel round. */
-export const HAND_SIZE = 5;
+/** Cards offered at the start of each ordinary (deke/check/intercept) battle round. */
+export const HAND_SIZE = 3;
 /** Duel rounds before the defender wins on timeout. */
 export const MAX_ROUNDS = 3;
 

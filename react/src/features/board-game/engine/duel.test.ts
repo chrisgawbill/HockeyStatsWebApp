@@ -1,6 +1,8 @@
 import { ENERGY } from '@/features/board-game/data/balance';
 import { CARDS, STARTER_DECK } from '@/features/board-game/data/cards';
+import { planCards } from '@/features/board-game/engine/cpuDuelPolicy';
 import { createDeck } from '@/features/board-game/engine/deck';
+import type { Side } from '@/features/board-game/engine/duelShared';
 import {
   canPlayCard,
   canUnqueueCard,
@@ -11,9 +13,64 @@ import {
   resolveDuel,
   unqueueCard,
 } from '@/features/board-game/engine/duel';
-import type { Deck, GameState } from '@/features/board-game/types/game';
+import type {
+  BattleSide,
+  Deck,
+  GameState,
+} from '@/features/board-game/types/game';
 import { makeState } from '@/test/fixtures/duel';
 import { describe, expect, it } from 'vitest';
+
+type OrdinaryKind = 'deke' | 'check' | 'intercept';
+const ORDINARY_KINDS: OrdinaryKind[] = ['deke', 'check', 'intercept'];
+const BASIC_ACTIONS = ['shield_the_puck', 'stay_on_him'];
+
+/** The Product Owner's ON2-03 card map, written out independently of the card data so the data is checked against it. */
+const BATTLE_CARD_MAP: Record<OrdinaryKind, Record<BattleSide, string[]>> = {
+  deke: {
+    possession: [
+      'deke',
+      'toe_drag',
+      'protect_puck',
+      'stickhandle',
+      'shield_the_puck',
+    ],
+    challenger: ['poke_check', 'body_check', 'stay_on_him'],
+  },
+  check: {
+    possession: ['protect_puck', 'stickhandle', 'shield_the_puck'],
+    challenger: ['poke_check', 'body_check', 'stay_on_him'],
+  },
+  intercept: {
+    possession: ['stickhandle', 'deke', 'protect_puck', 'shield_the_puck'],
+    challenger: ['poke_check', 'stay_on_him'],
+  },
+};
+
+/** The puck carrier is the defender in a check, the attacker otherwise. */
+function battleSideFor(kind: OrdinaryKind, side: Side): BattleSide {
+  const carrier: Side = kind === 'check' ? 'defender' : 'attacker';
+  return side === carrier ? 'possession' : 'challenger';
+}
+
+/** Every card id in a deck's piles plus hand, basic actions excluded, sorted. */
+function deckCardIds(deck: Deck): string[] {
+  return [
+    ...deck.drawPile,
+    ...deck.hand,
+    ...deck.discardPile,
+    ...deck.exhaustPile,
+  ]
+    .filter((id) => !BASIC_ACTIONS.includes(id))
+    .sort();
+}
+
+/** True if any deck pile (not the hand) holds a basic action. */
+function pileHoldsBasicAction(deck: Deck): boolean {
+  return [...deck.drawPile, ...deck.discardPile, ...deck.exhaustPile].some(
+    (id) => BASIC_ACTIONS.includes(id),
+  );
+}
 
 /** Drives a duel to completion by discarding the user's hand every round (a passive human). */
 function driveToCompletion(state: GameState, maxRounds = 10): GameState {
@@ -28,13 +85,13 @@ describe('createDuel', () => {
   // BG-A15b: the faceoff duel no longer goes through this generic
   // hand-dealing machinery at all (it's an ante pick now - see
   // engine/faceoffDuel.test.ts), so `handSizeFor`'s old +1-for-faceoff perk
-  // branch is gone; every remaining duel kind here draws a plain 5.
-  it('draws 5 cards each, plans CPU cards within budget, and adds streak energy to the user only', () => {
+  // branch is gone; every remaining duel kind here offers a plain 3.
+  it('offers 3 cards each, plans CPU cards within budget, and adds streak energy to the user only', () => {
     const state = makeState();
     const check = createDuel(state, 'check', 'user-LD', 'cpu-C');
     expect(check.duel!.energy).toBe(3);
-    expect(check.deck.hand).toHaveLength(5);
-    expect(check.cpuDeck.hand).toHaveLength(5);
+    expect(check.deck.hand).toHaveLength(3);
+    expect(check.cpuDeck.hand).toHaveLength(3);
 
     // Plans the CPU's round-1 cards within the energy budget.
     {
@@ -51,13 +108,13 @@ describe('createDuel', () => {
       const state = makeState({
         bonusEnergy: 1,
         cpuDeck: {
-          drawPile: ['toe_drag', 'toe_drag'],
+          drawPile: ['body_check', 'body_check'],
           hand: [],
           discardPile: [],
           exhaustPile: [],
         },
       });
-      const duel = createDuel(state, 'check', 'user-LD', 'cpu-C');
+      const duel = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
       const cpuPlanCost = duel.duel!.cpuPlan.reduce(
         (sum, id) => sum + CARDS[id].cost,
         0,
@@ -70,10 +127,8 @@ describe('createDuel', () => {
 });
 
 describe('filtered duel draw (BG-A13)', () => {
-  const isAllowedIn = (id: string, kind: 'faceoff' | 'deke' | 'check') => {
-    const allowedIn = CARDS[id].allowedIn;
-    return allowedIn === 'any' || allowedIn.includes(kind);
-  };
+  const isAllowedIn = (id: string, kind: OrdinaryKind, side: Side) =>
+    BATTLE_CARD_MAP[kind][battleSideFor(kind, side)].includes(id);
 
   // BG-A15b: STARTER_DECK now carries the 6 faceoff-pool cards too (they're
   // drawn by the faceoff ante instead, see engine/faceoffDuel.test.ts), so
@@ -83,14 +138,14 @@ describe('filtered duel draw (BG-A13)', () => {
   it('deals only eligible cards, short hands safely, deterministically, keeping the rest in the deck', () => {
     const state = makeState();
     const duel = createDuel(state, 'deke', 'user-LW', 'cpu-LD');
-    for (const id of duel.deck.hand) expect(isAllowedIn(id, 'deke')).toBe(true);
+    for (const id of duel.deck.hand)
+      expect(isAllowedIn(id, 'deke', 'attacker')).toBe(true);
     for (const id of duel.cpuDeck.hand)
-      expect(isAllowedIn(id, 'deke')).toBe(true);
+      expect(isAllowedIn(id, 'deke', 'defender')).toBe(true);
 
-    // Deals a short hand (not a throw or a hang) when the eligible pool cannot fill it.
+    // Pads the offer with the side's basic action (not a throw or a hang) when the eligible pool is empty.
     {
-      // A check duel only allows 'any' or check-tagged cards. Stock the CPU's
-      // deck entirely with shot-only cards so its eligible pool is empty.
+      // Stock the CPU carrier's deck entirely with shot-only cards so its eligible pool is empty.
       const state = makeState();
       const [cpuDeck] = createDeck(
         ['wrist_shot', 'wrist_shot', 'wrist_shot', 'slapshot', 'wrist_shot'],
@@ -102,7 +157,14 @@ describe('filtered duel draw (BG-A13)', () => {
         'user-LD',
         'cpu-C',
       );
-      expect(duel.cpuDeck.hand).toEqual([]);
+      expect(duel.cpuDeck.hand).toEqual([
+        'shield_the_puck',
+        'shield_the_puck',
+        'shield_the_puck',
+      ]);
+      expect([...duel.cpuDeck.drawPile].sort()).toEqual(
+        [...cpuDeck.drawPile].sort(),
+      );
       expect(duel.phase).toBe('duel');
     }
 
@@ -143,9 +205,9 @@ describe('filtered duel draw (BG-A13)', () => {
     duel = endDuelRound({ ...duel, deck: { ...duel.deck, hand: [] } });
     expect(duel.duel).not.toBeNull();
     for (const id of duel.deck.hand)
-      expect(isAllowedIn(id, 'check')).toBe(true);
+      expect(isAllowedIn(id, 'check', 'attacker')).toBe(true);
     for (const id of duel.cpuDeck.hand)
-      expect(isAllowedIn(id, 'check')).toBe(true);
+      expect(isAllowedIn(id, 'check', 'defender')).toBe(true);
 
     // Resets the next user duel round to base energy plus the daily-streak bonus.
     {
@@ -178,7 +240,7 @@ describe('canPlayCard / playCard (queue)', () => {
 
     // Moves the card from hand to userQueue and spends its energy, with no combat effect yet.
     {
-      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      let state = createDuel(makeState(), 'deke', 'user-LD', 'cpu-C');
       state = { ...state, deck: { ...state.deck, hand: ['protect_puck'] } };
       const next = playCard(state, 0);
       expect(next.deck.hand).toEqual([]);
@@ -189,7 +251,7 @@ describe('canPlayCard / playCard (queue)', () => {
 
     // Resolves a draw effect immediately on queue.
     {
-      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      let state = createDuel(makeState(), 'deke', 'user-LD', 'cpu-C');
       state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
       const next = playCard(state, 0);
       expect(next.deck.hand).toHaveLength(1);
@@ -210,11 +272,18 @@ describe('cardBlockReason', () => {
       expect(cardBlockReason(state, 0)).toBe('shotOnly');
     }
 
-    // Returns 'checkOnly' when the card's allowedIn excludes this duel kind and lists check first.
+    // Returns 'otherSide' when the card is legal in this battle but only for the other side.
     {
       let state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
       state = { ...state, deck: { ...state.deck, hand: ['body_check'] } };
-      expect(cardBlockReason(state, 0)).toBe('checkOnly');
+      expect(cardBlockReason(state, 0)).toBe('otherSide');
+    }
+
+    // Returns 'otherBattle' when the card is never legal in this battle kind.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = { ...state, deck: { ...state.deck, hand: ['toe_drag'] } };
+      expect(cardBlockReason(state, 0)).toBe('otherBattle');
     }
 
     // Returns 'energy' when the card costs more than the current energy, and rule reasons take priority over it.
@@ -248,7 +317,7 @@ describe('cardBlockReason', () => {
 
 describe('unqueueCard', () => {
   it('returns the card to hand with a refund, ignoring invalid indexes, with no net change over repeats', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+    let state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
     state = {
       ...state,
       deck: { ...state.deck, hand: ['protect_puck', 'deke'] },
@@ -267,7 +336,7 @@ describe('unqueueCard', () => {
 
     // Queue-unqueue Stickhandle 5x leaves hand size, total card count, and energy unchanged.
     {
-      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      let state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
       state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
       const total = (d: Deck) =>
         d.hand.length +
@@ -291,7 +360,7 @@ describe('unqueueCard', () => {
   });
 
   it('returned drawn cards are reshuffled, and a queued drawn card cannot be unqueued', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+    let state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
     state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
     const queued = playCard(state, 0);
     const drawnCardId = queued.deck.hand[0];
@@ -310,7 +379,7 @@ describe('unqueueCard', () => {
 
     // canUnqueueCard is false once a drawn card has itself been queued, and unqueueCard refuses (state unchanged).
     {
-      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      let state = createDuel(makeState(), 'deke', 'user-LW', 'cpu-C');
       state = { ...state, deck: { ...state.deck, hand: ['stickhandle'] } };
       let queued = playCard(state, 0);
       // Force a known drawn card id so the follow-up queue is deterministic.
@@ -328,7 +397,7 @@ describe('unqueueCard', () => {
 
 describe('endDuelRound (simultaneous reveal)', () => {
   it('applies block before damage with the LD perk, order-independently, exhausting at reveal', () => {
-    let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+    let state = createDuel(makeState(), 'deke', 'user-LD', 'cpu-C');
     state = {
       ...state,
       deck: { ...state.deck, hand: ['protect_puck'] },
@@ -342,7 +411,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
     expect(next.lastReveal!.userBlock).toBe(7);
 
     // Is order-independent: the same cards queued in either order deal the same damage to each side.
-    const base = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+    const base = createDuel(makeState(), 'deke', 'user-LD', 'cpu-C');
     const withHand = (order: string[]): GameState => ({
       ...base,
       deck: { ...base.deck, hand: order },
@@ -383,7 +452,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
   });
 
   it('resolves KOs and double KOs at reveal, recording lastReveal', () => {
-    let state = createDuel(makeState(), 'check', 'user-C', 'cpu-C');
+    let state = createDuel(makeState(), 'deke', 'user-C', 'cpu-C');
     state = {
       ...state,
       deck: { ...state.deck, hand: ['toe_drag'] },
@@ -422,7 +491,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
 
     // Records lastReveal with both sides' cards and post-block damage.
     {
-      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      let state = createDuel(makeState(), 'deke', 'user-LD', 'cpu-C');
       state = {
         ...state,
         deck: { ...state.deck, hand: ['deke'] },
@@ -443,7 +512,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
     }
   });
 
-  it('a mid-round KO discards the leftover hand, keeping all 12 cards across piles', () => {
+  it('a mid-round KO discards the leftover hand, keeping every card across piles', () => {
     const [starterDeck] = createDeck(STARTER_DECK, 1);
     const toeDragIndex = starterDeck.drawPile.indexOf('toe_drag');
     const deck: Deck = {
@@ -452,7 +521,7 @@ describe('endDuelRound (simultaneous reveal)', () => {
       discardPile: [],
       exhaustPile: [],
     };
-    let state = createDuel(makeState({ deck }), 'check', 'user-LD', 'cpu-C');
+    let state = createDuel(makeState({ deck }), 'deke', 'user-LD', 'cpu-C');
     state = {
       ...state,
       cpuDeck: { ...state.cpuDeck, hand: [] },
@@ -499,11 +568,11 @@ describe('endDuelRound (passive-human scenarios)', () => {
       state = {
         ...state,
         deck: { ...state.deck, hand: [] },
-        cpuDeck: { ...state.cpuDeck, hand: ['toe_drag'] },
+        cpuDeck: { ...state.cpuDeck, hand: ['stickhandle'] },
         duel: {
           ...state.duel!,
           attacker: { ...state.duel!.attacker, poise: 1 },
-          cpuPlan: ['toe_drag'],
+          cpuPlan: ['stickhandle'],
         },
       };
       const next = endDuelRound(state);
@@ -638,6 +707,242 @@ describe('resolveDuel outcome table', () => {
       const result = resolveDuel(state, 'defender', false);
       expect(result.lastOutcome!.cleanSave).toBe(false);
       expect(result.puck).toEqual({ kind: 'loose', pos: { col: 13, row: 3 } });
+    }
+  });
+});
+
+describe('contextual offers (ON2-03)', () => {
+  /** Queues the user's planned cards, unqueuing and re-queuing the last to exercise the return path. */
+  function queueUserPlan(state: GameState): GameState {
+    let next = state;
+    for (const cardId of planCards(next, 'user')) {
+      const handIndex = next.deck.hand.indexOf(cardId);
+      if (handIndex !== -1) next = playCard(next, handIndex);
+    }
+    const lastIndex = next.duel!.userQueue.length - 1;
+    if (lastIndex >= 0 && canUnqueueCard(next, lastIndex)) {
+      next = unqueueCard(next, lastIndex);
+      expect(pileHoldsBasicAction(next.deck)).toBe(false);
+      next = playCard(next, next.deck.hand.length - 1);
+    }
+    return next;
+  }
+
+  /** Moves every copy of `ids` from the draw pile to the exhaust pile, thinning the eligible pool. */
+  function exhaustCopies(deck: Deck, ids: string[]): Deck {
+    return {
+      ...deck,
+      drawPile: deck.drawPile.filter((id) => !ids.includes(id)),
+      exhaustPile: deck.drawPile.filter((id) => ids.includes(id)),
+    };
+  }
+
+  it('never offers a card outside the battle/side map, always offers 3, and keeps every deck card exactly once', () => {
+    for (let seed = 1; seed <= 12; seed++) {
+      const thin = seed % 2 === 0;
+      const [userDeck, seed1] = createDeck(STARTER_DECK, seed);
+      const [cpuDeck, rngSeed] = createDeck(STARTER_DECK, seed1);
+      const thinned = ['deke', 'protect_puck', 'poke_check'];
+      let state = makeState({
+        rngSeed,
+        deck: thin ? exhaustCopies(userDeck, thinned) : userDeck,
+        cpuDeck: thin ? exhaustCopies(cpuDeck, thinned) : cpuDeck,
+      });
+      const userExhausted = [...state.deck.exhaustPile];
+      const cpuExhausted = [...state.cpuDeck.exhaustPile];
+
+      for (let duelIndex = 0; duelIndex < 6; duelIndex++) {
+        const kind = ORDINARY_KINDS[duelIndex % ORDINARY_KINDS.length];
+        const userAttacks = (seed + duelIndex) % 2 === 0;
+        const [attackerId, defenderId] = userAttacks
+          ? ['user-LW', 'cpu-LD']
+          : ['cpu-LW', 'user-LD'];
+        state = createDuel(
+          { ...state, phase: 'move' },
+          kind,
+          attackerId,
+          defenderId,
+          kind === 'intercept' ? attackerId.replace('LW', 'C') : null,
+        );
+
+        while (state.duel) {
+          const userSide = state.duel.userSide;
+          const cpuSide: Side =
+            userSide === 'attacker' ? 'defender' : 'attacker';
+          const userAllowed =
+            BATTLE_CARD_MAP[kind][battleSideFor(kind, userSide)];
+          const cpuAllowed =
+            BATTLE_CARD_MAP[kind][battleSideFor(kind, cpuSide)];
+
+          expect(state.deck.hand).toHaveLength(3);
+          expect(state.cpuDeck.hand).toHaveLength(3);
+          for (const id of state.deck.hand) expect(userAllowed).toContain(id);
+          for (const id of state.cpuDeck.hand) expect(cpuAllowed).toContain(id);
+          for (const id of state.duel.cpuPlan) expect(cpuAllowed).toContain(id);
+          expect(deckCardIds(state.deck)).toEqual([...STARTER_DECK].sort());
+          expect(deckCardIds(state.cpuDeck)).toEqual([...STARTER_DECK].sort());
+
+          state = queueUserPlan(state);
+          for (const id of state.deck.hand) expect(userAllowed).toContain(id);
+          state = endDuelRound(state);
+
+          expect(pileHoldsBasicAction(state.deck)).toBe(false);
+          expect(pileHoldsBasicAction(state.cpuDeck)).toBe(false);
+          expect(state.deck.exhaustPile).toEqual(userExhausted);
+          expect(state.cpuDeck.exhaustPile).toEqual(cpuExhausted);
+        }
+        expect(state.deck.hand).toEqual([]);
+        expect(state.cpuDeck.hand).toEqual([]);
+        if (state.phase === 'gameOver') break;
+      }
+    }
+  });
+
+  it('gives user and CPU the same offer, plan and settled piles from the same deck and side', () => {
+    const deck: Deck = {
+      drawPile: ['wrist_shot', 'stickhandle', 'body_check', 'protect_puck'],
+      hand: [],
+      discardPile: ['poke_check'],
+      exhaustPile: ['deke'],
+    };
+    const emptyDeck: Deck = {
+      drawPile: [],
+      hand: [],
+      discardPile: [],
+      exhaustPile: [],
+    };
+    const userCarrier = createDuel(
+      makeState({ deck, cpuDeck: emptyDeck }),
+      'deke',
+      'user-LW',
+      'cpu-LD',
+    );
+    const cpuCarrier = createDuel(
+      makeState({ deck: emptyDeck, cpuDeck: deck }),
+      'deke',
+      'cpu-LW',
+      'user-LD',
+    );
+    expect(userCarrier.deck.hand).toEqual(cpuCarrier.cpuDeck.hand);
+    expect(userCarrier.deck.hand).toEqual([
+      'stickhandle',
+      'protect_puck',
+      'shield_the_puck',
+    ]);
+
+    const userPlan = planCards(userCarrier, 'user');
+    expect(userPlan).toEqual(cpuCarrier.duel!.cpuPlan);
+
+    // Both carriers commit the same plan and settle it with the same energy and pile rules.
+    let userPlayed = userCarrier;
+    for (const id of userPlan)
+      userPlayed = playCard(userPlayed, userPlayed.deck.hand.indexOf(id));
+    const planCost = userPlan.reduce((sum, id) => sum + CARDS[id].cost, 0);
+    expect(userPlayed.duel!.energy).toBe(ENERGY - planCost);
+
+    const knockOutCarrier = (state: GameState): GameState => ({
+      ...state,
+      duel: {
+        ...state.duel!,
+        attacker: { ...state.duel!.attacker, poise: 1 },
+        defender: { ...state.duel!.defender, poise: 1 },
+      },
+    });
+    const userSettled = endDuelRound(knockOutCarrier(userPlayed)).deck;
+    const cpuSettled = endDuelRound(knockOutCarrier(cpuCarrier)).cpuDeck;
+    for (const settled of [userSettled, cpuSettled]) {
+      expect(settled.hand).toEqual([]);
+      expect(settled.exhaustPile).toEqual(['deke']);
+      expect(pileHoldsBasicAction(settled)).toBe(false);
+    }
+    expect([...userSettled.discardPile].sort()).toEqual(
+      [...cpuSettled.discardPile].sort(),
+    );
+    expect([...userSettled.drawPile].sort()).toEqual(
+      [...cpuSettled.drawPile].sort(),
+    );
+  });
+
+  it('discards a flexible card played in one battle and reshuffles it into a later eligible offer', () => {
+    const deck: Deck = {
+      drawPile: ['protect_puck', 'deke', 'toe_drag'],
+      hand: [],
+      discardPile: [],
+      exhaustPile: [],
+    };
+    let state = createDuel(makeState({ deck }), 'deke', 'user-LW', 'cpu-LD');
+    state = playCard(state, state.deck.hand.indexOf('protect_puck'));
+    state = resolveDuel(endDuelRound(state), 'attacker', true);
+    expect(state.deck.discardPile).toContain('protect_puck');
+
+    // The user now carries the puck against a check: only protect_puck is eligible.
+    const check = createDuel(
+      { ...state, phase: 'move' },
+      'check',
+      'cpu-LD',
+      'user-LW',
+    );
+    expect(check.deck.hand).toEqual([
+      'protect_puck',
+      'shield_the_puck',
+      'shield_the_puck',
+    ]);
+    expect([...check.deck.drawPile].sort()).toEqual(['deke', 'toe_drag']);
+  });
+
+  it('draw effects pull only eligible cards for the user on queue and the CPU at reveal, never padding', () => {
+    let state = createDuel(makeState(), 'check', 'cpu-LD', 'user-LW');
+    state = {
+      ...state,
+      deck: {
+        drawPile: ['poke_check', 'toe_drag', 'protect_puck', 'deke'],
+        hand: ['stickhandle'],
+        discardPile: [],
+        exhaustPile: [],
+      },
+    };
+    const queued = playCard(state, 0);
+    expect(queued.deck.hand).toEqual(['protect_puck']);
+    expect(queued.duel!.queueDraws).toEqual([['protect_puck']]);
+
+    // With nothing eligible left, the draw finds nothing rather than a basic action.
+    {
+      const dry = playCard(
+        {
+          ...state,
+          deck: { ...state.deck, drawPile: ['poke_check', 'toe_drag'] },
+        },
+        0,
+      );
+      expect(dry.deck.hand).toEqual([]);
+      expect(dry.duel!.queueDraws).toEqual([[]]);
+    }
+
+    // The CPU carrier's Stickhandle draws at reveal from its eligible cards only.
+    {
+      let state = createDuel(makeState(), 'check', 'user-LD', 'cpu-C');
+      state = {
+        ...state,
+        deck: { ...state.deck, hand: [] },
+        cpuDeck: {
+          drawPile: ['body_check', 'poke_check', 'protect_puck'],
+          hand: ['stickhandle'],
+          discardPile: [],
+          exhaustPile: [],
+        },
+        duel: {
+          ...state.duel!,
+          cpuPlan: ['stickhandle'],
+          attacker: { ...state.duel!.attacker, poise: 1 },
+        },
+      };
+      const next = endDuelRound(state);
+      expect(next.duel).toBeNull();
+      expect(next.cpuDeck.drawPile).toEqual(['body_check', 'poke_check']);
+      expect([...next.cpuDeck.discardPile].sort()).toEqual([
+        'protect_puck',
+        'stickhandle',
+      ]);
     }
   });
 });

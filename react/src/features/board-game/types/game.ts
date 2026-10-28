@@ -29,9 +29,18 @@ export type Phase = 'faceoff' | 'move' | 'duel' | 'duelResult' | 'gameOver';
 
 export type DuelKind = 'faceoff' | 'deke' | 'check' | 'intercept' | 'shot';
 
+/**
+ * A participant's role in a battle: the puck carrier (`possession`) or the
+ * side trying to take the puck (`challenger`).
+ */
+export type BattleSide = 'possession' | 'challenger';
+
+/** Per duel kind, the battle sides that may play a card. A kind left out means the card is never legal there. */
+export type CardContexts = Partial<Record<DuelKind, readonly BattleSide[]>>;
+
 /** Why a hand card can't be played right now, for the UI to explain a greyed-out card. */
 export type CardBlockReason =
-  'energy' | 'shotOnly' | 'checkOnly' | 'faceoffOnly';
+  'energy' | 'shotOnly' | 'faceoffOnly' | 'otherBattle' | 'otherSide';
 
 export type CardTag = 'skill' | 'block' | 'shot' | 'check' | 'faceoff';
 
@@ -54,7 +63,7 @@ export interface CardDef {
   cost: number;
   text: string;
   tags: CardTag[];
-  allowedIn: DuelKind[] | 'any';
+  allowedIn: CardContexts;
   exhaust: boolean;
   effects: CardEffect[];
   /** Widens the perfect/yellow timing band. Only shot-pool cards set this. */

@@ -2,13 +2,14 @@ import { ENERGY, MAX_ROUNDS } from '@/features/board-game/data/balance';
 import { CARDS } from '@/features/board-game/data/cards';
 import {
   discardHand,
-  drawCards,
   drawFilteredCards,
+  drawPaddedOffer,
   returnCardsToDeck,
 } from '@/features/board-game/engine/deck';
 import { planCpuCards } from '@/features/board-game/engine/cpuDuelPolicy';
 import {
   applyDamage,
+  basicActionFor,
   cardEffects,
   handSizeFor,
   isDrawEligibleCard,
@@ -31,24 +32,53 @@ import type {
   RevealResult,
 } from '@/features/board-game/types/game';
 
+/** Draws `side`'s round offer: a full hand of cards legal for its side of this battle, padded with its basic action when too few remain. */
+function drawRoundOffer(
+  deck: Deck,
+  seed: number,
+  duel: DuelState,
+  side: Side,
+): [Deck, number] {
+  return drawPaddedOffer(
+    deck,
+    handSizeFor(duel.kind),
+    seed,
+    (cardId) => isDrawEligibleCard(duel, side, cardId),
+    basicActionFor(duel.kind, side),
+  );
+}
+
+/** Resolves a mid-round draw effect for `side`: only cards legal for its side of this battle, never padded. */
+function drawEligibleCards(
+  deck: Deck,
+  count: number,
+  seed: number,
+  duel: DuelState,
+  side: Side,
+): [Deck, number] {
+  return drawFilteredCards(deck, count, seed, (cardId) =>
+    isDrawEligibleCard(duel, side, cardId),
+  );
+}
+
 /**
- * Draws both sides' hands for a round and secretly plans the CPU's cards.
- * Each hand is filtered to cards legal for this duel kind, so a card never
- * sits in hand dead-on-arrival; ineligible cards stay in the deck.
+ * Draws both sides' round offers and secretly plans the CPU's cards. Both
+ * offers follow the same side-aware filter and padding rules, so a card
+ * never sits in hand dead-on-arrival; ineligible cards stay in the deck.
  */
 function drawHandsAndPlan(state: GameState, duelBase: DuelState): GameState {
   const cpuSide = otherSide(duelBase.userSide);
-  const [deck, seed1] = drawFilteredCards(
+  const [deck, seed1] = drawRoundOffer(
     state.deck,
-    handSizeFor(duelBase.kind),
     state.rngSeed,
-    (cardId) => isDrawEligibleCard(duelBase, duelBase.userSide, cardId),
+    duelBase,
+    duelBase.userSide,
   );
-  const [cpuDeck, seed2] = drawFilteredCards(
+  const [cpuDeck, seed2] = drawRoundOffer(
     state.cpuDeck,
-    handSizeFor(duelBase.kind),
     seed1,
-    (cardId) => isDrawEligibleCard(duelBase, cpuSide, cardId),
+    duelBase,
+    cpuSide,
   );
   const planningState: GameState = {
     ...state,
@@ -145,7 +175,13 @@ export function playCard(state: GameState, handIndex: number): GameState {
   const { draw } = cardEffects(card, userSkater.role);
   let drawnIds: string[] = [];
   if (draw > 0) {
-    const [drawnDeck, nextSeed] = drawCards(deck, draw, seed);
+    const [drawnDeck, nextSeed] = drawEligibleCards(
+      deck,
+      draw,
+      seed,
+      duel,
+      duel.userSide,
+    );
     drawnIds = drawnDeck.hand.slice(handBeforeDraw.length);
     deck = drawnDeck;
     seed = nextSeed;
@@ -224,7 +260,13 @@ export function endDuelRound(state: GameState): GameState {
   let cpuDeck = state.cpuDeck;
   let seed = state.rngSeed;
   if (cpuTotals.draw > 0) {
-    const [drawnDeck, nextSeed] = drawCards(cpuDeck, cpuTotals.draw, seed);
+    const [drawnDeck, nextSeed] = drawEligibleCards(
+      cpuDeck,
+      cpuTotals.draw,
+      seed,
+      duel,
+      cpuSide,
+    );
     cpuDeck = drawnDeck;
     seed = nextSeed;
   }

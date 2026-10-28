@@ -18,7 +18,7 @@ describe('cardText', () => {
       id: 'wrist_shot',
       text: '7 damage',
       tags: ['shot'],
-      allowedIn: ['shot'],
+      allowedIn: { shot: ['possession'] },
       effects: [{ type: 'damage', amount: 7 }],
     });
     expect(cardText(shot, 'LW')).toBe('7 damage');
@@ -40,7 +40,7 @@ describe('cardText', () => {
       id: 'slapshot',
       text: '14 damage, exhaust',
       tags: ['shot'],
-      allowedIn: ['shot'],
+      allowedIn: { shot: ['possession'] },
       exhaust: true,
       effects: [{ type: 'damage', amount: 14 }],
     });

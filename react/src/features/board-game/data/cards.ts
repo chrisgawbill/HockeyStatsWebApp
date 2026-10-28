@@ -1,4 +1,28 @@
-import type { CardDef } from '@/features/board-game/types/game';
+import type {
+  BattleSide,
+  CardContexts,
+  CardDef,
+} from '@/features/board-game/types/game';
+
+const POSSESSION: readonly BattleSide[] = ['possession'];
+const CHALLENGER: readonly BattleSide[] = ['challenger'];
+
+/** Every ordinary battle, for the puck carrier only. */
+const CARRIER_IN_ALL_BATTLES: CardContexts = {
+  deke: POSSESSION,
+  check: POSSESSION,
+  intercept: POSSESSION,
+};
+/** Every ordinary battle, for the challenging side only. */
+const CHALLENGER_IN_ALL_BATTLES: CardContexts = {
+  deke: CHALLENGER,
+  check: CHALLENGER,
+  intercept: CHALLENGER,
+};
+const SHOOTER_ONLY: CardContexts = { shot: POSSESSION };
+const EITHER_CENTRE: CardContexts = {
+  faceoff: ['possession', 'challenger'],
+};
 
 /** All card definitions, keyed by id. */
 export const CARDS: Record<string, CardDef> = {
@@ -8,7 +32,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: '6 damage',
     tags: ['skill'],
-    allowedIn: 'any',
+    allowedIn: { deke: POSSESSION, intercept: POSSESSION },
     exhaust: false,
     effects: [{ type: 'damage', amount: 6 }],
   },
@@ -18,7 +42,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 2,
     text: '10 damage',
     tags: ['skill'],
-    allowedIn: 'any',
+    allowedIn: { deke: POSSESSION },
     exhaust: false,
     effects: [{ type: 'damage', amount: 10 }],
   },
@@ -28,7 +52,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: '5 block',
     tags: ['block'],
-    allowedIn: 'any',
+    allowedIn: CARRIER_IN_ALL_BATTLES,
     exhaust: false,
     effects: [{ type: 'block', amount: 5 }],
   },
@@ -38,7 +62,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: '3 damage, draw 1',
     tags: ['skill'],
-    allowedIn: 'any',
+    allowedIn: CARRIER_IN_ALL_BATTLES,
     exhaust: false,
     effects: [
       { type: 'damage', amount: 3 },
@@ -51,7 +75,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: 'A quick, accurate release.',
     tags: ['shot'],
-    allowedIn: ['shot'],
+    allowedIn: SHOOTER_ONLY,
     exhaust: false,
     effects: [{ type: 'damage', amount: 7 }],
     accuracy: 70,
@@ -63,7 +87,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 2,
     text: 'A booming, hard-to-place blast.',
     tags: ['shot'],
-    allowedIn: ['shot'],
+    allowedIn: SHOOTER_ONLY,
     exhaust: true,
     effects: [{ type: 'damage', amount: 14 }],
     accuracy: 30,
@@ -75,7 +99,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: 'A balanced release off the toe.',
     tags: ['shot'],
-    allowedIn: ['shot'],
+    allowedIn: SHOOTER_ONLY,
     exhaust: false,
     effects: [{ type: 'damage', amount: 9 }],
     accuracy: 50,
@@ -87,7 +111,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 2,
     text: 'A blistering shot straight off the pass.',
     tags: ['shot'],
-    allowedIn: ['shot'],
+    allowedIn: SHOOTER_ONLY,
     exhaust: false,
     effects: [{ type: 'damage', amount: 11 }],
     accuracy: 20,
@@ -99,7 +123,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: 'A lightning-quick read on the drop.',
     tags: ['faceoff'],
-    allowedIn: ['faceoff'],
+    allowedIn: EITHER_CENTRE,
     exhaust: false,
     effects: [],
     anticipation: 70,
@@ -111,7 +135,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: 'Ties up the puck rather than give it away clean.',
     tags: ['faceoff'],
-    allowedIn: ['faceoff'],
+    allowedIn: EITHER_CENTRE,
     exhaust: false,
     effects: [],
     anticipation: 25,
@@ -124,7 +148,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 2,
     text: 'Pulls it back to the point instead of the circle.',
     tags: ['faceoff'],
-    allowedIn: ['faceoff'],
+    allowedIn: EITHER_CENTRE,
     exhaust: false,
     effects: [],
     anticipation: 50,
@@ -137,7 +161,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 2,
     text: 'Leans on the opposing centre through the whistle.',
     tags: ['faceoff'],
-    allowedIn: ['faceoff'],
+    allowedIn: EITHER_CENTRE,
     exhaust: false,
     effects: [],
     anticipation: 30,
@@ -150,7 +174,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: 'A clean forehand pull off the draw.',
     tags: ['faceoff'],
-    allowedIn: ['faceoff'],
+    allowedIn: EITHER_CENTRE,
     exhaust: false,
     effects: [],
     anticipation: 65,
@@ -163,7 +187,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: 'Jumps the drop without fear of a whistle.',
     tags: ['faceoff'],
-    allowedIn: ['faceoff'],
+    allowedIn: EITHER_CENTRE,
     exhaust: false,
     effects: [],
     anticipation: 85,
@@ -176,7 +200,7 @@ export const CARDS: Record<string, CardDef> = {
     cost: 2,
     text: '9 damage',
     tags: ['check'],
-    allowedIn: ['check'],
+    allowedIn: { deke: CHALLENGER, check: CHALLENGER },
     exhaust: false,
     effects: [{ type: 'damage', amount: 9 }],
   },
@@ -186,10 +210,39 @@ export const CARDS: Record<string, CardDef> = {
     cost: 1,
     text: '5 damage',
     tags: ['check'],
-    allowedIn: 'any',
+    allowedIn: CHALLENGER_IN_ALL_BATTLES,
     exhaust: false,
     effects: [{ type: 'damage', amount: 5 }],
   },
+  shield_the_puck: {
+    id: 'shield_the_puck',
+    name: 'Shield the Puck',
+    cost: 0,
+    text: '2 block',
+    tags: [],
+    allowedIn: CARRIER_IN_ALL_BATTLES,
+    exhaust: false,
+    effects: [{ type: 'block', amount: 2 }],
+  },
+  stay_on_him: {
+    id: 'stay_on_him',
+    name: 'Stay on Him',
+    cost: 0,
+    text: '2 damage',
+    tags: [],
+    allowedIn: CHALLENGER_IN_ALL_BATTLES,
+    exhaust: false,
+    effects: [{ type: 'damage', amount: 2 }],
+  },
+};
+
+/**
+ * Free basic action that pads an ordinary battle offer when too few eligible
+ * cards remain. It exists only for that offer: never in any deck pile.
+ */
+export const BASIC_ACTION_BY_SIDE: Record<BattleSide, string> = {
+  possession: 'shield_the_puck',
+  challenger: 'stay_on_him',
 };
 
 /**

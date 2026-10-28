@@ -165,14 +165,6 @@
   overflow-wrap: anywhere;
 }
 
-.planCards {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2px;
-}
-
 .queue {
   display: flex;
   flex-direction: column;
