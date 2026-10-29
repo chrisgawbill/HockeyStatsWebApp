@@ -3,7 +3,7 @@
 Delivery rules: [development workflow](../agent-development.md).
 
 **Status:** ACTIVE — Started by the Product Owner 2026-10-29. Implemented on
-branch `ccr-373a3121-jzv70k`; pending Product Owner confirmation of the
+branch `feature/ahl-league-toggle`; pending Product Owner confirmation of the
 checkpoint below, the experiential review, a Spotter run, and the API-AHL-02
 deploy. Requested 2026-10-29 ("an NHL/AHL toggle on the page"). Frontend.
 
@@ -71,7 +71,7 @@ API client used by standings, schedule, team and player pages.
 switching leagues on standings, schedule and a team page at desktop and phone
 widths; Spotter run.
 
-**Evidence (2026-10-29, branch `ccr-373a3121-jzv70k`):**
+**Evidence (2026-10-29, branch `feature/ahl-league-toggle`):**
 
 - PASS: `pnpm tsc`, `pnpm test` (316/316, new: league state and storage,
   switch targets, the `league=ahl` API parameter, AHL standings names, AHL
