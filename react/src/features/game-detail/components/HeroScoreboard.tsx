@@ -13,6 +13,7 @@ import {
 import { useTheme } from '@/lib/ThemeContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
 
@@ -28,9 +29,13 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
   const { season } = useSeason();
 
   const awayLogo =
-    theme === 'dark' ? boxscore.awayTeam.darkLogo : boxscore.awayTeam.logo;
+    theme === 'dark'
+      ? (boxscore.awayTeam.darkLogo ?? boxscore.awayTeam.logo)
+      : boxscore.awayTeam.logo;
   const homeLogo =
-    theme === 'dark' ? boxscore.homeTeam.darkLogo : boxscore.homeTeam.logo;
+    theme === 'dark'
+      ? (boxscore.homeTeam.darkLogo ?? boxscore.homeTeam.logo)
+      : boxscore.homeTeam.logo;
   const stateLabel = getStateLabel(boxscore, status);
   const isLive = status === 'live';
   const clockLabel = getLiveClockLabel(boxscore, status);
@@ -54,6 +59,7 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
           : sourcePath.startsWith('/team/')
             ? 'Team'
             : 'Schedule';
+  const { league } = useLeague();
   const matchupLabel = `${boxscore.awayTeam.abbrev} at ${boxscore.homeTeam.abbrev}`;
 
   return (
@@ -61,8 +67,14 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
       className={styles['game-detail-hero']}
       style={
         {
-          '--away-team-color': getTeamPrimaryColor(boxscore.awayTeam.abbrev),
-          '--home-team-color': getTeamPrimaryColor(boxscore.homeTeam.abbrev),
+          '--away-team-color': getTeamPrimaryColor(
+            boxscore.awayTeam.abbrev,
+            league,
+          ),
+          '--home-team-color': getTeamPrimaryColor(
+            boxscore.homeTeam.abbrev,
+            league,
+          ),
         } as React.CSSProperties
       }
     >
@@ -167,12 +179,15 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
           </>
         )}
       </div>
-      <Link
-        className={styles['game-detail-matchup-link']}
-        to={`/matchup?teamA=${boxscore.awayTeam.abbrev}&teamB=${boxscore.homeTeam.abbrev}&season=${season}`}
-      >
-        View season series
-      </Link>
+      {/* The matchup page is NHL only. */}
+      {league === 'nhl' && (
+        <Link
+          className={styles['game-detail-matchup-link']}
+          to={`/matchup?teamA=${boxscore.awayTeam.abbrev}&teamB=${boxscore.homeTeam.abbrev}&season=${season}`}
+        >
+          View season series
+        </Link>
+      )}
     </div>
   );
 }

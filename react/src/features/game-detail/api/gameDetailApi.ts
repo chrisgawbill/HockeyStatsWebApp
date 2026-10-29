@@ -1,5 +1,9 @@
 import { get } from '@/lib/apiClient';
 import {
+  League,
+  getLeagueQueryValue,
+} from '@/features/league/utils/leagueHelper';
+import {
   GameDetailBoxscore,
   GameLanding,
 } from '@/features/game-detail/types/gameDetail';
@@ -13,8 +17,13 @@ export function GetGameLanding(gameID: number): Promise<GameLanding> {
   return get<GameLanding>(`/schedule/landing/${gameID}`);
 }
 /** A game's boxscore. */
-export function GetGameDetails(gameID: number): Promise<GameDetailBoxscore> {
-  return get<GameDetailBoxscore>(`/schedule/${gameID}`);
+export function GetGameDetails(
+  gameID: number,
+  league: League = 'nhl',
+): Promise<GameDetailBoxscore> {
+  return get<GameDetailBoxscore>(`/schedule/${gameID}`, {
+    league: getLeagueQueryValue(league),
+  });
 }
 /** A game's shot and goal events for the shot map and game flow (404 until the API route deploys). */
 export function GetGamePlayByPlay(gameID: number): Promise<GamePlayByPlay> {

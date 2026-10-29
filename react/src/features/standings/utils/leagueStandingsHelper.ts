@@ -20,8 +20,12 @@ export function CreateLeagueStandingsArray(
     const name = responseTeam.name;
     const teamLogo =
       responseTeam.teamLogo || fallbackLogosByTeamName[name] || '';
-    const conferenceName = responseTeam.conferenceName;
-    const divisionName = responseTeam.divisionName;
+    // The AHL names them "Eastern Conference" and "North Division".
+    const conferenceName = responseTeam.conferenceName.replace(
+      / Conference$/,
+      '',
+    );
+    const divisionName = responseTeam.divisionName.replace(/ Division$/, '');
     const wins = responseTeam.wins;
     const losses = responseTeam.losses;
     const otLosses = responseTeam.otLosses;

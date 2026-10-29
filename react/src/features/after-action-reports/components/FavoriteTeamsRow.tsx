@@ -4,29 +4,34 @@ import FavoriteCard from '@/components/FavoriteCard';
 import FavoriteTeamStar from '@/features/after-action-reports/components/FavoriteTeamStar';
 import FavoriteRowSection from '@/components/FavoriteRowSection';
 import TeamLogo from '@/components/TeamLogo';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
 import { sortByFanTier } from '@/lib/favoriteCategory';
 import type { FavoriteTeam } from '@/features/after-action-reports/types/afterActionReport';
 import styles from '@/features/after-action-reports/components/FavoriteTeamsRow.module.css';
 
-/** Returns the team's full name from the local team list, or its tri-code. */
-function getTeamDisplayName(triCode: string): string {
-  const team = localTeamList.find((entry) => entry.triCode === triCode);
+/** Returns the team's full name from its league's team list, or its tri-code. */
+function getTeamDisplayName({ triCode, league }: FavoriteTeam): string {
+  const team = getTeamList(league).find((entry) => entry.triCode === triCode);
   return team?.fullName ?? triCode;
 }
 
 /**
  * Shows one favorite team: its logo with the favorite star on the card's top
- * border, the team name, and the category badge. The card links to the team
- * page; the star opens the fan category menu instead.
+ * border, the team name, an "AHL" tag for AHL teams, and the category badge.
+ * The card links to the team page in the team's own league, whichever league
+ * the site shows; the star opens the fan category menu instead.
  */
 function FavoriteTeamCard({ team }: { team: FavoriteTeam }) {
-  const teamName = getTeamDisplayName(team.triCode);
+  const teamName = getTeamDisplayName(team);
   return (
     <FavoriteCard
       picture={
         <span className={styles.logoFrame}>
-          <TeamLogo triCode={team.triCode} className={styles.logo} />
+          <TeamLogo
+            triCode={team.triCode}
+            league={team.league}
+            className={styles.logo}
+          />
           <FavoriteTeamStar
             team={team}
             teamName={teamName}
@@ -35,8 +40,9 @@ function FavoriteTeamCard({ team }: { team: FavoriteTeam }) {
         </span>
       }
       name={teamName}
+      leagueTag={team.league === 'ahl' ? 'AHL' : undefined}
       category={team}
-      linkTo={`/team/${team.triCode}`}
+      linkTo={`/team/${team.triCode}?league=${team.league}`}
     />
   );
 }
@@ -62,7 +68,7 @@ export default function FavoriteTeamsRow() {
       hasFavorites={favorites.length > 0}
     >
       {sortByFanTier(favorites).map((team) => (
-        <FavoriteTeamCard key={team.triCode} team={team} />
+        <FavoriteTeamCard key={`${team.league}-${team.triCode}`} team={team} />
       ))}
     </FavoriteRowSection>
   );

@@ -11,11 +11,19 @@ import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { GetCurrentStandings } from '@/features/standings/api/standingsApi';
 import { CreateLeagueStandingsArray } from '@/features/standings/utils/leagueStandingsHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { League } from '@/features/league/utils/leagueHelper';
+
+/** The Eastern division that is not the Atlantic: the NHL's Metropolitan, the AHL's North. */
+const METRO_OR_NORTH_DIVISION: Record<League, string> = {
+  nhl: 'Metropolitan',
+  ahl: 'North',
+};
 
 export interface StandingsData {
   easternStandingsData: StandingsTeam[];
   westernStandingsData: StandingsTeam[];
-  metropolitanStandings: StandingsTeam[];
+  metroOrNorthStandings: StandingsTeam[];
   atlanticStandings: StandingsTeam[];
   centralStandings: StandingsTeam[];
   pacificStandings: StandingsTeam[];
@@ -30,7 +38,7 @@ export const StandingsContext = createContext<StandingsData | null>(null);
 /**
  * Fetches the selected season's standings and pre-splits them into the slices the
  * UI needs — by conference, by division, and the draft-lottery odds list — each
- * sorted into standings order. Re-fetches whenever the season changes.
+ * sorted into standings order. Re-fetches whenever the season or league changes.
  */
 function StandingsDataProvider({ children }: { children: ReactNode }) {
   const [easternStandingsData, setEasternStandingsData] = useState<
@@ -39,7 +47,7 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
   const [westernStandingsData, setWesternStandingsData] = useState<
     StandingsTeam[]
   >([]);
-  const [metropolitanStandings, setMetropolitanStandings] = useState<
+  const [metroOrNorthStandings, setMetroOrNorthStandings] = useState<
     StandingsTeam[]
   >([]);
   const [atlanticStandings, setAtlanticStandings] = useState<StandingsTeam[]>(
@@ -53,6 +61,7 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
     null,
   );
   const { season } = useSeason();
+  const { league } = useLeague();
   const latestRequest = useRef(0);
 
   /**
@@ -63,73 +72,78 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
    * that arrives after a newer fetch started is dropped so it cannot overwrite
    * the newer season's standings.
    */
-  const fetchStandings = useCallback(async (seasonId: string) => {
-    const requestId = ++latestRequest.current;
-    const isStale = () => requestId !== latestRequest.current;
-    setErrorStandingsData(null);
-    try {
-      const standingsResponse = await GetCurrentStandings(seasonId);
-      if (isStale()) return;
-      const allTeams: StandingsTeam[] = CreateLeagueStandingsArray(
-        standingsResponse.standings,
-      );
+  const fetchStandings = useCallback(
+    async (seasonId: string, league: League) => {
+      const requestId = ++latestRequest.current;
+      const isStale = () => requestId !== latestRequest.current;
+      setErrorStandingsData(null);
+      try {
+        const standingsResponse = await GetCurrentStandings(seasonId, league);
+        if (isStale()) return;
+        const allTeams: StandingsTeam[] = CreateLeagueStandingsArray(
+          standingsResponse.standings,
+        );
 
-      const byConference = (name: string) =>
-        allTeams
-          .filter((team) => team.conferenceName === name)
-          .sort(
-            (a, b) => a.conferenceStandingsPlace - b.conferenceStandingsPlace,
-          );
+        const byConference = (name: string) =>
+          allTeams
+            .filter((team) => team.conferenceName === name)
+            .sort(
+              (a, b) => a.conferenceStandingsPlace - b.conferenceStandingsPlace,
+            );
 
-      const byDivision = (name: string) =>
-        allTeams
-          .filter((team) => team.divisionName === name)
-          .sort((a, b) => a.divisionStandingsPlace - b.divisionStandingsPlace);
+        const byDivision = (name: string) =>
+          allTeams
+            .filter((team) => team.divisionName === name)
+            .sort(
+              (a, b) => a.divisionStandingsPlace - b.divisionStandingsPlace,
+            );
 
-      setEasternStandingsData(byConference('Eastern'));
-      setWesternStandingsData(byConference('Western'));
-      setMetropolitanStandings(byDivision('Metropolitan'));
-      setAtlanticStandings(byDivision('Atlantic'));
-      setCentralStandings(byDivision('Central'));
-      setPacificStandings(byDivision('Pacific'));
-      // The lottery list holds the 16 non-playoff teams that carry odds,
-      // ordered worst team first (highest odds; ties broken by league rank).
-      setDraftLotteryOdds(
-        allTeams
-          .filter((team) => team.draftLotteryOdds > 0)
-          .sort(
-            (a, b) =>
-              b.draftLotteryOdds - a.draftLotteryOdds ||
-              b.leagueStanding - a.leagueStanding,
-          )
-          .slice(0, 16),
-      );
-    } catch (error) {
-      if (isStale()) return;
-      console.error('Error fetching standings: ', error);
-      setErrorStandingsData("Couldn't load standings.");
-      setEasternStandingsData([]);
-      setWesternStandingsData([]);
-      setMetropolitanStandings([]);
-      setAtlanticStandings([]);
-      setCentralStandings([]);
-      setPacificStandings([]);
-      setDraftLotteryOdds([]);
-    } finally {
-      if (!isStale()) setLoadingStandingsData(false);
-    }
-  }, []);
+        setEasternStandingsData(byConference('Eastern'));
+        setWesternStandingsData(byConference('Western'));
+        setMetroOrNorthStandings(byDivision(METRO_OR_NORTH_DIVISION[league]));
+        setAtlanticStandings(byDivision('Atlantic'));
+        setCentralStandings(byDivision('Central'));
+        setPacificStandings(byDivision('Pacific'));
+        // The lottery list holds the 16 non-playoff teams that carry odds,
+        // ordered worst team first (highest odds; ties broken by league rank).
+        setDraftLotteryOdds(
+          allTeams
+            .filter((team) => team.draftLotteryOdds > 0)
+            .sort(
+              (a, b) =>
+                b.draftLotteryOdds - a.draftLotteryOdds ||
+                b.leagueStanding - a.leagueStanding,
+            )
+            .slice(0, 16),
+        );
+      } catch (error) {
+        if (isStale()) return;
+        console.error('Error fetching standings: ', error);
+        setErrorStandingsData("Couldn't load standings.");
+        setEasternStandingsData([]);
+        setWesternStandingsData([]);
+        setMetroOrNorthStandings([]);
+        setAtlanticStandings([]);
+        setCentralStandings([]);
+        setPacificStandings([]);
+        setDraftLotteryOdds([]);
+      } finally {
+        if (!isStale()) setLoadingStandingsData(false);
+      }
+    },
+    [],
+  );
 
   /**
-   * Re-runs the season fetch for the current `season`. Shared by the mount/
+   * Re-runs the fetch for the current `season` and `league`. Shared by the mount/
    * season-change effect and the manual "Try again" retry action so there is
    * one fetch code path instead of two copies of the same reset-then-fetch
    * sequence.
    */
   const refetchStandings = useCallback(() => {
     setLoadingStandingsData(true);
-    fetchStandings(season);
-  }, [season, fetchStandings]);
+    fetchStandings(season, league);
+  }, [season, league, fetchStandings]);
 
   useEffect(() => {
     refetchStandings();
@@ -140,7 +154,7 @@ function StandingsDataProvider({ children }: { children: ReactNode }) {
       value={{
         easternStandingsData,
         westernStandingsData,
-        metropolitanStandings,
+        metroOrNorthStandings,
         atlanticStandings,
         centralStandings,
         pacificStandings,

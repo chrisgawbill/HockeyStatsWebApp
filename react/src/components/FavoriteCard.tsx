@@ -10,6 +10,8 @@ export interface FavoriteCardProps {
   name: string;
   /** Second line, such as "EDM · C"; omitted when empty. */
   detail?: string;
+  /** Small pill under the name naming the favorite's league, such as "AHL". */
+  leagueTag?: string;
   /** Fan category badge; leave out for stat cards. */
   category?: FavoriteCategory;
   /** Stat variant: category name above the name, big value in the badge's place. */
@@ -36,6 +38,7 @@ export default function FavoriteCard({
   picture,
   name,
   detail,
+  leagueTag,
   category,
   stat,
   fillWidth = false,
@@ -49,6 +52,7 @@ export default function FavoriteCard({
       {stat && <span className={styles.statValue}>{stat.value}</span>}
       <span className={styles.name}>{name}</span>
       {detail && <span className={styles.detail}>{detail}</span>}
+      {leagueTag && <span className={styles.leagueTag}>{leagueTag}</span>}
       {category && (
         <FanCategoryBadge category={category} className={styles.badge} />
       )}

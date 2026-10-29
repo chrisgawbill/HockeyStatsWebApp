@@ -1,8 +1,11 @@
 import type { FanTier } from '@/lib/favoriteCategory';
+import type { League } from '@/features/league/utils/leagueHelper';
 import type { TeamFormGame, TeamResultOutcome } from '@/lib/teamForm';
 
-/** A favorited player as stored by the API (display fields from the NHL). */
+/** A favorited player as stored by the API (display fields from its league). */
 export interface FavoritePlayer {
+  /** AHL and NHL player ids can match, so a favorite is league + id. */
+  league: League;
   playerId: number;
   name: string;
   teamTriCode: string | null;

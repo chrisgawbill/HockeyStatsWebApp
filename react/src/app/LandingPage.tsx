@@ -11,16 +11,19 @@ import DraftLotteryOddsRow from '@/features/draft-lottery/components/DraftLotter
 import UpNextStrip from '@/features/my-hockey/components/UpNextStrip';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /**
  * Home route. Composes skater leaders, goalie leaders, draft-lottery odds, and
  * standings from their shared contexts. The intro and Up next strip render at
  * once; each data section shows its own loading state and its own error with
  * Try again, so one slow or failed call never hides the rest. The global nav
- * season selector drives every section.
+ * league toggle and season selector drive every section; the AHL view leaves
+ * out the NHL-only draft lottery and favorites' Up next strip.
  */
 export default function LandingPage() {
   const { season } = useSeason();
+  const { league } = useLeague();
   const {
     goalLeaderData,
     assistLeaderData,
@@ -57,7 +60,8 @@ export default function LandingPage() {
             <p>Track the teams, leaders, and stories shaping the season.</p>
           </div>
         </header>
-        <UpNextStrip />
+        {/* Favorites and the draft lottery are NHL only for now. */}
+        {league === 'nhl' && <UpNextStrip />}
         <div className={`${styles['landingPage-content']} ds-grid`}>
           <section>
             <StatLeadersSection
@@ -84,13 +88,15 @@ export default function LandingPage() {
                 retry: retryGoalieLeaderData,
               }}
             />
-            <DraftLotteryOddsRow
-              title="Draft lottery"
-              data={draftLotteryOddsData}
-              loading={loadingStandingsData}
-              error={errorStandingsData}
-              onRetry={refetchStandings}
-            />
+            {league === 'nhl' && (
+              <DraftLotteryOddsRow
+                title="Draft lottery"
+                data={draftLotteryOddsData}
+                loading={loadingStandingsData}
+                error={errorStandingsData}
+                onRetry={refetchStandings}
+              />
+            )}
           </section>
           <section className={styles['landingPage-standings-col']}>
             <LandingPageStandings />

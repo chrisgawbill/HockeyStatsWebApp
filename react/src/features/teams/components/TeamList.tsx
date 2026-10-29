@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styles from '@/features/teams/components/TeamList.module.css';
 import PageHeader from '@/components/PageHeader';
 import TeamListCard from '@/features/teams/components/TeamListCard';
@@ -12,6 +12,7 @@ import {
 } from '@/features/teams/utils/teamListHelper';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /**
  * Team list route (`/teamList`): every club as a card with its record and key
@@ -37,6 +38,9 @@ export default function TeamList() {
   const [division, setDivision] = useState('All');
   const [filter, setFilter] = useState<TeamFilter>('all');
   const [sortBy, setSortBy] = useState<TeamSort>('name');
+  const { league } = useLeague();
+  // Playoff seeds and lottery odds follow NHL rules.
+  const hasPlayoffAndLottery = league === 'nhl';
 
   const resetFilters = () => {
     setSearch('');
@@ -46,6 +50,10 @@ export default function TeamList() {
     setSortBy('name');
   };
 
+  // Division names, playoff and lottery filters differ by league.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(resetFilters, [league]);
+
   const standingsByKey = useMemo(
     () =>
       buildStandingsLookup([...easternStandingsData, ...westernStandingsData]),
@@ -54,14 +62,20 @@ export default function TeamList() {
 
   const teams = useMemo(
     () =>
-      buildTeamCards(listOfTeamsData, standingsByKey, {
-        search,
-        conference,
-        division,
-        filter,
-        sortBy,
-      }),
+      buildTeamCards(
+        listOfTeamsData,
+        standingsByKey,
+        {
+          search,
+          conference,
+          division,
+          filter,
+          sortBy,
+        },
+        league,
+      ),
     [
+      league,
       conference,
       division,
       filter,
@@ -137,7 +151,7 @@ export default function TeamList() {
               >
                 <option>All</option>
                 <option>Atlantic</option>
-                <option>Metropolitan</option>
+                <option>{league === 'ahl' ? 'North' : 'Metropolitan'}</option>
                 <option>Central</option>
                 <option>Pacific</option>
               </select>
@@ -152,7 +166,9 @@ export default function TeamList() {
                 <option value="points">Points</option>
                 <option value="winPct">Win %</option>
                 <option value="goals">Goals / GP</option>
-                <option value="draftOdds">Draft Odds</option>
+                {hasPlayoffAndLottery && (
+                  <option value="draftOdds">Draft Odds</option>
+                )}
               </select>
             </label>
           </div>
@@ -160,11 +176,14 @@ export default function TeamList() {
             className={styles['team-list-filter-chips']}
             aria-label="Team filters"
           >
-            {[
-              ['all', 'All Teams'],
-              ['playoff', 'Playoff'],
-              ['lottery', 'Lottery'],
-            ].map(([value, label]) => (
+            {(hasPlayoffAndLottery
+              ? [
+                  ['all', 'All Teams'],
+                  ['playoff', 'Playoff'],
+                  ['lottery', 'Lottery'],
+                ]
+              : [['all', 'All Teams']]
+            ).map(([value, label]) => (
               <button
                 key={value}
                 className={filter === value ? styles['active'] : ''}

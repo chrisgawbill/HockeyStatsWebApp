@@ -45,12 +45,16 @@ export function getMatchupPreviewPath({
   return `/matchup?${params.toString()}`;
 }
 
-/** The route a game link opens: the matchup preview before puck drop, else the game page. */
+/**
+ * The route a game link opens: the matchup preview before puck drop, else the
+ * game page. The matchup page is NHL only, so AHL games always open the game page.
+ */
 export function getGamePath(
   game: GameLinkFacts,
   now: Date = new Date(),
+  league: 'nhl' | 'ahl' = 'nhl',
 ): string {
-  return isPreviewGame(game.gameState, game.startTime, now)
+  return league === 'nhl' && isPreviewGame(game.gameState, game.startTime, now)
     ? getMatchupPreviewPath(game)
     : `/game/${game.gameId}`;
 }

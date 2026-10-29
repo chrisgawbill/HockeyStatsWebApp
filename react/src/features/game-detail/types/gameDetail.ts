@@ -2,6 +2,7 @@ export interface BoxscorePlayerName {
   default: string;
 }
 
+/** A boxscore skater row; fields typed `| null` are ones the AHL feed lacks. */
 export interface BoxscoreSkater {
   playerId: number;
   sweaterNumber: number;
@@ -13,14 +14,14 @@ export interface BoxscoreSkater {
   plusMinus: number;
   pim: number;
   hits: number;
-  powerPlayGoals: number;
+  powerPlayGoals: number | null;
   sog: number; // shots on goal — NOT "shots"
-  faceoffWinningPctg: number;
-  toi: string; // "MM:SS"
+  faceoffWinningPctg: number | null;
+  toi: string | null; // "MM:SS"
   blockedShots: number;
-  shifts: number;
-  giveaways: number;
-  takeaways: number;
+  shifts: number | null;
+  giveaways: number | null;
+  takeaways: number | null;
 }
 
 export interface BoxscoreGoalie {
@@ -31,7 +32,7 @@ export interface BoxscoreGoalie {
   saveShotsAgainst?: string; // "31/34" (saves/shots)
   savePctg?: number;
   goalsAgainst: number;
-  toi: string;
+  toi: string | null; // null in the AHL
   starter: boolean;
   decision?: string; // "W" | "L"
   shotsAgainst: number;
@@ -54,7 +55,7 @@ export interface BoxscoreTeam {
   score: number;
   sog: number;
   logo: string; // light-mode logo URL
-  darkLogo: string; // dark-mode logo URL (use directly, no replacement needed)
+  darkLogo: string | null; // dark-mode logo URL; null in the AHL, which has one logo
 }
 
 export interface GameDetailBoxscore {
@@ -146,7 +147,7 @@ export interface TeamTotalsViewModel {
   hits: number;
   blockedShots: number;
   pim: number;
-  powerPlayGoals: number;
-  giveaways: number;
-  takeaways: number;
+  powerPlayGoals: number | null;
+  giveaways: number | null;
+  takeaways: number | null;
 }

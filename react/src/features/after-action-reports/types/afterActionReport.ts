@@ -1,7 +1,10 @@
 import type { FanTier } from '@/lib/favoriteCategory';
+import type { League } from '@/features/league/utils/leagueHelper';
 
 /** A favorite team and when it was favorited (ISO timestamp). */
 export interface FavoriteTeam {
+  /** AHL and NHL tri-codes can match (`TOR`), so a favorite is league + code. */
+  league: League;
   triCode: string;
   since: string;
   /** True when phone push is muted for this team (inbox still lists it). */

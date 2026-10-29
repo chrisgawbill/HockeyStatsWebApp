@@ -29,7 +29,10 @@ export default function FavoritePlayerStatsDialog({
   const { season } = useSeason();
   const { theme } = useTheme();
   const statsLoad = useFavoritePlayerStats(player, season);
-  const primaryColor = getTeamPrimaryColor(player.teamTriCode ?? undefined);
+  const primaryColor = getTeamPrimaryColor(
+    player.teamTriCode ?? undefined,
+    player.league,
+  );
   const teamColor =
     theme === 'dark' ? toDarkModeAccentColor(primaryColor) : primaryColor;
   const statusMessage = {

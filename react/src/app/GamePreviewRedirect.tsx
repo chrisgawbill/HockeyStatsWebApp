@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { getMatchupPreviewPath, isPreviewGame } from '@/lib/gamePath';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /**
  * Guards `/game/:gameId`: a game the loaded season list shows as not started
@@ -11,7 +12,8 @@ import { getMatchupPreviewPath, isPreviewGame } from '@/lib/gamePath';
  * the same check against its own box score. The redirect is keyed on the
  * location because the season provider may replace a bare `/game/:gameId`
  * URL with its `?season=` copy right after the redirect fires; the new key
- * fires it again from that copy.
+ * fires it again from that copy. The matchup page is NHL only, so AHL games
+ * always open the game page.
  */
 export default function GamePreviewRedirect({
   children,
@@ -21,10 +23,15 @@ export default function GamePreviewRedirect({
   const { gameId } = useParams<{ gameId: string }>();
   const location = useLocation();
   const { listOfGamesData } = useListOfGames();
+  const { league } = useLeague();
   const game = listOfGamesData.find(
     (seasonGame) => String(seasonGame.gameId) === gameId,
   );
-  if (game && isPreviewGame(game.gameState, game.gameTime)) {
+  if (
+    league === 'nhl' &&
+    game &&
+    isPreviewGame(game.gameState, game.gameTime)
+  ) {
     return (
       <Navigate
         key={location.key}

@@ -8,4 +8,16 @@ describe('CreateLeagueStandingsArray', () => {
       'https://assets.nhle.com/logos/nhl/svg/BUF_light.svg',
     );
   });
+
+  it('drops the AHL "Conference" and "Division" suffixes', () => {
+    const [ahlTeam] = CreateLeagueStandingsArray([
+      {
+        ...team,
+        conferenceName: 'Eastern Conference',
+        divisionName: 'North Division',
+      },
+    ]);
+    expect(ahlTeam.conferenceName).toBe('Eastern');
+    expect(ahlTeam.divisionName).toBe('North');
+  });
 });

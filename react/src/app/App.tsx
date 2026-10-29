@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { ListOfGamesProvider } from '@/features/schedule/hooks/ScheduleContext';
+import { LeagueProvider } from '@/features/league/hooks/LeagueContext';
 import { SeasonProvider } from '@/features/season/hooks/SeasonContext';
 import { StandingsDataProvider } from '@/features/standings/hooks/StandingsContext';
 import { StatLeadersProvider } from '@/features/stat-leaders/hooks/StatLeadersContext';
@@ -52,69 +53,74 @@ const BoardGamePage = lazy(
 );
 
 /**
- * Route table plus the providers that depend on routing or the selected season.
- * The nesting is deliberate: SeasonProvider reads `?season=` so it must sit inside
- * HashRouter, and the season-dependent data providers (standings, schedule,
- * skater/goalie leaders, team list) nest inside it so they re-fetch when the
- * season changes. Routing-agnostic providers live higher up in index.tsx.
+ * Route table plus the providers that depend on routing or the selected league
+ * and season. The nesting is deliberate: LeagueProvider and SeasonProvider read
+ * `?league=` and `?season=` so they must sit inside HashRouter, and the
+ * data providers (standings, schedule, skater/goalie leaders, team list) nest
+ * inside them so they re-fetch when the league or season changes. Routing-agnostic providers live higher up in index.tsx.
  */
 export default function App() {
   return (
     <HashRouter>
       <InstallBanner />
-      <SeasonProvider>
-        <StandingsDataProvider>
-          <ListOfGamesProvider>
-            <StatLeadersProvider>
-              <ListOfTeamsDataProvider>
-                <Suspense fallback={<RouteLoadingFallback />}>
-                  <ErrorBoundary
-                    fallbackRender={({ error, resetErrorBoundary }) => (
-                      <div className="ds-page-shell">
-                        <ErrorState
-                          fullPage
-                          title="Something went wrong"
-                          message={getErrorMessage(error)}
-                          onRetry={resetErrorBoundary}
+      <LeagueProvider>
+        <SeasonProvider>
+          <StandingsDataProvider>
+            <ListOfGamesProvider>
+              <StatLeadersProvider>
+                <ListOfTeamsDataProvider>
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <ErrorBoundary
+                      fallbackRender={({ error, resetErrorBoundary }) => (
+                        <div className="ds-page-shell">
+                          <ErrorState
+                            fullPage
+                            title="Something went wrong"
+                            message={getErrorMessage(error)}
+                            onRetry={resetErrorBoundary}
+                          />
+                        </div>
+                      )}
+                    >
+                      <Routes>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="standings" element={<StandingsPage />} />
+                        <Route path="schedule" element={<SchedulePage />} />
+                        <Route path="teamList" element={<TeamList />} />
+                        <Route path="team/:teamId" element={<TeamPage />} />
+                        <Route
+                          path="game/:gameId"
+                          element={
+                            <GamePreviewRedirect>
+                              <GameDetailPage />
+                            </GamePreviewRedirect>
+                          }
                         />
-                      </div>
-                    )}
-                  >
-                    <Routes>
-                      <Route path="/" element={<LandingPage />} />
-                      <Route path="standings" element={<StandingsPage />} />
-                      <Route path="schedule" element={<SchedulePage />} />
-                      <Route path="teamList" element={<TeamList />} />
-                      <Route path="team/:teamId" element={<TeamPage />} />
-                      <Route
-                        path="game/:gameId"
-                        element={
-                          <GamePreviewRedirect>
-                            <GameDetailPage />
-                          </GamePreviewRedirect>
-                        }
-                      />
-                      <Route path="matchup" element={<MatchupPage />} />
-                      <Route path="compare" element={<PlayerComparePage />} />
-                      <Route path="diagnostics" element={<DiagnosticsPage />} />
-                      <Route path="board-game" element={<BoardGamePage />} />
-                      <Route path="my-hockey" element={<MyHockeyPage />} />
-                      <Route
-                        path="weekly-report"
-                        element={<WeeklyReportPage />}
-                      />
-                      <Route
-                        path="weekly-report/:weekStart"
-                        element={<WeeklyReportPage />}
-                      />
-                    </Routes>
-                  </ErrorBoundary>
-                </Suspense>
-              </ListOfTeamsDataProvider>
-            </StatLeadersProvider>
-          </ListOfGamesProvider>
-        </StandingsDataProvider>
-      </SeasonProvider>
+                        <Route path="matchup" element={<MatchupPage />} />
+                        <Route path="compare" element={<PlayerComparePage />} />
+                        <Route
+                          path="diagnostics"
+                          element={<DiagnosticsPage />}
+                        />
+                        <Route path="board-game" element={<BoardGamePage />} />
+                        <Route path="my-hockey" element={<MyHockeyPage />} />
+                        <Route
+                          path="weekly-report"
+                          element={<WeeklyReportPage />}
+                        />
+                        <Route
+                          path="weekly-report/:weekStart"
+                          element={<WeeklyReportPage />}
+                        />
+                      </Routes>
+                    </ErrorBoundary>
+                  </Suspense>
+                </ListOfTeamsDataProvider>
+              </StatLeadersProvider>
+            </ListOfGamesProvider>
+          </StandingsDataProvider>
+        </SeasonProvider>
+      </LeagueProvider>
     </HashRouter>
   );
 }

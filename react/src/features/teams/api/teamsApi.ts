@@ -1,4 +1,8 @@
 import { get } from '@/lib/apiClient';
+import {
+  League,
+  getLeagueQueryValue,
+} from '@/features/league/utils/leagueHelper';
 import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import {
   GoalieSummaryContract,
@@ -56,25 +60,33 @@ export interface SkaterFaceoffResponseDto {
 export function GetTeamStatsById(
   teamId: '',
   season?: string,
+  league?: League,
 ): Promise<TeamHistoryResponseDto>;
 export function GetTeamStatsById(
   teamId: string,
   season?: string,
+  league?: League,
 ): Promise<TeamStatsResponseDto>;
 export function GetTeamStatsById(
   teamId: string,
   season?: string,
+  league: League = 'nhl',
 ): Promise<TeamHistoryResponseDto | TeamStatsResponseDto> {
   return get<TeamHistoryResponseDto | TeamStatsResponseDto>(`/team/${teamId}`, {
     season,
+    league: getLeagueQueryValue(league),
   });
 }
 /** A team's roster for a season. */
 export function GetTeamRoster(
   triCode: string,
   season?: string,
+  league: League = 'nhl',
 ): Promise<TeamRosterResponseDto> {
-  return get<TeamRosterResponseDto>(`/team/roster/${triCode}`, { season });
+  return get<TeamRosterResponseDto>(`/team/roster/${triCode}`, {
+    season,
+    league: getLeagueQueryValue(league),
+  });
 }
 /** Real forward lines / defense pairs derived from recent shift data. */
 export function GetTeamLines(
@@ -87,17 +99,23 @@ export function GetTeamLines(
 export function GetTeamSchedule(
   triCode: string,
   season?: string,
+  league: League = 'nhl',
 ): Promise<ScheduleResponseDto> {
-  return get<ScheduleResponseDto>(`/team/schedule/${triCode}`, { season });
+  return get<ScheduleResponseDto>(`/team/schedule/${triCode}`, {
+    season,
+    league: getLeagueQueryValue(league),
+  });
 }
 /** Skater season totals, optionally for one team. */
 export function GetSkaterSummary(
   teamId?: string,
   season?: string,
+  league: League = 'nhl',
 ): Promise<SkaterSummaryContract[]> {
   return get<SkaterSummaryContract[]>('/player/skater/summary', {
     teamId,
     season,
+    league: getLeagueQueryValue(league),
   });
 }
 /** Skater Corsi percentages, optionally for one team. */
@@ -125,9 +143,11 @@ export function GetSkaterFaceoffs(
 export function GetGoalieSummary(
   teamId?: string,
   season?: string,
+  league: League = 'nhl',
 ): Promise<GoalieSummaryContract[]> {
   return get<GoalieSummaryContract[]>('/player/goalie/summary', {
     teamId,
     season,
+    league: getLeagueQueryValue(league),
   });
 }

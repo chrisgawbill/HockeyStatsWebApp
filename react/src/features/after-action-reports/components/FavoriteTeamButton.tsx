@@ -6,6 +6,7 @@ import {
   MAX_FAVORITE_TEAMS,
   useAfterActionReports,
 } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
+import type { League } from '@/features/league/utils/leagueHelper';
 import styles from '@/features/after-action-reports/components/FavoriteTeamButton.module.css';
 
 function StarIcon({ filled }: { filled: boolean }) {
@@ -31,6 +32,7 @@ const ERROR_VISIBLE_MS = 6000;
 export interface FavoriteTeamButtonProps {
   triCode: string;
   teamName: string;
+  league: League;
 }
 
 /**
@@ -38,11 +40,13 @@ export interface FavoriteTeamButtonProps {
  * the header's Google sign-in instead of a dead button. Once the team is a
  * favorite, the star opens the fan category menu (tier, label, Unfavorite). A
  * failed save reverts the star and says so briefly rather than failing silently;
- * past the team cap it says to unfavorite one first.
+ * past the team cap (shared by both leagues) it says to unfavorite one first.
+ * AHL teams have no After Action Reports yet, so their copy leaves them out.
  */
 export default function FavoriteTeamButton({
   triCode,
   teamName,
+  league,
 }: FavoriteTeamButtonProps) {
   const {
     isSignedIn,
@@ -56,8 +60,11 @@ export default function FavoriteTeamButton({
   const [showHint, setShowHint] = useState(false);
   const [pending, setPending] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const favorite = isSignedIn && isFavorite(triCode);
-  const favoriteTeam = favorites.find((team) => team.triCode === triCode);
+  const favorite = isSignedIn && isFavorite(triCode, league);
+  const favoriteTeam = favorites.find(
+    (team) => team.league === league && team.triCode === triCode,
+  );
+  const reportsSuffix = league === 'nhl' ? ' for After Action Reports' : '';
 
   useEffect(() => {
     if (!saveError) return;
@@ -80,12 +87,12 @@ export default function FavoriteTeamButton({
     setSaveError(null);
     setPending(true);
     try {
-      await toggleFavorite(triCode);
+      await toggleFavorite(triCode, league);
     } catch (error) {
       // The provider already restored the star.
       setSaveError(
         error instanceof FavoriteTeamLimitError
-          ? `You can favorite up to ${MAX_FAVORITE_TEAMS} teams. Unfavorite one first.`
+          ? `You can favorite up to ${MAX_FAVORITE_TEAMS} teams across the NHL and AHL. Unfavorite one first.`
           : "Couldn't save your favorite. Try again in a moment.",
       );
     } finally {
@@ -107,7 +114,7 @@ export default function FavoriteTeamButton({
         aria-label={
           favorite
             ? `Fan category and options for ${teamName}`
-            : `Favorite ${teamName} for After Action Reports`
+            : `Favorite ${teamName}${reportsSuffix}`
         }
       >
         <StarIcon filled={favorite} />
@@ -121,15 +128,17 @@ export default function FavoriteTeamButton({
             label: favoriteTeam?.label ?? null,
           }}
           anchorRef={starRef}
-          onSave={(category) => updateTeamCategory(triCode, category)}
-          onUnfavorite={() => toggleFavorite(triCode)}
+          onSave={(category) => updateTeamCategory(triCode, league, category)}
+          onUnfavorite={() => toggleFavorite(triCode, league)}
           onClose={() => setIsMenuOpen(false)}
         />
       )}
       {showHint && !isSignedIn && (
         <p className={styles.hint} role="status">
-          Sign in with Google at the top of the page to favorite {teamName} and
-          get an After Action Report after every game.
+          Sign in with Google at the top of the page to favorite {teamName}
+          {league === 'nhl' &&
+            ' and get an After Action Report after every game'}
+          .
         </p>
       )}
       {saveError && (

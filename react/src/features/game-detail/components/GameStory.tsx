@@ -171,10 +171,13 @@ function GameStory({
             Shots: {awayTeam.abbrev} {awayTotals!.sog}, {homeTeam.abbrev}{' '}
             {homeTotals!.sog}
           </span>
-          <span>
-            Power-play goals: {awayTeam.abbrev} {awayTotals!.powerPlayGoals},{' '}
-            {homeTeam.abbrev} {homeTotals!.powerPlayGoals}
-          </span>
+          {awayTotals!.powerPlayGoals != null &&
+            homeTotals!.powerPlayGoals != null && (
+              <span>
+                Power-play goals: {awayTeam.abbrev} {awayTotals!.powerPlayGoals}
+                , {homeTeam.abbrev} {homeTotals!.powerPlayGoals}
+              </span>
+            )}
         </div>
       )}
     </section>

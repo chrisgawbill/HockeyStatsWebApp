@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { isCompletedGameState } from '@/lib/gameStatus';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /**
  * One entry in the global search index: either a team (routes to
@@ -23,7 +24,8 @@ export function normalizeNavPath(path: string): string {
 }
 
 /**
- * Global header search over teams and the loaded season's completed games.
+ * Global header search over the shown league's teams and the loaded season's
+ * completed games.
  * The index is rebuilt only when the game list changes; searching itself is a
  * cheap `includes()` filter over it, so no debouncing is needed.
  *
@@ -35,13 +37,14 @@ export function useHeaderSearch() {
   const location = useLocation();
   const navigate = useNavigate();
   const { listOfGamesData } = useListOfGames();
+  const { league } = useLeague();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
   const searchIndex = useMemo<SearchResult[]>(() => {
-    const teamResults: SearchResult[] = localTeamList.map((team) => ({
+    const teamResults: SearchResult[] = getTeamList(league).map((team) => ({
       type: 'team',
       id: `team-${team.triCode}`,
       label: `${team.fullName} (${team.triCode})`,
@@ -58,7 +61,7 @@ export function useHeaderSearch() {
       }));
 
     return [...teamResults, ...gameResults];
-  }, [listOfGamesData]);
+  }, [listOfGamesData, league]);
 
   const results = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();

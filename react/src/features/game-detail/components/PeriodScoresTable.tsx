@@ -1,5 +1,6 @@
 import React from 'react';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 
@@ -37,8 +38,9 @@ function PeriodGoalsBreakdownTable({
     (sum, period) => sum + period.homeGoals,
     0,
   );
-  const awayColor = getTeamPrimaryColor(awayAbbrev);
-  const homeColor = getTeamPrimaryColor(homeAbbrev);
+  const { league } = useLeague();
+  const awayColor = getTeamPrimaryColor(awayAbbrev, league);
+  const homeColor = getTeamPrimaryColor(homeAbbrev, league);
 
   return (
     <section className={`${styles['game-detail-section']} ${shared.section}`}>

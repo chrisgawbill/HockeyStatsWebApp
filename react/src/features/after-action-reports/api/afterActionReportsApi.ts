@@ -9,8 +9,13 @@ import type {
   AfterActionReportInbox,
   FavoriteTeam,
 } from '@/features/after-action-reports/types/afterActionReport';
+import {
+  withLeagueQuery,
+  type League,
+} from '@/features/league/utils/leagueHelper';
 
-type FavoriteTeamDto = Omit<FavoriteTeam, 'tier' | 'label'> & {
+type FavoriteTeamDto = Omit<FavoriteTeam, 'league' | 'tier' | 'label'> & {
+  league?: unknown;
   tier?: unknown;
   label?: unknown;
 };
@@ -19,10 +24,11 @@ interface FavoritesResponseDto {
   favorites: FavoriteTeamDto[];
 }
 
-/** Fills in the tier and label an API that predates fan categories leaves out. */
+/** Fills in the league, tier and label an older API leaves out. */
 function readFavoriteTeams(response: FavoritesResponseDto): FavoriteTeam[] {
   return response.favorites.map((favorite) => ({
     ...favorite,
+    league: favorite.league === 'ahl' ? 'ahl' : 'nhl',
     tier: readFanTier(favorite.tier),
     label: readCategoryLabel(favorite.label),
   }));
@@ -41,9 +47,10 @@ export async function fetchFavorites(token: string): Promise<FavoriteTeam[]> {
 export async function addFavorite(
   token: string,
   triCode: string,
+  league: League,
 ): Promise<FavoriteTeam[]> {
   const response = await put<FavoritesResponseDto>(
-    `/api/favorites/${encodeURIComponent(triCode)}`,
+    withLeagueQuery(`/api/favorites/${encodeURIComponent(triCode)}`, league),
     undefined,
     authHeader(token),
   );
@@ -53,9 +60,10 @@ export async function addFavorite(
 export async function removeFavorite(
   token: string,
   triCode: string,
+  league: League,
 ): Promise<FavoriteTeam[]> {
   const response = await del<FavoritesResponseDto>(
-    `/api/favorites/${encodeURIComponent(triCode)}`,
+    withLeagueQuery(`/api/favorites/${encodeURIComponent(triCode)}`, league),
     authHeader(token),
   );
   return readFavoriteTeams(response);
@@ -97,10 +105,14 @@ export function markAllAfterActionReportsRead(
 export async function setFavoritePushMuted(
   token: string,
   triCode: string,
+  league: League,
   muted: boolean,
 ): Promise<FavoriteTeam[]> {
   const response = await put<FavoritesResponseDto>(
-    `/api/favorites/${encodeURIComponent(triCode)}/push-mute`,
+    withLeagueQuery(
+      `/api/favorites/${encodeURIComponent(triCode)}/push-mute`,
+      league,
+    ),
     { muted },
     authHeader(token),
   );
@@ -111,10 +123,11 @@ export async function setFavoritePushMuted(
 export async function updateFavoriteTeamCategory(
   token: string,
   triCode: string,
+  league: League,
   category: FavoriteCategory,
 ): Promise<FavoriteTeam[]> {
   const response = await patch<FavoritesResponseDto>(
-    `/api/favorites/${encodeURIComponent(triCode)}`,
+    withLeagueQuery(`/api/favorites/${encodeURIComponent(triCode)}`, league),
     category,
     authHeader(token),
   );

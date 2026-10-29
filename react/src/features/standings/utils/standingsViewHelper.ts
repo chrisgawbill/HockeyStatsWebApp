@@ -1,5 +1,6 @@
 import { StandingsData } from '@/features/standings/hooks/StandingsContext';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
+import { League } from '@/features/league/utils/leagueHelper';
 
 export type Conference = 'Eastern' | 'Western';
 export type StandingsView = 'conference' | 'division';
@@ -20,13 +21,14 @@ export function getStandingsSections(
     StandingsData,
     | 'easternStandingsData'
     | 'westernStandingsData'
-    | 'metropolitanStandings'
+    | 'metroOrNorthStandings'
     | 'atlanticStandings'
     | 'centralStandings'
     | 'pacificStandings'
   >,
   view: StandingsView,
   conference: Conference,
+  league: League = 'nhl',
 ): StandingsSection[] {
   const sectionsByView: Record<
     StandingsView,
@@ -51,8 +53,8 @@ export function getStandingsSections(
     division: {
       Eastern: [
         {
-          name: 'Metro',
-          teams: standings.metropolitanStandings,
+          name: league === 'ahl' ? 'North' : 'Metro',
+          teams: standings.metroOrNorthStandings,
           format: 'Division',
         },
         {

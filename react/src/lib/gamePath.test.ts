@@ -58,4 +58,10 @@ describe('getGamePath', () => {
     expect(getGamePath(game('OFF', EARLIER), NOW)).toBe('/game/2026020123');
     expect(getGamePath(game('PRE', EARLIER), NOW)).toBe('/game/2026020123');
   });
+
+  it('sends AHL games to the game page, since the matchup page is NHL only', () => {
+    expect(getGamePath(game('FUT', LATER), NOW, 'ahl')).toBe(
+      '/game/2026020123',
+    );
+  });
 });

@@ -132,6 +132,18 @@
   font-size: var(--text-xs);
 }
 
+/* Small outlined pill naming a non-NHL favorite's league ("AHL"). */
+.leagueTag {
+  margin-top: 2px;
+  padding: 0 6px;
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 /* Space between the card text and its fan category badge. */
 .badge {
   margin-top: 4px;

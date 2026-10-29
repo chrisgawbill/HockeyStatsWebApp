@@ -29,6 +29,7 @@ import {
   DEFAULT_FAN_TIER,
   type FavoriteCategory,
 } from '@/lib/favoriteCategory';
+import type { League } from '@/features/league/utils/leagueHelper';
 import {
   usePushNotifications,
   type PushNotificationsState,
@@ -47,7 +48,7 @@ const POLL_INTERVAL_MS = 5 * 60 * 1000;
 /** Returning to the tab refreshes at most this often. */
 const FOCUS_REFRESH_MIN_MS = 60 * 1000;
 
-/** The API refuses a sixth favorite team (accounts already over keep theirs). */
+/** The API refuses a sixth favorite team across both leagues (accounts already over keep theirs). */
 export const MAX_FAVORITE_TEAMS = 5;
 
 /** Thrown by `toggleFavorite` when the API refused a team past the cap. */
@@ -64,15 +65,16 @@ export interface AfterActionReportsState {
   reports: AfterActionReport[];
   unreadCount: number;
   alertPermission: AlertPermission;
-  isFavorite: (triCode: string) => boolean;
+  isFavorite: (triCode: string, league: League) => boolean;
   /**
    * Rejects after restoring the previous favorites when the save fails
    * (FavoriteTeamLimitError on the cap).
    */
-  toggleFavorite: (triCode: string) => Promise<void>;
+  toggleFavorite: (triCode: string, league: League) => Promise<void>;
   /** Rejects after restoring the previous favorites when the save fails. */
   updateTeamCategory: (
     triCode: string,
+    league: League,
     category: FavoriteCategory,
   ) => Promise<void>;
   /** Marks a report read; the caller navigates to the game. */
@@ -82,12 +84,20 @@ export interface AfterActionReportsState {
   /** Phone (Web Push) notifications for this device. */
   push: PushNotificationsState;
   /** Mutes/unmutes phone push for a favorite; inbox still lists the team. */
-  setTeamPushMuted: (triCode: string, muted: boolean) => Promise<void>;
+  setTeamPushMuted: (
+    triCode: string,
+    league: League,
+    muted: boolean,
+  ) => Promise<void>;
 }
 
 const AfterActionReportsContext = createContext<AfterActionReportsState | null>(
   null,
 );
+
+function isTeam(favorite: FavoriteTeam, triCode: string, league: League) {
+  return favorite.league === league && favorite.triCode === triCode;
+}
 
 function withReadFlag(reports: AfterActionReport[], gameId: number) {
   return reports.map((report) =>
@@ -229,21 +239,23 @@ export function AfterActionReportsProvider({
   }, [refreshReports]);
 
   const isFavorite = useCallback(
-    (triCode: string) => favorites.some((f) => f.triCode === triCode),
+    (triCode: string, league: League) =>
+      favorites.some((f) => isTeam(f, triCode, league)),
     [favorites],
   );
 
   const toggleFavorite = useCallback(
-    async (triCode: string) => {
+    async (triCode: string, league: League) => {
       if (!token) return;
-      const wasFavorite = favorites.some((f) => f.triCode === triCode);
+      const wasFavorite = favorites.some((f) => isTeam(f, triCode, league));
       const previous = favorites;
       setFavorites(
         wasFavorite
-          ? favorites.filter((f) => f.triCode !== triCode)
+          ? favorites.filter((f) => !isTeam(f, triCode, league))
           : [
               ...favorites,
               {
+                league,
                 triCode,
                 since: new Date().toISOString(),
                 pushMuted: false,
@@ -254,8 +266,8 @@ export function AfterActionReportsProvider({
       );
       try {
         const next = wasFavorite
-          ? await removeFavorite(token, triCode)
-          : await addFavorite(token, triCode);
+          ? await removeFavorite(token, triCode, league)
+          : await addFavorite(token, triCode, league);
         setFavorites(next);
         await refreshReports(token);
       } catch (error) {
@@ -271,16 +283,16 @@ export function AfterActionReportsProvider({
   );
 
   const setTeamPushMuted = useCallback(
-    async (triCode: string, muted: boolean) => {
+    async (triCode: string, league: League, muted: boolean) => {
       if (!token) return;
       const previous = favorites;
       setFavorites(
         favorites.map((f) =>
-          f.triCode === triCode ? { ...f, pushMuted: muted } : f,
+          isTeam(f, triCode, league) ? { ...f, pushMuted: muted } : f,
         ),
       );
       try {
-        setFavorites(await setFavoritePushMuted(token, triCode, muted));
+        setFavorites(await setFavoritePushMuted(token, triCode, league, muted));
       } catch (error) {
         console.error('Failed to update push mute:', error);
         setFavorites(previous);
@@ -291,17 +303,17 @@ export function AfterActionReportsProvider({
   );
 
   const updateTeamCategory = useCallback(
-    async (triCode: string, category: FavoriteCategory) => {
+    async (triCode: string, league: League, category: FavoriteCategory) => {
       if (!token) return;
       const previous = favorites;
       setFavorites(
         favorites.map((f) =>
-          f.triCode === triCode ? { ...f, ...category } : f,
+          isTeam(f, triCode, league) ? { ...f, ...category } : f,
         ),
       );
       try {
         setFavorites(
-          await updateFavoriteTeamCategory(token, triCode, category),
+          await updateFavoriteTeamCategory(token, triCode, league, category),
         );
       } catch (error) {
         console.error('Failed to update favorite team category:', error);

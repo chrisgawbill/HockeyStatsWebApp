@@ -72,9 +72,13 @@ export default function MyHockeyPage() {
   const now = dataLoad.status === 'ready' ? new Date(dataLoad.loadedAt) : null;
 
   const renderPlayerLines = (player: FavoritePlayer) => {
-    const item = feed?.players.find(
-      (entry) => entry.player.playerId === player.playerId,
-    );
+    // The feed holds NHL players only; an AHL id can match an NHL one.
+    const item =
+      player.league === 'nhl'
+        ? feed?.players.find(
+            (entry) => entry.player.playerId === player.playerId,
+          )
+        : undefined;
     return item ? <FeedPlayerLines item={item} /> : null;
   };
 

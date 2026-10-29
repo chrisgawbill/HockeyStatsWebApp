@@ -5,6 +5,7 @@ import AppDialog from '@/components/AppDialog';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import { StatCell } from '@/features/teams/utils/playerStatsHelper';
 import { getComparePath } from '@/lib/comparePath';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import styles from '@/features/teams/components/PlayerStatsDialog.module.css';
 
 interface PlayerStatsDialogProps {
@@ -41,6 +42,7 @@ export default function PlayerStatsDialog({
   onClose,
 }: PlayerStatsDialogProps) {
   const titleId = useId();
+  const { league } = useLeague();
 
   return (
     <AppDialog
@@ -96,13 +98,16 @@ export default function PlayerStatsDialog({
           <p className={styles.empty}>No stats this season yet</p>
         )}
         <footer className={styles.footer}>
-          <Link
-            to={getComparePath([playerId])}
-            className={`ds-button ${styles.compare}`}
-            onClick={onClose}
-          >
-            Compare
-          </Link>
+          {/* Player comparison is NHL only. */}
+          {league === 'nhl' && (
+            <Link
+              to={getComparePath([playerId])}
+              className={`ds-button ${styles.compare}`}
+              onClick={onClose}
+            >
+              Compare
+            </Link>
+          )}
           <button
             type="button"
             className={`ds-button ${styles.close}`}

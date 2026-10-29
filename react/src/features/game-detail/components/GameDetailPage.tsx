@@ -23,6 +23,7 @@ import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 import GameStory from '@/features/game-detail/components/GameStory';
 import GameShots from '@/features/game-detail/components/GameShots';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /** Header plus page-width main wrapper shared by every state of the game page. */
 function GameDetailShell({ children }: { children: ReactNode }) {
@@ -41,12 +42,18 @@ function GameDetailShell({ children }: { children: ReactNode }) {
  * started, the story, period breakdown, game flow and shot map, scoring
  * summary, three stars, team comparison, and player stats. A game whose box score shows it has not
  * started yet moves to its matchup preview; past its scheduled start (a late
- * puck drop) it stays here on the preview scoreboard.
+ * puck drop) it stays here on the preview scoreboard. AHL games have no
+ * preview, game flow, shot map, scoring summary or three stars, so an AHL
+ * game always stays here and shows the box score sections only.
  */
 const GameDetailPage = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const location = useLocation();
-  const { boxscore, landing, loading, error, status } = useGameDetail(gameId);
+  const { league } = useLeague();
+  const { boxscore, landing, loading, error, status } = useGameDetail(
+    gameId,
+    league,
+  );
 
   const periodGoalsBreakdown = useMemo(() => {
     if (!landing?.summary?.scoring || !boxscore) return [];
@@ -102,7 +109,10 @@ const GameDetailPage = () => {
       </GameDetailShell>
     );
 
-  if (isPreviewGame(boxscore.gameState, boxscore.startTimeUTC))
+  if (
+    league === 'nhl' &&
+    isPreviewGame(boxscore.gameState, boxscore.startTimeUTC)
+  )
     return (
       <Navigate
         key={location.key}
@@ -141,7 +151,7 @@ const GameDetailPage = () => {
               awayAbbrev={boxscore.awayTeam.abbrev}
             />
           )}
-          {gameId && (
+          {gameId && league === 'nhl' && (
             <GameShots
               gameId={gameId}
               status={status}

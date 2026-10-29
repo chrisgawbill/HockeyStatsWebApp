@@ -46,8 +46,10 @@ export default function FavoriteTeamStar({
           itemName={teamName}
           category={team}
           anchorRef={starRef}
-          onSave={(category) => updateTeamCategory(team.triCode, category)}
-          onUnfavorite={() => toggleFavorite(team.triCode)}
+          onSave={(category) =>
+            updateTeamCategory(team.triCode, team.league, category)
+          }
+          onUnfavorite={() => toggleFavorite(team.triCode, team.league)}
           onClose={() => setIsMenuOpen(false)}
         />
       )}

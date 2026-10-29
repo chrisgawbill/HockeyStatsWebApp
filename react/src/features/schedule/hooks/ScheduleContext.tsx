@@ -16,6 +16,8 @@ import {
 } from '@/features/game-detail/utils/gameDetailHelper';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { League } from '@/features/league/utils/leagueHelper';
 import { isCompletedGameState, isInProgressGameState } from '@/lib/gameStatus';
 
 interface ListOfGamesData {
@@ -32,7 +34,7 @@ const ListOfGamesContext = createContext<ListOfGamesData | null>(null);
 /**
  * Loads the selected season's full schedule once and shares it. Every schedule
  * view (day/week/month) is a client-side projection of this one array, so only a
- * season change triggers a re-fetch. Also exposes the games for a chosen day and
+ * season or league change triggers a re-fetch. Also exposes the games for a chosen day and
  * a setter to change that day.
  */
 function ListOfGamesProvider({ children }: { children: ReactNode }) {
@@ -46,6 +48,7 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
     [],
   );
   const { season } = useSeason();
+  const { league } = useLeague();
   const latestRequest = useRef(0);
   // Games whose scores were already backfilled (or attempted) for the loaded
   // season, so updatePastGames requests each game detail at most once.
@@ -61,12 +64,12 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
    * the previous season's schedule on screen) and stores a human-readable
    * message for the UI instead of the raw API error.
    */
-  const fetchGames = useCallback(async (seasonId: string) => {
+  const fetchGames = useCallback(async (seasonId: string, league: League) => {
     const requestId = ++latestRequest.current;
     const isStale = () => requestId !== latestRequest.current;
     setErrorListOfGamesData(null);
     try {
-      const response = await GetScheduledGames(seasonId);
+      const response = await GetScheduledGames(seasonId, league);
       if (isStale()) return;
       backfilledGameIds.current = new Set();
       setListOfGamesData(ConvertContractsToGames(response.games));
@@ -89,8 +92,8 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
   const refetchGames = useCallback(() => {
     setLoadingListOfGamesData(true);
     setSelectedDateGames([]);
-    fetchGames(season);
-  }, [season, fetchGames]);
+    fetchGames(season, league);
+  }, [season, league, fetchGames]);
 
   /**
    * Filters the loaded season schedule to one local calendar day and stores it
@@ -154,7 +157,7 @@ function ListOfGamesProvider({ children }: { children: ReactNode }) {
    */
   async function updateGame(game: ScheduledGame) {
     try {
-      const response = await GetGameDetails(game.gameId);
+      const response = await GetGameDetails(game.gameId, league);
       if (!response?.homeTeam || !response?.awayTeam) return undefined;
       return new ScheduledGame(
         game.gameId,

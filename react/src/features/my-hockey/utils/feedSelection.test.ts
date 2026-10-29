@@ -139,6 +139,7 @@ describe('section ordering', () => {
 
 describe('buildMyHockeyFeed', () => {
   const player: FavoritePlayer = {
+    league: 'nhl',
     playerId: 8481540,
     name: 'Cole Caufield',
     teamTriCode: 'MTL',

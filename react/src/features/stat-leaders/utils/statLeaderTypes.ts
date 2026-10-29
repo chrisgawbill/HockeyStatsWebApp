@@ -3,6 +3,7 @@ import {
   GetGoalieStatLeaders,
   StatLeaderDto,
 } from '@/features/stat-leaders/api/statLeadersApi';
+import { League } from '@/features/league/utils/leagueHelper';
 
 export const STAT_LEADER_TYPES = {
   SKATER: 'skater',
@@ -19,7 +20,11 @@ export interface StatEntry {
 
 interface StatLeaderConfig {
   stats: StatEntry[];
-  fetcher: (statIndicator: string, season?: string) => Promise<StatLeaderDto[]>;
+  fetcher: (
+    statIndicator: string,
+    season?: string,
+    league?: League,
+  ) => Promise<StatLeaderDto[]>;
 }
 
 /**

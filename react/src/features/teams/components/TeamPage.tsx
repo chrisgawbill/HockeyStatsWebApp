@@ -11,7 +11,7 @@ import RosterTab from '@/features/teams/components/tabs/RosterTab';
 import ScheduleTab from '@/features/teams/components/tabs/ScheduleTab';
 import TeamDna from '@/components/TeamDna';
 import TeamFormPanel from '@/components/TeamFormPanel';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
 import {
   TeamOverview,
   TEAM_SECTIONS,
@@ -19,6 +19,7 @@ import {
 import { buildTeamOverview } from '@/features/teams/utils/teamPageHelper';
 import { useStandingsContext } from '@/features/standings/hooks/StandingsContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { toDarkModeAccentColor } from '@/lib/teamColor';
 import styles from '@/features/teams/components/TeamPage.module.css';
@@ -69,7 +70,8 @@ function TeamPageStatus({ children }: { children: React.ReactNode }) {
 
 /**
  * Team route (`/team/:teamId`, where the param is actually a tri-code). Pulls the
- * numeric team id and primary color from local team metadata, then loads stats,
+ * numeric team id and primary color from the league's local team metadata
+ * (AHL clubs have no color, so the page uses its default), then loads stats,
  * roster, schedule, and player stats for the selected season in one batch.
  *
  * The page body is a single scrolling page: every section renders at once and
@@ -91,12 +93,15 @@ export default function TeamPage() {
   const teamSourcePath = location.pathname;
   const { easternStandingsData, westernStandingsData } = useStandingsContext();
   const { season } = useSeason();
+  const { league } = useLeague();
   const { listOfGamesData } = useListOfGames();
   const { listOfTeamsData } = useListOfTeamsData();
   const { theme } = useTheme();
   const teamActiveNavPath =
     routeState?.activeNavPath ?? routeState?.sourcePath ?? '/teamList';
-  const teamEntry = localTeamList.find((entry) => entry.triCode === triCode);
+  const teamEntry = getTeamList(league).find(
+    (entry) => entry.triCode === triCode,
+  );
   const numericId: number = teamEntry?.id ?? 0;
   const primaryColor: string = teamEntry?.primary ?? FALLBACK_PRIMARY_COLOR;
   const primaryColorForTheme =
@@ -116,7 +121,7 @@ export default function TeamPage() {
     loading,
     error,
     refetchTeam,
-  } = useTeamPageData({ numericId, triCode, season });
+  } = useTeamPageData({ numericId, triCode, season, league });
 
   const team: TeamOverview | null = useMemo(() => {
     if (teamRawResponse == null) {

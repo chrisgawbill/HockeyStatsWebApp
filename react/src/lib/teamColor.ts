@@ -1,12 +1,18 @@
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
 import type { Theme } from '@/lib/themeSchedule';
 
-/** A team's primary brand color by tri-code, with a neutral blue fallback. */
-export function getTeamPrimaryColor(abbrev?: string): string {
+/**
+ * A team's primary brand color by tri-code, with a neutral blue fallback. AHL
+ * clubs have no colors in the feed, so they always get the fallback.
+ */
+export function getTeamPrimaryColor(
+  abbrev?: string,
+  league: 'nhl' | 'ahl' = 'nhl',
+): string {
   const normalizedAbbrev = abbrev?.toUpperCase();
   return (
-    localTeamList.find((team) => team.triCode === normalizedAbbrev)?.primary ??
-    '#1f5f99'
+    getTeamList(league).find((team) => team.triCode === normalizedAbbrev)
+      ?.primary ?? '#1f5f99'
   );
 }
 

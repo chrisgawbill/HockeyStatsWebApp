@@ -1,10 +1,13 @@
 import { useState, type ReactNode } from 'react';
 import FavoritePlayerStar from '@/features/favorite-players/components/FavoritePlayerStar';
+import type { League } from '@/features/league/utils/leagueHelper';
 import styles from '@/features/favorite-players/components/PlayerHeadshot.module.css';
 
 export interface PlayerHeadshotProps {
   playerId: number;
   playerName: string;
+  /** The player's league for the star; defaults to the league the site shows. */
+  league?: League;
   src?: string | null;
   /** Alt text for the photo; '' when the name is printed next to it. */
   alt?: string;
@@ -27,6 +30,7 @@ export interface PlayerHeadshotProps {
 export default function PlayerHeadshot({
   playerId,
   playerName,
+  league,
   src,
   alt = '',
   className,
@@ -55,6 +59,7 @@ export default function PlayerHeadshot({
       <FavoritePlayerStar
         playerId={playerId}
         playerName={playerName}
+        league={league}
         size={starSize}
         className={styles.corner}
       />

@@ -119,17 +119,21 @@ export function computeTeamTotals(
   teamSog: number,
 ): TeamTotalsViewModel {
   const skaters = [...teamStats.forwards, ...teamStats.defense];
+  /** Sums a stat the feed may lack (the AHL); null when no skater has it. */
+  const sumTrackedStat = (
+    stat: 'powerPlayGoals' | 'giveaways' | 'takeaways',
+  ): number | null =>
+    skaters.some((skater) => skater[stat] != null)
+      ? skaters.reduce((sum, skater) => sum + (skater[stat] ?? 0), 0)
+      : null;
   return {
     sog: teamSog,
     hits: skaters.reduce((sum, skater) => sum + skater.hits, 0),
     blockedShots: skaters.reduce((sum, skater) => sum + skater.blockedShots, 0),
     pim: skaters.reduce((sum, skater) => sum + skater.pim, 0),
-    powerPlayGoals: skaters.reduce(
-      (sum, skater) => sum + skater.powerPlayGoals,
-      0,
-    ),
-    giveaways: skaters.reduce((sum, skater) => sum + skater.giveaways, 0),
-    takeaways: skaters.reduce((sum, skater) => sum + skater.takeaways, 0),
+    powerPlayGoals: sumTrackedStat('powerPlayGoals'),
+    giveaways: sumTrackedStat('giveaways'),
+    takeaways: sumTrackedStat('takeaways'),
   };
 }
 

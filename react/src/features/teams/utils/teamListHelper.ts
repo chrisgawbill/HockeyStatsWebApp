@@ -1,7 +1,8 @@
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { Team } from '@/features/teams/types/team';
 import { TeamStats } from '@/features/teams/types/teamStats';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
+import { League } from '@/features/league/utils/leagueHelper';
 
 export type TeamFilter = 'all' | 'playoff' | 'lottery';
 export type TeamSort = 'name' | 'points' | 'winPct' | 'goals' | 'draftOdds';
@@ -21,10 +22,6 @@ export interface TeamListCriteria {
   filter: TeamFilter;
   sortBy: TeamSort;
 }
-
-const triCodeByTeamName: Record<string, string> = Object.fromEntries(
-  localTeamList.map((team) => [team.fullName, team.triCode]),
-);
 
 /** Lowercases a name and strips accents so "Montréal" matches "Montreal". */
 function normalizeKey(value: string) {
@@ -87,8 +84,12 @@ export function buildTeamCards(
   teams: Team[],
   standingsByKey: Map<string, StandingsTeam>,
   { search, conference, division, filter, sortBy }: TeamListCriteria,
+  league: League = 'nhl',
 ): TeamCardData[] {
   const normalizedSearch = search.trim().toLowerCase();
+  const triCodeByTeamName: Record<string, string> = Object.fromEntries(
+    getTeamList(league).map((team) => [team.fullName, team.triCode]),
+  );
 
   return teams
     .map((team: Team) => {
