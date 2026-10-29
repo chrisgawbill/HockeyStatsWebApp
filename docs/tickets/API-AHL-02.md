@@ -2,9 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE — Started by the Product Owner 2026-10-29. Implemented on
-HockeyStatsAPI branch `ccr-373a3121-jzv70k`; pending Product Owner
-confirmation of the checkpoint below, then review and merge. Requested
+**Status:** DONE — Closed by the Product Owner 2026-10-29. Implemented on
+HockeyStatsAPI branch `ccr-373a3121-jzv70k` (`7a4a5c1`). Requested
 2026-10-29. HockeyStatsAPI.
 
 **Goal:** The web app can ask any supported read route for AHL data with
@@ -36,6 +35,8 @@ falling back to NHL data.
   need a third of the most games any goalie has played, a stand-in for the
   AHL's qualifying rule. `league` is validated on the league-capable routers,
   so `league=<other>` is now a 400 there.
+- 2026-10-29 (Product Owner): closed the ticket as done, confirming the
+  route list and 404 for unsupported routes with `league=ahl`.
 
 **Scope:**
 
@@ -85,3 +86,6 @@ plus a test that NHL responses are unchanged; README route tables updated.
   AHL refresh and the refresh time after it; stat leaders then read the
   stored report.
 - NOT RUN: deploy to the dev server.
+
+**Release follow-ups:** deploy to the dev server (Product Owner); AHL-01
+depends on it. Not yet run.

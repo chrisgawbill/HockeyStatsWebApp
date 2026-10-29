@@ -2,10 +2,9 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE — Started by the Product Owner 2026-10-29. Implemented on
-HockeyStatsAPI branch `ccr-373a3121-jzv70k` (`9a9f57d`); pending Product Owner
-confirmation of the two checkpoint choices below, then review and merge.
-Requested 2026-10-29 ("bring in AHL data the same way we bring in NHL data …
+**Status:** DONE — Closed by the Product Owner 2026-10-29. Implemented on
+HockeyStatsAPI branch `ccr-373a3121-jzv70k` (`9a9f57d`). Requested
+2026-10-29 ("bring in AHL data the same way we bring in NHL data …
 add tables to db"). HockeyStatsAPI.
 
 **Goal:** The API can fetch, cache and store AHL teams, rosters, schedules,
@@ -45,6 +44,9 @@ as the NHL routes.
   player stats use `statviewfeed` with every player on one page (1,234 skaters
   in 2025-26). Rosters are stored when they are first read, not by the
   scheduled refresh.
+- 2026-10-29 (Product Owner): closed the ticket as done, confirming the
+  checkpoint choices it was built on: accept the HockeyTech feed risk, and
+  separate `ahl_*` tables.
 
 **Scope:**
 
@@ -93,3 +95,6 @@ risk and the new tables.
 - PASS: no NHL table, cache key or route changed. The NHL refresh runs first
   and catches its own errors.
 - NOT RUN: deploy to the dev server, and a scheduled refresh there.
+
+**Release follow-ups:** deploy to the dev server and a scheduled AHL refresh
+there (Product Owner). Not yet run.

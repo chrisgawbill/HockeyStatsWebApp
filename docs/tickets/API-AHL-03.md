@@ -2,9 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE — Started by the Product Owner 2026-10-29. Implemented on
-HockeyStatsAPI branch `ccr-373a3121-jzv70k`; pending Product Owner
-confirmation of the checkpoint below, then review and merge. Requested
+**Status:** DONE — Closed by the Product Owner 2026-10-29. Implemented on
+HockeyStatsAPI branch `ccr-373a3121-jzv70k` (`3f3566b`). Requested
 2026-10-29. HockeyStatsAPI.
 
 **Goal:** A user can favorite AHL teams and players in the same favorites
@@ -41,6 +40,8 @@ AHL-02.
   with no game yet this season is a 404 until they play. Both favorites
   routers validate `league` on every route, so `league=<other>` is a 400 even
   on `GET`.
+- 2026-10-29 (Product Owner): closed the ticket as done, confirming AHL
+  favorites are listed but create no reports or pushes until a follow-up.
 
 **Scope:**
 
@@ -94,3 +95,6 @@ and push dispatch ignore AHL favorites; README favorites section updated.
   leagues, the 10-player cap across leagues; the weekly dispatch reads only
   NHL rows.
 - NOT RUN: live AHL lookups against the real feed; deploy to the dev server.
+
+**Release follow-ups:** deploy to the dev server and live AHL favorite
+lookups there (Product Owner). Not yet run.
