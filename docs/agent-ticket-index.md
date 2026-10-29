@@ -66,6 +66,11 @@ are historical notes, not a second status field.
 | [API-PUSH-03](tickets/API-PUSH-03.md) | Account-level push settings and automatic device subscription (backend) |
 | [PUSH-03](tickets/PUSH-03.md) | Automatic device subscription and account push settings (frontend) |
 | [SCHED-STATUS-01](tickets/SCHED-STATUS-01.md) | Live and final states on the schedule from cached game data |
+| [API-AHL-01](tickets/API-AHL-01.md) | AHL data client and stored AHL tables (backend) |
+| [API-AHL-02](tickets/API-AHL-02.md) | AHL read routes behind a league switch (backend) |
+| [API-AHL-03](tickets/API-AHL-03.md) | Favorites cover both leagues under the shared limits (backend) |
+| [AHL-01](tickets/AHL-01.md) | NHL/AHL toggle for the main league view |
+| [AHL-02](tickets/AHL-02.md) | Favorite AHL teams and players in the shared favorites list |
 
 ## Dependency outline
 
@@ -89,6 +94,9 @@ API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
 WPR-01 + API-WPR-02 -> WPR-02
 API-AUTH-02 -> SIGNIN-01
+API-AHL-01 -> API-AHL-02, API-AHL-03
+API-AHL-02 -> AHL-01
+API-AHL-03 + AHL-01 -> AHL-02
 ```
 
 ON2-09A may run early using the existing game; it gates production presentation
