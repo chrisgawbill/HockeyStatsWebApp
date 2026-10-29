@@ -71,10 +71,11 @@ export default function TeamHero({ team }: TeamHeroProps) {
             {team.name}
           </span>
         </nav>
-        {/* AHL favorites arrive with AHL-02. */}
-        {league === 'nhl' && (
-          <FavoriteTeamButton triCode={team.triCode} teamName={team.name} />
-        )}
+        <FavoriteTeamButton
+          triCode={team.triCode}
+          teamName={team.name}
+          league={league}
+        />
       </div>
       <div className={styles['team-hero__body']}>
         <img

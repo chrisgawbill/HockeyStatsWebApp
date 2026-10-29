@@ -110,10 +110,17 @@ function FavoritePlayersList() {
       ) : (
         <ul className={`${styles.favorites} ${shared.surface}`}>
           {favorites.map((favorite) => (
-            <li key={favorite.playerId} className={styles.favoriteRow}>
+            <li
+              key={`${favorite.league}-${favorite.playerId}`}
+              className={styles.favoriteRow}
+            >
               <span className={styles.favoriteName}>{favorite.name}</span>
               <span className={styles.favoriteTeam}>
-                {[favorite.teamTriCode, favorite.position]
+                {[
+                  favorite.league === 'ahl' && 'AHL',
+                  favorite.teamTriCode,
+                  favorite.position,
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </span>
@@ -123,9 +130,11 @@ function FavoritePlayersList() {
                 aria-label={`Unfavorite ${favorite.name}`}
                 onClick={() => {
                   setFailed(null);
-                  toggleFavorite(favorite.playerId, favorite.name).catch(() =>
-                    setFailed(favorite.name),
-                  );
+                  toggleFavorite(
+                    favorite.playerId,
+                    favorite.league,
+                    favorite.name,
+                  ).catch(() => setFailed(favorite.name));
                 }}
               >
                 <span aria-hidden="true">★</span> Unstar

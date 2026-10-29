@@ -39,6 +39,11 @@ export function getLeagueQueryValue(league: League): 'ahl' | undefined {
   return league === 'ahl' ? 'ahl' : undefined;
 }
 
+/** Appends `?league=ahl` to a path for the AHL; NHL paths stay as they were. */
+export function withLeagueQuery(path: string, league: League): string {
+  return league === 'ahl' ? `${path}?league=ahl` : path;
+}
+
 /** Pages with no AHL version: the matchup page, comparison, favorites and Rink Quest. */
 const NHL_ONLY_PATHS = [
   '/matchup',

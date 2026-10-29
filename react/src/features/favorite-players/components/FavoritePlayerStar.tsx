@@ -9,6 +9,7 @@ import {
 import { MAX_FAVORITE_PLAYERS } from '@/features/favorite-players/utils/weeklyReportFormat';
 import styles from '@/components/FavoriteStar.module.css';
 import { useLeague } from '@/features/league/hooks/LeagueContext';
+import type { League } from '@/features/league/utils/leagueHelper';
 
 /** How long a hint or error toast stays up. */
 const MESSAGE_VISIBLE_MS = 6000;
@@ -16,6 +17,8 @@ const MESSAGE_VISIBLE_MS = 6000;
 export interface FavoritePlayerStarProps {
   playerId: number;
   playerName: string;
+  /** The player's league; defaults to the league the site shows. */
+  league?: League;
   size?: 'sm' | 'md';
   className?: string;
 }
@@ -26,11 +29,13 @@ export interface FavoritePlayerStarProps {
  * Unfavorite) instead. It never triggers the surrounding row or card. Signed-out users get a
  * pointer to the header's Google sign-in; hints and failures show as a toast
  * so they are not clipped by scrolling rows. Hidden when the API predates
- * favorite players, and in the AHL view.
+ * favorite players. AHL players have no Weekly Player Report yet, so their copy
+ * leaves it out.
  */
 export default function FavoritePlayerStar({
   playerId,
   playerName,
+  league: playerLeague,
   size = 'md',
   className,
 }: FavoritePlayerStarProps) {
@@ -42,7 +47,9 @@ export default function FavoritePlayerStar({
     toggleFavorite,
     updatePlayerCategory,
   } = useFavoritePlayers();
-  const { league } = useLeague();
+  const { league: viewLeague } = useLeague();
+  const league = playerLeague ?? viewLeague;
+  const reportSuffix = league === 'nhl' ? ' for the Weekly Player Report' : '';
   const starRef = useRef<HTMLButtonElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [message, setMessage] = useState<{
@@ -50,9 +57,9 @@ export default function FavoritePlayerStar({
     isError: boolean;
   } | null>(null);
   const [pending, setPending] = useState(false);
-  const favorite = isSignedIn && isFavorite(playerId);
+  const favorite = isSignedIn && isFavorite(playerId, league);
   const favoritePlayer = favorites.find(
-    (player) => player.playerId === playerId,
+    (player) => player.league === league && player.playerId === playerId,
   );
 
   useEffect(() => {
@@ -64,15 +71,14 @@ export default function FavoritePlayerStar({
     return () => window.clearTimeout(hideMessageTimer);
   }, [message]);
 
-  // AHL favorites arrive with AHL-02; until then AHL ids must not be saved as NHL ones.
-  if (league === 'ahl' || (isSignedIn && !available)) return null;
+  if (isSignedIn && !available) return null;
 
   const respondToStarPress = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     if (!isSignedIn) {
       setMessage({
-        text: `Sign in with Google at the top of the page to favorite ${playerName} and get a Weekly Player Report every Monday.`,
+        text: `Sign in with Google at the top of the page to favorite ${playerName}${league === 'nhl' ? ' and get a Weekly Player Report every Monday' : ''}.`,
         isError: false,
       });
       return;
@@ -84,12 +90,12 @@ export default function FavoritePlayerStar({
     setMessage(null);
     setPending(true);
     try {
-      await toggleFavorite(playerId, playerName);
+      await toggleFavorite(playerId, league, playerName);
     } catch (error) {
       setMessage({
         text:
           error instanceof FavoriteLimitError
-            ? `You can favorite up to ${MAX_FAVORITE_PLAYERS} players. Unstar one first.`
+            ? `You can favorite up to ${MAX_FAVORITE_PLAYERS} players across the NHL and AHL. Unstar one first.`
             : "Couldn't save your favorite. Try again in a moment.",
         isError: true,
       });
@@ -114,7 +120,7 @@ export default function FavoritePlayerStar({
         aria-label={
           favorite
             ? `Fan category and options for ${playerName}`
-            : `Favorite ${playerName} for the Weekly Player Report`
+            : `Favorite ${playerName}${reportSuffix}`
         }
         title={
           favorite ? `Fan category for ${playerName}` : `Favorite ${playerName}`
@@ -130,8 +136,10 @@ export default function FavoritePlayerStar({
             label: favoritePlayer?.label ?? null,
           }}
           anchorRef={starRef}
-          onSave={(category) => updatePlayerCategory(playerId, category)}
-          onUnfavorite={() => toggleFavorite(playerId, playerName)}
+          onSave={(category) =>
+            updatePlayerCategory(playerId, league, category)
+          }
+          onUnfavorite={() => toggleFavorite(playerId, league, playerName)}
           onClose={() => setIsMenuOpen(false)}
         />
       )}

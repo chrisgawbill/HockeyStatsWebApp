@@ -10,11 +10,16 @@ import type {
   WeeklyPlayerReport,
   WeeklyPlayerReportInbox,
 } from '@/features/favorite-players/types/favoritePlayers';
+import {
+  withLeagueQuery,
+  type League,
+} from '@/features/league/utils/leagueHelper';
 
 type FavoritePlayerDto = Omit<
   FavoritePlayer,
-  'tier' | 'label' | 'pushMuted'
+  'league' | 'tier' | 'label' | 'pushMuted'
 > & {
+  league?: unknown;
   tier?: unknown;
   label?: unknown;
   pushMuted?: unknown;
@@ -24,12 +29,13 @@ interface FavoritePlayersResponseDto {
   favorites: FavoritePlayerDto[];
 }
 
-/** Fills in the tier, label and push toggle an older API leaves out. */
+/** Fills in the league, tier, label and push toggle an older API leaves out. */
 function readFavoritePlayers(
   response: FavoritePlayersResponseDto,
 ): FavoritePlayer[] {
   return response.favorites.map((favorite) => ({
     ...favorite,
+    league: favorite.league === 'ahl' ? 'ahl' : 'nhl',
     tier: readFanTier(favorite.tier),
     label: readCategoryLabel(favorite.label),
     pushMuted: favorite.pushMuted === true,
@@ -52,9 +58,10 @@ export async function fetchFavoritePlayers(
 export async function addFavoritePlayer(
   token: string,
   playerId: number,
+  league: League,
 ): Promise<FavoritePlayer[]> {
   const response = await put<FavoritePlayersResponseDto>(
-    `/api/favorite-players/${playerId}`,
+    withLeagueQuery(`/api/favorite-players/${playerId}`, league),
     undefined,
     authHeader(token),
   );
@@ -64,9 +71,10 @@ export async function addFavoritePlayer(
 export async function removeFavoritePlayer(
   token: string,
   playerId: number,
+  league: League,
 ): Promise<FavoritePlayer[]> {
   const response = await del<FavoritePlayersResponseDto>(
-    `/api/favorite-players/${playerId}`,
+    withLeagueQuery(`/api/favorite-players/${playerId}`, league),
     authHeader(token),
   );
   return readFavoritePlayers(response);
@@ -76,10 +84,11 @@ export async function removeFavoritePlayer(
 export async function updateFavoritePlayerCategory(
   token: string,
   playerId: number,
+  league: League,
   category: FavoriteCategory,
 ): Promise<FavoritePlayer[]> {
   const response = await patch<FavoritePlayersResponseDto>(
-    `/api/favorite-players/${playerId}`,
+    withLeagueQuery(`/api/favorite-players/${playerId}`, league),
     category,
     authHeader(token),
   );
@@ -90,10 +99,11 @@ export async function updateFavoritePlayerCategory(
 export async function setFavoritePlayerPushMuted(
   token: string,
   playerId: number,
+  league: League,
   muted: boolean,
 ): Promise<FavoritePlayer[]> {
   const response = await put<FavoritePlayersResponseDto>(
-    `/api/favorite-players/${playerId}/push-mute`,
+    withLeagueQuery(`/api/favorite-players/${playerId}/push-mute`, league),
     { muted },
     authHeader(token),
   );

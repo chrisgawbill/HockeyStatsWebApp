@@ -34,6 +34,7 @@ function FavoritePlayerCard({
           <PlayerHeadshot
             playerId={player.playerId}
             playerName={player.name}
+            league={player.league}
             src={player.headshot}
             starSize="sm"
             className={styles.avatar}
@@ -47,6 +48,7 @@ function FavoritePlayerCard({
         }
         name={player.name}
         detail={formatTeamAndPosition(player)}
+        leagueTag={player.league === 'ahl' ? 'AHL' : undefined}
         category={player}
         onSelect={() => setIsStatsOpen(true)}
         footer={footer}
@@ -90,7 +92,7 @@ export default function FavoritePlayersRow({
     >
       {visibleFavorites.map((player) => (
         <FavoritePlayerCard
-          key={player.playerId}
+          key={`${player.league}-${player.playerId}`}
           player={player}
           footer={renderCardFooter?.(player)}
         />

@@ -30,12 +30,13 @@ import type {
   FavoritePlayer,
   WeeklyPlayerReport,
 } from '@/features/favorite-players/types/favoritePlayers';
+import type { League } from '@/features/league/utils/leagueHelper';
 
 /** Reports arrive weekly; refreshing on focus plus this cadence is plenty. */
 const POLL_INTERVAL_MS = 15 * 60 * 1000;
 const FOCUS_REFRESH_MIN_MS = 60 * 1000;
 
-/** Thrown by `toggleFavorite` when the API refused an 11th favorite. */
+/** Thrown by `toggleFavorite` when the API refused an 11th favorite across both leagues. */
 export class FavoriteLimitError extends Error {
   constructor() {
     super('Favorite player limit reached');
@@ -53,16 +54,25 @@ export interface FavoritePlayersState {
   favorites: FavoritePlayer[];
   reports: WeeklyPlayerReport[];
   unreadCount: number;
-  isFavorite: (playerId: number) => boolean;
+  isFavorite: (playerId: number, league: League) => boolean;
   /** Rejects (FavoriteLimitError on the cap) after restoring the old list. */
-  toggleFavorite: (playerId: number, name: string) => Promise<void>;
+  toggleFavorite: (
+    playerId: number,
+    league: League,
+    name: string,
+  ) => Promise<void>;
   /** Rejects after restoring the previous favorites when the save fails. */
   updatePlayerCategory: (
     playerId: number,
+    league: League,
     category: FavoriteCategory,
   ) => Promise<void>;
   /** Rejects after restoring the previous favorites when the save fails. */
-  setPlayerPushMuted: (playerId: number, muted: boolean) => Promise<void>;
+  setPlayerPushMuted: (
+    playerId: number,
+    league: League,
+    muted: boolean,
+  ) => Promise<void>;
   markReportRead: (weekStart: string) => void;
   markAllReportsRead: () => void;
   /** The Monday push switch; null until loaded. */
@@ -71,6 +81,10 @@ export interface FavoritePlayersState {
 }
 
 const FavoritePlayersContext = createContext<FavoritePlayersState | null>(null);
+
+function isPlayer(favorite: FavoritePlayer, playerId: number, league: League) {
+  return favorite.league === league && favorite.playerId === playerId;
+}
 
 function withReadFlag(reports: WeeklyPlayerReport[], weekStart: string) {
   return reports.map((report) =>
@@ -171,21 +185,23 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
   }, [refreshReports]);
 
   const isFavorite = useCallback(
-    (playerId: number) => favorites.some((f) => f.playerId === playerId),
+    (playerId: number, league: League) =>
+      favorites.some((f) => isPlayer(f, playerId, league)),
     [favorites],
   );
 
   const toggleFavorite = useCallback(
-    async (playerId: number, name: string) => {
+    async (playerId: number, league: League, name: string) => {
       if (!token) return;
-      const wasFavorite = favorites.some((f) => f.playerId === playerId);
+      const wasFavorite = favorites.some((f) => isPlayer(f, playerId, league));
       const previous = favorites;
       setFavorites(
         wasFavorite
-          ? favorites.filter((f) => f.playerId !== playerId)
+          ? favorites.filter((f) => !isPlayer(f, playerId, league))
           : [
               ...favorites,
               {
+                league,
                 playerId,
                 name,
                 teamTriCode: null,
@@ -201,8 +217,8 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
       try {
         setFavorites(
           wasFavorite
-            ? await removeFavoritePlayer(token, playerId)
-            : await addFavoritePlayer(token, playerId),
+            ? await removeFavoritePlayer(token, playerId, league)
+            : await addFavoritePlayer(token, playerId, league),
         );
       } catch (error) {
         console.error('Failed to update favorite player:', error);
@@ -217,17 +233,17 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
   );
 
   const updatePlayerCategory = useCallback(
-    async (playerId: number, category: FavoriteCategory) => {
+    async (playerId: number, league: League, category: FavoriteCategory) => {
       if (!token) return;
       const previous = favorites;
       setFavorites(
         favorites.map((f) =>
-          f.playerId === playerId ? { ...f, ...category } : f,
+          isPlayer(f, playerId, league) ? { ...f, ...category } : f,
         ),
       );
       try {
         setFavorites(
-          await updateFavoritePlayerCategory(token, playerId, category),
+          await updateFavoritePlayerCategory(token, playerId, league, category),
         );
       } catch (error) {
         console.error('Failed to update favorite player category:', error);
@@ -239,16 +255,18 @@ export function FavoritePlayersProvider({ children }: { children: ReactNode }) {
   );
 
   const setPlayerPushMuted = useCallback(
-    async (playerId: number, muted: boolean) => {
+    async (playerId: number, league: League, muted: boolean) => {
       if (!token) return;
       const previous = favorites;
       setFavorites(
         favorites.map((f) =>
-          f.playerId === playerId ? { ...f, pushMuted: muted } : f,
+          isPlayer(f, playerId, league) ? { ...f, pushMuted: muted } : f,
         ),
       );
       try {
-        setFavorites(await setFavoritePlayerPushMuted(token, playerId, muted));
+        setFavorites(
+          await setFavoritePlayerPushMuted(token, playerId, league, muted),
+        );
       } catch (error) {
         console.error('Failed to update player push setting:', error);
         setFavorites(previous);

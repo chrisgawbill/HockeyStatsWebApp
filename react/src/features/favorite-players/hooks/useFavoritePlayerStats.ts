@@ -13,7 +13,7 @@ import {
   type StatCell,
 } from '@/features/teams/utils/playerStatsHelper';
 import type { TokenSlot } from '@/features/teams/utils/teamLinesHelper';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
 import type { FavoritePlayer } from '@/features/favorite-players/types/favoritePlayers';
 
 export type FavoritePlayerStatsLoad =
@@ -42,11 +42,13 @@ async function loadStatCells(
     slot === 'G'
       ? buildStatsLookup(
           [],
-          transformGoalieStats(await GetGoalieSummary(String(teamId), season)),
+          transformGoalieStats(
+            await GetGoalieSummary(String(teamId), season, player.league),
+          ),
         )
       : buildStatsLookup(
           transformPlayerStats(
-            await GetSkaterSummary(String(teamId), season),
+            await GetSkaterSummary(String(teamId), season, player.league),
             null,
           ),
           [],
@@ -64,7 +66,7 @@ export function useFavoritePlayerStats(
   });
 
   useEffect(() => {
-    const teamId = localTeamList.find(
+    const teamId = getTeamList(player.league).find(
       (team) => team.triCode === player.teamTriCode,
     )?.id;
     if (!teamId) {
@@ -86,7 +88,13 @@ export function useFavoritePlayerStats(
     };
     // Keyed on the fields that pick the stats, not the player object, so a
     // tier change (which replaces the object) does not refetch.
-  }, [player.playerId, player.teamTriCode, player.position, season]);
+  }, [
+    player.league,
+    player.playerId,
+    player.teamTriCode,
+    player.position,
+    season,
+  ]);
 
   return statsLoad;
 }

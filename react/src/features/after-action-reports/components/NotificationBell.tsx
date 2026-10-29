@@ -118,14 +118,22 @@ function WeeklyReportRow({
 function WeeklyReportPlayerMutes() {
   const { favorites, setPlayerPushMuted } = useFavoritePlayers();
   const [muteError, setMuteError] = useState(false);
+  // The weekly report covers NHL players only (API-AHL-03).
+  const nhlFavorites = favorites.filter((player) => player.league === 'nhl');
+  const hasAhlFavorites = nhlFavorites.length < favorites.length;
   if (favorites.length === 0) return null;
   return (
     <>
+      {hasAhlFavorites && (
+        <p className={styles.footnote}>
+          The weekly report covers your NHL players only.
+        </p>
+      )}
       <ul
         className={styles.muteList}
         aria-label="Weekly player report notifications by player"
       >
-        {favorites.map((player) => (
+        {nhlFavorites.map((player) => (
           <li key={player.playerId} className={styles.muteRow}>
             <span className={styles.muteTeam}>{player.name}</span>
             <button
@@ -135,9 +143,11 @@ function WeeklyReportPlayerMutes() {
               aria-label={`Mute ${player.name} in the weekly report notification`}
               onClick={() => {
                 setMuteError(false);
-                setPlayerPushMuted(player.playerId, !player.pushMuted).catch(
-                  () => setMuteError(true),
-                );
+                setPlayerPushMuted(
+                  player.playerId,
+                  player.league,
+                  !player.pushMuted,
+                ).catch(() => setMuteError(true));
               }}
             >
               {player.pushMuted ? 'Muted' : 'Mute'}
@@ -192,6 +202,9 @@ function WeeklyReportPushToggle() {
 function PushControls() {
   const { favorites, push, setTeamPushMuted } = useAfterActionReports();
   const [muteError, setMuteError] = useState(false);
+  // Game notifications cover NHL teams only (API-AHL-03).
+  const nhlFavorites = favorites.filter((team) => team.league === 'nhl');
+  const hasAhlFavorites = nhlFavorites.length < favorites.length;
 
   if (push.status === 'hidden') return null;
   if (push.status === 'ios-install') {
@@ -239,13 +252,14 @@ function PushControls() {
           <p className={styles.footnote}>
             Phone notifications are on for your account, on every device that
             allows them. Browser alerts are off on this device.
+            {hasAhlFavorites && ' They cover your NHL teams only.'}
           </p>
-          {favorites.length > 0 && (
+          {nhlFavorites.length > 0 && (
             <ul
               className={styles.muteList}
               aria-label="Phone notifications by team"
             >
-              {favorites.map((favorite) => (
+              {nhlFavorites.map((favorite) => (
                 <li key={favorite.triCode} className={styles.muteRow}>
                   <span className={styles.muteTeam}>{favorite.triCode}</span>
                   <button
@@ -256,6 +270,7 @@ function PushControls() {
                       setMuteError(false);
                       setTeamPushMuted(
                         favorite.triCode,
+                        favorite.league,
                         !favorite.pushMuted,
                       ).catch(() => setMuteError(true));
                     }}
@@ -326,6 +341,8 @@ export default function NotificationBell() {
     markAllReportsRead,
   } = useFavoritePlayers();
   const totalUnread = unreadCount + weeklyUnread;
+  // After Action Reports cover NHL teams only (API-AHL-03).
+  const reportTeams = favorites.filter((team) => team.league === 'nhl');
   const items = inboxItems(reports, weeklyReports);
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -436,13 +453,13 @@ export default function NotificationBell() {
             </ul>
           ) : (
             <p className={styles.empty}>
-              {favorites.length === 0
-                ? 'Favorite a team with the ☆ on its team page to get an After Action Report after every game.'
-                : `No reports yet. One lands here after ${favorites
+              {reportTeams.length === 0
+                ? 'Favorite an NHL team with the ☆ on its team page to get an After Action Report after every game.'
+                : `No reports yet. One lands here after ${reportTeams
                     .map((f) => f.triCode)
                     .join(
                       ', ',
-                    )} play${favorites.length === 1 ? 's' : ''} next.`}
+                    )} play${reportTeams.length === 1 ? 's' : ''} next.`}
               {favoritePlayers.length === 0 &&
                 ' Star a player on their headshot for a Weekly Player Report every Monday.'}
             </p>
