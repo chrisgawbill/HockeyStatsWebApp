@@ -173,7 +173,20 @@
 @media (max-width: 576px) {
   :global(.page-header-season-selector) .season-field {
     height: 44px;
-    max-width: calc(100vw - 7rem);
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* The phone app bar is shared with the league toggle and account controls,
+     so the visible label is dropped (still read by screen readers) to keep
+     the pill from overlapping its neighbours. */
+  :global(.page-header-season-selector) .season-field__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   :global(.page-header-season-selector) .season-field__button {
@@ -184,6 +197,12 @@
 
   .season-field__control {
     min-width: 0;
+  }
+
+  @media (max-width: 374px) {
+    :global(.page-header-season-selector) .season-field {
+      padding-inline: 6px;
+    }
   }
 
   /* The selector sits at the trailing edge of the top app bar, so the list

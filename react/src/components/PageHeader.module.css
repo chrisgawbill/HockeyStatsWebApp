@@ -650,6 +650,19 @@
   }
 }
 
+/* Narrow phones: the top app bar holds back, league toggle, season, share,
+   bell, and avatar, so tighten the toggle and gaps to keep the season whole. */
+@media (max-width: 374px) {
+  .nav-secondary-row {
+    gap: 2px;
+  }
+
+  .nav-league-toggle button {
+    padding-inline: 6px;
+    font-size: 0.85rem;
+  }
+}
+
 /*
  * Mobile search FAB: replaces the desktop inline search (hidden above via
  * .nav-search-col's max-width: 576px rule) instead of adding a 7th touch
