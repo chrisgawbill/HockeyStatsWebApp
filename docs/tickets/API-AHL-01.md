@@ -2,8 +2,11 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA — Requested by the Product Owner 2026-10-29 ("bring in AHL
-data the same way we bring in NHL data … add tables to db"). HockeyStatsAPI.
+**Status:** ACTIVE — Started by the Product Owner 2026-10-29. Implemented on
+HockeyStatsAPI branch `ccr-373a3121-jzv70k` (`9a9f57d`); pending Product Owner
+confirmation of the two checkpoint choices below, then review and merge.
+Requested 2026-10-29 ("bring in AHL data the same way we bring in NHL data …
+add tables to db"). HockeyStatsAPI.
 
 **Goal:** The API can fetch, cache and store AHL teams, rosters, schedules,
 standings and player stats, so later tickets can serve them in the same shapes
@@ -28,7 +31,20 @@ as the NHL routes.
   numbering system and can collide with NHL ids, so they must never share a key
   with NHL rows.
 
-**Decisions:** none yet.
+**Decisions:**
+
+- 2026-10-29: Product Owner started the ticket and allowed
+  `lscluster.hockeytech.com` in the environment's network settings. Built on
+  the PM recommendation (accept the feed risk; separate `ahl_*` tables). Still
+  needs explicit Product Owner confirmation of both.
+- 2026-10-29 (spike): the feed answered with the AHL website key. HockeyTech
+  has no preseason; its "Exhibition" seasons map to game type 1, Calder Cup
+  and division playoffs to 3, regular seasons to 2. All-star events are left
+  out. The season id follows from the start date with the NHL September 1
+  rollover. Standings use the modulekit `statviewtype` conference view, and
+  player stats use `statviewfeed` with every player on one page (1,234 skaters
+  in 2025-26). Rosters are stored when they are first read, not by the
+  scheduled refresh.
 
 **Scope:**
 
@@ -63,3 +79,17 @@ line combinations, shot coordinates, push and reports.
 **Verify:** migration 014 on real Postgres; client and mapper unit tests
 against recorded HockeyTech fixtures; README documents the data source, its
 risk and the new tables.
+
+**Evidence (2026-10-29, API `9a9f57d`):**
+
+- PASS: `pnpm test`, 180/180, including 7 new AHL tests against fixtures
+  recorded from the live feed (`src/test/fixtures/ahl/`, key removed).
+- PASS: migrations 001–014 applied on local Postgres 16.
+- PASS: a live refresh against the real feed stored 46 seasons, 32 teams,
+  1,152 games for 2026-27, standings, 837 skaters and 76 goalies. A roster
+  read stored 27 players. Every cache key starts with `ahl:`.
+- PASS: with the feed failing, the refresh logged and returned. The cached
+  schedule and the stored skater report were still served.
+- PASS: no NHL table, cache key or route changed. The NHL refresh runs first
+  and catches its own errors.
+- NOT RUN: deploy to the dev server, and a scheduled refresh there.
