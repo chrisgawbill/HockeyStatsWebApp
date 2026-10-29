@@ -1,5 +1,6 @@
 import React from 'react';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { hasScore } from '@/features/schedule/utils/gameStatusHelper';
 import { isInProgressGameState } from '@/lib/gameStatus';
@@ -25,12 +26,13 @@ export default function ScheduleStripCard({
   teamAbbrev,
   onOpenGame,
 }: ScheduleStripCardProps) {
+  const { league } = useLeague();
   const isHome = game.homeTeam === teamAbbrev;
   const opponentTriCode = isHome ? game.awayTeam : game.homeTeam;
   const opponentLogo = isHome ? game.awayLogo : game.homeLogo;
   const opponent =
-    localTeamList.find((team) => team.triCode === opponentTriCode)?.fullName ??
-    opponentTriCode;
+    getTeamList(league).find((team) => team.triCode === opponentTriCode)
+      ?.fullName ?? opponentTriCode;
   const teamScore = isHome ? game.homeScore : game.awayScore;
   const opponentScore = isHome ? game.awayScore : game.homeScore;
   const resultLabel = getTeamResultLabel(game, teamAbbrev);

@@ -1,4 +1,8 @@
 import { get } from '@/lib/apiClient';
+import {
+  League,
+  getLeagueQueryValue,
+} from '@/features/league/utils/leagueHelper';
 
 export interface ScheduleBroadcastDto {
   id: string;
@@ -40,6 +44,10 @@ export interface ScheduleResponseDto {
 /** Whole-season schedule (`GET /schedule/`), normalized backend contracts. */
 export function GetScheduledGames(
   season?: string,
+  league: League = 'nhl',
 ): Promise<ScheduleResponseDto> {
-  return get<ScheduleResponseDto>('/schedule/', { season });
+  return get<ScheduleResponseDto>('/schedule/', {
+    season,
+    league: getLeagueQueryValue(league),
+  });
 }

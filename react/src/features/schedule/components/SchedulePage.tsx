@@ -32,7 +32,8 @@ import {
 import { filterGames } from '@/features/schedule/utils/scheduleFilterHelper';
 import { parseLocalDate } from '@/lib/dateFormat';
 import { getGamePath } from '@/lib/gamePath';
-import { localTeamList } from '@/lib/teamListData';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { getTeamList } from '@/lib/teamListData';
 
 /**
  * Schedule route. Reads the whole season from ScheduleContext and renders one of
@@ -51,6 +52,7 @@ function SchedulePage() {
     refetchGames,
   } = useListOfGames();
   const navigate = useNavigate();
+  const { league } = useLeague();
   const { season } = useSeason();
   const {
     selectedDateParam,
@@ -82,14 +84,17 @@ function SchedulePage() {
   );
 
   /**
-   * Team options for the filter dropdown, derived from the canonical local NHL
-   * team list rather than the teams appearing in the loaded season, so non-NHL
-   * clubs (exhibition/international/all-star entries) in the game feed don't
-   * leak into the filter.
+   * Team options for the filter dropdown, derived from the league's canonical
+   * local team list rather than the teams appearing in the loaded season, so
+   * other clubs (exhibition/international/all-star entries) in the game feed
+   * don't leak into the filter.
    */
   const teamOptions = useMemo(
-    () => localTeamList.map((team) => team.triCode).sort(),
-    [],
+    () =>
+      getTeamList(league)
+        .map((team) => team.triCode)
+        .sort(),
+    [league],
   );
 
   /**
@@ -147,13 +152,16 @@ function SchedulePage() {
    */
   const goToGameDetails = (game: ScheduledGame) => {
     const backPath = `/schedule?view=${viewParam}&date=${formatDateParam(effectiveDate)}`;
-    navigate(getGamePath({ ...game, startTime: game.gameTime }), {
-      state: {
-        sourcePath: backPath,
-        fallbackPath: backPath,
-        activeNavPath: '/schedule',
+    navigate(
+      getGamePath({ ...game, startTime: game.gameTime }, new Date(), league),
+      {
+        state: {
+          sourcePath: backPath,
+          fallbackPath: backPath,
+          activeNavPath: '/schedule',
+        },
       },
-    });
+    );
   };
 
   const hasGames = !!listOfGamesData && listOfGamesData.length > 0;

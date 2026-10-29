@@ -1,5 +1,7 @@
 import { ReactNode, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import LeagueToggle from '@/components/LeagueToggle';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import SeasonSelector from '@/components/SeasonSelector';
 import ShareButton from '@/components/ShareButton';
 import AccountCorner from '@/components/AccountCorner';
@@ -32,6 +34,8 @@ const NAV_ITEMS = [
   { label: 'Team List', path: '/teamList', icon: <UsersIcon /> },
   { label: 'Rink Quest', path: '/board-game', icon: <StickPuckIcon /> },
 ];
+/** Rink Quest plays with NHL teams, so the AHL view leaves it out. */
+const AHL_NAV_ITEMS = NAV_ITEMS.filter(({ path }) => path !== '/board-game');
 
 /** Back arrow shown on team and game pages; the header renders two layouts of it. */
 function HeaderBackButton({ onClick }: { onClick: () => void }) {
@@ -57,7 +61,7 @@ export interface PageHeaderProps {
 
 /**
  * Global header rendered at the top of every page: brand, back button on team
- * and game pages, desktop search, season selector, the phone-only share
+ * and game pages, desktop search, NHL/AHL toggle, season selector, the phone-only share
  * button, primary navigation (a glass top bar on desktop, a bottom bar on
  * phones), the account corner, and the phone search overlay.
  */
@@ -68,6 +72,8 @@ export default function PageHeader({
   const { pathname } = location;
   const navigate = useNavigate();
   const navRef = useRef<HTMLElement>(null);
+  const { league } = useLeague();
+  const navItems = league === 'ahl' ? AHL_NAV_ITEMS : NAV_ITEMS;
   const mobileNavRef = useRef<HTMLElement>(null);
 
   useNavSystemBarColor(navRef);
@@ -119,6 +125,9 @@ export default function PageHeader({
             <div className={styles['nav-mobile-back']}>
               {isSubPage && <HeaderBackButton onClick={handleBack} />}
             </div>
+            <div className={styles['nav-league-toggle']}>
+              <LeagueToggle />
+            </div>
             <div className={styles['nav-season-selector']}>
               <SeasonSelector className="page-header-season-selector" />
             </div>
@@ -128,7 +137,7 @@ export default function PageHeader({
             </div>
           </div>
           <div className={styles['nav-right']}>
-            {NAV_ITEMS.map(({ label, path, icon }) => (
+            {navItems.map(({ label, path, icon }) => (
               <div key={path} className={styles['nav-bar-item']}>
                 <Link
                   to={path}
@@ -160,7 +169,7 @@ export default function PageHeader({
         className={styles['mobile-nav-bar']}
         ref={mobileNavRef}
       >
-        {NAV_ITEMS.map(({ label, path, icon }) => (
+        {navItems.map(({ label, path, icon }) => (
           <Link
             key={path}
             to={path}

@@ -16,7 +16,12 @@ let knownVersion: string | null | undefined;
 let lastCheckMs = 0;
 let pollTimer: number | undefined;
 
-/** Asks the API for its stats version and notifies every listener when it moved. */
+/**
+ * Asks the API for its stats version and notifies every listener when it moved.
+ * shortcut: polls the NHL version only, so AHL views refresh on NHL changes
+ * and pick up AHL changes (3 refreshes a day) on reload; poll per league if
+ * AHL live polling arrives.
+ */
 async function checkStatsVersion() {
   lastCheckMs = Date.now();
   try {

@@ -14,6 +14,7 @@ import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import PlayoffRacePanel from '@/features/standings/components/PlayoffRacePanel';
@@ -27,7 +28,7 @@ export default function StandingsPage() {
   const {
     easternStandingsData,
     westernStandingsData,
-    metropolitanStandings,
+    metroOrNorthStandings,
     atlanticStandings,
     centralStandings,
     pacificStandings,
@@ -39,6 +40,7 @@ export default function StandingsPage() {
   const [view, setView] = useState<StandingsView>('conference');
   const [conference, setConference] = useState<Conference>('Eastern');
   const { season } = useSeason();
+  const { league } = useLeague();
   const { listOfGamesData, loadingListOfGamesData } = useListOfGames();
 
   const hasStandings =
@@ -48,13 +50,14 @@ export default function StandingsPage() {
     {
       easternStandingsData,
       westernStandingsData,
-      metropolitanStandings,
+      metroOrNorthStandings,
       atlanticStandings,
       centralStandings,
       pacificStandings,
     },
     view,
     conference,
+    league,
   );
 
   return (
@@ -118,7 +121,8 @@ export default function StandingsPage() {
                 />
               ))}
             </div>
-            {loadingListOfGamesData ? (
+            {/* The race panel uses NHL wild-card rules. */}
+            {league === 'ahl' ? null : loadingListOfGamesData ? (
               <p className={styles['playoff-race-loading']}>
                 Loading playoff race…
               </p>

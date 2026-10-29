@@ -8,6 +8,7 @@ import {
 } from '@/features/favorite-players/hooks/FavoritePlayersContext';
 import { MAX_FAVORITE_PLAYERS } from '@/features/favorite-players/utils/weeklyReportFormat';
 import styles from '@/components/FavoriteStar.module.css';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /** How long a hint or error toast stays up. */
 const MESSAGE_VISIBLE_MS = 6000;
@@ -25,7 +26,7 @@ export interface FavoritePlayerStarProps {
  * Unfavorite) instead. It never triggers the surrounding row or card. Signed-out users get a
  * pointer to the header's Google sign-in; hints and failures show as a toast
  * so they are not clipped by scrolling rows. Hidden when the API predates
- * favorite players.
+ * favorite players, and in the AHL view.
  */
 export default function FavoritePlayerStar({
   playerId,
@@ -41,6 +42,7 @@ export default function FavoritePlayerStar({
     toggleFavorite,
     updatePlayerCategory,
   } = useFavoritePlayers();
+  const { league } = useLeague();
   const starRef = useRef<HTMLButtonElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [message, setMessage] = useState<{
@@ -62,7 +64,8 @@ export default function FavoritePlayerStar({
     return () => window.clearTimeout(hideMessageTimer);
   }, [message]);
 
-  if (isSignedIn && !available) return null;
+  // AHL favorites arrive with AHL-02; until then AHL ids must not be saved as NHL ones.
+  if (league === 'ahl' || (isSignedIn && !available)) return null;
 
   const respondToStarPress = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();

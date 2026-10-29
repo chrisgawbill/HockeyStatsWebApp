@@ -1,5 +1,6 @@
 import React from 'react';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
@@ -9,9 +10,9 @@ type TeamTotals = {
   hits: number;
   blockedShots: number;
   pim: number;
-  powerPlayGoals: number;
-  giveaways: number;
-  takeaways: number;
+  powerPlayGoals: number | null;
+  giveaways: number | null;
+  takeaways: number | null;
 };
 
 type TeamComparisonProps = {
@@ -31,15 +32,16 @@ const STAT_ROWS: { label: string; key: keyof TeamTotals }[] = [
   { label: 'Takeaways', key: 'takeaways' },
 ];
 
-/** Side-by-side bars comparing the teams' game totals. */
+/** Side-by-side bars comparing the teams' game totals; stats the feed lacks are left out. */
 function TeamComparison({
   homeTotals,
   awayTotals,
   homeAbbrev,
   awayAbbrev,
 }: TeamComparisonProps) {
-  const awayColor = getTeamPrimaryColor(awayAbbrev);
-  const homeColor = getTeamPrimaryColor(homeAbbrev);
+  const { league } = useLeague();
+  const awayColor = getTeamPrimaryColor(awayAbbrev, league);
+  const homeColor = getTeamPrimaryColor(homeAbbrev, league);
 
   return (
     <section className={`${styles['game-detail-section']} ${shared.section}`}>
@@ -75,6 +77,7 @@ function TeamComparison({
         {STAT_ROWS.map(({ label, key }) => {
           const awayVal = awayTotals[key];
           const homeVal = homeTotals[key];
+          if (awayVal == null || homeVal == null) return null;
           const awayLeads = awayVal > homeVal;
           const homeLeads = homeVal > awayVal;
 

@@ -11,6 +11,7 @@ import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
 import { DEFAULT_HEADSHOT_URL } from '@/lib/playerHeadshot';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /**
  * Common leaderboard row shape for skaters and goalies. Goalies have no
@@ -117,6 +118,12 @@ const DEFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
   formatValue: (row) => formatFaceoffCount(row.skater?.defensiveZoneFaceoffs),
 };
 
+/** Categories the AHL feed has no data for. */
+const NHL_ONLY_CATEGORIES = new Set<StatCategoryKey>([
+  'faceoffWinPct',
+  'corsiPct',
+]);
+
 /** Extra columns per category; categories not listed show the value alone. */
 const EXTRA_COLUMNS: Partial<Record<StatCategoryKey, LeaderColumn[]>> = {
   goals: [PER_GAME_COLUMN, PROJECTED_COLUMN],
@@ -214,6 +221,10 @@ export default function PlayerStatsSection({
   headshotMap,
 }: Props) {
   const [selectedKey, setSelectedKey] = useState<StatCategoryKey>('goals');
+  const { league } = useLeague();
+  const shownCategories = STAT_CATEGORIES.filter(
+    (category) => league === 'nhl' || !NHL_ONLY_CATEGORIES.has(category.key),
+  );
 
   const selectedCategory = STAT_CATEGORIES.find(
     (statCategory) => statCategory.key === selectedKey,
@@ -230,7 +241,7 @@ export default function PlayerStatsSection({
       <h2 className={shared.sectionTitle}>Player Stats</h2>
 
       <div className={styles['player-stat-categories']}>
-        {STAT_CATEGORIES.map((cat) => (
+        {shownCategories.map((cat) => (
           <button
             key={cat.key}
             className={joinClassNames(

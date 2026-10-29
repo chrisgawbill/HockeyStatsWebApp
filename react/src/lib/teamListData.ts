@@ -1,3 +1,15 @@
+import { ahlTeamList } from '@/lib/ahlTeamListData';
+
+/** One club in a league's local team list; AHL clubs have a logo but no colors. */
+export interface ClubListEntry {
+  id: number;
+  fullName: string;
+  triCode: string;
+  primary?: string;
+  secondary?: string;
+  logo?: string;
+}
+
 export const localTeamList = [
   {
     id: 8,
@@ -224,3 +236,12 @@ export const localTeamList = [
     secondary: '#FFFFFF',
   },
 ];
+
+/**
+ * The local team list for a league, keyed by bare league value so `lib/`
+ * stays free of feature types. AHL tri-codes can match NHL ones (`TOR`), so
+ * team lookups always go through the league's own list.
+ */
+export function getTeamList(league: 'nhl' | 'ahl'): ClubListEntry[] {
+  return league === 'ahl' ? ahlTeamList : localTeamList;
+}

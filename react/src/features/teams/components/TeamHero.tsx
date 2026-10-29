@@ -1,6 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { TeamOverview } from '@/features/teams/types/teamPageTypes';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
+import { getTeamLogoUrl } from '@/lib/teamLogo';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import FavoriteTeamButton from '@/features/after-action-reports/components/FavoriteTeamButton';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
@@ -30,10 +32,11 @@ export default function TeamHero({ team }: TeamHeroProps) {
         : sourcePath === '/standings'
           ? 'Standings'
           : 'Team List';
-  const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${team.triCode}_dark.svg`;
-  const primaryColor = localTeamList.find(
-    (entry) => entry.triCode === team.triCode,
-  )?.primary;
+  const { league } = useLeague();
+  const logoUrl = getTeamLogoUrl(team.triCode, 'dark', league);
+  const primaryColor =
+    getTeamList(league).find((entry) => entry.triCode === team.triCode)
+      ?.primary ?? 'var(--color-primary)';
 
   return (
     <div
@@ -68,7 +71,10 @@ export default function TeamHero({ team }: TeamHeroProps) {
             {team.name}
           </span>
         </nav>
-        <FavoriteTeamButton triCode={team.triCode} teamName={team.name} />
+        {/* AHL favorites arrive with AHL-02. */}
+        {league === 'nhl' && (
+          <FavoriteTeamButton triCode={team.triCode} teamName={team.name} />
+        )}
       </div>
       <div className={styles['team-hero__body']}>
         <img
@@ -89,16 +95,19 @@ export default function TeamHero({ team }: TeamHeroProps) {
             <span className={styles['team-hero__badge']}>
               #{team.divisionRank} {team.division}
             </span>
-            <span
-              className={joinClassNames(
-                styles['team-hero__badge'],
-                styles['team-hero__badge--playoff'],
-                team.playoffLineDelta >= 0 ? styles.above : styles.below,
-              )}
-            >
-              {Math.abs(team.playoffLineDelta)} pts{' '}
-              {team.playoffLineDelta >= 0 ? 'above' : 'below'} playoff line
-            </span>
+            {/* The playoff line is the NHL's eighth conference seed. */}
+            {league === 'nhl' && (
+              <span
+                className={joinClassNames(
+                  styles['team-hero__badge'],
+                  styles['team-hero__badge--playoff'],
+                  team.playoffLineDelta >= 0 ? styles.above : styles.below,
+                )}
+              >
+                {Math.abs(team.playoffLineDelta)} pts{' '}
+                {team.playoffLineDelta >= 0 ? 'above' : 'below'} playoff line
+              </span>
+            )}
           </div>
         </div>
       </div>

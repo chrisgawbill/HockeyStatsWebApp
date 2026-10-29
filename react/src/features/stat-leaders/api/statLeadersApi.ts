@@ -1,4 +1,8 @@
 import { get } from '@/lib/apiClient';
+import {
+  League,
+  getLeagueQueryValue,
+} from '@/features/league/utils/leagueHelper';
 
 export interface StatLeaderDto {
   id: number;
@@ -17,17 +21,21 @@ export interface StatLeaderDto {
 export function GetSkaterStatLeaders(
   statIndicator: string,
   season?: string,
+  league: League = 'nhl',
 ): Promise<StatLeaderDto[]> {
   return get<StatLeaderDto[]>(`/player/skater/statLeaders/${statIndicator}`, {
     season,
+    league: getLeagueQueryValue(league),
   });
 }
 /** Goalie leaders for one stat category. */
 export function GetGoalieStatLeaders(
   statIndicator: string,
   season?: string,
+  league: League = 'nhl',
 ): Promise<StatLeaderDto[]> {
   return get<StatLeaderDto[]>(`/player/goalie/statLeaders/${statIndicator}`, {
     season,
+    league: getLeagueQueryValue(league),
   });
 }

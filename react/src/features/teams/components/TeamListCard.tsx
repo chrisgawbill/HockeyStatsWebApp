@@ -8,6 +8,8 @@ import {
   getWinPct,
 } from '@/features/teams/utils/teamListHelper';
 import styles from '@/features/teams/components/TeamList.module.css';
+import { getTeamLogoUrl } from '@/lib/teamLogo';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 /** One team's card on the team list: logo, record, points, win %, and goals per game. */
 export default function TeamListCard({
@@ -18,7 +20,8 @@ export default function TeamListCard({
   filter: TeamFilter;
 }) {
   const { team, stats, standings, triCode } = card;
-  const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${triCode}_light.svg`;
+  const { league } = useLeague();
+  const logoUrl = getTeamLogoUrl(triCode, 'light', league);
   const winPct = getWinPct(stats);
   const statusLabel = getStatusLabel(card, filter);
 
@@ -40,7 +43,7 @@ export default function TeamListCard({
       </div>
       <p className={styles['team-card__name']}>{team.teamName}</p>
       <p className={styles['team-card__meta']}>
-        {standings?.divisionName ?? 'NHL'} · {triCode}
+        {standings?.divisionName ?? league.toUpperCase()} · {triCode}
       </p>
       {stats ? (
         <>

@@ -8,17 +8,22 @@ import {
   StatLeaderType,
 } from '@/features/stat-leaders/utils/statLeaderTypes';
 import { useRefreshOnStatsChange } from '@/lib/statsVersion';
+import { League } from '@/features/league/utils/leagueHelper';
 
 /**
  * Loads the stat-leader categories for one player type (skater or goalie),
  * driven by STAT_CONFIG. Returns `leaders` keyed by display name (e.g. "Goals")
  * and a single `loading` flag. Each category is fetched independently for `season`
- * and added as it resolves, so the UI can show categories as they arrive.
+ * (and `league`) and added as it resolves, so the UI can show categories as they arrive.
  * Also exposes `error` (set only when every category failed) and `retry`.
  * When the API's stored stats change the categories refresh in the
  * background, keeping a category's shown leaders when its refresh fails.
  */
-export function useStatLeaders(type: StatLeaderType, season?: string) {
+export function useStatLeaders(
+  type: StatLeaderType,
+  season?: string,
+  league: League = 'nhl',
+) {
   const { stats, fetcher } = STAT_CONFIG[type];
 
   const [leaders, setLeaders] = useState<Record<string, TopStatLeader>>({});
@@ -64,7 +69,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   async function fetchStat({ displayKey, apiKey }: StatEntry, runId: number) {
     const isStale = () => runId !== latestRun.current;
     try {
-      const leaderContracts = await fetcher(apiKey, season);
+      const leaderContracts = await fetcher(apiKey, season, league);
       if (isStale()) return;
       failedRefs.current[displayKey] = false;
       showLeaders(displayKey, leaderContracts);
@@ -106,7 +111,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
   function refreshQuietly() {
     const runId = latestRun.current;
     for (const { displayKey, apiKey } of stats) {
-      fetcher(apiKey, season)
+      fetcher(apiKey, season, league)
         .then((leaderContracts) => {
           if (runId === latestRun.current)
             showLeaders(displayKey, leaderContracts);
@@ -128,7 +133,7 @@ export function useStatLeaders(type: StatLeaderType, season?: string) {
       stats.map((stat) => [stat.displayKey, false]),
     );
     stats.forEach((stat) => fetchStat(stat, runId));
-  }, [stats, season]);
+  }, [stats, season, league]);
 
   useEffect(() => {
     runFetch();

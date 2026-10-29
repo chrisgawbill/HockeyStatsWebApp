@@ -7,11 +7,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { localTeamList } from '@/lib/teamListData';
+import { getTeamList } from '@/lib/teamListData';
 import { GetTeamStatsById } from '@/features/teams/api/teamsApi';
 import { ConvertToListOfTeams } from '@/features/teams/utils/teamHelpers';
 import { Team } from '@/features/teams/types/team';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import { useRefreshOnStatsChange } from '@/lib/statsVersion';
 
 interface ListOfTeamsData {
@@ -24,7 +25,7 @@ interface ListOfTeamsData {
 const ListOfTeamsContext = createContext<ListOfTeamsData | null>(null);
 
 /**
- * Loads every club with its per-season stats for the selected season and
+ * Loads every club of the selected league with its stats for the selected season and
  * shares it with the team pages. When the API's stored stats change
  * they refresh in the background, keeping the shown list when a refresh fails.
  */
@@ -36,23 +37,25 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
     string | null
   >(null);
   const { season } = useSeason();
-  const seasonRef = useRef(season);
-  seasonRef.current = season;
+  const { league } = useLeague();
+  const requestKey = `${league}:${season}`;
+  const requestKeyRef = useRef(requestKey);
+  requestKeyRef.current = requestKey;
 
   /**
    * Fetches season stats and merges them onto the local team list. A `silent`
-   * refresh leaves the error state alone; a response for a season the user has
-   * left is dropped.
+   * refresh leaves the error state alone; a response for a league or season
+   * the user has left is dropped.
    */
   const loadTeams = useCallback(
     async (silent = false) => {
-      const isCurrent = () => seasonRef.current === season;
+      const isCurrent = () => requestKeyRef.current === requestKey;
       if (!silent) setErrorListOfTeamsData(null);
-      const sortedLocalTeams = [...localTeamList].sort((first, second) =>
+      const sortedLocalTeams = [...getTeamList(league)].sort((first, second) =>
         second.fullName.localeCompare(first.fullName),
       );
       try {
-        const teamStatsData = await GetTeamStatsById('', season);
+        const teamStatsData = await GetTeamStatsById('', season, league);
         const finalTeamData = ConvertToListOfTeams(
           sortedLocalTeams,
           teamStatsData.data,
@@ -68,7 +71,7 @@ function ListOfTeamsDataProvider({ children }: { children: ReactNode }) {
         if (isCurrent()) setLoadingListOfTeamsData(false);
       }
     },
-    [season],
+    [season, league, requestKey],
   );
 
   /** Re-runs the team list fetch for the current season. */

@@ -5,6 +5,7 @@ import {
   BoxscoreTeamStats,
 } from '@/features/game-detail/types/gameDetail';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import FavoritePlayerStar from '@/features/favorite-players/components/FavoritePlayerStar';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
@@ -16,8 +17,9 @@ interface Props {
   awayAbbrev: string;
 }
 
-/** Converts an 'mm:ss' time on ice to seconds. */
-function toSeconds(toi: string): number {
+/** Converts an 'mm:ss' time on ice to seconds; 0 when it is missing (the AHL). */
+function toSeconds(toi: string | null): number {
+  if (!toi) return 0;
   const [m, s] = toi.split(':').map(Number);
   return m * 60 + (s || 0);
 }
@@ -46,10 +48,11 @@ function PlayerNameCell({
   );
 }
 
-/** Skater box score sorted by time on ice. */
+/** Skater box score sorted by time on ice, or by points where TOI is not tracked. */
 function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
-  const sorted = [...skaters].sort(
-    (a, b) => toSeconds(b.toi) - toSeconds(a.toi),
+  const hasToi = skaters.some((skater) => skater.toi != null);
+  const sorted = [...skaters].sort((a, b) =>
+    hasToi ? toSeconds(b.toi) - toSeconds(a.toi) : b.points - a.points,
   );
   return (
     <div
@@ -69,7 +72,7 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
             <th>Hits</th>
             <th>Blk</th>
             <th>SOG</th>
-            <th>TOI</th>
+            {hasToi && <th>TOI</th>}
           </tr>
         </thead>
         <tbody>
@@ -111,9 +114,11 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
               <td>{skater.hits}</td>
               <td>{skater.blockedShots}</td>
               <td>{skater.sog}</td>
-              <td className={styles['player-box-table__muted']}>
-                {skater.toi}
-              </td>
+              {hasToi && (
+                <td className={styles['player-box-table__muted']}>
+                  {skater.toi}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -122,9 +127,17 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
   );
 }
 
-/** Box score for goalies who played. */
+/**
+ * Box score for goalies who played: time on ice, or where that is not
+ * tracked (the AHL), a decision or a shot faced.
+ */
 function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
-  const played = goalies.filter((goalie) => toSeconds(goalie.toi) > 0);
+  const hasToi = goalies.some((goalie) => goalie.toi != null);
+  const played = goalies.filter((goalie) =>
+    hasToi
+      ? toSeconds(goalie.toi) > 0
+      : Boolean(goalie.decision) || goalie.shotsAgainst > 0,
+  );
   if (played.length === 0) return null;
   return (
     <div
@@ -139,7 +152,7 @@ function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
             <th>SV/SA</th>
             <th>SV%</th>
             <th>GA</th>
-            <th>TOI</th>
+            {hasToi && <th>TOI</th>}
           </tr>
         </thead>
         <tbody>
@@ -169,9 +182,11 @@ function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
               </td>
               <td>{formatSvPct(goalie.savePctg)}</td>
               <td>{goalie.goalsAgainst}</td>
-              <td className={styles['player-box-table__muted']}>
-                {goalie.toi}
-              </td>
+              {hasToi && (
+                <td className={styles['player-box-table__muted']}>
+                  {goalie.toi}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -188,8 +203,9 @@ function TeamPlayerStats({
   team: BoxscoreTeamStats;
   abbrev: string;
 }) {
+  const { league } = useLeague();
   const skaters = [...team.forwards, ...team.defense];
-  const teamColor = getTeamPrimaryColor(abbrev);
+  const teamColor = getTeamPrimaryColor(abbrev, league);
 
   return (
     <div

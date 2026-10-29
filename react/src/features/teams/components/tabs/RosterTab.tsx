@@ -14,6 +14,7 @@ import {
   getTeamPrimaryColor,
   toDarkModeAccentColor,
 } from '@/lib/teamColor';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import { useTheme } from '@/lib/ThemeContext';
 import shared from '@/styles/shared.module.css';
 
@@ -38,11 +39,12 @@ export default function RosterTab({
   goalieStats,
 }: Props) {
   const { theme } = useTheme();
+  const { league } = useLeague();
   const view = useMemo(
     () => buildTeamLinesView(roster, lines),
     [roster, lines],
   );
-  const base = getTeamPrimaryColor(triCode);
+  const base = getTeamPrimaryColor(triCode, league);
   const teamColor = theme === 'dark' ? toDarkModeAccentColor(base, 45) : base;
 
   return (

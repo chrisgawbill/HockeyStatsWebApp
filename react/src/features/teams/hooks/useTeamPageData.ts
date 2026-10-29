@@ -34,6 +34,7 @@ import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 import { useRefreshOnStatsChange } from '@/lib/statsVersion';
+import { League } from '@/features/league/utils/leagueHelper';
 
 interface FetchSeasonDataOptions {
   /** Background refresh: keeps the shown data and error state if it fails. */
@@ -41,16 +42,18 @@ interface FetchSeasonDataOptions {
 }
 
 interface UseTeamPageDataArgs {
-  /** NHL numeric team id, used by the stats endpoints. */
+  /** Numeric team id (NHL, or HockeyTech for the AHL), used by the stats endpoints. */
   numericId: number;
   triCode: string;
   season: string;
+  league: League;
 }
 
 /**
  * Loads everything the team page shows for one team and season: summary
  * stats, roster, club schedule, skater and goalie stats, and the real line
- * combinations. Team lines load independently so they never block the roster;
+ * combinations. The AHL has no Corsi, zone faceoffs or line combinations, so
+ * those are never requested for it. Team lines load independently so they never block the roster;
  * until they arrive (or if the call fails) the roster shows projected lines.
  * When the API's stored stats change (a game went final) the season data
  * refreshes in the background, so a finished game's stats show up without a
@@ -61,6 +64,7 @@ export function useTeamPageData({
   numericId,
   triCode,
   season,
+  league,
 }: UseTeamPageDataArgs) {
   const [teamRawResponse, setTeamRawResponse] =
     useState<TeamStatsContract | null>(null);
@@ -77,7 +81,7 @@ export function useTeamPageData({
   const [error, setError] = useState<string | null>(null);
   // The team and season the page shows now, so a response for one the user
   // has left is dropped.
-  const requestKey = `${numericId}:${triCode}:${season}`;
+  const requestKey = `${league}:${numericId}:${triCode}:${season}`;
   const requestKeyRef = useRef(requestKey);
   requestKeyRef.current = requestKey;
 
@@ -88,7 +92,7 @@ export function useTeamPageData({
   const fetchSeasonData = useCallback(
     async ({ silent = false }: FetchSeasonDataOptions = {}) => {
       const isCurrent = () =>
-        requestKeyRef.current === `${numericId}:${triCode}:${season}`;
+        requestKeyRef.current === `${league}:${numericId}:${triCode}:${season}`;
       if (!silent) setError(null);
       try {
         const [
@@ -108,13 +112,15 @@ export function useTeamPageData({
           SkaterFaceoffResponseDto | null,
           GoalieSummaryContract[] | null,
         ] = await Promise.all([
-          GetTeamStatsById(String(numericId), season),
-          GetTeamRoster(triCode, season),
-          GetTeamSchedule(triCode, season),
-          GetSkaterSummary(String(numericId), season),
-          GetSkaterCorsi(String(numericId), season),
-          GetSkaterFaceoffs(String(numericId), season).catch(() => null),
-          GetGoalieSummary(String(numericId), season).catch(() => null),
+          GetTeamStatsById(String(numericId), season, league),
+          GetTeamRoster(triCode, season, league),
+          GetTeamSchedule(triCode, season, league),
+          GetSkaterSummary(String(numericId), season, league),
+          league === 'ahl' ? {} : GetSkaterCorsi(String(numericId), season),
+          league === 'ahl'
+            ? null
+            : GetSkaterFaceoffs(String(numericId), season).catch(() => null),
+          GetGoalieSummary(String(numericId), season, league).catch(() => null),
         ]);
         if (!isCurrent()) return;
 
@@ -151,7 +157,7 @@ export function useTeamPageData({
         if (isCurrent()) setLoading(false);
       }
     },
-    [numericId, triCode, season],
+    [numericId, triCode, season, league],
   );
 
   /** Re-runs the season fetch for the current team and season. */
@@ -171,9 +177,9 @@ export function useTeamPageData({
   );
 
   useEffect(() => {
-    if (!triCode) return;
-    let cancelled = false;
     setTeamLines(null);
+    if (!triCode || league === 'ahl') return;
+    let cancelled = false;
     GetTeamLines(triCode, season)
       .then((lines) => {
         if (!cancelled) setTeamLines(lines);
@@ -184,7 +190,7 @@ export function useTeamPageData({
     return () => {
       cancelled = true;
     };
-  }, [triCode, season]);
+  }, [triCode, season, league]);
 
   return {
     teamRawResponse,

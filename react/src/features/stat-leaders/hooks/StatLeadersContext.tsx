@@ -3,6 +3,7 @@ import { TopStatLeader } from '@/features/stat-leaders/types/topStatLeader';
 import { useStatLeaders } from '@/features/stat-leaders/hooks/useStatLeaders';
 import { STAT_LEADER_TYPES } from '@/features/stat-leaders/utils/statLeaderTypes';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 
 interface SkaterLeaderContextValue {
   goalLeaderData: TopStatLeader | undefined;
@@ -37,18 +38,19 @@ const StatLeadersContext = createContext<StatLeadersContextValue | null>(null);
  */
 function StatLeadersProvider({ children }: { children: ReactNode }) {
   const { season } = useSeason();
+  const { league } = useLeague();
   const {
     leaders: skaterLeaders,
     loading: skaterLoading,
     error: skaterError,
     retry: retrySkater,
-  } = useStatLeaders(STAT_LEADER_TYPES.SKATER, season);
+  } = useStatLeaders(STAT_LEADER_TYPES.SKATER, season, league);
   const {
     leaders: goalieLeaders,
     loading: goalieLoading,
     error: goalieError,
     retry: retryGoalie,
-  } = useStatLeaders(STAT_LEADER_TYPES.GOALIE, season);
+  } = useStatLeaders(STAT_LEADER_TYPES.GOALIE, season, league);
 
   const skater: SkaterLeaderContextValue = {
     goalLeaderData: skaterLeaders['Goals'],

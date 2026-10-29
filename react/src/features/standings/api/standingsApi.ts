@@ -1,4 +1,8 @@
 import { get } from '@/lib/apiClient';
+import {
+  League,
+  getLeagueQueryValue,
+} from '@/features/league/utils/leagueHelper';
 
 export interface StandingsTeamDto {
   teamId: string;
@@ -26,6 +30,10 @@ export interface StandingsResponseDto {
 /** Season-wide league standings (`GET /standings`). */
 export function GetCurrentStandings(
   season?: string,
+  league: League = 'nhl',
 ): Promise<StandingsResponseDto> {
-  return get<StandingsResponseDto>('/standings', { season });
+  return get<StandingsResponseDto>('/standings', {
+    season,
+    league: getLeagueQueryValue(league),
+  });
 }

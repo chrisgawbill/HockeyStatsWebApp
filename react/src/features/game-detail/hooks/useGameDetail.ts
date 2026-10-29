@@ -12,12 +12,16 @@ import {
   LIVE_POLL_INTERVAL_MS,
   mapGameStateToStatus,
 } from '@/features/game-detail/utils/gameDetailHelper';
+import { League } from '@/features/league/utils/leagueHelper';
 
-/** Fetches a game's boxscore and landing payloads together. */
-function fetchGameDetail(gameId: string) {
+/**
+ * Fetches a game's boxscore and landing payloads together. The AHL has no
+ * landing payload (scoring summary, three stars), so it gets null.
+ */
+function fetchGameDetail(gameId: string, league: League) {
   return Promise.all([
-    GetGameDetails(Number(gameId)),
-    GetGameLanding(Number(gameId)),
+    GetGameDetails(Number(gameId), league),
+    league === 'ahl' ? null : GetGameLanding(Number(gameId)),
   ]);
 }
 
@@ -29,7 +33,10 @@ function fetchGameDetail(gameId: string) {
  * live state. A failed poll keeps the last good data rather than surfacing an
  * error.
  */
-export function useGameDetail(gameId: string | undefined) {
+export function useGameDetail(
+  gameId: string | undefined,
+  league: League = 'nhl',
+) {
   const [boxscore, setBoxscore] = useState<GameDetailBoxscore | null>(null);
   const [landing, setLanding] = useState<GameLanding | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,14 +46,14 @@ export function useGameDetail(gameId: string | undefined) {
     if (!gameId) return;
     setLoading(true);
     setError(false);
-    fetchGameDetail(gameId)
+    fetchGameDetail(gameId, league)
       .then(([boxscoreData, landingData]) => {
         setBoxscore(boxscoreData);
         setLanding(landingData);
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [gameId]);
+  }, [gameId, league]);
 
   const status = useMemo(
     () => mapGameStateToStatus(boxscore?.gameState),
@@ -56,7 +63,7 @@ export function useGameDetail(gameId: string | undefined) {
   useEffect(() => {
     if (!gameId || status !== 'live') return;
     const intervalId = window.setInterval(() => {
-      fetchGameDetail(gameId)
+      fetchGameDetail(gameId, league)
         .then(([boxscoreData, landingData]) => {
           setBoxscore(boxscoreData);
           setLanding(landingData);
@@ -66,7 +73,7 @@ export function useGameDetail(gameId: string | undefined) {
         });
     }, LIVE_POLL_INTERVAL_MS);
     return () => window.clearInterval(intervalId);
-  }, [gameId, status]);
+  }, [gameId, league, status]);
 
   return { boxscore, landing, loading, error, status };
 }

@@ -13,6 +13,7 @@ import styles from '@/features/standings/components/LandingPageStandings.module.
 import EmptyState from '@/components/EmptyState';
 import SectionLoadState from '@/components/SectionLoadState';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
+import { useLeague } from '@/features/league/hooks/LeagueContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 
 /** The phone-only "Standings" title (wider screens name each table instead). */
@@ -88,7 +89,7 @@ export default function LandingPageStandings() {
   const {
     easternStandingsData,
     westernStandingsData,
-    metropolitanStandings,
+    metroOrNorthStandings,
     atlanticStandings,
     centralStandings,
     pacificStandings,
@@ -100,11 +101,12 @@ export default function LandingPageStandings() {
   const [view, setView] = useState<StandingsView>('conference');
   const [conference, setConference] = useState<Conference>('Eastern');
   const { season } = useSeason();
+  const { league } = useLeague();
 
   const standingsData = {
     easternStandingsData,
     westernStandingsData,
-    metropolitanStandings,
+    metroOrNorthStandings,
     atlanticStandings,
     centralStandings,
     pacificStandings,
@@ -129,6 +131,7 @@ export default function LandingPageStandings() {
               standingsData,
               view,
               conference,
+              league,
             )}
             view={view}
             onViewChange={setView}

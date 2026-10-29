@@ -73,6 +73,10 @@ Sign-in is optional and shared by every page. `lib/auth/AuthContext.tsx` (`AuthP
 
 `features/install-prompt` shows a mobile-only (≤576px) floating card above the bottom nav: "Install Hockey Stats · Get final-score alerts". Chromium gets **Install** (the `beforeinstallprompt` event captured early by `lib/installPrompt.ts`, imported from `app/index.tsx`); iOS gets **How?** → Share → Add to Home Screen steps. Never on the first visit: eligible from the second browser session or after opening a `/team/:id` or `/game/:id` page. ✕ / dismissed native prompt / "Got it" snooze 30 days; never shown when standalone or after `appinstalled`. State lives in `localStorage` `installPrompt.*` keys; while visible it sets `body[data-install-banner]` so `PageHeader.module.css` lifts (or, for the iOS steps card, hides) the search FAB. iOS/standalone detection is shared in `lib/displayMode.ts`.
 
+### League toggle (AHL-01)
+
+`features/league` holds the shown league (`nhl` default, `ahl`). `LeagueProvider` (inside HashRouter, around `SeasonProvider`) reads `?league=ahl`; NHL URLs carry no league, so NHL requests and links are unchanged. The device remembers the last choice (`localStorage`), and a bare navigation in the AHL view gets `league=ahl` back. The header `LeagueToggle` switches in place, or moves to the team list, schedule or home when the page has no twin in the other league (`getLeagueSwitchPath`). Every feature may read `useLeague()` like `useSeason()`; API modules take a `league` argument and send it only for the AHL (`getLeagueQueryValue`). AHL team lookups use `lib/ahlTeamListData.ts` (2026-27 HockeyTech ids, codes, logos; no colors) through `getTeamList(league)`, so an AHL `TOR` is never the Maple Leafs. The AHL view hides NHL-only parts: the matchup page and game previews (AHL game links always open `/game/:id`), shot map and game flow, scoring summary and three stars, real lines, Corsi and faceoff categories, playoff race, playoff line, clinch legend, draft lottery, player comparison, Rink Quest, and favorites (stars, team button, Up next) until AHL-02. Boxscore fields the AHL lacks are `null` in the types and left out of tables and totals.
+
 ### Frontend tests
 
 Vitest (`cd react && pnpm test`), configured in `react/vite.config.ts` to include `src/**/*.test.ts` across features and shared libraries.
@@ -90,7 +94,7 @@ Neon Postgres. Concurrency-1 task queue (`runServiceTask`) runs batched multi-ro
 ├── app/               # Root providers, HashRouter, App.tsx routes, LandingPage
 ├── components/        # Cross-domain primitives (PageHeader, ShareButton, PageIntro, SectionHeading, FanCategoryBadge, TeamLogo, TeamDna, FormStrip, TeamFormPanel, SeasonSelector, SlidingToggle, EmptyState, SectionLoadState)
 ├── features/          # Domain feature slices
-│   ├── [feature]/     # schedule, game-detail, matchup, standings, teams, stat-leaders, draft-lottery, season, diagnostics, board-game, after-action-reports, favorite-players, my-hockey, install-prompt
+│   ├── [feature]/     # schedule, game-detail, matchup, standings, teams, stat-leaders, draft-lottery, season, league, diagnostics, board-game, after-action-reports, favorite-players, my-hockey, install-prompt
 │   │   ├── api/       # Typed endpoints wrapping @/lib/apiClient
 │   │   ├── components/# Feature UI + colocated CSS modules
 │   │   ├── hooks/     # Contexts and domain hooks (e.g., useStatLeaders)
