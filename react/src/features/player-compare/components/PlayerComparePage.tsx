@@ -48,9 +48,9 @@ export default function PlayerComparePage() {
   }
 
   return (
-    <>
+    <div className="ds-page-shell">
       <PageHeader />
-      <main className={`${styles.page} ds-page-shell ds-container`}>
+      <main className={`${styles.page} ds-container`}>
         <PageIntro
           kicker="Players"
           title="Compare players"
@@ -74,6 +74,6 @@ export default function PlayerComparePage() {
           />
         )}
       </main>
-    </>
+    </div>
   );
 }
