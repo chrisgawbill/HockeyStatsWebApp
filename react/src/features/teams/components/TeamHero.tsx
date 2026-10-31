@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { TeamOverview } from '@/features/teams/types/teamPageTypes';
 import { getTeamList } from '@/lib/teamListData';
 import { getTeamLogoUrl } from '@/lib/teamLogo';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import FavoriteTeamButton from '@/features/after-action-reports/components/FavoriteTeamButton';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';

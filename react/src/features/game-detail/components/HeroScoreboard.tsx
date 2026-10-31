@@ -13,7 +13,7 @@ import {
 import { useTheme } from '@/lib/ThemeContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
 

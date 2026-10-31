@@ -29,7 +29,7 @@ import {
   DEFAULT_FAN_TIER,
   type FavoriteCategory,
 } from '@/lib/favoriteCategory';
-import type { League } from '@/features/league/utils/leagueHelper';
+import type { League } from '@/lib/league';
 import {
   usePushNotifications,
   type PushNotificationsState,

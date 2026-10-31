@@ -23,7 +23,7 @@ import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
 import GameStory from '@/features/game-detail/components/GameStory';
 import GameShots from '@/features/game-detail/components/GameShots';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 /** Header plus page-width main wrapper shared by every state of the game page. */
 function GameDetailShell({ children }: { children: ReactNode }) {

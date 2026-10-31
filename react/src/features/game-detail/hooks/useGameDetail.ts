@@ -12,7 +12,7 @@ import {
   LIVE_POLL_INTERVAL_MS,
   mapGameStateToStatus,
 } from '@/features/game-detail/utils/gameDetailHelper';
-import { League } from '@/features/league/utils/leagueHelper';
+import { League } from '@/lib/league';
 
 /**
  * Fetches a game's boxscore and landing payloads together. The AHL has no

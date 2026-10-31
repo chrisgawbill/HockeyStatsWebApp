@@ -1,6 +1,6 @@
 import React from 'react';
 import { getTeamList } from '@/lib/teamListData';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { hasScore } from '@/features/schedule/utils/gameStatusHelper';
 import { isInProgressGameState } from '@/lib/gameStatus';

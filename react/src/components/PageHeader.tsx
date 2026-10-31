@@ -1,7 +1,7 @@
 import { ReactNode, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import LeagueToggle from '@/components/LeagueToggle';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import SeasonSelector from '@/components/SeasonSelector';
 import ShareButton from '@/components/ShareButton';
 import AccountCorner from '@/components/AccountCorner';

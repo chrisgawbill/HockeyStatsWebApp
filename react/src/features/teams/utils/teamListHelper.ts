@@ -2,7 +2,7 @@ import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { Team } from '@/features/teams/types/team';
 import { TeamStats } from '@/features/teams/types/teamStats';
 import { getTeamList } from '@/lib/teamListData';
-import { League } from '@/features/league/utils/leagueHelper';
+import { League } from '@/lib/league';
 
 export type TeamFilter = 'all' | 'playoff' | 'lottery';
 export type TeamSort = 'name' | 'points' | 'winPct' | 'goals' | 'draftOdds';

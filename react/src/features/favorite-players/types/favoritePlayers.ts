@@ -1,5 +1,5 @@
 import type { FanTier } from '@/lib/favoriteCategory';
-import type { League } from '@/features/league/utils/leagueHelper';
+import type { League } from '@/lib/league';
 import type { TeamFormGame, TeamResultOutcome } from '@/lib/teamForm';
 
 /** A favorited player as stored by the API (display fields from its league). */

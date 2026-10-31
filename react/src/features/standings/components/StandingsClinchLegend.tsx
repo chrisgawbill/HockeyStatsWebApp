@@ -3,7 +3,7 @@ import {
   ClinchStatus,
 } from '@/features/standings/utils/clinchStatus';
 import { joinClassNames } from '@/lib/joinClassNames';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import styles from '@/features/standings/components/LandingPageStandings.module.css';
 
 interface Props {

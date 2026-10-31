@@ -3,7 +3,7 @@ import { TopStatLeader } from '@/features/stat-leaders/types/topStatLeader';
 import { useStatLeaders } from '@/features/stat-leaders/hooks/useStatLeaders';
 import { STAT_LEADER_TYPES } from '@/features/stat-leaders/utils/statLeaderTypes';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 interface SkaterLeaderContextValue {
   goalLeaderData: TopStatLeader | undefined;

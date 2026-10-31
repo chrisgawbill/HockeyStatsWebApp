@@ -12,7 +12,7 @@ import { GetTeamStatsById } from '@/features/teams/api/teamsApi';
 import { ConvertToListOfTeams } from '@/features/teams/utils/teamHelpers';
 import { Team } from '@/features/teams/types/team';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import { useRefreshOnStatsChange } from '@/lib/statsVersion';
 
 interface ListOfTeamsData {

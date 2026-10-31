@@ -14,7 +14,7 @@ import {
   getTeamPrimaryColor,
   toDarkModeAccentColor,
 } from '@/lib/teamColor';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import { useTheme } from '@/lib/ThemeContext';
 import shared from '@/styles/shared.module.css';
 

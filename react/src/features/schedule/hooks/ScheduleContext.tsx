@@ -16,8 +16,8 @@ import {
 } from '@/features/game-detail/utils/gameDetailHelper';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
-import { League } from '@/features/league/utils/leagueHelper';
+import { useLeague } from '@/lib/LeagueContext';
+import { League } from '@/lib/league';
 import { isCompletedGameState, isInProgressGameState } from '@/lib/gameStatus';
 
 interface ListOfGamesData {

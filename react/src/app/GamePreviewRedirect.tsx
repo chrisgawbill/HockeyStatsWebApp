@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { getMatchupPreviewPath, isPreviewGame } from '@/lib/gamePath';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 /**
  * Guards `/game/:gameId`: a game the loaded season list shows as not started

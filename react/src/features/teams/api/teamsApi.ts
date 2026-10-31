@@ -1,8 +1,5 @@
 import { get } from '@/lib/apiClient';
-import {
-  League,
-  getLeagueQueryValue,
-} from '@/features/league/utils/leagueHelper';
+import { League, getLeagueQueryValue } from '@/lib/league';
 import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import {
   GoalieSummaryContract,

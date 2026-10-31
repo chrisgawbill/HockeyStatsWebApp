@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import FavoritePlayerStar from '@/features/favorite-players/components/FavoritePlayerStar';
-import type { League } from '@/features/league/utils/leagueHelper';
+import type { League } from '@/lib/league';
 import styles from '@/features/favorite-players/components/PlayerHeadshot.module.css';
 
 export interface PlayerHeadshotProps {

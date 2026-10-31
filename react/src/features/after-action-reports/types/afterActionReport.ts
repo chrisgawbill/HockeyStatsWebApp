@@ -1,5 +1,5 @@
 import type { FanTier } from '@/lib/favoriteCategory';
-import type { League } from '@/features/league/utils/leagueHelper';
+import type { League } from '@/lib/league';
 
 /** A favorite team and when it was favorited (ISO timestamp). */
 export interface FavoriteTeam {

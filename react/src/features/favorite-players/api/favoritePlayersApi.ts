@@ -10,10 +10,7 @@ import type {
   WeeklyPlayerReport,
   WeeklyPlayerReportInbox,
 } from '@/features/favorite-players/types/favoritePlayers';
-import {
-  withLeagueQuery,
-  type League,
-} from '@/features/league/utils/leagueHelper';
+import { withLeagueQuery, type League } from '@/lib/league';
 
 type FavoritePlayerDto = Omit<
   FavoritePlayer,

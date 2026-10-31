@@ -13,7 +13,7 @@ import styles from '@/features/standings/components/LandingPageStandings.module.
 import EmptyState from '@/components/EmptyState';
 import SectionLoadState from '@/components/SectionLoadState';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 
 /** The phone-only "Standings" title (wider screens name each table instead). */

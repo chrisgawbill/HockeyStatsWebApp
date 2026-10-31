@@ -9,7 +9,7 @@ import {
 } from '@/features/teams/utils/teamListHelper';
 import styles from '@/features/teams/components/TeamList.module.css';
 import { getTeamLogoUrl } from '@/lib/teamLogo';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 /** One team's card on the team list: logo, record, points, win %, and goals per game. */
 export default function TeamListCard({

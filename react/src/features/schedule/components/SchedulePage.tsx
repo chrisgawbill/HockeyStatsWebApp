@@ -32,7 +32,7 @@ import {
 import { filterGames } from '@/features/schedule/utils/scheduleFilterHelper';
 import { parseLocalDate } from '@/lib/dateFormat';
 import { getGamePath } from '@/lib/gamePath';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import { getTeamList } from '@/lib/teamListData';
 
 /**

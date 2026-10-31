@@ -12,7 +12,7 @@ import {
 } from '@/features/teams/utils/teamListHelper';
 import LoadingState from '@/components/LoadingState';
 import ErrorState from '@/components/ErrorState';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 /**
  * Team list route (`/teamList`): every club as a card with its record and key

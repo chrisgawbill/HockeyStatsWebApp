@@ -14,7 +14,7 @@ import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import ErrorState from '@/components/ErrorState';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import PlayoffRacePanel from '@/features/standings/components/PlayoffRacePanel';

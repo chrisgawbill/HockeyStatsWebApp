@@ -1,6 +1,6 @@
 import React from 'react';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';

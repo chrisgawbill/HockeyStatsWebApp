@@ -11,7 +11,7 @@ import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
 import { DEFAULT_HEADSHOT_URL } from '@/lib/playerHeadshot';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 /**
  * Common leaderboard row shape for skaters and goalies. Goalies have no

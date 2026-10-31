@@ -9,10 +9,7 @@ import type {
   AfterActionReportInbox,
   FavoriteTeam,
 } from '@/features/after-action-reports/types/afterActionReport';
-import {
-  withLeagueQuery,
-  type League,
-} from '@/features/league/utils/leagueHelper';
+import { withLeagueQuery, type League } from '@/lib/league';
 
 type FavoriteTeamDto = Omit<FavoriteTeam, 'league' | 'tier' | 'label'> & {
   league?: unknown;
