@@ -61,11 +61,9 @@ export default function StandingsPage() {
   );
 
   return (
-    <>
+    <div className="ds-page-shell">
       <PageHeader />
-      <main
-        className={`${styles['standings-page']} ds-page-shell ds-container`}
-      >
+      <main className={`${styles['standings-page']} ds-container`}>
         <h1 className="ds-visually-hidden">Standings</h1>
         {loadingStandingsData ? (
           <LoadingState label="Loading standings" fullPage />
@@ -145,6 +143,6 @@ export default function StandingsPage() {
           </>
         )}
       </main>
-    </>
+    </div>
   );
 }

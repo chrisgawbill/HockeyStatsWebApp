@@ -113,11 +113,9 @@ export default function TeamList() {
   }
 
   return (
-    <>
+    <div className="ds-page-shell">
       <PageHeader />
-      <main
-        className={`${styles['team-list-page']} ds-page-shell ds-container`}
-      >
+      <main className={`${styles['team-list-page']} ds-container`}>
         <section className={styles['team-list-toolbar']}>
           <div className={styles['team-list-toolbar__header']}>
             <h1>Team List</h1>
@@ -215,6 +213,6 @@ export default function TeamList() {
           </p>
         )}
       </main>
-    </>
+    </div>
   );
 }

@@ -63,8 +63,10 @@
   flex: 1 1 auto;
 }
 
+/* The destination pills never shrink (their labels would overflow onto each
+   other); the search box in .nav-left gives up width first. */
 .nav-right {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   justify-content: flex-end;
 }
 
@@ -290,6 +292,16 @@
     display: none;
   }
 
+  .nav-inner {
+    gap: var(--ds-space-2);
+  }
+
+  .nav-bar-item,
+  .nav-corner,
+  .nav-theme-toggle {
+    padding: 2px;
+  }
+
   .nav-btn {
     min-height: 36px;
     padding: var(--ds-space-1) !important;
@@ -301,6 +313,23 @@
 
   .nav-btn__icon {
     display: flex;
+  }
+}
+
+/* Small tablets: the icon pills, league toggle, season pill, and account
+   controls fill the bar, so the brand (the only visible item in .nav-left at
+   this width) gives way and the spacing tightens. */
+@media (min-width: 577px) and (max-width: 759px) {
+  .nav-left {
+    display: none;
+  }
+
+  .nav-inner {
+    gap: var(--ds-space-1);
+  }
+
+  .nav-bar-item {
+    padding: 2px 0;
   }
 }
 
@@ -397,7 +426,7 @@
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    gap: var(--ds-space-1);
+    gap: 2px;
     width: 100%;
     min-height: 64px;
   }
@@ -428,13 +457,14 @@
     display: contents;
   }
 
-  /* MD3 icon button: 40px visual, 48px touch target. */
+  /* MD3 icon button: 40px visual, 48px-tall touch target (40px wide so the
+     crowded game-page app bar still fits a 360px phone). */
   .nav-back-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 48px;
+    width: 40px;
     height: 48px;
     padding: 0;
     border: 0;
@@ -450,7 +480,7 @@
   .nav-back-btn::before {
     content: '';
     position: absolute;
-    inset: 4px;
+    inset: 4px 0;
     border-radius: inherit;
     background: white;
     opacity: 0;

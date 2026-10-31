@@ -261,9 +261,9 @@ export default function WeeklyReportPage() {
   }
 
   return (
-    <>
+    <div className="ds-page-shell">
       <PageHeader />
-      <main className={`${styles.page} ds-page-shell ds-container`}>
+      <main className={`${styles.page} ds-container`}>
         {!report && (
           <h1 className="ds-visually-hidden">Weekly Player Report</h1>
         )}
@@ -290,6 +290,6 @@ export default function WeeklyReportPage() {
         )}
         {token && available && <FavoritePlayersList />}
       </main>
-    </>
+    </div>
   );
 }

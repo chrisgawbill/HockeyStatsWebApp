@@ -170,9 +170,9 @@ function SchedulePage() {
   );
 
   return (
-    <>
+    <div className="ds-page-shell">
       <PageHeader />
-      <main className={`${styles['schedule-page']} ds-page-shell ds-container`}>
+      <main className={`${styles['schedule-page']} ds-container`}>
         <h1 className="ds-visually-hidden">Schedule</h1>
         {loadingListOfGamesData ? (
           <LoadingState label="Loading schedule" fullPage />
@@ -252,7 +252,7 @@ function SchedulePage() {
           </>
         )}
       </main>
-    </>
+    </div>
   );
 }
 

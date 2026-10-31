@@ -93,9 +93,9 @@ export default function MyHockeyPage() {
   }
 
   return (
-    <>
+    <div className="ds-page-shell">
       <PageHeader />
-      <main className={`${styles.page} ds-page-shell ds-container`}>
+      <main className={`${styles.page} ds-container`}>
         <PageIntro kicker="My Hockey" title="Your teams and players" />
         {isSignedIn ? (
           <>
@@ -110,6 +110,6 @@ export default function MyHockeyPage() {
           />
         )}
       </main>
-    </>
+    </div>
   );
 }
