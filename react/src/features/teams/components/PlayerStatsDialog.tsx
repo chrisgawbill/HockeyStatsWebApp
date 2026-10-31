@@ -5,7 +5,7 @@ import AppDialog from '@/components/AppDialog';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
 import { StatCell } from '@/features/teams/utils/playerStatsHelper';
 import { getComparePath } from '@/lib/comparePath';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import styles from '@/features/teams/components/PlayerStatsDialog.module.css';
 
 interface PlayerStatsDialogProps {

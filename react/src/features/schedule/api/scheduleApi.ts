@@ -1,8 +1,5 @@
 import { get } from '@/lib/apiClient';
-import {
-  League,
-  getLeagueQueryValue,
-} from '@/features/league/utils/leagueHelper';
+import { League, getLeagueQueryValue } from '@/lib/league';
 
 export interface ScheduleBroadcastDto {
   id: string;

@@ -5,7 +5,7 @@ import {
   BoxscoreTeamStats,
 } from '@/features/game-detail/types/gameDetail';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import FavoritePlayerStar from '@/features/favorite-players/components/FavoritePlayerStar';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';

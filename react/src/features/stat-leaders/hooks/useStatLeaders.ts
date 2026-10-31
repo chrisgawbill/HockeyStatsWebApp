@@ -8,7 +8,7 @@ import {
   StatLeaderType,
 } from '@/features/stat-leaders/utils/statLeaderTypes';
 import { useRefreshOnStatsChange } from '@/lib/statsVersion';
-import { League } from '@/features/league/utils/leagueHelper';
+import { League } from '@/lib/league';
 
 /**
  * Loads the stat-leader categories for one player type (skater or goalie),

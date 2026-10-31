@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { ListOfGamesProvider } from '@/features/schedule/hooks/ScheduleContext';
-import { LeagueProvider } from '@/features/league/hooks/LeagueContext';
+import { LeagueProvider } from '@/lib/LeagueContext';
 import { SeasonProvider } from '@/features/season/hooks/SeasonContext';
 import { StandingsDataProvider } from '@/features/standings/hooks/StandingsContext';
 import { StatLeadersProvider } from '@/features/stat-leaders/hooks/StatLeadersContext';

@@ -6,7 +6,7 @@ import {
   MAX_FAVORITE_TEAMS,
   useAfterActionReports,
 } from '@/features/after-action-reports/hooks/AfterActionReportsContext';
-import type { League } from '@/features/league/utils/leagueHelper';
+import type { League } from '@/lib/league';
 import styles from '@/features/after-action-reports/components/FavoriteTeamButton.module.css';
 
 function StarIcon({ filled }: { filled: boolean }) {

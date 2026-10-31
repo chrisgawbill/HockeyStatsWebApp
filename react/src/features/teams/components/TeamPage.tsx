@@ -19,7 +19,7 @@ import {
 import { buildTeamOverview } from '@/features/teams/utils/teamPageHelper';
 import { useStandingsContext } from '@/features/standings/hooks/StandingsContext';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { toDarkModeAccentColor } from '@/lib/teamColor';
 import styles from '@/features/teams/components/TeamPage.module.css';

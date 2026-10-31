@@ -12,7 +12,7 @@ import {
   parseLeague,
   readRememberedLeague,
   rememberLeague,
-} from '@/features/league/utils/leagueHelper';
+} from '@/lib/league';
 
 const LeagueContext = createContext<{
   league: League;

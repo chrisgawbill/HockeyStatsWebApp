@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useListOfGames } from '@/features/schedule/hooks/ScheduleContext';
 import { isCompletedGameState } from '@/lib/gameStatus';
 import { getTeamList } from '@/lib/teamListData';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 /**
  * One entry in the global search index: either a team (routes to

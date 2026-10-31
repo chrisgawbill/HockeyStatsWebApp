@@ -15,17 +15,24 @@ async function markDocument(page) {
 const leagueToggle = (page) =>
   page.getByRole('group', { name: 'League' }).first();
 
+/**
+ * A standings row's team logo. Phones show only the tri-code (team names are
+ * hidden), so the logo's alt text is the one name visible at every width.
+ */
+const standingsTeamLogo = (page, teamName) =>
+  page.getByAltText(`${teamName} logo`).first();
+
 test('AHL-01 Verify: standings switch to the AHL and back without a reload', async ({
   page,
 }) => {
   await routeAhlApi(page);
   await page.goto('./#/standings');
-  await expect(page.getByText('Maple Leafs').first()).toBeVisible();
+  await expect(standingsTeamLogo(page, 'Maple Leafs')).toBeVisible();
   await markDocument(page);
 
   await leagueToggle(page).getByRole('button', { name: 'AHL' }).click();
   await expect(page).toHaveURL(/league=ahl/);
-  await expect(page.getByText('Marlies').first()).toBeVisible();
+  await expect(standingsTeamLogo(page, 'Marlies')).toBeVisible();
   await expect(page.getByText('Maple Leafs')).toHaveCount(0);
   await expect(page.getByText(/playoff race/i)).toHaveCount(0);
   expect(await page.evaluate(() => window.__ahl01Marker)).toBe(true);
@@ -35,7 +42,7 @@ test('AHL-01 Verify: standings switch to the AHL and back without a reload', asy
 
   await leagueToggle(page).getByRole('button', { name: 'NHL' }).click();
   await expect(page).not.toHaveURL(/league=/);
-  await expect(page.getByText('Maple Leafs').first()).toBeVisible();
+  await expect(standingsTeamLogo(page, 'Maple Leafs')).toBeVisible();
   expect(await page.evaluate(() => window.__ahl01Marker)).toBe(true);
 });
 
@@ -52,7 +59,7 @@ test('AHL-01 Verify: an AHL link opens the AHL and the device remembers it', asy
 
   await page.goto('./#/standings');
   await expect(page).toHaveURL(/league=ahl/);
-  await expect(page.getByText('Marlies').first()).toBeVisible();
+  await expect(standingsTeamLogo(page, 'Marlies')).toBeVisible();
 });
 
 test('AHL-01 Verify: the AHL TOR team page shows the Marlies, not the Maple Leafs', async ({

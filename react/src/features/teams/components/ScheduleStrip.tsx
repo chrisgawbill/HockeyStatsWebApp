@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { getGamePath } from '@/lib/gamePath';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import {

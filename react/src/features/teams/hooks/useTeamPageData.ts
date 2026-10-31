@@ -34,7 +34,7 @@ import { ScheduleResponseDto } from '@/features/schedule/api/scheduleApi';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { ConvertContractsToGames } from '@/features/schedule/utils/scheduleHelper';
 import { useRefreshOnStatsChange } from '@/lib/statsVersion';
-import { League } from '@/features/league/utils/leagueHelper';
+import { League } from '@/lib/league';
 
 interface FetchSeasonDataOptions {
   /** Background refresh: keeps the shown data and error state if it fails. */

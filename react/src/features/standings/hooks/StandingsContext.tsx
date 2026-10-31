@@ -11,8 +11,8 @@ import { StandingsTeam } from '@/features/standings/types/standingsTeam';
 import { GetCurrentStandings } from '@/features/standings/api/standingsApi';
 import { CreateLeagueStandingsArray } from '@/features/standings/utils/leagueStandingsHelper';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
-import { League } from '@/features/league/utils/leagueHelper';
+import { useLeague } from '@/lib/LeagueContext';
+import { League } from '@/lib/league';
 
 /** The Eastern division that is not the Atlantic: the NHL's Metropolitan, the AHL's North. */
 const METRO_OR_NORTH_DIVISION: Record<League, string> = {

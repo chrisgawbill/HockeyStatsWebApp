@@ -30,7 +30,7 @@ import type {
   FavoritePlayer,
   WeeklyPlayerReport,
 } from '@/features/favorite-players/types/favoritePlayers';
-import type { League } from '@/features/league/utils/leagueHelper';
+import type { League } from '@/lib/league';
 
 /** Reports arrive weekly; refreshing on focus plus this cadence is plenty. */
 const POLL_INTERVAL_MS = 15 * 60 * 1000;

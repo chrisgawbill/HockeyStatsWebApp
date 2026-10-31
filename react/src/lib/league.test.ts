@@ -5,7 +5,7 @@ import {
   parseLeague,
   readRememberedLeague,
   rememberLeague,
-} from '@/features/league/utils/leagueHelper';
+} from '@/lib/league';
 
 /** A minimal in-memory localStorage. */
 function createStorage(): Storage {
@@ -20,7 +20,7 @@ function createStorage(): Storage {
   };
 }
 
-describe('leagueHelper', () => {
+describe('league', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('parses only the two leagues', () => {

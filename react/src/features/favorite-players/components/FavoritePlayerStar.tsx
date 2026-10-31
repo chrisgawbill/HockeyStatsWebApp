@@ -8,8 +8,8 @@ import {
 } from '@/features/favorite-players/hooks/FavoritePlayersContext';
 import { MAX_FAVORITE_PLAYERS } from '@/features/favorite-players/utils/weeklyReportFormat';
 import styles from '@/components/FavoriteStar.module.css';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
-import type { League } from '@/features/league/utils/leagueHelper';
+import { useLeague } from '@/lib/LeagueContext';
+import type { League } from '@/lib/league';
 
 /** How long a hint or error toast stays up. */
 const MESSAGE_VISIBLE_MS = 6000;

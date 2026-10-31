@@ -3,7 +3,7 @@ import {
   GetGoalieStatLeaders,
   StatLeaderDto,
 } from '@/features/stat-leaders/api/statLeadersApi';
-import { League } from '@/features/league/utils/leagueHelper';
+import { League } from '@/lib/league';
 
 export const STAT_LEADER_TYPES = {
   SKATER: 'skater',

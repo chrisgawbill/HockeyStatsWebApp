@@ -11,7 +11,7 @@ import DraftLotteryOddsRow from '@/features/draft-lottery/components/DraftLotter
 import UpNextStrip from '@/features/my-hockey/components/UpNextStrip';
 import { useSeason } from '@/features/season/hooks/SeasonContext';
 import { formatSeasonLabel } from '@/features/season/utils/seasonHelper';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
+import { useLeague } from '@/lib/LeagueContext';
 
 /**
  * Home route. Composes skater leaders, goalie leaders, draft-lottery odds, and

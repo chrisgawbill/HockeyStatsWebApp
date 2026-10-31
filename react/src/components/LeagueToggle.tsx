@@ -1,10 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import SlidingToggle from '@/components/SlidingToggle';
-import { useLeague } from '@/features/league/hooks/LeagueContext';
-import {
-  League,
-  getLeagueSwitchPath,
-} from '@/features/league/utils/leagueHelper';
+import { useLeague } from '@/lib/LeagueContext';
+import { League, getLeagueSwitchPath } from '@/lib/league';
 
 /**
  * Header switch between the NHL and AHL views of the site. Keeps the visitor

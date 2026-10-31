@@ -1,6 +1,6 @@
 import { StandingsData } from '@/features/standings/hooks/StandingsContext';
 import { StandingsTeam } from '@/features/standings/types/standingsTeam';
-import { League } from '@/features/league/utils/leagueHelper';
+import { League } from '@/lib/league';
 
 export type Conference = 'Eastern' | 'Western';
 export type StandingsView = 'conference' | 'division';
