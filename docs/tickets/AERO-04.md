@@ -2,8 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE (HockeyStatsWebApp part implemented 2026-11-01, in review;
-Spotter part not started)
+**Status:** ACTIVE (HockeyStatsWebApp part accepted by the Product Owner
+2026-11-01; Spotter part not started)
 
 **Goal:** HockeyStatsWebApp and the Spotter dashboard look the same as today
 (or better where approved), but get their shared patterns from
@@ -87,8 +87,12 @@ the pushed branch. Spotter: `npm test` and the dashboard browser integration
 command in `docs/dashboard.md`. Save before/after screenshots for both apps
 (desktop and 375px, light and dark) of the pages touched.
 
+**Acceptance:** Product Owner accepted AERO-04 on 2026-11-01, which unblocks
+[AERO-05](AERO-05.md). The Spotter run listed under NOT RUN did not happen
+before acceptance, and the Spotter part is still to be copied into Spotter.
+
 **Evidence** (branch `ccr-151cb49c-meihlk`; HockeyStatsWebApp part
-implemented, awaiting Spotter and Product Owner review):
+implemented):
 
 - Dependency: `@chrisgawbill/aero-md3-core@0.3.0` is on npm and its `core.css`
   matches the aero-md3-core branch.
