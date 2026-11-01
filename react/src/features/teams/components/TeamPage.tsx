@@ -60,7 +60,7 @@ function TeamPageStatus({ children }: { children: React.ReactNode }) {
       <h1 className="ds-visually-hidden">Team</h1>
       <div
         className={`${styles['team-page__content']} ${shared.pageContent}`}
-        style={{ paddingTop: 'var(--page-block-start)' }}
+        style={{ paddingTop: 'var(--ds-page-block-start)' }}
       >
         {children}
       </div>
@@ -227,7 +227,7 @@ export default function TeamPage() {
             <TeamDna profile={teamDna} season={season} />
             <TeamFormPanel
               teamForm={teamForm}
-              className={styles['team-form']}
+              className={joinClassNames(styles['team-form'], 'ds-enter')}
             />
           </section>
           <section id="leaders" className={styles['team-section']}>

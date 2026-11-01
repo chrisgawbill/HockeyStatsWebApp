@@ -54,7 +54,10 @@ export default function InstallBanner() {
 
   if (stepsOpen) {
     return (
-      <section className={styles.card} aria-labelledby="install-steps-title">
+      <section
+        className={`${styles.card} ds-enter`}
+        aria-labelledby="install-steps-title"
+      >
         <h2
           id="install-steps-title"
           ref={headingRef}
@@ -79,7 +82,10 @@ export default function InstallBanner() {
   }
 
   return (
-    <aside className={styles.banner} aria-label="Install Hockey Stats">
+    <aside
+      className={`${styles.banner} ds-enter`}
+      aria-label="Install Hockey Stats"
+    >
       <img
         className={styles.icon}
         src={ICON_SRC}

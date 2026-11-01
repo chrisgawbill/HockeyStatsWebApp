@@ -74,7 +74,7 @@ function GameStory({
     <section className={`${styles['game-detail-section']} ${shared.section}`}>
       <div className={styles['game-story-heading']}>
         <div>
-          <p className={styles['game-story-eyebrow']}>The quick read</p>
+          <p className="ds-overline-primary">The quick read</p>
           <h2 className={shared.sectionTitle}>Game Story</h2>
         </div>
         <p className={styles['game-story-description']}>
@@ -105,13 +105,14 @@ function GameStory({
             className={styles['game-story-timeline__line']}
             aria-hidden="true"
           />
-          {facts.scoringEvents.map((event) => (
+          {facts.scoringEvents.map((event, index) => (
             <div
-              className={styles['game-story-event']}
+              className={`${styles['game-story-event']} ds-enter ds-enter-start`}
               key={event.eventIndex}
               style={
                 {
                   '--story-team-color': getTeamPrimaryColor(event.teamAbbrev),
+                  '--ds-stagger-index': Math.min(index, 3),
                 } as React.CSSProperties
               }
             >

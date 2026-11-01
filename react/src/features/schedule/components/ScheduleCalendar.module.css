@@ -180,7 +180,7 @@
 /* Preseason games get a light blue accent rail; live overrides it below since
    "in progress" is the more urgent signal when a game is somehow both. */
 .game-chip--preseason {
-  border-left-color: var(--color-blue-accent);
+  border-left-color: var(--ds-color-info);
 }
 
 /* Live games get a danger-colored accent rail. */

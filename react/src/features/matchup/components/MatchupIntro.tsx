@@ -25,7 +25,7 @@ export default function MatchupIntro({
   if (!previewGame) {
     return (
       <header className={styles.intro}>
-        <p className={styles.kicker}>Season series</p>
+        <p className="ds-overline-primary">Season series</p>
         <h1>Head-to-Head Matchup</h1>
         <p>Compare meetings, results, goals, team DNA, and recent form.</p>
       </header>
@@ -33,7 +33,7 @@ export default function MatchupIntro({
   }
   return (
     <header className={styles.intro}>
-      <p className={styles.kicker}>
+      <p className="ds-overline-primary">
         {isPreviewGame(previewGame.gameState, previewGame.gameTime)
           ? 'Game preview'
           : 'Season series'}

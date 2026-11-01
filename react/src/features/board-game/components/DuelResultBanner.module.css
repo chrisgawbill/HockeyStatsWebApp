@@ -6,8 +6,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--ds-space-3);
-  background-color: var(--color-overlay);
-  z-index: var(--z-modal);
+  background-color: var(--ds-color-scrim);
+  z-index: var(--ds-layer-modal);
   padding: var(--ds-space-3);
 }
 

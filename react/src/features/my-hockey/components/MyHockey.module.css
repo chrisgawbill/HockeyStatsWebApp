@@ -11,7 +11,7 @@
 
 /* Theme-aware link color: the browser default is unreadable on dark pages. */
 .hint a {
-  color: var(--color-blue-accent);
+  color: var(--ds-color-info);
   font-weight: 600;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .row:focus-visible {
-  outline: 3px solid var(--color-blue-accent);
+  outline: 3px solid var(--ds-color-info);
   outline-offset: -3px;
 }
 
@@ -156,7 +156,7 @@
   height: 1.5rem;
   padding: 0 4px;
   border-radius: 6px;
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
   font-size: var(--text-xs);
   font-weight: 700;
   color: var(--color-text-secondary);
@@ -182,7 +182,7 @@
   border-radius: 999px;
   font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--color-blue-accent);
+  color: var(--ds-color-info);
   white-space: nowrap;
 }
 
@@ -190,7 +190,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--color-blue-accent);
+  background: var(--ds-color-info);
 }
 
 .latestGame {

@@ -57,7 +57,7 @@
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
 }
 
 .stat-leader-modal__name {

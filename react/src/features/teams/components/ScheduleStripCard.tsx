@@ -15,6 +15,7 @@ import { joinClassNames } from '@/lib/joinClassNames';
 interface ScheduleStripCardProps {
   game: ScheduledGame;
   index: number;
+  enterClassName?: string;
   teamAbbrev: string;
   onOpenGame: (game: ScheduledGame) => void;
 }
@@ -23,6 +24,7 @@ interface ScheduleStripCardProps {
 export default function ScheduleStripCard({
   game,
   index,
+  enterClassName,
   teamAbbrev,
   onOpenGame,
 }: ScheduleStripCardProps) {
@@ -45,6 +47,7 @@ export default function ScheduleStripCard({
         shared.surface,
         shared.surfaceInteractive,
         styles['schedule-strip__card--clickable'],
+        enterClassName,
       )}
       onClick={() => onOpenGame(game)}
       onKeyDown={(event) => {
@@ -55,7 +58,7 @@ export default function ScheduleStripCard({
       }}
       role="button"
       tabIndex={0}
-      style={{ '--card-index': index } as React.CSSProperties}
+      style={{ '--ds-stagger-index': index } as React.CSSProperties}
     >
       {game.isPlayoff && (
         <div className={styles['schedule-strip__playoff-badge']}>

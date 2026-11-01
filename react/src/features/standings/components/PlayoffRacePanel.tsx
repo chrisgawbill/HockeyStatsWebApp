@@ -72,7 +72,7 @@ export default function PlayoffRacePanel({
 
   return (
     <section
-      className={styles.panel}
+      className={`${styles.panel} ds-enter`}
       aria-labelledby={`${conference}-race-heading`}
     >
       <div className={styles.headingRow}>
