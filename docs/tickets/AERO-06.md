@@ -2,7 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA
+**Status:** ACTIVE (HockeyStatsWebApp part started 2026-11-01; Spotter part
+not started)
 
 **Goal:** HockeyStatsWebApp and the Spotter dashboard look and behave as they
 do today, but get entrance motion, menus, toasts, badges, app chrome, page
@@ -41,7 +42,17 @@ the source files named below. Spotter: its `CLAUDE.md`, `AGENTS.md`,
   Approve the shared defaults, or set per-page `--ds-enter-*` overrides where
   the current feel matters (for example the landing intro).
 
-**Decisions:** none yet.
+**Decisions (Product Owner, 2026-11-01):**
+
+- `.ds-base` heading weight: keep the HockeyStats h1 at 400 with a local
+  override (no visible change).
+- Mobile bottom navigation: adopt the shared `.ds-bottom-nav` including its
+  primary-container current-page pill, replacing the white glass pill. The
+  team-tinted bar stays local.
+- Kickers: the small size/tracking differences are approved; all listed
+  kickers use `.ds-overline-primary`.
+- Entrance timing: the shared `.ds-enter` defaults are approved everywhere,
+  with no per-page `--ds-enter-*` overrides.
 
 **Scope:** bump `@chrisgawbill/aero-md3-core` to `^0.4.0` in each app, then
 replace the local copies below. Delete each local rule a shared class or token
