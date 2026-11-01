@@ -55,14 +55,17 @@ export default function ShareButton() {
     <>
       <button
         type="button"
-        className={styles.share}
+        className={`ds-icon-button ${styles.share}`}
         onClick={shareCurrentPage}
         aria-label="Share this page"
       >
         <ShareIcon />
       </button>
       {createPortal(
-        <p className={message ? styles.toast : styles.liveRegion} role="status">
+        <p
+          className={message ? styles.toast : 'ds-visually-hidden'}
+          role="status"
+        >
           {message}
         </p>,
         document.body,

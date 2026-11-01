@@ -78,7 +78,7 @@ function DnaRow({ row, index }: { row: TeamDnaRow; index: number }) {
         </div>
       )}
       {row.rank == null && (
-        <span className={styles['dna-sr-only']}>{describeRow(row)}</span>
+        <span className={'ds-visually-hidden'}>{describeRow(row)}</span>
       )}
       {row.note && (
         <span className={styles['dna-metric__description']}>{row.note}</span>

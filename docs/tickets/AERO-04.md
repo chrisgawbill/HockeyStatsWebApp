@@ -2,7 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA
+**Status:** ACTIVE (HockeyStatsWebApp part implemented 2026-11-01, in review;
+Spotter part not started)
 
 **Goal:** HockeyStatsWebApp and the Spotter dashboard look the same as today
 (or better where approved), but get their shared patterns from
@@ -86,6 +87,40 @@ the pushed branch. Spotter: `npm test` and the dashboard browser integration
 command in `docs/dashboard.md`. Save before/after screenshots for both apps
 (desktop and 375px, light and dark) of the pages touched.
 
-**Evidence:** NOT RUN.
+**Evidence** (branch `ccr-151cb49c-meihlk`; HockeyStatsWebApp part
+implemented, awaiting Spotter and Product Owner review):
+
+- Dependency: `@chrisgawbill/aero-md3-core@0.3.0` is on npm and its `core.css`
+  matches the aero-md3-core branch.
+- Replaced with shared classes: page states (`.ds-state*`, `.ds-spinner`,
+  outlined `.ds-button` retry); `SectionHeading` (`.ds-section-header`);
+  `PageIntro` kicker (`.ds-overline`, keeps 0.8rem); global table overrides
+  (`.ds-table-compact` on the standings and stat-leader tables); share, bell,
+  sign-in and avatar buttons (`.ds-icon-button`); header search
+  (`.ds-input-glass`); team player-stat and roster tabs (`.ds-tab`); five
+  visually-hidden copies (`.ds-visually-hidden`); stat-leader value column
+  (`.ds-num`). CSS: 378 lines deleted, 20 added.
+- Fix from the 0.3.0 bump: the player-stat tabs carried `.ds-button` with
+  `aria-pressed`, which 0.3.0 styles as a toggle (check mark, outlined
+  border). They now use `.ds-tab` without `.ds-button`.
+- Kept local: team-color tab hover/selected, white icon color, 40px avatar,
+  600 state-message weight, app state icons, `SeasonSelector`'s
+  below-1200px hidden label (conditional, so not the utility class).
+- `pnpm tsc`, `pnpm test` (72 files, 337 tests), `pnpm format:check`,
+  `pnpm build`: PASS.
+- Screenshots (home page with no API: loading and error states, header;
+  1280 and 375, light and dark, before = `2247532`): resting headers match
+  pixel for pixel. Differences: retry button is outlined with primary text
+  and 2.5rem tall; spinner is 28px instead of 34px (`.ds-spinner` is
+  border-box); header icon focus is a 3px white outline instead of the
+  browser default ring.
+- NOT RUN: Spotter run; screenshots of data pages (team tabs, standings and
+  stat-leader tables, compare, draft lottery) because no API or fixtures
+  were available.
+
+**Follow-up duplicates (not in this ticket):** primary-colored bold kickers
+(`LandingPage`, `MatchupPage`, `GameDetailPage` eyebrow) repeat one rule
+that differs from `.ds-overline`; `TeamPage` player-stat value columns
+right-align numbers alongside other styling.
 
 **Release follow-ups:** none yet.

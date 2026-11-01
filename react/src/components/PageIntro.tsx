@@ -16,7 +16,7 @@ export default function PageIntro({
 }: PageIntroProps) {
   return (
     <header className={styles.header}>
-      <p className={styles.kicker}>{kicker}</p>
+      <p className={`ds-overline ${styles.kicker}`}>{kicker}</p>
       <h1 className={styles.title}>{title}</h1>
       {description && <p className={styles.description}>{description}</p>}
     </header>

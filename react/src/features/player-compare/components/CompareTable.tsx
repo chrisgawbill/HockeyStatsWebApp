@@ -37,7 +37,7 @@ export default function CompareTable({
           className={styles.table}
           style={{ '--slot-count': slots.length } as React.CSSProperties}
         >
-          <caption className={styles.visuallyHidden}>
+          <caption className="ds-visually-hidden">
             Season stats side by side; the best value in each row is marked
           </caption>
           <thead>
@@ -77,7 +77,7 @@ export default function CompareTable({
                     {cell.isBest && (
                       <span className={styles.bestMark}>
                         <span aria-hidden="true">●</span>
-                        <span className={styles.visuallyHidden}> (best)</span>
+                        <span className="ds-visually-hidden"> (best)</span>
                       </span>
                     )}
                   </td>

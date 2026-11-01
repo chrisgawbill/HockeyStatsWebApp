@@ -39,44 +39,20 @@
 
 :global(.ds-table-wrap) {
   min-width: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
+/* App tables use .ds-table-compact; these are the app's own choices. */
 :global(.ds-table) {
-  width: 100%;
-  border-collapse: collapse;
-  color: var(--color-text);
   font-size: var(--text-sm);
 }
 
-:global(.ds-table th),
-:global(.ds-table td) {
-  height: 44px;
-  box-sizing: border-box;
-  padding: var(--ds-space-2) var(--ds-space-3);
-  border-bottom: 1px solid var(--color-divider);
-  vertical-align: middle;
-}
-
 :global(.ds-table th) {
-  color: var(--color-muted-text);
-  font-size: var(--text-xs);
-  font-weight: 700;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
   white-space: nowrap;
-}
-
-:global(.ds-table tbody tr:last-child td) {
-  border-bottom: 0;
 }
 
 :global(.ds-table-sort-button) {
   min-height: 2rem;
-  color: inherit;
-  font: inherit;
-  font-weight: inherit;
   letter-spacing: inherit;
   text-align: inherit;
   text-transform: inherit;

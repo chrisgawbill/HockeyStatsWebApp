@@ -562,17 +562,8 @@
 }
 
 .player-stat-tab {
-  appearance: none;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  box-shadow: none;
   padding: 14px 16px;
   font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
   white-space: nowrap;
   letter-spacing: 0.1px;
   transition:
@@ -583,17 +574,15 @@
       var(--ds-motion-easing-standard);
 }
 
+/* Team color instead of the shared primary; bold like a selected .ds-tab. */
 .player-stat-tab:hover {
   color: var(--color-primary);
-  border-color: transparent;
-  box-shadow: none;
-  transform: none;
 }
 
 .player-stat-tab.active {
-  background: transparent;
   border-bottom-color: var(--color-primary);
   color: var(--color-primary);
+  font-weight: var(--ds-font-weight-bold);
 }
 
 .player-stat-leaderboard__title {

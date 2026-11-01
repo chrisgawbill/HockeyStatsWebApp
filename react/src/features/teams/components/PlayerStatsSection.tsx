@@ -245,8 +245,8 @@ export default function PlayerStatsSection({
           <button
             key={cat.key}
             className={joinClassNames(
+              'ds-tab',
               styles['player-stat-tab'],
-              'ds-button',
               selectedKey === cat.key && styles.active,
             )}
             type="button"

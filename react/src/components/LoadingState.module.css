@@ -1,57 +1,5 @@
-.loading-state,
-.loading-state--full-page {
-  display: flex;
-  min-height: 8rem;
-  align-items: center;
-  justify-content: center;
-  gap: var(--ds-space-2);
-  color: var(--color-muted-text);
-  font-size: var(--text-base);
+/* App weight for state text; .ds-state-message defaults to medium. */
+.label {
   font-weight: 600;
-  contain: layout;
-  animation: state-enter var(--ds-motion-duration-medium)
-    var(--ds-motion-easing-standard) both;
-}
-
-.loading-state--full-page {
-  min-height: 42vh;
-}
-
-.loading-state__spinner {
-  width: 1.75rem;
-  height: 1.75rem;
-  border: 3px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: loading-state-spin 0.75s linear infinite;
-}
-
-.loading-state__label {
   line-height: 1;
-}
-
-@keyframes loading-state-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes state-enter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loading-state__spinner {
-    animation: none;
-  }
-
-  .loading-state,
-  .loading-state--full-page {
-    animation: none;
-  }
 }

@@ -12,14 +12,14 @@ export default function LoadingState({
 }: LoadingStateProps) {
   return (
     <div
-      className={
-        fullPage ? styles['loading-state--full-page'] : styles['loading-state']
-      }
+      className={fullPage ? 'ds-state ds-state-full' : 'ds-state'}
       role="status"
       aria-live="polite"
     >
-      <span className={styles['loading-state__spinner']} aria-hidden="true" />
-      <span className={styles['loading-state__label']}>{label}</span>
+      <span className="ds-cluster">
+        <span className="ds-spinner" aria-hidden="true" />
+        <span className={`ds-state-message ${styles.label}`}>{label}</span>
+      </span>
     </div>
   );
 }

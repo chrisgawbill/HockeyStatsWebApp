@@ -25,7 +25,7 @@ export default function HeaderSearchBox({
     <div className={styles['nav-search-col']} ref={searchBoxRef}>
       <input
         type="text"
-        className={styles['nav-search-input']}
+        className={`ds-input-glass ${styles['nav-search-input']}`}
         placeholder="Search teams or games"
         aria-label="Search teams or games"
         value={query}

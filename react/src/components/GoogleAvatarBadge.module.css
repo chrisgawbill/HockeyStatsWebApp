@@ -2,36 +2,11 @@
   position: relative;
 }
 
-/* Matches PageHeader's Aero-glass nav-back-btn chrome (same size, glossy
-   gradient ring): this renders inside the shared global nav bar. */
+/* .ds-icon-button at the 40px nav-back-btn size; clips the photo to the circle. */
 .badge {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.08)
-  );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   overflow: hidden;
-  flex-shrink: 0;
-  transition: background 0.2s;
-}
-
-.badge:hover,
-.badge:focus-visible {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.42),
-    rgba(255, 255, 255, 0.14)
-  );
 }
 
 .avatar {
