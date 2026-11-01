@@ -73,6 +73,7 @@ are historical notes, not a second status field.
 | [AHL-02](tickets/AHL-02.md) | Favorite AHL teams and players in the shared favorites list |
 | [AERO-03](tickets/AERO-03.md) | Shared primitives for duplicated app styles (aero-md3-core 0.3.0) |
 | [AERO-04](tickets/AERO-04.md) | Apps use shared aero-md3-core styles instead of local copies |
+| [AERO-05](tickets/AERO-05.md) | More shared primitives for app chrome, overlays and motion (aero-md3-core 0.4.0) |
 
 ## Dependency outline
 
