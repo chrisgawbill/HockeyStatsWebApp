@@ -2,7 +2,7 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA
+**Status:** ACTIVE
 
 **Goal:** HockeyStatsWebApp and Spotter can build buttons, page states,
 section headers, tables, callouts, tabs and small form/utility patterns from
@@ -27,7 +27,15 @@ The consumer sources named under each item below show the duplicated pattern.
 - Whether items 7–9 ship in 0.3.0 or wait for a later release. Each is used by
   one app today.
 
-**Decisions:** none recorded yet.
+**Decisions (Product Owner, 2026-11-01):**
+
+- Class names approved as proposed.
+- Item 1 `.ds-button` hover/pressed/disabled styling ships as an approved
+  default change in 0.3.0.
+- Items 7–9 ship in 0.3.0.
+
+Library-side implementation choices (including the `.ds-input-glass` name for
+the item 7 input) are recorded in aero-md3-core `docs/tickets/AERO-03.md`.
 
 **Scope:** additive, opt-in CSS in `src/core.css`, documented in the README's
 public contract (so `pnpm check` still matches every `.ds-*` class and
@@ -103,6 +111,19 @@ navigation, and with reduced motion enabled; save screenshots. Install the
 packed 0.3.0 tarball in HockeyStatsWebApp and Spotter without code changes and
 confirm both still build and render.
 
-**Evidence:** NOT RUN.
+**Evidence:** aero-md3-core branch `ccr-151cb49c-meihlk`; details and
+screenshots in aero-md3-core `docs/tickets/AERO-03.md` and
+`docs/evidence/AERO-03/`.
+
+- `pnpm check`: PASS.
+- Fixture pages at 1280 and 375px, light and dark, keyboard, reduced motion:
+  PASS (Chromium). 0.1/0.2 fixtures are pixel-identical before and after.
+- Packed 0.3.0 in HockeyStatsWebApp without code changes: `pnpm tsc`,
+  `pnpm test`, `pnpm build` PASS; renders pixel-identical to 0.2.0.
+- Packed 0.3.0 in Spotter without code changes: renders unchanged; `npm test`
+  188 pass / 7 fail, the same 7 tests that fail on 0.2.0 in this environment.
+- Firefox/Safari: NOT RUN.
+- `@chrisgawbill/aero-md3-core@0.3.0` published: NOT RUN (publishes from
+  aero-md3-core `main` after merge).
 
 **Release follow-ups:** consumer adoption is [AERO-04](AERO-04.md).
