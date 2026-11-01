@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@chrisgawbill/aero-md3-core':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -141,8 +141,8 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@chrisgawbill/aero-md3-core@0.2.0':
-    resolution: {integrity: sha512-33l/QeDYVfI1sDf2s4J68vf1E8J5xdeYNgCX2HMbDg2H8HDPiUyyDe6b2H8SCM9JzkGtnh9NsD7AU6D9B/Kfqw==}
+  '@chrisgawbill/aero-md3-core@0.3.0':
+    resolution: {integrity: sha512-jfteTwmnAwkIaBjK0djU22AQDo3C34gRAAj3Ouud0/StBLVYTpiXNqr89dZ69TTy0mOGot/WDPgjOhx8HW2m1A==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -859,7 +859,7 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@chrisgawbill/aero-md3-core@0.2.0': {}
+  '@chrisgawbill/aero-md3-core@0.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

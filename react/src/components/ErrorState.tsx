@@ -24,20 +24,16 @@ export default function ErrorState({
 
   return (
     <div
-      className={
-        fullPage ? styles['error-state--full-page'] : styles['error-state']
-      }
+      className={fullPage ? 'ds-state ds-state-full' : 'ds-state'}
       role="alert"
     >
-      <span className={styles['error-state__icon']} aria-hidden="true" />
-      {title && (
-        <TitleTag className={styles['error-state__title']}>{title}</TitleTag>
-      )}
-      <span className={styles['error-state__message']}>{message}</span>
+      <span className={styles.icon} aria-hidden="true" />
+      {title && <TitleTag className="ds-state-title">{title}</TitleTag>}
+      <span className={`ds-state-message ${styles.message}`}>{message}</span>
       {onRetry && (
         <button
           type="button"
-          className={styles['error-state__retry']}
+          className={`ds-button ds-button-outlined ${styles.retry}`}
           onClick={onRetry}
         >
           Try again

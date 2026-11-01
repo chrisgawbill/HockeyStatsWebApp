@@ -2,7 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA
+**Status:** ACTIVE (HockeyStatsWebApp part started 2026-11-01; Spotter part
+not started)
 
 **Goal:** HockeyStatsWebApp and the Spotter dashboard look the same as today
 (or better where approved), but get their shared patterns from
@@ -86,6 +87,17 @@ the pushed branch. Spotter: `npm test` and the dashboard browser integration
 command in `docs/dashboard.md`. Save before/after screenshots for both apps
 (desktop and 375px, light and dark) of the pages touched.
 
-**Evidence:** NOT RUN.
+**Evidence** (branch `ccr-151cb49c-meihlk`, in progress):
+
+- Dependency: `@chrisgawbill/aero-md3-core@0.3.0` is on npm and its `core.css`
+  matches the aero-md3-core branch.
+- Done: bump to `^0.3.0`; `LoadingState`, `EmptyState`, `ErrorState` use
+  `.ds-state*`, `.ds-spinner` and an outlined `.ds-button` retry. The three
+  `state-enter` keyframes are gone. Local overrides kept: 600 message weight
+  and the app's empty/error icons.
+- `pnpm tsc`, `pnpm test` (337), `pnpm format:check`, `pnpm build`: PASS.
+- Screenshots and Spotter run: NOT RUN.
+- Remaining HockeyStatsWebApp items: section header/overline, table compact,
+  icon buttons and glass search, tabs, visually-hidden, `.ds-num`.
 
 **Release follow-ups:** none yet.

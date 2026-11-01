@@ -18,15 +18,13 @@ export default function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={
-        fullPage ? styles['empty-state--full-page'] : styles['empty-state']
-      }
+      className={fullPage ? 'ds-state ds-state-full' : 'ds-state'}
       role="status"
       aria-live="polite"
     >
-      <span className={styles['empty-state__icon']} aria-hidden="true" />
-      {title && <span className={styles['empty-state__title']}>{title}</span>}
-      <span className={styles['empty-state__message']}>{message}</span>
+      <span className={styles.icon} aria-hidden="true" />
+      {title && <span className="ds-state-title">{title}</span>}
+      <span className={`ds-state-message ${styles.message}`}>{message}</span>
     </div>
   );
 }
