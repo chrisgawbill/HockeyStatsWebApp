@@ -2,7 +2,7 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA
+**Status:** ACTIVE (started 2026-11-01; library work in aero-md3-core)
 
 **Goal:** HockeyStatsWebApp, Spotter and future apps can build entrance
 motion, menus, toasts, badges, the app bar, page rhythm and common small
@@ -37,7 +37,14 @@ below show the duplicated pattern.
   CSS-only. Decide whether a dependency-free optional `behaviors.js` export is
   ever in scope; it is excluded from this ticket either way.
 
-**Decisions:** none yet.
+**Decisions (Product Owner, 2026-11-01):**
+
+- [AERO-04](AERO-04.md) accepted, so this ticket may start.
+- Class and token names approved as proposed.
+- Item 7: `.ds-base` ships element rules (`body`, `h1`–`h3`, `code`/`pre`,
+  `::selection`) under the opt-in root class.
+- Item 5: ship `.ds-app-bar` and also an MD3 `.ds-bottom-nav` in 0.4.0.
+- Optional `behaviors.js`: not decided; excluded from this ticket either way.
 
 **Scope:** additive, opt-in CSS in `src/core.css`, documented in the README's
 public contract (so `pnpm check` still matches every `.ds-*` class and
@@ -167,7 +174,14 @@ reduced motion enabled; save screenshots. Install the packed 0.4.0 tarball in
 HockeyStatsWebApp and Spotter without code changes and confirm both still
 build, test and render unchanged.
 
-**Evidence:** not started.
+**Evidence:** library work implemented on aero-md3-core branch
+`ccr-151cb49c-meihlk`; the checks are recorded in that repository's
+`docs/tickets/AERO-05.md`. In summary: `pnpm check` PASS. The 0.4 fixture at
+1280 and 375px, light and dark, keyboard and reduced motion: PASS. The 0.1–0.3
+fixtures are pixel-identical. The packed 0.4.0 in HockeyStatsWebApp passes
+tsc, test and build and renders pixel-identical. Spotter: same results as
+before. NOT RUN: npm publish, Firefox/Safari. The Spotter browser integration
+test fails the same way on 0.2.0 in this container.
 
 **Release follow-ups:** consumer adoption (a follow-up to AERO-04 that
 replaces the sources listed above) needs its own ticket once 0.4.0 is
