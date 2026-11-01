@@ -111,7 +111,7 @@ export default function PlayerPicker({
 
   return (
     <div className={styles.picker}>
-      <label htmlFor={inputId} className={styles.visuallyHidden}>
+      <label htmlFor={inputId} className="ds-visually-hidden">
         {label}
       </label>
       <input
@@ -173,7 +173,7 @@ export default function PlayerPicker({
           No {groupNoun} match “{query.trim()}”
         </p>
       )}
-      <p role="status" className={styles.visuallyHidden}>
+      <p role="status" className="ds-visually-hidden">
         {statusText}
       </p>
     </div>

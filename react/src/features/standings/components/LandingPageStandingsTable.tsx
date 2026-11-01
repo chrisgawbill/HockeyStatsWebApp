@@ -132,7 +132,9 @@ export default function LandingPageStandingsTable({
             }
       }
     >
-      <table className={`${styles['standings-table']} ds-table`}>
+      <table
+        className={`${styles['standings-table']} ds-table ds-table-compact`}
+      >
         <thead>
           <tr>
             {HEADERS.map(([label, key]) => (

@@ -16,7 +16,7 @@ export default function SectionHeading({
   link,
 }: SectionHeadingProps) {
   return (
-    <div className={styles.row}>
+    <div className={`ds-section-header ${styles.row}`}>
       <h2 id={id} className={styles.title}>
         {title}
       </h2>

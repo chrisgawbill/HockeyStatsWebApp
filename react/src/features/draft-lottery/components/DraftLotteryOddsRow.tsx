@@ -178,7 +178,7 @@ export default function DraftLotteryOddsRow({
         onRetry={onRetry}
         className={styles['placeholder']}
       >
-        <div role="status" aria-live="polite" className={styles['sr-only']}>
+        <div role="status" aria-live="polite" className={'ds-visually-hidden'}>
           {announcement}
         </div>
         <div className={styles['frame']}>

@@ -404,7 +404,7 @@ export default function NotificationBell() {
       <button
         type="button"
         ref={bellRef}
-        className={styles.bell}
+        className={`ds-icon-button ${styles.bell}`}
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="menu"
         aria-expanded={open}

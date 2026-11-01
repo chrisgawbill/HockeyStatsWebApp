@@ -45,12 +45,6 @@
   white-space: nowrap;
 }
 
-.stat-leader-modal__table th:last-child,
-.stat-leader-modal__table td:last-child {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
 .stat-leader-modal__player {
   display: flex;
   align-items: center;

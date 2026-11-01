@@ -119,7 +119,7 @@ export default function RosterLinesTabs({
               aria-selected={selected === group}
               aria-controls={panelId(group)}
               tabIndex={selected === group ? 0 : -1}
-              className={`${teamStyles['player-stat-tab']} ds-button ${selected === group ? teamStyles.active : ''}`}
+              className={`ds-tab ${teamStyles['player-stat-tab']} ${selected === group ? teamStyles.active : ''}`}
               onClick={() => select(group)}
               onKeyDown={(event) => onKeyDown(event, tabIndex)}
             >

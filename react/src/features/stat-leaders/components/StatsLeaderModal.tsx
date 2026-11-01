@@ -42,7 +42,7 @@ function LeaderboardRow({ leader }: { leader: PlayerStatLeader }) {
       <td className={styles['stat-leader-modal__position']}>
         {leader.position}
       </td>
-      <td>{leader.statLeaderValue}</td>
+      <td className="ds-num">{leader.statLeaderValue}</td>
     </tr>
   );
 }
@@ -79,7 +79,7 @@ export default function StatsLeaderModal({
           <div
             className={`${styles['stat-leader-modal__table']} ds-table-wrap`}
           >
-            <table className="ds-table">
+            <table className="ds-table ds-table-compact">
               <thead>
                 <tr>
                   <th scope="col">Name</th>
@@ -90,7 +90,7 @@ export default function StatsLeaderModal({
                   >
                     Pos
                   </th>
-                  <th scope="col" title={modalTitle}>
+                  <th scope="col" className="ds-num" title={modalTitle}>
                     {modalTitle}
                   </th>
                 </tr>

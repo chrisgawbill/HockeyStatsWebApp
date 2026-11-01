@@ -79,7 +79,7 @@ export default function GoogleAvatarBadge({
     >
       <button
         type="button"
-        className={styles.badge}
+        className={`ds-icon-button ${styles.badge}`}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         aria-haspopup="menu"
         aria-expanded={open}

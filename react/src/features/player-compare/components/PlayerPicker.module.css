@@ -74,12 +74,3 @@
   color: var(--color-text-secondary);
   padding: var(--ds-space-2) var(--ds-space-3);
 }
-
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
