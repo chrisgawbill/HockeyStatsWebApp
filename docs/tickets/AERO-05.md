@@ -2,7 +2,7 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE (started 2026-11-01; library work in aero-md3-core)
+**Status:** DONE (Product Owner approved the merge on 2026-11-01)
 
 **Goal:** HockeyStatsWebApp, Spotter and future apps can build entrance
 motion, menus, toasts, badges, the app bar, page rhythm and common small
@@ -183,6 +183,13 @@ tsc, test and build and renders pixel-identical. Spotter: same results as
 before. NOT RUN: npm publish, Firefox/Safari. The Spotter browser integration
 test fails the same way on 0.2.0 in this container.
 
-**Release follow-ups:** consumer adoption (a follow-up to AERO-04 that
-replaces the sources listed above) needs its own ticket once 0.4.0 is
-published.
+**Release:** merged to aero-md3-core `main` as `0f0d5d0` (PR #3). The
+publish workflow published 0.4.0, which is verified on npm as `latest`; the
+published `core.css` is byte-identical to `main`. The workflow still shows red:
+its verify step ran before npm finished processing and got a 404 (the 0.3.0
+run did the same).
+
+**Release follow-ups:** consumer adoption is [AERO-06](AERO-06.md). Publish
+workflow: add a retry or wait to the "Verify published version" step so a
+successful publish does not report failure (owner: aero-md3-core, not yet
+ticketed).
