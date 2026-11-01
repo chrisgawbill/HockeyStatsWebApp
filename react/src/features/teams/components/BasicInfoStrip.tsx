@@ -17,8 +17,8 @@ export default function BasicInfoStrip({ team }: BasicInfoStripProps) {
   ];
 
   return (
-    <section className={shared.section}>
-      <h2 className={shared.sectionTitle}>Basic Info</h2>
+    <section className="ds-section">
+      <h2 className="ds-section-title">Basic Info</h2>
       <div className={styles['info-strip']}>
         {items.map((item) => (
           <div

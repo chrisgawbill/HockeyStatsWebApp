@@ -109,7 +109,9 @@ export default function StandingsPage() {
             <div className={styles['standings-page-legend-row']}>
               <StandingsClinchLegend className={styles['standings-legend']} />
             </div>
-            <div className={styles['standings-page-table-container']}>
+            <div
+              className={`${styles['standings-page-table-container']} ds-enter`}
+            >
               {standingsSections.map((section) => (
                 <StandingsContainer
                   key={section.name}
@@ -121,7 +123,9 @@ export default function StandingsPage() {
             </div>
             {/* The race panel uses NHL wild-card rules. */}
             {league === 'ahl' ? null : loadingListOfGamesData ? (
-              <p className={styles['playoff-race-loading']}>
+              <p
+                className={`${styles['playoff-race-loading']} ds-enter ds-enter-fade`}
+              >
                 Loading playoff race…
               </p>
             ) : (

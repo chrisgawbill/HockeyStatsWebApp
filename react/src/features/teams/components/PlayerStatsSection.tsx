@@ -237,8 +237,8 @@ export default function PlayerStatsSection({
   );
 
   return (
-    <section className={shared.section}>
-      <h2 className={shared.sectionTitle}>Player Stats</h2>
+    <section className="ds-section">
+      <h2 className="ds-section-title">Player Stats</h2>
 
       <div className={styles['player-stat-categories']}>
         {shownCategories.map((cat) => (

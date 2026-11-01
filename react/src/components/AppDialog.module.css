@@ -1,7 +1,5 @@
 .backdrop {
   composes: ds-modal-layer from global;
-  z-index: var(--z-modal);
-  background: var(--color-overlay);
 }
 
 .dialog {

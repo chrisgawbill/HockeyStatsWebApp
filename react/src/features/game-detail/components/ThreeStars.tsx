@@ -28,8 +28,8 @@ function formatStatLine(star: LandingThreeStar): string {
 /** The game's three stars with headshots and stat lines. */
 function ThreeStars({ stars }: ThreeStarsProps) {
   return (
-    <section className={`${styles['game-detail-section']} ${shared.section}`}>
-      <h2 className={shared.sectionTitle}>Three Stars</h2>
+    <section className={`${styles['game-detail-section']} ds-section`}>
+      <h2 className="ds-section-title">Three Stars</h2>
       <div className={styles['three-stars-row']}>
         {stars.map((star) => (
           <div

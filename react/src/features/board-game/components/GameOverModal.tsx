@@ -32,7 +32,7 @@ export default function GameOverModal({
   return (
     <ModalOverlay>
       <div
-        className={styles.dialog}
+        className={`${styles.dialog} ds-enter ds-enter-scale`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

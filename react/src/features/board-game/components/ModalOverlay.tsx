@@ -7,5 +7,7 @@ export interface ModalOverlayProps {
 
 /** Fixed, centered, dimmed backdrop shared by full-screen modals (DuelScreen, GameOverModal). */
 export default function ModalOverlay({ children }: ModalOverlayProps) {
-  return <div className={styles.overlay}>{children}</div>;
+  return (
+    <div className={`${styles.overlay} ds-enter ds-enter-fade`}>{children}</div>
+  );
 }

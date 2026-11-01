@@ -2,47 +2,24 @@
   position: relative;
 }
 
-/* Glass circle comes from .ds-icon-button; position anchors the unread count. */
+/* Glass circle comes from .ds-icon-button; .ds-badge-anchor anchors the count. */
 .bell {
-  position: relative;
   color: white;
 }
 
+/* .ds-badge supplies the pill; the ring lifts it off the team-tinted bar. */
 .badge {
-  position: absolute;
-  top: -4px;
-  right: -6px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  box-sizing: border-box;
-  border-radius: 9px;
-  background: var(--color-danger);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 80%, black);
 }
 
+/* .ds-menu supplies the opaque surface (report rows sit over busy team-hero art). */
 .panel {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
   width: min(360px, calc(100vw - 32px));
-  max-height: min(480px, 70vh);
-  overflow-y: auto;
-  /* Opaque: report rows sit over busy team-hero art. */
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--ds-radius-medium);
-  box-shadow: var(--ds-elevation-1);
-  padding: var(--ds-space-1);
-  box-sizing: border-box;
   z-index: 120;
   font-family: 'Roboto', sans-serif;
-  color: var(--color-text);
   text-align: left;
 }
 

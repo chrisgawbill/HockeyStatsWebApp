@@ -81,7 +81,7 @@ function ReportTeamsSection({ report }: { report: WeeklyPlayerReport }) {
 
   return (
     <section className={styles.teamSection} aria-labelledby="report-teams">
-      <h2 id="report-teams" className={shared.sectionTitle}>
+      <h2 id="report-teams" className="ds-section-title">
         Favorite teams
       </h2>
       <ul className={styles.teamCards}>
@@ -98,8 +98,8 @@ function FavoritePlayersList() {
   const [failed, setFailed] = useState<string | null>(null);
 
   return (
-    <section className={shared.section} aria-labelledby="favorite-players">
-      <h2 id="favorite-players" className={shared.sectionTitle}>
+    <section className="ds-section" aria-labelledby="favorite-players">
+      <h2 id="favorite-players" className="ds-section-title">
         Favorite players ({favorites.length}/{MAX_FAVORITE_PLAYERS})
       </h2>
       {favorites.length === 0 ? (
@@ -267,10 +267,10 @@ export default function WeeklyReportPage() {
         {!report && (
           <h1 className="ds-visually-hidden">Weekly Player Report</h1>
         )}
-        <section className={shared.section}>{content}</section>
+        <section className="ds-section">{content}</section>
         {token && available && others.length > 0 && (
-          <nav className={shared.section} aria-label="Earlier reports">
-            <h2 className={shared.sectionTitle}>Other weeks</h2>
+          <nav className="ds-section" aria-label="Earlier reports">
+            <h2 className="ds-section-title">Other weeks</h2>
             <ul className={styles.weeks}>
               {others.map((other) => (
                 <li key={other.weekStart}>

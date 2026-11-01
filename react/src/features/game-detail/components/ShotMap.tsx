@@ -137,10 +137,10 @@ function ShotMap({ events, periods, homeTriCode, awayTriCode }: ShotMapProps) {
 
   return (
     <section
-      className={`${shared.section} ${shared.surface} ${styles['shot-card']}`}
+      className={`ds-section ${shared.surface} ${styles['shot-card']}`}
       aria-labelledby="shot-map-heading"
     >
-      <h2 id="shot-map-heading" className={shared.sectionTitle}>
+      <h2 id="shot-map-heading" className="ds-section-title">
         Shot map
       </h2>
       <p className={styles['shot-card__subtitle']}>

@@ -217,7 +217,7 @@ export default function FavoriteCategoryMenu({
   return createPortal(
     <div
       ref={menuRef}
-      className={styles.menu}
+      className={`ds-menu ${styles.menu}`}
       style={position}
       role="dialog"
       aria-label={`Fan category for ${itemName}`}
@@ -265,7 +265,9 @@ export default function FavoriteCategoryMenu({
         </label>
         <p
           id="fan-label-count"
-          className={isLabelTooLong ? styles.countOver : styles.count}
+          className={
+            isLabelTooLong ? styles.countOver : `ds-muted ${styles.count}`
+          }
         >
           {labelLength}/{MAX_CATEGORY_LABEL_LENGTH}
           {isLabelTooLong && ' - label is too long'}

@@ -39,7 +39,10 @@ export default function HeaderSearchBox({
         onKeyDown={handleKeyDown}
       />
       {isOpen && results.length > 0 && (
-        <ul className={styles['nav-search-dropdown']} role="listbox">
+        <ul
+          className={`ds-menu ${styles['nav-search-dropdown']}`}
+          role="listbox"
+        >
           {results.map((result, index) => (
             <li
               key={result.id}
@@ -49,6 +52,7 @@ export default function HeaderSearchBox({
               <button
                 type="button"
                 className={joinClassNames(
+                  'ds-menu-item',
                   styles['nav-search-option'],
                   index === activeIndex && styles['nav-search-option--active'],
                 )}

@@ -128,11 +128,11 @@
 }
 
 .standings-table tbody tr:hover > td:first-child {
-  border-left-color: var(--color-blue-accent);
+  border-left-color: var(--ds-color-info);
 }
 
 .standings-table tbody tr:nth-child(even) td {
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
 }
 
 .standings-label--mobile {

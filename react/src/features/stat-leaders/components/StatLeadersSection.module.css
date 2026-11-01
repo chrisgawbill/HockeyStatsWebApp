@@ -13,7 +13,7 @@
   margin: 0 0 var(--ds-space-2);
   padding: 2px;
   border-radius: 999px;
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
 }
 
 .switchButton {
@@ -36,29 +36,13 @@
 }
 
 .switchButton:focus-visible {
-  outline: 3px solid var(--color-blue-accent);
+  outline: 3px solid var(--ds-color-info);
   outline-offset: 2px;
 }
 
 /* Horizontal swipes switch groups; vertical drags still scroll the page. */
 .swipeArea {
   touch-action: pan-y;
-}
-
-.groupPanel {
-  animation: group-fade-in 160ms ease-out;
-}
-
-@keyframes group-fade-in {
-  from {
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .groupPanel {
-    animation: none;
-  }
 }
 
 /* Holds a loaded 2x2 card grid's height while a group loads or has failed. */

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import LandingPageStandings from '@/features/standings/components/LandingPageStandings';
 import StatLeadersSection from '@/features/stat-leaders/components/StatLeadersSection';
 import PageHeader from '@/components/PageHeader';
@@ -53,16 +54,23 @@ export default function LandingPage() {
     <div className="ds-page-shell">
       <PageHeader />
       <main>
-        <header className={styles['landingPage-intro']}>
+        <header className={`ds-enter ${styles['landingPage-intro']}`}>
           <div className={styles['landingPage-intro-copy']}>
-            <p className={styles['landingPage-kicker']}>Season overview</p>
+            <p
+              className={`ds-overline-primary ${styles['landingPage-kicker']}`}
+            >
+              Season overview
+            </p>
             <h1>{formatSeasonLabel(season)} at a glance</h1>
             <p>Track the teams, leaders, and stories shaping the season.</p>
           </div>
         </header>
         {/* Favorites and the draft lottery are NHL only for now. */}
         {league === 'nhl' && <UpNextStrip />}
-        <div className={`${styles['landingPage-content']} ds-grid`}>
+        <div
+          className={`ds-enter ${styles['landingPage-content']} ds-grid`}
+          style={{ '--ds-stagger-index': 1 } as CSSProperties}
+        >
           <section>
             <StatLeadersSection
               skaters={{

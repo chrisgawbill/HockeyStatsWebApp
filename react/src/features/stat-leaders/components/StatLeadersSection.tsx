@@ -160,7 +160,7 @@ export default function StatLeadersSection({
           onSelect={setSelectedGroup}
         />
         <div className={styles.swipeArea} {...swipeProps}>
-          <div key={selectedGroup} className={styles.groupPanel}>
+          <div key={selectedGroup} className="ds-enter ds-enter-fade">
             <LeaderGroupPanel
               group={selectedGroup}
               data={dataByGroup[selectedGroup]}

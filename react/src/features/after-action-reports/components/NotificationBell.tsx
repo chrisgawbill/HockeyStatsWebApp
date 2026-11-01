@@ -404,7 +404,7 @@ export default function NotificationBell() {
       <button
         type="button"
         ref={bellRef}
-        className={`ds-icon-button ${styles.bell}`}
+        className={`ds-icon-button ds-badge-anchor ${styles.bell}`}
         onClick={() => setOpen((value) => !value)}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -414,13 +414,13 @@ export default function NotificationBell() {
       >
         <BellIcon />
         {totalUnread > 0 && (
-          <span className={styles.badge} aria-hidden="true">
+          <span className={`ds-badge ${styles.badge}`} aria-hidden="true">
             {totalUnread > 9 ? '9+' : totalUnread}
           </span>
         )}
       </button>
       {open && (
-        <div className={styles.panel} id={panelId} role="menu">
+        <div className={`ds-menu ${styles.panel}`} id={panelId} role="menu">
           <div className={styles.panelHeader}>
             <span className={styles.panelTitle}>Reports</span>
             {totalUnread > 0 && (

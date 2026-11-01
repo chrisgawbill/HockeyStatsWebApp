@@ -83,7 +83,11 @@
 
 .open {
   border-color: var(--color-danger);
-  background-color: var(--color-info-bg);
+  background-color: color-mix(
+    in srgb,
+    var(--ds-color-info) 8%,
+    var(--ds-color-surface)
+  );
 }
 
 .puckIcon {

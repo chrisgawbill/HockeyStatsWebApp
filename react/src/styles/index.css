@@ -1,12 +1,8 @@
 :root {
-  --color-blue-accent: #1565c0;
   --color-white: #ffffff;
   --color-bg-subtle: #f8f9fa;
-  --color-info-bg: #e3f2fd;
-  --color-subtle-divider: rgba(0, 0, 0, 0.05);
-  --color-chip-bg: rgba(0, 0, 0, 0.07);
-  --color-selection: #ffffff;
-  --color-selection-text: #1b4f8a;
+  --ds-color-selection: #ffffff;
+  --ds-color-on-selection: #1b4f8a;
   --color-team-user: #1565c0;
   --color-team-cpu: #c62828;
   --color-ice: #ddf0fb;
@@ -21,7 +17,6 @@
   --color-rink-net: rgba(200, 230, 250, 0.7);
   --color-rink-net-border: #4fa8d8;
   --color-tile-highlight: rgba(255, 202, 40, 0.45);
-  --color-overlay: rgba(0, 0, 0, 0.5);
   --color-puck: #1a1a1a;
   --color-puck-ring: #00bcd4;
   --color-skater-movable: #fb8c00;
@@ -39,14 +34,9 @@
   --color-energy-bonus: #ffeb3b;
   /** Shot minigame timing bar's "good" band: distinct from the puck ring's cyan and card-block blue. */
   --color-shot-band-good: #a5d8ff;
-  /* Must stay above PageHeader's highest z-index (300, PageHeader.module.css). */
-  --z-modal: var(--ds-layer-modal);
   --ds-layout-max-width: 80rem;
   --page-content-width: var(--ds-layout-max-width);
   --page-gutter: var(--ds-page-gutter);
-  --page-section-gap: var(--ds-space-5);
-  --page-block-start: var(--ds-space-4);
-  --page-block-end: var(--ds-space-5);
   /** Measured by PageHeader so fixed mobile chrome always reserves its real height. */
   --mobile-chrome-height: 0px;
   --mobile-top-chrome-height: 0px;
@@ -63,20 +53,13 @@
 @media (max-width: 576px) {
   :root {
     --ds-page-gutter: var(--ds-space-2);
-    --page-section-gap: var(--ds-space-4);
-    --page-block-start: var(--ds-space-3);
-    --page-block-end: var(--ds-space-4);
   }
 }
 
 [data-theme='dark'] {
-  --color-blue-accent: #64b5f6;
   --color-bg-subtle: #161b27;
-  --color-info-bg: rgba(66, 153, 225, 0.15);
-  --color-subtle-divider: rgba(255, 255, 255, 0.05);
-  --color-chip-bg: rgba(255, 255, 255, 0.07);
-  --color-selection: #93c5fd;
-  --color-selection-text: #1b4f8a;
+  --ds-color-selection: #93c5fd;
+  --ds-color-on-selection: #1b4f8a;
   --color-team-user: #64b5f6;
   --color-team-cpu: #fc8181;
   --color-ice: #0d1a26;
@@ -91,7 +74,6 @@
   --color-rink-net: rgba(10, 25, 40, 0.7);
   --color-rink-net-border: #1a4a6e;
   --color-tile-highlight: rgba(255, 202, 40, 0.35);
-  --color-overlay: rgba(0, 0, 0, 0.65);
   --color-puck: #050505;
   --color-puck-ring: #00e5ff;
   --color-skater-movable: #ffa726;

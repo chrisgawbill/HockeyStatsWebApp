@@ -39,7 +39,7 @@
   margin: 0;
   padding: var(--ds-space-1) var(--ds-space-3);
   border-radius: var(--ds-radius-full);
-  background-color: var(--color-chip-bg);
+  background-color: var(--ds-color-subtle-fill);
   color: var(--color-text);
   font-weight: bold;
 }

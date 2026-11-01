@@ -2,7 +2,6 @@ import { CSSProperties, useMemo } from 'react';
 import { useTheme } from '@/lib/ThemeContext';
 import { isCompletedGameState } from '@/lib/gameStatus';
 import ErrorState from '@/components/ErrorState';
-import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameShots.module.css';
 import GameFlowChart from '@/features/game-detail/components/GameFlowChart';
 import ShotMap from '@/features/game-detail/components/ShotMap';
@@ -64,8 +63,8 @@ function GameShots({
 
   if (state === 'error') {
     return (
-      <section className={shared.section} aria-labelledby="shots-error-heading">
-        <h2 id="shots-error-heading" className={shared.sectionTitle}>
+      <section className="ds-section" aria-labelledby="shots-error-heading">
+        <h2 id="shots-error-heading" className="ds-section-title">
           Game flow and shot map
         </h2>
         <ErrorState message="Couldn't load the shot data." onRetry={retry} />

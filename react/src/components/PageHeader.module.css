@@ -1,12 +1,9 @@
 .nav-bar {
-  composes: ds-aero-glass from global;
+  /* .ds-app-bar + .ds-aero-glass (PageHeader.tsx) supply the sticky glass bar. */
   /* App chrome declares its own font rather than inheriting the page's: the
      board game sets a pixel font on its page root, and these nav labels must
      not widen or the fixed mobile bar breaks. */
   font-family: 'Roboto', sans-serif;
-  width: 100%;
-  max-width: none;
-  box-sizing: border-box;
   /* Aero-glass bar: a translucent, blurred tint of the brand color rather
      than a flat fill, so whatever scrolls underneath shows through softly. */
   --ds-aero-glass-tint: color-mix(
@@ -14,29 +11,24 @@
     var(--color-primary) 62%,
     transparent
   );
-  border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  /* The row is sized by its controls plus padding, not the shared minimum. */
+  --ds-app-bar-min-height: 0;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
-  /* With viewport-fit=cover the bar extends under the status bar (installed
-     app), so the system area takes the same (team) tint as the bar. */
-  padding: env(safe-area-inset-top, 0px) 0 0;
   margin-bottom: var(--ds-space-3);
   display: grid;
-  align-items: center;
-  flex-wrap: nowrap;
-  position: sticky;
-  top: 0;
-  z-index: var(--ds-layer-sticky);
 }
 
-.nav-inner {
-  display: flex;
-  align-items: center;
+/* Matches .ds-app-bar.ds-aero-glass specificity to keep the softer hairline. */
+.nav-bar:global(.ds-aero-glass) {
+  border-block-end-color: rgba(255, 255, 255, 0.25);
+}
+
+/* .ds-container supplies the width; the app bar's row never wraps. */
+.nav-bar > .nav-inner {
+  flex-wrap: nowrap;
   justify-content: space-between;
   gap: var(--ds-space-4);
-  width: min(100% - (2 * var(--page-gutter)), var(--page-content-width));
-  margin-inline: auto;
-  padding: var(--ds-space-2) 0;
+  padding-block: var(--ds-space-2);
 }
 
 .nav-secondary-row {
@@ -72,7 +64,7 @@
 
 .nav-season-selector {
   position: relative;
-  z-index: 2;
+  z-index: var(--ds-layer-raised);
 }
 
 .nav-league-toggle {
@@ -130,44 +122,27 @@
   font-size: 0.85rem;
 }
 
+/* .ds-menu supplies the surface; this only positions it under the input. */
 .nav-search-dropdown {
   position: absolute;
   top: calc(100% + 4px);
   left: 8px;
   right: 8px;
-  max-height: 320px;
-  overflow-y: auto;
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--ds-radius-medium);
-  box-shadow: var(--ds-elevation-1);
-  list-style: none;
-  margin: 0;
-  padding: 4px;
   z-index: var(--ds-layer-dropdown);
 }
 
+/* .ds-menu-item supplies the row and its hover/focus; the keyboard-highlighted
+   option shows the same tint as hover. */
 .nav-search-option {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  padding: 8px 10px;
   font-size: 0.85rem;
-  color: var(--color-text);
-  border-radius: var(--ds-radius-medium);
-  cursor: pointer;
 }
 
-.nav-search-option:hover,
 .nav-search-option--active {
-  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-}
-
-.nav-search-option:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
-  outline-offset: -2px;
+  background: color-mix(
+    in srgb,
+    currentColor var(--ds-state-hover-opacity),
+    transparent
+  );
 }
 
 @media (max-width: 576px) {
@@ -242,12 +217,12 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 2px 6px rgba(0, 0, 0, 0.2) !important;
-  color: var(--color-selection-text) !important;
+  color: var(--ds-color-on-selection) !important;
 }
 
 .nav-btn.active-page:hover,
 .nav-btn.active-page:focus-visible {
-  color: var(--color-selection-text) !important;
+  color: var(--ds-color-on-selection) !important;
   opacity: 0.92;
 }
 
@@ -274,7 +249,7 @@
     display: none;
   }
 
-  .nav-inner {
+  .nav-bar > .nav-inner {
     gap: var(--ds-space-2);
   }
 
@@ -306,7 +281,7 @@
     display: none;
   }
 
-  .nav-inner {
+  .nav-bar > .nav-inner {
     gap: var(--ds-space-1);
   }
 
@@ -331,7 +306,7 @@
 /* Labelled pills plus the signed-out Google button overflow just above the
    icon-only breakpoint, so tighten pill padding and gaps until 1200px. */
 @media (min-width: 1001px) and (max-width: 1199px) {
-  .nav-inner {
+  .nav-bar > .nav-inner {
     gap: var(--ds-space-2);
   }
 
@@ -385,7 +360,7 @@
     margin-bottom: var(--ds-space-2);
   }
 
-  .nav-inner {
+  .nav-bar > .nav-inner {
     display: block;
     width: 100%;
     /* Grid item of .nav-bar: without this it grows to its min-content, so a
@@ -517,33 +492,23 @@
     display: none;
   }
 
-  /*
-   * MD3 navigation bar on the Aero glass: 80px container (plus the device's
-   * bottom safe area), equal-width destinations with an always-visible
-   * label, and a 64x32 pill active indicator behind the 24px icon.
-   */
+  /* .ds-bottom-nav supplies the bar, items, indicator and the primary-container
+     current-page pill; the team tint, sheen and white text are the app's. */
   .mobile-nav-bar {
-    composes: ds-aero-glass from global;
     --ds-aero-glass-tint: color-mix(
       in srgb,
       var(--color-primary) 62%,
       transparent
     );
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: var(--ds-layer-sticky);
-    box-sizing: border-box;
-    min-height: calc(80px + env(safe-area-inset-bottom, 0px));
-    padding: 0 var(--ds-space-1) env(safe-area-inset-bottom, 0px);
-    border: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    color: rgba(255, 255, 255, 0.82);
     /* Same reason as .nav-bar: keep labels out of the board game's pixel font. */
     font-family: 'Roboto', sans-serif;
+  }
+
+  .mobile-nav-bar:global(.ds-aero-glass) {
+    border-block-start-color: rgba(255, 255, 255, 0.25);
   }
 
   .mobile-nav-bar::before {
@@ -560,97 +525,18 @@
     z-index: -1;
   }
 
-  .mobile-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 4px;
-    min-width: 0;
-    min-height: 80px;
-    padding: 12px 0 16px;
-    box-sizing: border-box;
-    color: rgba(255, 255, 255, 0.82);
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .mobile-nav-item__indicator {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px;
-    max-width: 100%;
-    height: 32px;
-    border-radius: var(--ds-radius-full);
-    transition:
-      background-color var(--ds-motion-duration-short)
-        var(--ds-motion-easing-standard),
-      box-shadow var(--ds-motion-duration-short)
-        var(--ds-motion-easing-standard);
+  .mobile-nav-bar > .mobile-nav-item[aria-current='page'] {
+    color: white;
   }
 
   .mobile-nav-item__indicator svg {
     width: 24px;
     height: 24px;
   }
-
-  /* State layer for hover/press/focus on inactive destinations. */
-  .mobile-nav-item:hover .mobile-nav-item__indicator {
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  .mobile-nav-item:active .mobile-nav-item__indicator {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  .mobile-nav-item:focus-visible {
-    outline: none;
-  }
-
-  .mobile-nav-item:focus-visible .mobile-nav-item__indicator {
-    outline: 3px solid rgba(255, 255, 255, 0.85);
-    outline-offset: 2px;
-  }
-
-  .mobile-nav-item__label {
-    max-width: 100%;
-    overflow: hidden;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1rem;
-    letter-spacing: 0.03em;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  /* Active destination: the same white glass pill as the desktop active tab. */
-  .mobile-nav-item--active {
-    color: white;
-  }
-
-  .mobile-nav-item--active .mobile-nav-item__indicator,
-  .mobile-nav-item--active:hover .mobile-nav-item__indicator,
-  .mobile-nav-item--active:active .mobile-nav-item__indicator {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.92),
-      rgba(255, 255, 255, 0.68)
-    );
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 1px 3px rgba(0, 0, 0, 0.2);
-    color: var(--color-selection-text);
-  }
-
-  .mobile-nav-item--active .mobile-nav-item__label {
-    font-weight: 700;
-  }
 }
 
-/* Narrowest phones: five 12px labels would touch, so drop the tracking and a
-   half step of size while keeping every label whole. */
+/* Narrowest phones: five 12px labels would touch, so drop half a step of size
+   while keeping every label whole. */
 @media (max-width: 360px) {
   .mobile-nav-item {
     padding-inline: 2px;
@@ -658,7 +544,6 @@
 
   .mobile-nav-item__label {
     font-size: 0.6875rem;
-    letter-spacing: 0;
   }
 }
 
@@ -688,8 +573,8 @@
     height: var(--mobile-search-fab-size);
     border-radius: var(--ds-radius-large);
     border: 1px solid var(--ds-aero-border);
-    background-color: var(--color-selection);
-    color: var(--color-selection-text);
+    background-color: var(--ds-color-selection);
+    color: var(--ds-color-on-selection);
     box-shadow: var(--ds-elevation-2);
     /* The nav owns its open season listbox; this button only needs to float
        above page content and must remain below that chrome. */
@@ -721,7 +606,6 @@
   .nav-btn,
   .nav-back-btn,
   .nav-back-btn::before,
-  .mobile-nav-item__indicator,
   .mobile-search-fab {
     transition: none;
   }
@@ -737,22 +621,6 @@
   padding: var(--ds-space-3);
   padding-top: calc(var(--ds-space-3) + env(safe-area-inset-top, 0px));
   box-sizing: border-box;
-  animation: mobile-search-fade-in 0.15s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mobile-search-overlay {
-    animation: none;
-  }
-}
-
-@keyframes mobile-search-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .mobile-search-panel {

@@ -70,7 +70,7 @@ export default function MatchupPage() {
   return (
     <div className={`${styles.page} ${shared.pageShell} ds-page-shell`}>
       <PageHeader />
-      <main className={styles.content}>
+      <main className={`${styles.content} ds-enter`}>
         <section className={`${shared.surfaceElevated} ${styles.hero}`}>
           <nav className={styles.breadcrumb} aria-label="Breadcrumb">
             <Link to={sourcePath} className={styles.breadcrumbBack}>

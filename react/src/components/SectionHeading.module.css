@@ -11,7 +11,7 @@
 }
 
 .link {
-  color: var(--color-blue-accent);
+  color: var(--ds-color-info);
   font-size: var(--text-sm);
   font-weight: 600;
   text-decoration: none;

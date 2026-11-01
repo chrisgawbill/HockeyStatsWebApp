@@ -10,18 +10,6 @@
   box-sizing: border-box;
 }
 
-.section {
-  margin-bottom: var(--page-section-gap);
-}
-
-.sectionTitle {
-  font-size: var(--ds-font-size-title);
-  font-weight: var(--ds-font-weight-semibold);
-  letter-spacing: 0;
-  color: var(--color-text);
-  margin: 0 0 var(--ds-space-3);
-}
-
 .surface {
   composes: ds-aero-surface from global;
   background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
@@ -60,7 +48,7 @@
 
 .surfaceInteractive {
   composes: ds-aero-surface-interactive ds-focus-outline from global;
-  --ds-focus-outline-color: var(--color-blue-accent);
+  --ds-focus-outline-color: var(--ds-color-info);
   --ds-focus-outline-offset: 3px;
 }
 

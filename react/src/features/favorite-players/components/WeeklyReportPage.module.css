@@ -13,7 +13,7 @@
 }
 
 .teamSection {
-  margin-top: var(--page-section-gap);
+  margin-top: var(--ds-section-gap);
 }
 
 .teamCards {
@@ -101,7 +101,7 @@
 
 /* Theme-aware link color: the browser default is unreadable on dark cards. */
 .bestGame a {
-  color: var(--color-blue-accent);
+  color: var(--ds-color-info);
   font-weight: 600;
 }
 

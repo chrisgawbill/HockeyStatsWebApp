@@ -26,7 +26,7 @@ export default function MobileSearchOverlay({
 }: MobileSearchOverlayProps) {
   return (
     <div
-      className={styles['mobile-search-overlay']}
+      className={`ds-enter ds-enter-fade ${styles['mobile-search-overlay']}`}
       role="dialog"
       aria-modal="true"
       aria-label="Search teams or games"

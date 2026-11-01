@@ -1,6 +1,6 @@
 /* Schedule page layout */
 .schedule-page {
-  padding: var(--page-block-start) 0 var(--page-block-end);
+  padding: var(--ds-page-block-start) 0 var(--ds-page-block-end);
 }
 
 .schedule-filter-field {
@@ -257,8 +257,8 @@
 }
 
 .game-preseason-badge {
-  background: color-mix(in srgb, var(--color-blue-accent) 15%, transparent);
-  color: var(--color-blue-accent);
+  background: color-mix(in srgb, var(--ds-color-info) 15%, transparent);
+  color: var(--ds-color-info);
   border-radius: 999px;
   padding: 2px 8px;
   font-size: 0.7rem;
@@ -286,7 +286,7 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
   color: var(--color-muted-text);
   white-space: nowrap;
 }
@@ -297,7 +297,7 @@
   font-size: 0.68rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
   color: var(--color-text);
   white-space: nowrap;
 }
@@ -346,7 +346,9 @@
 /* Mobile: stack details vertically */
 @media (max-width: 575.98px) {
   .schedule-page {
-    padding-top: calc(var(--page-block-start) + env(safe-area-inset-top, 0px));
+    padding-top: calc(
+      var(--ds-page-block-start) + env(safe-area-inset-top, 0px)
+    );
   }
 
   .schedule-filter-bar {
@@ -429,7 +431,7 @@
 }
 
 :global([data-theme='dark']) .game-period-chip.overtime {
-  color: var(--color-blue-accent);
+  color: var(--ds-color-info);
 }
 
 :global([data-theme='dark']) .game-playoff-badge {

@@ -64,7 +64,7 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
 
   return (
     <div
-      className={styles['game-detail-hero']}
+      className={`${styles['game-detail-hero']} ds-enter`}
       style={
         {
           '--away-team-color': getTeamPrimaryColor(
@@ -144,6 +144,7 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
             className={joinClassNames(
               styles['game-detail-state-chip'],
               isLive && styles['game-detail-state-chip--live'],
+              isLive && 'ds-pulse',
             )}
             aria-live={isLive ? 'polite' : undefined}
           >

@@ -2,7 +2,9 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA
+**Status:** DONE (Product Owner accepted the HockeyStatsWebApp part and
+approved the merge on 2026-11-01, with item 7 deferred; the Spotter part is
+not started and moves to Spotter's own ticket index)
 
 **Goal:** HockeyStatsWebApp and the Spotter dashboard look and behave as they
 do today, but get entrance motion, menus, toasts, badges, app chrome, page
@@ -41,7 +43,21 @@ the source files named below. Spotter: its `CLAUDE.md`, `AGENTS.md`,
   Approve the shared defaults, or set per-page `--ds-enter-*` overrides where
   the current feel matters (for example the landing intro).
 
-**Decisions:** none yet.
+**Decisions (Product Owner, 2026-11-01):**
+
+- `.ds-base` heading weight: keep the HockeyStats h1 at 400 with a local
+  override (no visible change).
+- Mobile bottom navigation: adopt the shared `.ds-bottom-nav` including its
+  primary-container current-page pill, replacing the white glass pill. The
+  team-tinted bar stays local.
+- Kickers: the small size/tracking differences are approved; all listed
+  kickers use `.ds-overline-primary`.
+- Entrance timing: the shared `.ds-enter` defaults are approved everywhere,
+  with no per-page `--ds-enter-*` overrides.
+- Closure: accept the HockeyStatsWebApp part and merge without a Spotter run.
+  Item 7 (`.ds-base`) is deferred to the aero-md3-core patch follow-up below.
+  The local styles kept and the visible differences listed under Evidence are
+  accepted.
 
 **Scope:** bump `@chrisgawbill/aero-md3-core` to `^0.4.0` in each app, then
 replace the local copies below. Delete each local rule a shared class or token
@@ -140,6 +156,59 @@ and the dashboard browser integration command in `docs/dashboard.md`. Save
 before/after screenshots for both apps (1280 and 375px, light and dark, plus
 reduced motion) of the pages touched.
 
-**Evidence:** not started.
+**Evidence** (branch `ccr-151cb49c-meihlk`; HockeyStatsWebApp part
+implemented except item 7):
 
-**Release follow-ups:** none yet.
+- Dependency: `^0.4.0` (installs 0.4.0).
+- Adopted: items 1–6 and 8–12 as scoped. All 13 listed entrance keyframes plus
+  `standings-content-enter`, `standings-loading-enter`, `playoff-panel-enter`
+  and `install-enter` now use `.ds-enter*`. Menus, toasts, badge, app bar,
+  bottom navigation, semantic tokens, page rhythm (`shared.module.css`
+  `.section`/`.sectionTitle` deleted, callers use `.ds-section*`), kickers,
+  `.ds-pulse`, and layer tokens are also shared. No `.stat` row was a true
+  label–value row, so item 9 changed nothing. CSS/TSX: 464 lines deleted,
+  189 added.
+- **Item 7 (`.ds-base`) is not adopted: library defect.** `.ds-base h1`–`h3`
+  and `.ds-base body` have specificity (0,1,1), which beats single-class
+  component rules. The old global `h2 {}` rules did not. Adopting it enlarged
+  section titles that set their own size (home "Up next"/"Stat leaders"), moved
+  the Rink Quest headings, and overrode the app body background. A test with
+  the selectors wrapped in `:where(.ds-base)` (response rewritten in the
+  browser, nothing on disk) removed those differences. The local element rules
+  stay until an aero-md3-core patch ships.
+- Kept local, with reasons: nav and bottom-nav hairline `rgba(255,255,255,.25)`;
+  app-bar row sizing (padding instead of the 3.5rem minimum, keeping 56px);
+  landing kicker 4px bottom margin; z-index literals where a token would
+  change stacking order (team nav 50, install banner 95, mobile search FAB 90,
+  avatar menu 110, bell panel 120, season listbox 150, team-button popover 20,
+  player picker 5, and in-component 0–3 layers); focus outlines in info blue or
+  team colors (they are not the default focus color).
+- Visible differences (screenshots, reduced motion): bottom-nav current page
+  is the shared primary-container pill (approved). The desktop 1280 shots of
+  home, Rink Quest, My Hockey, compare and standings are pixel-identical, light
+  and dark. Expected but not captured (need data or sign-in): menus use
+  surface-container with elevation 2 and 2.5rem rows; search dropdown
+  max-height is `min(30rem, 70vh)`; toasts gain a border and body-small text;
+  entrances use 360ms/0.75rem with a 50ms stagger (approved); game-detail
+  eyebrow and matchup kicker lose a 4px margin (approved kicker change);
+  game-over dialog scales without rising; two info tints
+  (`TeamList` metrics, faceoff `.open`) use an 8% info mix.
+- `pnpm tsc`, `pnpm test` (72 files, 337 tests), `pnpm format:check`,
+  `pnpm build`: PASS.
+- Screenshots: `/home/user/evidence/aero-06/*-{before,after}.png` (home, board
+  game, My Hockey, compare, standings; 1280 and 375; light and dark; reduced
+  motion; before = `6441c662`) and `bottom-nav-375-before-after.png`.
+- NOT RUN: Spotter run (data pages, menus, toasts, badge, keyboard, live game
+  pulse, non-reduced motion); Spotter dashboard part (not started here).
+
+**Release follow-ups:**
+
+- Spotter dashboard part (scope above): copy into Spotter's
+  `docs/ticket-index.md` and start it there, after its AERO-04 part.
+- Spotter run on main for the checks listed as NOT RUN under Evidence.
+- aero-md3-core patch (0.4.1): wrap the `.ds-base` element selectors in
+  `:where(.ds-base)` so component classes win. Then adopt item 7 here (owner:
+  aero-md3-core; needs Product Owner approval).
+- Duplicates for a follow-up: repeated uppercase label rules in
+  `GameDetailPage.module.css` (`.game-story-stats__label`,
+  `.three-star-card__label` and others); the hard-coded 280px `.nav-search-col`.
