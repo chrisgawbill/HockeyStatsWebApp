@@ -71,6 +71,8 @@ are historical notes, not a second status field.
 | [API-AHL-03](tickets/API-AHL-03.md) | Favorites cover both leagues under the shared limits (backend) |
 | [AHL-01](tickets/AHL-01.md) | NHL/AHL toggle for the main league view |
 | [AHL-02](tickets/AHL-02.md) | Favorite AHL teams and players in the shared favorites list |
+| [AERO-03](tickets/AERO-03.md) | Shared primitives for duplicated app styles (aero-md3-core 0.3.0) |
+| [AERO-04](tickets/AERO-04.md) | Apps use shared aero-md3-core styles instead of local copies |
 
 ## Dependency outline
 
