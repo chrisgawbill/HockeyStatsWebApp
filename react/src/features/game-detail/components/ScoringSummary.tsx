@@ -31,8 +31,8 @@ function ScoringSummary({ scoring }: ScoringSummaryProps) {
   if (periodsWithGoals.length === 0) return null;
 
   return (
-    <section className={`${styles['game-detail-section']} ${shared.section}`}>
-      <h2 className={shared.sectionTitle}>Scoring Summary</h2>
+    <section className={`${styles['game-detail-section']} ds-section`}>
+      <h2 className="ds-section-title">Scoring Summary</h2>
       <div className={styles['scoring-summary']}>
         {periodsWithGoals.map((period) => (
           <div

@@ -16,7 +16,6 @@ import {
 } from '@/lib/teamColor';
 import { useLeague } from '@/lib/LeagueContext';
 import { useTheme } from '@/lib/ThemeContext';
-import shared from '@/styles/shared.module.css';
 
 interface Props {
   roster: Record<Position, RosterPlayer[]>;
@@ -48,8 +47,8 @@ export default function RosterTab({
   const teamColor = theme === 'dark' ? toDarkModeAccentColor(base, 45) : base;
 
   return (
-    <section className={shared.section}>
-      <h2 className={shared.sectionTitle}>Roster</h2>
+    <section className="ds-section">
+      <h2 className="ds-section-title">Roster</h2>
       <RosterLinesTabs
         view={view}
         teamColor={teamColor}

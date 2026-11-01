@@ -41,7 +41,7 @@ export default function TeamFormPanel({
     >
       <div className={styles['form-panel__header']}>
         <div>
-          <Heading id={headingId} className={shared.sectionTitle}>
+          <Heading id={headingId} className="ds-section-title">
             Team Form
           </Heading>
           <p className={styles['form-panel__caption']}>

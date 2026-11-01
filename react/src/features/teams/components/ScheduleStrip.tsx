@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ScheduledGame } from '@/features/schedule/types/scheduledGame';
 import { getGamePath } from '@/lib/gamePath';
 import { useLeague } from '@/lib/LeagueContext';
-import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import {
   SCHEDULE_STRIP_PAGE_SIZE,
@@ -97,8 +96,8 @@ export default function ScheduleStrip({
   };
 
   return (
-    <section className={shared.section}>
-      <h2 className={shared.sectionTitle}>Schedule</h2>
+    <section className="ds-section">
+      <h2 className="ds-section-title">Schedule</h2>
 
       <div
         className={joinClassNames(

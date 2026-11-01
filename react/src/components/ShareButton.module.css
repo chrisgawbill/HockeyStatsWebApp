@@ -6,22 +6,14 @@
 /* Just under the top bar, next to the button that was tapped and clear of
    the bottom nav, search FAB and install banner. */
 .toast {
-  position: fixed;
-  top: calc(var(--mobile-top-chrome-height, 64px) + var(--ds-space-2));
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(360px, calc(100vw - 32px));
-  box-sizing: border-box;
-  margin: 0;
-  padding: var(--ds-space-2) var(--ds-space-3);
-  border-radius: var(--ds-radius-medium);
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--ds-elevation-2);
-  font-size: 0.85rem;
-  line-height: 1.4;
+  composes: ds-toast from global;
+  --ds-toast-inset-top: calc(
+    var(--mobile-top-chrome-height, 64px) + var(--ds-space-2)
+  );
+  --ds-toast-inset-bottom: auto;
+  /* The measured top chrome height already includes the safe-area inset. */
+  margin-block-start: 0;
   text-align: center;
-  z-index: 1000;
 }
 
 @media (prefers-reduced-motion: reduce) {

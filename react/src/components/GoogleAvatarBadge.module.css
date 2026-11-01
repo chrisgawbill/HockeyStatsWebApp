@@ -32,46 +32,21 @@
      instead, which is still part of the element's hoverable box. */
   top: 100%;
   right: 0;
-  min-width: 180px;
-  /* Light frosted glass: still the clean readable card, with a touch of the
-     same blur/translucency as the nav bar rather than a flat opaque fill. */
-  background: color-mix(in srgb, var(--color-surface) 85%, transparent);
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--ds-radius-medium);
-  box-shadow: var(--ds-elevation-1);
-  padding: 6px var(--ds-space-1) var(--ds-space-1);
-  box-sizing: border-box;
+  /* Light frosted glass (.ds-aero-glass), not the nav bar's team tint that
+     the glass tint variable would otherwise inherit. */
+  --ds-aero-glass-tint: color-mix(
+    in srgb,
+    var(--color-surface) 85%,
+    transparent
+  );
+  padding-top: 6px;
   z-index: 110;
   font-family: 'Roboto', sans-serif;
 }
 
+/* The label shows the signed-in email as typed, not as an uppercase kicker. */
 .dropdownEmail {
-  margin: 0;
-  padding: var(--ds-space-1) var(--ds-space-2);
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
+  letter-spacing: 0;
+  text-transform: none;
   word-break: break-word;
-}
-
-.dropdownItem {
-  display: block;
-  box-sizing: border-box;
-  font-family: inherit;
-  text-decoration: none;
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  border-radius: var(--ds-radius-medium);
-  padding: var(--ds-space-2);
-  font-size: 0.9rem;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.dropdownItem:hover,
-.dropdownItem:focus-visible {
-  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
 }

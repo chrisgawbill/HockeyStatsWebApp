@@ -4,7 +4,6 @@
   container-type: inline-size;
   margin: 0 0 var(--ds-space-4);
   padding: var(--ds-space-4);
-  animation: dna-panel-enter 280ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 .dna-panel__header,
@@ -56,7 +55,7 @@
 .dna-chip {
   padding: 0.15rem var(--ds-space-3);
   border-radius: var(--ds-radius-full);
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
 }
@@ -162,38 +161,9 @@
   display: block;
   margin-top: var(--ds-space-1);
   font-size: var(--text-xs);
-  animation: dna-description-reveal 220ms ease-out both;
-  animation-delay: calc(120ms + (var(--dna-index, 0) * 45ms));
-}
-
-@keyframes dna-panel-enter {
-  from {
-    opacity: 0;
-    transform: translateY(0.4rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes dna-description-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(0.2rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dna-panel,
-  .dna-metric__description {
-    animation: none;
-  }
-
   .dna-metric__fill {
     transition: none;
   }

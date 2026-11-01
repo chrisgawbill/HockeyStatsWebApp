@@ -2,7 +2,7 @@
   max-width: 100%;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--color-chip-bg);
+  background: var(--ds-color-subtle-fill);
   color: var(--color-text);
   font-weight: 600;
   text-overflow: ellipsis;

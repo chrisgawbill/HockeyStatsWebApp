@@ -43,8 +43,8 @@ function PeriodGoalsBreakdownTable({
   const homeColor = getTeamPrimaryColor(homeAbbrev, league);
 
   return (
-    <section className={`${styles['game-detail-section']} ${shared.section}`}>
-      <h2 className={shared.sectionTitle}>Period Goals Breakdown</h2>
+    <section className={`${styles['game-detail-section']} ds-section`}>
+      <h2 className="ds-section-title">Period Goals Breakdown</h2>
       <div
         className={`${styles['period-goals-breakdown-wrapper']} ${shared.surface} ${shared.surfaceScroll}`}
       >

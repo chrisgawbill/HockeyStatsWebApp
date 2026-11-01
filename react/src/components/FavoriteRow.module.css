@@ -12,7 +12,7 @@
 
 /* Theme-aware link color: the browser default is unreadable on dark pages. */
 .hint a {
-  color: var(--color-blue-accent);
+  color: var(--ds-color-info);
   font-weight: 600;
 }
 
@@ -62,7 +62,7 @@
   position: absolute;
   top: 0;
   left: 50%;
-  z-index: 1;
+  z-index: var(--ds-layer-raised);
   display: grid;
   place-items: center;
   width: var(--favorite-picture-size);
@@ -109,7 +109,7 @@
 }
 
 .link:focus-visible::after {
-  outline: 3px solid var(--color-blue-accent);
+  outline: 3px solid var(--ds-color-info);
   outline-offset: 3px;
 }
 
@@ -153,7 +153,7 @@
    stay clickable. */
 .footer {
   position: relative;
-  z-index: 1;
+  z-index: var(--ds-layer-raised);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -179,7 +179,7 @@
 }
 
 .statLabel {
-  color: var(--color-blue-accent);
+  color: var(--ds-color-info);
   font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 0.06em;

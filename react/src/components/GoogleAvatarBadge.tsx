@@ -99,12 +99,12 @@ export default function GoogleAvatarBadge({
         )}
       </button>
       {open && (
-        <div className={styles.dropdown} role="menu">
-          <p className={styles.dropdownEmail}>{email}</p>
+        <div className={`ds-menu ds-aero-glass ${styles.dropdown}`} role="menu">
+          <p className={`ds-menu-label ${styles.dropdownEmail}`}>{email}</p>
           <Link
             to="/my-hockey"
             role="menuitem"
-            className={styles.dropdownItem}
+            className="ds-menu-item"
             onClick={() => setOpen(false)}
           >
             My Hockey
@@ -112,7 +112,7 @@ export default function GoogleAvatarBadge({
           <button
             type="button"
             role="menuitem"
-            className={styles.dropdownItem}
+            className="ds-menu-item"
             onClick={() => {
               onSignOut();
               setOpen(false);

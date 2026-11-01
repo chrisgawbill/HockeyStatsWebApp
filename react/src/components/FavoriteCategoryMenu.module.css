@@ -1,14 +1,9 @@
+/* .ds-menu supplies the elevated surface; this is a form popover, so it keeps
+   its own padding and position. */
 .menu {
   position: fixed;
-  z-index: 1000;
-  box-sizing: border-box;
-  overflow-y: auto;
+  z-index: var(--ds-layer-dropdown);
   padding: var(--ds-space-3);
-  border: 1px solid var(--ds-aero-border);
-  border-radius: var(--ds-radius-medium);
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--ds-elevation-2);
   font-size: var(--text-sm);
   text-align: left;
 }
@@ -74,10 +69,6 @@
   font-size: var(--text-xs);
 }
 
-.count {
-  color: var(--color-text-secondary);
-}
-
 .countOver,
 .error {
   color: var(--color-danger);
@@ -114,8 +105,8 @@
 }
 
 .saveButton {
-  border-color: var(--color-blue-accent);
-  background: var(--color-blue-accent);
+  border-color: var(--ds-color-info);
+  background: var(--ds-color-info);
   color: var(--color-white);
 }
 
@@ -128,6 +119,6 @@
 
 .menu input:focus-visible,
 .menu button:focus-visible {
-  outline: 3px solid var(--color-blue-accent);
+  outline: 3px solid var(--ds-color-info);
   outline-offset: 2px;
 }

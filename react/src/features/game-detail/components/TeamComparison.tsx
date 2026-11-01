@@ -44,8 +44,8 @@ function TeamComparison({
   const homeColor = getTeamPrimaryColor(homeAbbrev, league);
 
   return (
-    <section className={`${styles['game-detail-section']} ${shared.section}`}>
-      <h2 className={shared.sectionTitle}>Team Stats</h2>
+    <section className={`${styles['game-detail-section']} ds-section`}>
+      <h2 className="ds-section-title">Team Stats</h2>
       <div
         className={`${styles['team-comparison-card']} ${shared.surface} ${shared.surfaceClip}`}
         style={

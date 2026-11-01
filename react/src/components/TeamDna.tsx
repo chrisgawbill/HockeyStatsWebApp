@@ -44,11 +44,7 @@ function captionOf(profile: TeamDnaProfile, season: string): string {
 function DnaRow({ row, index }: { row: TeamDnaRow; index: number }) {
   const tierClass = row.tier ? styles[`dna-metric--${row.tier}`] : '';
   return (
-    <div
-      className={`${styles['dna-metric']} ${tierClass}`}
-      role="listitem"
-      style={{ '--dna-index': index } as CSSProperties}
-    >
+    <div className={`${styles['dna-metric']} ${tierClass}`} role="listitem">
       <div className={styles['dna-metric__heading']} aria-hidden="true">
         <span>{row.label}</span>
         <span className={styles['dna-metric__stat']}>
@@ -81,7 +77,12 @@ function DnaRow({ row, index }: { row: TeamDnaRow; index: number }) {
         <span className={'ds-visually-hidden'}>{describeRow(row)}</span>
       )}
       {row.note && (
-        <span className={styles['dna-metric__description']}>{row.note}</span>
+        <span
+          className={`ds-enter ${styles['dna-metric__description']}`}
+          style={{ '--ds-stagger-index': index } as CSSProperties}
+        >
+          {row.note}
+        </span>
       )}
     </div>
   );
@@ -102,13 +103,13 @@ export default function TeamDna({
 
   return (
     <section
-      className={`${styles['dna-panel']} ${shared.surface}`}
+      className={`ds-enter ${styles['dna-panel']} ${shared.surface}`}
       aria-labelledby={headingId}
       style={colorStyle}
     >
       <div className={styles['dna-panel__header']}>
         <div>
-          <h2 id={headingId} className={shared.sectionTitle}>
+          <h2 id={headingId} className="ds-section-title">
             {title}
           </h2>
           {rows.length > 0 && (

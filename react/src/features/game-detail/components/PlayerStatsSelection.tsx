@@ -229,8 +229,8 @@ function PlayerStatsSelection({
   awayAbbrev,
 }: Props) {
   return (
-    <section className={`${styles['game-detail-section']} ${shared.section}`}>
-      <h2 className={shared.sectionTitle}>Player Stats</h2>
+    <section className={`${styles['game-detail-section']} ds-section`}>
+      <h2 className="ds-section-title">Player Stats</h2>
       <TeamPlayerStats team={awayTeam} abbrev={awayAbbrev} />
       <TeamPlayerStats team={homeTeam} abbrev={homeAbbrev} />
     </section>

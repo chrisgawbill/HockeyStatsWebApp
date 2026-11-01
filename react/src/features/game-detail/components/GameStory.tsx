@@ -71,11 +71,11 @@ function GameStory({
   const hasSupportingStats = homeTotals !== null && awayTotals !== null;
 
   return (
-    <section className={`${styles['game-detail-section']} ${shared.section}`}>
+    <section className={`${styles['game-detail-section']} ds-section`}>
       <div className={styles['game-story-heading']}>
         <div>
           <p className="ds-overline-primary">The quick read</p>
-          <h2 className={shared.sectionTitle}>Game Story</h2>
+          <h2 className="ds-section-title">Game Story</h2>
         </div>
         <p className={styles['game-story-description']}>
           Verified from the scoring feed and box score.

@@ -133,10 +133,10 @@ function GameFlowChart({
 
   return (
     <section
-      className={`${shared.section} ${shared.surface} ${styles['shot-card']}`}
+      className={`ds-section ${shared.surface} ${styles['shot-card']}`}
       aria-labelledby="game-flow-heading"
     >
-      <h2 id="game-flow-heading" className={shared.sectionTitle}>
+      <h2 id="game-flow-heading" className="ds-section-title">
         Game flow
       </h2>
       <p className={styles['shot-card__subtitle']}>

@@ -109,11 +109,14 @@ export default function PageHeader({
     <>
       <nav
         aria-label="Site"
-        className={styles['nav-bar']}
+        className={joinClassNames(
+          'ds-app-bar ds-aero-glass',
+          styles['nav-bar'],
+        )}
         ref={navRef}
         style={isSubPage ? { marginBottom: 0 } : undefined}
       >
-        <div className={styles['nav-inner']}>
+        <div className={joinClassNames('ds-container', styles['nav-inner'])}>
           <div className={styles['nav-left']}>
             <span className={styles['nav-brand']}>HockeyStats</span>
             <div className={styles['nav-back-col']}>
@@ -166,7 +169,10 @@ export default function PageHeader({
           own destination links are hidden, so only one set is exposed. */}
       <nav
         aria-label="Primary"
-        className={styles['mobile-nav-bar']}
+        className={joinClassNames(
+          'ds-bottom-nav ds-aero-glass',
+          styles['mobile-nav-bar'],
+        )}
         ref={mobileNavRef}
       >
         {navItems.map(({ label, path, icon }) => (
@@ -174,13 +180,27 @@ export default function PageHeader({
             key={path}
             to={path}
             className={joinClassNames(
+              'ds-bottom-nav-item',
               styles['mobile-nav-item'],
-              activePath === path && styles['mobile-nav-item--active'],
             )}
             aria-current={activePath === path ? 'page' : undefined}
           >
-            <span className={styles['mobile-nav-item__indicator']}>{icon}</span>
-            <span className={styles['mobile-nav-item__label']}>{label}</span>
+            <span
+              className={joinClassNames(
+                'ds-bottom-nav-indicator',
+                styles['mobile-nav-item__indicator'],
+              )}
+            >
+              {icon}
+            </span>
+            <span
+              className={joinClassNames(
+                'ds-bottom-nav-label',
+                styles['mobile-nav-item__label'],
+              )}
+            >
+              {label}
+            </span>
           </Link>
         ))}
       </nav>
