@@ -2,8 +2,9 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE (HockeyStatsWebApp part started 2026-11-01; Spotter part
-not started)
+**Status:** DONE (Product Owner accepted the HockeyStatsWebApp part and
+approved the merge on 2026-11-01, with item 7 deferred; the Spotter part is
+not started and moves to Spotter's own ticket index)
 
 **Goal:** HockeyStatsWebApp and the Spotter dashboard look and behave as they
 do today, but get entrance motion, menus, toasts, badges, app chrome, page
@@ -53,6 +54,10 @@ the source files named below. Spotter: its `CLAUDE.md`, `AGENTS.md`,
   kickers use `.ds-overline-primary`.
 - Entrance timing: the shared `.ds-enter` defaults are approved everywhere,
   with no per-page `--ds-enter-*` overrides.
+- Closure: accept the HockeyStatsWebApp part and merge without a Spotter run.
+  Item 7 (`.ds-base`) is deferred to the aero-md3-core patch follow-up below.
+  The local styles kept and the visible differences listed under Evidence are
+  accepted.
 
 **Scope:** bump `@chrisgawbill/aero-md3-core` to `^0.4.0` in each app, then
 replace the local copies below. Delete each local rule a shared class or token
@@ -198,6 +203,9 @@ implemented except item 7):
 
 **Release follow-ups:**
 
+- Spotter dashboard part (scope above): copy into Spotter's
+  `docs/ticket-index.md` and start it there, after its AERO-04 part.
+- Spotter run on main for the checks listed as NOT RUN under Evidence.
 - aero-md3-core patch (0.4.1): wrap the `.ds-base` element selectors in
   `:where(.ds-base)` so component classes win. Then adopt item 7 here (owner:
   aero-md3-core; needs Product Owner approval).
