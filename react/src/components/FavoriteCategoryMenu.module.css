@@ -119,6 +119,6 @@
 
 .menu input:focus-visible,
 .menu button:focus-visible {
-  outline: 3px solid var(--ds-color-info);
+  outline: var(--ds-focus-outline-width) solid var(--ds-focus-outline-color);
   outline-offset: 2px;
 }

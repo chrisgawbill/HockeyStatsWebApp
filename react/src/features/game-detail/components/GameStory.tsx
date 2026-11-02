@@ -5,6 +5,7 @@ import {
 } from '@/features/game-detail/types/gameDetail';
 import {
   GameStoryFacts,
+  GameStoryScoringEvent,
   GameStoryTurningPoint,
 } from '@/features/game-detail/utils/gameStoryHelper';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
@@ -25,39 +26,42 @@ function periodLabel(periodNumber: number, periodType: string): string {
   return `P${periodNumber}`;
 }
 
-/** Away-home score such as 2–1, or a placeholder when either score is missing. */
-function scoreLabel(
-  awayScore: number | null,
-  homeScore: number | null,
-): string {
-  if (awayScore === null || homeScore === null) return 'Score unavailable';
-  return `${awayScore}–${homeScore}`;
-}
+const TURNING_POINT_LABELS: Record<GameStoryTurningPoint['kind'], string> = {
+  'first-lead': 'First goal',
+  'largest-lead': 'Largest lead',
+  'lead-change': 'Lead change',
+  'tied-game': 'Tied up',
+};
 
-/** Sentence describing a turning-point goal. */
-function turningPointText(
-  point: GameStoryTurningPoint,
-  facts: GameStoryFacts,
+/** The score after a goal with the leader first: "PHI up 5–1", "Tied 1–1". */
+function scoreAfterGoal(
+  event: GameStoryScoringEvent,
   awayAbbrev: string,
   homeAbbrev: string,
 ): string {
-  const event = facts.scoringEvents[point.eventIndex];
-  if (!event) return '';
+  const { awayScore, homeScore } = event;
+  if (awayScore === null || homeScore === null) return 'Score unavailable';
+  if (awayScore === homeScore) return `Tied ${awayScore}–${homeScore}`;
+  return awayScore > homeScore
+    ? `${awayAbbrev} up ${awayScore}–${homeScore}`
+    : `${homeAbbrev} up ${homeScore}–${awayScore}`;
+}
 
-  const score = scoreLabel(event.awayScore, event.homeScore);
-  if (point.kind === 'first-lead') {
-    return `${event.teamAbbrev} took the first lead, ${score}.`;
-  }
-  if (point.kind === 'largest-lead') {
-    return `${event.teamAbbrev} built the largest lead: ${event.scoreDifference} goals, ${score}.`;
-  }
-  if (point.kind === 'lead-change') {
-    return `The lead changed to ${event.teamAbbrev}, ${score}.`;
-  }
-  if (event.gameState === 'tied') {
-    return `The game was tied at ${score}.`;
-  }
-  return `${awayAbbrev} and ${homeAbbrev} were level at ${score}.`;
+/** Who scored and when: "M. Michkov · P1 12:49 · PP". */
+function goalMoment(event: GameStoryScoringEvent): string {
+  const badge =
+    event.goalModifier === 'empty-net'
+      ? 'EN'
+      : event.strength === 'pp' || event.strength === 'sh'
+        ? event.strength.toUpperCase()
+        : null;
+  return [
+    event.scorer,
+    `${periodLabel(event.periodNumber, event.periodType)} ${event.timeInPeriod}`.trim(),
+    badge,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 /** Plain-language recap of the game built from the scoring facts. */
@@ -82,85 +86,44 @@ function GameStory({
         </p>
       </div>
 
-      {facts.turningPoints.length > 0 && (
-        <div className={styles['game-story-turning-points']}>
-          {facts.turningPoints.map((point) => (
-            <p
-              className={`${styles['game-story-point']} ${shared.surfaceElevated}`}
-              key={`${point.kind}-${point.eventIndex}`}
-            >
-              {turningPointText(point, facts, awayTeam.abbrev, homeTeam.abbrev)}
-            </p>
-          ))}
-        </div>
-      )}
-
-      {facts.scoringEvents.length > 0 ? (
-        <div
-          className={`${styles['game-story-timeline']} ${shared.surface} ${shared.surfaceClip}`}
-          role="region"
-          aria-label="Scoring timeline"
-        >
-          <div
-            className={styles['game-story-timeline__line']}
-            aria-hidden="true"
-          />
-          {facts.scoringEvents.map((event, index) => (
-            <div
-              className={`${styles['game-story-event']} ds-enter ds-enter-start`}
-              key={event.eventIndex}
-              style={
-                {
-                  '--story-team-color': getTeamPrimaryColor(event.teamAbbrev),
-                  '--ds-stagger-index': Math.min(index, 3),
-                } as React.CSSProperties
-              }
-            >
-              <div
-                className={styles['game-story-event__marker']}
-                aria-hidden="true"
-              />
-              <div className={styles['game-story-event__content']}>
-                <div className={styles['game-story-event__meta']}>
-                  <span>
-                    {periodLabel(event.periodNumber, event.periodType)}
-                  </span>
-                  <span>{event.timeInPeriod}</span>
-                  {event.strength !== 'ev' && (
-                    <span
-                      className={`${shared.chip} ${styles['game-story-event__badge']}`}
-                    >
-                      {event.goalModifier === 'empty-net'
-                        ? 'EN'
-                        : event.strength.toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <p className={styles['game-story-event__title']}>
-                  <strong>{event.teamAbbrev}</strong> — {event.scorer}
-                </p>
-                <p className={styles['game-story-event__detail']}>
-                  {event.gameState === 'tied'
-                    ? 'Game tied'
-                    : event.gameState === 'away-lead'
-                      ? `${awayTeam.abbrev} led`
-                      : event.gameState === 'home-lead'
-                        ? `${homeTeam.abbrev} led`
-                        : 'Score after goal'}{' '}
-                  <span
-                    aria-label={`Score ${scoreLabel(event.awayScore, event.homeScore)}`}
-                  >
-                    {scoreLabel(event.awayScore, event.homeScore)}
-                  </span>
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+      {facts.turningPoints.length > 0 ? (
+        <ul className={styles['game-story-turning-points']}>
+          {facts.turningPoints.map((point) => {
+            const event = facts.scoringEvents[point.eventIndex];
+            if (!event) return null;
+            return (
+              <li
+                className={`${styles['game-story-point']} ${shared.surfaceElevated}`}
+                key={`${point.kind}-${point.eventIndex}`}
+                style={
+                  point.kind === 'tied-game'
+                    ? undefined
+                    : ({
+                        '--story-team-color': getTeamPrimaryColor(
+                          event.teamAbbrev,
+                        ),
+                      } as React.CSSProperties)
+                }
+              >
+                <span className={styles['game-story-point__label']}>
+                  {TURNING_POINT_LABELS[point.kind]}
+                </span>
+                <span className={styles['game-story-point__score']}>
+                  {scoreAfterGoal(event, awayTeam.abbrev, homeTeam.abbrev)}
+                </span>
+                <span className={styles['game-story-point__detail']}>
+                  {goalMoment(event)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       ) : (
-        <p className={`${styles['game-story-empty']} ${shared.surface}`}>
-          Scoring details are not available for this game.
-        </p>
+        facts.scoringEvents.length === 0 && (
+          <p className={`${styles['game-story-empty']} ${shared.surface}`}>
+            Scoring details are not available for this game.
+          </p>
+        )
       )}
 
       {hasSupportingStats && (

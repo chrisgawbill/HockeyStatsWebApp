@@ -66,7 +66,7 @@ function ShotMarker({
         className={styles['shot-marker--goal']}
         cx={cx}
         cy={cy}
-        r={radius + 1.5}
+        r={radius + 3}
         fill={colorVar}
       />
     );
@@ -82,7 +82,7 @@ function ShotMarker({
       />
     );
   }
-  const arm = radius * 0.75;
+  const arm = radius * 0.6;
   return (
     <path
       className={styles['shot-marker--miss']}
@@ -95,7 +95,8 @@ function ShotMarker({
 }
 
 /**
- * The full rink with one marker per shot, home attacking right. Hovering or
+ * The full rink with one marker per shot, home attacking right, with each
+ * team's attack direction named under it. Hovering or
  * tapping a marker shows the shooter, time, shot type and strength. Hidden
  * from assistive technology; the summary table carries the numbers.
  */
@@ -105,7 +106,6 @@ function ShotRink({ shots, homeTriCode, awayTriCode, message }: ShotRinkProps) {
   const [activeShotId, setActiveShotId] = useState<number | null>(null);
   const scale = createRinkScale(width);
   const markerRadius = width < PHONE_WIDTH ? 4 : 5;
-  const directionLabelSize = width < PHONE_WIDTH ? 10 : 11;
   const activeShot = message
     ? undefined
     : shots.find((shot) => shot.eventId === activeShotId);
@@ -116,91 +116,80 @@ function ShotRink({ shots, homeTriCode, awayTriCode, message }: ShotRinkProps) {
   );
 
   return (
-    <div
-      ref={frameRef}
-      className={`${styles['chart-frame']} ${
-        message ? styles['chart-frame--faded'] : ''
-      }`}
-      data-testid="shot-rink"
-    >
-      {width > 0 && (
-        <svg
-          viewBox={`0 0 ${scale.width} ${scale.height}`}
-          width={scale.width}
-          height={scale.height}
-          aria-hidden="true"
-          onPointerLeave={() => setActiveShotId(null)}
-        >
-          <RinkOutline scale={scale} />
-          <text
-            className={styles['axis-text']}
-            x={scale.toPixelX(-4)}
-            y={scale.toPixelY(-37)}
-            textAnchor="end"
-            fontSize={directionLabelSize}
+    <>
+      <div
+        ref={frameRef}
+        className={`${styles['chart-frame']} ${
+          message ? styles['chart-frame--faded'] : ''
+        }`}
+        data-testid="shot-rink"
+      >
+        {width > 0 && (
+          <svg
+            viewBox={`0 0 ${scale.width} ${scale.height}`}
+            width={scale.width}
+            height={scale.height}
+            aria-hidden="true"
+            onPointerLeave={() => setActiveShotId(null)}
           >
-            {`◀ ${awayTriCode} shoots`}
-          </text>
-          <text
-            className={styles['axis-text']}
-            x={scale.toPixelX(4)}
-            y={scale.toPixelY(-37)}
-            fontSize={directionLabelSize}
+            <RinkOutline scale={scale} />
+            {!message &&
+              orderedShots.map((shot) => {
+                const cx = scale.toPixelX(shot.x!);
+                const cy = scale.toPixelY(shot.y!);
+                return (
+                  <g
+                    key={shot.eventId}
+                    data-shot-type={shot.type}
+                    data-team={shot.teamTriCode}
+                    onPointerEnter={() => setActiveShotId(shot.eventId)}
+                    onPointerDown={() => setActiveShotId(shot.eventId)}
+                  >
+                    <ShotMarker
+                      shot={shot}
+                      cx={cx}
+                      cy={cy}
+                      radius={markerRadius}
+                      colorVar={colorFor(shot)}
+                    />
+                    <circle
+                      className={styles['shot-hit-area']}
+                      cx={cx}
+                      cy={cy}
+                      r={HIT_RADIUS}
+                    />
+                  </g>
+                );
+              })}
+            {activeShot && (
+              <circle
+                className={styles['shot-marker--active']}
+                cx={scale.toPixelX(activeShot.x!)}
+                cy={scale.toPixelY(activeShot.y!)}
+                r={markerRadius + 5}
+              />
+            )}
+          </svg>
+        )}
+        {activeShot && (
+          <ChartTooltip
+            anchorX={scale.toPixelX(activeShot.x!)}
+            anchorY={scale.toPixelY(activeShot.y!)}
+            frameWidth={width}
           >
-            {`${homeTriCode} shoots ▶`}
-          </text>
-          {!message &&
-            orderedShots.map((shot) => {
-              const cx = scale.toPixelX(shot.x!);
-              const cy = scale.toPixelY(shot.y!);
-              return (
-                <g
-                  key={shot.eventId}
-                  data-shot-type={shot.type}
-                  data-team={shot.teamTriCode}
-                  onPointerEnter={() => setActiveShotId(shot.eventId)}
-                  onPointerDown={() => setActiveShotId(shot.eventId)}
-                >
-                  <ShotMarker
-                    shot={shot}
-                    cx={cx}
-                    cy={cy}
-                    radius={markerRadius}
-                    colorVar={colorFor(shot)}
-                  />
-                  <circle
-                    className={styles['shot-hit-area']}
-                    cx={cx}
-                    cy={cy}
-                    r={HIT_RADIUS}
-                  />
-                </g>
-              );
-            })}
-          {activeShot && (
-            <circle
-              className={styles['shot-marker--active']}
-              cx={scale.toPixelX(activeShot.x!)}
-              cy={scale.toPixelY(activeShot.y!)}
-              r={markerRadius + 5}
-            />
-          )}
-        </svg>
-      )}
-      {activeShot && (
-        <ChartTooltip
-          anchorX={scale.toPixelX(activeShot.x!)}
-          anchorY={scale.toPixelY(activeShot.y!)}
-          frameWidth={width}
-        >
-          <strong>
-            {`${TYPE_LABELS[activeShot.type]} · ${activeShot.shooterName ?? activeShot.teamTriCode ?? ''}`}
-          </strong>
-          {describeShot(activeShot)}
-        </ChartTooltip>
-      )}
-      {message && <div className={styles['chart-message']}>{message}</div>}
-    </div>
+            <strong>
+              {`${TYPE_LABELS[activeShot.type]} · ${activeShot.shooterName ?? activeShot.teamTriCode ?? ''}`}
+            </strong>
+            {describeShot(activeShot)}
+          </ChartTooltip>
+        )}
+        {message && <div className={styles['chart-message']}>{message}</div>}
+      </div>
+      <p className={styles['rink-sides']} aria-hidden="true">
+        <span>{`◀ ${awayTriCode} shoots`}</span>
+        <span>{`${homeTriCode} shoots ▶`}</span>
+      </p>
+    </>
   );
 }
 

@@ -36,7 +36,7 @@ export function StatCard({
 }) {
   return (
     <div className={styles['diagnostics-stat-card']}>
-      <span className={styles['diagnostics-stat-card__label']}>{label}</span>
+      <span className="ds-overline">{label}</span>
       <span className={styles['diagnostics-stat-card__value']}>{children}</span>
     </div>
   );
@@ -52,7 +52,7 @@ export function CacheSummaryItem({
 }) {
   return (
     <div className={styles['cache-summary__item']}>
-      <span className={styles['cache-summary__label']}>{label}</span>
+      <span className="ds-overline">{label}</span>
       <span className={styles['cache-summary__value']}>{children}</span>
     </div>
   );

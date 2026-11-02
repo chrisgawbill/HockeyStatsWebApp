@@ -67,7 +67,7 @@
 }
 
 .row:focus-visible {
-  outline: 3px solid var(--ds-color-info);
+  outline: var(--ds-focus-outline-width) solid var(--ds-focus-outline-color);
   outline-offset: -3px;
 }
 
@@ -79,11 +79,7 @@
 }
 
 .whenDay {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
+  composes: ds-overline from global;
   white-space: nowrap;
 }
 

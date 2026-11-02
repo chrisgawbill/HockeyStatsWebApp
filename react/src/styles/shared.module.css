@@ -48,7 +48,6 @@
 
 .surfaceInteractive {
   composes: ds-aero-surface-interactive ds-focus-outline from global;
-  --ds-focus-outline-color: var(--ds-color-info);
   --ds-focus-outline-offset: 3px;
 }
 

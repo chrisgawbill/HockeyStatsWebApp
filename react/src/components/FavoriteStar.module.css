@@ -49,19 +49,13 @@
 }
 
 .star:focus-visible {
-  outline: 3px solid var(--ds-color-info);
+  outline: var(--ds-focus-outline-width) solid var(--ds-focus-outline-color);
   outline-offset: 2px;
 }
 
 .star:disabled {
   cursor: progress;
   opacity: 0.75;
-}
-
-/* Also used by FavoritePlayerStar, so the shared toast is composed here. */
-.toast {
-  composes: ds-toast from global;
-  text-align: left;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -144,6 +144,9 @@ const GameDetailPage = () => {
             homeTotals={homeTotals}
             awayTotals={awayTotals}
           />
+          {hasScoringSummary(landing) && (
+            <ScoringSummary scoring={landing!.summary.scoring} />
+          )}
           {periodGoalsBreakdown.length > 0 && (
             <PeriodGoalsBreakdownTable
               periodGoalsBreakdown={periodGoalsBreakdown}
@@ -158,9 +161,6 @@ const GameDetailPage = () => {
               homeTriCode={boxscore.homeTeam.abbrev}
               awayTriCode={boxscore.awayTeam.abbrev}
             />
-          )}
-          {hasScoringSummary(landing) && (
-            <ScoringSummary scoring={landing!.summary.scoring} />
           )}
           {hasThreeStars(landing) && (
             <ThreeStars stars={landing!.summary.threeStars} />

@@ -1,4 +1,4 @@
-import { PointerEvent, useMemo, useRef, useState } from 'react';
+import { PointerEvent, useId, useMemo, useRef, useState } from 'react';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameShots.module.css';
 import ChartTooltip from '@/features/game-detail/components/ChartTooltip';
@@ -55,9 +55,40 @@ function separateEndLabels(firstY: number, secondY: number): [number, number] {
 }
 
 /**
+ * Fills the gap between the two lines in the color of the team ahead. The
+ * gap is the even-odd overlap of the two areas under the lines; clipping it
+ * to one team's area keeps only the stretches where that team's line is on
+ * top.
+ */
+function LeadShading({
+  areas,
+}: {
+  areas: { clipId: string; path: string; colorVar: string }[];
+}) {
+  const gapPath = areas.map((area) => area.path).join(' ');
+  return (
+    <g>
+      {areas.map(({ clipId, path, colorVar }) => (
+        <g key={clipId}>
+          <clipPath id={clipId}>
+            <path d={path} />
+          </clipPath>
+          <path
+            className={styles['flow-lead']}
+            d={gapPath}
+            fill={colorVar}
+            clipPath={`url(#${clipId})`}
+          />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/**
  * Game flow: each team's cumulative shot attempts as a step line over game
  * time, with goal dots, period dividers, a shaded overtime band and end
- * labels. A crosshair reads both teams' attempts at any moment. Hidden from
+ * labels, and the gap between the lines shaded for the team ahead. A crosshair reads both teams' attempts at any moment. Hidden from
  * assistive technology; the shot map's summary table carries the numbers.
  */
 function GameFlowChart({
@@ -70,6 +101,7 @@ function GameFlowChart({
   const frameRef = useRef<HTMLDivElement>(null);
   const width = useElementWidth(frameRef);
   const [hoveredSeconds, setHoveredSeconds] = useState<number | null>(null);
+  const clipIdPrefix = `flow-lead${useId().replace(/:/g, '')}`;
 
   const teamLines: TeamLine[] = useMemo(
     () => [
@@ -110,6 +142,10 @@ function GameFlowChart({
       )
       .join(' ');
 
+  /** The step line closed down to the x-axis: everything under the line. */
+  const describeAreaUnder = (series: FlowSeries) =>
+    `${describeStepLine(series)} V${plotBottom} H${toX(0)} Z`;
+
   const trackPointer = (event: PointerEvent<SVGRectElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
     const fraction = (event.clientX - bounds.left) / bounds.width;
@@ -140,8 +176,8 @@ function GameFlowChart({
         Game flow
       </h2>
       <p className={styles['shot-card__subtitle']}>
-        Shot attempts over the game (on goal, missed and blocked). Dots mark
-        goals.
+        Shot attempts over the game (on goal, missed and blocked). Shading shows
+        who led in attempts; dots mark goals.
         <span className="ds-visually-hidden">
           {' '}
           The table under the shot map lists shots and goals by period.
@@ -177,6 +213,15 @@ function GameFlowChart({
               toX={toX}
               toY={toY}
             />
+            {hasEvents && (
+              <LeadShading
+                areas={teamLines.map(({ series, colorVar, role }) => ({
+                  clipId: `${clipIdPrefix}-${role}`,
+                  path: describeAreaUnder(series),
+                  colorVar,
+                }))}
+              />
+            )}
             {hasEvents &&
               teamLines.map(({ series, colorVar, role }) => (
                 <g key={role} data-team={series.teamTriCode}>
@@ -263,22 +308,6 @@ function GameFlowChart({
           </div>
         )}
       </div>
-      <ul className={styles.legend} aria-hidden="true">
-        <li>
-          <span className={`${styles['line-key']} ${styles['away-color']}`} />
-          {awayTriCode} (away)
-        </li>
-        <li>
-          <span className={`${styles['line-key']} ${styles['home-color']}`} />
-          {homeTriCode} (home)
-        </li>
-        <li>
-          <svg width="12" height="12">
-            <circle className={styles['legend-mark']} cx="6" cy="6" r="4.5" />
-          </svg>
-          Goal
-        </li>
-      </ul>
     </section>
   );
 }

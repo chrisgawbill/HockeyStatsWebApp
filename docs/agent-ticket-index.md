@@ -58,6 +58,7 @@ are historical notes, not a second status field.
 | [API-CACHE-01](tickets/API-CACHE-01.md) | Cache resilience (backend) |
 | [API-PBP-01](tickets/API-PBP-01.md) | Play-by-play events for shot maps and game flow (backend) |
 | [GAME-SHOTS-01](tickets/GAME-SHOTS-01.md) | Shot map and game flow on the game page |
+| [GAME-SHOTS-02](tickets/GAME-SHOTS-02.md) | Clearer game flow, shot map and game story |
 | [SHARE-01](tickets/SHARE-01.md) | Share button in the phone top bar |
 | [API-AUTH-02](tickets/API-AUTH-02.md) | Discord sign-in and account linking (backend) |
 | [SIGNIN-01](tickets/SIGNIN-01.md) | Account icon and sign-in modal (frontend) |
@@ -76,6 +77,7 @@ are historical notes, not a second status field.
 | [AERO-05](tickets/AERO-05.md) | More shared primitives for app chrome, overlays and motion (aero-md3-core 0.4.0) |
 | [AERO-06](tickets/AERO-06.md) | Apps use aero-md3-core 0.4.0 primitives for chrome, overlays and motion |
 | [AERO-07](tickets/AERO-07.md) | `.ds-base` specificity fix (aero-md3-core 0.4.1) and base-layer adoption |
+| [STYLE-DEDUP-01](tickets/STYLE-DEDUP-01.md) | Remove the duplicate label, header and toast styles AERO-06 left out of scope |
 
 ## Dependency outline
 
@@ -97,12 +99,14 @@ API-COMPARE-01 -> COMPARE-01
 FAN-01 -> FEED-01
 API-LINES-01 -> PREVIEW-01
 API-PBP-01 -> GAME-SHOTS-01
+GAME-SHOTS-01 -> GAME-SHOTS-02
 WPR-01 + API-WPR-02 -> WPR-02
 API-AUTH-02 -> SIGNIN-01
 API-AHL-01 -> API-AHL-02, API-AHL-03
 API-AHL-02 -> AHL-01
 API-AHL-03 + AHL-01 -> AHL-02
 AERO-03 -> AERO-04 -> AERO-05 -> AERO-06 -> AERO-07
+AERO-06 + AERO-07 -> STYLE-DEDUP-01
 ```
 
 ON2-09A may run early using the existing game; it gates production presentation
