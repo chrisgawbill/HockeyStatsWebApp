@@ -3,7 +3,9 @@ import type {
   SkaterWeekStats,
   WeeklyPlayerReport,
   WeeklyReportPlayer,
+  WeeklyReportTeam,
 } from '@/features/favorite-players/types/favoritePlayers';
+import type { League } from '@/lib/league';
 
 /** Most favorite players a user may have (enforced by the API with a 409). */
 export const MAX_FAVORITE_PLAYERS = 10;
@@ -19,17 +21,31 @@ export function formatSavePct(value: number | null): string {
   return fixed.startsWith('0') ? fixed.slice(1) : fixed;
 }
 
-/** Stat chips for a skater's week, in the approved order. */
-export function skaterStatItems(stats: SkaterWeekStats): string[] {
-  return [
+/** A report entry's league; entries from before API-AHL-04 are NHL. */
+export function reportEntryLeague(
+  entry: Pick<WeeklyReportPlayer | WeeklyReportTeam, 'league'>,
+): League {
+  return entry.league ?? 'nhl';
+}
+
+/**
+ * Stat chips for a skater's week, in the approved order. The AHL feed has no
+ * time on ice, so AHL skaters have no TOI chip.
+ */
+export function skaterStatItems(
+  stats: SkaterWeekStats,
+  league: League = 'nhl',
+): string[] {
+  const items = [
     `${stats.gp} GP`,
     `${stats.goals} G`,
     `${stats.assists} A`,
     `${stats.points} PTS`,
     `${formatPlusMinus(stats.plusMinus)} +/-`,
     `${stats.shots} SOG`,
-    `${stats.toiPerGame ?? '—'} TOI/GP`,
   ];
+  if (league === 'ahl') return items;
+  return [...items, `${stats.toiPerGame ?? '—'} TOI/GP`];
 }
 
 /** Stat chips for a goalie's week, in the approved order. */
@@ -47,7 +63,7 @@ export function playerStatItems(player: WeeklyReportPlayer): string[] {
   if (!player.stats) return [];
   return player.type === 'goalie'
     ? goalieStatItems(player.stats)
-    : skaterStatItems(player.stats);
+    : skaterStatItems(player.stats, reportEntryLeague(player));
 }
 
 /** "Did not play (team played 3 games)". */

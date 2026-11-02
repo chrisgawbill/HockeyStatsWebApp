@@ -3,6 +3,8 @@ import {
   formatSavePct,
   goalieStatItems,
   isWeekStart,
+  playerStatItems,
+  reportEntryLeague,
   skaterStatItems,
   teamsLabel,
   weeklyReportTitle,
@@ -71,5 +73,36 @@ describe('weeklyReportFormat', () => {
     expect(isWeekStart('2026-10-13')).toBe(false);
     expect(isWeekStart('2026-02-30')).toBe(false);
     expect(isWeekStart(undefined)).toBe(false);
+  });
+
+  it('reads a report entry without a league as NHL', () => {
+    expect(reportEntryLeague({})).toBe('nhl');
+    expect(reportEntryLeague({ league: 'nhl' })).toBe('nhl');
+    expect(reportEntryLeague({ league: 'ahl' })).toBe('ahl');
+  });
+
+  it('leaves the TOI chip out for AHL skaters only', () => {
+    const stats = {
+      gp: 2,
+      goals: 1,
+      assists: 1,
+      points: 2,
+      plusMinus: 0,
+      shots: 5,
+      toiPerGame: null,
+      bestGame: null,
+    };
+    const ahlSkater = player({ league: 'ahl', type: 'skater', stats });
+    expect(playerStatItems(ahlSkater)).toEqual([
+      '2 GP',
+      '1 G',
+      '1 A',
+      '2 PTS',
+      '0 +/-',
+      '5 SOG',
+    ]);
+    expect(playerStatItems(player({ type: 'skater', stats }))).toContain(
+      '— TOI/GP',
+    );
   });
 });

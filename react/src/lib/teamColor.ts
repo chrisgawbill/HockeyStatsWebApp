@@ -23,8 +23,9 @@ export function getTeamPrimaryColor(
 export function getTeamAccentColor(
   abbrev: string | undefined,
   theme: Theme,
+  league: 'nhl' | 'ahl' = 'nhl',
 ): string {
-  const primaryColor = getTeamPrimaryColor(abbrev);
+  const primaryColor = getTeamPrimaryColor(abbrev, league);
   return theme === 'dark' ? toDarkModeAccentColor(primaryColor) : primaryColor;
 }
 
