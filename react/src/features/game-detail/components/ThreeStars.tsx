@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LandingThreeStar } from '@/features/game-detail/types/gameDetail';
 import { getTeamPrimaryColor } from '@/lib/teamColor';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
+import FavoritePlayerStatsDialog from '@/features/favorite-players/components/FavoritePlayerStatsDialog';
+import { useLeague } from '@/lib/LeagueContext';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 
@@ -25,8 +27,12 @@ function formatStatLine(star: LandingThreeStar): string {
   return `${goals}G  ${assists}A  ${points}P`;
 }
 
-/** The game's three stars with headshots and stat lines. */
+/** The game's three stars with headshots and stat lines; a card opens the star's season stats. */
 function ThreeStars({ stars }: ThreeStarsProps) {
+  const { league } = useLeague();
+  const [selectedStar, setSelectedStar] = useState<LandingThreeStar | null>(
+    null,
+  );
   return (
     <section className={`${styles['game-detail-section']} ds-section`}>
       <h2 className="ds-section-title">Three Stars</h2>
@@ -50,9 +56,14 @@ function ThreeStars({ stars }: ThreeStarsProps) {
               imgClassName={styles['three-star-card__headshot']}
             />
             <div className={styles['three-star-card__info']}>
-              <span className={styles['three-star-card__name']}>
+              <button
+                type="button"
+                className={`${styles['three-star-card__name']} ${styles['player-stats-button']}`}
+                onClick={() => setSelectedStar(star)}
+                aria-haspopup="dialog"
+              >
                 {star.name.default}
-              </span>
+              </button>
               <span className={styles['three-star-card__meta']}>
                 {star.teamAbbrev} · {star.position}
               </span>
@@ -64,6 +75,19 @@ function ThreeStars({ stars }: ThreeStarsProps) {
           </div>
         ))}
       </div>
+      {selectedStar && (
+        <FavoritePlayerStatsDialog
+          player={{
+            league,
+            playerId: selectedStar.playerId,
+            name: selectedStar.name.default,
+            teamTriCode: selectedStar.teamAbbrev,
+            position: selectedStar.position,
+            headshot: selectedStar.headshot,
+          }}
+          onClose={() => setSelectedStar(null)}
+        />
+      )}
     </section>
   );
 }

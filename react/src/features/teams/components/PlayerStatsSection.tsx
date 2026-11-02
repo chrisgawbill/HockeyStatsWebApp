@@ -7,11 +7,14 @@ import {
   GoalieStatLine,
 } from '@/features/teams/types/teamPageTypes';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
+import FavoritePlayerStatsDialog from '@/features/favorite-players/components/FavoritePlayerStatsDialog';
+import type { StatsDialogPlayer } from '@/features/favorite-players/types/favoritePlayers';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
 import { DEFAULT_HEADSHOT_URL } from '@/lib/playerHeadshot';
 import { useLeague } from '@/lib/LeagueContext';
+import { formatPercentOneDecimal, STAT_DASH } from '@/lib/statFormat';
 
 /**
  * Common leaderboard row shape for skaters and goalies. Goalies have no
@@ -118,6 +121,12 @@ const DEFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
   formatValue: (row) => formatFaceoffCount(row.skater?.defensiveZoneFaceoffs),
 };
 
+const SHOOTING_PCT_COLUMN: LeaderColumn = {
+  label: 'S%',
+  formatValue: (row) =>
+    formatPercentOneDecimal(row.skater?.shootingPct ?? null),
+};
+
 /** Categories the AHL feed has no data for. */
 const NHL_ONLY_CATEGORIES = new Set<StatCategoryKey>([
   'faceoffWinPct',
@@ -126,7 +135,7 @@ const NHL_ONLY_CATEGORIES = new Set<StatCategoryKey>([
 
 /** Extra columns per category; categories not listed show the value alone. */
 const EXTRA_COLUMNS: Partial<Record<StatCategoryKey, LeaderColumn[]>> = {
-  goals: [PER_GAME_COLUMN, PROJECTED_COLUMN],
+  goals: [PER_GAME_COLUMN, PROJECTED_COLUMN, SHOOTING_PCT_COLUMN],
   assists: [PER_GAME_COLUMN, PROJECTED_COLUMN],
   points: [PER_GAME_COLUMN, PROJECTED_COLUMN],
   faceoffWinPct: [
@@ -212,15 +221,22 @@ interface Props {
   players: PlayerStatLine[];
   goalies: GoalieStatLine[];
   headshotMap: Map<number, string>;
+  triCode: string;
 }
 
-/** Team leaders: pick a stat category and see the top players with headshots. */
+/**
+ * Team leaders: pick a stat category and see the top players with headshots;
+ * a row opens that player's season stats dialog.
+ */
 export default function PlayerStatsSection({
   players,
   goalies,
   headshotMap,
+  triCode,
 }: Props) {
   const [selectedKey, setSelectedKey] = useState<StatCategoryKey>('goals');
+  const [selectedPlayer, setSelectedPlayer] =
+    useState<StatsDialogPlayer | null>(null);
   const { league } = useLeague();
   const shownCategories = STAT_CATEGORIES.filter(
     (category) => league === 'nhl' || !NHL_ONLY_CATEGORIES.has(category.key),
@@ -230,10 +246,15 @@ export default function PlayerStatsSection({
     (statCategory) => statCategory.key === selectedKey,
   )!;
   const topTen = getTopTen(players, goalies, selectedCategory);
-  const extraColumns = EXTRA_COLUMNS[selectedKey] ?? [];
   const teamGamesPlayed = Math.max(
     ...players.map((player) => player.gamesPlayed),
     0,
+  );
+  // A column the feed has no values for (such as S% from an older API) is left out.
+  const extraColumns = (EXTRA_COLUMNS[selectedKey] ?? []).filter((column) =>
+    topTen.some(
+      (row) => column.formatValue(row, teamGamesPlayed) !== STAT_DASH,
+    ),
   );
 
   return (
@@ -286,6 +307,16 @@ export default function PlayerStatsSection({
             <div
               key={`${row.id}-${index}`}
               className={styles['player-stat-row']}
+              onClick={() =>
+                setSelectedPlayer({
+                  league,
+                  playerId: row.id,
+                  name: row.name,
+                  teamTriCode: triCode,
+                  position: row.positionLabel,
+                  headshot: headshotMap.get(row.id) ?? null,
+                })
+              }
             >
               <div className={styles['player-stat-row__leading']}>
                 <span className={styles['player-stat-row__rank']}>
@@ -308,9 +339,14 @@ export default function PlayerStatsSection({
                 />
               </div>
               <div className={styles['player-stat-row__info']}>
-                <span className={styles['player-stat-row__name']}>
+                {/* A button so the row's dialog is reachable by keyboard; its click bubbles to the row. */}
+                <button
+                  type="button"
+                  className={`${styles['player-stat-row__name']} ds-focus-outline`}
+                  aria-haspopup="dialog"
+                >
                   {row.name}
-                </span>
+                </button>
                 <span className={styles['player-stat-row__pos']}>
                   {row.positionLabel} · {row.gamesPlayed} GP
                 </span>
@@ -330,6 +366,12 @@ export default function PlayerStatsSection({
           );
         })}
       </div>
+      {selectedPlayer && (
+        <FavoritePlayerStatsDialog
+          player={selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </section>
   );
 }

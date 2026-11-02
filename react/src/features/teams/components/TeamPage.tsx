@@ -235,6 +235,7 @@ export default function TeamPage() {
               players={playerStats}
               goalies={goalieStats}
               headshotMap={headshotMap}
+              triCode={triCode}
             />
           </section>
           <section id="roster" className={styles['team-section']}>

@@ -90,6 +90,8 @@ export interface SkaterSummaryContract {
   penaltyMinutes: number;
   faceoffWinPct: number | null;
   toiPerGame: number | null;
+  /** Goals per shot as a fraction (0.173); absent from older API responses. */
+  shootingPct?: number | null;
 }
 
 /** Normalized goalie summary contract returned by `/player/goalie/summary`. */
@@ -148,6 +150,8 @@ export interface PlayerStatLine {
   offensiveZoneFaceoffs: number | null;
   defensiveZoneFaceoffs: number | null;
   corsiPct: number | null;
+  /** Goals per shot as a fraction, or null when the feed lacks it. */
+  shootingPct: number | null;
 }
 
 /** View model backing the sortable Goalies tab table. */

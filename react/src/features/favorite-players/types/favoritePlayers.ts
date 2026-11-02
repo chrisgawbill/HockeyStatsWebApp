@@ -19,6 +19,12 @@ export interface FavoritePlayer {
   pushMuted: boolean;
 }
 
+/** The player fields the season stats dialog needs, favorited or not. */
+export type StatsDialogPlayer = Pick<
+  FavoritePlayer,
+  'league' | 'playerId' | 'name' | 'teamTriCode' | 'position' | 'headshot'
+>;
+
 export interface SkaterWeekStats {
   gp: number;
   goals: number;

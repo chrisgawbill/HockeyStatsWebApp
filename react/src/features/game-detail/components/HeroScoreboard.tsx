@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
+  BoxscoreTeam,
   GameDetailBoxscore,
   GameDetailStatus,
 } from '@/features/game-detail/types/gameDetail';
@@ -20,6 +21,34 @@ import { joinClassNames } from '@/lib/joinClassNames';
 interface Props {
   boxscore: GameDetailBoxscore;
   status: GameDetailStatus;
+}
+
+/** One side of the scoreboard: logo and abbreviation linking to the team page, then the score. */
+function ScoreboardTeam({
+  team,
+  logo,
+  showScore,
+}: {
+  team: BoxscoreTeam;
+  logo: string;
+  showScore: boolean;
+}) {
+  return (
+    <div className={styles['game-detail-team']}>
+      <Link
+        to={`/team/${team.abbrev}`}
+        className={`${styles['game-detail-team__link']} ds-focus-outline`}
+      >
+        <img className={styles['game-detail-team__logo']} src={logo} alt="" />
+        <span className={styles['game-detail-team__abbrev']}>
+          {team.abbrev}
+        </span>
+      </Link>
+      {showScore && (
+        <span className={styles['game-detail-team__score']}>{team.score}</span>
+      )}
+    </div>
+  );
 }
 
 /** Top-of-page scoreboard: team logos, score, period or puck-drop time, and a status chip. */
@@ -107,21 +136,11 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
         </span>
       </nav>
       <div className={styles['game-detail-scoreboard']}>
-        <div className={styles['game-detail-team']}>
-          <img
-            className={styles['game-detail-team__logo']}
-            src={awayLogo}
-            alt={boxscore.awayTeam.abbrev}
-          />
-          <span className={styles['game-detail-team__abbrev']}>
-            {boxscore.awayTeam.abbrev}
-          </span>
-          {!isFuture && (
-            <span className={styles['game-detail-team__score']}>
-              {boxscore.awayTeam.score}
-            </span>
-          )}
-        </div>
+        <ScoreboardTeam
+          team={boxscore.awayTeam}
+          logo={awayLogo}
+          showScore={!isFuture}
+        />
 
         <div className={styles['game-detail-center']}>
           {isFuture ? (
@@ -152,21 +171,11 @@ export default function HeroScoreboard({ boxscore, status }: Props) {
           </span>
         </div>
 
-        <div className={styles['game-detail-team']}>
-          <img
-            className={styles['game-detail-team__logo']}
-            src={homeLogo}
-            alt={boxscore.homeTeam.abbrev}
-          />
-          <span className={styles['game-detail-team__abbrev']}>
-            {boxscore.homeTeam.abbrev}
-          </span>
-          {!isFuture && (
-            <span className={styles['game-detail-team__score']}>
-              {boxscore.homeTeam.score}
-            </span>
-          )}
-        </div>
+        <ScoreboardTeam
+          team={boxscore.homeTeam}
+          logo={homeLogo}
+          showScore={!isFuture}
+        />
       </div>
 
       <div className={styles['game-detail-meta']}>

@@ -7,6 +7,11 @@ export function formatSavePct(value: number | null): string {
   return value == null ? STAT_DASH : value.toFixed(3).replace(/^0\./, '.');
 }
 
+/** A fraction as a percentage to one decimal without the sign (0.1734 -> "17.3"), or a dash. */
+export function formatPercentOneDecimal(value: number | null): string {
+  return value == null ? STAT_DASH : (value * 100).toFixed(1);
+}
+
 /** Goals-against average to two decimals, or a dash when missing. */
 export function formatGaa(value: number | null): string {
   return value == null ? STAT_DASH : value.toFixed(2);

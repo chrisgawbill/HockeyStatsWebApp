@@ -14,7 +14,7 @@ import {
 } from '@/features/teams/utils/playerStatsHelper';
 import type { TokenSlot } from '@/features/teams/utils/teamLinesHelper';
 import { getTeamList } from '@/lib/teamListData';
-import type { FavoritePlayer } from '@/features/favorite-players/types/favoritePlayers';
+import type { StatsDialogPlayer } from '@/features/favorite-players/types/favoritePlayers';
 
 export type FavoritePlayerStatsLoad =
   | { status: 'loading' }
@@ -33,7 +33,7 @@ function getStatSlot(position: string | null): TokenSlot {
  * after a trade).
  */
 async function loadStatCells(
-  player: FavoritePlayer,
+  player: StatsDialogPlayer,
   teamId: number,
   season: string,
 ): Promise<StatCell[] | null> {
@@ -56,9 +56,9 @@ async function loadStatCells(
   return buildPlayerStatCells(player.playerId, slot, lookup);
 }
 
-/** Loads a favorite player's season stats for the stats dialog. */
+/** Loads a player's season stats for the stats dialog. */
 export function useFavoritePlayerStats(
-  player: FavoritePlayer,
+  player: StatsDialogPlayer,
   season: string,
 ): FavoritePlayerStatsLoad {
   const [statsLoad, setStatsLoad] = useState<FavoritePlayerStatsLoad>({

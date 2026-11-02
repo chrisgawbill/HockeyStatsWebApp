@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BoxscoreSkater,
   BoxscoreGoalie,
@@ -7,6 +7,8 @@ import {
 import { getTeamPrimaryColor } from '@/lib/teamColor';
 import { useLeague } from '@/lib/LeagueContext';
 import FavoritePlayerStar from '@/features/favorite-players/components/FavoritePlayerStar';
+import FavoritePlayerStatsDialog from '@/features/favorite-players/components/FavoritePlayerStatsDialog';
+import type { StatsDialogPlayer } from '@/features/favorite-players/types/favoritePlayers';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/game-detail/components/GameDetailPage.module.css';
 
@@ -30,7 +32,13 @@ function formatSvPct(pct?: number): string {
   return (pct * 100).toFixed(1) + '%';
 }
 
-/** Name cell: the favorite star, then the player's name. */
+/** Opens a box score player's season stats dialog. */
+type SelectPlayer = (player: BoxscoreSkater | BoxscoreGoalie) => void;
+
+/**
+ * Name cell: the favorite star, then the player's name as a button so the
+ * row's stats dialog is reachable by keyboard. Its click bubbles to the row.
+ */
 function PlayerNameCell({
   playerId,
   name,
@@ -42,14 +50,26 @@ function PlayerNameCell({
     <td className={styles['player-box-table__name-col']}>
       <span className={styles['player-box-table__player']}>
         <FavoritePlayerStar playerId={playerId} playerName={name} size="sm" />
-        {name}
+        <button
+          type="button"
+          className={`${styles['player-stats-button']} ds-focus-outline`}
+          aria-haspopup="dialog"
+        >
+          {name}
+        </button>
       </span>
     </td>
   );
 }
 
 /** Skater box score sorted by time on ice, or by points where TOI is not tracked. */
-function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
+function SkaterTable({
+  skaters,
+  onSelectPlayer,
+}: {
+  skaters: BoxscoreSkater[];
+  onSelectPlayer: SelectPlayer;
+}) {
   const hasToi = skaters.some((skater) => skater.toi != null);
   const sorted = [...skaters].sort((a, b) =>
     hasToi ? toSeconds(b.toi) - toSeconds(a.toi) : b.points - a.points,
@@ -77,7 +97,11 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
         </thead>
         <tbody>
           {sorted.map((skater) => (
-            <tr key={skater.playerId}>
+            <tr
+              key={skater.playerId}
+              className={styles['player-box-table__row']}
+              onClick={() => onSelectPlayer(skater)}
+            >
               <td className={styles['player-box-table__muted']}>
                 {skater.sweaterNumber}
               </td>
@@ -131,7 +155,13 @@ function SkaterTable({ skaters }: { skaters: BoxscoreSkater[] }) {
  * Box score for goalies who played: time on ice, or where that is not
  * tracked (the AHL), a decision or a shot faced.
  */
-function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
+function GoalieTable({
+  goalies,
+  onSelectPlayer,
+}: {
+  goalies: BoxscoreGoalie[];
+  onSelectPlayer: SelectPlayer;
+}) {
   const hasToi = goalies.some((goalie) => goalie.toi != null);
   const played = goalies.filter((goalie) =>
     hasToi
@@ -157,7 +187,11 @@ function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
         </thead>
         <tbody>
           {played.map((goalie) => (
-            <tr key={goalie.playerId}>
+            <tr
+              key={goalie.playerId}
+              className={styles['player-box-table__row']}
+              onClick={() => onSelectPlayer(goalie)}
+            >
               <td className={styles['player-box-table__muted']}>
                 {goalie.sweaterNumber}
               </td>
@@ -195,7 +229,7 @@ function GoalieTable({ goalies }: { goalies: BoxscoreGoalie[] }) {
   );
 }
 
-/** One team's skater and goalie tables. */
+/** One team's skater and goalie tables; a row opens that player's season stats. */
 function TeamPlayerStats({
   team,
   abbrev,
@@ -204,8 +238,19 @@ function TeamPlayerStats({
   abbrev: string;
 }) {
   const { league } = useLeague();
+  const [selectedPlayer, setSelectedPlayer] =
+    useState<StatsDialogPlayer | null>(null);
   const skaters = [...team.forwards, ...team.defense];
   const teamColor = getTeamPrimaryColor(abbrev, league);
+  const selectPlayer: SelectPlayer = (player) =>
+    setSelectedPlayer({
+      league,
+      playerId: player.playerId,
+      name: player.name.default,
+      teamTriCode: abbrev,
+      position: player.position,
+      headshot: null,
+    });
 
   return (
     <div
@@ -214,9 +259,15 @@ function TeamPlayerStats({
     >
       <h3 className={styles['player-stats-team-block__title']}>{abbrev}</h3>
       <p className={styles['player-stats-team-block__subtitle']}>Skaters</p>
-      <SkaterTable skaters={skaters} />
+      <SkaterTable skaters={skaters} onSelectPlayer={selectPlayer} />
       <p className={styles['player-stats-team-block__subtitle']}>Goalies</p>
-      <GoalieTable goalies={team.goalies} />
+      <GoalieTable goalies={team.goalies} onSelectPlayer={selectPlayer} />
+      {selectedPlayer && (
+        <FavoritePlayerStatsDialog
+          player={selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </div>
   );
 }
