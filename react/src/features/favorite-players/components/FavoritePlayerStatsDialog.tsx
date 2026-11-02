@@ -11,16 +11,17 @@ import {
   getInitials,
 } from '@/features/favorite-players/utils/playerCardFormat';
 import { useTheme } from '@/lib/ThemeContext';
-import type { FavoritePlayer } from '@/features/favorite-players/types/favoritePlayers';
+import type { StatsDialogPlayer } from '@/features/favorite-players/types/favoritePlayers';
 
 export interface FavoritePlayerStatsDialogProps {
-  player: FavoritePlayer;
+  player: StatsDialogPlayer;
   onClose: () => void;
 }
 
 /**
- * Shows a favorite player's stats for the selected season, tinted with their
- * team's color, using the same dialog as the team page roster.
+ * Shows a player's stats for the selected season (favorites, game stars and
+ * box score rows), tinted with their team's color, using the same dialog as
+ * the team page roster.
  */
 export default function FavoritePlayerStatsDialog({
   player,

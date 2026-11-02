@@ -194,6 +194,21 @@
   min-width: 0;
 }
 
+.game-detail-team__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-1);
+  border-radius: var(--ds-radius-medium);
+  color: inherit;
+  text-decoration: none;
+}
+
+.game-detail-team__link:hover .game-detail-team__abbrev {
+  color: white;
+  text-decoration: underline;
+}
+
 .game-detail-team__logo {
   height: 80px;
   width: 80px;
@@ -571,6 +586,38 @@
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text);
+}
+
+/* The name button opens the stats dialog; its ::after stretches over the
+   card, and the headshot star (z-index 1) stays clickable above it. */
+.player-stats-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.three-star-card__name::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.three-star-card__name:focus-visible {
+  outline: none;
+}
+
+.three-star-card__name:focus-visible::after {
+  outline: var(--ds-focus-outline-width) solid var(--ds-focus-outline-color);
+  outline-offset: 3px;
+}
+
+.player-box-table__row {
+  cursor: pointer;
 }
 
 .three-star-card__meta {
