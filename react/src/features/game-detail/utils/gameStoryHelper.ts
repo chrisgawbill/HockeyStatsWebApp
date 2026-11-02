@@ -174,7 +174,7 @@ function findLeads(
   return { leadChanges, firstLead, largestLead };
 }
 
-/** Picks the notable goals to call out, listing each goal at most once. */
+/** Picks the notable goals to call out, each goal at most once, in game order. */
 function pickTurningPoints(
   facts: Pick<
     GameStoryFacts,
@@ -201,7 +201,9 @@ function pickTurningPoints(
     'tied-game',
     facts.tiedEventIndexes.find((index) => index > 0),
   );
-  return turningPoints;
+  return turningPoints.sort(
+    (first, second) => first.eventIndex - second.eventIndex,
+  );
 }
 
 /**

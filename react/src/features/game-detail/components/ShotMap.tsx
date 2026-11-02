@@ -26,7 +26,7 @@ interface ShotMapProps {
   awayTriCode: string;
 }
 
-/** One team's goals, shots on goal and misses for the filtered shots, beside its color. */
+/** One team's goals, shots on goal, misses and blocks for the filtered shots, beside its color. */
 function TeamTally({
   triCode,
   counts,
@@ -38,12 +38,21 @@ function TeamTally({
 }) {
   return (
     <span className={styles['tally-team']} data-testid={`tally-${triCode}`}>
-      <span
-        className={`${styles['team-dot']} ${colorClass}`}
-        aria-hidden="true"
-      />
-      {triCode} <strong>{counts.goals}</strong> G ·{' '}
-      <strong>{counts.shotsOnGoal}</strong> SOG · {counts.missed} missed
+      <span className={styles['tally-name']}>
+        <span
+          className={`${styles['team-dot']} ${colorClass}`}
+          aria-hidden="true"
+        />
+        {triCode}
+      </span>
+      <span>
+        <strong>{counts.goals}</strong> G
+      </span>
+      <span>
+        <strong>{counts.shotsOnGoal}</strong> SOG
+      </span>
+      <span>{counts.missed} missed</span>
+      <span>{counts.blocked} blocked</span>
     </span>
   );
 }

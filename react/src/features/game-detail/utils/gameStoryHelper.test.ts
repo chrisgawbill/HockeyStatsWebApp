@@ -30,6 +30,12 @@ describe('getGameStoryFacts', () => {
     ]);
     expect(facts.firstLead?.eventIndex).toBe(0);
     expect(facts.largestLead?.eventIndex).toBe(0);
+    // Called out in game order: the 1-1 tie comes before the lead change.
+    expect(facts.turningPoints).toEqual([
+      { kind: 'first-lead', eventIndex: 0 },
+      { kind: 'tied-game', eventIndex: 1 },
+      { kind: 'lead-change', eventIndex: 2 },
+    ]);
   });
 
   it('returns empty or partial facts for missing or incomplete scoring', () => {
