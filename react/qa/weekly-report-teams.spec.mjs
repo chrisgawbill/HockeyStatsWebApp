@@ -408,7 +408,7 @@ for (const width of [375, 1280]) {
           expect(placement.marginTop).toBe('0px');
           expect(placement.marginBottom).not.toBe('0px');
           expect(placement.padding).toBe(width <= 576 ? '16px' : '24px');
-          expect(placement.animationName).toMatch(/team-form-enter/);
+          expect(placement.animationName).toMatch(/\bds-enter\b/);
 
           await expectNoHorizontalScroll(page);
         });
