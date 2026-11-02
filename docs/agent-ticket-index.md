@@ -15,67 +15,67 @@ are historical notes, not a second status field.
 
 ## Tickets
 
-| Ticket | Title |
-| --- | --- |
-| [ON2-01](tickets/ON2-01.md) | Alternating shift activation engine |
-| [ON2-02](tickets/ON2-02.md) | Ranged diagonal skating and pass lanes |
-| [ON2-03](tickets/ON2-03.md) | Contextual card contracts and offers |
-| [ON2-04](tickets/ON2-04.md) | Hockey card library and identity packages |
-| [ON2-05](tickets/ON2-05.md) | Screens and Clear Crease battles |
-| [API-ON2-01](tickets/API-ON2-01.md) | Site-wide rivalry records and contract |
-| [API-ON2-02](tickets/API-ON2-02.md) | Rink Quest team and player profiles |
-| [ON2-06](tickets/ON2-06.md) | Team playbook and featured-star integration |
-| [ON2-07](tickets/ON2-07.md) | Daily opponent and Rivalry Night selection |
-| [ON2-08](tickets/ON2-08.md) | Product Owner team-content pilot |
-| [ON2-09](tickets/ON2-09.md) | Pregame team, matchup, and star flow |
-| [ON2-09A](tickets/ON2-09A.md) | Dimensional arena and camera prototype |
-| [ON2-10](tickets/ON2-10.md) | Fullscreen broadcast match shell and arena integration |
-| [ON2-11](tickets/ON2-11.md) | Physical hand and battle stage |
-| [ON2-12](tickets/ON2-12.md) | Broadcast moments and Rivalry Night clash |
-| [ON2-13](tickets/ON2-13.md) | Coach's Report and 2.0 release gate |
-| [AAR-01](tickets/AAR-01.md) | Favorite teams and After Action Report inbox |
-| [AAR-02](tickets/AAR-02.md) | Mobile push for After Action Reports |
-| [API-LINES-01](tickets/API-LINES-01.md) | Real line combinations from shift charts |
-| [TEAM-LINES-01](tickets/TEAM-LINES-01.md) | "Line Change" roster view |
-| [API-WPR-01](tickets/API-WPR-01.md) | Favorite players and the weekly player report (backend) |
-| [WPR-01](tickets/WPR-01.md) | Favorite players and the weekly report (frontend) |
-| [API-WPR-02](tickets/API-WPR-02.md) | Favorite teams in the weekly report (backend) |
-| [WPR-02](tickets/WPR-02.md) | Favorite teams and their form in the weekly report |
-| [HOME-FAV-01](tickets/HOME-FAV-01.md) | Favorite players row on the home page |
-| [API-FAN-01](tickets/API-FAN-01.md) | Fan categories for favorite teams (and players) (backend) |
-| [FAN-01](tickets/FAN-01.md) | Favorite teams on home and fan categories (frontend) |
-| [HOME-LEAD-01](tickets/HOME-LEAD-01.md) | Stat leaders use the favorite card on the home page |
-| [STAR-01](tickets/STAR-01.md) | Favorite star in leaderboards and box scores |
-| [NAV-01](tickets/NAV-01.md) | Header nav fits at 1024px |
-| [FEED-01](tickets/FEED-01.md) | "My Hockey" personal feed |
-| [HOME-LEAD-02](tickets/HOME-LEAD-02.md) | Swipe between phone stat leader groups |
-| [HOME-LOTTERY-01](tickets/HOME-LOTTERY-01.md) | Draft lottery matches the landing page |
-| [FEED-02](tickets/FEED-02.md) | Favorites move to My Hockey |
-| [PREVIEW-01](tickets/PREVIEW-01.md) | Pre-game preview on the matchup page |
-| [COMPARE-01](tickets/COMPARE-01.md) | Player comparison |
-| [API-COMPARE-01](tickets/API-COMPARE-01.md) | Every player in the season summaries (backend) |
-| [HOME-LOAD-01](tickets/HOME-LOAD-01.md) | Home sections load and fail on their own |
-| [API-CACHE-01](tickets/API-CACHE-01.md) | Cache resilience (backend) |
-| [API-PBP-01](tickets/API-PBP-01.md) | Play-by-play events for shot maps and game flow (backend) |
-| [GAME-SHOTS-01](tickets/GAME-SHOTS-01.md) | Shot map and game flow on the game page |
-| [SHARE-01](tickets/SHARE-01.md) | Share button in the phone top bar |
-| [API-AUTH-02](tickets/API-AUTH-02.md) | Discord sign-in and account linking (backend) |
-| [SIGNIN-01](tickets/SIGNIN-01.md) | Account icon and sign-in modal (frontend) |
-| [A11Y-01](tickets/A11Y-01.md) | Accessibility fixes from the Spotter baseline |
-| [API-PUSH-02](tickets/API-PUSH-02.md) | Reliable push delivery and scheduling (backend) |
-| [API-PUSH-03](tickets/API-PUSH-03.md) | Account-level push settings and automatic device subscription (backend) |
-| [PUSH-03](tickets/PUSH-03.md) | Automatic device subscription and account push settings (frontend) |
-| [SCHED-STATUS-01](tickets/SCHED-STATUS-01.md) | Live and final states on the schedule from cached game data |
-| [API-AHL-01](tickets/API-AHL-01.md) | AHL data client and stored AHL tables (backend) |
-| [API-AHL-02](tickets/API-AHL-02.md) | AHL read routes behind a league switch (backend) |
-| [API-AHL-03](tickets/API-AHL-03.md) | Favorites cover both leagues under the shared limits (backend) |
-| [AHL-01](tickets/AHL-01.md) | NHL/AHL toggle for the main league view |
-| [AHL-02](tickets/AHL-02.md) | Favorite AHL teams and players in the shared favorites list |
-| [AERO-03](tickets/AERO-03.md) | Shared primitives for duplicated app styles (aero-md3-core 0.3.0) |
-| [AERO-04](tickets/AERO-04.md) | Apps use shared aero-md3-core styles instead of local copies |
-| [AERO-05](tickets/AERO-05.md) | More shared primitives for app chrome, overlays and motion (aero-md3-core 0.4.0) |
-| [AERO-06](tickets/AERO-06.md) | Apps use aero-md3-core 0.4.0 primitives for chrome, overlays and motion |
-| [AERO-07](tickets/AERO-07.md) | `.ds-base` specificity fix (aero-md3-core 0.4.1) and base-layer adoption |
+| Ticket                                        | Title                                                                            |
+| --------------------------------------------- | -------------------------------------------------------------------------------- |
+| [ON2-01](tickets/ON2-01.md)                   | Alternating shift activation engine                                              |
+| [ON2-02](tickets/ON2-02.md)                   | Ranged diagonal skating and pass lanes                                           |
+| [ON2-03](tickets/ON2-03.md)                   | Contextual card contracts and offers                                             |
+| [ON2-04](tickets/ON2-04.md)                   | Hockey card library and identity packages                                        |
+| [ON2-05](tickets/ON2-05.md)                   | Screens and Clear Crease battles                                                 |
+| [API-ON2-01](tickets/API-ON2-01.md)           | Site-wide rivalry records and contract                                           |
+| [API-ON2-02](tickets/API-ON2-02.md)           | Rink Quest team and player profiles                                              |
+| [ON2-06](tickets/ON2-06.md)                   | Team playbook and featured-star integration                                      |
+| [ON2-07](tickets/ON2-07.md)                   | Daily opponent and Rivalry Night selection                                       |
+| [ON2-08](tickets/ON2-08.md)                   | Product Owner team-content pilot                                                 |
+| [ON2-09](tickets/ON2-09.md)                   | Pregame team, matchup, and star flow                                             |
+| [ON2-09A](tickets/ON2-09A.md)                 | Dimensional arena and camera prototype                                           |
+| [ON2-10](tickets/ON2-10.md)                   | Fullscreen broadcast match shell and arena integration                           |
+| [ON2-11](tickets/ON2-11.md)                   | Physical hand and battle stage                                                   |
+| [ON2-12](tickets/ON2-12.md)                   | Broadcast moments and Rivalry Night clash                                        |
+| [ON2-13](tickets/ON2-13.md)                   | Coach's Report and 2.0 release gate                                              |
+| [AAR-01](tickets/AAR-01.md)                   | Favorite teams and After Action Report inbox                                     |
+| [AAR-02](tickets/AAR-02.md)                   | Mobile push for After Action Reports                                             |
+| [API-LINES-01](tickets/API-LINES-01.md)       | Real line combinations from shift charts                                         |
+| [TEAM-LINES-01](tickets/TEAM-LINES-01.md)     | "Line Change" roster view                                                        |
+| [API-WPR-01](tickets/API-WPR-01.md)           | Favorite players and the weekly player report (backend)                          |
+| [WPR-01](tickets/WPR-01.md)                   | Favorite players and the weekly report (frontend)                                |
+| [API-WPR-02](tickets/API-WPR-02.md)           | Favorite teams in the weekly report (backend)                                    |
+| [WPR-02](tickets/WPR-02.md)                   | Favorite teams and their form in the weekly report                               |
+| [HOME-FAV-01](tickets/HOME-FAV-01.md)         | Favorite players row on the home page                                            |
+| [API-FAN-01](tickets/API-FAN-01.md)           | Fan categories for favorite teams (and players) (backend)                        |
+| [FAN-01](tickets/FAN-01.md)                   | Favorite teams on home and fan categories (frontend)                             |
+| [HOME-LEAD-01](tickets/HOME-LEAD-01.md)       | Stat leaders use the favorite card on the home page                              |
+| [STAR-01](tickets/STAR-01.md)                 | Favorite star in leaderboards and box scores                                     |
+| [NAV-01](tickets/NAV-01.md)                   | Header nav fits at 1024px                                                        |
+| [FEED-01](tickets/FEED-01.md)                 | "My Hockey" personal feed                                                        |
+| [HOME-LEAD-02](tickets/HOME-LEAD-02.md)       | Swipe between phone stat leader groups                                           |
+| [HOME-LOTTERY-01](tickets/HOME-LOTTERY-01.md) | Draft lottery matches the landing page                                           |
+| [FEED-02](tickets/FEED-02.md)                 | Favorites move to My Hockey                                                      |
+| [PREVIEW-01](tickets/PREVIEW-01.md)           | Pre-game preview on the matchup page                                             |
+| [COMPARE-01](tickets/COMPARE-01.md)           | Player comparison                                                                |
+| [API-COMPARE-01](tickets/API-COMPARE-01.md)   | Every player in the season summaries (backend)                                   |
+| [HOME-LOAD-01](tickets/HOME-LOAD-01.md)       | Home sections load and fail on their own                                         |
+| [API-CACHE-01](tickets/API-CACHE-01.md)       | Cache resilience (backend)                                                       |
+| [API-PBP-01](tickets/API-PBP-01.md)           | Play-by-play events for shot maps and game flow (backend)                        |
+| [GAME-SHOTS-01](tickets/GAME-SHOTS-01.md)     | Shot map and game flow on the game page                                          |
+| [SHARE-01](tickets/SHARE-01.md)               | Share button in the phone top bar                                                |
+| [API-AUTH-02](tickets/API-AUTH-02.md)         | Discord sign-in and account linking (backend)                                    |
+| [SIGNIN-01](tickets/SIGNIN-01.md)             | Account icon and sign-in modal (frontend)                                        |
+| [A11Y-01](tickets/A11Y-01.md)                 | Accessibility fixes from the Spotter baseline                                    |
+| [API-PUSH-02](tickets/API-PUSH-02.md)         | Reliable push delivery and scheduling (backend)                                  |
+| [API-PUSH-03](tickets/API-PUSH-03.md)         | Account-level push settings and automatic device subscription (backend)          |
+| [PUSH-03](tickets/PUSH-03.md)                 | Automatic device subscription and account push settings (frontend)               |
+| [SCHED-STATUS-01](tickets/SCHED-STATUS-01.md) | Live and final states on the schedule from cached game data                      |
+| [API-AHL-01](tickets/API-AHL-01.md)           | AHL data client and stored AHL tables (backend)                                  |
+| [API-AHL-02](tickets/API-AHL-02.md)           | AHL read routes behind a league switch (backend)                                 |
+| [API-AHL-03](tickets/API-AHL-03.md)           | Favorites cover both leagues under the shared limits (backend)                   |
+| [AHL-01](tickets/AHL-01.md)                   | NHL/AHL toggle for the main league view                                          |
+| [AHL-02](tickets/AHL-02.md)                   | Favorite AHL teams and players in the shared favorites list                      |
+| [AERO-03](tickets/AERO-03.md)                 | Shared primitives for duplicated app styles (aero-md3-core 0.3.0)                |
+| [AERO-04](tickets/AERO-04.md)                 | Apps use shared aero-md3-core styles instead of local copies                     |
+| [AERO-05](tickets/AERO-05.md)                 | More shared primitives for app chrome, overlays and motion (aero-md3-core 0.4.0) |
+| [AERO-06](tickets/AERO-06.md)                 | Apps use aero-md3-core 0.4.0 primitives for chrome, overlays and motion          |
+| [AERO-07](tickets/AERO-07.md)                 | `.ds-base` specificity fix (aero-md3-core 0.4.1) and base-layer adoption         |
 
 ## Dependency outline
 

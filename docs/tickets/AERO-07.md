@@ -32,14 +32,14 @@ aero-md3-core `docs/tickets/AERO-07.md` and must be on npm before the app part.
 **Product Owner checkpoint (pending):** measured differences after adoption,
 1280px, reduced motion (`/home/user/evidence/aero-07/diff-*.png`):
 
-| Difference | Where it shows | Size |
-| --- | --- | --- |
-| Shared `line-height: 1.2` on h1–h3 (was `normal`) | Rink Quest title and "Choose game length" (Press Start 2P, `normal` = 1.0) | Headings 6.4px and 4.8px taller; content below moves down about 11px. Clearly visible |
-| Same | Home section titles (Roboto, `normal` ≈ 1.15) | 0.4–0.8px per heading; "Draft lottery" ends 2.8px lower, page 4px taller |
-| Same | My Hockey / compare / standings page and state titles | Under 1px |
-| h1 letter-spacing -0.02em (was -0.5px) | 32px h1: -0.64px; 24px: -0.48px; standings 18px state title -0.36px | "Rink Quest" 1.4px narrower; standings state title 3px wider. Not noticeable |
-| h3 letter-spacing 0 (was 0.15px) | No bare h3 on the captured pages | Not measured |
-| Mono stack (`--ds-font-family-mono` vs source-code-pro/Menlo…) | No `code` on the captured pages | Not measured |
+| Difference                                                     | Where it shows                                                             | Size                                                                                  |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Shared `line-height: 1.2` on h1–h3 (was `normal`)              | Rink Quest title and "Choose game length" (Press Start 2P, `normal` = 1.0) | Headings 6.4px and 4.8px taller; content below moves down about 11px. Clearly visible |
+| Same                                                           | Home section titles (Roboto, `normal` ≈ 1.15)                              | 0.4–0.8px per heading; "Draft lottery" ends 2.8px lower, page 4px taller              |
+| Same                                                           | My Hockey / compare / standings page and state titles                      | Under 1px                                                                             |
+| h1 letter-spacing -0.02em (was -0.5px)                         | 32px h1: -0.64px; 24px: -0.48px; standings 18px state title -0.36px        | "Rink Quest" 1.4px narrower; standings state title 3px wider. Not noticeable          |
+| h3 letter-spacing 0 (was 0.15px)                               | No bare h3 on the captured pages                                           | Not measured                                                                          |
+| Mono stack (`--ds-font-family-mono` vs source-code-pro/Menlo…) | No `code` on the captured pages                                            | Not measured                                                                          |
 
 Recommendation: keep one local override, `line-height: normal` on the two
 Rink Quest title rules (`BoardGamePage`), and accept the rest. Option B: a
@@ -59,7 +59,7 @@ letter-spacing) restores 1280px pixel identity on every captured page
   337 tests), `pnpm format:check`, `pnpm build`: PASS.
 - `html`/`body` computed values unchanged: margin 0, inline padding, the
   `--color-bg` background, text color, Roboto, antialiasing, `overflow-x:
-  clip`; `scroll-behavior` smooth, and auto under reduced motion.
+clip`; `scroll-behavior` smooth, and auto under reduced motion.
 - Before = `93bd7e4` (0.4.0, local rules); after = this branch built against
   the 0.4.1 stylesheet. Pages: home, Rink Quest, My Hockey, compare,
   standings; 1280 and 375; light and dark; reduced motion. Data APIs and
