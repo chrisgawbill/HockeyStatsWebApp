@@ -5,6 +5,10 @@ Delivery rules: [development workflow](../agent-development.md).
 **Status:** ACTIVE (all items implemented; Spotter run and Product Owner
 acceptance pending)
 
+**Merged to `main` 2026-11-02** together with GAME-SHOTS-02, at the Product
+Owner's direction, before its Spotter run or acceptance; both remain
+pending.
+
 **Goal:** The duplicate styles listed under [AERO-06](AERO-06.md) "Release
 follow-ups" are gone. Pages look the same, except for differences the Product
 Owner approves below.

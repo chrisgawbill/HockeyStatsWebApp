@@ -2,8 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE — implemented on the work branch; awaiting Spotter and
-Product Owner review.
+**Status:** DONE — accepted by the Product Owner 2026-11-02 and merged to
+`main`. Spotter did not run before acceptance.
 
 **Goal:** The game page's charts read at a glance, and the game story says
 something the scoring summary doesn't.
@@ -57,5 +57,7 @@ game order of story boxes.
 build PASS. `qa/game-shots.spec.mjs` 8/8 PASS locally against a stand-in for
 the Spotter test module and a mocked API. Before/after screenshots at
 375/1280, light/dark, taken locally (not committed). Spotter NOT RUN.
+
+**Product Owner acceptance:** 2026-11-02, from the before/after screenshots.
 
 **Release follow-ups:** none.
