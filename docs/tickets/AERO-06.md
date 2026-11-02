@@ -208,7 +208,7 @@ implemented except item 7):
 - Spotter run on main for the checks listed as NOT RUN under Evidence.
 - aero-md3-core patch (0.4.1): wrap the `.ds-base` element selectors in
   `:where(.ds-base)` so component classes win. Then adopt item 7 here (owner:
-  aero-md3-core; needs Product Owner approval).
+  aero-md3-core; needs Product Owner approval). Tracked in [AERO-07](AERO-07.md).
 - Duplicates for a follow-up: repeated uppercase label rules in
   `GameDetailPage.module.css` (`.game-story-stats__label`,
   `.three-star-card__label` and others); the hard-coded 280px `.nav-search-col`.

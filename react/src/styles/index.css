@@ -90,10 +90,6 @@
   --color-shot-band-good: #74a8d0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 /* Scrollbar theming comes from .ds-scrollbar on <html>; this adds the Aero thumb bevel. */
 .ds-scrollbar::-webkit-scrollbar-thumb,
 .ds-scrollbar *::-webkit-scrollbar-thumb {
@@ -103,49 +99,20 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   body {
     transition: none;
   }
 }
 
+/* Element defaults (margin, safe areas, text, headings, code) come from .ds-base on <html>. */
 body {
-  margin: 0;
-  /* viewport-fit=cover: keep content clear of a landscape notch. */
-  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
   overflow-x: clip;
   background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: 'Roboto', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   transition:
     background-color 0.2s,
     color 0.2s;
 }
 
 h1 {
-  font-size: var(--ds-font-size-display);
   font-weight: 400;
-  letter-spacing: -0.5px;
-}
-
-h2 {
-  font-size: var(--ds-font-size-headline);
-  font-weight: 500;
-  letter-spacing: 0px;
-}
-
-h3 {
-  font-size: var(--text-xl);
-  font-weight: 500;
-  letter-spacing: 0.15px;
-}
-
-code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
