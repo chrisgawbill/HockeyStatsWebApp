@@ -2,9 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE (library part released as 0.4.1; app part implemented on
-branch `ccr-a1a082c9-flvcfk` with option A below, awaiting a Spotter run and
-Product Owner acceptance)
+**Status:** DONE (Product Owner accepted and approved the merge on
+2026-11-02 without a Spotter run; the run moves to the release follow-ups)
 
 **Goal:** HockeyStatsWebApp gets its `html`/`body`/heading/`code` element
 defaults from `.ds-base` (deferred [AERO-06](AERO-06.md) item 7) without
@@ -28,6 +27,8 @@ aero-md3-core `docs/tickets/AERO-07.md` and must be on npm before the app part.
   decision). `--ds-color-selection*` already hold today's selection values.
 - Known small differences are measured and brought to the Product Owner; keep
   local overrides only where a difference is visible.
+- Closure: accept the app part and merge without a Spotter run; the
+  differences accepted in the table below stand.
 - Heading differences: option A. Rink Quest's two pixel-font titles
   (`BoardGamePage` and `GameLengthPicker` `.title`) keep `line-height: normal`
   locally; every other difference in the table below is accepted.
@@ -92,7 +93,11 @@ clip`; `scroll-behavior` smooth, and auto under reduced motion.
 
 **Release follow-ups:**
 
+- Spotter run on main for the checks listed as NOT RUN under Evidence.
 - Pre-existing, unchanged here: the reduced-motion `body { transition: none }`
   in `styles/index.css` comes before the `body` rule, so the 0.2s theme
   transition still runs under reduced motion (same before and after). Moving
   the block below the `body` rule would fix it.
+- aero-md3-core publish workflow: the "Verify published version" step runs
+  before npm finishes processing and fails with a 404 after every release;
+  give it a short retry.
