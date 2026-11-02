@@ -7,6 +7,7 @@ import ErrorState from '@/components/ErrorState';
 import LoadingState from '@/components/LoadingState';
 import { ApiError } from '@/lib/apiClient';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { withLeagueQuery } from '@/lib/league';
 import { fetchWeeklyReport } from '@/features/favorite-players/api/favoritePlayersApi';
 import { useFavoritePlayers } from '@/features/favorite-players/hooks/FavoritePlayersContext';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
@@ -20,6 +21,7 @@ import {
   isWeekStart,
   MAX_FAVORITE_PLAYERS,
   playerStatItems,
+  reportEntryLeague,
   teamsLabel,
 } from '@/features/favorite-players/utils/weeklyReportFormat';
 import { listReportTeams } from '@/features/favorite-players/utils/weeklyReportTeams';
@@ -28,6 +30,7 @@ import shared from '@/styles/shared.module.css';
 import styles from '@/features/favorite-players/components/WeeklyReportPage.module.css';
 
 function PlayerCard({ player }: { player: WeeklyReportPlayer }) {
+  const league = reportEntryLeague(player);
   const items = playerStatItems(player);
   const bestGame =
     player.type === 'skater' ? (player.stats?.bestGame ?? null) : null;
@@ -36,6 +39,7 @@ function PlayerCard({ player }: { player: WeeklyReportPlayer }) {
       <PlayerHeadshot
         playerId={player.playerId}
         playerName={player.name}
+        league={league}
         src={player.headshot}
         className={styles.avatar}
         imgClassName={styles.avatarImg}
@@ -48,7 +52,9 @@ function PlayerCard({ player }: { player: WeeklyReportPlayer }) {
       <div className={styles.cardBody}>
         <h3 className={styles.playerName}>{player.name}</h3>
         <p className={styles.playerMeta}>
-          {[teamsLabel(player), player.position].filter(Boolean).join(' · ')}
+          {[league === 'ahl' && 'AHL', teamsLabel(player), player.position]
+            .filter(Boolean)
+            .join(' · ')}
         </p>
         {player.played && items.length > 0 ? (
           <>
@@ -62,7 +68,9 @@ function PlayerCard({ player }: { player: WeeklyReportPlayer }) {
             {bestGame && (
               <p className={styles.bestGame}>
                 Best game:{' '}
-                <Link to={`/game/${bestGame.gameId}`}>{bestGame.text}</Link>
+                <Link to={withLeagueQuery(`/game/${bestGame.gameId}`, league)}>
+                  {bestGame.text}
+                </Link>
               </p>
             )}
           </>
@@ -86,7 +94,10 @@ function ReportTeamsSection({ report }: { report: WeeklyPlayerReport }) {
       </h2>
       <ul className={styles.teamCards}>
         {teams.map((team) => (
-          <WeeklyReportTeamCard key={team.triCode} team={team} />
+          <WeeklyReportTeamCard
+            key={`${reportEntryLeague(team)}-${team.triCode}`}
+            team={team}
+          />
         ))}
       </ul>
     </section>

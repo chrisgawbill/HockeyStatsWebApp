@@ -51,6 +51,8 @@ export interface GoalieWeekStats {
 }
 
 interface WeeklyReportPlayerBase {
+  /** Absent on reports made before API-AHL-04, which hold NHL players only. */
+  league?: League;
   playerId: number;
   name: string;
   position: string | null;
@@ -94,6 +96,8 @@ export type WeeklyReportFormGame = Omit<TeamFormGame, 'date'> & {
 
 /** A favorite team frozen into the report (API-WPR-02). */
 export interface WeeklyReportTeam {
+  /** Absent on reports made before API-AHL-04, which hold NHL teams only. */
+  league?: League;
   triCode: string;
   name: string;
   logo: string | null;
