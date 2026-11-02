@@ -144,7 +144,7 @@ export default function FavoritePlayerStar({
         />
       )}
       {message && (
-        <p className={styles.toast} role={message.isError ? 'alert' : 'status'}>
+        <p className="ds-toast" role={message.isError ? 'alert' : 'status'}>
           {message.text}
         </p>
       )}

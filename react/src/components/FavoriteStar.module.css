@@ -58,12 +58,6 @@
   opacity: 0.75;
 }
 
-/* Also used by FavoritePlayerStar, so the shared toast is composed here. */
-.toast {
-  composes: ds-toast from global;
-  text-align: left;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .star,
   .star:hover,

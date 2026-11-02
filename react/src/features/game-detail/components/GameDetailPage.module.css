@@ -421,13 +421,8 @@
 }
 
 .scoring-period__header {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.75px;
-  color: var(--color-muted-text);
+  composes: ds-overline from global;
   padding: var(--ds-space-2) var(--ds-space-3);
-  margin: 0;
   border-bottom: 1px solid var(--color-divider);
   background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface));
 }
@@ -646,14 +641,6 @@
   margin-top: 2px;
 }
 
-.three-star-card__label {
-  font-size: var(--text-xs);
-  color: var(--color-muted-text);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-
 /* ── Team stats comparison ──────────────────────────────────────────────── */
 
 .team-comparison-header {
@@ -731,11 +718,7 @@
 }
 
 .team-stat-row__label {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-muted-text);
+  composes: ds-overline from global;
   text-align: center;
   white-space: nowrap;
 }
@@ -767,11 +750,7 @@
 }
 
 .player-stats-team-block__subtitle {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.75px;
-  color: var(--color-muted-text);
+  composes: ds-overline from global;
   margin: var(--ds-space-2) 0 var(--ds-space-1);
 }
 

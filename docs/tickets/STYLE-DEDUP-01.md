@@ -2,8 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE (inventory done; implementation waits for the Product
-Owner checkpoint below)
+**Status:** ACTIVE (items 1, 2 and the toast implemented; focus-outline
+decision pending; Spotter run and Product Owner acceptance pending)
 
 **Goal:** The duplicate styles listed under [AERO-06](AERO-06.md) "Release
 follow-ups" are gone. Pages look the same, except for differences the Product
@@ -109,7 +109,20 @@ fits none of the rules below (none is a `.ds-meta` row).
 Keep: roles, keyboard behavior, team colors, measured chrome heights, and the
 game-detail live state stated in text.
 
-**Decisions:** pending.
+**Decisions (Product Owner, 2026-11-02):**
+
+- Labels: where there is no good reason for a difference, use `.ds-overline`.
+  The 600/700 weight and 0.48–0.75px tracking split has no product meaning
+  (game detail mixes both on one page), so all nine family members use
+  `.ds-overline`: tracking becomes 0.72px and the five bold labels become 600.
+  Rules marked (c) keep their size, role or table differences. No local
+  `.label` class.
+- `.nav-search-col`: named local property `--nav-search-width: 280px` on
+  `.nav-bar`.
+- FavoritePlayerStar: use `.ds-toast` directly; the composed `.toast` is
+  deleted (accepting that the toast inherits its parent's alignment).
+- Focus outlines: pending; the Product Owner asked for the pros and cons of
+  each option.
 
 **Scope:** apply the approved options. Delete every rule (or every property)
 a shared class replaces; callers that keep layout properties keep only those.
@@ -134,7 +147,39 @@ Change bench), My Hockey, diagnostics, and the header at 1024/1280/375 plus
 detail (live and final, recorded fixtures), the header at 1024/1280/375, and
 keyboard focus on the changed controls.
 
-**Evidence:** pending.
+**Evidence** (branch `ccr-a1a082c9-flvcfk`):
+
+- Labels: three rules deleted (`.three-star-card__label`,
+  `.diagnostics-stat-card__label`, `.cache-summary__label`; their elements use
+  `ds-overline`); six keep only layout and `composes: ds-overline from global`
+  (`.team-stat-row__label` alignment/nowrap, `.scoring-period__header`
+  padding/divider/tint, `.player-stats-team-block__subtitle` margins,
+  `.player-stat-leaderboard__title` padding/tint/divider, `.bench__title`
+  margin, `.whenDay` nowrap; the live `.whenDay` danger color still wins).
+  CSS/TSX: 67 lines deleted, 13 added.
+- Computed styles of the real components and the mirrored markup, before vs
+  after, light and dark (`computed-{before,after}.json`): only
+  `letter-spacing` (0.48/0.5/0.75px → 0.72px) and `font-weight` (700 → 600 on
+  `.scoring-period__header`, `.player-stats-team-block__subtitle`, `.whenDay`,
+  both diagnostics labels) change. Size, color, margins, padding, alignment and
+  wrapping are unchanged; label boxes widen by up to 1.6px.
+- Header: `--nav-search-width`; the search column computes 181.4px at 1440
+  before and after (it shrinks in the row). Header and bottom navigation
+  regions are pixel-identical before/after at 375, 1280 and 1440 (light and
+  dark) and at 1024 dark; 1024 light differs only by glyph antialiasing (max
+  36/255, no layout change).
+- Toast: was `text-align: left`; now inherits `center` inside the three-star
+  card (`toast-375-light-before-after.png`), as accepted.
+- `pnpm tsc`, `pnpm test` (72 files, 337 tests), `pnpm format:check`,
+  `pnpm build`: PASS.
+- Screenshots: `/home/user/evidence/style-dedup-01/` — `labels-{1280,375}-{light,dark}-{before,after}.png`
+  (temporary harness rendering ThreeStars, TeamComparison, ScoringSummary,
+  StatCard, CacheSummaryItem and the other four labels' markup; not
+  committed), `home-{375,1024,1280,1440}-{light,dark}-{before,after}.png`
+  (no API locally: header plus loading state), `toast-375-light-*.png`.
+- NOT RUN: Spotter run (game detail live and final with recorded fixtures,
+  team page, My Hockey, diagnostics with data, header at 1024/1280/375,
+  keyboard focus on changed controls); Product Owner acceptance.
 
 **Release follow-ups:**
 

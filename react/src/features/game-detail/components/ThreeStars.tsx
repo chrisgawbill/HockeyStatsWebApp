@@ -59,9 +59,7 @@ function ThreeStars({ stars }: ThreeStarsProps) {
               <span className={styles['three-star-card__stats']}>
                 {formatStatLine(star)}
               </span>
-              <span className={styles['three-star-card__label']}>
-                {STAR_LABELS[star.star - 1]}
-              </span>
+              <span className="ds-overline">{STAR_LABELS[star.star - 1]}</span>
             </div>
           </div>
         ))}

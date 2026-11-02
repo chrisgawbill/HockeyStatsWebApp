@@ -530,12 +530,7 @@
 }
 
 .player-stat-leaderboard__title {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--color-muted-text);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0;
+  composes: ds-overline from global;
   padding: var(--ds-space-2) var(--ds-space-3);
   background: var(--color-bg-subtle);
   border-bottom: 1px solid var(--color-divider);
