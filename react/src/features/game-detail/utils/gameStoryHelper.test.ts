@@ -35,6 +35,7 @@ describe('getGameStoryFacts', () => {
       { kind: 'first-lead', eventIndex: 0 },
       { kind: 'tied-game', eventIndex: 1 },
       { kind: 'lead-change', eventIndex: 2 },
+      { kind: 'game-winner', eventIndex: 4 },
     ]);
   });
 
@@ -46,6 +47,7 @@ describe('getGameStoryFacts', () => {
       leadChanges: [],
       firstLead: null,
       largestLead: null,
+      gameWinnerEventIndex: null,
       turningPoints: [],
     });
 
@@ -58,5 +60,46 @@ describe('getGameStoryFacts', () => {
     expect(partial.scoringEvents[0]?.gameState).toBeNull();
     expect(partial.firstLead).toBeNull();
     expect(partial.largestLead).toBeNull();
+  });
+
+  it('finds the goal that put the winner ahead for good', () => {
+    // HOM wins 3-1: its second goal (2-1) is the winner, not the first lead.
+    const facts = getGameStoryFacts(
+      landingWithGoals([
+        { team: 'HOM', awayScore: 0, homeScore: 1 },
+        { team: 'AWY', awayScore: 1, homeScore: 1 },
+        { team: 'HOM', awayScore: 1, homeScore: 2 },
+        { team: 'HOM', awayScore: 1, homeScore: 3, period: 2 },
+      ]),
+      'AWY',
+      'HOM',
+    );
+    expect(facts.gameWinnerEventIndex).toBe(2);
+
+    // In a 1-0 game the only goal is called the game winner, not the first goal.
+    const shutout = getGameStoryFacts(
+      landingWithGoals([{ team: 'AWY', awayScore: 1, homeScore: 0 }]),
+      'AWY',
+      'HOM',
+    );
+    expect(shutout.turningPoints).toEqual([
+      { kind: 'game-winner', eventIndex: 0 },
+    ]);
+  });
+
+  it('has no game winner while live or when a shootout decided it', () => {
+    const goals = [{ team: 'AWY', awayScore: 1, homeScore: 0 }];
+    const live = { ...landingWithGoals(goals), gameState: 'LIVE' };
+    expect(getGameStoryFacts(live, 'AWY', 'HOM').gameWinnerEventIndex).toBe(
+      null,
+    );
+
+    const tiedAfterOvertime = landingWithGoals([
+      { team: 'AWY', awayScore: 1, homeScore: 0 },
+      { team: 'HOM', awayScore: 1, homeScore: 1 },
+    ]);
+    expect(
+      getGameStoryFacts(tiedAfterOvertime, 'AWY', 'HOM').gameWinnerEventIndex,
+    ).toBeNull();
   });
 });

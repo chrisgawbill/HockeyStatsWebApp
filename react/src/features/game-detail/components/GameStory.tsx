@@ -27,6 +27,7 @@ function periodLabel(periodNumber: number, periodType: string): string {
 }
 
 const TURNING_POINT_LABELS: Record<GameStoryTurningPoint['kind'], string> = {
+  'game-winner': 'Game winner',
   'first-lead': 'First goal',
   'largest-lead': 'Largest lead',
   'lead-change': 'Lead change',

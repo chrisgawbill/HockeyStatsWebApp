@@ -1,3 +1,4 @@
+import { isCompletedGameState } from '@/lib/gameStatus';
 import {
   GameLanding,
   LandingGoal,
@@ -32,7 +33,8 @@ export interface GameStoryLeadChange {
 }
 
 export interface GameStoryTurningPoint {
-  kind: 'first-lead' | 'largest-lead' | 'lead-change' | 'tied-game';
+  kind:
+    'game-winner' | 'first-lead' | 'largest-lead' | 'lead-change' | 'tied-game';
   eventIndex: number;
 }
 
@@ -42,6 +44,7 @@ export interface GameStoryFacts {
   leadChanges: GameStoryLeadChange[];
   firstLead: GameStoryLeadChange | null;
   largestLead: GameStoryLeadChange | null;
+  gameWinnerEventIndex: number | null;
   turningPoints: GameStoryTurningPoint[];
 }
 
@@ -174,11 +177,42 @@ function findLeads(
   return { leadChanges, firstLead, largestLead };
 }
 
+/**
+ * The winner's goal that put them ahead for good: the one that took their
+ * score to one more than the loser's final score. Only for a finished game
+ * decided in regulation or overtime; a shootout decides no goal.
+ */
+function findGameWinner(
+  scoringEvents: GameStoryScoringEvent[],
+  isFinal: boolean,
+): number | null {
+  if (!isFinal) return null;
+  const scoredGoals = scoringEvents.filter(
+    (event) =>
+      event.periodType !== 'SO' &&
+      event.awayScore !== null &&
+      event.homeScore !== null,
+  );
+  const finalGoal = scoredGoals[scoredGoals.length - 1];
+  if (!finalGoal || finalGoal.awayScore === finalGoal.homeScore) return null;
+  const awayWon = finalGoal.awayScore! > finalGoal.homeScore!;
+  const loserFinalScore = Math.min(finalGoal.awayScore!, finalGoal.homeScore!);
+  const gameWinner = scoredGoals.find(
+    (event) =>
+      (awayWon ? event.awayScore : event.homeScore) === loserFinalScore + 1,
+  );
+  return gameWinner?.eventIndex ?? null;
+}
+
 /** Picks the notable goals to call out, each goal at most once, in game order. */
 function pickTurningPoints(
   facts: Pick<
     GameStoryFacts,
-    'tiedEventIndexes' | 'leadChanges' | 'firstLead' | 'largestLead'
+    | 'tiedEventIndexes'
+    | 'leadChanges'
+    | 'firstLead'
+    | 'largestLead'
+    | 'gameWinnerEventIndex'
   >,
 ): GameStoryTurningPoint[] {
   const turningPoints: GameStoryTurningPoint[] = [];
@@ -194,6 +228,7 @@ function pickTurningPoints(
     }
   };
 
+  addTurningPoint('game-winner', facts.gameWinnerEventIndex ?? undefined);
   addTurningPoint('first-lead', facts.firstLead?.eventIndex);
   addTurningPoint('largest-lead', facts.largestLead?.eventIndex);
   addTurningPoint('lead-change', facts.leadChanges[0]?.eventIndex);
@@ -225,6 +260,10 @@ export function getGameStoryFacts(
     awayAbbrev,
     homeAbbrev,
   );
+  const gameWinnerEventIndex = findGameWinner(
+    scoringEvents,
+    isCompletedGameState(landing?.gameState ?? ''),
+  );
 
   return {
     scoringEvents,
@@ -232,11 +271,13 @@ export function getGameStoryFacts(
     leadChanges,
     firstLead,
     largestLead,
+    gameWinnerEventIndex,
     turningPoints: pickTurningPoints({
       tiedEventIndexes,
       leadChanges,
       firstLead,
       largestLead,
+      gameWinnerEventIndex,
     }),
   };
 }
