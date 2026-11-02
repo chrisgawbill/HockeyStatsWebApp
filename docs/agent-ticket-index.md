@@ -75,6 +75,7 @@ are historical notes, not a second status field.
 | [AERO-04](tickets/AERO-04.md) | Apps use shared aero-md3-core styles instead of local copies |
 | [AERO-05](tickets/AERO-05.md) | More shared primitives for app chrome, overlays and motion (aero-md3-core 0.4.0) |
 | [AERO-06](tickets/AERO-06.md) | Apps use aero-md3-core 0.4.0 primitives for chrome, overlays and motion |
+| [AERO-07](tickets/AERO-07.md) | `.ds-base` specificity fix (aero-md3-core 0.4.1) and base-layer adoption |
 
 ## Dependency outline
 
@@ -101,7 +102,7 @@ API-AUTH-02 -> SIGNIN-01
 API-AHL-01 -> API-AHL-02, API-AHL-03
 API-AHL-02 -> AHL-01
 API-AHL-03 + AHL-01 -> AHL-02
-AERO-03 -> AERO-04 -> AERO-05 -> AERO-06
+AERO-03 -> AERO-04 -> AERO-05 -> AERO-06 -> AERO-07
 ```
 
 ON2-09A may run early using the existing game; it gates production presentation
