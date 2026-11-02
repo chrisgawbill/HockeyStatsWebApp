@@ -14,6 +14,7 @@ import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
 import { DEFAULT_HEADSHOT_URL } from '@/lib/playerHeadshot';
 import { useLeague } from '@/lib/LeagueContext';
+import { formatPercentOneDecimal, STAT_DASH } from '@/lib/statFormat';
 
 /**
  * Common leaderboard row shape for skaters and goalies. Goalies have no
@@ -120,6 +121,12 @@ const DEFENSIVE_ZONE_FACEOFFS_COLUMN: LeaderColumn = {
   formatValue: (row) => formatFaceoffCount(row.skater?.defensiveZoneFaceoffs),
 };
 
+const SHOOTING_PCT_COLUMN: LeaderColumn = {
+  label: 'S%',
+  formatValue: (row) =>
+    formatPercentOneDecimal(row.skater?.shootingPct ?? null),
+};
+
 /** Categories the AHL feed has no data for. */
 const NHL_ONLY_CATEGORIES = new Set<StatCategoryKey>([
   'faceoffWinPct',
@@ -128,7 +135,7 @@ const NHL_ONLY_CATEGORIES = new Set<StatCategoryKey>([
 
 /** Extra columns per category; categories not listed show the value alone. */
 const EXTRA_COLUMNS: Partial<Record<StatCategoryKey, LeaderColumn[]>> = {
-  goals: [PER_GAME_COLUMN, PROJECTED_COLUMN],
+  goals: [PER_GAME_COLUMN, PROJECTED_COLUMN, SHOOTING_PCT_COLUMN],
   assists: [PER_GAME_COLUMN, PROJECTED_COLUMN],
   points: [PER_GAME_COLUMN, PROJECTED_COLUMN],
   faceoffWinPct: [
@@ -239,10 +246,15 @@ export default function PlayerStatsSection({
     (statCategory) => statCategory.key === selectedKey,
   )!;
   const topTen = getTopTen(players, goalies, selectedCategory);
-  const extraColumns = EXTRA_COLUMNS[selectedKey] ?? [];
   const teamGamesPlayed = Math.max(
     ...players.map((player) => player.gamesPlayed),
     0,
+  );
+  // A column the feed has no values for (such as S% from an older API) is left out.
+  const extraColumns = (EXTRA_COLUMNS[selectedKey] ?? []).filter((column) =>
+    topTen.some(
+      (row) => column.formatValue(row, teamGamesPlayed) !== STAT_DASH,
+    ),
   );
 
   return (

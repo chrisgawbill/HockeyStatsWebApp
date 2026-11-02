@@ -775,4 +775,39 @@
   .player-stat-tab {
     padding: 10px 12px;
   }
+
+  /* Up to four stat columns share a phone row, so they narrow and the name
+     wraps onto a second line instead of being cut off. */
+  .player-stat-row,
+  .player-stat-header {
+    --player-stat-col-width: 36px;
+    gap: var(--ds-space-2);
+    padding-left: var(--ds-space-2);
+    padding-right: var(--ds-space-2);
+  }
+
+  .player-stat-row__leading {
+    width: 60px;
+    gap: var(--ds-space-1);
+  }
+
+  .player-stat-row__headshot {
+    height: 32px;
+    width: 32px;
+  }
+
+  .player-stat-row__name {
+    font-size: var(--text-sm);
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .player-stat-row__value {
+    font-size: var(--text-base);
+  }
+
+  .player-stat-row__extra {
+    font-size: var(--text-sm);
+  }
 }

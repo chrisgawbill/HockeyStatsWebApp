@@ -232,6 +232,7 @@ test.describe('team player stats', () => {
             points: 12,
             plusMinus: 3,
             penaltyMinutes: 2,
+            shootingPct: 0.1734,
           },
         ],
       }),
@@ -241,6 +242,8 @@ test.describe('team player stats', () => {
       has: page.getByRole('heading', { name: 'Player Stats' }),
     });
     await leaders.getByText('Goals Leaders').waitFor();
+    // Goals leaders show shooting percentage beside the pace columns.
+    await expect(leaders.getByText('17.3', { exact: true })).toBeVisible();
     await leaders.getByText('10 GP').click();
     const dialog = page.getByRole('dialog');
     await expect(

@@ -208,6 +208,7 @@ export function transformPlayerStats(
     defensiveZoneFaceoffs:
       faceoffsByPlayerId.get(skater.playerId)?.defensiveZoneFaceoffs ?? null,
     corsiPct: corsiMap.get(skater.playerId) ?? null,
+    shootingPct: skater.shootingPct ?? null,
   }));
 }
 

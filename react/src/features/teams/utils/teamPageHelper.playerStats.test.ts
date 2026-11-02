@@ -22,4 +22,14 @@ describe('transformPlayerStats', () => {
     expect(statLine.offensiveZoneFaceoffs).toBeNull();
     expect(statLine.defensiveZoneFaceoffs).toBeNull();
   });
+
+  it('keeps shooting percentage, or null when an older API leaves it out', () => {
+    const [withShooting] = transformPlayerStats(
+      [{ ...centerSummary, shootingPct: 0.173 }],
+      null,
+    );
+    expect(withShooting.shootingPct).toBe(0.173);
+    const [withoutShooting] = transformPlayerStats([centerSummary], null);
+    expect(withoutShooting.shootingPct).toBeNull();
+  });
 });

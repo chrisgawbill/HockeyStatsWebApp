@@ -72,6 +72,7 @@ export const lookup = buildStatsLookup(
       offensiveZoneFaceoffs: null,
       defensiveZoneFaceoffs: null,
       corsiPct: null,
+      shootingPct: null,
     },
   ],
   [
