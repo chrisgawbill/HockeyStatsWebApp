@@ -2,8 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE (items 1, 2 and the toast implemented; focus-outline
-decision pending; Spotter run and Product Owner acceptance pending)
+**Status:** ACTIVE (all items implemented; Spotter run and Product Owner
+acceptance pending)
 
 **Goal:** The duplicate styles listed under [AERO-06](AERO-06.md) "Release
 follow-ups" are gone. Pages look the same, except for differences the Product
@@ -121,8 +121,10 @@ game-detail live state stated in text.
   `.nav-bar`.
 - FavoritePlayerStar: use `.ds-toast` directly; the composed `.toast` is
   deleted (accepting that the toast inherits its parent's alignment).
-- Focus outlines: pending; the Product Owner asked for the pros and cons of
-  each option.
+- Focus outlines (after a pros/cons table): unify now on the library default
+  `--ds-focus-outline-color` (primary, the team color on team pages, at 55%)
+  and the shared `--ds-focus-outline-width` (3px). No root override. Each
+  control keeps its own offset.
 
 **Scope:** apply the approved options. Delete every rule (or every property)
 a shared class replaces; callers that keep layout properties keep only those.
@@ -177,6 +179,21 @@ keyboard focus on the changed controls.
   StatCard, CacheSummaryItem and the other four labels' markup; not
   committed), `home-{375,1024,1280,1440}-{light,dark}-{before,after}.png`
   (no API locally: header plus loading state), `toast-375-light-*.png`.
+- Focus outlines: FavoriteStar, FavoriteRow, SeasonSelector,
+  FavoriteCategoryMenu, TeamList, StatLeadersSection, DraftLotteryOddsCard and
+  Row, MyHockey `.row`, TeamPage `.team-tab` and `.player-stat-row` use
+  `var(--ds-focus-outline-width) solid var(--ds-focus-outline-color)`;
+  `.surfaceInteractive` no longer overrides the color. Visible: info blue →
+  primary/team at 55%; DraftLottery card/row and TeamPage player rows 2px →
+  3px (player rows were opaque). Header season selector
+  (`focus-season-before-after.png`, 1280/375, light/dark; left before, right
+  after): the ring is now low contrast on the tinted bar. Focus stays
+  visible through the existing white halo. A one-rule header override would
+  restore contrast if the Product Owner wants it. Other primary-colored rings
+  outside the listed set (Matchup, Standings, Schedule, CompareTable,
+  InstallBanner and others) are unchanged.
+- Checks re-run after the focus change: `pnpm tsc`, `pnpm test` (72 files,
+  337 tests), `pnpm format:check`, `pnpm build`: PASS.
 - NOT RUN: Spotter run (game detail live and final with recorded fixtures,
   team page, My Hockey, diagnostics with data, header at 1024/1280/375,
   keyboard focus on changed controls); Product Owner acceptance.

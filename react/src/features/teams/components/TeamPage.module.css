@@ -65,7 +65,7 @@
 }
 
 .team-tab:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline: var(--ds-focus-outline-width) solid var(--ds-focus-outline-color);
   outline-offset: -3px;
 }
 
@@ -563,7 +563,7 @@
 }
 
 .player-stat-row:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: var(--ds-focus-outline-width) solid var(--ds-focus-outline-color);
   outline-offset: -2px;
 }
 
