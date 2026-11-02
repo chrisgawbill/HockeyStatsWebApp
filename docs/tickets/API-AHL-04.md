@@ -21,7 +21,10 @@ Blocks AHL-03's release. API-AHL-01/03 must be deployed first.
 repository), the push slice's `weeklyDispatch`, `src/platform/ahlApiClient.js`,
 the API README "Weekly Player Report" section.
 
-**Product Owner checkpoint (PM recommendation in each item):**
+**Product Owner checkpoint:** resolved 2026-11-02 (all five items as
+recommended below; see Decisions). Remaining: first real AHL report review.
+
+**Checkpoint items as asked (PM recommendation in each item):**
 
 1. **Break weeks.** Today a week with zero completed NHL games makes no
    reports at all. Recommendation: judge each league on its own. A week is a
@@ -47,6 +50,22 @@ the API README "Weekly Player Report" section.
 
 - 2026-11-02 (Product Owner): requested AHL favorites in the weekly report.
 - 2026-11-02 (PM): split into this backend ticket and frontend AHL-03.
+- 2026-11-02 (Product Owner): "go with your recommendations on all six"
+  (items 1–5 here, plus AHL-03's league marking):
+  1. Breaks are judged per league; a full break only when neither league
+     completed a game. An AHL favorite who played in an NHL break week gets
+     a report and push.
+  2. AHL skaters: GP, G, A, PTS, +/-, SOG, best game, no TOI/GP; goalies
+     unchanged; shootout losses count as OTL.
+  3. AHL teams in the team line read `TOR (AHL) 1-1-0`; the best performer
+     is chosen across both leagues by the existing rule; AHL player lines
+     carry no tag.
+  4. One mixed list per section, no separate AHL section.
+  5. AHL players get the per-player weekly-push mute; team push mutes stay
+     game-alert only.
+- Still a spike decision inside approved scope (not a Product Owner item):
+  on an AHL feed failure, 502 on the first Monday run, then NHL-only entries
+  with a logged warning on the last run of the day.
 
 **Scope (proposed contract, confirm at the checkpoint):**
 
@@ -79,7 +98,9 @@ Hockey; rewriting existing reports.
 - AHL-only users get a report and push when an AHL favorite played.
 - NHL-only users' reports and pushes are unchanged (byte-identical headline
   and payload except the new `league: 'nhl'` fields).
-- Break rule, stat line and headline follow the checkpoint answers.
+- An NHL break week with AHL games still yields reports for users whose AHL
+  favorites played; a week with no games in either league yields none.
+- The headline team line marks AHL teams `(AHL)`.
 
 **Verify:** builder tests with recorded HockeyTech fixtures (AHL skater,
 goalie, team week with an OT and a shootout loss, mixed-league headline,

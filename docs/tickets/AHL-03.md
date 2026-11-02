@@ -17,15 +17,19 @@ AHL-02 (league-aware favorites).
 `utils/weeklyReportTeams.ts`, `types/favoritePlayers.ts`, `lib/league.ts`,
 the weekly-report part of `after-action-reports/components/NotificationBell.tsx`.
 
-**Product Owner checkpoint:** the API-AHL-04 checkpoint items that show on
-the page (stat line without TOI, one mixed list); how an AHL entry shows its
-league (PM recommendation: the same small outlined "AHL" tag AHL-02 uses on
-favorite cards); experiential review.
+**Product Owner checkpoint:** league marking and the page-visible API-AHL-04
+items decided 2026-11-02 (see Decisions). Remaining: experiential review with
+a real AHL report.
 
 **Decisions:**
 
 - 2026-11-02 (Product Owner): started the ticket ("start work on tying
   favorited AHL players and teams in the weekly report").
+- 2026-11-02 (Product Owner): "go with your recommendations on all six":
+  AHL entries are marked with the "AHL ·" prefix in their meta/record line
+  (as built); AHL skaters show no TOI chip; players and teams stay in one
+  mixed list; AHL players join the bell's weekly-push mutes once
+  API-AHL-04 is deployed. API-AHL-04 records the backend items.
 - 2026-11-02 (PM): the report-page changes below are safe before the API
   ships (every entry reads as NHL until `league` arrives). The bell's
   "covers NHL favorites only" copy and NHL-only weekly mutes stay until
