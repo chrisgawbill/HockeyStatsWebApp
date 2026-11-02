@@ -2,12 +2,12 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE (all items implemented; Spotter run and Product Owner
-acceptance pending)
+**Status:** DONE — Spotter passed and the Product Owner accepted
+2026-11-02.
 
-**Merged to `main` 2026-11-02** together with GAME-SHOTS-02, at the Product
-Owner's direction, before its Spotter run or acceptance; both remain
-pending.
+**Merged to `main` 2026-11-02** (#138) together with GAME-SHOTS-02, at the
+Product Owner's direction, before its Spotter run or acceptance; both
+followed the same day.
 
 **Goal:** The duplicate styles listed under [AERO-06](AERO-06.md) "Release
 follow-ups" are gone. Pages look the same, except for differences the Product
@@ -213,9 +213,12 @@ keyboard focus on the changed controls.
   themselves are not contrast-checked yet (Spotter).
 - Checks re-run after the focus change: `pnpm tsc`, `pnpm test` (72 files,
   337 tests), `pnpm format:check`, `pnpm build`: PASS.
-- NOT RUN: Spotter run (game detail live and final with recorded fixtures,
-  team page, My Hockey, diagnostics with data, header at 1024/1280/375,
-  keyboard focus on changed controls); Product Owner acceptance.
+- Spotter run (game detail live and final with recorded fixtures, team
+  page, My Hockey, diagnostics with data, header at 1024/1280/375, keyboard
+  focus on changed controls): PASS, as reported by the Product Owner
+  2026-11-02 after the merge to `main`; the run's commit and report are not
+  recorded here.
+- Product Owner acceptance: 2026-11-02.
 
 **Release follow-ups:**
 
@@ -231,8 +234,8 @@ keyboard focus on the changed controls.
   `0 0 0 3px` opaque primary. `pnpm tsc`, `pnpm test` (72 files, 337 tests),
   `pnpm format:check`, `pnpm build`: PASS. Screenshots
   `/home/user/evidence/style-dedup-01/focus-season-1280-{light,dark}-{home,team}-0.4.2.png`
-  (not committed). NOT RUN: Spotter (the ring change on `.ds-button` and
-  `.ds-input` controls is part of the pending keyboard-focus check).
+  (not committed). Spotter's keyboard-focus check, which covers the ring
+  change on `.ds-button` and `.ds-input` controls, passed 2026-11-02.
 - Possible library follow-up (aero-md3-core, needs approval): a bold overline
   variant if option (b) is adopted, so `.label` can become shared.
 - Duplicates seen, not in scope: `.season-field__label` and
