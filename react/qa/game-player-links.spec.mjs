@@ -198,3 +198,64 @@ test.describe('game player links', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('team player stats', () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  test('GAME-LINKS Verify: a team page Player Stats row opens the player stats dialog', async ({
+    page,
+  }) => {
+    // The team page's season calls, empty apart from one skater; anything
+    // else the page asks for is not needed here.
+    await page.route(`${API}/**`, (route) =>
+      route.fulfill({ status: 404, json: { error: 'Not found' } }),
+    );
+    const emptyResponses = {
+      '/team/10?': { data: [{ teamFullName: 'Toronto Maple Leafs' }] },
+      '/team/roster/TOR?': { players: [] },
+      '/team/schedule/TOR?': { games: [] },
+      '/player/skater/corsi?': { data: [] },
+    };
+    for (const [path, json] of Object.entries(emptyResponses)) {
+      await page.route(`${API}${path}**`, (route) => route.fulfill({ json }));
+    }
+    await page.route(`${API}/player/skater/summary**`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            playerId: MATTHEWS,
+            name: 'Auston Matthews',
+            position: 'C',
+            gamesPlayed: 10,
+            goals: 7,
+            assists: 5,
+            points: 12,
+            plusMinus: 3,
+            penaltyMinutes: 2,
+          },
+        ],
+      }),
+    );
+    await page.goto('./#/team/TOR');
+    const leaders = page.locator('section', {
+      has: page.getByRole('heading', { name: 'Player Stats' }),
+    });
+    await leaders.getByText('Goals Leaders').waitFor();
+    await leaders.getByText('10 GP').click();
+    const dialog = page.getByRole('dialog');
+    await expect(
+      dialog.getByRole('heading', { name: 'Auston Matthews' }),
+    ).toBeVisible();
+    await expect(dialog.getByText('TOR · C')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
+
+    await leaders
+      .getByRole('button', { name: 'Auston Matthews', exact: true })
+      .focus();
+    await page.keyboard.press('Enter');
+    await expect(
+      dialog.getByRole('heading', { name: 'Auston Matthews' }),
+    ).toBeVisible();
+  });
+});

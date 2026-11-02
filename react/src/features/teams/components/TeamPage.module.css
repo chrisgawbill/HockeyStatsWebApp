@@ -602,6 +602,12 @@
 }
 
 .player-stat-row__name {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
   font-size: var(--text-base);
   font-weight: 500;
   color: var(--color-text);

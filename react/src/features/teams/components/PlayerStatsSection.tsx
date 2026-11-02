@@ -7,6 +7,8 @@ import {
   GoalieStatLine,
 } from '@/features/teams/types/teamPageTypes';
 import PlayerHeadshot from '@/features/favorite-players/components/PlayerHeadshot';
+import FavoritePlayerStatsDialog from '@/features/favorite-players/components/FavoritePlayerStatsDialog';
+import type { StatsDialogPlayer } from '@/features/favorite-players/types/favoritePlayers';
 import shared from '@/styles/shared.module.css';
 import styles from '@/features/teams/components/TeamPage.module.css';
 import { joinClassNames } from '@/lib/joinClassNames';
@@ -212,15 +214,22 @@ interface Props {
   players: PlayerStatLine[];
   goalies: GoalieStatLine[];
   headshotMap: Map<number, string>;
+  triCode: string;
 }
 
-/** Team leaders: pick a stat category and see the top players with headshots. */
+/**
+ * Team leaders: pick a stat category and see the top players with headshots;
+ * a row opens that player's season stats dialog.
+ */
 export default function PlayerStatsSection({
   players,
   goalies,
   headshotMap,
+  triCode,
 }: Props) {
   const [selectedKey, setSelectedKey] = useState<StatCategoryKey>('goals');
+  const [selectedPlayer, setSelectedPlayer] =
+    useState<StatsDialogPlayer | null>(null);
   const { league } = useLeague();
   const shownCategories = STAT_CATEGORIES.filter(
     (category) => league === 'nhl' || !NHL_ONLY_CATEGORIES.has(category.key),
@@ -286,6 +295,16 @@ export default function PlayerStatsSection({
             <div
               key={`${row.id}-${index}`}
               className={styles['player-stat-row']}
+              onClick={() =>
+                setSelectedPlayer({
+                  league,
+                  playerId: row.id,
+                  name: row.name,
+                  teamTriCode: triCode,
+                  position: row.positionLabel,
+                  headshot: headshotMap.get(row.id) ?? null,
+                })
+              }
             >
               <div className={styles['player-stat-row__leading']}>
                 <span className={styles['player-stat-row__rank']}>
@@ -308,9 +327,14 @@ export default function PlayerStatsSection({
                 />
               </div>
               <div className={styles['player-stat-row__info']}>
-                <span className={styles['player-stat-row__name']}>
+                {/* A button so the row's dialog is reachable by keyboard; its click bubbles to the row. */}
+                <button
+                  type="button"
+                  className={`${styles['player-stat-row__name']} ds-focus-outline`}
+                  aria-haspopup="dialog"
+                >
                   {row.name}
-                </span>
+                </button>
                 <span className={styles['player-stat-row__pos']}>
                   {row.positionLabel} · {row.gamesPlayed} GP
                 </span>
@@ -330,6 +354,12 @@ export default function PlayerStatsSection({
           );
         })}
       </div>
+      {selectedPlayer && (
+        <FavoritePlayerStatsDialog
+          player={selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </section>
   );
 }
