@@ -215,8 +215,20 @@ keyboard focus on the changed controls.
 
 **Release follow-ups:**
 
-- aero-md3-core AERO-09 (IDEA): opaque default focus colors (0.4.2). On
-  release, bump and delete the interim root line in `styles/index.css`.
+- aero-md3-core AERO-09: done. 0.4.2 released 2026-11-02 (npm `latest`;
+  packed `core.css` matches aero-md3-core `main` `3c45432`). The app is on
+  `^0.4.2` and the interim root `--ds-focus-outline-color` line in
+  `styles/index.css` is deleted; the `.team-page` redeclaration stays. 0.4.2
+  also makes `--ds-focus-ring` (`.ds-button`, `.ds-input`, `.ds-focusable`,
+  `.ds-table-sort-button`) opaque primary instead of 35%, approved in AERO-09.
+  Computed after the bump (1280, keyboard focus on the season selector): home
+  `rgb(63,95,144)` light / `rgb(174,198,255)` dark, same as the interim;
+  team page `#/team/10` follows `--color-primary`; `--ds-focus-ring` is
+  `0 0 0 3px` opaque primary. `pnpm tsc`, `pnpm test` (72 files, 337 tests),
+  `pnpm format:check`, `pnpm build`: PASS. Screenshots
+  `/home/user/evidence/style-dedup-01/focus-season-1280-{light,dark}-{home,team}-0.4.2.png`
+  (not committed). NOT RUN: Spotter (the ring change on `.ds-button` and
+  `.ds-input` controls is part of the pending keyboard-focus check).
 - Possible library follow-up (aero-md3-core, needs approval): a bold overline
   variant if option (b) is adopted, so `.label` can become shared.
 - Duplicates seen, not in scope: `.season-field__label` and

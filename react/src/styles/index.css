@@ -37,9 +37,6 @@
   --ds-layout-max-width: 80rem;
   --page-content-width: var(--ds-layout-max-width);
   --page-gutter: var(--ds-page-gutter);
-  /* Opaque focus ring: the shared 55% default is below 3:1 on light
-     surfaces. Delete once aero-md3-core ships AERO-09. */
-  --ds-focus-outline-color: var(--ds-color-primary);
   /** Measured by PageHeader so fixed mobile chrome always reserves its real height. */
   --mobile-chrome-height: 0px;
   --mobile-top-chrome-height: 0px;
