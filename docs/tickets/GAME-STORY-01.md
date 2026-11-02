@@ -2,8 +2,8 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE — implemented on the work branch; awaiting Product Owner
-review.
+**Status:** DONE — accepted by the Product Owner 2026-11-02 and merged to
+`main`. Spotter did not run before acceptance.
 
 **Goal:** A finished game's story names the goal that won it.
 
@@ -38,5 +38,7 @@ a winner that is not the first lead; no box while live or for a shootout.
 **Evidence:** Typecheck, unit tests (72 files, 339 tests), format check and
 build PASS. Screenshot at 375 px (overtime winner, "TOR up 4–3") taken
 locally against a mocked API. Spotter NOT RUN.
+
+**Product Owner acceptance:** 2026-11-02, from the screenshots.
 
 **Release follow-ups:** none.
