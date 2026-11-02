@@ -2,6 +2,8 @@
   padding-bottom: var(--ds-page-block-end);
   background: var(--color-bg-subtle);
   min-height: 100vh;
+  /* Focus rings follow the team color set inline on this element. */
+  --ds-focus-outline-color: var(--color-primary);
 }
 
 .team-page #nav-bar {

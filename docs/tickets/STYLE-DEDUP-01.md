@@ -125,6 +125,10 @@ game-detail live state stated in text.
   `--ds-focus-outline-color` (primary, the team color on team pages, at 55%)
   and the shared `--ds-focus-outline-width` (3px). No root override. Each
   control keeps its own offset.
+- Focus contrast (2026-11-02, after measuring): the 55% default is 2.45:1 on
+  light surfaces, below 3:1. Interim: set `--ds-focus-outline-color:
+  var(--ds-color-primary)` once on the app root (opaque, 6.46:1 light,
+  10.9:1 dark) until the library default is fixed in aero-md3-core AERO-09.
 
 **Scope:** apply the approved options. Delete every rule (or every property)
 a shared class replaces; callers that keep layout properties keep only those.
@@ -192,6 +196,17 @@ keyboard focus on the changed controls.
   restore contrast if the Product Owner wants it. Other primary-colored rings
   outside the listed set (Matchup, Standings, Schedule, CompareTable,
   InstallBanner and others) are unchanged.
+- Correction: the library default resolves at `:root` from the site primary,
+  so it never followed team colors. After the unify commit the TeamPage tab
+  and row rings had lost the team color. `.team-page` now redeclares
+  `--ds-focus-outline-color: var(--color-primary)`, so team-page rings use the
+  team color again (opaque, 3px).
+- Opaque interim (computed, 1280, season selector focused via keyboard): home
+  `rgb(63,95,144)` light / `rgb(174,198,255)` dark; team page (`#/team/10`, error
+  frame without API) `#1B4F8A` light / `#5495de` dark, matching its
+  `--color-primary`. Screenshots `focus-season-1280-{light,dark}-opaque.png`,
+  `focus-season-1280-{light,dark}-team-opaque.png`. Team colors that are light
+  themselves are not contrast-checked yet (Spotter).
 - Checks re-run after the focus change: `pnpm tsc`, `pnpm test` (72 files,
   337 tests), `pnpm format:check`, `pnpm build`: PASS.
 - NOT RUN: Spotter run (game detail live and final with recorded fixtures,
@@ -200,6 +215,8 @@ keyboard focus on the changed controls.
 
 **Release follow-ups:**
 
+- aero-md3-core AERO-09 (IDEA): opaque default focus colors (0.4.2). On
+  release, bump and delete the interim root line in `styles/index.css`.
 - Possible library follow-up (aero-md3-core, needs approval): a bold overline
   variant if option (b) is adopted, so `.label` can become shared.
 - Duplicates seen, not in scope: `.season-field__label` and
