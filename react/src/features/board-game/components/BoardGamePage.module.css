@@ -21,6 +21,8 @@
 
 .title {
   margin: 0;
+  /* The pixel font's own line box; the .ds-base 1.2 would push the page down. */
+  line-height: normal;
 }
 
 .hint {

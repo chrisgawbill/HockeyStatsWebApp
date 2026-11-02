@@ -3,8 +3,8 @@
 Delivery rules: [development workflow](../agent-development.md).
 
 **Status:** ACTIVE (library part released as 0.4.1; app part implemented on
-branch `ccr-a1a082c9-flvcfk`, awaiting the heading-difference decision below,
-a Spotter run and Product Owner acceptance)
+branch `ccr-a1a082c9-flvcfk` with option A below, awaiting a Spotter run and
+Product Owner acceptance)
 
 **Goal:** HockeyStatsWebApp gets its `html`/`body`/heading/`code` element
 defaults from `.ds-base` (deferred [AERO-06](AERO-06.md) item 7) without
@@ -28,8 +28,11 @@ aero-md3-core `docs/tickets/AERO-07.md` and must be on npm before the app part.
   decision). `--ds-color-selection*` already hold today's selection values.
 - Known small differences are measured and brought to the Product Owner; keep
   local overrides only where a difference is visible.
+- Heading differences: option A. Rink Quest's two pixel-font titles
+  (`BoardGamePage` and `GameLengthPicker` `.title`) keep `line-height: normal`
+  locally; every other difference in the table below is accepted.
 
-**Product Owner checkpoint (pending):** measured differences after adoption,
+**Product Owner checkpoint (decided: option A):** measured differences after adoption,
 1280px, reduced motion (`/home/user/evidence/aero-07/diff-*.png`):
 
 | Difference                                                     | Where it shows                                                             | Size                                                                                  |
@@ -74,8 +77,15 @@ clip`; `scroll-behavior` smooth, and auto under reduced motion.
   (text antialiasing), so 375px is compared visually, not by pixels. The
   same noise appeared once at 1280 (standings dark, text fringes only) when
   re-shooting with the published package; computed styles were identical.
+- Option A applied: `pnpm tsc`, `pnpm test` (72 files, 337 tests),
+  `pnpm format:check`, `pnpm build`: PASS. Rink Quest at 1280 now differs from
+  before only inside the "Rink Quest" title glyphs (accepted letter-spacing);
+  "Choose game length" and everything below are pixel-identical. Other pages
+  are unchanged from the no-override build.
 - Screenshots: `/home/user/evidence/aero-07/<page>-<width>-<theme>-{before,after}.png`
-  (after = published 0.4.1, no overrides), `diff-*.png` side-by-side crops,
+  (after = published 0.4.1 with option A; `diff-rink-quest-1280-light.png`
+  shows the no-override build, `diff-rink-quest-1280-light-option-a.png` the
+  result), `diff-*.png` side-by-side crops,
   `computed-{before,after}.json`.
 - NOT RUN: Spotter run on the pushed branch (data pages, signed-in views,
   Rink Quest gameplay headings, `code` text, non-reduced-motion theme toggle).
