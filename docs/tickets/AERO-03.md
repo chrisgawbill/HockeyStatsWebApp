@@ -2,7 +2,9 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** ACTIVE
+**Status:** DONE (Product Owner approved the aero-md3-core merge on 2026-11-01,
+PR #2; 0.3.0 published the same day; closed on 2026-11-12 at the Product
+Owner's request. Firefox/Safari remain NOT RUN.)
 
 **Goal:** HockeyStatsWebApp and Spotter can build buttons, page states,
 section headers, tables, callouts, tabs and small form/utility patterns from
@@ -123,7 +125,8 @@ screenshots in aero-md3-core `docs/tickets/AERO-03.md` and
 - Packed 0.3.0 in Spotter without code changes: renders unchanged; `npm test`
   188 pass / 7 fail, the same 7 tests that fail on 0.2.0 in this environment.
 - Firefox/Safari: NOT RUN.
-- `@chrisgawbill/aero-md3-core@0.3.0` published: NOT RUN (publishes from
-  aero-md3-core `main` after merge).
+- `@chrisgawbill/aero-md3-core@0.3.0` published: PASS, 2026-11-01 from
+  aero-md3-core `main` (`bc3cfdb`); the published `src/core.css` and README are
+  byte-identical to that commit.
 
 **Release follow-ups:** consumer adoption is [AERO-04](AERO-04.md).
