@@ -75,6 +75,8 @@ are historical notes, not a second status field.
 | [AHL-02](tickets/AHL-02.md) | Favorite AHL teams and players in the shared favorites list |
 | [API-AHL-04](tickets/API-AHL-04.md) | AHL favorites in the Weekly Player Report (backend) |
 | [AHL-03](tickets/AHL-03.md) | AHL favorites in the weekly report page |
+| [API-PWHL-01](tickets/API-PWHL-01.md) | PWHL data on the read routes through a shared HockeyTech league slice (backend) |
+| [PWHL-01](tickets/PWHL-01.md) | PWHL in the league toggle |
 | [AERO-03](tickets/AERO-03.md) | Shared primitives for duplicated app styles (aero-md3-core 0.3.0) |
 | [AERO-04](tickets/AERO-04.md) | Apps use shared aero-md3-core styles instead of local copies |
 | [AERO-05](tickets/AERO-05.md) | More shared primitives for app chrome, overlays and motion (aero-md3-core 0.4.0) |
@@ -110,6 +112,8 @@ API-AHL-02 -> AHL-01
 API-AHL-03 + AHL-01 -> AHL-02
 API-AHL-03 + WPR-02 -> API-AHL-04
 AHL-02 + API-AHL-04 contract -> AHL-03
+API-AHL-02 -> API-PWHL-01
+API-PWHL-01 + AHL-01 -> PWHL-01
 AERO-03 -> AERO-04 -> AERO-05 -> AERO-06 -> AERO-07
 AERO-06 + AERO-07 -> STYLE-DEDUP-01
 ```
