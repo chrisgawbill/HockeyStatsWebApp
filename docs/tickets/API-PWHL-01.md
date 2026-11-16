@@ -4,7 +4,9 @@ Delivery rules: [development workflow](../agent-development.md).
 
 **Status:** ACTIVE — Requested 2026-11-15 ("research PWHL free APIs … can we
 plug PWHL data in like we do with AHL"; "save the fixtures and write the
-tickets"). Started 2026-11-16 ("Start API-PWHL-01"). HockeyStatsAPI.
+tickets"). Started 2026-11-16 ("Start API-PWHL-01"). Implemented and verified on
+HockeyStatsAPI branch `ccr-50ba0d77-wyvfm0` (`3a6e343`); awaiting Product
+Owner acceptance before the pull request. HockeyStatsAPI.
 
 **Goal:** The web app can ask the same read routes for PWHL data with
 `league=pwhl` and get the response shape it already reads for the NHL and
@@ -138,8 +140,24 @@ id and point percentage. Run the new migration on real Postgres over a
 database that already has AHL rows. Do one live refresh with the PWHL key. The
 README "AHL data" section becomes "HockeyTech leagues (AHL, PWHL)".
 
-**Evidence:** none yet.
+**Evidence:** 2026-11-16, HockeyStatsAPI commit `3a6e343`.
 
-**Release follow-ups:** set `PWHL_FEED_KEY` on the dev server, then deploy
-and check one scheduled refresh there (Product Owner). Check the 2026-27
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `pnpm test` (existing AHL tests on the shared slice, new PWHL tests) | PASS | 210 pass, 0 fail (195 before, plus 15 new tests in `pwhl.test.js` and `pwhlRoutes.test.js`). Existing assertions are unchanged. The only edits to existing tests are plumbing forced by the approved rename: `ahl_*` → `hockeytech_*` table names, the stub's `isAhlFeedConfigured` → `isFeedConfigured`, and routers receiving `hockeytechReadServices`. |
+| Migration 016 on real Postgres 16 with existing AHL rows | PASS | Migrations 001-015, AHL fixture rows seeded (6 seasons, 3 teams, 3 players, 3 games, 3 roster entries, 3 reports), then 016: same counts, every row `ahl`, no `ahl_*` tables left. League-first keys, composite foreign keys and league CHECKs are present. A PWHL row with AHL ids inserts; `xhl` is rejected; a game with no PWHL season is rejected; the refreshed repository reads and writes both leagues side by side. |
+| AHL and NHL responses unchanged (QA, before/after on the fixture stubs) | PASS | 24 requests: NHL standings, schedule and boxscore, and AHL standings, schedule, final game 1029073, roster, team summary, skater and goalie summaries, leaders. Bodies are identical. The only difference is the 400 text for an unknown league, which now names `pwhl`. |
+| `league=pwhl` routes (QA, fixtures) | PASS | Every Acceptance route answers 200 with `league: "pwhl"`. Defenders are `D` in roster, skater summary and boxscore defense, with no `LD`/`RD` left. Game 326 is `SO` in schedule and boxscore. Montréal point percentage is 0.68889. `/team/lines` is a 404. |
+| Live PWHL refresh (feed key in `.env` only) | PASS | Seasons 1-11 stored with 2025-26 preseason 7 under `20252026`, plus 12 teams, 12 games of the current pre-season and 3 reports. `?season=20252026`: 8 teams, Montréal and Boston 62 points, 0.68889. 141 games, with game 326 an `SO` final. The live boxscore 326 lists defenders as `D` (7 and 6). The stats version answers from the stored reports. |
+| Stats version with no database (QA) | NOT RUN | It answers 500 without a database both before and after the change. It is covered by the live run above. |
+| README and `.env.example` | PASS | The section is now "HockeyTech leagues (AHL, PWHL)". `PWHL_FEED_KEY` and `PWHL_CLIENT_CODE` are documented, and no key is committed. |
+
+Known side effect of the preseason rule: the AHL's 2017-18 exhibition season
+(2018-02-13 to 2018-09-29) is now filed under `20182019`. The 2025-26 PWHL
+preseason now counts as part of 2025-26, so its games appear in that season's
+schedule.
+
+**Release follow-ups:** set `PWHL_FEED_KEY` (and `PWHL_CLIENT_CODE=pwhl`) on
+the dev server, then deploy (migration 016 runs on start) and check one
+scheduled refresh there (Product Owner). Check the 2026-27
 standings layout (two conferences) once games start on 2026-12-04.
