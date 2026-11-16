@@ -2,9 +2,9 @@
 
 Delivery rules: [development workflow](../agent-development.md).
 
-**Status:** IDEA — Requested 2026-11-15 ("research PWHL free APIs … can we
+**Status:** ACTIVE — Requested 2026-11-15 ("research PWHL free APIs … can we
 plug PWHL data in like we do with AHL"; "save the fixtures and write the
-tickets"). HockeyStatsAPI.
+tickets"). Started 2026-11-16 ("Start API-PWHL-01"). HockeyStatsAPI.
 
 **Goal:** The web app can ask the same read routes for PWHL data with
 `league=pwhl` and get the response shape it already reads for the NHL and
@@ -68,6 +68,14 @@ and `src/test/fixtures/ahl/`.
   standings header and two teams, a three-player Boston roster (G, LD, C), two
   skaters (F, LD), two goalies, and the game 326 summary with three skaters a
   side, including a defender.
+
+- 2026-11-16 (Product Owner): the feed risk is accepted for the PWHL, as for
+  the AHL.
+- 2026-11-16 (Product Owner): storage option 1. One migration renames `ahl_*`
+  to `hockeytech_*`, adds `league` (default `'ahl'`, CHECK `ahl`/`pwhl`) and
+  puts `league` first in each primary key. Existing AHL rows are kept.
+- 2026-11-16 (Product Owner): PWHL point percentage is points ÷ (3 × games
+  played). Points per game is part of each league's config (AHL 2, PWHL 3).
 
 **Scope:**
 
